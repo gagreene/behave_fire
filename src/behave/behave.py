@@ -1,469 +1,374 @@
-# Behave Fire Behavior Model - Python Conversion
-# Facade/Driver for the Behave fire behavior model using the Facade OOP Design Pattern
-# Complete implementation with 100% C++ feature parity
-import copy
-import os
-import sys
-script_dir = os.path.dirname(os.path.abspath(__file__))
-behave_python_dir = os.path.dirname(script_dir)
+"""
+behave.py — Array-Mode Facade (V9)
 
-# Add to path BEFORE any imports
-if behave_python_dir not in sys.path:
-    sys.path.insert(0, behave_python_dir)
+BehaveRun is the public entry point for array/raster mode.
+It accepts NumPy arrays for all spatially-variable inputs and returns
+dicts of output arrays of the same shape.
+
+Usage
+-----
+    import numpy as np
+    from behave.components.fuel_models import FuelModels
+    from behave.behave import BehaveRun
+    from behave.components.behave_units import SpeedUnits
+
+    fm     = FuelModels()
+    runner = BehaveRun(fm)
+
+    results = runner.do_surface_run(
+        fuel_model_grid=np.array([[124]]),
+        m1h=np.array([[0.06]]), m10h=np.array([[0.07]]),
+        m100h=np.array([[0.08]]), mlh=np.array([[0.60]]),
+        mlw=np.array([[0.90]]),
+        wind_speed=np.array([[5.0]]),
+        wind_speed_units=SpeedUnits.SpeedUnitsEnum.MilesPerHour,
+        wind_direction=np.array([[0.0]]),
+        wind_orientation_mode='RelativeToUpslope',
+        slope=np.array([[np.degrees(np.arctan(0.30))]]),   # 30% → degrees
+        aspect=np.array([[0.0]]),
+        canopy_cover=np.array([[0.50]]),
+        canopy_height=np.array([[30.0]]),
+        crown_ratio=np.array([[0.50]]),
+    )
+    ros = results['spread_rate'][0, 0]   # ft/min
+
+Notes
+-----
+* slope must be in DEGREES.  Convert percent before calling:
+      slope_deg = np.degrees(np.arctan(slope_pct / 100.0))
+* BehaveRun accepts single-value inputs and returns shape-(1,) or
+  shape-(1,1) arrays, not Python scalars.
+"""
+
+import numpy as np
 
 try:
-    from python.components.behave_units import (
-        AreaUnits, BasalAreaUnits, LengthUnits, LoadingUnits, PressureUnits,
-        SurfaceAreaToVolumeUnits, SpeedUnits, FractionUnits, SlopeUnits,
-        DensityUnits, HeatOfCombustionUnits, HeatSinkUnits, HeatPerUnitAreaUnits,
-        HeatSourceAndReactionIntensityUnits, FirelineIntensityUnits,
-        TemperatureUnits, TimeUnits
+    from .components.fuel_models import FuelModels
+    from .components.fuel_models_array import build_fuel_lookup_arrays
+    from .components.surface import (
+        build_particle_arrays,
+        calculate_fuelbed_intermediates,
+        calculate_reaction_intensity,
+        calculate_spread_rate,
+        calculate_fire_area,
+        calculate_fire_perimeter,
+        calculate_fire_length,
+        calculate_fire_width,
     )
-    from python.components.fuel_models import FuelModels
-    from python.components.species_master_table import SpeciesMasterTable
-    from python.components.surface import Surface
-    from python.components.crown import Crown
-    from python.components.mortality import Mortality
-    from python.components.spot import Spot
-    from python.components.ignite import Ignite
-    from python.components.safety import Safety
-    from python.components.contain import ContainAdapter
-    from python.components.fine_dead_fuel_moisture_tool import FineDeadFuelMoistureTool
-    from python.components.slope_tool import SlopeTool
-    from python.components.vapor_pressure_deficit_calculator import VaporPressureDeficitCalculator
+    from .components.crown import calculate_crown_fire
+    from .components.mortality import (
+        calculate_scorch_height,
+        build_mortality_lookup,
+        calculate_crown_scorch_mortality,
+    )
+    from .components.spot import (
+        calculate_spotting_from_surface_fire,
+        calculate_spotting_from_burning_pile,
+        calculate_spotting_from_torching_trees,
+    )
+    from .components.behave_units import (
+        fireline_intensity_to_base,
+        speed_to_base,
+        speed_from_base,
+        temp_to_base,
+    )
 except ImportError:
-    from components.behave_units import (
-        AreaUnits, BasalAreaUnits, LengthUnits, LoadingUnits, PressureUnits,
-        SurfaceAreaToVolumeUnits, SpeedUnits, FractionUnits, SlopeUnits,
-        DensityUnits, HeatOfCombustionUnits, HeatSinkUnits, HeatPerUnitAreaUnits,
-        HeatSourceAndReactionIntensityUnits, FirelineIntensityUnits,
-        TemperatureUnits, TimeUnits
-    )
     from components.fuel_models import FuelModels
-    from components.species_master_table import SpeciesMasterTable
-    from components.surface import Surface
-    from components.crown import Crown
-    from components.mortality import Mortality
-    from components.spot import Spot
-    from components.ignite import Ignite
-    from components.safety import Safety
-    from components.contain import ContainAdapter
-    from components.fine_dead_fuel_moisture_tool import FineDeadFuelMoistureTool
-    from components.slope_tool import SlopeTool
-    from components.vapor_pressure_deficit_calculator import VaporPressureDeficitCalculator
+    from components.fuel_models_array import build_fuel_lookup_arrays
+    from components.surface import (
+        build_particle_arrays,
+        calculate_fuelbed_intermediates,
+        calculate_reaction_intensity,
+        calculate_spread_rate,
+        calculate_fire_area,
+        calculate_fire_perimeter,
+        calculate_fire_length,
+        calculate_fire_width,
+    )
+    from components.crown import calculate_crown_fire
+    from components.mortality import (
+        calculate_scorch_height,
+        build_mortality_lookup,
+        calculate_crown_scorch_mortality,
+    )
+    from components.spot import (
+        calculate_spotting_from_surface_fire,
+        calculate_spotting_from_burning_pile,
+        calculate_spotting_from_torching_trees,
+    )
+    from components.behave_units import (
+        fireline_intensity_to_base,
+        speed_to_base,
+        speed_from_base,
+        temp_to_base,
+    )
 
 
 class BehaveRun:
     """
-    BehaveRun is the primary driver (Facade) for the Behave fire behavior model.
-    It aggregates all fire behavior components and exposes a unified API.
-    
-    This implementation uses the Facade OOP Design Pattern to tie together
-    all fire behavior modules including Surface, Crown, Mortality, Spot, Ignite, and Safety.
+    Array-mode facade for behave_py.
+
+    Accepts NumPy arrays for all spatially-variable inputs.
+    Scalar inputs (unit enums, mode strings) remain Python scalars.
+
+    The fuel lookup table is built once at construction from the FuelModels
+    instance and reused for all subsequent run calls.
     """
-    
-    def __init__(self, fuel_models, species_master_table):
-        """
-        Initialize BehaveRun with fuel models and species master table.
-        
-        Args:
-            fuel_models: FuelModels instance
-            species_master_table: SpeciesMasterTable instance
-        """
-        # Pointers to fuel models and species data (matching C++ implementation)
-        self.fuel_models_ = fuel_models
-        self.species_master_table_ = species_master_table
-        
-        # Initialize all fire behavior components
-        self.surface = Surface(fuel_models)
-        self.crown = Crown(fuel_models)
-        self.mortality = Mortality(species_master_table)
-        self.spot = Spot()
-        self.ignite = Ignite()
-        self.safety = Safety()
-        self.contain = ContainAdapter()
-        self.fine_dead_fuel_moisture_tool = FineDeadFuelMoistureTool()
-        self.slope_tool = SlopeTool()
-        self.vpd_calculator = VaporPressureDeficitCalculator()
-    
-    def __copy__(self):
-        """Support copy operation"""
-        return self._copy_assignment(self)
-    
-    def _copy_assignment(self, rhs):
-        """
-        Deep-copy assignment (mirrors C++ memberwise copy).
-        Each component is deep-copied so the original and the copy are
-        fully independent — mutating one does not affect the other.
-        Use copy.copy(behave_run) or copy.deepcopy(behave_run) safely.
-        """
-        new_run = BehaveRun(rhs.fuel_models_, rhs.species_master_table_)
-        new_run.surface  = copy.deepcopy(rhs.surface)
-        new_run.crown    = copy.deepcopy(rhs.crown)
-        new_run.spot     = copy.deepcopy(rhs.spot)
-        new_run.ignite   = copy.deepcopy(rhs.ignite)
-        new_run.safety   = copy.deepcopy(rhs.safety)
-        new_run.mortality = copy.deepcopy(rhs.mortality)
-        return new_run
 
-    def reinitialize(self):
+    def __init__(self, fuel_models: FuelModels):
         """
-        Reset all fire behavior components to default state.
-        Matching C++ BehaveRun::reinitialize()
+        Parameters
+        ----------
+        fuel_models : FuelModels
+            Populated FuelModels instance (scalar, unchanged).
         """
-        self.surface.initialize_members()
-        self.crown.initialize_members()
-        self.spot.initialize_members()
-        self.ignite.initialize_members()
-        self.safety.initialize_members()
+        self._fuel_models = fuel_models
+        self._lut = build_fuel_lookup_arrays(fuel_models)
+        self._mortality_coeffs = build_mortality_lookup()
 
-    def set_fuel_models(self, fuel_models):
-        """
-        Set the fuel models for all components.
-        Matching C++ BehaveRun::setFuelModels()
-        
-        Args:
-            fuel_models: FuelModels instance
-        """
-        # Update pointer to fuel models
-        self.fuel_models_ = fuel_models
-        
-        # Propagate to all components
-        self.surface.set_fuel_models(fuel_models)
-        self.crown.set_fuel_models(fuel_models)
+    # ------------------------------------------------------------------
+    # Surface run
+    # ------------------------------------------------------------------
 
-    def set_moisture_scenarios(self, moisture_scenarios):
+    def do_surface_run(self,
+                       fuel_model_grid,
+                       m1h, m10h, m100h,
+                       mlh, mlw,
+                       wind_speed,
+                       wind_speed_units,
+                       wind_direction,
+                       wind_orientation_mode,
+                       slope,
+                       aspect,
+                       canopy_cover,
+                       canopy_height,
+                       crown_ratio,
+                       wind_height_mode='TwentyFoot',
+                       waf_method='UseCrownRatio',
+                       user_waf=None) -> dict:
         """
-        Set the moisture scenarios for all components.
-        Matching C++ BehaveRun::setMoistureScenarios()
-        
-        Args:
-            moisture_scenarios: MoistureScenarios instance
-        """
-        self.surface.set_moisture_scenarios(moisture_scenarios)
-        self.crown.set_moisture_scenarios(moisture_scenarios)
-    
-    # ========================================================================
-    # FUEL MODEL GETTER METHODS - Delegation to FuelModels
-    # ========================================================================
-    # These methods delegate to fuel_models_ and match C++ BehaveRun exactly
-    
-    def get_fuel_code(self, fuel_model_number):
-        """Get fuel code for fuel model. Matching C++ getFuelCode()"""
-        return self.fuel_models_.get_fuel_code(fuel_model_number)
-    
-    def get_fuel_name(self, fuel_model_number):
-        """Get fuel name for fuel model. Matching C++ getFuelName()"""
-        return self.fuel_models_.get_fuel_name(fuel_model_number)
-    
-    def get_fuelbed_depth(self, fuel_model_number, length_units):
-        """Get fuelbed depth. Matching C++ getFuelbedDepth()"""
-        return self.fuel_models_.get_fuelbed_depth(fuel_model_number, length_units)
-    
-    def get_fuel_moisture_of_extinction_dead(self, fuel_model_number, moisture_units):
-        """Get moisture of extinction for dead fuel. Matching C++ getFuelMoistureOfExtinctionDead()"""
-        return self.fuel_models_.get_moisture_of_extinction_dead(fuel_model_number, moisture_units)
-    
-    def get_fuel_heat_of_combustion_dead(self, fuel_model_number, heat_units):
-        """Get heat of combustion for dead fuel. Matching C++ getFuelHeatOfCombustionDead()"""
-        return self.fuel_models_.get_heat_of_combustion_dead(fuel_model_number, heat_units)
-    
-    def get_fuel_heat_of_combustion_live(self, fuel_model_number, heat_units):
-        """Get heat of combustion for live fuel. Matching C++ getFuelHeatOfCombustionLive()"""
-        return self.fuel_models_.get_heat_of_combustion_live(fuel_model_number, heat_units)
-    
-    def get_fuel_load_one_hour(self, fuel_model_number, loading_units):
-        """Get 1-hour fuel load. Matching C++ getFuelLoadOneHour()"""
-        return self.fuel_models_.get_fuel_load_one_hour(fuel_model_number, loading_units)
-    
-    def get_fuel_load_ten_hour(self, fuel_model_number, loading_units):
-        """Get 10-hour fuel load. Matching C++ getFuelLoadTenHour()"""
-        return self.fuel_models_.get_fuel_load_ten_hour(fuel_model_number, loading_units)
-    
-    def get_fuel_load_hundred_hour(self, fuel_model_number, loading_units):
-        """Get 100-hour fuel load. Matching C++ getFuelLoadHundredHour()"""
-        return self.fuel_models_.get_fuel_load_hundred_hour(fuel_model_number, loading_units)
-    
-    def get_fuel_load_live_herbaceous(self, fuel_model_number, loading_units):
-        """Get live herbaceous fuel load. Matching C++ getFuelLoadLiveHerbaceous()"""
-        return self.fuel_models_.get_fuel_load_live_herbaceous(fuel_model_number, loading_units)
-    
-    def get_fuel_load_live_woody(self, fuel_model_number, loading_units):
-        """Get live woody fuel load. Matching C++ getFuelLoadLiveWoody()"""
-        return self.fuel_models_.get_fuel_load_live_woody(fuel_model_number, loading_units)
-    
-    def get_fuel_savr_one_hour(self, fuel_model_number, savr_units):
-        """Get 1-hour SAVR. Matching C++ getFuelSavrOneHour()"""
-        return self.fuel_models_.get_savr_one_hour(fuel_model_number, savr_units)
-    
-    def get_fuel_savr_live_herbaceous(self, fuel_model_number, savr_units):
-        """Get live herbaceous SAVR. Matching C++ getFuelSavrLiveHerbaceous()"""
-        return self.fuel_models_.get_savr_live_herbaceous(fuel_model_number, savr_units)
-    
-    def get_fuel_savr_live_woody(self, fuel_model_number, savr_units):
-        """Get live woody SAVR. Matching C++ getFuelSavrLiveWoody()"""
-        return self.fuel_models_.get_savr_live_woody(fuel_model_number, savr_units)
-    
-    def is_fuel_dynamic(self, fuel_model_number):
-        """Check if fuel model is dynamic. Matching C++ isFuelDynamic()"""
-        return self.fuel_models_.get_is_dynamic(fuel_model_number)
-    
-    def is_fuel_model_defined(self, fuel_model_number):
-        """Check if fuel model is defined. Matching C++ isFuelModelDefined()"""
-        return self.fuel_models_.is_fuel_model_defined(fuel_model_number)
-    
-    def is_fuel_model_reserved(self, fuel_model_number):
-        """Check if fuel model is reserved. Matching C++ isFuelModelReserved()"""
-        return self.fuel_models_.is_fuel_model_reserved(fuel_model_number)
-    
-    def is_all_fuel_load_zero(self, fuel_model_number):
-        """Check if all fuel loads are zero. Matching C++ isAllFuelLoadZero()"""
-        return self.fuel_models_.is_all_fuel_load_zero(fuel_model_number)
-    
-    # ========================================================================
-    # UNIT CONVERSION METHODS - Delegate to behave_units module
-    # ========================================================================
-    # These methods expose comprehensive unit conversion capabilities
-    
-    # AREA UNITS (Base: Square Feet)
-    def convert_area_to_base_units(self, value, units):
-        """Convert area to base units (Square Feet)"""
-        return AreaUnits.toBaseUnits(value, units)
-    
-    def convert_area_from_base_units(self, value, units):
-        """Convert area from base units (Square Feet)"""
-        return AreaUnits.fromBaseUnits(value, units)
-    
-    # BASAL AREA UNITS (Base: Square Feet Per Acre)
-    def convert_basal_area_to_base_units(self, value, units):
-        """Convert basal area to base units (Square Feet Per Acre)"""
-        return BasalAreaUnits.toBaseUnits(value, units)
-    
-    def convert_basal_area_from_base_units(self, value, units):
-        """Convert basal area from base units (Square Feet Per Acre)"""
-        return BasalAreaUnits.fromBaseUnits(value, units)
-    
-    # LENGTH UNITS (Base: Feet)
-    def convert_length_to_base_units(self, value, units):
-        """Convert length to base units (Feet)"""
-        return LengthUnits.toBaseUnits(value, units)
-    
-    def convert_length_from_base_units(self, value, units):
-        """Convert length from base units (Feet)"""
-        return LengthUnits.fromBaseUnits(value, units)
-    
-    # LOADING UNITS (Base: Pounds Per Square Foot)
-    def convert_loading_to_base_units(self, value, units):
-        """Convert fuel loading to base units (Pounds Per Square Foot)"""
-        return LoadingUnits.toBaseUnits(value, units)
-    
-    def convert_loading_from_base_units(self, value, units):
-        """Convert fuel loading from base units (Pounds Per Square Foot)"""
-        return LoadingUnits.fromBaseUnits(value, units)
-    
-    # PRESSURE UNITS (Base: Pascal)
-    def convert_pressure_to_base_units(self, value, units):
-        """Convert pressure to base units (Pascal)"""
-        return PressureUnits.toBaseUnits(value, units)
-    
-    def convert_pressure_from_base_units(self, value, units):
-        """Convert pressure from base units (Pascal)"""
-        return PressureUnits.fromBaseUnits(value, units)
-    
-    # SURFACE AREA TO VOLUME (SAVR) UNITS (Base: Square Feet Over Cubic Feet)
-    def convert_savr_to_base_units(self, value, units):
-        """Convert SAVR to base units (Square Feet Over Cubic Feet)"""
-        return SurfaceAreaToVolumeUnits.toBaseUnits(value, units)
-    
-    def convert_savr_from_base_units(self, value, units):
-        """Convert SAVR from base units (Square Feet Over Cubic Feet)"""
-        return SurfaceAreaToVolumeUnits.fromBaseUnits(value, units)
-    
-    # SPEED UNITS (Base: Feet Per Minute)
-    def convert_speed_to_base_units(self, value, units):
-        """Convert speed to base units (Feet Per Minute)"""
-        return SpeedUnits.toBaseUnits(value, units)
-    
-    def convert_speed_from_base_units(self, value, units):
-        """Convert speed from base units (Feet Per Minute)"""
-        return SpeedUnits.fromBaseUnits(value, units)
-    
-    # FRACTION UNITS (Base: Fraction)
-    def convert_fraction_to_base_units(self, value, units):
-        """Convert fraction to base units (Fraction)"""
-        return FractionUnits.toBaseUnits(value, units)
-    
-    def convert_fraction_from_base_units(self, value, units):
-        """Convert fraction from base units (Fraction)"""
-        return FractionUnits.fromBaseUnits(value, units)
-    
-    # SLOPE UNITS (Base: Degrees)
-    def convert_slope_to_base_units(self, value, units):
-        """Convert slope to base units (Degrees)"""
-        return SlopeUnits.toBaseUnits(value, units)
-    
-    def convert_slope_from_base_units(self, value, units):
-        """Convert slope from base units (Degrees)"""
-        return SlopeUnits.fromBaseUnits(value, units)
-    
-    # DENSITY UNITS (Base: Pounds Per Cubic Foot)
-    def convert_density_to_base_units(self, value, units):
-        """Convert density to base units (Pounds Per Cubic Foot)"""
-        return DensityUnits.toBaseUnits(value, units)
-    
-    def convert_density_from_base_units(self, value, units):
-        """Convert density from base units (Pounds Per Cubic Foot)"""
-        return DensityUnits.fromBaseUnits(value, units)
-    
-    # HEAT OF COMBUSTION UNITS (Base: BTU Per Pound)
-    def convert_heat_of_combustion_to_base_units(self, value, units):
-        """Convert heat of combustion to base units (BTU Per Pound)"""
-        return HeatOfCombustionUnits.toBaseUnits(value, units)
-    
-    def convert_heat_of_combustion_from_base_units(self, value, units):
-        """Convert heat of combustion from base units (BTU Per Pound)"""
-        return HeatOfCombustionUnits.fromBaseUnits(value, units)
-    
-    # HEAT SINK UNITS (Base: BTU Per Cubic Foot)
-    def convert_heat_sink_to_base_units(self, value, units):
-        """Convert heat sink to base units (BTU Per Cubic Foot)"""
-        return HeatSinkUnits.toBaseUnits(value, units)
-    
-    def convert_heat_sink_from_base_units(self, value, units):
-        """Convert heat sink from base units (BTU Per Cubic Foot)"""
-        return HeatSinkUnits.fromBaseUnits(value, units)
-    
-    # HEAT PER UNIT AREA UNITS (Base: BTU Per Square Foot)
-    def convert_heat_per_unit_area_to_base_units(self, value, units):
-        """Convert heat per unit area to base units (BTU Per Square Foot)"""
-        return HeatPerUnitAreaUnits.toBaseUnits(value, units)
-    
-    def convert_heat_per_unit_area_from_base_units(self, value, units):
-        """Convert heat per unit area from base units (BTU Per Square Foot)"""
-        return HeatPerUnitAreaUnits.fromBaseUnits(value, units)
-    
-    # HEAT SOURCE AND REACTION INTENSITY UNITS (Base: BTU Per Square Foot Per Minute)
-    def convert_reaction_intensity_to_base_units(self, value, units):
-        """Convert reaction intensity to base units (BTU Per Square Foot Per Minute)"""
-        return HeatSourceAndReactionIntensityUnits.toBaseUnits(value, units)
-    
-    def convert_reaction_intensity_from_base_units(self, value, units):
-        """Convert reaction intensity from base units (BTU Per Square Foot Per Minute)"""
-        return HeatSourceAndReactionIntensityUnits.fromBaseUnits(value, units)
-    
-    # FIRELINE INTENSITY UNITS (Base: BTU Per Foot Per Second)
-    def convert_fireline_intensity_to_base_units(self, value, units):
-        """Convert fireline intensity to base units (BTU Per Foot Per Second)"""
-        return FirelineIntensityUnits.toBaseUnits(value, units)
-    
-    def convert_fireline_intensity_from_base_units(self, value, units):
-        """Convert fireline intensity from base units (BTU Per Foot Per Second)"""
-        return FirelineIntensityUnits.fromBaseUnits(value, units)
-    
-    # TEMPERATURE UNITS (Base: Fahrenheit)
-    def convert_temperature_to_base_units(self, value, units):
-        """Convert temperature to base units (Fahrenheit)"""
-        return TemperatureUnits.toBaseUnits(value, units)
-    
-    def convert_temperature_from_base_units(self, value, units):
-        """Convert temperature from base units (Fahrenheit)"""
-        return TemperatureUnits.fromBaseUnits(value, units)
-    
-    # TIME UNITS (Base: Minutes)
-    def convert_time_to_base_units(self, value, units):
-        """Convert time to base units (Minutes)"""
-        return TimeUnits.toBaseUnits(value, units)
-    
-    def convert_time_from_base_units(self, value, units):
-        """Convert time from base units (Minutes)"""
-        return TimeUnits.fromBaseUnits(value, units)
-    
-    # ========================================================================
-    # UNIT ENUM ACCESSORS - For applications that need direct access to enums
-    # ========================================================================
-    
-    @staticmethod
-    def get_area_units_enum():
-        """Get AreaUnits enum"""
-        return AreaUnits.AreaUnitsEnum
-    
-    @staticmethod
-    def get_basal_area_units_enum():
-        """Get BasalAreaUnits enum"""
-        return BasalAreaUnits.BasalAreaUnitsEnum
-    
-    @staticmethod
-    def get_length_units_enum():
-        """Get LengthUnits enum"""
-        return LengthUnits.LengthUnitsEnum
-    
-    @staticmethod
-    def get_loading_units_enum():
-        """Get LoadingUnits enum"""
-        return LoadingUnits.LoadingUnitsEnum
-    
-    @staticmethod
-    def get_pressure_units_enum():
-        """Get PressureUnits enum"""
-        return PressureUnits.PressureUnitsEnum
-    
-    @staticmethod
-    def get_savr_units_enum():
-        """Get SurfaceAreaToVolumeUnits enum"""
-        return SurfaceAreaToVolumeUnits.SurfaceAreaToVolumeUnitsEnum
-    
-    @staticmethod
-    def get_speed_units_enum():
-        """Get SpeedUnits enum"""
-        return SpeedUnits.SpeedUnitsEnum
-    
-    @staticmethod
-    def get_fraction_units_enum():
-        """Get FractionUnits enum"""
-        return FractionUnits.FractionUnitsEnum
-    
-    @staticmethod
-    def get_slope_units_enum():
-        """Get SlopeUnits enum"""
-        return SlopeUnits.SlopeUnitsEnum
-    
-    @staticmethod
-    def get_density_units_enum():
-        """Get DensityUnits enum"""
-        return DensityUnits.DensityUnitsEnum
-    
-    @staticmethod
-    def get_heat_of_combustion_units_enum():
-        """Get HeatOfCombustionUnits enum"""
-        return HeatOfCombustionUnits.HeatOfCombustionUnitsEnum
-    
-    @staticmethod
-    def get_heat_sink_units_enum():
-        """Get HeatSinkUnits enum"""
-        return HeatSinkUnits.HeatSinkUnitsEnum
-    
-    @staticmethod
-    def get_heat_per_unit_area_units_enum():
-        """Get HeatPerUnitAreaUnits enum"""
-        return HeatPerUnitAreaUnits.HeatPerUnitAreaUnitsEnum
-    
-    @staticmethod
-    def get_reaction_intensity_units_enum():
-        """Get HeatSourceAndReactionIntensityUnits enum"""
-        return HeatSourceAndReactionIntensityUnits.HeatSourceAndReactionIntensityUnitsEnum
-    
-    @staticmethod
-    def get_fireline_intensity_units_enum():
-        """Get FirelineIntensityUnits enum"""
-        return FirelineIntensityUnits.FirelineIntensityUnitsEnum
-    
-    @staticmethod
-    def get_temperature_units_enum():
-        """Get TemperatureUnits enum"""
-        return TemperatureUnits.TemperatureUnitsEnum
-    
-    @staticmethod
-    def get_time_units_enum():
-        """Get TimeUnits enum"""
-        return TimeUnits.TimeUnitsEnum
+        Run the vectorized surface fire pipeline.
 
+        Parameters
+        ----------
+        fuel_model_grid      : int array (*S)
+        m1h .. mlw           : float arrays (*S) — moisture fractions
+        wind_speed           : (*S) or scalar — in wind_speed_units
+        wind_speed_units     : scalar int — SpeedUnitsEnum
+        wind_direction       : (*S) or scalar — degrees
+        wind_orientation_mode: str — 'RelativeToUpslope' or 'RelativeToNorth'
+        slope                : (*S) or scalar — DEGREES (not percent)
+        aspect               : (*S) or scalar — degrees
+        canopy_cover         : (*S) or scalar — fraction (0–1)
+        canopy_height        : (*S) or scalar — feet
+        crown_ratio          : (*S) or scalar — fraction (0–1)
+        wind_height_mode     : str — 'TwentyFoot' or 'TenMeter'
+        waf_method           : str — 'UseCrownRatio' or 'UserInput'
+        user_waf             : (*S) or scalar or None
+
+        Returns
+        -------
+        dict of (*S) ndarrays — same keys as calculate_spread_rate() output:
+            spread_rate, backing_spread_rate, flanking_spread_rate,
+            flame_length, fireline_intensity, heat_per_unit_area,
+            effective_wind_speed, fire_length_to_width_ratio, eccentricity,
+            direction_of_max_spread, residence_time, reaction_intensity,
+            midflame_wind_speed, no_wind_no_slope_spread_rate
+
+        IMPORTANT — slope must be in DEGREES.
+        Convert percent slope before calling:
+            slope_deg = np.degrees(np.arctan(slope_pct_grid / 100.0))
+        """
+        # Coerce all spatial inputs to at-least-1D ndarrays (G10 fix)
+        fuel_model_grid = np.atleast_1d(np.asarray(fuel_model_grid, dtype=np.int32))
+        m1h = np.atleast_1d(np.asarray(m1h, dtype=float))
+        m10h = np.atleast_1d(np.asarray(m10h, dtype=float))
+        m100h = np.atleast_1d(np.asarray(m100h, dtype=float))
+        mlh = np.atleast_1d(np.asarray(mlh, dtype=float))
+        mlw = np.atleast_1d(np.asarray(mlw, dtype=float))
+        wind_speed = np.atleast_1d(np.asarray(wind_speed, dtype=float))
+        wind_direction = np.atleast_1d(np.asarray(wind_direction, dtype=float))
+        slope = np.atleast_1d(np.asarray(slope, dtype=float))
+        aspect = np.atleast_1d(np.asarray(aspect, dtype=float))
+        canopy_cover = np.atleast_1d(np.asarray(canopy_cover, dtype=float))
+        canopy_height = np.atleast_1d(np.asarray(canopy_height, dtype=float))
+        crown_ratio = np.atleast_1d(np.asarray(crown_ratio, dtype=float))
+
+        p = build_particle_arrays(
+            self._lut, fuel_model_grid,
+            m1h, m10h, m100h, mlh, mlw
+        )
+        ib = calculate_fuelbed_intermediates(p)
+        ri = calculate_reaction_intensity(ib)
+        return calculate_spread_rate(
+            ri, ib,
+            wind_speed, wind_speed_units,
+            wind_direction, wind_orientation_mode,
+            slope, aspect,
+            canopy_cover, canopy_height, crown_ratio,
+            wind_height_mode=wind_height_mode,
+            waf_method=waf_method,
+            user_waf=user_waf,
+        )
+
+    # ------------------------------------------------------------------
+    # Crown run
+    # ------------------------------------------------------------------
+
+    def do_crown_run(self,
+                     surface_results,
+                     fuel_model_grid,
+                     m1h, m10h, m100h, mlh, mlw,
+                     wind_speed, wind_speed_units,
+                     wind_direction, wind_orientation_mode,
+                     slope, aspect,
+                     canopy_base_height, canopy_height,
+                     canopy_bulk_density, moisture_foliar) -> dict:
+        """
+        Run the vectorized crown fire pipeline.
+
+        Parameters
+        ----------
+        surface_results   : dict from do_surface_run()
+        (other params same as do_surface_run / calculate_crown_fire)
+        canopy_base_height: (*S) — feet
+        canopy_bulk_density: (*S) — lb/ft³
+        moisture_foliar   : (*S) or scalar — percent
+
+        Returns
+        -------
+        dict — see calculate_crown_fire() for full key list
+        """
+        return calculate_crown_fire(
+            surface_results, self._lut, fuel_model_grid,
+            m1h, m10h, m100h, mlh, mlw,
+            wind_speed, wind_speed_units,
+            wind_direction, wind_orientation_mode,
+            slope, aspect,
+            canopy_base_height, canopy_height,
+            canopy_bulk_density, moisture_foliar,
+        )
+
+    # ------------------------------------------------------------------
+    # Scorch height
+    # ------------------------------------------------------------------
+    @staticmethod
+    def calculate_scorch_height(fireline_intensity,
+                                fireline_intensity_units,
+                                midflame_wind_speed,
+                                wind_speed_units,
+                                air_temperature,
+                                temperature_units) -> np.ndarray:
+        """
+        Vectorized scorch height.
+
+        Parameters
+        ----------
+        fireline_intensity       : (*S) or scalar
+        fireline_intensity_units : scalar int — FirelineIntensityUnitsEnum
+        midflame_wind_speed      : (*S) or scalar
+        wind_speed_units         : scalar int — SpeedUnitsEnum
+        air_temperature          : (*S) or scalar
+        temperature_units        : scalar int — TemperatureUnitsEnum
+
+        Returns
+        -------
+        (*S) ndarray — scorch height in feet
+        """
+        fi = fireline_intensity_to_base(fireline_intensity, fireline_intensity_units)
+        ws_fpm = speed_to_base(midflame_wind_speed, wind_speed_units)
+        ws_mph = speed_from_base(ws_fpm, 5)  # 5 = MilesPerHour
+        t_f = temp_to_base(air_temperature, temperature_units)
+        return calculate_scorch_height(fi, ws_mph, t_f)
+
+    # ------------------------------------------------------------------
+    # Mortality
+    # ------------------------------------------------------------------
+
+    def calculate_crown_scorch_mortality(self,
+                                         scorch_height_ft,
+                                         tree_height_ft,
+                                         crown_ratio,
+                                         dbh_inches,
+                                         equation_number_grid) -> dict:
+        """
+        Vectorized crown scorch mortality.
+
+        Parameters
+        ----------
+        scorch_height_ft     : (*S) — feet
+        tree_height_ft       : (*S) — feet
+        crown_ratio          : (*S) — fraction (0–1)
+        dbh_inches           : (*S) — inches
+        equation_number_grid : (*S) int — mortality equation number per cell
+
+        Returns
+        -------
+        dict with keys:
+            'crown_length_scorch', 'crown_volume_scorch', 'probability_mortality'
+        """
+        return calculate_crown_scorch_mortality(
+            scorch_height_ft, tree_height_ft,
+            crown_ratio, dbh_inches,
+            equation_number_grid, self._mortality_coeffs,
+        )
+
+    # ------------------------------------------------------------------
+    # Spotting
+    # ------------------------------------------------------------------
+    @staticmethod
+    def calculate_spotting_from_surface_fire(flame_length_ft,
+                                             wind_mph,
+                                             cover_height_ft) -> np.ndarray:
+        """Vectorized surface fire spotting distance. Returns feet (*S)."""
+        return calculate_spotting_from_surface_fire(
+            flame_length_ft, wind_mph, cover_height_ft
+        )
+
+    @staticmethod
+    def calculate_spotting_from_burning_pile(flame_height_ft,
+                                             wind_mph,
+                                             cover_height_ft) -> np.ndarray:
+        """Vectorized burning pile spotting distance. Returns feet (*S)."""
+        return calculate_spotting_from_burning_pile(
+            flame_height_ft, wind_mph, cover_height_ft
+        )
+
+    @staticmethod
+    def calculate_spotting_from_torching_trees(dbh_in, height_ft, count,
+                                               wind_mph,
+                                               cover_height_ft) -> np.ndarray:
+        """Vectorized torching-tree spotting distance. Returns feet (*S)."""
+        return calculate_spotting_from_torching_trees(
+            dbh_in, height_ft, count, wind_mph, cover_height_ft
+        )
+
+    # ------------------------------------------------------------------
+    # Fire size / shape
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def calculate_fire_area(forward_ros, backing_ros, lwr,
+                            elapsed_min, is_crown=False) -> np.ndarray:
+        """Fire area in square feet (*S)."""
+        return calculate_fire_area(forward_ros, backing_ros, lwr,
+                                   elapsed_min, is_crown)
+
+    @staticmethod
+    def calculate_fire_perimeter(forward_ros, backing_ros, lwr,
+                                 elapsed_min, is_crown=False) -> np.ndarray:
+        """Fire perimeter in feet (*S)."""
+        return calculate_fire_perimeter(forward_ros, backing_ros, lwr,
+                                        elapsed_min, is_crown)
+
+    @staticmethod
+    def calculate_fire_length(forward_ros, backing_ros,
+                              elapsed_min) -> np.ndarray:
+        """Fire length (major axis) in feet (*S)."""
+        return calculate_fire_length(forward_ros, backing_ros, elapsed_min)
+
+    @staticmethod
+    def calculate_fire_width(forward_ros, backing_ros, lwr,
+                             elapsed_min) -> np.ndarray:
+        """Fire width (minor axis) in feet (*S)."""
+        return calculate_fire_width(forward_ros, backing_ros, lwr, elapsed_min)
