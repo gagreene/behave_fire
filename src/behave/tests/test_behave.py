@@ -148,8 +148,8 @@ def ti():
 
 _FM = FuelModels()
 _SMT = SpeciesMasterTable()
-_LUT = build_fuel_lookup_arrays(_FM)
-_RUNNER = BehaveRun(_FM)
+_LUT = build_fuel_lookup_arrays(fuel_models=_FM)
+_RUNNER = BehaveRun(fuel_models=_FM)
 
 # Common GS4 low-moisture inputs (upslope orientation, percent -> degrees slope)
 _FM124 = np.array([[124]], dtype=np.int32)
@@ -172,10 +172,11 @@ _MPH = SpeedUnits.SpeedUnitsEnum.MilesPerHour
 def _surface_run_upslope():
     """Run the standard GS4 upslope scenario, return results dict."""
     return _RUNNER.do_surface_run(
-        _FM124, _M1H, _M10H, _M100H, _MLH, _MLW,
-        _WS5, _MPH, _WD0, 'RelativeToUpslope',
-        _SLOPE_ARR,
-        slope_units=0,
+        fuel_model_grid=_FM124,
+        m1h=_M1H, m10h=_M10H, m100h=_M100H, mlh=_MLH, mlw=_MLW,
+        wind_speed=_WS5, wind_speed_units=_MPH,
+        wind_direction=_WD0, wind_orientation_mode='RelativeToUpslope',
+        slope=_SLOPE_ARR, slope_units=0,
         aspect=_ASP0,
         canopy_cover=_CC50,
         canopy_height=_CH30,
@@ -225,11 +226,11 @@ def test_surface_north_oriented(ti):
     print("=" * 70)
 
     r = _RUNNER.do_surface_run(
-        _FM124, _M1H, _M10H, _M100H, _MLH, _MLW,
-        _WS5, _MPH,
-        np.array([[45.0]]), 'RelativeToNorth',
-        np.array([[30.0]]),  # slope in degrees
-        slope_units=0,
+        fuel_model_grid=_FM124,
+        m1h=_M1H, m10h=_M10H, m100h=_M100H, mlh=_MLH, mlw=_MLW,
+        wind_speed=_WS5, wind_speed_units=_MPH,
+        wind_direction=np.array([[45.0]]), wind_orientation_mode='RelativeToNorth',
+        slope=np.array([[30.0]]), slope_units=0,
         aspect=np.array([[95.0]]),
         canopy_cover=_CC50,
         canopy_height=_CH30,
@@ -256,14 +257,13 @@ def test_surface_fm4_canopy(ti):
     print("=" * 70)
 
     r = _RUNNER.do_surface_run(
-        np.array([[4]], dtype=np.int32),
-        _M1H, _M10H, _M100H, _MLH, _MLW,
-        _WS5, _MPH,
-        np.array([[90.0]]), 'RelativeToNorth',
-        np.array([[30.0]]),  # degrees slope
-        slope_units=0,
+        fuel_model_grid=np.array([[4]], dtype=np.int32),
+        m1h=_M1H, m10h=_M10H, m100h=_M100H, mlh=_MLH, mlw=_MLW,
+        wind_speed=_WS5, wind_speed_units=_MPH,
+        wind_direction=np.array([[90.0]]), wind_orientation_mode='RelativeToNorth',
+        slope=np.array([[30.0]]), slope_units=0,
         aspect=np.array([[0.0]]),
-        canopy_cover=np.array([[0.40]]),  # 40% canopy cover
+        canopy_cover=np.array([[0.40]]),
         canopy_height=_CH30,
         crown_ratio=_CR50,
     )
@@ -286,11 +286,11 @@ def test_surface_non_burnable(ti):
     print("=" * 70)
 
     r = _RUNNER.do_surface_run(
-        np.array([[91]], dtype=np.int32),
-        _M1H, _M10H, _M100H, _MLH, _MLW,
-        _WS5, _MPH, _WD0, 'RelativeToUpslope',
-        _SLOPE_ARR,
-        slope_units=0,
+        fuel_model_grid=np.array([[91]], dtype=np.int32),
+        m1h=_M1H, m10h=_M10H, m100h=_M100H, mlh=_MLH, mlw=_MLW,
+        wind_speed=_WS5, wind_speed_units=_MPH,
+        wind_direction=_WD0, wind_orientation_mode='RelativeToUpslope',
+        slope=_SLOPE_ARR, slope_units=0,
         aspect=_ASP0,
         canopy_cover=_CC50,
         canopy_height=_CH30,
@@ -315,11 +315,11 @@ def test_surface_no_data_cell(ti):
     print("=" * 70)
 
     r = _RUNNER.do_surface_run(
-        np.array([[0]], dtype=np.int32),
-        _M1H, _M10H, _M100H, _MLH, _MLW,
-        _WS5, _MPH, _WD0, 'RelativeToUpslope',
-        _SLOPE_ARR,
-        slope_units=0,
+        fuel_model_grid=np.array([[0]], dtype=np.int32),
+        m1h=_M1H, m10h=_M10H, m100h=_M100H, mlh=_MLH, mlw=_MLW,
+        wind_speed=_WS5, wind_speed_units=_MPH,
+        wind_direction=_WD0, wind_orientation_mode='RelativeToUpslope',
+        slope=_SLOPE_ARR, slope_units=0,
         aspect=_ASP0,
         canopy_cover=_CC50,
         canopy_height=_CH30,
@@ -344,13 +344,13 @@ def test_surface_shape_preservation(ti):
     for shape in [(5,), (4, 6), (2, 3, 4)]:
         fm_g = np.full(shape, 124, dtype=np.int32)
         res = _RUNNER.do_surface_run(
-            fm_g,
-            np.full(shape, 0.06), np.full(shape, 0.07),
-            np.full(shape, 0.08), np.full(shape, 0.60),
-            np.full(shape, 0.90),
-            5.0, _MPH, 0.0, 'RelativeToUpslope',
-            _SLOPE30_DEG,
-            slope_units=0,
+            fuel_model_grid=fm_g,
+            m1h=np.full(shape, 0.06), m10h=np.full(shape, 0.07),
+            m100h=np.full(shape, 0.08), mlh=np.full(shape, 0.60),
+            mlw=np.full(shape, 0.90),
+            wind_speed=5.0, wind_speed_units=_MPH,
+            wind_direction=0.0, wind_orientation_mode='RelativeToUpslope',
+            slope=_SLOPE30_DEG, slope_units=0,
             aspect=0.0,
             canopy_cover=0.50,
             canopy_height=30.0,
@@ -374,13 +374,13 @@ def test_surface_heterogeneous_fuels(ti):
 
     fm_grid = np.arange(1, 61, dtype=np.int32).reshape(6, 10)
     res = _RUNNER.do_surface_run(
-        fm_grid,
-        np.full((6, 10), 0.06), np.full((6, 10), 0.07),
-        np.full((6, 10), 0.08), np.full((6, 10), 0.60),
-        np.full((6, 10), 0.90),
-        5.0, _MPH, 0.0, 'RelativeToUpslope',
-        _SLOPE30_DEG,
-        slope_units=0,
+        fuel_model_grid=fm_grid,
+        m1h=np.full((6, 10), 0.06), m10h=np.full((6, 10), 0.07),
+        m100h=np.full((6, 10), 0.08), mlh=np.full((6, 10), 0.60),
+        mlw=np.full((6, 10), 0.90),
+        wind_speed=5.0, wind_speed_units=_MPH,
+        wind_direction=0.0, wind_orientation_mode='RelativeToUpslope',
+        slope=_SLOPE30_DEG, slope_units=0,
         aspect=0.0,
         canopy_cover=0.50,
         canopy_height=30.0,
@@ -409,17 +409,17 @@ def test_surface_mixed_grid(ti):
     print("=" * 70)
 
     fm_grid = np.full((5, 5), 124, dtype=np.int32)
-    fm_grid[2, 2] = 0  # no-fuel water cell
-    fm_grid[0, 4] = 91  # non-burnable
+    fm_grid[2, 2] = 0
+    fm_grid[0, 4] = 91
 
     res = _RUNNER.do_surface_run(
-        fm_grid,
-        np.full((5, 5), 0.06), np.full((5, 5), 0.07),
-        np.full((5, 5), 0.08), np.full((5, 5), 0.60),
-        np.full((5, 5), 0.90),
-        5.0, _MPH, 0.0, 'RelativeToUpslope',
-        _SLOPE30_DEG,
-        slope_units=0,
+        fuel_model_grid=fm_grid,
+        m1h=np.full((5, 5), 0.06), m10h=np.full((5, 5), 0.07),
+        m100h=np.full((5, 5), 0.08), mlh=np.full((5, 5), 0.60),
+        mlw=np.full((5, 5), 0.90),
+        wind_speed=5.0, wind_speed_units=_MPH,
+        wind_direction=0.0, wind_orientation_mode='RelativeToUpslope',
+        slope=_SLOPE30_DEG, slope_units=0,
         aspect=0.0,
         canopy_cover=0.50,
         canopy_height=30.0,
@@ -486,14 +486,22 @@ def test_fire_size(ti):
     elapsed_hr = 1.0
     elapsed_min = elapsed_hr * 60.0
 
-    area_sqft = calculate_fire_area(fros, bros, lwr, elapsed_min)
+    area_sqft = calculate_fire_area(
+        forward_ros=fros, backing_ros=bros, lwr=lwr, elapsed_min=elapsed_min,
+    )
     area_acres = float(area_sqft) / 43560.002160576107
 
-    perim_ft = float(calculate_fire_perimeter(fros, bros, lwr, elapsed_min))
+    perim_ft = float(calculate_fire_perimeter(
+        forward_ros=fros, backing_ros=bros, lwr=lwr, elapsed_min=elapsed_min,
+    ))
     perim_chains = perim_ft / 66.0
 
-    length_ft = float(calculate_fire_length(fros, bros, elapsed_min))
-    width_ft = float(calculate_fire_width(fros, bros, lwr, elapsed_min))
+    length_ft = float(calculate_fire_length(
+        forward_ros=fros, backing_ros=bros, elapsed_min=elapsed_min,
+    ))
+    width_ft = float(calculate_fire_width(
+        forward_ros=fros, backing_ros=bros, lwr=lwr, elapsed_min=elapsed_min,
+    ))
 
     # Expected values obtained from scalar Surface.getFireArea / getFirePerimeter
     # for the same 5 mph direct-midflame scenario:
@@ -511,8 +519,12 @@ def test_fire_size(ti):
            round_to_six((fros + bros) * elapsed_min), ERROR_TOLERANCE)
 
     # Crown fire area / perimeter (circular approximation)
-    crown_area = float(calculate_fire_area(fros, bros, lwr, elapsed_min, is_crown=True))
-    crown_perim = float(calculate_fire_perimeter(fros, bros, lwr, elapsed_min, is_crown=True))
+    crown_area = float(calculate_fire_area(
+        forward_ros=fros, backing_ros=bros, lwr=lwr, elapsed_min=elapsed_min, is_crown=True,
+    ))
+    crown_perim = float(calculate_fire_perimeter(
+        forward_ros=fros, backing_ros=bros, lwr=lwr, elapsed_min=elapsed_min, is_crown=True,
+    ))
     report(ti, "Crown fire area > 0",
            int(crown_area > 0), 1, ERROR_TOLERANCE)
     report(ti, "Crown fire perimeter > 0",
@@ -533,9 +545,13 @@ def test_crown_fire(ti):
     surf = _surface_run_upslope()
 
     crown = _RUNNER.do_crown_run(
-        surf, _FM124, _M1H, _M10H, _M100H, _MLH, _MLW,
-        _WS5, _MPH, _WD0, 'RelativeToUpslope',
-        _SLOPE_ARR, _ASP0,
+        surface_results=surf,
+        fuel_model_grid=_FM124,
+        m1h=_M1H, m10h=_M10H, m100h=_M100H, mlh=_MLH, mlw=_MLW,
+        wind_speed=_WS5, wind_speed_units=_MPH,
+        wind_direction=_WD0, wind_orientation_mode='RelativeToUpslope',
+        slope=_SLOPE_ARR, slope_units=0,
+        aspect=_ASP0,
         canopy_base_height=np.array([[6.0]]),
         canopy_height=np.array([[30.0]]),
         canopy_bulk_density=np.array([[0.03]]),
@@ -554,19 +570,24 @@ def test_crown_fire(ti):
 
     # Crown run at 10 mph should produce Crowning (fire_type == 2)
     surf10 = _RUNNER.do_surface_run(
-        _FM124, _M1H, _M10H, _M100H, _MLH, _MLW,
-        np.array([[10.0]]), _MPH, _WD0, 'RelativeToUpslope',
-        _SLOPE_ARR,
-        slope_units=0,
+        fuel_model_grid=_FM124,
+        m1h=_M1H, m10h=_M10H, m100h=_M100H, mlh=_MLH, mlw=_MLW,
+        wind_speed=np.array([[10.0]]), wind_speed_units=_MPH,
+        wind_direction=_WD0, wind_orientation_mode='RelativeToUpslope',
+        slope=_SLOPE_ARR, slope_units=0,
         aspect=_ASP0,
         canopy_cover=_CC50,
         canopy_height=_CH30,
         crown_ratio=_CR50,
     )
     crown10 = _RUNNER.do_crown_run(
-        surf10, _FM124, _M1H, _M10H, _M100H, _MLH, _MLW,
-        np.array([[10.0]]), _MPH, _WD0, 'RelativeToUpslope',
-        _SLOPE_ARR, _ASP0,
+        surface_results=surf10,
+        fuel_model_grid=_FM124,
+        m1h=_M1H, m10h=_M10H, m100h=_M100H, mlh=_MLH, mlw=_MLW,
+        wind_speed=np.array([[10.0]]), wind_speed_units=_MPH,
+        wind_direction=_WD0, wind_orientation_mode='RelativeToUpslope',
+        slope=_SLOPE_ARR, slope_units=0,
+        aspect=_ASP0,
         canopy_base_height=np.array([[6.0]]),
         canopy_height=np.array([[30.0]]),
         canopy_bulk_density=np.array([[0.03]]),
@@ -589,9 +610,9 @@ def test_scorch_height(ti):
 
     # Case 1: 50 BTU/ft/s, 5 mph, 80 degF  -> expected 7.617325 ft
     sh1 = calculate_scorch_height(
-        np.array([50.0]),  # BTU/ft/s (base unit already)
-        np.array([5.0]),  # mph (already in mph)
-        np.array([80.0]),  #  degF
+        fireline_intensity_btu_ft_s=np.array([50.0]),
+        midflame_wind_mph=np.array([5.0]),
+        air_temp_f=np.array([80.0]),
     ).item()
     report(ti, "Scorch height: 50 BTU/ft/s, 5 mph, 80 degF",
            round_to_six(sh1), 7.617325, ERROR_TOLERANCE)
@@ -600,18 +621,21 @@ def test_scorch_height(ti):
     from components.behave_units import speed_to_base, speed_from_base
     ws_mph = speed_from_base(300.0, 5).item()  # fpm -> mph = 300/88
     sh2 = calculate_scorch_height(
-        np.array([55.0]),
-        np.array([ws_mph]),
-        np.array([70.0]),
+        fireline_intensity_btu_ft_s=np.array([55.0]),
+        midflame_wind_mph=np.array([ws_mph]),
+        air_temp_f=np.array([70.0]),
     ).item()
     report(ti, "Scorch height: 55 BTU/ft/s, 300 ft/min, 70 degF",
            round_to_six(sh2), 9.923720, ERROR_TOLERANCE)
 
     # BehaveRun wrapper (with unit conversion)
     sh3 = _RUNNER.calculate_scorch_height(
-        50.0, FirelineIntensityUnits.FirelineIntensityUnitsEnum.BtusPerFootPerSecond,
-        5.0, SpeedUnits.SpeedUnitsEnum.MilesPerHour,
-        80.0, TemperatureUnits.TemperatureUnitsEnum.Fahrenheit,
+        fireline_intensity=50.0,
+        fireline_intensity_units=FirelineIntensityUnits.FirelineIntensityUnitsEnum.BtusPerFootPerSecond,
+        midflame_wind_speed=5.0,
+        wind_speed_units=SpeedUnits.SpeedUnitsEnum.MilesPerHour,
+        air_temperature=80.0,
+        temperature_units=TemperatureUnits.TemperatureUnitsEnum.Fahrenheit,
     ).item()
     report(ti, "Scorch height via BehaveRun wrapper",
            round_to_six(sh3), 7.617325, ERROR_TOLERANCE)
@@ -656,17 +680,25 @@ def test_crown_scorch_mortality(ti):
 
     # Equation 0 (undefined) must yield 0 probability
     mort0 = calculate_crown_scorch_mortality(
-        np.array([30.0]), np.array([50.0]), np.array([0.5]),
-        np.array([10.0]), np.array([0]), coeffs,
+        scorch_height_ft=np.array([30.0]),
+        tree_height_ft=np.array([50.0]),
+        crown_ratio=np.array([0.5]),
+        dbh_inches=np.array([10.0]),
+        equation_number_grid=np.array([0]),
+        coeffs=coeffs,
     )
     report(ti, "Undefined equation (0) -> probability = 0",
            float(mort0['probability_mortality'][0]), 0.0, ERROR_TOLERANCE)
 
     # BehaveRun wrapper
     mort_w = _RUNNER.calculate_crown_scorch_mortality(
-        np.array([30.0]), np.array([50.0]), np.array([0.5]),
-        np.array([10.0]), np.array([2]),
+        scorch_height_ft=np.array([30.0]),
+        tree_height_ft=np.array([50.0]),
+        crown_ratio=np.array([0.5]),
+        dbh_inches=np.array([10.0]),
+        equation_number_grid=np.array([2]),
     )
+
     report(ti, "Mortality via BehaveRun wrapper matches direct call",
            float(mort_w['crown_length_scorch'][0]),
            float(mort['crown_length_scorch'][0]), PARITY_TOLERANCE)
@@ -689,19 +721,19 @@ def test_ignite(ti):
     # Array ignite expects:
     #   air_temp_f, sun_shade_fraction (0=full sun, 1=full shade), moisture_1h_fraction
     fb_prob = calculate_firebrand_ignition_probability(
-        np.array([80.0]),  # air temp  degF
-        np.array([0.50]),  # sun_shade_fraction: 50% shaded
-        np.array([0.06]),  # 1-hr moisture: 6% -> fraction 0.06
+        air_temp_f=np.array([80.0]),
+        sun_shade_fraction=np.array([0.50]),
+        moisture_1h_fraction=np.array([0.06]),
     ).item()
     report(ti, "Firebrand ignition probability, DF duff (fraction)",
            round_to_six(fb_prob), 0.548317, ERROR_TOLERANCE)
 
     # Douglas fir duff = type 5 in ignite.py; charge=2 (unknown)
     lig_prob = calculate_lightning_ignition_probability(
-        np.array([5]),  # DouglasFirDuff
-        np.array([0.08]),  # 100-hr moisture fraction: 8%
-        np.array([6.0]),  # duff depth inches
-        2,  # unknown charge
+        fuel_bed_type_grid=np.array([5]),
+        moisture_100h_fraction=np.array([0.08]),
+        duff_depth_inches=np.array([6.0]),
+        charge_type=2,
     ).item()
     report(ti, "Lightning ignition probability, DF duff (fraction)",
            round_to_six(lig_prob), 0.393620, ERROR_TOLERANCE)
@@ -710,28 +742,28 @@ def test_ignite(ti):
     # Scalar: m1h=7%, m100h=9%, temp=90F, shade=25%, LodgepolePineDuff, depth=8in, Negative
     # scalar expected: firebrand=50.717573 %, lightning=17.931991 %
     fb2 = calculate_firebrand_ignition_probability(
-        np.array([90.0]),
-        np.array([0.25]),  # 25% shading -> fraction 0.25
-        np.array([0.07]),  # 1-hr moisture: 7% -> fraction
+        air_temp_f=np.array([90.0]),
+        sun_shade_fraction=np.array([0.25]),
+        moisture_1h_fraction=np.array([0.07]),
     ).item()
     report(ti, "Firebrand ignition probability, lodgepole pine duff (percent)",
            round_to_six(fb2 * 100.0), 50.717573, ERROR_TOLERANCE)
 
     # LodgepolePineDuff = type 4; negative charge
     lig2 = calculate_lightning_ignition_probability(
-        np.array([4]),
-        np.array([0.09]),  # 100-hr moisture: 9% -> fraction
-        np.array([8.0]),  # 8 inch duff depth
-        0,  # negative charge
+        fuel_bed_type_grid=np.array([4]),
+        moisture_100h_fraction=np.array([0.09]),
+        duff_depth_inches=np.array([8.0]),
+        charge_type=0,
     ).item()
     report(ti, "Lightning ignition probability, lodgepole pine duff (percent)",
            round_to_six(lig2 * 100.0), 17.931991, ERROR_TOLERANCE)
 
     # Array with multiple cells simultaneously
     fb_multi = calculate_firebrand_ignition_probability(
-        np.array([80.0, 90.0, 100.0]),
-        np.array([0.50, 0.25, 0.10]),
-        np.array([0.08, 0.09, 0.05]),
+        air_temp_f=np.array([80.0, 90.0, 100.0]),
+        sun_shade_fraction=np.array([0.50, 0.25, 0.10]),
+        moisture_1h_fraction=np.array([0.08, 0.09, 0.05]),
     )
     report(ti, "Multi-cell firebrand probabilities: no NaN",
            int(not np.any(np.isnan(fb_multi))), 1, ERROR_TOLERANCE)
@@ -808,9 +840,9 @@ def test_spot(ti):
     scalar_fl_ft = 15.811421  # ft (WAF=1 / UserInput scalar run, FM124 upslope 30% slope)
 
     surf_dist_ft = calculate_spotting_from_surface_fire(
-        np.array([scalar_fl_ft]),
-        np.array([5.0]),  # 20-ft wind mph
-        np.array([30.0]),  # cover height ft
+        flame_length_ft=np.array([scalar_fl_ft]),
+        wind_mph=np.array([5.0]),
+        cover_height_ft=np.array([30.0]),
     ).item()
     # Scalar expected flat: 0.22005 miles
     surf_dist_mi = surf_dist_ft / 5280.0
@@ -825,35 +857,44 @@ def test_spot(ti):
     # that accepts cover height as a direct input — these are not equivalent
     # for small flames, so we test behaviour rather than exact parity here.)
     pile_tall = calculate_spotting_from_burning_pile(
-        np.array([20.0]),  # taller pile flame ft
-        np.array([15.0]),  # strong 20-ft wind mph
-        np.array([30.0]),  # downwind cover height ft
+        flame_height_ft=np.array([20.0]),
+        wind_mph=np.array([15.0]),
+        cover_height_ft=np.array([30.0]),
     ).item()
     report(ti, "Flat spotting from burning pile (tall pile, 15 mph) > 0",
            int(pile_tall > 0), 1, ERROR_TOLERANCE)
     pile_low = calculate_spotting_from_burning_pile(
-        np.array([20.0]), np.array([5.0]), np.array([30.0])
+        flame_height_ft=np.array([20.0]),
+        wind_mph=np.array([5.0]),
+        cover_height_ft=np.array([30.0]),
     ).item()
     report(ti, "Pile spotting increases with wind speed",
            int(pile_tall > pile_low), 1, ERROR_TOLERANCE)
 
     # BehaveRun wrappers return same values
     surf_r = _RUNNER.calculate_spotting_from_surface_fire(
-        np.array([scalar_fl_ft]), 0,          # flame length — 0 = Feet
-        np.array([5.0]), 5,                   # wind speed   — 5 = MilesPerHour
-        np.array([30.0]), 0,                  # cover height — 0 = Feet
+        flame_length=np.array([scalar_fl_ft]),
+        flame_length_units=0,
+        wind_speed=np.array([5.0]),
+        wind_speed_units=5,
+        cover_height=np.array([30.0]),
+        cover_height_units=0,
     ).item()
     report(ti, "Spotting from surface fire via BehaveRun wrapper",
            round_to_six(surf_r / 5280.0), 0.22005, ERROR_TOLERANCE)
 
     # Zero flame -> zero distance
-    zero_d = float(calculate_spotting_from_surface_fire(0.0, 5.0, 30.0))
+    zero_d = float(calculate_spotting_from_surface_fire(
+        flame_length_ft=0.0, wind_mph=5.0, cover_height_ft=30.0,
+    ))
     report(ti, "Zero flame length -> zero spotting distance",
            zero_d, 0.0, ERROR_TOLERANCE)
 
     # Multi-cell: 3 cells with increasing flame lengths
     fl_arr = np.array([5.0, 10.0, 20.0])
-    dists = calculate_spotting_from_surface_fire(fl_arr, 5.0, 30.0)
+    dists = calculate_spotting_from_surface_fire(
+        flame_length_ft=fl_arr, wind_mph=5.0, cover_height_ft=30.0,
+    )
     report(ti, "Multi-cell: no NaN in spotting distances",
            int(not np.any(np.isnan(dists))), 1, ERROR_TOLERANCE)
     report(ti, "Multi-cell: distances increase with flame length",
@@ -900,10 +941,10 @@ def test_fine_dead_fuel_moisture(ti):
 
     # Parity: all-zero array matches scalar
     v_arr = calculate_fine_dead_fuel_moisture(
-        np.array([0, 1]), np.array([0, 1]),
-        np.array([0, 1]), np.array([0, 1]),
-        np.array([0, 1]), np.array([0, 1]),
-        np.array([0, 1]), np.array([0, 1]),
+        dry_bulb_i=np.array([0, 1]), rh_i=np.array([0, 1]),
+        slope_i=np.array([0, 1]), aspect_i=np.array([0, 1]),
+        shading_i=np.array([0, 1]), month_i=np.array([0, 1]),
+        elev_i=np.array([0, 1]), time_i=np.array([0, 1]),
     )
     report(ti, "Array index 0 matches scalar",
            round_to_six(float(v_arr[0]) * pct), 3.0, ERROR_TOLERANCE)
@@ -940,10 +981,10 @@ def test_vpd(ti):
     for temp_f, rh_pct, expected_hpa in cases:
         result = calculate_vpd(
             temperature=np.array([temp_f]),
-            temp_units=0,  # Fahrenheit
+            temp_units=0,
             relative_humidity=np.array([rh_pct]),
-            rh_units=1,  # Percent
-            output_units=1,  # HectoPascal
+            rh_units=1,
+            output_units=1,
         )
         vpd_hpa = result['vpd'].item()
         report(ti,
@@ -953,7 +994,11 @@ def test_vpd(ti):
     # Batch: all 10 cases in a single vectorised call
     temps = np.full(10, 50.0)
     rhs = np.array([100, 90, 80, 70, 60, 50, 40, 30, 20, 10], dtype=float)
-    result_batch = calculate_vpd(temps, 0, rhs, 1, output_units=1)
+    result_batch = calculate_vpd(
+        temperature=temps, temp_units=0,
+        relative_humidity=rhs, rh_units=1,
+        output_units=1,
+    )
     vpd_batch = result_batch['vpd']
     expected_arr = np.array([c[2] for c in cases])
     all_match = np.allclose(vpd_batch, expected_arr, atol=tol_hpa)
@@ -1002,15 +1047,15 @@ def test_all_fuel_models_no_nan(ti):
     print("Testing all standard fuel models — no NaN/Inf in any output")
     print("=" * 70)
 
-    fm_grid = np.arange(1, 261, dtype=np.int32)  # 1–260
+    fm_grid = np.arange(1, 261, dtype=np.int32)
     n = len(fm_grid)
     res = _RUNNER.do_surface_run(
-        fm_grid,
-        np.full(n, 0.06), np.full(n, 0.07), np.full(n, 0.08),
-        np.full(n, 0.60), np.full(n, 0.90),
-        5.0, _MPH, 0.0, 'RelativeToUpslope',
-        _SLOPE30_DEG,
-        slope_units=0,
+        fuel_model_grid=fm_grid,
+        m1h=np.full(n, 0.06), m10h=np.full(n, 0.07), m100h=np.full(n, 0.08),
+        mlh=np.full(n, 0.60), mlw=np.full(n, 0.90),
+        wind_speed=5.0, wind_speed_units=_MPH,
+        wind_direction=0.0, wind_orientation_mode='RelativeToUpslope',
+        slope=_SLOPE30_DEG, slope_units=0,
         aspect=0.0,
         canopy_cover=0.50,
         canopy_height=30.0,
@@ -1039,26 +1084,24 @@ def test_scalar_inputs(ti):
 
     # --- Surface run: scalar vs array ---
     r_arr = _RUNNER.do_surface_run(
-        np.array([[124]]),
-        np.array([[0.06]]), np.array([[0.07]]),
-        np.array([[0.08]]), np.array([[0.60]]),
-        np.array([[0.90]]),
-        np.array([[5.0]]), _MPH,
-        np.array([[0.0]]), 'RelativeToUpslope',
-        np.array([[_SLOPE30_DEG]]),
-        slope_units=0,
+        fuel_model_grid=np.array([[124]]),
+        m1h=np.array([[0.06]]), m10h=np.array([[0.07]]),
+        m100h=np.array([[0.08]]), mlh=np.array([[0.60]]),
+        mlw=np.array([[0.90]]),
+        wind_speed=np.array([[5.0]]), wind_speed_units=_MPH,
+        wind_direction=np.array([[0.0]]), wind_orientation_mode='RelativeToUpslope',
+        slope=np.array([[_SLOPE30_DEG]]), slope_units=0,
         aspect=np.array([[0.0]]),
         canopy_cover=np.array([[0.50]]),
         canopy_height=np.array([[30.0]]),
         crown_ratio=np.array([[0.50]]),
     )
     r_scl = _RUNNER.do_surface_run(
-        124,
-        0.06, 0.07, 0.08, 0.60, 0.90,
-        5.0, _MPH,
-        0.0, 'RelativeToUpslope',
-        _SLOPE30_DEG,
-        slope_units=0,
+        fuel_model_grid=124,
+        m1h=0.06, m10h=0.07, m100h=0.08, mlh=0.60, mlw=0.90,
+        wind_speed=5.0, wind_speed_units=_MPH,
+        wind_direction=0.0, wind_orientation_mode='RelativeToUpslope',
+        slope=_SLOPE30_DEG, slope_units=0,
         aspect=0.0,
         canopy_cover=0.50,
         canopy_height=30.0,
@@ -1073,23 +1116,27 @@ def test_scalar_inputs(ti):
     surf_arr = r_arr
     surf_scl = r_scl
     c_arr = _RUNNER.do_crown_run(
-        surf_arr, np.array([[124]]),
-        np.array([[0.06]]), np.array([[0.07]]),
-        np.array([[0.08]]), np.array([[0.60]]), np.array([[0.90]]),
-        np.array([[5.0]]), _MPH,
-        np.array([[0.0]]), 'RelativeToUpslope',
-        np.array([[_SLOPE30_DEG]]), np.array([[0.0]]),
+        surface_results=surf_arr,
+        fuel_model_grid=np.array([[124]]),
+        m1h=np.array([[0.06]]), m10h=np.array([[0.07]]),
+        m100h=np.array([[0.08]]), mlh=np.array([[0.60]]), mlw=np.array([[0.90]]),
+        wind_speed=np.array([[5.0]]), wind_speed_units=_MPH,
+        wind_direction=np.array([[0.0]]), wind_orientation_mode='RelativeToUpslope',
+        slope=np.array([[_SLOPE30_DEG]]), slope_units=0,
+        aspect=np.array([[0.0]]),
         canopy_base_height=np.array([[6.0]]),
         canopy_height=np.array([[30.0]]),
         canopy_bulk_density=np.array([[0.03]]),
         moisture_foliar=np.array([[100.0]]),
     )
     c_scl = _RUNNER.do_crown_run(
-        surf_scl, 124,
-        0.06, 0.07, 0.08, 0.60, 0.90,
-        5.0, _MPH,
-        0.0, 'RelativeToUpslope',
-        _SLOPE30_DEG, 0.0,
+        surface_results=surf_scl,
+        fuel_model_grid=124,
+        m1h=0.06, m10h=0.07, m100h=0.08, mlh=0.60, mlw=0.90,
+        wind_speed=5.0, wind_speed_units=_MPH,
+        wind_direction=0.0, wind_orientation_mode='RelativeToUpslope',
+        slope=_SLOPE30_DEG, slope_units=0,
+        aspect=0.0,
         canopy_base_height=6.0,
         canopy_height=30.0,
         canopy_bulk_density=0.03,
@@ -1102,16 +1149,20 @@ def test_scalar_inputs(ti):
 
     # --- Scorch height: scalar vs array ---
     sh_arr = _RUNNER.calculate_scorch_height(
-        np.array([50.0]),
-        FirelineIntensityUnits.FirelineIntensityUnitsEnum.BtusPerFootPerSecond,
-        np.array([5.0]), SpeedUnits.SpeedUnitsEnum.MilesPerHour,
-        np.array([80.0]), TemperatureUnits.TemperatureUnitsEnum.Fahrenheit,
+        fireline_intensity=np.array([50.0]),
+        fireline_intensity_units=FirelineIntensityUnits.FirelineIntensityUnitsEnum.BtusPerFootPerSecond,
+        midflame_wind_speed=np.array([5.0]),
+        wind_speed_units=SpeedUnits.SpeedUnitsEnum.MilesPerHour,
+        air_temperature=np.array([80.0]),
+        temperature_units=TemperatureUnits.TemperatureUnitsEnum.Fahrenheit,
     )
     sh_scl = _RUNNER.calculate_scorch_height(
-        50.0,
-        FirelineIntensityUnits.FirelineIntensityUnitsEnum.BtusPerFootPerSecond,
-        5.0, SpeedUnits.SpeedUnitsEnum.MilesPerHour,
-        80.0, TemperatureUnits.TemperatureUnitsEnum.Fahrenheit,
+        fireline_intensity=50.0,
+        fireline_intensity_units=FirelineIntensityUnits.FirelineIntensityUnitsEnum.BtusPerFootPerSecond,
+        midflame_wind_speed=5.0,
+        wind_speed_units=SpeedUnits.SpeedUnitsEnum.MilesPerHour,
+        air_temperature=80.0,
+        temperature_units=TemperatureUnits.TemperatureUnitsEnum.Fahrenheit,
     )
     report(ti, "calculate_scorch_height scalar==array",
            float(sh_scl.flat[0]), float(sh_arr.flat[0]), PARITY_TOLERANCE)
@@ -1120,11 +1171,20 @@ def test_scalar_inputs(ti):
     from components.mortality import build_mortality_lookup, calculate_crown_scorch_mortality
     coeffs = build_mortality_lookup()
     m_arr = calculate_crown_scorch_mortality(
-        np.array([30.0]), np.array([50.0]), np.array([0.5]),
-        np.array([10.0]), np.array([2]), coeffs,
+        scorch_height_ft=np.array([30.0]),
+        tree_height_ft=np.array([50.0]),
+        crown_ratio=np.array([0.5]),
+        dbh_inches=np.array([10.0]),
+        equation_number_grid=np.array([2]),
+        coeffs=coeffs,
     )
     m_scl = calculate_crown_scorch_mortality(
-        30.0, 50.0, 0.5, 10.0, 2, coeffs,
+        scorch_height_ft=30.0,
+        tree_height_ft=50.0,
+        crown_ratio=0.5,
+        dbh_inches=10.0,
+        equation_number_grid=2,
+        coeffs=coeffs,
     )
     report(ti, "calculate_crown_scorch_mortality scalar==array: crown_length_scorch",
            float(m_scl['crown_length_scorch'].flat[0]),
@@ -1139,25 +1199,46 @@ def test_scalar_inputs(ti):
         calculate_lightning_ignition_probability,
     )
     fb_arr = calculate_firebrand_ignition_probability(
-        np.array([80.0]), np.array([0.50]), np.array([0.06])
+        air_temp_f=np.array([80.0]),
+        sun_shade_fraction=np.array([0.50]),
+        moisture_1h_fraction=np.array([0.06]),
     )
-    fb_scl = calculate_firebrand_ignition_probability(80.0, 0.50, 0.06)
-    report(ti, "calculate_firebrand_ignition_probability scalar==array",
-           float(fb_scl.flat[0]), float(fb_arr.flat[0]), PARITY_TOLERANCE)
+    fb_scl = calculate_firebrand_ignition_probability(
+        air_temp_f=80.0,
+        sun_shade_fraction=0.50,
+        moisture_1h_fraction=0.06,
+    )
 
     lig_arr = calculate_lightning_ignition_probability(
-        np.array([5]), np.array([0.08]), np.array([6.0]), 2
+        fuel_bed_type_grid=np.array([5]),
+        moisture_100h_fraction=np.array([0.08]),
+        duff_depth_inches=np.array([6.0]),
+        charge_type=2,
     )
-    lig_scl = calculate_lightning_ignition_probability(5, 0.08, 6.0, 2)
-    report(ti, "calculate_lightning_ignition_probability scalar==array",
-           float(lig_scl.flat[0]), float(lig_arr.flat[0]), PARITY_TOLERANCE)
+    lig_scl = calculate_lightning_ignition_probability(
+        fuel_bed_type_grid=5,
+        moisture_100h_fraction=0.08,
+        duff_depth_inches=6.0,
+        charge_type=2,
+    )
 
     # --- Safety zone: scalar vs array ---
     from components.safety import calculate_safety_zone
     sz_arr = calculate_safety_zone(
-        np.array([5.0]), 6, 50.0, 1, 300.0
+        flame_height_ft=np.array([5.0]),
+        number_of_personnel=6,
+        area_per_person_sqft=50.0,
+        number_of_equipment=1,
+        area_per_equipment_sqft=300.0,
     )
-    sz_scl = calculate_safety_zone(5.0, 6, 50.0, 1, 300.0)
+    sz_scl = calculate_safety_zone(
+        flame_height_ft=5.0,
+        number_of_personnel=6,
+        area_per_person_sqft=50.0,
+        number_of_equipment=1,
+        area_per_equipment_sqft=300.0,
+    )
+
     for key in ('separation_distance', 'radius', 'area'):
         report(ti, f"calculate_safety_zone scalar==array: {key}",
                float(sz_scl[key].flat[0]), float(sz_arr[key].flat[0]), PARITY_TOLERANCE)
@@ -1168,35 +1249,55 @@ def test_scalar_inputs(ti):
         calculate_spotting_from_burning_pile,
     )
     sp_arr = calculate_spotting_from_surface_fire(
-        np.array([15.811421]), np.array([5.0]), np.array([30.0])
+        flame_length_ft=np.array([15.811421]),
+        wind_mph=np.array([5.0]),
+        cover_height_ft=np.array([30.0]),
     )
-    sp_scl = calculate_spotting_from_surface_fire(15.811421, 5.0, 30.0)
-    report(ti, "calculate_spotting_from_surface_fire scalar==array",
-           float(sp_scl.flat[0]), float(sp_arr.flat[0]), PARITY_TOLERANCE)
+    sp_scl = calculate_spotting_from_surface_fire(
+        flame_length_ft=15.811421,
+        wind_mph=5.0,
+        cover_height_ft=30.0,
+    )
 
     pile_arr = calculate_spotting_from_burning_pile(
-        np.array([20.0]), np.array([15.0]), np.array([30.0])
+        flame_height_ft=np.array([20.0]),
+        wind_mph=np.array([15.0]),
+        cover_height_ft=np.array([30.0]),
     )
-    pile_scl = calculate_spotting_from_burning_pile(20.0, 15.0, 30.0)
-    report(ti, "calculate_spotting_from_burning_pile scalar==array",
-           float(pile_scl.flat[0]), float(pile_arr.flat[0]), PARITY_TOLERANCE)
+    pile_scl = calculate_spotting_from_burning_pile(
+        flame_height_ft=20.0,
+        wind_mph=15.0,
+        cover_height_ft=30.0,
+    )
 
     # --- Fine dead fuel moisture: scalar vs array ---
     from components.fine_dead_fuel_moisture_tool import calculate_fine_dead_fuel_moisture
     fdm_arr = calculate_fine_dead_fuel_moisture(
-        np.array([0]), np.array([0]), np.array([0]), np.array([0]),
-        np.array([0]), np.array([0]), np.array([0]), np.array([0]),
+        dry_bulb_i=np.array([0]), rh_i=np.array([0]),
+        slope_i=np.array([0]), aspect_i=np.array([0]),
+        shading_i=np.array([0]), month_i=np.array([0]),
+        elev_i=np.array([0]), time_i=np.array([0]),
     )
-    fdm_scl = calculate_fine_dead_fuel_moisture(0, 0, 0, 0, 0, 0, 0, 0)
+    fdm_scl = calculate_fine_dead_fuel_moisture(
+        dry_bulb_i=0, rh_i=0, slope_i=0, aspect_i=0,
+        shading_i=0, month_i=0, elev_i=0, time_i=0,
+    )
+
     report(ti, "calculate_fine_dead_fuel_moisture scalar==array",
            float(fdm_scl.flat[0]), float(fdm_arr.flat[0]), PARITY_TOLERANCE)
 
     # --- VPD: scalar vs array ---
     from components.vapor_pressure_deficit_calculator import calculate_vpd
     vpd_arr = calculate_vpd(
-        np.array([50.0]), 0, np.array([50.0]), 1, output_units=1
+        temperature=np.array([50.0]), temp_units=0,
+        relative_humidity=np.array([50.0]), rh_units=1,
+        output_units=1,
     )
-    vpd_scl = calculate_vpd(50.0, 0, 50.0, 1, output_units=1)
+    vpd_scl = calculate_vpd(
+        temperature=50.0, temp_units=0,
+        relative_humidity=50.0, rh_units=1,
+        output_units=1,
+    )
     report(ti, "calculate_vpd scalar==array: vpd",
            float(vpd_scl['vpd'].flat[0]), float(vpd_arr['vpd'].flat[0]), PARITY_TOLERANCE)
 
@@ -1208,18 +1309,20 @@ def test_scalar_inputs(ti):
     fros, bros, lwr = 9.763838, 3.207761, 1.158917
     elapsed = 60.0
     fa_arr = calculate_fire_area(
-        np.array([fros]), np.array([bros]), np.array([lwr]), np.array([elapsed])
+        forward_ros=np.array([fros]), backing_ros=np.array([bros]),
+        lwr=np.array([lwr]), elapsed_min=np.array([elapsed]),
     )
-    fa_scl = calculate_fire_area(fros, bros, lwr, elapsed)
-    report(ti, "calculate_fire_area scalar==array",
-           float(fa_scl.flat[0]), float(fa_arr.flat[0]), PARITY_TOLERANCE)
+    fa_scl = calculate_fire_area(
+        forward_ros=fros, backing_ros=bros, lwr=lwr, elapsed_min=elapsed,
+    )
 
     fp_arr = calculate_fire_perimeter(
-        np.array([fros]), np.array([bros]), np.array([lwr]), np.array([elapsed])
+        forward_ros=np.array([fros]), backing_ros=np.array([bros]),
+        lwr=np.array([lwr]), elapsed_min=np.array([elapsed]),
     )
-    fp_scl = calculate_fire_perimeter(fros, bros, lwr, elapsed)
-    report(ti, "calculate_fire_perimeter scalar==array",
-           float(fp_scl.flat[0]), float(fp_arr.flat[0]), PARITY_TOLERANCE)
+    fp_scl = calculate_fire_perimeter(
+        forward_ros=fros, backing_ros=bros, lwr=lwr, elapsed_min=elapsed,
+    )
 
     print("Finished scalar input parity\n")
 

@@ -54,8 +54,8 @@ def calculate_vpd(
         from behave_units import temp_to_base, fraction_to_base, pressure_from_base
 
     # Convert inputs to base units: °F and fraction
-    temp_f = temp_to_base(temperature, temp_units)         # (*S) °F
-    rh     = fraction_to_base(relative_humidity, rh_units) # (*S) fraction [0–1]
+    temp_f = temp_to_base(value=temperature, units=temp_units)
+    rh     = fraction_to_base(value=relative_humidity, units=rh_units)
 
     # °F → °C required for Tetens formula
     temp_c = (np.asarray(temp_f) - 32.0) * 5.0 / 9.0
@@ -73,8 +73,8 @@ def calculate_vpd(
     vpd_pa = vpd_hpa * 100.0
 
     return {
-        'vpd':          pressure_from_base(vpd_pa,  output_units),
-        'actual_vp':    pressure_from_base(act_pa,  output_units),
-        'saturated_vp': pressure_from_base(sat_pa,  output_units),
+        'vpd':          pressure_from_base(value=vpd_pa,  units=output_units),
+        'actual_vp':    pressure_from_base(value=act_pa,  units=output_units),
+        'saturated_vp': pressure_from_base(value=sat_pa,  units=output_units),
     }
 

@@ -147,5 +147,9 @@ def calculate_spotting_from_torching_trees(
         0.5 * ht + 2.0 * dbh * np.sqrt(safe_cnt),
         0.0
     )
-    return calculate_spotting_from_burning_pile(flame_ht, ws, ch)
+    return calculate_spotting_from_burning_pile(
+        flame_height_ft=flame_ht,
+        wind_mph=ws,
+        cover_height_ft=ch,
+    )
 

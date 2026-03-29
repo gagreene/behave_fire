@@ -202,7 +202,7 @@ def _apply_out_units(results: dict, out_units: dict, converters: dict) -> dict:
         # we first go back to the true base (index 0) then out to requested.
         value = out[key]
         if stored_base != 0:
-            value = speed_to_base(value, stored_base)   # mph → ft/min
+            value = speed_to_base(value=value, units=stored_base)   # mph → ft/min
         out[key] = converter_fn(value, requested)
     return out
 
@@ -277,8 +277,16 @@ class BehaveRun:
         :param canopy_cover: Canopy cover fraction (0–1) (*S) or scalar.
         :param canopy_height: Canopy height (ft) (*S) or scalar.
         :param crown_ratio: Crown ratio fraction (0–1) (*S) or scalar.
-        :param wind_height_mode: ``'TwentyFoot'`` (default) or ``'TenMeter'``.
-        :param waf_method: ``'UseCrownRatio'`` (default) or ``'UserInput'``.
+        :param wind_height_mode: Height at which ``wind_speed`` was measured.
+            ``'TwentyFoot'`` (default) — standard 20-ft open-wind measurement;
+            ``'TenMeter'`` — 10-m meteorological-station measurement.
+            The value is internally adjusted to midflame height using the WAF.
+        :param waf_method: Controls how the wind adjustment factor (WAF) is
+            computed to reduce the input wind speed to midflame height.
+            ``'UseCrownRatio'`` (default) — WAF is derived from ``canopy_cover``,
+            ``canopy_height``, and ``crown_ratio`` using the Albini & Baughman
+            (1979) method; ``'UserInput'`` — the value supplied in ``user_waf``
+            is used directly, bypassing the automatic calculation.
         :param user_waf: User-supplied WAF (*S) or scalar, used when
             ``waf_method='UserInput'``. Ignored otherwise.
         :param out_units: Optional ``dict`` mapping output key names to
@@ -394,17 +402,26 @@ class BehaveRun:
             np.atleast_1d(np.asarray(slope, dtype=float)), slope_units
         )
 
-        p  = build_particle_arrays(self._lut, fuel_model_grid,
-                                   m1h, m10h, m100h, mlh, mlw)
-        ib = calculate_fuelbed_intermediates(p)
-        ri = calculate_reaction_intensity(ib)
+        p  = build_particle_arrays(
+            lut=self._lut,
+            fuel_model_grid=fuel_model_grid,
+            m1h=m1h, m10h=m10h, m100h=m100h, mlh=mlh, mlw=mlw,
+        )
+        ib = calculate_fuelbed_intermediates(p=p)
+        ri = calculate_reaction_intensity(ib=ib)
         results = calculate_spread_rate(
-            ri, ib,
-            wind_speed_fpm, 0,
-            wind_direction, wind_orientation_mode,
-            slope_deg, 0,
-            aspect,
-            canopy_cover, canopy_height, crown_ratio,
+            ri=ri,
+            ib=ib,
+            wind_speed=wind_speed_fpm,
+            wind_speed_units=0,
+            wind_direction=wind_direction,
+            wind_orientation_mode=wind_orientation_mode,
+            slope=slope_deg,
+            slope_units=0,
+            aspect=aspect,
+            canopy_cover=canopy_cover,
+            canopy_height=canopy_height,
+            crown_ratio=crown_ratio,
             wind_height_mode=wind_height_mode,
             waf_method=waf_method,
             user_waf=user_waf,
@@ -450,11 +467,16 @@ class BehaveRun:
         :param wind_speed: Wind speed (*S) or scalar, in ``wind_speed_units``.
         :param wind_speed_units: Scalar integer ``SpeedUnitsEnum`` value.
         :param wind_direction: Wind direction in degrees (*S) or scalar.
-        :param wind_orientation_mode: ``'RelativeToUpslope'`` or ``'RelativeToNorth'``.
+            Interpretation depends on ``wind_orientation_mode``.
+        :param wind_orientation_mode: ``'RelativeToUpslope'`` — wind direction is
+            measured clockwise from the upslope direction; ``'RelativeToNorth'`` —
+            wind direction is a standard compass bearing (0° = north, clockwise).
         :param slope: Slope (*S) or scalar, in the units given by ``slope_units``.
         :param slope_units: Scalar integer ``SlopeUnitsEnum`` value
             (0 = Degrees [default], 1 = Percent).
-        :param aspect: Terrain aspect in degrees (*S) or scalar.
+        :param aspect: Terrain aspect in degrees (*S) or scalar
+            (0 = north, clockwise). Used to resolve wind direction when
+            ``wind_orientation_mode='RelativeToNorth'``.
         :param canopy_base_height: Height to base of canopy (ft) (*S) or scalar.
         :param canopy_height: Total canopy height (ft) (*S) or scalar.
         :param canopy_bulk_density: Canopy bulk density (lb/ft³) (*S) or scalar.
@@ -533,14 +555,21 @@ class BehaveRun:
             np.atleast_1d(np.asarray(slope, dtype=float)), slope_units
         )
         results = calculate_crown_fire(
-            surface_results, self._lut, fuel_model_grid,
-            m1h, m10h, m100h, mlh, mlw,
-            wind_speed_fpm, 0,
-            wind_direction, wind_orientation_mode,
-            slope_deg, 0,
-            aspect,
-            canopy_base_height, canopy_height,
-            canopy_bulk_density, moisture_foliar,
+            surface_results=surface_results,
+            lut=self._lut,
+            fuel_model_grid=fuel_model_grid,
+            m1h=m1h, m10h=m10h, m100h=m100h, mlh=mlh, mlw=mlw,
+            wind_speed=wind_speed_fpm,
+            wind_speed_units=0,
+            wind_direction=wind_direction,
+            wind_orientation_mode=wind_orientation_mode,
+            slope=slope_deg,
+            slope_units=0,
+            aspect=aspect,
+            canopy_base_height=canopy_base_height,
+            canopy_height=canopy_height,
+            canopy_bulk_density=canopy_bulk_density,
+            moisture_foliar=moisture_foliar,
         )
         return _apply_out_units(results, out_units or {}, _CROWN_KEY_CONVERTERS)
 
@@ -587,12 +616,16 @@ class BehaveRun:
 
         :return: (*S) ndarray — scorch height in ``out_units``.
         """
-        fi     = fireline_intensity_to_base(fireline_intensity, fireline_intensity_units)
-        ws_fpm = speed_to_base(midflame_wind_speed, wind_speed_units)
-        ws_mph = speed_from_base(ws_fpm, 5)
-        t_f    = temp_to_base(air_temperature, temperature_units)
-        result = calculate_scorch_height(fi, ws_mph, t_f)   # ft
-        return length_from_base(result, out_units)
+        fi     = fireline_intensity_to_base(value=fireline_intensity, units=fireline_intensity_units)
+        ws_fpm = speed_to_base(value=midflame_wind_speed, units=wind_speed_units)
+        ws_mph = speed_from_base(value=ws_fpm, units=5)
+        t_f    = temp_to_base(value=air_temperature, units=temperature_units)
+        result = calculate_scorch_height(
+            fireline_intensity_btu_ft_s=fi,
+            midflame_wind_mph=ws_mph,
+            air_temp_f=t_f,
+        )
+        return length_from_base(value=result, units=out_units)
 
     # ------------------------------------------------------------------
     # Mortality
@@ -610,8 +643,11 @@ class BehaveRun:
         """
         Vectorized crown scorch mortality.
 
-        :param scorch_height_ft: Scorch height (ft) (*S) or scalar.
-        :param tree_height_ft: Tree height (ft) (*S) or scalar.
+        :param scorch_height_ft: Height above ground (ft) to which foliage is
+            scorched (*S) or scalar. Typically obtained from
+            ``calculate_scorch_height()``.
+        :param tree_height_ft: Total tree height (ft) (*S) or scalar. Used with
+            ``scorch_height_ft`` to compute the fraction of crown length scorched.
         :param crown_ratio: Live crown ratio as fraction (0–1) (*S) or scalar.
         :param dbh_inches: Diameter at breast height (inches) (*S) or scalar.
         :param equation_number_grid: Mortality equation number per cell (*S) int.
@@ -637,9 +673,12 @@ class BehaveRun:
         :return: dict with converted (*S) ndarrays.
         """
         results = calculate_crown_scorch_mortality(
-            scorch_height_ft, tree_height_ft,
-            crown_ratio, dbh_inches,
-            equation_number_grid, self._mortality_coeffs,
+            scorch_height_ft=scorch_height_ft,
+            tree_height_ft=tree_height_ft,
+            crown_ratio=crown_ratio,
+            dbh_inches=dbh_inches,
+            equation_number_grid=equation_number_grid,
+            coeffs=self._mortality_coeffs,
         )
         return _apply_out_units(results, out_units or {}, _MORTALITY_KEY_CONVERTERS)
 
@@ -682,11 +721,15 @@ class BehaveRun:
 
         :return: (*S) ndarray — spotting distance in ``out_units``.
         """
-        fl_ft  = length_to_base(flame_length, flame_length_units)
-        ws_mph = speed_from_base(speed_to_base(wind_speed, wind_speed_units), 5)
-        ch_ft  = length_to_base(cover_height, cover_height_units)
-        result = calculate_spotting_from_surface_fire(fl_ft, ws_mph, ch_ft)  # ft
-        return length_from_base(result, out_units)
+        fl_ft  = length_to_base(value=flame_length, units=flame_length_units)
+        ws_mph = speed_from_base(value=speed_to_base(value=wind_speed, units=wind_speed_units), units=5)
+        ch_ft  = length_to_base(value=cover_height, units=cover_height_units)
+        result = calculate_spotting_from_surface_fire(
+            flame_length_ft=fl_ft,
+            wind_mph=ws_mph,
+            cover_height_ft=ch_ft,
+        )
+        return length_from_base(value=result, units=out_units)
 
     @staticmethod
     def calculate_spotting_from_burning_pile(
@@ -723,11 +766,15 @@ class BehaveRun:
 
         :return: (*S) ndarray — spotting distance in ``out_units``.
         """
-        fh_ft  = length_to_base(flame_height, flame_height_units)
-        ws_mph = speed_from_base(speed_to_base(wind_speed, wind_speed_units), 5)
-        ch_ft  = length_to_base(cover_height, cover_height_units)
-        result = calculate_spotting_from_burning_pile(fh_ft, ws_mph, ch_ft)  # ft
-        return length_from_base(result, out_units)
+        fh_ft  = length_to_base(value=flame_height, units=flame_height_units)
+        ws_mph = speed_from_base(value=speed_to_base(value=wind_speed, units=wind_speed_units), units=5)
+        ch_ft  = length_to_base(value=cover_height, units=cover_height_units)
+        result = calculate_spotting_from_burning_pile(
+            flame_height_ft=fh_ft,
+            wind_mph=ws_mph,
+            cover_height_ft=ch_ft,
+        )
+        return length_from_base(value=result, units=out_units)
 
     @staticmethod
     def calculate_spotting_from_torching_trees(
@@ -770,12 +817,18 @@ class BehaveRun:
 
         :return: (*S) ndarray — spotting distance in ``out_units``.
         """
-        dbh_in = length_to_base(dbh, dbh_units) * 12.0  # ft → inches
-        ht_ft  = length_to_base(height, height_units)
-        ws_mph = speed_from_base(speed_to_base(wind_speed, wind_speed_units), 5)
-        ch_ft  = length_to_base(cover_height, cover_height_units)
-        result = calculate_spotting_from_torching_trees(dbh_in, ht_ft, count, ws_mph, ch_ft)  # ft
-        return length_from_base(result, out_units)
+        dbh_in = length_to_base(value=dbh, units=dbh_units) * 12.0  # ft → inches
+        ht_ft  = length_to_base(value=height, units=height_units)
+        ws_mph = speed_from_base(value=speed_to_base(value=wind_speed, units=wind_speed_units), units=5)
+        ch_ft  = length_to_base(value=cover_height, units=cover_height_units)
+        result = calculate_spotting_from_torching_trees(
+            dbh_in=dbh_in,
+            height_ft=ht_ft,
+            count=count,
+            wind_mph=ws_mph,
+            cover_height_ft=ch_ft,
+        )
+        return length_from_base(value=result, units=out_units)
 
     # ------------------------------------------------------------------
     # Fire size / shape
@@ -798,10 +851,14 @@ class BehaveRun:
         :param forward_ros: Forward rate of spread (*S), in ``ros_units``.
         :param backing_ros: Backing rate of spread (*S), in ``ros_units``.
         :param ros_units: ``SpeedUnitsEnum`` integer (0=FeetPerMinute, etc.).
-        :param lwr: Fire length-to-width ratio (dimensionless) (*S).
-        :param elapsed_time: Elapsed time, in ``elapsed_time_units``.
+        :param lwr: Fire length-to-width ratio (dimensionless) (*S). Values
+            greater than 1 indicate an elongated ellipse; 1 is circular.
+            Typically taken from ``results['fire_length_to_width_ratio']``.
+        :param elapsed_time: Elapsed time since ignition, in ``elapsed_time_units``.
+            Must be a scalar (single time step).
         :param elapsed_time_units: ``TimeUnitsEnum`` integer (0=Minutes, 2=Hours, etc.).
-        :param is_crown: If ``True``, use crown fire approximation.
+        :param is_crown: If ``True``, applies the Scott & Reinhardt (2001) crown
+            fire area approximation instead of the standard surface fire formula.
         :param out_units: ``AreaUnitsEnum`` integer for the output area.
             Default ``0`` = SquareFeet.
 
@@ -816,11 +873,17 @@ class BehaveRun:
 
         :return: (*S) ndarray — fire area in ``out_units``.
         """
-        fros_fpm    = speed_to_base(forward_ros, ros_units)
-        bros_fpm    = speed_to_base(backing_ros, ros_units)
-        elapsed_min = float(time_to_base(elapsed_time, elapsed_time_units))
-        result = calculate_fire_area(fros_fpm, bros_fpm, lwr, elapsed_min, is_crown)  # ft²
-        return area_from_base(result, out_units)
+        fros_fpm    = speed_to_base(value=forward_ros, units=ros_units)
+        bros_fpm    = speed_to_base(value=backing_ros, units=ros_units)
+        elapsed_min = float(time_to_base(value=elapsed_time, units=elapsed_time_units))
+        result = calculate_fire_area(
+            forward_ros=fros_fpm,
+            backing_ros=bros_fpm,
+            lwr=lwr,
+            elapsed_min=elapsed_min,
+            is_crown=is_crown,
+        )
+        return area_from_base(value=result, units=out_units)
 
     @staticmethod
     def calculate_fire_perimeter(
@@ -839,10 +902,14 @@ class BehaveRun:
         :param forward_ros: Forward rate of spread (*S), in ``ros_units``.
         :param backing_ros: Backing rate of spread (*S), in ``ros_units``.
         :param ros_units: ``SpeedUnitsEnum`` integer (0=FeetPerMinute, etc.).
-        :param lwr: Fire length-to-width ratio (dimensionless) (*S).
-        :param elapsed_time: Elapsed time, in ``elapsed_time_units``.
+        :param lwr: Fire length-to-width ratio (dimensionless) (*S). Values
+            greater than 1 indicate an elongated ellipse; 1 is circular.
+            Typically taken from ``results['fire_length_to_width_ratio']``.
+        :param elapsed_time: Elapsed time since ignition, in ``elapsed_time_units``.
+            Must be a scalar (single time step).
         :param elapsed_time_units: ``TimeUnitsEnum`` integer (0=Minutes, 2=Hours, etc.).
-        :param is_crown: If ``True``, use crown fire approximation.
+        :param is_crown: If ``True``, applies the Scott & Reinhardt (2001) crown
+            fire perimeter approximation instead of the standard surface fire formula.
         :param out_units: ``LengthUnitsEnum`` integer for the output perimeter.
             Default ``0`` = Feet.
 
@@ -859,11 +926,17 @@ class BehaveRun:
 
         :return: (*S) ndarray — fire perimeter in ``out_units``.
         """
-        fros_fpm    = speed_to_base(forward_ros, ros_units)
-        bros_fpm    = speed_to_base(backing_ros, ros_units)
-        elapsed_min = float(time_to_base(elapsed_time, elapsed_time_units))
-        result = calculate_fire_perimeter(fros_fpm, bros_fpm, lwr, elapsed_min, is_crown)  # ft
-        return length_from_base(result, out_units)
+        fros_fpm    = speed_to_base(value=forward_ros, units=ros_units)
+        bros_fpm    = speed_to_base(value=backing_ros, units=ros_units)
+        elapsed_min = float(time_to_base(value=elapsed_time, units=elapsed_time_units))
+        result = calculate_fire_perimeter(
+            forward_ros=fros_fpm,
+            backing_ros=bros_fpm,
+            lwr=lwr,
+            elapsed_min=elapsed_min,
+            is_crown=is_crown,
+        )
+        return length_from_base(value=result, units=out_units)
 
     @staticmethod
     def calculate_fire_length(
@@ -880,7 +953,8 @@ class BehaveRun:
         :param forward_ros: Forward rate of spread (*S), in ``ros_units``.
         :param backing_ros: Backing rate of spread (*S), in ``ros_units``.
         :param ros_units: ``SpeedUnitsEnum`` integer (0=FeetPerMinute, etc.).
-        :param elapsed_time: Elapsed time, in ``elapsed_time_units``.
+        :param elapsed_time: Elapsed time since ignition, in ``elapsed_time_units``.
+            Must be a scalar (single time step).
         :param elapsed_time_units: ``TimeUnitsEnum`` integer (0=Minutes, 2=Hours, etc.).
         :param out_units: ``LengthUnitsEnum`` integer for the output length.
             Default ``0`` = Feet.
@@ -898,11 +972,15 @@ class BehaveRun:
 
         :return: (*S) ndarray — fire length in ``out_units``.
         """
-        fros_fpm    = speed_to_base(forward_ros, ros_units)
-        bros_fpm    = speed_to_base(backing_ros, ros_units)
-        elapsed_min = float(time_to_base(elapsed_time, elapsed_time_units))
-        result = calculate_fire_length(fros_fpm, bros_fpm, elapsed_min)  # ft
-        return length_from_base(result, out_units)
+        fros_fpm    = speed_to_base(value=forward_ros, units=ros_units)
+        bros_fpm    = speed_to_base(value=backing_ros, units=ros_units)
+        elapsed_min = float(time_to_base(value=elapsed_time, units=elapsed_time_units))
+        result = calculate_fire_length(
+            forward_ros=fros_fpm,
+            backing_ros=bros_fpm,
+            elapsed_min=elapsed_min,
+        )
+        return length_from_base(value=result, units=out_units)
 
     @staticmethod
     def calculate_fire_width(
@@ -920,8 +998,11 @@ class BehaveRun:
         :param forward_ros: Forward rate of spread (*S), in ``ros_units``.
         :param backing_ros: Backing rate of spread (*S), in ``ros_units``.
         :param ros_units: ``SpeedUnitsEnum`` integer (0=FeetPerMinute, etc.).
-        :param lwr: Fire length-to-width ratio (dimensionless) (*S).
-        :param elapsed_time: Elapsed time, in ``elapsed_time_units``.
+        :param lwr: Fire length-to-width ratio (dimensionless) (*S). Values
+            greater than 1 indicate an elongated ellipse; 1 is circular.
+            Typically taken from ``results['fire_length_to_width_ratio']``.
+        :param elapsed_time: Elapsed time since ignition, in ``elapsed_time_units``.
+            Must be a scalar (single time step).
         :param elapsed_time_units: ``TimeUnitsEnum`` integer (0=Minutes, 2=Hours, etc.).
         :param out_units: ``LengthUnitsEnum`` integer for the output width.
             Default ``0`` = Feet.
@@ -939,8 +1020,13 @@ class BehaveRun:
 
         :return: (*S) ndarray — fire width in ``out_units``.
         """
-        fros_fpm    = speed_to_base(forward_ros, ros_units)
-        bros_fpm    = speed_to_base(backing_ros, ros_units)
-        elapsed_min = float(time_to_base(elapsed_time, elapsed_time_units))
-        result = calculate_fire_width(fros_fpm, bros_fpm, lwr, elapsed_min)  # ft
-        return length_from_base(result, out_units)
+        fros_fpm    = speed_to_base(value=forward_ros, units=ros_units)
+        bros_fpm    = speed_to_base(value=backing_ros, units=ros_units)
+        elapsed_min = float(time_to_base(value=elapsed_time, units=elapsed_time_units))
+        result = calculate_fire_width(
+            forward_ros=fros_fpm,
+            backing_ros=bros_fpm,
+            lwr=lwr,
+            elapsed_min=elapsed_min,
+        )
+        return length_from_base(value=result, units=out_units)

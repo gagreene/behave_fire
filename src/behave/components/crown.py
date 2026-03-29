@@ -129,21 +129,29 @@ def calculate_crown_fire(
     # Terrain (slope_deg, aspect) and wind direction are passed through so that
     # direction_of_max_spread is computed correctly for the crown run.
     fm10 = np.full(S, 10, dtype=np.int32)
-    p_crown = build_particle_arrays(lut, fm10, m1h, m10h, m100h, mlh, mlw)
-    ib_crown = calculate_fuelbed_intermediates(p_crown)
-    ri_crown = calculate_reaction_intensity(ib_crown)
+    p_crown = build_particle_arrays(
+        lut=lut,
+        fuel_model_grid=fm10,
+        m1h=m1h, m10h=m10h, m100h=m100h, mlh=mlh, mlw=mlw,
+    )
+    ib_crown = calculate_fuelbed_intermediates(p=p_crown)
+    ri_crown = calculate_reaction_intensity(ib=ib_crown)
 
     crown_surface = calculate_spread_rate(
-        ri_crown, ib_crown,
-        wind_speed, wind_speed_units,
-        wind_dir, wind_orientation_mode,   # actual wind direction and orientation
-        slope_deg, 0,                       # already converted to degrees above
-        aspect,                             # actual terrain — affects direction_of_max_spread
+        ri=ri_crown,
+        ib=ib_crown,
+        wind_speed=wind_speed,
+        wind_speed_units=wind_speed_units,
+        wind_direction=wind_dir,
+        wind_orientation_mode=wind_orientation_mode,
+        slope=slope_deg,
+        slope_units=0,
+        aspect=aspect,
         canopy_cover=np.zeros(S),
         canopy_height=ch,
         crown_ratio=np.zeros(S),
         waf_method='UserInput',
-        user_waf=np.full(S, 0.4),           # fixed WAF for crown fire
+        user_waf=np.full(S, 0.4),
     )
 
     # Crown ROS = 3.34 × surface-equivalent spread rate under FM10 (Rothermel 1991)
