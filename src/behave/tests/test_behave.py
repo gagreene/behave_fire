@@ -174,7 +174,12 @@ def _surface_run_upslope():
     return _RUNNER.do_surface_run(
         _FM124, _M1H, _M10H, _M100H, _MLH, _MLW,
         _WS5, _MPH, _WD0, 'RelativeToUpslope',
-        _SLOPE_ARR, _ASP0, _CC50, _CH30, _CR50,
+        _SLOPE_ARR,
+        slope_units=0,
+        aspect=_ASP0,
+        canopy_cover=_CC50,
+        canopy_height=_CH30,
+        crown_ratio=_CR50,
     )
 
 
@@ -223,9 +228,12 @@ def test_surface_north_oriented(ti):
         _FM124, _M1H, _M10H, _M100H, _MLH, _MLW,
         _WS5, _MPH,
         np.array([[45.0]]), 'RelativeToNorth',
-        np.array([[30.0]]),  # slope already in degrees
-        np.array([[95.0]]),  # aspect
-        _CC50, _CH30, _CR50,
+        np.array([[30.0]]),  # slope in degrees
+        slope_units=0,
+        aspect=np.array([[95.0]]),
+        canopy_cover=_CC50,
+        canopy_height=_CH30,
+        crown_ratio=_CR50,
     )
 
     # Expected: scalar test_surface_single_fuel_model -> 19.677584 ch/hr
@@ -253,9 +261,11 @@ def test_surface_fm4_canopy(ti):
         _WS5, _MPH,
         np.array([[90.0]]), 'RelativeToNorth',
         np.array([[30.0]]),  # degrees slope
-        np.array([[0.0]]),
-        np.array([[0.40]]),  # 40 % canopy cover
-        _CH30, _CR50,
+        slope_units=0,
+        aspect=np.array([[0.0]]),
+        canopy_cover=np.array([[0.40]]),  # 40% canopy cover
+        canopy_height=_CH30,
+        crown_ratio=_CR50,
     )
 
     # Expected from scalar: 46.631688 ch/hr
@@ -279,7 +289,12 @@ def test_surface_non_burnable(ti):
         np.array([[91]], dtype=np.int32),
         _M1H, _M10H, _M100H, _MLH, _MLW,
         _WS5, _MPH, _WD0, 'RelativeToUpslope',
-        _SLOPE_ARR, _ASP0, _CC50, _CH30, _CR50,
+        _SLOPE_ARR,
+        slope_units=0,
+        aspect=_ASP0,
+        canopy_cover=_CC50,
+        canopy_height=_CH30,
+        crown_ratio=_CR50,
     )
 
     report(ti, "Non-burnable FM91 spread rate = 0",
@@ -303,7 +318,12 @@ def test_surface_no_data_cell(ti):
         np.array([[0]], dtype=np.int32),
         _M1H, _M10H, _M100H, _MLH, _MLW,
         _WS5, _MPH, _WD0, 'RelativeToUpslope',
-        _SLOPE_ARR, _ASP0, _CC50, _CH30, _CR50,
+        _SLOPE_ARR,
+        slope_units=0,
+        aspect=_ASP0,
+        canopy_cover=_CC50,
+        canopy_height=_CH30,
+        crown_ratio=_CR50,
     )
 
     report(ti, "No-data FM0 spread rate = 0",
@@ -329,7 +349,12 @@ def test_surface_shape_preservation(ti):
             np.full(shape, 0.08), np.full(shape, 0.60),
             np.full(shape, 0.90),
             5.0, _MPH, 0.0, 'RelativeToUpslope',
-            _SLOPE30_DEG, 0.0, 0.50, 30.0, 0.50,
+            _SLOPE30_DEG,
+            slope_units=0,
+            aspect=0.0,
+            canopy_cover=0.50,
+            canopy_height=30.0,
+            crown_ratio=0.50,
         )
         matches = res['spread_rate'].shape == shape
         report(ti, f"Shape {shape} -> output shape {res['spread_rate'].shape}",
@@ -354,7 +379,12 @@ def test_surface_heterogeneous_fuels(ti):
         np.full((6, 10), 0.08), np.full((6, 10), 0.60),
         np.full((6, 10), 0.90),
         5.0, _MPH, 0.0, 'RelativeToUpslope',
-        _SLOPE30_DEG, 0.0, 0.50, 30.0, 0.50,
+        _SLOPE30_DEG,
+        slope_units=0,
+        aspect=0.0,
+        canopy_cover=0.50,
+        canopy_height=30.0,
+        crown_ratio=0.50,
     )
 
     report(ti, "Heterogeneous FM grid: no NaN in spread_rate",
@@ -388,7 +418,12 @@ def test_surface_mixed_grid(ti):
         np.full((5, 5), 0.08), np.full((5, 5), 0.60),
         np.full((5, 5), 0.90),
         5.0, _MPH, 0.0, 'RelativeToUpslope',
-        _SLOPE30_DEG, 0.0, 0.50, 30.0, 0.50,
+        _SLOPE30_DEG,
+        slope_units=0,
+        aspect=0.0,
+        canopy_cover=0.50,
+        canopy_height=30.0,
+        crown_ratio=0.50,
     )
 
     scalar_ros = 9.763837980768564  # ft/min
@@ -521,7 +556,12 @@ def test_crown_fire(ti):
     surf10 = _RUNNER.do_surface_run(
         _FM124, _M1H, _M10H, _M100H, _MLH, _MLW,
         np.array([[10.0]]), _MPH, _WD0, 'RelativeToUpslope',
-        _SLOPE_ARR, _ASP0, _CC50, _CH30, _CR50,
+        _SLOPE_ARR,
+        slope_units=0,
+        aspect=_ASP0,
+        canopy_cover=_CC50,
+        canopy_height=_CH30,
+        crown_ratio=_CR50,
     )
     crown10 = _RUNNER.do_crown_run(
         surf10, _FM124, _M1H, _M10H, _M100H, _MLH, _MLW,
@@ -799,7 +839,9 @@ def test_spot(ti):
 
     # BehaveRun wrappers return same values
     surf_r = _RUNNER.calculate_spotting_from_surface_fire(
-        np.array([scalar_fl_ft]), np.array([5.0]), np.array([30.0])
+        np.array([scalar_fl_ft]), 0,          # flame length — 0 = Feet
+        np.array([5.0]), 5,                   # wind speed   — 5 = MilesPerHour
+        np.array([30.0]), 0,                  # cover height — 0 = Feet
     ).item()
     report(ti, "Spotting from surface fire via BehaveRun wrapper",
            round_to_six(surf_r / 5280.0), 0.22005, ERROR_TOLERANCE)
@@ -967,7 +1009,12 @@ def test_all_fuel_models_no_nan(ti):
         np.full(n, 0.06), np.full(n, 0.07), np.full(n, 0.08),
         np.full(n, 0.60), np.full(n, 0.90),
         5.0, _MPH, 0.0, 'RelativeToUpslope',
-        _SLOPE30_DEG, 0.0, 0.50, 30.0, 0.50,
+        _SLOPE30_DEG,
+        slope_units=0,
+        aspect=0.0,
+        canopy_cover=0.50,
+        canopy_height=30.0,
+        crown_ratio=0.50,
     )
     for key in ('spread_rate', 'flame_length', 'fireline_intensity',
                 'heat_per_unit_area', 'eccentricity'):
@@ -998,16 +1045,24 @@ def test_scalar_inputs(ti):
         np.array([[0.90]]),
         np.array([[5.0]]), _MPH,
         np.array([[0.0]]), 'RelativeToUpslope',
-        np.array([[_SLOPE30_DEG]]), np.array([[0.0]]),
-        np.array([[0.50]]), np.array([[30.0]]), np.array([[0.50]]),
+        np.array([[_SLOPE30_DEG]]),
+        slope_units=0,
+        aspect=np.array([[0.0]]),
+        canopy_cover=np.array([[0.50]]),
+        canopy_height=np.array([[30.0]]),
+        crown_ratio=np.array([[0.50]]),
     )
     r_scl = _RUNNER.do_surface_run(
         124,
         0.06, 0.07, 0.08, 0.60, 0.90,
         5.0, _MPH,
         0.0, 'RelativeToUpslope',
-        _SLOPE30_DEG, 0.0,
-        0.50, 30.0, 0.50,
+        _SLOPE30_DEG,
+        slope_units=0,
+        aspect=0.0,
+        canopy_cover=0.50,
+        canopy_height=30.0,
+        crown_ratio=0.50,
     )
     for key in ('spread_rate', 'flame_length', 'fireline_intensity',
                 'heat_per_unit_area', 'fire_length_to_width_ratio', 'eccentricity'):
