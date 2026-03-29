@@ -24,7 +24,10 @@ CROWN_SCORCH_TABLE (see implementation note below).
 """
 
 import numpy as np
-from typing import Union, Optional
+from typing import Union, Optional, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .species_master_table import SpeciesMasterTable
 
 # ---------------------------------------------------------------------------
 # Crown-scorch B-coefficient table (equation numbers 1–20 from Ryan &
@@ -71,17 +74,29 @@ _BOLE_CHAR_COEFFS_BY_EQ = {
 _MAX_EQ = 120
 
 
-def build_mortality_lookup(species_master_table: Optional[object] = None) -> np.ndarray:
+def build_mortality_lookup(species_master_table: Optional['SpeciesMasterTable'] = None) -> np.ndarray:
     """
     Pre-build mortality B-coefficient array indexed by equation number.
 
     Combines crown-scorch equations (1–99) and bole-char equations (100+).
     Equation numbers not present in either table remain ``[0, 0, 0]``.
 
+    When a ``SpeciesMasterTable`` instance is supplied, this function validates
+    that every ``mortality_equation_number`` referenced by the table has a
+    corresponding entry in the hardcoded coefficient dicts and emits a
+    ``warnings.warn()`` for any equation number that is missing.
+
     :param species_master_table: ``SpeciesMasterTable`` instance or ``None``.
-        Currently unused; B-coefficients are hardcoded above.
-        Kept for API symmetry with ``build_fuel_lookup_arrays()``.
+        When provided, the table is used to validate coefficient coverage.
+        B-coefficients are still sourced from the hardcoded dicts above.
     :return: ndarray of shape (``_MAX_EQ`` + 1, 3) — columns ``[B1, B2, B3]``.
+
+    .. todo::
+        In a future release, extend this function to read B-coefficients
+        directly from an extended ``SpeciesMasterTable`` (or an associated
+        coefficient table) rather than from the hardcoded dicts, mirroring
+        how ``build_fuel_lookup_arrays()`` reads all values from the
+        ``FuelModels`` instance.
     """
     coeffs = np.zeros((_MAX_EQ + 1, 3), dtype=float)
     # Populate crown-scorch equations (1–20)
@@ -92,6 +107,26 @@ def build_mortality_lookup(species_master_table: Optional[object] = None) -> np.
     for eq, b in _BOLE_CHAR_COEFFS_BY_EQ.items():
         if 0 < eq <= _MAX_EQ:
             coeffs[eq] = b
+
+    # --- Validate coefficient coverage against SpeciesMasterTable ---
+    # TODO: When B-coefficients are moved into an extended SpeciesMasterTable,
+    #       replace the hardcoded dicts above with a lookup from species_master_table
+    #       (mirroring build_fuel_lookup_arrays → FuelModels relationship).
+    if species_master_table is not None:
+        import warnings
+        _all_known = set(_CROWN_SCORCH_COEFFS_BY_EQ) | set(_BOLE_CHAR_COEFFS_BY_EQ)
+        for record in species_master_table.records:
+            eq_num = record.mortality_equation_number
+            if eq_num > 0 and eq_num not in _all_known:
+                warnings.warn(
+                    f"SpeciesMasterTable species '{record.species_code}' references "
+                    f"mortality equation {eq_num} which has no B-coefficients in "
+                    f"the hardcoded tables. Probability of mortality will be 0 "
+                    f"for cells assigned this equation number.",
+                    UserWarning,
+                    stacklevel=2,
+                )
+
     return coeffs
 
 

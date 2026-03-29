@@ -278,6 +278,7 @@ class BehaveRun:
     # ------------------------------------------------------------------
     # Scorch height
     # ------------------------------------------------------------------
+
     @staticmethod
     def calculate_scorch_height(fireline_intensity: Union[float, np.ndarray],
                                 fireline_intensity_units: int,
@@ -338,6 +339,7 @@ class BehaveRun:
     # ------------------------------------------------------------------
     # Spotting
     # ------------------------------------------------------------------
+
     @staticmethod
     def calculate_spotting_from_surface_fire(flame_length_ft: Union[float, np.ndarray],
                                              wind_mph: Union[float, np.ndarray],

@@ -17,7 +17,6 @@ Usage
 """
 
 import numpy as np
-from typing import Union
 
 try:
     from .fuel_models import FuelModels

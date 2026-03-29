@@ -641,10 +641,37 @@ class AreaUnits:
         SquareMiles = 4
         SquareKilometers = 5
 
+    @staticmethod
+    def toBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+        """Convert area to square feet (base unit). Delegates to ``area_to_base()``."""
+        return area_to_base(value, units)
+
+    @staticmethod
+    def fromBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+        """Convert area from square feet to requested units. Delegates to ``area_from_base()``."""
+        return area_from_base(value, units)
+
 class BasalAreaUnits:
     class BasalAreaUnitsEnum:
         SquareFeetPerAcre = 0
         SquareMetersPerHectare = 1
+
+    @staticmethod
+    def toBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+        """Convert basal area to ft²/acre (base unit, units=0 pass-through)."""
+        arr = np.asarray(value, dtype=float)
+        if units == 0:
+            return arr
+        # 1 m²/ha ≈ 4.35889 ft²/acre
+        return arr * 4.35889
+
+    @staticmethod
+    def fromBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+        """Convert basal area from ft²/acre to requested units."""
+        arr = np.asarray(value, dtype=float)
+        if units == 0:
+            return arr
+        return arr / 4.35889
 
 class LengthUnits:
     class LengthUnitsEnum:
@@ -657,12 +684,32 @@ class LengthUnits:
         Miles = 6
         Kilometers = 7
 
+    @staticmethod
+    def toBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+        """Convert length to feet (base unit). Delegates to ``length_to_base()``."""
+        return length_to_base(value, units)
+
+    @staticmethod
+    def fromBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+        """Convert length from feet to requested units. Delegates to ``length_from_base()``."""
+        return length_from_base(value, units)
+
 class LoadingUnits:
     class LoadingUnitsEnum:
         PoundsPerSquareFoot = 0
         TonsPerAcre = 1
         TonnesPerHectare = 2
         KilogramsPerSquareMeter = 3
+
+    @staticmethod
+    def toBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+        """Convert fuel loading to lb/ft² (base unit). Delegates to ``loading_to_base()``."""
+        return loading_to_base(value, units)
+
+    @staticmethod
+    def fromBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+        """Convert fuel loading from lb/ft² to requested units. Delegates to ``loading_from_base()``."""
+        return loading_from_base(value, units)
 
 class PressureUnits:
     class PressureUnitsEnum:
@@ -676,12 +723,44 @@ class PressureUnits:
         TechnicalAtmosphere = 7
         PoundPerSquareInch = 8
 
+    @staticmethod
+    def toBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+        """Convert pressure to Pascals (base unit). Delegates to ``pressure_to_base()``."""
+        return pressure_to_base(value, units)
+
+    @staticmethod
+    def fromBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+        """Convert pressure from Pascals to requested units. Delegates to ``pressure_from_base()``."""
+        return pressure_from_base(value, units)
+
 class SurfaceAreaToVolumeUnits:
     class SurfaceAreaToVolumeUnitsEnum:
         SquareFeetOverCubicFeet = 0
         SquareMetersOverCubicMeters = 1
         SquareInchesOverCubicInches = 2
         SquareCentimetersOverCubicCentimeters = 3
+
+    # Conversion factors to ft²/ft³ (base)
+    _TO_BASE = [1.0, 0.3048, 12.0, 0.032808]
+    _FROM_BASE = [1.0, 1.0 / 0.3048, 1.0 / 12.0, 1.0 / 0.032808]
+
+    @staticmethod
+    def toBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+        """Convert SAVR to ft²/ft³ (base unit)."""
+        arr = np.asarray(value, dtype=float)
+        if units == 0:
+            return arr
+        factors = [1.0, 0.3048, 12.0, 0.032808]
+        return arr * factors[units]
+
+    @staticmethod
+    def fromBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+        """Convert SAVR from ft²/ft³ to requested units."""
+        arr = np.asarray(value, dtype=float)
+        if units == 0:
+            return arr
+        factors = [1.0, 1.0 / 0.3048, 1.0 / 12.0, 1.0 / 0.032808]
+        return arr * factors[units]
 
 class SpeedUnits:
     class SpeedUnitsEnum:
@@ -693,36 +772,121 @@ class SpeedUnits:
         MilesPerHour = 5
         KilometersPerHour = 6
 
+    @staticmethod
+    def toBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+        """Convert speed to ft/min (base unit). Delegates to ``speed_to_base()``."""
+        return speed_to_base(value, units)
+
+    @staticmethod
+    def fromBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+        """Convert speed from ft/min to requested units. Delegates to ``speed_from_base()``."""
+        return speed_from_base(value, units)
+
 class FractionUnits:
     class FractionUnitsEnum:
         Fraction = 0
         Percent = 1
+
+    @staticmethod
+    def toBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+        """Convert fraction/percent to fraction (base unit). Delegates to ``fraction_to_base()``."""
+        return fraction_to_base(value, units)
+
+    @staticmethod
+    def fromBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+        """Convert fraction to requested units. Delegates to ``fraction_from_base()``."""
+        return fraction_from_base(value, units)
 
 class SlopeUnits:
     class SlopeUnitsEnum:
         Degrees = 0
         Percent = 1
 
+    @staticmethod
+    def toBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+        """Convert slope to degrees (base unit). Delegates to ``slope_to_base()``."""
+        return slope_to_base(value, units)
+
+    @staticmethod
+    def fromBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+        """Convert slope from degrees to requested units. Delegates to ``slope_from_base()``."""
+        return slope_from_base(value, units)
+
 class DensityUnits:
     class DensityUnitsEnum:
         PoundsPerCubicFoot = 0
         KilogramsPerCubicMeter = 1
+
+    @staticmethod
+    def toBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+        """Convert density to lb/ft³ (base unit). Delegates to ``density_to_base()``."""
+        return density_to_base(value, units)
+
+    @staticmethod
+    def fromBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+        """Convert density from lb/ft³ to requested units. Delegates to ``density_from_base()``."""
+        return density_from_base(value, units)
 
 class HeatOfCombustionUnits:
     class HeatOfCombustionUnitsEnum:
         BtusPerPound = 0
         KilojoulesPerKilogram = 1
 
+    @staticmethod
+    def toBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+        """Convert heat of combustion to BTU/lb (base unit)."""
+        arr = np.asarray(value, dtype=float)
+        if units == 0:
+            return arr
+        # 1 kJ/kg ≈ 0.429923 BTU/lb
+        return arr * 0.429923
+
+    @staticmethod
+    def fromBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+        """Convert heat of combustion from BTU/lb to requested units."""
+        arr = np.asarray(value, dtype=float)
+        if units == 0:
+            return arr
+        return arr / 0.429923
+
+
 class HeatSinkUnits:
     class HeatSinkUnitsEnum:
         BtusPerCubicFoot = 0
         KilojoulesPerCubicMeter = 1
+
+    @staticmethod
+    def toBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+        """Convert heat sink to BTU/ft³ (base unit)."""
+        arr = np.asarray(value, dtype=float)
+        if units == 0:
+            return arr
+        # 1 kJ/m³ ≈ 0.026839 BTU/ft³
+        return arr * 0.026839
+
+    @staticmethod
+    def fromBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+        """Convert heat sink from BTU/ft³ to requested units."""
+        arr = np.asarray(value, dtype=float)
+        if units == 0:
+            return arr
+        return arr / 0.026839
 
 class HeatPerUnitAreaUnits:
     class HeatPerUnitAreaUnitsEnum:
         BtusPerSquareFoot = 0
         KilojoulesPerSquareMeter = 1
         KilowattSecondsPerSquareMeter = 2
+
+    @staticmethod
+    def toBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+        """Convert heat per unit area to BTU/ft² (base unit). Delegates to ``hpua_to_base()``."""
+        return hpua_to_base(value, units)
+
+    @staticmethod
+    def fromBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+        """Convert heat per unit area from BTU/ft² to requested units. Delegates to ``hpua_from_base()``."""
+        return hpua_from_base(value, units)
 
 class HeatSourceAndReactionIntensityUnits:
     class HeatSourceAndReactionIntensityUnitsEnum:
@@ -732,6 +896,16 @@ class HeatSourceAndReactionIntensityUnits:
         KilojoulesPerSquareMeterPerMinute = 3
         KilowattsPerSquareMeter = 4
 
+    @staticmethod
+    def toBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+        """Convert reaction intensity to BTU/ft²/min (base unit). Delegates to ``reaction_intensity_to_base()``."""
+        return reaction_intensity_to_base(value, units)
+
+    @staticmethod
+    def fromBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+        """Convert reaction intensity from BTU/ft²/min to requested units. Delegates to ``reaction_intensity_from_base()``."""
+        return reaction_intensity_from_base(value, units)
+
 class FirelineIntensityUnits:
     class FirelineIntensityUnitsEnum:
         BtusPerFootPerSecond = 0
@@ -740,11 +914,31 @@ class FirelineIntensityUnits:
         KilojoulesPerMeterPerMinute = 3
         KilowattsPerMeter = 4
 
+    @staticmethod
+    def toBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+        """Convert fireline intensity to BTU/ft/s (base unit). Delegates to ``fireline_intensity_to_base()``."""
+        return fireline_intensity_to_base(value, units)
+
+    @staticmethod
+    def fromBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+        """Convert fireline intensity from BTU/ft/s to requested units. Delegates to ``fireline_intensity_from_base()``."""
+        return fireline_intensity_from_base(value, units)
+
 class TemperatureUnits:
     class TemperatureUnitsEnum:
         Fahrenheit = 0
         Celsius = 1
         Kelvin = 2
+
+    @staticmethod
+    def toBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+        """Convert temperature to °F (base unit). Delegates to ``temp_to_base()``."""
+        return temp_to_base(value, units)
+
+    @staticmethod
+    def fromBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+        """Convert temperature from °F to requested units. Delegates to ``temp_from_base()``."""
+        return temp_from_base(value, units)
 
 class TimeUnits:
     class TimeUnitsEnum:
@@ -753,4 +947,14 @@ class TimeUnits:
         Hours = 2
         Days = 3
         Years = 4
+
+    @staticmethod
+    def toBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+        """Convert time to minutes (base unit). Delegates to ``time_to_base()``."""
+        return time_to_base(value, units)
+
+    @staticmethod
+    def fromBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+        """Convert time from minutes to requested units. Delegates to ``time_from_base()``."""
+        return time_from_base(value, units)
 

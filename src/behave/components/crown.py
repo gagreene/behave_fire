@@ -1,9 +1,11 @@
 """
 crown.py — Vectorized Crown Fire Pipeline (V6)
 
-Crown fire uses FM10 as the crown fuel model, WAF=0.4, flat terrain.
-The crown L:W ratio uses the Rothermel 1991 (eq. 10) formula — different
-from the surface formula (§13.2 Gap A fix).
+Crown fire uses FM10 as the crown fuel model and a fixed WAF=0.4.
+Wind direction, orientation mode, slope, and aspect are passed through to
+``calculate_spread_rate()`` so that ``direction_of_max_spread`` is computed
+correctly for the crown run.  The crown L:W ratio uses the Rothermel 1991
+(eq. 10) formula — different from the surface formula (§13.2 Gap A fix).
 
 Public API
 ----------
@@ -52,7 +54,8 @@ def calculate_crown_fire(
         and ``'heat_per_unit_area'``).
     :param lut: Fuel property lookup dict from ``build_fuel_lookup_arrays()``.
     :param fuel_model_grid: Integer fuel model number array (*S) or scalar.
-        Used for moisture inputs only — crown always runs on FM10.
+        Used only to derive the spatial shape ``S``; crown fuel properties
+        always come from FM10 regardless of this value.
     :param m1h: 1-hr dead fuel moisture as fraction (*S) or scalar.
     :param m10h: 10-hr dead fuel moisture as fraction (*S) or scalar.
     :param m100h: 100-hr dead fuel moisture as fraction (*S) or scalar.
@@ -61,9 +64,16 @@ def calculate_crown_fire(
     :param wind_speed: Wind speed (*S) or scalar, in ``wind_speed_units``.
     :param wind_speed_units: Scalar integer ``SpeedUnitsEnum`` value.
     :param wind_direction: Wind direction in degrees (*S) or scalar.
+        Passed through to ``calculate_spread_rate()`` to compute
+        ``direction_of_max_spread`` for the crown run.
     :param wind_orientation_mode: ``'RelativeToUpslope'`` or ``'RelativeToNorth'``.
+        Passed through to ``calculate_spread_rate()`` alongside
+        ``wind_direction``.
     :param slope_deg: Slope in degrees (*S) or scalar (not percent).
+        Passed through to ``calculate_spread_rate()`` to compute
+        ``direction_of_max_spread`` for the crown run.
     :param aspect: Terrain aspect in degrees (*S) or scalar (0 = north, clockwise).
+        Passed through to ``calculate_spread_rate()`` alongside ``slope_deg``.
     :param canopy_base_height: Height to base of canopy (ft) (*S) or scalar.
     :param canopy_height: Total canopy height (ft) (*S) or scalar.
     :param canopy_bulk_density: Canopy bulk density (lb/ft³) (*S) or scalar.
@@ -99,18 +109,20 @@ def calculate_crown_fire(
         from behave_units import speed_from_base
 
     # --- Coerce spatial inputs to at-least-1D ndarrays ---
-    fm_grid = np.atleast_1d(np.asarray(fuel_model_grid, dtype=np.int32))
-    slope_deg = np.atleast_1d(np.asarray(slope_deg, dtype=float))
-    aspect = np.atleast_1d(np.asarray(aspect, dtype=float))
-    cbh = np.atleast_1d(np.asarray(canopy_base_height, dtype=float))   # ft
-    ch = np.atleast_1d(np.asarray(canopy_height, dtype=float))          # ft
-    cbd = np.atleast_1d(np.asarray(canopy_bulk_density, dtype=float))   # lb/ft³
-    mf_pct = np.atleast_1d(np.asarray(moisture_foliar, dtype=float))    # percent
-    wind_speed = np.atleast_1d(np.asarray(wind_speed, dtype=float))
-    wind_dir = np.atleast_1d(np.asarray(wind_direction, dtype=float))
+    fm_grid   = np.atleast_1d(np.asarray(fuel_model_grid,    dtype=np.int32))
+    slope_deg = np.atleast_1d(np.asarray(slope_deg,          dtype=float))
+    aspect    = np.atleast_1d(np.asarray(aspect,             dtype=float))
+    wind_dir  = np.atleast_1d(np.asarray(wind_direction,     dtype=float))
+    cbh       = np.atleast_1d(np.asarray(canopy_base_height, dtype=float))   # ft
+    ch        = np.atleast_1d(np.asarray(canopy_height,      dtype=float))   # ft
+    cbd       = np.atleast_1d(np.asarray(canopy_bulk_density, dtype=float))  # lb/ft³
+    mf_pct    = np.atleast_1d(np.asarray(moisture_foliar,    dtype=float))   # percent
+    wind_speed = np.atleast_1d(np.asarray(wind_speed,        dtype=float))
     S = fm_grid.shape
 
-    # --- Crown fuel: FM10 everywhere, flat terrain, WAF=0.4 ---
+    # --- Crown fuel: FM10 everywhere, WAF=0.4 ---
+    # Terrain (slope_deg, aspect) and wind direction are passed through so that
+    # direction_of_max_spread is computed correctly for the crown run.
     fm10 = np.full(S, 10, dtype=np.int32)
     p_crown = build_particle_arrays(lut, fm10, m1h, m10h, m100h, mlh, mlw)
     ib_crown = calculate_fuelbed_intermediates(p_crown)
@@ -119,8 +131,8 @@ def calculate_crown_fire(
     crown_surface = calculate_spread_rate(
         ri_crown, ib_crown,
         wind_speed, wind_speed_units,
-        np.zeros(S), 'RelativeToUpslope',  # no direction offset for crown run
-        np.zeros(S), np.zeros(S),           # flat terrain assumption
+        wind_dir, wind_orientation_mode,   # actual wind direction and orientation
+        slope_deg, aspect,                  # actual terrain — affects direction_of_max_spread
         canopy_cover=np.zeros(S),
         canopy_height=ch,
         crown_ratio=np.zeros(S),
