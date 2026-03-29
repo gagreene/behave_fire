@@ -1,6 +1,7 @@
 # Behave Fire Behavior Model - Python Conversion
 # Facade/Driver for the Behave fire behavior model using the Facade OOP Design Pattern
 # Complete implementation with 100% C++ feature parity
+import copy
 import os
 import sys
 script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -90,14 +91,19 @@ class BehaveRun:
         return self._copy_assignment(self)
     
     def _copy_assignment(self, rhs):
-        """Memberwise copy assignment (C++ pattern)"""
+        """
+        Deep-copy assignment (mirrors C++ memberwise copy).
+        Each component is deep-copied so the original and the copy are
+        fully independent — mutating one does not affect the other.
+        Use copy.copy(behave_run) or copy.deepcopy(behave_run) safely.
+        """
         new_run = BehaveRun(rhs.fuel_models_, rhs.species_master_table_)
-        new_run.surface = rhs.surface
-        new_run.crown = rhs.crown
-        new_run.spot = rhs.spot
-        new_run.ignite = rhs.ignite
-        new_run.safety = rhs.safety
-        new_run.mortality = rhs.mortality
+        new_run.surface  = copy.deepcopy(rhs.surface)
+        new_run.crown    = copy.deepcopy(rhs.crown)
+        new_run.spot     = copy.deepcopy(rhs.spot)
+        new_run.ignite   = copy.deepcopy(rhs.ignite)
+        new_run.safety   = copy.deepcopy(rhs.safety)
+        new_run.mortality = copy.deepcopy(rhs.mortality)
         return new_run
 
     def reinitialize(self):

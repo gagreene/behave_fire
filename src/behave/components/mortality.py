@@ -10,10 +10,20 @@ try:
         LengthUnits, AreaUnits, FractionUnits, SpeedUnits,
         TemperatureUnits, FirelineIntensityUnits
     )
+    from .species_master_table import (
+        GACC as _GACC,
+        EquationType as _EquationType,
+        CrownDamageEquationCode as _CrownDamageEquationCode,
+    )
 except ImportError:
     from behave_units import (
         LengthUnits, AreaUnits, FractionUnits, SpeedUnits,
         TemperatureUnits, FirelineIntensityUnits
+    )
+    from species_master_table import (
+        GACC as _GACC,
+        EquationType as _EquationType,
+        CrownDamageEquationCode as _CrownDamageEquationCode,
     )
 
 
@@ -37,42 +47,66 @@ class FlameLengthOrScorchHeightSwitch:
     SCORCH_HEIGHT = 1
 
 
-class EquationType:
-    """Enumeration for equation types"""
-    NOT_SET = -1
-    CROWN_SCORCH = 0
-    BOLE_CHAR = 1
-    CROWN_DAMAGE = 2
-
+# ---------------------------------------------------------------------------
+# Re-export canonical IntEnum types from species_master_table with
+# SCREAMING_SNAKE_CASE aliases so existing mortality.py call-sites keep
+# working unchanged.
+#
+# Python's IntEnum forbids subclassing an enum that already has members, so
+# we use plain namespace classes whose attributes ARE the real IntEnum values
+# (not copies).  That means:
+#   mortality.GACC.ALASKA  is  species_master_table.GACC.Alaska   → True
+#   isinstance(mortality.GACC.ALASKA, species_master_table.GACC)  → True
+# ---------------------------------------------------------------------------
 
 class GACC:
-    """Geographic Area Coordination Centers"""
-    NOT_SET = -1
-    ALASKA = 1
-    CALIFORNIA = 2
-    EASTERN_AREA = 3
-    GREAT_BASIN = 4
-    NORTHERN_ROCKIES = 5
-    NORTHWEST = 6
-    ROCKY_MOUNTAIN = 7
-    SOUTHERN_AREA = 8
-    SOUTHWEST = 9
+    """
+    Geographic Area Coordination Centers — SCREAMING_SNAKE_CASE aliases for
+    the canonical species_master_table.GACC IntEnum values.
+    Every attribute IS the corresponding IntEnum member (same object).
+    """
+    NOT_SET          = _GACC.NotSet
+    ALASKA           = _GACC.Alaska
+    CALIFORNIA       = _GACC.California
+    EASTERN_AREA     = _GACC.EasternArea
+    GREAT_BASIN      = _GACC.GreatBasin
+    NORTHERN_ROCKIES = _GACC.NorthernRockies
+    NORTHWEST        = _GACC.Northwest
+    ROCKY_MOUNTAIN   = _GACC.RockyMountain
+    SOUTHERN_AREA    = _GACC.SouthernArea
+    SOUTHWEST        = _GACC.Southwest
+
+
+class EquationType:
+    """
+    Equation types — SCREAMING_SNAKE_CASE aliases for the canonical
+    species_master_table.EquationType IntEnum values.
+    """
+    NOT_SET      = _EquationType.NotSet
+    CROWN_SCORCH = _EquationType.CrownScorch
+    BOLE_CHAR    = _EquationType.BoleChar
+    CROWN_DAMAGE = _EquationType.CrownDamage
 
 
 class CrownDamageEquationCode:
-    """Crown damage equation codes"""
-    NOT_SET = -1
-    WHITE_FIR = 0
-    SUBALPINE_FIR = 1
-    INCENSE_CEDAR = 2
-    WESTERN_LARCH = 3
-    WHITEBARK_PINE = 4
+    """
+    Crown damage equation codes.
+    Plain class (not IntEnum subclass) because Python IntEnum forbids adding
+    new integer members in a subclass.  This class is only used internally
+    within mortality.py so there is no cross-module isinstance() issue.
+    """
+    NOT_SET          = -1
+    WHITE_FIR        = 0
+    SUBALPINE_FIR    = 1
+    INCENSE_CEDAR    = 2
+    WESTERN_LARCH    = 3
+    WHITEBARK_PINE   = 4
     ENGELMANN_SPRUCE = 5
-    SUGAR_PINE = 6
-    RED_FIR = 7
-    PONDEROSA_PINE = 8
-    PONDEROSA_KILL = 9
-    DOUGLAS_FIR = 10
+    SUGAR_PINE       = 6
+    RED_FIR          = 7
+    PONDEROSA_PINE   = 8
+    PONDEROSA_KILL   = 9
+    DOUGLAS_FIR      = 10
 
 
 class CrownDamageType:
