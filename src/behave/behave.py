@@ -24,7 +24,8 @@ Usage
         wind_speed_units=SpeedUnits.SpeedUnitsEnum.MilesPerHour,
         wind_direction=np.array([[0.0]]),
         wind_orientation_mode='RelativeToUpslope',
-        slope=np.array([[np.degrees(np.arctan(0.30))]]),   # 30% → degrees
+        slope=np.array([[30.0]]),          # 30% slope
+        slope_units=1,                     # 1 = SlopeUnitsEnum.Percent
         aspect=np.array([[0.0]]),
         canopy_cover=np.array([[0.50]]),
         canopy_height=np.array([[30.0]]),
@@ -34,8 +35,8 @@ Usage
 
 Notes
 -----
-* slope must be in DEGREES.  Convert percent before calling:
-      slope_deg = np.degrees(np.arctan(slope_pct / 100.0))
+* slope_units=0 → Degrees (default); slope_units=1 → Percent.
+  The conversion (percent → degrees via arctan) is handled automatically.
 * BehaveRun accepts single-value inputs and returns shape-(1,) or
   shape-(1,1) arrays, not Python scalars.
 """
@@ -69,9 +70,19 @@ try:
     )
     from .components.behave_units import (
         fireline_intensity_to_base,
+        fireline_intensity_from_base,
         speed_to_base,
         speed_from_base,
+        slope_to_base,
+        length_to_base,
+        length_from_base,
+        area_from_base,
+        time_to_base,
+        time_from_base,
         temp_to_base,
+        hpua_from_base,
+        reaction_intensity_from_base,
+        fraction_from_base,
     )
 except ImportError:
     from components.fuel_models import FuelModels
@@ -99,10 +110,101 @@ except ImportError:
     )
     from components.behave_units import (
         fireline_intensity_to_base,
+        fireline_intensity_from_base,
         speed_to_base,
         speed_from_base,
+        slope_to_base,
+        length_to_base,
+        length_from_base,
+        area_from_base,
+        time_to_base,
+        time_from_base,
         temp_to_base,
+        hpua_from_base,
+        reaction_intensity_from_base,
+        fraction_from_base,
     )
+
+
+# ---------------------------------------------------------------------------
+# Output-unit conversion helper
+# ---------------------------------------------------------------------------
+
+# Maps each output key to (converter_fn, stored_base_unit_index).
+# stored_base_unit_index is the unit the component already stores the value in
+# (needed for keys like 'effective_wind_speed' whose base differs from ft/min).
+_SURFACE_KEY_CONVERTERS = {
+    # key:                               (converter,                    stored_base)
+    'spread_rate':                       (speed_from_base,              0),   # ft/min
+    'backing_spread_rate':               (speed_from_base,              0),
+    'flanking_spread_rate':              (speed_from_base,              0),
+    'no_wind_no_slope_spread_rate':      (speed_from_base,              0),
+    'midflame_wind_speed':               (speed_from_base,              0),
+    'effective_wind_speed':              (speed_from_base,              5),   # stored as mph
+    'flame_length':                      (length_from_base,             0),   # ft
+    'fireline_intensity':                (fireline_intensity_from_base, 0),   # BTU/ft/s
+    'heat_per_unit_area':                (hpua_from_base,               0),   # BTU/ft²
+    'reaction_intensity':                (reaction_intensity_from_base, 0),   # BTU/ft²/min
+    'residence_time':                    (time_from_base,               0),   # min
+    # dimensionless — no conversion
+    'fire_length_to_width_ratio':        None,
+    'eccentricity':                      None,
+    'direction_of_max_spread':           None,
+}
+
+_CROWN_KEY_CONVERTERS = {
+    'crown_fire_spread_rate':                        (speed_from_base,              0),
+    'crown_critical_fire_spread_rate':               (speed_from_base,              0),
+    'crown_flame_length':                            (length_from_base,             0),
+    'crown_fire_line_intensity':                     (fireline_intensity_from_base, 0),
+    'crown_critical_surface_fire_line_intensity':    (fireline_intensity_from_base, 0),
+    'crown_fire_heat_per_unit_area':                 (hpua_from_base,               0),
+    'canopy_heat_per_unit_area':                     (hpua_from_base,               0),
+    # dimensionless / categorical — no conversion
+    'crown_fire_transition_ratio':                   None,
+    'crown_fire_active_ratio':                       None,
+    'crown_length_to_width_ratio':                   None,
+    'fire_type':                                     None,
+}
+
+_MORTALITY_KEY_CONVERTERS = {
+    'crown_length_scorch':   (fraction_from_base, 0),
+    'crown_volume_scorch':   (fraction_from_base, 0),
+    'probability_mortality': (fraction_from_base, 0),
+}
+
+
+def _apply_out_units(results: dict, out_units: dict, converters: dict) -> dict:
+    """
+    Convert each key in *results* whose converter is registered in *converters*
+    to the unit requested in *out_units*.
+
+    Keys absent from *out_units* are left in their base units.
+    Keys with ``None`` converter (dimensionless / categorical) are never converted.
+
+    :param results: Raw output dict from a component function.
+    :param out_units: Caller-supplied ``{key: unit_enum_int}`` overrides.
+    :param converters: ``{key: (converter_fn, stored_base_unit)}`` map.
+    :return: New dict with requested conversions applied.
+    """
+    if not out_units:
+        return results
+    out = dict(results)
+    for key, entry in converters.items():
+        if entry is None or key not in out_units:
+            continue
+        converter_fn, stored_base = entry
+        requested = out_units[key]
+        if requested == stored_base:
+            continue                        # already in the right unit
+        # Convert: stored_base → ft/min (or whichever true base) → requested.
+        # For keys stored in a non-zero base (e.g. effective_wind_speed in mph)
+        # we first go back to the true base (index 0) then out to requested.
+        value = out[key]
+        if stored_base != 0:
+            value = speed_to_base(value, stored_base)   # mph → ft/min
+        out[key] = converter_fn(value, requested)
+    return out
 
 
 class BehaveRun:
@@ -131,32 +233,31 @@ class BehaveRun:
     # Surface run
     # ------------------------------------------------------------------
 
-    def do_surface_run(self,
-                       fuel_model_grid: Union[int, np.ndarray],
-                       m1h: Union[float, np.ndarray],
-                       m10h: Union[float, np.ndarray],
-                       m100h: Union[float, np.ndarray],
-                       mlh: Union[float, np.ndarray],
-                       mlw: Union[float, np.ndarray],
-                       wind_speed: Union[float, np.ndarray],
-                       wind_speed_units: int,
-                       wind_direction: Union[float, np.ndarray],
-                       wind_orientation_mode: str,
-                       slope: Union[float, np.ndarray],
-                       aspect: Union[float, np.ndarray],
-                       canopy_cover: Union[float, np.ndarray],
-                       canopy_height: Union[float, np.ndarray],
-                       crown_ratio: Union[float, np.ndarray],
-                       wind_height_mode: str = 'TwentyFoot',
-                       waf_method: str = 'UseCrownRatio',
-                       user_waf: Union[float, np.ndarray, None] = None) -> dict:
+    def do_surface_run(
+            self,
+            fuel_model_grid: Union[int, np.ndarray],
+            m1h: Union[float, np.ndarray],
+            m10h: Union[float, np.ndarray],
+            m100h: Union[float, np.ndarray],
+            mlh: Union[float, np.ndarray],
+            mlw: Union[float, np.ndarray],
+            wind_speed: Union[float, np.ndarray],
+            wind_speed_units: int,
+            wind_direction: Union[float, np.ndarray],
+            wind_orientation_mode: str,
+            slope: Union[float, np.ndarray],
+            slope_units: int = 0,
+            aspect: Union[float, np.ndarray] = 0.0,
+            canopy_cover: Union[float, np.ndarray] = 0.0,
+            canopy_height: Union[float, np.ndarray] = 0.0,
+            crown_ratio: Union[float, np.ndarray] = 0.0,
+            wind_height_mode: str = 'TwentyFoot',
+            waf_method: str = 'UseCrownRatio',
+            user_waf: Union[float, np.ndarray, None] = None,
+            out_units: Optional[dict] = None,
+    ) -> dict:
         """
         Run the vectorized surface fire pipeline.
-
-        .. note::
-            ``slope`` must be in **degrees** (not percent).  Convert before calling::
-
-                slope_deg = np.degrees(np.arctan(slope_pct / 100.0))
 
         :param fuel_model_grid: Integer fuel model number array (*S).
         :param m1h: 1-hr dead fuel moisture as fraction (*S) or scalar (e.g. 0.06 = 6%).
@@ -169,7 +270,9 @@ class BehaveRun:
         :param wind_direction: Wind direction in degrees (*S) or scalar.
             Interpretation depends on ``wind_orientation_mode``.
         :param wind_orientation_mode: ``'RelativeToUpslope'`` or ``'RelativeToNorth'``.
-        :param slope: Slope in **degrees** (*S) or scalar (not percent).
+        :param slope: Slope (*S) or scalar, in the units given by ``slope_units``.
+        :param slope_units: Scalar integer ``SlopeUnitsEnum`` value
+            (0 = Degrees [default], 1 = Percent).
         :param aspect: Terrain aspect in degrees (*S) or scalar (0 = north, clockwise).
         :param canopy_cover: Canopy cover fraction (0–1) (*S) or scalar.
         :param canopy_height: Canopy height (ft) (*S) or scalar.
@@ -178,71 +281,162 @@ class BehaveRun:
         :param waf_method: ``'UseCrownRatio'`` (default) or ``'UserInput'``.
         :param user_waf: User-supplied WAF (*S) or scalar, used when
             ``waf_method='UserInput'``. Ignored otherwise.
-        :return: dict of (*S) ndarrays — same keys as ``calculate_spread_rate()``
-            output:
-            ``spread_rate`` (ft/min), ``backing_spread_rate`` (ft/min),
-            ``flanking_spread_rate`` (ft/min), ``flame_length`` (ft),
-            ``fireline_intensity`` (BTU/ft/s), ``heat_per_unit_area`` (BTU/ft²),
-            ``effective_wind_speed`` (mph), ``fire_length_to_width_ratio``
-            (dimensionless), ``eccentricity`` (dimensionless),
-            ``direction_of_max_spread`` (degrees), ``residence_time`` (min),
-            ``reaction_intensity`` (BTU/ft²/min), ``midflame_wind_speed`` (ft/min),
-            ``no_wind_no_slope_spread_rate`` (ft/min).
+        :param out_units: Optional ``dict`` mapping output key names to
+            ``*UnitsEnum`` integers.  Only the keys you want converted need to
+            be present; omitted keys remain in their default base units.
+            Dimensionless keys (``fire_length_to_width_ratio``, ``eccentricity``,
+            ``direction_of_max_spread``) are never converted.
+
+            **Convertible keys and their defaults:**
+
+            ============================================  ================================
+            Key                                           Default (enum class · value)
+            ============================================  ================================
+            ``spread_rate``                               SpeedUnitsEnum.FeetPerMinute · 0
+            ``backing_spread_rate``                       SpeedUnitsEnum.FeetPerMinute · 0
+            ``flanking_spread_rate``                      SpeedUnitsEnum.FeetPerMinute · 0
+            ``no_wind_no_slope_spread_rate``              SpeedUnitsEnum.FeetPerMinute · 0
+            ``midflame_wind_speed``                       SpeedUnitsEnum.FeetPerMinute · 0
+            ``effective_wind_speed``                      SpeedUnitsEnum.MilesPerHour · 5
+            ``flame_length``                              LengthUnitsEnum.Feet · 0
+            ``fireline_intensity``                        FirelineIntensityUnitsEnum.BtusPerFootPerSecond · 0
+            ``heat_per_unit_area``                        HeatPerUnitAreaUnitsEnum.BtusPerSquareFoot · 0
+            ``reaction_intensity``                        HeatSourceAndReactionIntensityUnitsEnum.BtusPerSquareFootPerMinute · 0
+            ``residence_time``                            TimeUnitsEnum.Minutes · 0
+            ============================================  ================================
+
+            **SpeedUnitsEnum options** (``spread_rate``, ``backing_spread_rate``,
+            ``flanking_spread_rate``, ``no_wind_no_slope_spread_rate``,
+            ``midflame_wind_speed``, ``effective_wind_speed``):
+
+            =  ========================
+            0  FeetPerMinute (default for ROS keys)
+            1  ChainsPerHour
+            2  MetersPerSecond
+            3  MetersPerMinute
+            4  MetersPerHour
+            5  MilesPerHour (default for ``effective_wind_speed``)
+            6  KilometersPerHour
+            =  ========================
+
+            **LengthUnitsEnum options** (``flame_length``):
+
+            =  ============
+            0  Feet
+            1  Inches
+            2  Millimeters
+            3  Centimeters
+            4  Meters
+            5  Chains
+            6  Miles
+            7  Kilometers
+            =  ============
+
+            **FirelineIntensityUnitsEnum options** (``fireline_intensity``):
+
+            =  ==============================
+            0  BtusPerFootPerSecond
+            1  BtusPerFootPerMinute
+            2  KilojoulesPerMeterPerSecond
+            3  KilojoulesPerMeterPerMinute
+            4  KilowattsPerMeter
+            =  ==============================
+
+            **HeatPerUnitAreaUnitsEnum options** (``heat_per_unit_area``):
+
+            =  ==============================
+            0  BtusPerSquareFoot
+            1  KilojoulesPerSquareMeter
+            2  KilowattSecondsPerSquareMeter
+            =  ==============================
+
+            **HeatSourceAndReactionIntensityUnitsEnum options**
+            (``reaction_intensity``):
+
+            =  ===================================
+            0  BtusPerSquareFootPerMinute
+            1  BtusPerSquareFootPerSecond
+            2  KilojoulesPerSquareMeterPerSecond
+            3  KilojoulesPerSquareMeterPerMinute
+            4  KilowattsPerSquareMeter
+            =  ===================================
+
+            **TimeUnitsEnum options** (``residence_time``):
+
+            =  =======
+            0  Minutes
+            1  Seconds
+            2  Hours
+            3  Days
+            4  Years
+            =  =======
+
+        :return: dict of (*S) ndarrays in the requested output units.
         """
         # Coerce all spatial inputs to at-least-1D ndarrays (G10 fix)
         fuel_model_grid = np.atleast_1d(np.asarray(fuel_model_grid, dtype=np.int32))
-        m1h = np.atleast_1d(np.asarray(m1h, dtype=float))
-        m10h = np.atleast_1d(np.asarray(m10h, dtype=float))
+        m1h   = np.atleast_1d(np.asarray(m1h,   dtype=float))
+        m10h  = np.atleast_1d(np.asarray(m10h,  dtype=float))
         m100h = np.atleast_1d(np.asarray(m100h, dtype=float))
-        mlh = np.atleast_1d(np.asarray(mlh, dtype=float))
-        mlw = np.atleast_1d(np.asarray(mlw, dtype=float))
-        wind_speed = np.atleast_1d(np.asarray(wind_speed, dtype=float))
+        mlh   = np.atleast_1d(np.asarray(mlh,   dtype=float))
+        mlw   = np.atleast_1d(np.asarray(mlw,   dtype=float))
         wind_direction = np.atleast_1d(np.asarray(wind_direction, dtype=float))
-        slope = np.atleast_1d(np.asarray(slope, dtype=float))
-        aspect = np.atleast_1d(np.asarray(aspect, dtype=float))
-        canopy_cover = np.atleast_1d(np.asarray(canopy_cover, dtype=float))
-        canopy_height = np.atleast_1d(np.asarray(canopy_height, dtype=float))
-        crown_ratio = np.atleast_1d(np.asarray(crown_ratio, dtype=float))
+        aspect         = np.atleast_1d(np.asarray(aspect,         dtype=float))
+        canopy_cover   = np.atleast_1d(np.asarray(canopy_cover,   dtype=float))
+        canopy_height  = np.atleast_1d(np.asarray(canopy_height,  dtype=float))
+        crown_ratio    = np.atleast_1d(np.asarray(crown_ratio,    dtype=float))
 
-        p = build_particle_arrays(
-            self._lut, fuel_model_grid,
-            m1h, m10h, m100h, mlh, mlw
+        # Unit conversions done here once, so components receive base units.
+        wind_speed_fpm = speed_to_base(
+            np.atleast_1d(np.asarray(wind_speed, dtype=float)), wind_speed_units
         )
+        slope_deg = slope_to_base(
+            np.atleast_1d(np.asarray(slope, dtype=float)), slope_units
+        )
+
+        p  = build_particle_arrays(self._lut, fuel_model_grid,
+                                   m1h, m10h, m100h, mlh, mlw)
         ib = calculate_fuelbed_intermediates(p)
         ri = calculate_reaction_intensity(ib)
-        return calculate_spread_rate(
+        results = calculate_spread_rate(
             ri, ib,
-            wind_speed, wind_speed_units,
+            wind_speed_fpm, 0,
             wind_direction, wind_orientation_mode,
-            slope, aspect,
+            slope_deg, 0,
+            aspect,
             canopy_cover, canopy_height, crown_ratio,
             wind_height_mode=wind_height_mode,
             waf_method=waf_method,
             user_waf=user_waf,
         )
+        return _apply_out_units(results, out_units or {}, _SURFACE_KEY_CONVERTERS)
 
     # ------------------------------------------------------------------
     # Crown run
     # ------------------------------------------------------------------
 
-    def do_crown_run(self,
-                     surface_results: dict,
-                     fuel_model_grid: Union[int, np.ndarray],
-                     m1h: Union[float, np.ndarray],
-                     m10h: Union[float, np.ndarray],
-                     m100h: Union[float, np.ndarray],
-                     mlh: Union[float, np.ndarray],
-                     mlw: Union[float, np.ndarray],
-                     wind_speed: Union[float, np.ndarray],
-                     wind_speed_units: int,
-                     wind_direction: Union[float, np.ndarray],
-                     wind_orientation_mode: str,
-                     slope: Union[float, np.ndarray],
-                     aspect: Union[float, np.ndarray],
-                     canopy_base_height: Union[float, np.ndarray],
-                     canopy_height: Union[float, np.ndarray],
-                     canopy_bulk_density: Union[float, np.ndarray],
-                     moisture_foliar: Union[float, np.ndarray]) -> dict:
+    def do_crown_run(
+            self,
+            surface_results: dict,
+            fuel_model_grid: Union[int, np.ndarray],
+            m1h: Union[float, np.ndarray],
+            m10h: Union[float, np.ndarray],
+            m100h: Union[float, np.ndarray],
+            mlh: Union[float, np.ndarray],
+            mlw: Union[float, np.ndarray],
+            wind_speed: Union[float, np.ndarray],
+            wind_speed_units: int,
+            wind_direction: Union[float, np.ndarray],
+            wind_orientation_mode: str,
+            slope: Union[float, np.ndarray],
+            slope_units: int = 0,
+            aspect: Union[float, np.ndarray] = 0.0,
+            canopy_base_height: Union[float, np.ndarray] = 0.0,
+            canopy_height: Union[float, np.ndarray] = 0.0,
+            canopy_bulk_density: Union[float, np.ndarray] = 0.0,
+            moisture_foliar: Union[float, np.ndarray] = 100.0,
+            out_units: Optional[dict] = None,
+    ) -> dict:
         """
         Run the vectorized crown fire pipeline.
 
@@ -257,35 +451,113 @@ class BehaveRun:
         :param wind_speed_units: Scalar integer ``SpeedUnitsEnum`` value.
         :param wind_direction: Wind direction in degrees (*S) or scalar.
         :param wind_orientation_mode: ``'RelativeToUpslope'`` or ``'RelativeToNorth'``.
-        :param slope: Slope in degrees (*S) or scalar (not percent).
+        :param slope: Slope (*S) or scalar, in the units given by ``slope_units``.
+        :param slope_units: Scalar integer ``SlopeUnitsEnum`` value
+            (0 = Degrees [default], 1 = Percent).
         :param aspect: Terrain aspect in degrees (*S) or scalar.
         :param canopy_base_height: Height to base of canopy (ft) (*S) or scalar.
         :param canopy_height: Total canopy height (ft) (*S) or scalar.
         :param canopy_bulk_density: Canopy bulk density (lb/ft³) (*S) or scalar.
         :param moisture_foliar: Foliar moisture content (%) (*S) or scalar.
-        :return: dict — see ``calculate_crown_fire()`` for full key list.
+        :param out_units: Optional ``dict`` mapping output key names to
+            ``*UnitsEnum`` integers.  Dimensionless / categorical keys
+            (``crown_fire_transition_ratio``, ``crown_fire_active_ratio``,
+            ``crown_length_to_width_ratio``, ``fire_type``) are never converted.
+
+            **Convertible keys and their defaults:**
+
+            ================================================  ================================
+            Key                                               Default (enum class · value)
+            ================================================  ================================
+            ``crown_fire_spread_rate``                        SpeedUnitsEnum.FeetPerMinute · 0
+            ``crown_critical_fire_spread_rate``               SpeedUnitsEnum.FeetPerMinute · 0
+            ``crown_flame_length``                            LengthUnitsEnum.Feet · 0
+            ``crown_fire_line_intensity``                     FirelineIntensityUnitsEnum.BtusPerFootPerSecond · 0
+            ``crown_critical_surface_fire_line_intensity``    FirelineIntensityUnitsEnum.BtusPerFootPerSecond · 0
+            ``crown_fire_heat_per_unit_area``                 HeatPerUnitAreaUnitsEnum.BtusPerSquareFoot · 0
+            ``canopy_heat_per_unit_area``                     HeatPerUnitAreaUnitsEnum.BtusPerSquareFoot · 0
+            ================================================  ================================
+
+            **SpeedUnitsEnum options** (``crown_fire_spread_rate``,
+            ``crown_critical_fire_spread_rate``):
+
+            =  =====================
+            0  FeetPerMinute
+            1  ChainsPerHour
+            2  MetersPerSecond
+            3  MetersPerMinute
+            4  MetersPerHour
+            5  MilesPerHour
+            6  KilometersPerHour
+            =  =====================
+
+            **LengthUnitsEnum options** (``crown_flame_length``):
+
+            =  ============
+            0  Feet
+            1  Inches
+            2  Millimeters
+            3  Centimeters
+            4  Meters
+            5  Chains
+            6  Miles
+            7  Kilometers
+            =  ============
+
+            **FirelineIntensityUnitsEnum options** (``crown_fire_line_intensity``,
+            ``crown_critical_surface_fire_line_intensity``):
+
+            =  ==============================
+            0  BtusPerFootPerSecond
+            1  BtusPerFootPerMinute
+            2  KilojoulesPerMeterPerSecond
+            3  KilojoulesPerMeterPerMinute
+            4  KilowattsPerMeter
+            =  ==============================
+
+            **HeatPerUnitAreaUnitsEnum options** (``crown_fire_heat_per_unit_area``,
+            ``canopy_heat_per_unit_area``):
+
+            =  ==============================
+            0  BtusPerSquareFoot
+            1  KilojoulesPerSquareMeter
+            2  KilowattSecondsPerSquareMeter
+            =  ==============================
+
+        :return: dict in the requested output units.
         """
-        return calculate_crown_fire(
+        wind_speed_fpm = speed_to_base(
+            np.atleast_1d(np.asarray(wind_speed, dtype=float)), wind_speed_units
+        )
+        slope_deg = slope_to_base(
+            np.atleast_1d(np.asarray(slope, dtype=float)), slope_units
+        )
+        results = calculate_crown_fire(
             surface_results, self._lut, fuel_model_grid,
             m1h, m10h, m100h, mlh, mlw,
-            wind_speed, wind_speed_units,
+            wind_speed_fpm, 0,
             wind_direction, wind_orientation_mode,
-            slope, aspect,
+            slope_deg, 0,
+            aspect,
             canopy_base_height, canopy_height,
             canopy_bulk_density, moisture_foliar,
         )
+        return _apply_out_units(results, out_units or {}, _CROWN_KEY_CONVERTERS)
 
     # ------------------------------------------------------------------
     # Scorch height
     # ------------------------------------------------------------------
 
     @staticmethod
-    def calculate_scorch_height(fireline_intensity: Union[float, np.ndarray],
-                                fireline_intensity_units: int,
-                                midflame_wind_speed: Union[float, np.ndarray],
-                                wind_speed_units: int,
-                                air_temperature: Union[float, np.ndarray],
-                                temperature_units: int) -> np.ndarray:
+    def calculate_scorch_height(
+            fireline_intensity: Union[float, np.ndarray],
+            fireline_intensity_units: int,
+            midflame_wind_speed: Union[float, np.ndarray],
+            wind_speed_units: int,
+            air_temperature: Union[float, np.ndarray],
+            temperature_units: int,
+            out_units: int = 0,
+    ) -> np.ndarray:
         """
         Vectorized scorch height.
 
@@ -299,24 +571,42 @@ class BehaveRun:
         :param air_temperature: Air temperature (*S) or scalar, in
             ``temperature_units``.
         :param temperature_units: Scalar integer ``TemperatureUnitsEnum`` value.
-        :return: (*S) ndarray — scorch height (ft).
+        :param out_units: ``LengthUnitsEnum`` integer for the output scorch
+            height.  Default ``0`` = Feet.
+
+            =  ============
+            0  Feet
+            1  Inches
+            2  Millimeters
+            3  Centimeters
+            4  Meters
+            5  Chains
+            6  Miles
+            7  Kilometers
+            =  ============
+
+        :return: (*S) ndarray — scorch height in ``out_units``.
         """
-        fi = fireline_intensity_to_base(fireline_intensity, fireline_intensity_units)
+        fi     = fireline_intensity_to_base(fireline_intensity, fireline_intensity_units)
         ws_fpm = speed_to_base(midflame_wind_speed, wind_speed_units)
-        ws_mph = speed_from_base(ws_fpm, 5)  # 5 = MilesPerHour
-        t_f = temp_to_base(air_temperature, temperature_units)
-        return calculate_scorch_height(fi, ws_mph, t_f)
+        ws_mph = speed_from_base(ws_fpm, 5)
+        t_f    = temp_to_base(air_temperature, temperature_units)
+        result = calculate_scorch_height(fi, ws_mph, t_f)   # ft
+        return length_from_base(result, out_units)
 
     # ------------------------------------------------------------------
     # Mortality
     # ------------------------------------------------------------------
 
-    def calculate_crown_scorch_mortality(self,
-                                         scorch_height_ft: Union[float, np.ndarray],
-                                         tree_height_ft: Union[float, np.ndarray],
-                                         crown_ratio: Union[float, np.ndarray],
-                                         dbh_inches: Union[float, np.ndarray],
-                                         equation_number_grid: Union[int, np.ndarray]) -> dict:
+    def calculate_crown_scorch_mortality(
+            self,
+            scorch_height_ft: Union[float, np.ndarray],
+            tree_height_ft: Union[float, np.ndarray],
+            crown_ratio: Union[float, np.ndarray],
+            dbh_inches: Union[float, np.ndarray],
+            equation_number_grid: Union[int, np.ndarray],
+            out_units: Optional[dict] = None,
+    ) -> dict:
         """
         Vectorized crown scorch mortality.
 
@@ -326,140 +616,331 @@ class BehaveRun:
         :param dbh_inches: Diameter at breast height (inches) (*S) or scalar.
         :param equation_number_grid: Mortality equation number per cell (*S) int.
             Crown-scorch equations are 1–20; bole-char equations are 100–109.
-        :return: dict with keys:
-            ``'crown_length_scorch'``, ``'crown_volume_scorch'``,
-            ``'probability_mortality'`` — all (*S) ndarrays [0, 1].
+        :param out_units: Optional ``dict`` mapping output key names to
+            ``FractionUnitsEnum`` integers.  Convertible keys and their defaults:
+
+            =======================  ===================================
+            Key                      Default (enum class · value)
+            =======================  ===================================
+            ``crown_length_scorch``  FractionUnitsEnum.Fraction · 0
+            ``crown_volume_scorch``  FractionUnitsEnum.Fraction · 0
+            ``probability_mortality`` FractionUnitsEnum.Fraction · 0
+            =======================  ===================================
+
+            **FractionUnitsEnum options:**
+
+            =  =======
+            0  Fraction  (0–1)
+            1  Percent   (0–100)
+            =  =======
+
+        :return: dict with converted (*S) ndarrays.
         """
-        return calculate_crown_scorch_mortality(
+        results = calculate_crown_scorch_mortality(
             scorch_height_ft, tree_height_ft,
             crown_ratio, dbh_inches,
             equation_number_grid, self._mortality_coeffs,
         )
+        return _apply_out_units(results, out_units or {}, _MORTALITY_KEY_CONVERTERS)
 
     # ------------------------------------------------------------------
     # Spotting
     # ------------------------------------------------------------------
 
     @staticmethod
-    def calculate_spotting_from_surface_fire(flame_length_ft: Union[float, np.ndarray],
-                                             wind_mph: Union[float, np.ndarray],
-                                             cover_height_ft: Union[float, np.ndarray]) -> np.ndarray:
+    def calculate_spotting_from_surface_fire(
+            flame_length: Union[float, np.ndarray],
+            flame_length_units: int,
+            wind_speed: Union[float, np.ndarray],
+            wind_speed_units: int,
+            cover_height: Union[float, np.ndarray],
+            cover_height_units: int,
+            out_units: int = 0,
+    ) -> np.ndarray:
         """
         Vectorized surface fire spotting distance (Albini 1979).
 
-        :param flame_length_ft: Flame length (ft) (*S) or scalar.
-        :param wind_mph: 20-ft open wind speed (mph) (*S) or scalar.
-        :param cover_height_ft: Cover height downwind (ft) (*S) or scalar.
-        :return: (*S) ndarray — spotting distance (ft).
+        :param flame_length: Flame length (*S) or scalar, in ``flame_length_units``.
+        :param flame_length_units: ``LengthUnitsEnum`` integer (0=Feet, 4=Meters, etc.).
+        :param wind_speed: 20-ft open wind speed (*S) or scalar, in ``wind_speed_units``.
+        :param wind_speed_units: ``SpeedUnitsEnum`` integer (0=FeetPerMinute, 5=MilesPerHour, etc.).
+        :param cover_height: Cover height downwind (*S) or scalar, in ``cover_height_units``.
+        :param cover_height_units: ``LengthUnitsEnum`` integer (0=Feet, 4=Meters, etc.).
+        :param out_units: ``LengthUnitsEnum`` integer for the output spotting
+            distance.  Default ``0`` = Feet.
+
+            =  ============
+            0  Feet
+            1  Inches
+            2  Millimeters
+            3  Centimeters
+            4  Meters
+            5  Chains
+            6  Miles
+            7  Kilometers
+            =  ============
+
+        :return: (*S) ndarray — spotting distance in ``out_units``.
         """
-        return calculate_spotting_from_surface_fire(
-            flame_length_ft, wind_mph, cover_height_ft
-        )
+        fl_ft  = length_to_base(flame_length, flame_length_units)
+        ws_mph = speed_from_base(speed_to_base(wind_speed, wind_speed_units), 5)
+        ch_ft  = length_to_base(cover_height, cover_height_units)
+        result = calculate_spotting_from_surface_fire(fl_ft, ws_mph, ch_ft)  # ft
+        return length_from_base(result, out_units)
 
     @staticmethod
-    def calculate_spotting_from_burning_pile(flame_height_ft: Union[float, np.ndarray],
-                                             wind_mph: Union[float, np.ndarray],
-                                             cover_height_ft: Union[float, np.ndarray]) -> np.ndarray:
+    def calculate_spotting_from_burning_pile(
+            flame_height: Union[float, np.ndarray],
+            flame_height_units: int,
+            wind_speed: Union[float, np.ndarray],
+            wind_speed_units: int,
+            cover_height: Union[float, np.ndarray],
+            cover_height_units: int,
+            out_units: int = 0,
+    ) -> np.ndarray:
         """
         Vectorized burning pile spotting distance (Albini 1979).
 
-        :param flame_height_ft: Flame height of the pile (ft) (*S) or scalar.
-        :param wind_mph: 20-ft open wind speed (mph) (*S) or scalar.
-        :param cover_height_ft: Cover height downwind (ft) (*S) or scalar.
-        :return: (*S) ndarray — spotting distance (ft).
+        :param flame_height: Flame height of the pile (*S) or scalar, in ``flame_height_units``.
+        :param flame_height_units: ``LengthUnitsEnum`` integer (0=Feet, 4=Meters, etc.).
+        :param wind_speed: 20-ft open wind speed (*S) or scalar, in ``wind_speed_units``.
+        :param wind_speed_units: ``SpeedUnitsEnum`` integer (0=FeetPerMinute, 5=MilesPerHour, etc.).
+        :param cover_height: Cover height downwind (*S) or scalar, in ``cover_height_units``.
+        :param cover_height_units: ``LengthUnitsEnum`` integer (0=Feet, 4=Meters, etc.).
+        :param out_units: ``LengthUnitsEnum`` integer for the output spotting
+            distance.  Default ``0`` = Feet.
+
+            =  ============
+            0  Feet
+            1  Inches
+            2  Millimeters
+            3  Centimeters
+            4  Meters
+            5  Chains
+            6  Miles
+            7  Kilometers
+            =  ============
+
+        :return: (*S) ndarray — spotting distance in ``out_units``.
         """
-        return calculate_spotting_from_burning_pile(
-            flame_height_ft, wind_mph, cover_height_ft
-        )
+        fh_ft  = length_to_base(flame_height, flame_height_units)
+        ws_mph = speed_from_base(speed_to_base(wind_speed, wind_speed_units), 5)
+        ch_ft  = length_to_base(cover_height, cover_height_units)
+        result = calculate_spotting_from_burning_pile(fh_ft, ws_mph, ch_ft)  # ft
+        return length_from_base(result, out_units)
 
     @staticmethod
-    def calculate_spotting_from_torching_trees(dbh_in: Union[float, np.ndarray],
-                                               height_ft: Union[float, np.ndarray],
-                                               count: Union[int, float, np.ndarray],
-                                               wind_mph: Union[float, np.ndarray],
-                                               cover_height_ft: Union[float, np.ndarray]) -> np.ndarray:
+    def calculate_spotting_from_torching_trees(
+            dbh: Union[float, np.ndarray],
+            dbh_units: int,
+            height: Union[float, np.ndarray],
+            height_units: int,
+            count: Union[int, float, np.ndarray],
+            wind_speed: Union[float, np.ndarray],
+            wind_speed_units: int,
+            cover_height: Union[float, np.ndarray],
+            cover_height_units: int,
+            out_units: int = 0,
+    ) -> np.ndarray:
         """
         Vectorized torching-tree spotting distance (Albini 1979).
 
-        :param dbh_in: Tree diameter at breast height (inches) (*S) or scalar.
-        :param height_ft: Tree height (ft) (*S) or scalar.
-        :param count: Number of torching trees (*S) or scalar.
-        :param wind_mph: 20-ft open wind speed (mph) (*S) or scalar.
-        :param cover_height_ft: Cover height downwind (ft) (*S) or scalar.
-        :return: (*S) ndarray — spotting distance (ft).
+        :param dbh: Tree diameter at breast height (*S) or scalar, in ``dbh_units``.
+        :param dbh_units: ``LengthUnitsEnum`` integer (0=Feet, 1=Inches, 4=Meters, etc.).
+        :param height: Tree height (*S) or scalar, in ``height_units``.
+        :param height_units: ``LengthUnitsEnum`` integer (0=Feet, 4=Meters, etc.).
+        :param count: Number of torching trees (*S) or scalar (dimensionless).
+        :param wind_speed: 20-ft open wind speed (*S) or scalar, in ``wind_speed_units``.
+        :param wind_speed_units: ``SpeedUnitsEnum`` integer (0=FeetPerMinute, 5=MilesPerHour, etc.).
+        :param cover_height: Cover height downwind (*S) or scalar, in ``cover_height_units``.
+        :param cover_height_units: ``LengthUnitsEnum`` integer (0=Feet, 4=Meters, etc.).
+        :param out_units: ``LengthUnitsEnum`` integer for the output spotting
+            distance.  Default ``0`` = Feet.
+
+            =  ============
+            0  Feet
+            1  Inches
+            2  Millimeters
+            3  Centimeters
+            4  Meters
+            5  Chains
+            6  Miles
+            7  Kilometers
+            =  ============
+
+        :return: (*S) ndarray — spotting distance in ``out_units``.
         """
-        return calculate_spotting_from_torching_trees(
-            dbh_in, height_ft, count, wind_mph, cover_height_ft
-        )
+        dbh_in = length_to_base(dbh, dbh_units) * 12.0  # ft → inches
+        ht_ft  = length_to_base(height, height_units)
+        ws_mph = speed_from_base(speed_to_base(wind_speed, wind_speed_units), 5)
+        ch_ft  = length_to_base(cover_height, cover_height_units)
+        result = calculate_spotting_from_torching_trees(dbh_in, ht_ft, count, ws_mph, ch_ft)  # ft
+        return length_from_base(result, out_units)
 
     # ------------------------------------------------------------------
     # Fire size / shape
     # ------------------------------------------------------------------
 
     @staticmethod
-    def calculate_fire_area(forward_ros: Union[float, np.ndarray],
-                            backing_ros: Union[float, np.ndarray],
-                            lwr: Union[float, np.ndarray],
-                            elapsed_min: float,
-                            is_crown: bool = False) -> np.ndarray:
+    def calculate_fire_area(
+            forward_ros: Union[float, np.ndarray],
+            backing_ros: Union[float, np.ndarray],
+            ros_units: int,
+            lwr: Union[float, np.ndarray],
+            elapsed_time: float,
+            elapsed_time_units: int,
+            is_crown: bool = False,
+            out_units: int = 0,
+    ) -> np.ndarray:
         """
         Elliptical fire area.
 
-        :param forward_ros: Forward rate of spread (ft/min) (*S).
-        :param backing_ros: Backing rate of spread (ft/min) (*S).
+        :param forward_ros: Forward rate of spread (*S), in ``ros_units``.
+        :param backing_ros: Backing rate of spread (*S), in ``ros_units``.
+        :param ros_units: ``SpeedUnitsEnum`` integer (0=FeetPerMinute, etc.).
         :param lwr: Fire length-to-width ratio (dimensionless) (*S).
-        :param elapsed_min: Elapsed time (minutes) — scalar float.
+        :param elapsed_time: Elapsed time, in ``elapsed_time_units``.
+        :param elapsed_time_units: ``TimeUnitsEnum`` integer (0=Minutes, 2=Hours, etc.).
         :param is_crown: If ``True``, use crown fire approximation.
-        :return: (*S) ndarray — fire area (ft²).
+        :param out_units: ``AreaUnitsEnum`` integer for the output area.
+            Default ``0`` = SquareFeet.
+
+            =  ================
+            0  SquareFeet
+            1  Acres
+            2  Hectares
+            3  SquareMeters
+            4  SquareMiles
+            5  SquareKilometers
+            =  ================
+
+        :return: (*S) ndarray — fire area in ``out_units``.
         """
-        return calculate_fire_area(forward_ros, backing_ros, lwr,
-                                   elapsed_min, is_crown)
+        fros_fpm    = speed_to_base(forward_ros, ros_units)
+        bros_fpm    = speed_to_base(backing_ros, ros_units)
+        elapsed_min = float(time_to_base(elapsed_time, elapsed_time_units))
+        result = calculate_fire_area(fros_fpm, bros_fpm, lwr, elapsed_min, is_crown)  # ft²
+        return area_from_base(result, out_units)
 
     @staticmethod
-    def calculate_fire_perimeter(forward_ros: Union[float, np.ndarray],
-                                 backing_ros: Union[float, np.ndarray],
-                                 lwr: Union[float, np.ndarray],
-                                 elapsed_min: float,
-                                 is_crown: bool = False) -> np.ndarray:
+    def calculate_fire_perimeter(
+            forward_ros: Union[float, np.ndarray],
+            backing_ros: Union[float, np.ndarray],
+            ros_units: int,
+            lwr: Union[float, np.ndarray],
+            elapsed_time: float,
+            elapsed_time_units: int,
+            is_crown: bool = False,
+            out_units: int = 0,
+    ) -> np.ndarray:
         """
         Elliptical fire perimeter (Ramanujan approximation).
 
-        :param forward_ros: Forward rate of spread (ft/min) (*S).
-        :param backing_ros: Backing rate of spread (ft/min) (*S).
+        :param forward_ros: Forward rate of spread (*S), in ``ros_units``.
+        :param backing_ros: Backing rate of spread (*S), in ``ros_units``.
+        :param ros_units: ``SpeedUnitsEnum`` integer (0=FeetPerMinute, etc.).
         :param lwr: Fire length-to-width ratio (dimensionless) (*S).
-        :param elapsed_min: Elapsed time (minutes) — scalar float.
+        :param elapsed_time: Elapsed time, in ``elapsed_time_units``.
+        :param elapsed_time_units: ``TimeUnitsEnum`` integer (0=Minutes, 2=Hours, etc.).
         :param is_crown: If ``True``, use crown fire approximation.
-        :return: (*S) ndarray — fire perimeter (ft).
+        :param out_units: ``LengthUnitsEnum`` integer for the output perimeter.
+            Default ``0`` = Feet.
+
+            =  ============
+            0  Feet
+            1  Inches
+            2  Millimeters
+            3  Centimeters
+            4  Meters
+            5  Chains
+            6  Miles
+            7  Kilometers
+            =  ============
+
+        :return: (*S) ndarray — fire perimeter in ``out_units``.
         """
-        return calculate_fire_perimeter(forward_ros, backing_ros, lwr,
-                                        elapsed_min, is_crown)
+        fros_fpm    = speed_to_base(forward_ros, ros_units)
+        bros_fpm    = speed_to_base(backing_ros, ros_units)
+        elapsed_min = float(time_to_base(elapsed_time, elapsed_time_units))
+        result = calculate_fire_perimeter(fros_fpm, bros_fpm, lwr, elapsed_min, is_crown)  # ft
+        return length_from_base(result, out_units)
 
     @staticmethod
-    def calculate_fire_length(forward_ros: Union[float, np.ndarray],
-                              backing_ros: Union[float, np.ndarray],
-                              elapsed_min: float) -> np.ndarray:
+    def calculate_fire_length(
+            forward_ros: Union[float, np.ndarray],
+            backing_ros: Union[float, np.ndarray],
+            ros_units: int,
+            elapsed_time: float,
+            elapsed_time_units: int,
+            out_units: int = 0,
+    ) -> np.ndarray:
         """
         Fire ellipse length (major axis × 2).
 
-        :param forward_ros: Forward rate of spread (ft/min) (*S).
-        :param backing_ros: Backing rate of spread (ft/min) (*S).
-        :param elapsed_min: Elapsed time (minutes) — scalar float.
-        :return: (*S) ndarray — fire length (ft).
+        :param forward_ros: Forward rate of spread (*S), in ``ros_units``.
+        :param backing_ros: Backing rate of spread (*S), in ``ros_units``.
+        :param ros_units: ``SpeedUnitsEnum`` integer (0=FeetPerMinute, etc.).
+        :param elapsed_time: Elapsed time, in ``elapsed_time_units``.
+        :param elapsed_time_units: ``TimeUnitsEnum`` integer (0=Minutes, 2=Hours, etc.).
+        :param out_units: ``LengthUnitsEnum`` integer for the output length.
+            Default ``0`` = Feet.
+
+            =  ============
+            0  Feet
+            1  Inches
+            2  Millimeters
+            3  Centimeters
+            4  Meters
+            5  Chains
+            6  Miles
+            7  Kilometers
+            =  ============
+
+        :return: (*S) ndarray — fire length in ``out_units``.
         """
-        return calculate_fire_length(forward_ros, backing_ros, elapsed_min)
+        fros_fpm    = speed_to_base(forward_ros, ros_units)
+        bros_fpm    = speed_to_base(backing_ros, ros_units)
+        elapsed_min = float(time_to_base(elapsed_time, elapsed_time_units))
+        result = calculate_fire_length(fros_fpm, bros_fpm, elapsed_min)  # ft
+        return length_from_base(result, out_units)
 
     @staticmethod
-    def calculate_fire_width(forward_ros: Union[float, np.ndarray],
-                             backing_ros: Union[float, np.ndarray],
-                             lwr: Union[float, np.ndarray],
-                             elapsed_min: float) -> np.ndarray:
+    def calculate_fire_width(
+            forward_ros: Union[float, np.ndarray],
+            backing_ros: Union[float, np.ndarray],
+            ros_units: int,
+            lwr: Union[float, np.ndarray],
+            elapsed_time: float,
+            elapsed_time_units: int,
+            out_units: int = 0,
+    ) -> np.ndarray:
         """
         Fire ellipse width (minor axis × 2).
 
-        :param forward_ros: Forward rate of spread (ft/min) (*S).
-        :param backing_ros: Backing rate of spread (ft/min) (*S).
+        :param forward_ros: Forward rate of spread (*S), in ``ros_units``.
+        :param backing_ros: Backing rate of spread (*S), in ``ros_units``.
+        :param ros_units: ``SpeedUnitsEnum`` integer (0=FeetPerMinute, etc.).
         :param lwr: Fire length-to-width ratio (dimensionless) (*S).
-        :param elapsed_min: Elapsed time (minutes) — scalar float.
-        :return: (*S) ndarray — fire width (ft).
+        :param elapsed_time: Elapsed time, in ``elapsed_time_units``.
+        :param elapsed_time_units: ``TimeUnitsEnum`` integer (0=Minutes, 2=Hours, etc.).
+        :param out_units: ``LengthUnitsEnum`` integer for the output width.
+            Default ``0`` = Feet.
+
+            =  ============
+            0  Feet
+            1  Inches
+            2  Millimeters
+            3  Centimeters
+            4  Meters
+            5  Chains
+            6  Miles
+            7  Kilometers
+            =  ============
+
+        :return: (*S) ndarray — fire width in ``out_units``.
         """
-        return calculate_fire_width(forward_ros, backing_ros, lwr, elapsed_min)
+        fros_fpm    = speed_to_base(forward_ros, ros_units)
+        bros_fpm    = speed_to_base(backing_ros, ros_units)
+        elapsed_min = float(time_to_base(elapsed_time, elapsed_time_units))
+        result = calculate_fire_width(fros_fpm, bros_fpm, lwr, elapsed_min)  # ft
+        return length_from_base(result, out_units)

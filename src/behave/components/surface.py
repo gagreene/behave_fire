@@ -19,7 +19,7 @@ calculate_wind_adjustment_factor(canopy_cover, canopy_height, crown_ratio, depth
     → (*S) array
 
 calculate_spread_rate(ri, ib, wind_speed, wind_speed_units, wind_direction,
-                      wind_orientation_mode, slope_deg, aspect,
+                      wind_orientation_mode, slope, slope_units, aspect,
                       canopy_cover, canopy_height, crown_ratio,
                       wind_height_mode, waf_method, user_waf)
     → dict of (*S) arrays
@@ -34,7 +34,9 @@ Notes on units
 --------------
 * All spatial inputs must already be in the base units used by the scalar path:
     - moisture:    fraction (e.g. 0.06, not 6)
-    - slope_deg:   DEGREES  (not percent) — convert before calling
+    - slope:       degrees by default (SlopeUnitsEnum.Degrees=0); pass
+                   SlopeUnitsEnum.Percent=1 and provide percent values to
+                   convert automatically via ``slope_units``
     - wind_speed:  in the units specified by wind_speed_units
     - canopy_*:    canopy_cover & crown_ratio as fraction (0–1); heights in feet
 """
@@ -493,11 +495,12 @@ def calculate_spread_rate(
         wind_speed_units: int,
         wind_direction: Union[float, np.ndarray],
         wind_orientation_mode: str,
-        slope_deg: Union[float, np.ndarray],
-        aspect: Union[float, np.ndarray],
-        canopy_cover: Union[float, np.ndarray],
-        canopy_height: Union[float, np.ndarray],
-        crown_ratio: Union[float, np.ndarray],
+        slope: Union[float, np.ndarray],
+        slope_units: int = 0,
+        aspect: Union[float, np.ndarray] = 0.0,
+        canopy_cover: Union[float, np.ndarray] = 0.0,
+        canopy_height: Union[float, np.ndarray] = 0.0,
+        crown_ratio: Union[float, np.ndarray] = 0.0,
         wind_height_mode: str = 'TwentyFoot',
         waf_method: str = 'UseCrownRatio',
         user_waf: Union[float, np.ndarray, None] = None
@@ -505,12 +508,6 @@ def calculate_spread_rate(
     """
     Compute fire spread rate, fire shape, and intensity from reaction intensity
     and fuelbed intermediates (Rothermel 1972).
-
-    .. note::
-        ``slope_deg`` must be in **degrees** (not percent).
-        Convert before calling::
-
-            slope_deg = np.degrees(np.arctan(slope_pct / 100.0))
 
     :param ri: Reaction intensity array (*S) (BTU/ft²/min) from
         ``calculate_reaction_intensity()``.
@@ -520,7 +517,9 @@ def calculate_spread_rate(
     :param wind_direction: Wind direction in degrees (*S) or scalar.
         Interpretation depends on ``wind_orientation_mode``.
     :param wind_orientation_mode: ``'RelativeToUpslope'`` or ``'RelativeToNorth'``.
-    :param slope_deg: Slope in **degrees** (*S) or scalar (not percent).
+    :param slope: Slope (*S) or scalar, in the units given by ``slope_units``.
+    :param slope_units: Scalar integer ``SlopeUnitsEnum`` value
+        (0 = Degrees [default], 1 = Percent).
     :param aspect: Terrain aspect in degrees (*S) or scalar (0 = north, clockwise).
     :param canopy_cover: Canopy cover fraction (0–1) (*S) or scalar.
     :param canopy_height: Canopy height (ft) (*S) or scalar.
@@ -540,9 +539,12 @@ def calculate_spread_rate(
         ``no_wind_no_slope_spread_rate`` (ft/min).
     """
     try:
-        from .behave_units import speed_to_base, speed_from_base
+        from .behave_units import speed_to_base, speed_from_base, slope_to_base
     except ImportError:
-        from behave_units import speed_to_base, speed_from_base
+        from behave_units import speed_to_base, speed_from_base, slope_to_base
+
+    # Convert slope to degrees (base unit) using slope_units
+    slope_deg = slope_to_base(slope, slope_units)
 
     sigma     = ib['sigma']
     rpr       = ib['relative_packing_ratio']
@@ -584,7 +586,7 @@ def calculate_spread_rate(
         0.0
     )
 
-    # Slope phi factor (slope_deg already in degrees — convert to tan for formula)
+    # Slope phi factor (slope_deg is in degrees after slope_to_base conversion above)
     slope_tan = np.tan(np.radians(np.asarray(slope_deg, dtype=float)))
     pr = ib['packing_ratio']
     safe_pr = np.where(pr > 1e-7, pr, 1.0)

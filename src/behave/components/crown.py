@@ -36,12 +36,13 @@ def calculate_crown_fire(
         wind_speed_units: int,
         wind_direction: Union[float, np.ndarray],
         wind_orientation_mode: str,
-        slope_deg: Union[float, np.ndarray],
-        aspect: Union[float, np.ndarray],
-        canopy_base_height: Union[float, np.ndarray],
-        canopy_height: Union[float, np.ndarray],
-        canopy_bulk_density: Union[float, np.ndarray],
-        moisture_foliar: Union[float, np.ndarray]
+        slope: Union[float, np.ndarray],
+        slope_units: int = 0,
+        aspect: Union[float, np.ndarray] = 0.0,
+        canopy_base_height: Union[float, np.ndarray] = 0.0,
+        canopy_height: Union[float, np.ndarray] = 0.0,
+        canopy_bulk_density: Union[float, np.ndarray] = 0.0,
+        moisture_foliar: Union[float, np.ndarray] = 100.0
 ) -> dict:
     """
     Vectorized crown fire calculations (Van Wagner 1977 / Rothermel 1991).
@@ -69,11 +70,13 @@ def calculate_crown_fire(
     :param wind_orientation_mode: ``'RelativeToUpslope'`` or ``'RelativeToNorth'``.
         Passed through to ``calculate_spread_rate()`` alongside
         ``wind_direction``.
-    :param slope_deg: Slope in degrees (*S) or scalar (not percent).
+    :param slope: Slope (*S) or scalar, in the units given by ``slope_units``.
         Passed through to ``calculate_spread_rate()`` to compute
         ``direction_of_max_spread`` for the crown run.
+    :param slope_units: Scalar integer ``SlopeUnitsEnum`` value
+        (0 = Degrees [default], 1 = Percent).
     :param aspect: Terrain aspect in degrees (*S) or scalar (0 = north, clockwise).
-        Passed through to ``calculate_spread_rate()`` alongside ``slope_deg``.
+        Passed through to ``calculate_spread_rate()`` alongside ``slope``.
     :param canopy_base_height: Height to base of canopy (ft) (*S) or scalar.
     :param canopy_height: Total canopy height (ft) (*S) or scalar.
     :param canopy_bulk_density: Canopy bulk density (lb/ft³) (*S) or scalar.
@@ -98,7 +101,7 @@ def calculate_crown_fire(
             calculate_reaction_intensity,
             calculate_spread_rate,
         )
-        from .behave_units import speed_from_base
+        from .behave_units import speed_from_base, slope_to_base
     except ImportError:
         from surface import (
             build_particle_arrays,
@@ -106,11 +109,13 @@ def calculate_crown_fire(
             calculate_reaction_intensity,
             calculate_spread_rate,
         )
-        from behave_units import speed_from_base
+        from behave_units import speed_from_base, slope_to_base
 
     # --- Coerce spatial inputs to at-least-1D ndarrays ---
     fm_grid   = np.atleast_1d(np.asarray(fuel_model_grid,    dtype=np.int32))
-    slope_deg = np.atleast_1d(np.asarray(slope_deg,          dtype=float))
+    slope_deg = slope_to_base(
+        np.atleast_1d(np.asarray(slope, dtype=float)), slope_units
+    )
     aspect    = np.atleast_1d(np.asarray(aspect,             dtype=float))
     wind_dir  = np.atleast_1d(np.asarray(wind_direction,     dtype=float))
     cbh       = np.atleast_1d(np.asarray(canopy_base_height, dtype=float))   # ft
@@ -132,7 +137,8 @@ def calculate_crown_fire(
         ri_crown, ib_crown,
         wind_speed, wind_speed_units,
         wind_dir, wind_orientation_mode,   # actual wind direction and orientation
-        slope_deg, aspect,                  # actual terrain — affects direction_of_max_spread
+        slope_deg, 0,                       # already converted to degrees above
+        aspect,                             # actual terrain — affects direction_of_max_spread
         canopy_cover=np.zeros(S),
         canopy_height=ch,
         crown_ratio=np.zeros(S),
