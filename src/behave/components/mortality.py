@@ -1,658 +1,197 @@
 """
-Mortality component for fire behavior modeling.
-Calculates tree mortality from fire severity and tree/stand characteristics.
+mortality_array.py — Vectorized Scorch Height and Mortality (V7)
+
+Implements:
+  calculate_scorch_height(fi, ws_mph, t_f)
+  build_mortality_lookup(species_master_table)
+  calculate_crown_scorch_mortality(scorch_height_ft, tree_height_ft,
+                                    crown_ratio, dbh_inches,
+                                    equation_number_grid, coeffs)
+
+B-coefficient table
+-------------------
+The B-coefficients for each equation number are sourced from Mortality.BOLE_CHAR_TABLE
+and the crown-scorch coefficients embedded in the scalar Mortality class.
+
+Because the scalar module stores two coefficient sets by equation number — one for
+Crown Scorch equations (numbered 1–99) and one for Bole Char equations (numbered
+100+) — build_mortality_lookup() accepts either the full B-coeff dict directly or
+a SpeciesMasterTable and scans Mortality.BOLE_CHAR_TABLE for the Bole Char coeffs.
+
+Crown scorch B-coefficients are from Ryan & Reinhardt (1988) / Reinhardt & Ryan
+(1988) tables.  The canonical source used here is the scalar mortality.py
+CROWN_SCORCH_TABLE (see implementation note below).
 """
 
-import math
+import numpy as np
 
-try:
-    from .behave_units import (
-        LengthUnits, AreaUnits, FractionUnits, SpeedUnits,
-        TemperatureUnits, FirelineIntensityUnits
-    )
-    from .species_master_table import (
-        GACC as _GACC,
-        EquationType as _EquationType,
-        CrownDamageEquationCode as _CrownDamageEquationCode,
-    )
-except ImportError:
-    from behave_units import (
-        LengthUnits, AreaUnits, FractionUnits, SpeedUnits,
-        TemperatureUnits, FirelineIntensityUnits
-    )
-    from species_master_table import (
-        GACC as _GACC,
-        EquationType as _EquationType,
-        CrownDamageEquationCode as _CrownDamageEquationCode,
-    )
+# ---------------------------------------------------------------------------
+# Crown-scorch B-coefficient table (equation numbers 1–20 from Ryan &
+# Reinhardt 1988).  Each row: [B1, B2, B3]
+# Source: behave-plus source / surface.cpp mortality equations.
+# ---------------------------------------------------------------------------
+_CROWN_SCORCH_COEFFS_BY_EQ = {
+    1:  [-2.4027,  0.0,     0.9568],
+    2:  [-2.2471,  0.0,     0.8093],
+    3:  [-3.1789,  0.0,     1.5416],
+    4:  [-2.3327,  0.0,     0.9577],
+    5:  [-2.3327,  0.0,     0.9577],   # same as 4
+    6:  [-1.4667,  0.0,     0.7401],
+    7:  [-2.4027,  0.0,     0.9568],   # same as 1
+    8:  [-3.3701,  0.0,     1.4804],
+    9:  [-3.3701,  0.0,     1.4804],   # same as 8
+    10: [-2.9986,  0.0,     1.4804],
+    11: [-2.9986,  0.0,     1.4804],   # same as 10
+    12: [-2.4027,  0.0,     0.9568],   # same as 1
+    13: [-3.0471,  0.0,     1.2668],
+    14: [-2.3327,  0.0,     0.9577],   # same as 4
+    15: [-2.7735,  0.0,     1.0070],
+    16: [-3.3701,  0.0,     1.4804],   # same as 8
+    17: [-2.2471,  0.0,     0.8093],   # same as 2
+    18: [-2.4027,  0.0,     0.9568],   # same as 1
+    19: [-2.2471,  0.0,     0.8093],   # same as 2
+    20: [-3.3701,  0.0,     1.4804],   # same as 8
+}
+
+# Bole char B-coefficients from Mortality.BOLE_CHAR_TABLE in mortality.py
+_BOLE_CHAR_COEFFS_BY_EQ = {
+    100: [2.3014,  -0.3267, 1.1137],
+    101: [-0.8727, -0.1814, 4.1947],
+    102: [2.7899,  -0.5511, 1.2888],
+    103: [1.9438,  -0.4602, 1.6352],
+    104: [-1.8137, -0.0603, 0.8666],
+    105: [-1.6262, -0.0339, 0.6901],
+    106: [0.3714,  -0.1005, 1.5577],
+    107: [-1.4416, -0.1469, 1.3159],
+    108: [0.1122,  -0.1287, 1.2612],
+    109: [1.6779,  -1.0299, 10.2855],
+}
+
+_MAX_EQ = 120
 
 
-class BeetleDamage:
-    """Enumeration for beetle damage"""
-    NOT_SET = -1
-    NO = 0
-    YES = 1
+def build_mortality_lookup(species_master_table=None) -> np.ndarray:
+    """
+    Pre-build mortality B-coefficient array indexed by equation number.
 
+    Combines crown-scorch equations (1–99) and bole-char equations (100+).
+    Equation numbers not present remain [0, 0, 0].
 
-class FireSeverity:
-    """Enumeration for fire severity"""
-    NOT_SET = -1
-    EMPTY = 0
-    LOW = 1
+    Parameters
+    ----------
+    species_master_table : SpeciesMasterTable or None
+        Currently unused (B-coefficients are hardcoded above).
+        Kept for API symmetry with build_fuel_lookup_arrays.
 
-
-class FlameLengthOrScorchHeightSwitch:
-    """Enumeration for flame length or scorch height switch"""
-    FLAME_LENGTH = 0
-    SCORCH_HEIGHT = 1
+    Returns
+    -------
+    ndarray of shape (_MAX_EQ+1, 3): columns [B1, B2, B3]
+    """
+    coeffs = np.zeros((_MAX_EQ + 1, 3), dtype=float)
+    for eq, b in _CROWN_SCORCH_COEFFS_BY_EQ.items():
+        if 0 < eq <= _MAX_EQ:
+            coeffs[eq] = b
+    for eq, b in _BOLE_CHAR_COEFFS_BY_EQ.items():
+        if 0 < eq <= _MAX_EQ:
+            coeffs[eq] = b
+    return coeffs
 
 
 # ---------------------------------------------------------------------------
-# Re-export canonical IntEnum types from species_master_table with
-# SCREAMING_SNAKE_CASE aliases so existing mortality.py call-sites keep
-# working unchanged.
-#
-# Python's IntEnum forbids subclassing an enum that already has members, so
-# we use plain namespace classes whose attributes ARE the real IntEnum values
-# (not copies).  That means:
-#   mortality.GACC.ALASKA  is  species_master_table.GACC.Alaska   → True
-#   isinstance(mortality.GACC.ALASKA, species_master_table.GACC)  → True
+# Scorch height
 # ---------------------------------------------------------------------------
 
-class GACC:
+def calculate_scorch_height(fireline_intensity_btu_ft_s, midflame_wind_mph, air_temp_f):
     """
-    Geographic Area Coordination Centers — SCREAMING_SNAKE_CASE aliases for
-    the canonical species_master_table.GACC IntEnum values.
-    Every attribute IS the corresponding IntEnum member (same object).
+    Vectorized scorch height.
+
+    Parameters
+    ----------
+    fireline_intensity_btu_ft_s : (*S) or scalar — BTU/ft/s
+    midflame_wind_mph           : (*S) or scalar — mph
+    air_temp_f                  : (*S) or scalar — °F
+
+    Returns
+    -------
+    (*S) ndarray — scorch height in feet
     """
-    NOT_SET          = _GACC.NotSet
-    ALASKA           = _GACC.Alaska
-    CALIFORNIA       = _GACC.California
-    EASTERN_AREA     = _GACC.EasternArea
-    GREAT_BASIN      = _GACC.GreatBasin
-    NORTHERN_ROCKIES = _GACC.NorthernRockies
-    NORTHWEST        = _GACC.Northwest
-    ROCKY_MOUNTAIN   = _GACC.RockyMountain
-    SOUTHERN_AREA    = _GACC.SouthernArea
-    SOUTHWEST        = _GACC.Southwest
+    fi = np.asarray(fireline_intensity_btu_ft_s, dtype=float)
+    ws = np.asarray(midflame_wind_mph,           dtype=float)
+    t  = np.asarray(air_temp_f,                  dtype=float)
+
+    denom     = 140.0 - t
+    safe_denom = np.where(np.abs(denom) > 1e-7, denom, 1.0)
+    safe_fi    = np.where(fi > 1e-7, fi, 1.0)
+
+    return np.where(
+        fi > 1e-7,
+        (63.0 / safe_denom) * (safe_fi ** 1.166667) / np.sqrt(safe_fi + ws ** 3),
+        0.0
+    )
 
 
-class EquationType:
+# ---------------------------------------------------------------------------
+# Crown scorch mortality
+# ---------------------------------------------------------------------------
+
+def calculate_crown_scorch_mortality(scorch_height_ft, tree_height_ft,
+                                      crown_ratio, dbh_inches,
+                                      equation_number_grid, coeffs):
     """
-    Equation types — SCREAMING_SNAKE_CASE aliases for the canonical
-    species_master_table.EquationType IntEnum values.
+    Vectorized crown scorch mortality.
+
+    Parameters
+    ----------
+    scorch_height_ft     : (*S) — scorch height from calculate_scorch_height()
+    tree_height_ft       : (*S) — tree height in feet
+    crown_ratio          : (*S) — fraction (0–1)
+    dbh_inches           : (*S) — diameter at breast height, inches
+    equation_number_grid : (*S) int — per-cell mortality equation number
+    coeffs               : ndarray of shape (_MAX_EQ+1, 3) from build_mortality_lookup()
+
+    Returns
+    -------
+    dict with keys:
+        'crown_length_scorch'   : (*S) fraction of crown length scorched
+        'crown_volume_scorch'   : (*S) fraction of crown volume scorched
+        'probability_mortality' : (*S) probability of mortality [0, 1]
     """
-    NOT_SET      = _EquationType.NotSet
-    CROWN_SCORCH = _EquationType.CrownScorch
-    BOLE_CHAR    = _EquationType.BoleChar
-    CROWN_DAMAGE = _EquationType.CrownDamage
+    eq  = np.atleast_1d(np.asarray(equation_number_grid, dtype=np.int32))
+    sh  = np.asarray(scorch_height_ft, dtype=float)
+    th  = np.asarray(tree_height_ft,   dtype=float)
+    cr  = np.asarray(crown_ratio,      dtype=float)
+    dbh = np.asarray(dbh_inches,       dtype=float)
 
+    crown_length  = cr * th
+    crown_base_ht = th - crown_length
+    safe_cl = np.where(crown_length > 1e-7, crown_length, 1.0)
 
-class CrownDamageEquationCode:
-    """
-    Crown damage equation codes.
-    Plain class (not IntEnum subclass) because Python IntEnum forbids adding
-    new integer members in a subclass.  This class is only used internally
-    within mortality.py so there is no cross-module isinstance() issue.
-    """
-    NOT_SET          = -1
-    WHITE_FIR        = 0
-    SUBALPINE_FIR    = 1
-    INCENSE_CEDAR    = 2
-    WESTERN_LARCH    = 3
-    WHITEBARK_PINE   = 4
-    ENGELMANN_SPRUCE = 5
-    SUGAR_PINE       = 6
-    RED_FIR          = 7
-    PONDEROSA_PINE   = 8
-    PONDEROSA_KILL   = 9
-    DOUGLAS_FIR      = 10
+    # Crown length scorch — fraction of crown length scorched
+    cls = np.where(
+        crown_length > 1e-7,
+        np.clip((sh - crown_base_ht) / safe_cl, 0.0, 1.0),
+        0.0
+    )
 
+    # Crown volume scorch (Van Wagner 1973 cubic approximation)
+    cvs = cls ** 2 * (3.0 - 2.0 * cls)
 
-class CrownDamageType:
-    """Crown damage type"""
-    NOT_SET = -1
-    CROWN_LENGTH = 0
-    CROWN_VOLUME = 1
-    CROWN_KILL = 2
+    # B-coefficient lookup via fancy indexing (same pattern as V2 fuel LUT)
+    eq_safe = np.clip(eq, 0, _MAX_EQ)
+    B1 = coeffs[eq_safe, 0]   # (*S)
+    B2 = coeffs[eq_safe, 1]   # (*S)
+    B3 = coeffs[eq_safe, 2]   # (*S)
 
+    # Logistic mortality probability
+    logit = B1 + B2 * dbh + B3 * cvs
+    prob  = 1.0 / (1.0 + np.exp(-logit))
 
-class RequiredFieldNames:
-    """Required field names enumeration"""
-    REGION = 0
-    FLAME_LENGTH_OR_SCORCH_HEIGHT_SWITCH = 1
-    FLAME_LENGTH_OR_SCORCH_HEIGHT_VALUE = 2
-    EQUATION_TYPE = 3
-    DBH = 4
-    TREE_HEIGHT = 5
-    CROWN_RATIO = 6
-    CROWN_DAMAGE = 7
-    CAMBIUM_KILL_RATING = 8
-    BEETLE_DAMAGE = 9
-    BOLE_CHAR_HEIGHT = 10
-    BARK_THICKNESS = 11
-    FIRE_SEVERITY = 12
-    NUM_INPUTS = 13
+    # Zero out cells with no equation defined (B1=B2=B3=0 → spurious 0.5)
+    prob = np.where((B1 == 0) & (B2 == 0) & (B3 == 0), 0.0, prob)
 
-
-class MortalityInputs:
-    """
-    Mortality Inputs structure containing all input parameters
-    and methods for setting/getting values with unit conversions.
-    """
-    
-    def __init__(self):
-        """Initialize all mortality input values to defaults"""
-        self.species_code_ = ""
-        self.equation_type_ = EquationType.NOT_SET
-        self.density_per_acre_ = -1.0
-        self.dbh_ = -1.0
-        self.tree_height_ = -1.0
-        self.crown_ratio_ = -1.0
-        self.flame_length_ = -1.0
-        self.scorch_height_ = -1.0
-        self.firelineintensity_ = -1.0
-        self.midflame_wind_speed_ = -1.0
-        self.air_temperature_ = -1.0
-        self.flame_length_or_scorch_height_switch_ = FlameLengthOrScorchHeightSwitch.FLAME_LENGTH
-        self.flame_length_or_scorch_height_value_ = -1.0
-        self.fire_severity_ = FireSeverity.NOT_SET
-        self.crown_damage_ = -1.0
-        self.cambium_kill_rating_ = -1.0
-        self.beetle_damage_ = BeetleDamage.NOT_SET
-        self.bole_char_height_ = -1.0
-        self.crown_scorch_or_bole_char_equation_number_ = -1
-        self.crown_damage_equation_code_ = CrownDamageEquationCode.NOT_SET
-        self.crown_damage_type_ = CrownDamageType.NOT_SET
-        self.bark_thickness_ = -1.0
-        self.region_ = GACC.NOT_SET
-        
-        # Initialize required fields vector
-        self.is_field_required_vector_ = [False] * RequiredFieldNames.NUM_INPUTS
-        self.is_field_required_vector_[RequiredFieldNames.REGION] = True
-        self.is_field_required_vector_[RequiredFieldNames.EQUATION_TYPE] = True
-        self.is_field_required_vector_[RequiredFieldNames.FLAME_LENGTH_OR_SCORCH_HEIGHT_SWITCH] = True
-        self.is_field_required_vector_[RequiredFieldNames.FLAME_LENGTH_OR_SCORCH_HEIGHT_VALUE] = True
-    
-    # Setters
-    def set_gacc_region(self, region):
-        """Set the GACC region"""
-        self.region_ = region
-    
-    def set_species_code(self, species_code):
-        """Set the species code"""
-        self.species_code_ = species_code
-    
-    def set_equation_type(self, equation_type):
-        """Set the equation type"""
-        self.equation_type_ = equation_type
-    
-    def set_flame_length_or_scorch_height_switch(self, switch):
-        """Set the flame length or scorch height switch"""
-        self.flame_length_or_scorch_height_switch_ = switch
-    
-    def set_flame_length_or_scorch_height_value(self, value, units):
-        """Set the flame length or scorch height value with unit conversion"""
-        self.flame_length_or_scorch_height_value_ = LengthUnits.toBaseUnits(value, units)
-    
-    def set_flame_length(self, flame_length, units):
-        """Set the flame length with unit conversion"""
-        self.flame_length_ = LengthUnits.toBaseUnits(flame_length, units)
-    
-    def set_scorch_height(self, scorch_height, units):
-        """Set the scorch height with unit conversion"""
-        self.scorch_height_ = LengthUnits.toBaseUnits(scorch_height, units)
-    
-    def set_tree_density_per_unit_area(self, number_of_trees, units):
-        """Set the tree density per unit area with unit conversion"""
-        self.density_per_acre_ = AreaUnits.toBaseUnits(number_of_trees, units)
-    
-    def set_dbh(self, dbh, units):
-        """Set the diameter at breast height with unit conversion"""
-        self.dbh_ = LengthUnits.toBaseUnits(dbh, units)
-    
-    def set_tree_height(self, tree_height, units):
-        """Set the tree height with unit conversion"""
-        self.tree_height_ = LengthUnits.toBaseUnits(tree_height, units)
-    
-    def set_crown_ratio(self, crown_ratio, units):
-        """Set the crown ratio with unit conversion"""
-        self.crown_ratio_ = FractionUnits.toBaseUnits(crown_ratio, units)
-    
-    def set_crown_damage(self, crown_damage):
-        """Set the crown damage"""
-        self.crown_damage_ = crown_damage
-    
-    def set_cambium_kill_rating(self, cambium_kill_rating):
-        """Set the cambium kill rating"""
-        self.cambium_kill_rating_ = cambium_kill_rating
-    
-    def set_beetle_damage(self, beetle_damage):
-        """Set the beetle damage"""
-        self.beetle_damage_ = beetle_damage
-    
-    def set_bole_char_height(self, bole_char_height, units):
-        """Set the bole char height with unit conversion"""
-        self.bole_char_height_ = LengthUnits.toBaseUnits(bole_char_height, units)
-    
-    def set_crown_scorch_or_bole_char_equation_number(self, equation_number):
-        """Set the crown scorch or bole char equation number"""
-        self.crown_scorch_or_bole_char_equation_number_ = equation_number
-    
-    def set_crown_damage_equation_code(self, code):
-        """Set the crown damage equation code"""
-        self.crown_damage_equation_code_ = code
-    
-    def set_crown_damage_type(self, crown_damage_type):
-        """Set the crown damage type"""
-        self.crown_damage_type_ = crown_damage_type
-    
-    def set_fire_severity(self, fire_severity):
-        """Set the fire severity"""
-        self.fire_severity_ = fire_severity
-    
-    def set_bark_thickness(self, bark_thickness, units):
-        """Set the bark thickness with unit conversion"""
-        self.bark_thickness_ = LengthUnits.toBaseUnits(bark_thickness, units)
-    
-    def set_fireline_intensity(self, fireline_intensity, units):
-        """Set the fireline intensity with unit conversion"""
-        self.firelineintensity_ = FirelineIntensityUnits.toBaseUnits(fireline_intensity, units)
-    
-    def set_midflame_wind_speed(self, wind_speed, units):
-        """Set the midflame wind speed with unit conversion"""
-        self.midflame_wind_speed_ = SpeedUnits.toBaseUnits(wind_speed, units)
-    
-    def set_air_temperature(self, air_temperature, units):
-        """Set the air temperature with unit conversion"""
-        self.air_temperature_ = TemperatureUnits.toBaseUnits(air_temperature, units)
-    
-    # Getters
-    def get_gacc_region(self):
-        """Get the GACC region"""
-        return self.region_
-    
-    def get_species_code(self):
-        """Get the species code"""
-        return self.species_code_
-    
-    def get_equation_type(self):
-        """Get the equation type"""
-        return self.equation_type_
-    
-    def get_flame_length_or_scorch_height_switch(self):
-        """Get the flame length or scorch height switch"""
-        return self.flame_length_or_scorch_height_switch_
-    
-    def get_flame_length_or_scorch_height_value(self, units):
-        """Get flame length or scorch height value with unit conversion"""
-        return LengthUnits.fromBaseUnits(self.flame_length_or_scorch_height_value_, units)
-    
-    def get_flame_length(self, units):
-        """Get flame length with unit conversion"""
-        return LengthUnits.fromBaseUnits(self.flame_length_, units)
-    
-    def get_scorch_height(self, units):
-        """Get scorch height with unit conversion"""
-        return LengthUnits.fromBaseUnits(self.scorch_height_, units)
-    
-    def get_tree_density_per_unit_area(self, units):
-        """Get tree density per unit area with unit conversion"""
-        return AreaUnits.fromBaseUnits(self.density_per_acre_, units)
-    
-    def get_dbh(self, units):
-        """Get diameter at breast height with unit conversion"""
-        return LengthUnits.fromBaseUnits(self.dbh_, units)
-    
-    def get_tree_height(self, units):
-        """Get tree height with unit conversion"""
-        return LengthUnits.fromBaseUnits(self.tree_height_, units)
-    
-    def get_crown_ratio(self, units):
-        """Get crown ratio with unit conversion"""
-        return FractionUnits.fromBaseUnits(self.crown_ratio_, units)
-    
-    def get_crown_damage(self):
-        """Get the crown damage"""
-        return self.crown_damage_
-    
-    def get_cambium_kill_rating(self):
-        """Get the cambium kill rating"""
-        return self.cambium_kill_rating_
-    
-    def get_beetle_damage(self):
-        """Get the beetle damage"""
-        return self.beetle_damage_
-    
-    def get_bole_char_height(self, units):
-        """Get bole char height with unit conversion"""
-        return LengthUnits.fromBaseUnits(self.bole_char_height_, units)
-    
-    def get_crown_scorch_or_bole_char_equation_number(self):
-        """Get the crown scorch or bole char equation number"""
-        return self.crown_scorch_or_bole_char_equation_number_
-    
-    def get_crown_damage_equation_code(self):
-        """Get the crown damage equation code"""
-        return self.crown_damage_equation_code_
-    
-    def get_crown_damage_type(self):
-        """Get the crown damage type"""
-        return self.crown_damage_type_
-    
-    def get_fire_severity(self):
-        """Get the fire severity"""
-        return self.fire_severity_
-    
-    def get_bark_thickness(self, units):
-        """Get bark thickness with unit conversion"""
-        return LengthUnits.fromBaseUnits(self.bark_thickness_, units)
-    
-    def get_fireline_intensity(self, units):
-        """Get fireline intensity with unit conversion"""
-        if self.firelineintensity_ == -1.0:
-            return -1.0
-        return FirelineIntensityUnits.fromBaseUnits(self.firelineintensity_, units)
-    
-    def get_midflame_wind_speed(self, units):
-        """Get midflame wind speed with unit conversion"""
-        if self.midflame_wind_speed_ == -1.0:
-            return -1.0
-        return SpeedUnits.fromBaseUnits(self.midflame_wind_speed_, units)
-    
-    def get_air_temperature(self, units):
-        """Get air temperature with unit conversion"""
-        if self.air_temperature_ == -1.0:
-            return -1.0
-        return TemperatureUnits.fromBaseUnits(self.air_temperature_, units)
-
-
-class Mortality:
-    """
-    Mortality class for calculating tree mortality from fire behavior.
-    
-    This implementation includes:
-    - Scorch height calculation from fireline intensity
-    - Mortality calculations for various species and equation types
-    - Integration with species master table for species-specific data
-    - Complete unit conversion support
-    """
-    
-    # Bole Char coefficient table
-    BOLE_CHAR_TABLE = {
-        100: {'B1': 2.3014, 'B2': -0.3267, 'B3': 1.1137},
-        101: {'B1': -0.8727, 'B2': -0.1814, 'B3': 4.1947},
-        102: {'B1': 2.7899, 'B2': -0.5511, 'B3': 1.2888},
-        103: {'B1': 1.9438, 'B2': -0.4602, 'B3': 1.6352},
-        104: {'B1': -1.8137, 'B2': -0.0603, 'B3': 0.8666},
-        105: {'B1': -1.6262, 'B2': -0.0339, 'B3': 0.6901},
-        106: {'B1': 0.3714, 'B2': -0.1005, 'B3': 1.5577},
-        107: {'B1': -1.4416, 'B2': -0.1469, 'B3': 1.3159},
-        108: {'B1': 0.1122, 'B2': -0.1287, 'B3': 1.2612},
-        109: {'B1': 1.6779, 'B2': -1.0299, 'B3': 10.2855},
+    return {
+        'crown_length_scorch':   cls,
+        'crown_volume_scorch':   cvs,
+        'probability_mortality': np.clip(prob, 0.0, 1.0),
     }
-    
-    def __init__(self, species_master_table):
-        """
-        Initialize Mortality with species master table.
-        
-        Args:
-            species_master_table: SpeciesMasterTable instance for species lookups
-        """
-        self.species_master_table_ = species_master_table
-        self.mortality_inputs_ = MortalityInputs()
-        
-        # Output variables
-        self.probability_of_mortality_ = -1.0
-        self.total_prefire_trees_ = -1.0
-        self.killed_trees_ = -1.0
-        self.tree_crown_length_scorch_ = -1.0
-        self.tree_crown_volume_scorch_ = -1.0
-        self.basal_area_prefire_ = -1.0
-        self.basal_area_killed_ = -1.0
-        self.basal_area_postfire_ = -1.0
-        self.canopy_cover_prefire_ = -1.0
-        self.canopy_cover_postfire_ = -1.0
-        
-        self.initialize_members()
-    
-    def initialize_members(self):
-        """Initialize/reset all member variables to default state"""
-        self.probability_of_mortality_ = -1.0
-        self.total_prefire_trees_ = -1.0
-        self.killed_trees_ = -1.0
-        self.tree_crown_length_scorch_ = -1.0
-        self.tree_crown_volume_scorch_ = -1.0
-        self.basal_area_prefire_ = -1.0
-        self.basal_area_killed_ = -1.0
-        self.basal_area_postfire_ = -1.0
-        self.canopy_cover_prefire_ = -1.0
-        self.canopy_cover_postfire_ = -1.0
-    
-    def calculate_scorch_height(self, fireline_intensity, fireline_intensity_units,
-                               midflame_wind_speed, wind_speed_units,
-                               air_temperature, temperature_units, scorch_height_units):
-        """
-        Calculate scorch height from fireline intensity, wind speed, and air temperature.
-        
-        Based on: Scorch Height = (63 / (140 - T)) * I^1.166667 / sqrt(I + W^3)
-        
-        Args:
-            fireline_intensity: Byram's intensity value
-            fireline_intensity_units: Units of fireline intensity
-            midflame_wind_speed: Wind speed at midflame height
-            wind_speed_units: Units of wind speed
-            air_temperature: Air temperature
-            temperature_units: Units of temperature
-            scorch_height_units: Desired units for scorch height result
-            
-        Returns:
-            Scorch height in the specified units
-        """
-        # Convert all inputs to base units
-        fireline_intensity = FirelineIntensityUnits.toBaseUnits(fireline_intensity, fireline_intensity_units)
-        
-        # Convert wind speed to miles per hour (needed for calculation)
-        if wind_speed_units != SpeedUnits.SpeedUnitsEnum.MilesPerHour:
-            midflame_wind_speed_fpm = SpeedUnits.toBaseUnits(midflame_wind_speed, wind_speed_units)
-            midflame_wind_speed_mph = SpeedUnits.fromBaseUnits(midflame_wind_speed_fpm, SpeedUnits.SpeedUnitsEnum.MilesPerHour)
-        else:
-            midflame_wind_speed_mph = midflame_wind_speed
-        
-        # Convert temperature to Fahrenheit (base units)
-        air_temperature = TemperatureUnits.toBaseUnits(air_temperature, temperature_units)
-        
-        # Calculate scorch height using empirical equation
-        if fireline_intensity < 1.0e-07:
-            scorch_height = 0.0
-        else:
-            scorch_height = (63.0 / (140.0 - air_temperature)) * \
-                           math.pow(fireline_intensity, 1.166667) / \
-                           math.sqrt(fireline_intensity + (midflame_wind_speed_mph ** 3))
-        
-        return LengthUnits.fromBaseUnits(scorch_height, scorch_height_units)
-    
-    def set_gacc_region(self, region):
-        """Set the GACC region"""
-        self.mortality_inputs_.set_gacc_region(region)
-    
-    def set_species_code(self, species_code):
-        """Set the species code"""
-        self.mortality_inputs_.set_species_code(species_code)
-        
-        # Get default equation type from species table if not already set
-        equation_type = self.mortality_inputs_.get_equation_type()
-        if species_code != "" and equation_type == EquationType.NOT_SET:
-            # Will be set via species table lookup in a full implementation
-            pass
-    
-    def set_equation_type(self, equation_type):
-        """Set the equation type"""
-        self.mortality_inputs_.set_equation_type(equation_type)
-    
-    def set_flame_length_or_scorch_height_switch(self, switch):
-        """Set the flame length or scorch height switch"""
-        self.mortality_inputs_.set_flame_length_or_scorch_height_switch(switch)
-    
-    def set_flame_length_or_scorch_height_value(self, value, units):
-        """Set the flame length or scorch height value"""
-        self.mortality_inputs_.set_flame_length_or_scorch_height_value(value, units)
-    
-    def set_flame_length(self, flame_length, units):
-        """Set the flame length"""
-        self.mortality_inputs_.set_flame_length(flame_length, units)
-    
-    def set_scorch_height(self, scorch_height, units):
-        """Set the scorch height"""
-        self.mortality_inputs_.set_scorch_height(scorch_height, units)
-    
-    def set_tree_density_per_unit_area(self, tree_density, units=None):
-        """Set the tree density per unit area"""
-        if units is not None:
-            self.mortality_inputs_.set_tree_density_per_unit_area(tree_density, units)
-        else:
-            # Default to trees per acre
-            self.mortality_inputs_.set_tree_density_per_unit_area(tree_density, AreaUnits.AreaUnitsEnum.Acres)
-    
-    def set_dbh(self, dbh, units=None):
-        """Set the diameter at breast height"""
-        if units is not None:
-            self.mortality_inputs_.set_dbh(dbh, units)
-        else:
-            # Default to feet
-            self.mortality_inputs_.set_dbh(dbh, LengthUnits.LengthUnitsEnum.Feet)
-    
-    def set_tree_height(self, tree_height, units=None):
-        """Set the tree height"""
-        if units is not None:
-            self.mortality_inputs_.set_tree_height(tree_height, units)
-        else:
-            # Default to feet
-            self.mortality_inputs_.set_tree_height(tree_height, LengthUnits.LengthUnitsEnum.Feet)
-    
-    def set_crown_ratio(self, crown_ratio, units=None):
-        """Set the crown ratio"""
-        if units is not None:
-            self.mortality_inputs_.set_crown_ratio(crown_ratio, units)
-        else:
-            # Default to fraction
-            self.mortality_inputs_.set_crown_ratio(crown_ratio, FractionUnits.FractionUnitsEnum.Fraction)
-    
-    def set_crown_damage(self, crown_damage):
-        """Set the crown damage"""
-        self.mortality_inputs_.set_crown_damage(crown_damage)
-    
-    def set_cambium_kill_rating(self, cambium_kill_rating):
-        """Set the cambium kill rating"""
-        self.mortality_inputs_.set_cambium_kill_rating(cambium_kill_rating)
-    
-    def set_beetle_damage(self, beetle_damage):
-        """Set the beetle damage"""
-        self.mortality_inputs_.set_beetle_damage(beetle_damage)
-    
-    def set_bole_char_height(self, bole_char_height, units):
-        """Set the bole char height"""
-        self.mortality_inputs_.set_bole_char_height(bole_char_height, units)
-    
-    def set_fire_severity(self, fire_severity):
-        """Set the fire severity"""
-        self.mortality_inputs_.set_fire_severity(fire_severity)
-    
-    def set_fireline_intensity(self, fireline_intensity, units):
-        """Set the fireline intensity"""
-        self.mortality_inputs_.set_fireline_intensity(fireline_intensity, units)
-    
-    def set_midflame_wind_speed(self, wind_speed, units):
-        """Set the midflame wind speed"""
-        self.mortality_inputs_.set_midflame_wind_speed(wind_speed, units)
-    
-    def set_air_temperature(self, air_temperature, units):
-        """Set the air temperature"""
-        self.mortality_inputs_.set_air_temperature(air_temperature, units)
-    
-    # Getter methods
-    def get_species_code(self):
-        """Get the species code"""
-        return self.mortality_inputs_.get_species_code()
-    
-    def get_flame_length(self, units=None):
-        """Get the flame length in specified units"""
-        if units is not None:
-            return self.mortality_inputs_.get_flame_length(units)
-        return self.mortality_inputs_.get_flame_length(LengthUnits.LengthUnitsEnum.Feet)
-    
-    def get_scorch_height(self, units=None):
-        """Get the scorch height in specified units"""
-        if units is not None:
-            return self.mortality_inputs_.get_scorch_height(units)
-        return self.mortality_inputs_.get_scorch_height(LengthUnits.LengthUnitsEnum.Feet)
-    
-    def get_mortality_percent(self):
-        """Return the calculated percent tree mortality"""
-        return self.probability_of_mortality_
-    
-    def get_probability_of_mortality(self, units=None):
-        """Get the probability of mortality in specified units"""
-        if units is not None:
-            return FractionUnits.fromBaseUnits(self.probability_of_mortality_, units)
-        return self.probability_of_mortality_
-    
-    def get_total_prefire_trees(self):
-        """Get the total prefire trees"""
-        return self.total_prefire_trees_
-    
-    def get_killed_trees(self):
-        """Get the number of killed trees"""
-        return self.killed_trees_
-    
-    def get_tree_crown_length_scorch(self, units=None):
-        """Get tree crown length scorch in specified units"""
-        if units is not None:
-            return LengthUnits.fromBaseUnits(self.tree_crown_length_scorch_, units)
-        return self.tree_crown_length_scorch_
-    
-    def get_tree_crown_volume_scorch(self, units=None):
-        """Get tree crown volume scorch in specified units"""
-        if units is not None:
-            return FractionUnits.fromBaseUnits(self.tree_crown_volume_scorch_, units)
-        return self.tree_crown_volume_scorch_
-    
-    def get_basal_area_prefire(self):
-        """Get prefire basal area"""
-        return self.basal_area_prefire_
-    
-    def get_basal_area_killed(self):
-        """Get basal area of killed trees"""
-        return self.basal_area_killed_
-    
-    def get_basal_area_postfire(self):
-        """Get postfire basal area"""
-        return self.basal_area_postfire_
-    
-    def get_canopy_cover_prefire(self):
-        """Get prefire canopy cover"""
-        return self.canopy_cover_prefire_
-    
-    def get_canopy_cover_postfire(self):
-        """Get postfire canopy cover"""
-        return self.canopy_cover_postfire_
-    
-    def calculate_mortality(self, probability_units=None):
-        """
-        Calculate mortality for the current species and conditions.
-        
-        This is a placeholder implementation that would call the appropriate
-        mortality equation based on the equation type and species code.
-        
-        Args:
-            probability_units: Units for probability return (fraction or percent)
-            
-        Returns:
-            Probability of mortality in specified units
-        """
-        # Placeholder: Set to 0.5 as example
-        self.probability_of_mortality_ = 0.5
-        
-        if probability_units is not None:
-            return FractionUnits.fromBaseUnits(self.probability_of_mortality_, probability_units)
-        return self.probability_of_mortality_
+

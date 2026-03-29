@@ -1,126 +1,491 @@
 """
-Behave Fire Behavior Model - Unit Conversion Module
-A collection of units conversion functions and enums for the Behave model.
+behave_units_array.py — NumPy-native unit conversion (V1)
 
-This module provides comprehensive unit conversion capabilities for all measurements
-used in fire behavior modeling, including lengths, areas, speeds, temperatures, etc.
-Each unit category has a base unit defined, with conversion functions to/from base units.
+Vectorized equivalents of every conversion in behave_units.py.
+All functions:
+  - Accept scalars or any-shape NumPy arrays.
+  - Always return an ndarray (never a bare Python scalar) so downstream
+    np.where / arithmetic always receives a consistent type (G1 fix).
+  - 'units' arguments are scalar integer enums (same values as behave_units.py).
+
+Base units (same as scalar module):
+  Speed          → FeetPerMinute      (0)
+  Length         → Feet               (0)
+  Area           → SquareFeet         (0)
+  Fraction       → Fraction           (0)
+  Temperature    → Fahrenheit         (0)
+  Slope          → Degrees            (0)
+  Pressure       → Pascal             (0)
+  FirelineIntensity → BtusPerFootPerSecond (0)
+  HeatPerUnitArea   → BtusPerSquareFoot   (0)
+  ReactionIntensity → BtusPerSqFtPerMin   (0)
+  Loading           → PoundsPerSquareFoot (0)
+  Density           → PoundsPerCubicFoot  (0)
+  Time              → Minutes             (0)
 """
 
-import math
+import numpy as np
 
+# ---------------------------------------------------------------------------
+# Speed  (base = FeetPerMinute = 0)
+# ---------------------------------------------------------------------------
+_SPEED_TO_FPM = np.array([
+    1.0,           # 0 FeetPerMinute
+    1.1,           # 1 ChainsPerHour
+    196.8503937,   # 2 MetersPerSecond
+    3.28084,       # 3 MetersPerMinute
+    0.0547,        # 4 MetersPerHour   (ft/min per m/hr)
+    88.0,          # 5 MilesPerHour
+    54.680665,     # 6 KilometersPerHour
+])
+
+_SPEED_FROM_FPM = np.array([
+    1.0,                # 0 FeetPerMinute
+    10.0 / 11.0,        # 1 ChainsPerHour
+    0.00508,            # 2 MetersPerSecond
+    0.3048,             # 3 MetersPerMinute
+    18.288,             # 4 MetersPerHour
+    0.01136363636,      # 5 MilesPerHour
+    0.018288,           # 6 KilometersPerHour
+])
+
+
+def speed_to_base(value, units):
+    """Convert speed to ft/min.  Always returns ndarray."""
+    arr = np.asarray(value, dtype=float)
+    if units == 0:
+        return arr
+    return arr * _SPEED_TO_FPM[units]
+
+
+def speed_from_base(value, units):
+    """Convert speed from ft/min to requested units.  Always returns ndarray."""
+    arr = np.asarray(value, dtype=float)
+    if units == 0:
+        return arr
+    return arr * _SPEED_FROM_FPM[units]
+
+
+# ---------------------------------------------------------------------------
+# Length  (base = Feet = 0)
+# ---------------------------------------------------------------------------
+_LENGTH_TO_FT = np.array([
+    1.0,              # 0 Feet
+    0.08333333333333, # 1 Inches
+    0.003280839895,   # 2 Millimeters
+    0.03280839895,    # 3 Centimeters
+    3.2808398950131,  # 4 Meters
+    66.0,             # 5 Chains
+    5280.0,           # 6 Miles
+    3280.8398950131,  # 7 Kilometers
+])
+
+_LENGTH_FROM_FT = np.array([
+    1.0,                      # 0 Feet
+    12.0,                     # 1 Inches
+    1.0 / 0.003280839895,     # 2 Millimeters  (≈304.8)
+    30.480,                   # 3 Centimeters
+    0.3048,                   # 4 Meters
+    0.0151515151515,          # 5 Chains
+    0.0001893939393939394,    # 6 Miles
+    0.0003048,                # 7 Kilometers
+])
+
+
+def length_to_base(value, units):
+    """Convert length to feet.  Always returns ndarray."""
+    arr = np.asarray(value, dtype=float)
+    if units == 0:
+        return arr
+    return arr * _LENGTH_TO_FT[units]
+
+
+def length_from_base(value, units):
+    """Convert length from feet to requested units.  Always returns ndarray."""
+    arr = np.asarray(value, dtype=float)
+    if units == 0:
+        return arr
+    return arr * _LENGTH_FROM_FT[units]
+
+
+# ---------------------------------------------------------------------------
+# Area  (base = SquareFeet = 0)
+# ---------------------------------------------------------------------------
+_AREA_TO_SQFT = np.array([
+    1.0,                     # 0 SquareFeet
+    43560.002160576107,      # 1 Acres
+    107639.10416709723,      # 2 Hectares
+    10.76391041671,          # 3 SquareMeters
+    27878400.0,              # 4 SquareMiles
+    10763910.416709721,      # 5 SquareKilometers
+])
+
+_AREA_FROM_SQFT = np.array([
+    1.0,                  # 0 SquareFeet
+    2.295684e-05,         # 1 Acres
+    0.0000092903036,      # 2 Hectares
+    0.0929030353835,      # 3 SquareMeters
+    3.5870064279e-08,     # 4 SquareMiles
+    9.290304e-08,         # 5 SquareKilometers
+])
+
+
+def area_to_base(value, units):
+    """Convert area to sq ft.  Always returns ndarray."""
+    arr = np.asarray(value, dtype=float)
+    if units == 0:
+        return arr
+    return arr * _AREA_TO_SQFT[units]
+
+
+def area_from_base(value, units):
+    """Convert area from sq ft.  Always returns ndarray."""
+    arr = np.asarray(value, dtype=float)
+    if units == 0:
+        return arr
+    return arr * _AREA_FROM_SQFT[units]
+
+
+# ---------------------------------------------------------------------------
+# Fraction / Percentage  (base = Fraction = 0)
+# ---------------------------------------------------------------------------
+
+def fraction_to_base(value, units):
+    """Convert fraction/percent to fraction (base).  Always returns ndarray."""
+    arr = np.asarray(value, dtype=float)
+    if units == 0:
+        return arr
+    # units == 1 → Percent
+    return arr / 100.0
+
+
+def fraction_from_base(value, units):
+    """Convert fraction to requested units.  Always returns ndarray."""
+    arr = np.asarray(value, dtype=float)
+    if units == 0:
+        return arr
+    return arr * 100.0
+
+
+# ---------------------------------------------------------------------------
+# Temperature  (base = Fahrenheit = 0)
+# ---------------------------------------------------------------------------
+
+def temp_to_base(value, units):
+    """Convert temperature to °F.  Always returns ndarray."""
+    arr = np.asarray(value, dtype=float)
+    if units == 0:
+        return arr
+    if units == 1:   # Celsius
+        return arr * (9.0 / 5.0) + 32.0
+    if units == 2:   # Kelvin
+        return (arr - 273.15) * (9.0 / 5.0) + 32.0
+    return arr
+
+
+def temp_from_base(value, units):
+    """Convert temperature from °F to requested units.  Always returns ndarray."""
+    arr = np.asarray(value, dtype=float)
+    if units == 0:
+        return arr
+    if units == 1:   # Celsius
+        return (arr - 32.0) * (5.0 / 9.0)
+    if units == 2:   # Kelvin
+        return (arr - 32.0) * (5.0 / 9.0) + 273.15
+    return arr
+
+
+# ---------------------------------------------------------------------------
+# Slope  (base = Degrees = 0)
+# ---------------------------------------------------------------------------
+
+def slope_to_base(value, units):
+    """Convert slope to degrees.  Always returns ndarray."""
+    arr = np.asarray(value, dtype=float)
+    if units == 0:
+        return arr
+    # units == 1 → Percent
+    return np.degrees(np.arctan(arr / 100.0))
+
+
+def slope_from_base(value, units):
+    """Convert slope from degrees to requested units.  Always returns ndarray."""
+    arr = np.asarray(value, dtype=float)
+    if units == 0:
+        return arr
+    return np.tan(np.radians(arr)) * 100.0
+
+
+# ---------------------------------------------------------------------------
+# Pressure  (base = Pascal = 0)
+# ---------------------------------------------------------------------------
+_PRESSURE_TO_PA = np.array([
+    1.0,          # 0 Pascal
+    100.0,        # 1 HectoPascal
+    1000.0,       # 2 KiloPascal
+    1e6,          # 3 MegaPascal
+    1e9,          # 4 GigaPascal
+    100000.0,     # 5 Bar
+    101325.0,     # 6 Atmosphere
+    98066.5,      # 7 TechnicalAtmosphere
+    6894.757,     # 8 PoundPerSquareInch
+])
+
+_PRESSURE_FROM_PA = np.array([
+    1.0,                     # 0 Pascal
+    0.01,                    # 1 HectoPascal
+    0.001,                   # 2 KiloPascal
+    1e-6,                    # 3 MegaPascal
+    1e-9,                    # 4 GigaPascal
+    1e-5,                    # 5 Bar
+    1.0 / 101325.0,          # 6 Atmosphere
+    1.0 / 98066.5,           # 7 TechnicalAtmosphere
+    1.0 / 6894.757,          # 8 PoundPerSquareInch
+])
+
+
+def pressure_to_base(value, units):
+    """Convert pressure to Pascals.  Always returns ndarray."""
+    arr = np.asarray(value, dtype=float)
+    if units == 0:
+        return arr
+    return arr * _PRESSURE_TO_PA[units]
+
+
+def pressure_from_base(value, units):
+    """Convert pressure from Pascals to requested units.  Always returns ndarray."""
+    arr = np.asarray(value, dtype=float)
+    if units == 0:
+        return arr
+    return arr * _PRESSURE_FROM_PA[units]
+
+
+# ---------------------------------------------------------------------------
+# Fireline Intensity  (base = BtusPerFootPerSecond = 0)
+# ---------------------------------------------------------------------------
+_FLI_TO_BASE = np.array([
+    1.0,                    # 0 BtusPerFootPerSecond
+    0.01666666666666667,    # 1 BtusPerFootPerMinute
+    0.2886719,              # 2 KilojoulesPerMeterPerSecond
+    0.00481120819,          # 3 KilojoulesPerMeterPerMinute
+    0.2886719,              # 4 KilowattsPerMeter
+])
+
+_FLI_FROM_BASE = np.array([
+    1.0,           # 0 BtusPerFootPerSecond
+    60.0,          # 1 BtusPerFootPerMinute
+    3.464140419,   # 2 KilojoulesPerMeterPerSecond
+    207.848,       # 3 KilojoulesPerMeterPerMinute
+    3.464140419,   # 4 KilowattsPerMeter
+])
+
+
+def fireline_intensity_to_base(value, units):
+    """Convert fireline intensity to BTU/ft/s.  Always returns ndarray."""
+    arr = np.asarray(value, dtype=float)
+    if units == 0:
+        return arr
+    return arr * _FLI_TO_BASE[units]
+
+
+def fireline_intensity_from_base(value, units):
+    """Convert fireline intensity from BTU/ft/s.  Always returns ndarray."""
+    arr = np.asarray(value, dtype=float)
+    if units == 0:
+        return arr
+    return arr * _FLI_FROM_BASE[units]
+
+
+# ---------------------------------------------------------------------------
+# Heat Per Unit Area  (base = BtusPerSquareFoot = 0)
+# ---------------------------------------------------------------------------
+_HPUA_TO_BASE = np.array([
+    1.0,    # 0 BtusPerSquareFoot
+    0.088,  # 1 KilojoulesPerSquareMeter
+    0.088,  # 2 KilowattSecondsPerSquareMeter
+])
+
+_HPUA_FROM_BASE = np.array([
+    1.0,               # 0 BtusPerSquareFoot
+    1.0 / 0.088,       # 1 KilojoulesPerSquareMeter
+    1.0 / 0.088,       # 2 KilowattSecondsPerSquareMeter
+])
+
+
+def hpua_to_base(value, units):
+    """Convert heat per unit area to BTU/ft².  Always returns ndarray."""
+    arr = np.asarray(value, dtype=float)
+    if units == 0:
+        return arr
+    return arr * _HPUA_TO_BASE[units]
+
+
+def hpua_from_base(value, units):
+    """Convert heat per unit area from BTU/ft².  Always returns ndarray."""
+    arr = np.asarray(value, dtype=float)
+    if units == 0:
+        return arr
+    return arr * _HPUA_FROM_BASE[units]
+
+
+# ---------------------------------------------------------------------------
+# Reaction Intensity / Heat Source  (base = BtusPerSqFtPerMinute = 0)
+# ---------------------------------------------------------------------------
+_RI_TO_BASE = np.array([
+    1.0,    # 0 BtusPerSquareFootPerMinute
+    60.0,   # 1 BtusPerSquareFootPerSecond
+    5.28,   # 2 KilojoulesPerSquareMeterPerSecond
+    0.088,  # 3 KilojoulesPerSquareMeterPerMinute
+    0.528,  # 4 KilowattsPerSquareMeter
+])
+
+_RI_FROM_BASE = np.array([
+    1.0,              # 0 BtusPerSquareFootPerMinute
+    1.0 / 60.0,       # 1 BtusPerSquareFootPerSecond
+    1.0 / 5.28,       # 2 KilojoulesPerSquareMeterPerSecond
+    1.0 / 0.088,      # 3 KilojoulesPerSquareMeterPerMinute
+    1.0 / 0.528,      # 4 KilowattsPerSquareMeter
+])
+
+
+def reaction_intensity_to_base(value, units):
+    """Convert reaction intensity to BTU/ft²/min.  Always returns ndarray."""
+    arr = np.asarray(value, dtype=float)
+    if units == 0:
+        return arr
+    return arr * _RI_TO_BASE[units]
+
+
+def reaction_intensity_from_base(value, units):
+    """Convert reaction intensity from BTU/ft²/min.  Always returns ndarray."""
+    arr = np.asarray(value, dtype=float)
+    if units == 0:
+        return arr
+    return arr * _RI_FROM_BASE[units]
+
+
+# ---------------------------------------------------------------------------
+# Loading  (base = PoundsPerSquareFoot = 0)
+# ---------------------------------------------------------------------------
+_LOAD_TO_BASE = np.array([
+    1.0,              # 0 PoundsPerSquareFoot
+    0.02296841643,    # 1 TonsPerAcre
+    0.10197162129,    # 2 TonnesPerHectare
+    0.20481754075,    # 3 KilogramsPerSquareMeter
+])
+
+_LOAD_FROM_BASE = np.array([
+    1.0,                           # 0 PoundsPerSquareFoot
+    1.0 / 0.02296841643,           # 1 TonsPerAcre
+    1.0 / 0.10197162129,           # 2 TonnesPerHectare
+    1.0 / 0.20481754075,           # 3 KilogramsPerSquareMeter
+])
+
+
+def loading_to_base(value, units):
+    """Convert loading to lb/ft².  Always returns ndarray."""
+    arr = np.asarray(value, dtype=float)
+    if units == 0:
+        return arr
+    return arr * _LOAD_TO_BASE[units]
+
+
+def loading_from_base(value, units):
+    """Convert loading from lb/ft².  Always returns ndarray."""
+    arr = np.asarray(value, dtype=float)
+    if units == 0:
+        return arr
+    return arr * _LOAD_FROM_BASE[units]
+
+
+# ---------------------------------------------------------------------------
+# Density  (base = PoundsPerCubicFoot = 0)
+# ---------------------------------------------------------------------------
+_DENSITY_TO_BASE = np.array([
+    1.0,           # 0 PoundsPerCubicFoot
+    0.062427961,   # 1 KilogramsPerCubicMeter
+])
+
+_DENSITY_FROM_BASE = np.array([
+    1.0,                     # 0 PoundsPerCubicFoot
+    1.0 / 0.062427961,       # 1 KilogramsPerCubicMeter
+])
+
+
+def density_to_base(value, units):
+    """Convert density to lb/ft³.  Always returns ndarray."""
+    arr = np.asarray(value, dtype=float)
+    if units == 0:
+        return arr
+    return arr * _DENSITY_TO_BASE[units]
+
+
+def density_from_base(value, units):
+    """Convert density from lb/ft³.  Always returns ndarray."""
+    arr = np.asarray(value, dtype=float)
+    if units == 0:
+        return arr
+    return arr * _DENSITY_FROM_BASE[units]
+
+
+# ---------------------------------------------------------------------------
+# Time  (base = Minutes = 0)
+# ---------------------------------------------------------------------------
+_TIME_TO_MIN = np.array([
+    1.0,                       # 0 Minutes
+    1.0 / 60.0,                # 1 Seconds
+    60.0,                      # 2 Hours
+    24.0 * 60.0,               # 3 Days
+    365.25 * 24.0 * 60.0,      # 4 Years
+])
+
+_TIME_FROM_MIN = np.array([
+    1.0,                            # 0 Minutes
+    60.0,                           # 1 Seconds
+    1.0 / 60.0,                     # 2 Hours
+    1.0 / (24.0 * 60.0),            # 3 Days
+    1.0 / (365.25 * 24.0 * 60.0),  # 4 Years
+])
+
+
+def time_to_base(value, units):
+    """Convert time to minutes.  Always returns ndarray."""
+    arr = np.asarray(value, dtype=float)
+    if units == 0:
+        return arr
+    return arr * _TIME_TO_MIN[units]
+
+
+def time_from_base(value, units):
+    """Convert time from minutes.  Always returns ndarray."""
+    arr = np.asarray(value, dtype=float)
+    if units == 0:
+        return arr
+    return arr * _TIME_FROM_MIN[units]
+
+
+# ---------------------------------------------------------------------------
+# Unit enum classes — defined here so that code which relies on e.g.
+# SpeedUnits.SpeedUnitsEnum continues to work unchanged.
+# ---------------------------------------------------------------------------
 
 class AreaUnits:
-    """Area unit conversions. Base unit: Square Feet"""
-    
     class AreaUnitsEnum:
-        SquareFeet = 0          # base area unit
+        SquareFeet = 0
         Acres = 1
         Hectares = 2
         SquareMeters = 3
         SquareMiles = 4
         SquareKilometers = 5
-    
-    @staticmethod
-    def toBaseUnits(value, units):
-        """Convert area to base units (Square Feet)"""
-        if value == 0.0:
-            return 0.0
-        
-        # Conversion constants to Square Feet (match C++ behaveUnits.cpp exactly)
-        ACRES_TO_SQ_FT = 43560.002160576107
-        HECTARES_TO_SQ_FT = 107639.10416709723
-        SQ_METERS_TO_SQ_FT = 10.76391041671
-        SQ_MILES_TO_SQ_FT = 27878400.0
-        SQ_KM_TO_SQ_FT = 10763910.416709721
-        
-        if units == AreaUnits.AreaUnitsEnum.SquareFeet:
-            pass  # Already in base
-        elif units == AreaUnits.AreaUnitsEnum.Acres:
-            value *= ACRES_TO_SQ_FT
-        elif units == AreaUnits.AreaUnitsEnum.Hectares:
-            value *= HECTARES_TO_SQ_FT
-        elif units == AreaUnits.AreaUnitsEnum.SquareMeters:
-            value *= SQ_METERS_TO_SQ_FT
-        elif units == AreaUnits.AreaUnitsEnum.SquareMiles:
-            value *= SQ_MILES_TO_SQ_FT
-        elif units == AreaUnits.AreaUnitsEnum.SquareKilometers:
-            value *= SQ_KM_TO_SQ_FT
-        
-        return value
-    
-    @staticmethod
-    def fromBaseUnits(value, units):
-        """Convert area from base units (Square Feet)"""
-        if value == 0.0:
-            return 0.0
-        
-        # Conversion constants from Square Feet (match C++ behaveUnits.cpp exactly)
-        SQ_FT_TO_ACRES = 2.295684e-05
-        SQ_FT_TO_HECTARES = 0.0000092903036
-        SQ_FT_TO_SQ_METERS = 0.0929030353835
-        SQ_FT_TO_SQ_MILES = 3.5870064279e-08
-        SQ_FT_TO_SQ_KM = 9.290304e-08
-        
-        if units == AreaUnits.AreaUnitsEnum.SquareFeet:
-            pass  # Already in base
-        elif units == AreaUnits.AreaUnitsEnum.Acres:
-            value *= SQ_FT_TO_ACRES
-        elif units == AreaUnits.AreaUnitsEnum.Hectares:
-            value *= SQ_FT_TO_HECTARES
-        elif units == AreaUnits.AreaUnitsEnum.SquareMeters:
-            value *= SQ_FT_TO_SQ_METERS
-        elif units == AreaUnits.AreaUnitsEnum.SquareMiles:
-            value *= SQ_FT_TO_SQ_MILES
-        elif units == AreaUnits.AreaUnitsEnum.SquareKilometers:
-            value *= SQ_FT_TO_SQ_KM
-        
-        return value
-
 
 class BasalAreaUnits:
-    """Basal Area unit conversions. Base unit: Square Feet Per Acre"""
-    
     class BasalAreaUnitsEnum:
-        SquareFeetPerAcre = 0       # base basal area unit
+        SquareFeetPerAcre = 0
         SquareMetersPerHectare = 1
-    
-    @staticmethod
-    def toBaseUnits(value, units):
-        """Convert basal area to base units (Square Feet Per Acre)"""
-        if value == 0.0:
-            return 0.0
-        
-        SQ_M_PER_HA_TO_SQ_FT_PER_ACRE = 0.229568411
-        
-        if units == BasalAreaUnits.BasalAreaUnitsEnum.SquareFeetPerAcre:
-            pass  # Already in base
-        elif units == BasalAreaUnits.BasalAreaUnitsEnum.SquareMetersPerHectare:
-            value *= SQ_M_PER_HA_TO_SQ_FT_PER_ACRE
-        
-        return value
-    
-    @staticmethod
-    def fromBaseUnits(value, units):
-        """Convert basal area from base units (Square Feet Per Acre)"""
-        if value == 0.0:
-            return 0.0
-        
-        SQ_FT_PER_ACRE_TO_SQ_M_PER_HA = 1.0 / 0.229568411
-        
-        if units == BasalAreaUnits.BasalAreaUnitsEnum.SquareFeetPerAcre:
-            pass  # Already in base
-        elif units == BasalAreaUnits.BasalAreaUnitsEnum.SquareMetersPerHectare:
-            value *= SQ_FT_PER_ACRE_TO_SQ_M_PER_HA
-        
-        return value
-
 
 class LengthUnits:
-    """Length unit conversions. Base unit: Feet"""
-    
     class LengthUnitsEnum:
-        Feet = 0                   # base length unit
+        Feet = 0
         Inches = 1
         Millimeters = 2
         Centimeters = 3
@@ -128,776 +493,101 @@ class LengthUnits:
         Chains = 5
         Miles = 6
         Kilometers = 7
-    
-    @staticmethod
-    def toBaseUnits(value, units):
-        """Convert length to base units (Feet)"""
-        if value == 0.0:
-            return 0.0
-        
-        # Conversion constants to Feet
-        INCHES_TO_FEET = 0.08333333333333
-        METERS_TO_FEET = 3.2808398950131
-        MILLIMETERS_TO_FEET = 0.003280839895
-        CENTIMETERS_TO_FEET = 0.03280839895
-        CHAINS_TO_FEET = 66.0
-        MILES_TO_FEET = 5280.0
-        KILOMETERS_TO_FEET = 3280.8398950131
-        
-        if units == LengthUnits.LengthUnitsEnum.Feet:
-            pass  # Already in base
-        elif units == LengthUnits.LengthUnitsEnum.Inches:
-            value *= INCHES_TO_FEET
-        elif units == LengthUnits.LengthUnitsEnum.Millimeters:
-            value *= MILLIMETERS_TO_FEET
-        elif units == LengthUnits.LengthUnitsEnum.Centimeters:
-            value *= CENTIMETERS_TO_FEET
-        elif units == LengthUnits.LengthUnitsEnum.Meters:
-            value *= METERS_TO_FEET
-        elif units == LengthUnits.LengthUnitsEnum.Chains:
-            value *= CHAINS_TO_FEET
-        elif units == LengthUnits.LengthUnitsEnum.Miles:
-            value *= MILES_TO_FEET
-        elif units == LengthUnits.LengthUnitsEnum.Kilometers:
-            value *= KILOMETERS_TO_FEET
-        
-        return value
-    
-    @staticmethod
-    def fromBaseUnits(value, units):
-        """Convert length from base units (Feet)"""
-        if value == 0.0:
-            return 0.0
-        
-        # Conversion constants from Feet
-        FEET_TO_INCHES = 12.0
-        FEET_TO_CENTIMETERS = 30.480
-        FEET_TO_METERS = 0.3048
-        FEET_TO_CHAINS = 0.0151515151515
-        FEET_TO_MILES = 0.0001893939393939394
-        FEET_TO_KILOMETERS = 0.0003048
-        
-        if units == LengthUnits.LengthUnitsEnum.Feet:
-            pass  # Already in base
-        elif units == LengthUnits.LengthUnitsEnum.Inches:
-            value *= FEET_TO_INCHES
-        elif units == LengthUnits.LengthUnitsEnum.Centimeters:
-            value *= FEET_TO_CENTIMETERS
-        elif units == LengthUnits.LengthUnitsEnum.Meters:
-            value *= FEET_TO_METERS
-        elif units == LengthUnits.LengthUnitsEnum.Chains:
-            value *= FEET_TO_CHAINS
-        elif units == LengthUnits.LengthUnitsEnum.Miles:
-            value *= FEET_TO_MILES
-        elif units == LengthUnits.LengthUnitsEnum.Kilometers:
-            value *= FEET_TO_KILOMETERS
-        
-        return value
-
 
 class LoadingUnits:
-    """Fuel loading unit conversions. Base unit: Pounds Per Square Foot"""
-    
     class LoadingUnitsEnum:
-        PoundsPerSquareFoot = 0     # base loading unit
+        PoundsPerSquareFoot = 0
         TonsPerAcre = 1
         TonnesPerHectare = 2
         KilogramsPerSquareMeter = 3
-    
-    @staticmethod
-    def toBaseUnits(value, units):
-        """Convert loading to base units (Pounds Per Square Foot)"""
-        if value == 0.0:
-            return 0.0
-        
-        # Conversion constants to Pounds Per Square Foot
-        TONS_PER_ACRE_TO_LBS_PER_SQ_FT = 0.02296841643
-        TONNES_PER_HA_TO_LBS_PER_SQ_FT = 0.10197162129
-        KG_PER_SQ_M_TO_LBS_PER_SQ_FT = 0.20481754075
-        
-        if units == LoadingUnits.LoadingUnitsEnum.PoundsPerSquareFoot:
-            pass  # Already in base
-        elif units == LoadingUnits.LoadingUnitsEnum.TonsPerAcre:
-            value *= TONS_PER_ACRE_TO_LBS_PER_SQ_FT
-        elif units == LoadingUnits.LoadingUnitsEnum.TonnesPerHectare:
-            value *= TONNES_PER_HA_TO_LBS_PER_SQ_FT
-        elif units == LoadingUnits.LoadingUnitsEnum.KilogramsPerSquareMeter:
-            value *= KG_PER_SQ_M_TO_LBS_PER_SQ_FT
-        
-        return value
-    
-    @staticmethod
-    def fromBaseUnits(value, units):
-        """Convert loading from base units (Pounds Per Square Foot)"""
-        if value == 0.0:
-            return 0.0
-        
-        # Conversion constants from Pounds Per Square Foot
-        LBS_PER_SQ_FT_TO_TONS_PER_ACRE = 1.0 / 0.02296841643
-        LBS_PER_SQ_FT_TO_TONNES_PER_HA = 1.0 / 0.10197162129
-        LBS_PER_SQ_FT_TO_KG_PER_SQ_M = 1.0 / 0.20481754075
-        
-        if units == LoadingUnits.LoadingUnitsEnum.PoundsPerSquareFoot:
-            pass  # Already in base
-        elif units == LoadingUnits.LoadingUnitsEnum.TonsPerAcre:
-            value *= LBS_PER_SQ_FT_TO_TONS_PER_ACRE
-        elif units == LoadingUnits.LoadingUnitsEnum.TonnesPerHectare:
-            value *= LBS_PER_SQ_FT_TO_TONNES_PER_HA
-        elif units == LoadingUnits.LoadingUnitsEnum.KilogramsPerSquareMeter:
-            value *= LBS_PER_SQ_FT_TO_KG_PER_SQ_M
-        
-        return value
-
 
 class PressureUnits:
-    """Pressure unit conversions. Base unit: Pascal"""
-    
     class PressureUnitsEnum:
-        Pascal = 0                 # base pressure unit
-        HectoPascal = 1            # hPa
-        KiloPascal = 2             # kPa
-        MegaPascal = 3             # MPa
-        GigaPascal = 4             # GPa
-        Bar = 5                    # bar
-        Atmosphere = 6             # atm
-        TechnicalAtmosphere = 7    # at
-        PoundPerSquareInch = 8     # psi
-    
-    @staticmethod
-    def toBaseUnits(value, units):
-        """Convert pressure to base units (Pascal)"""
-        if value == 0.0:
-            return 0.0
-        
-        # Conversion constants to Pascal
-        HPA_TO_PA = 100.0
-        KPA_TO_PA = 1000.0
-        MPA_TO_PA = 1000000.0
-        GPA_TO_PA = 1000000000.0
-        BAR_TO_PA = 100000.0
-        ATM_TO_PA = 101325.0
-        TECHNICAL_ATM_TO_PA = 98066.5
-        PSI_TO_PA = 6894.757
-        
-        if units == PressureUnits.PressureUnitsEnum.Pascal:
-            pass  # Already in base
-        elif units == PressureUnits.PressureUnitsEnum.HectoPascal:
-            value *= HPA_TO_PA
-        elif units == PressureUnits.PressureUnitsEnum.KiloPascal:
-            value *= KPA_TO_PA
-        elif units == PressureUnits.PressureUnitsEnum.MegaPascal:
-            value *= MPA_TO_PA
-        elif units == PressureUnits.PressureUnitsEnum.GigaPascal:
-            value *= GPA_TO_PA
-        elif units == PressureUnits.PressureUnitsEnum.Bar:
-            value *= BAR_TO_PA
-        elif units == PressureUnits.PressureUnitsEnum.Atmosphere:
-            value *= ATM_TO_PA
-        elif units == PressureUnits.PressureUnitsEnum.TechnicalAtmosphere:
-            value *= TECHNICAL_ATM_TO_PA
-        elif units == PressureUnits.PressureUnitsEnum.PoundPerSquareInch:
-            value *= PSI_TO_PA
-        
-        return value
-    
-    @staticmethod
-    def fromBaseUnits(value, units):
-        """Convert pressure from base units (Pascal)"""
-        if value == 0.0:
-            return 0.0
-        
-        # Conversion constants from Pascal
-        PA_TO_HPA = 0.01
-        PA_TO_KPA = 0.001
-        PA_TO_MPA = 0.000001
-        PA_TO_GPA = 0.000000001
-        PA_TO_BAR = 0.00001
-        PA_TO_ATM = 1.0 / 101325.0
-        PA_TO_TECHNICAL_ATM = 1.0 / 98066.5
-        PA_TO_PSI = 1.0 / 6894.757
-        
-        if units == PressureUnits.PressureUnitsEnum.Pascal:
-            pass  # Already in base
-        elif units == PressureUnits.PressureUnitsEnum.HectoPascal:
-            value *= PA_TO_HPA
-        elif units == PressureUnits.PressureUnitsEnum.KiloPascal:
-            value *= PA_TO_KPA
-        elif units == PressureUnits.PressureUnitsEnum.MegaPascal:
-            value *= PA_TO_MPA
-        elif units == PressureUnits.PressureUnitsEnum.GigaPascal:
-            value *= PA_TO_GPA
-        elif units == PressureUnits.PressureUnitsEnum.Bar:
-            value *= PA_TO_BAR
-        elif units == PressureUnits.PressureUnitsEnum.Atmosphere:
-            value *= PA_TO_ATM
-        elif units == PressureUnits.PressureUnitsEnum.TechnicalAtmosphere:
-            value *= PA_TO_TECHNICAL_ATM
-        elif units == PressureUnits.PressureUnitsEnum.PoundPerSquareInch:
-            value *= PA_TO_PSI
-        
-        return value
-
+        Pascal = 0
+        HectoPascal = 1
+        KiloPascal = 2
+        MegaPascal = 3
+        GigaPascal = 4
+        Bar = 5
+        Atmosphere = 6
+        TechnicalAtmosphere = 7
+        PoundPerSquareInch = 8
 
 class SurfaceAreaToVolumeUnits:
-    """Surface Area to Volume (SAVR) unit conversions. Base unit: Square Feet Over Cubic Feet"""
-    
     class SurfaceAreaToVolumeUnitsEnum:
-        SquareFeetOverCubicFeet = 0         # base SAVR unit
+        SquareFeetOverCubicFeet = 0
         SquareMetersOverCubicMeters = 1
         SquareInchesOverCubicInches = 2
         SquareCentimetersOverCubicCentimeters = 3
-    
-    @staticmethod
-    def toBaseUnits(value, units):
-        """Convert SAVR to base units (Square Feet Over Cubic Feet)"""
-        if value == 0.0:
-            return 0.0
-        
-        # Conversion constants to Square Feet Over Cubic Feet
-        SQ_M_OVER_CUB_M_TO_SQ_FT_OVER_CUB_FT = 3.280839895
-        SQ_IN_OVER_CUB_IN_TO_SQ_FT_OVER_CUB_FT = 1.0 / 12.0
-        SQ_CM_OVER_CUB_CM_TO_SQ_FT_OVER_CUB_FT = 0.03280839895
-        
-        if units == SurfaceAreaToVolumeUnits.SurfaceAreaToVolumeUnitsEnum.SquareFeetOverCubicFeet:
-            pass  # Already in base
-        elif units == SurfaceAreaToVolumeUnits.SurfaceAreaToVolumeUnitsEnum.SquareMetersOverCubicMeters:
-            value *= SQ_M_OVER_CUB_M_TO_SQ_FT_OVER_CUB_FT
-        elif units == SurfaceAreaToVolumeUnits.SurfaceAreaToVolumeUnitsEnum.SquareInchesOverCubicInches:
-            value *= SQ_IN_OVER_CUB_IN_TO_SQ_FT_OVER_CUB_FT
-        elif units == SurfaceAreaToVolumeUnits.SurfaceAreaToVolumeUnitsEnum.SquareCentimetersOverCubicCentimeters:
-            value *= SQ_CM_OVER_CUB_CM_TO_SQ_FT_OVER_CUB_FT
-        
-        return value
-    
-    @staticmethod
-    def fromBaseUnits(value, units):
-        """Convert SAVR from base units (Square Feet Over Cubic Feet)"""
-        if value == 0.0:
-            return 0.0
-        
-        # Conversion constants from Square Feet Over Cubic Feet
-        SQ_FT_OVER_CUB_FT_TO_SQ_M_OVER_CUB_M = 1.0 / 3.280839895
-        SQ_FT_OVER_CUB_FT_TO_SQ_IN_OVER_CUB_IN = 12.0
-        SQ_FT_OVER_CUB_FT_TO_SQ_CM_OVER_CUB_CM = 1.0 / 0.03280839895
-        
-        if units == SurfaceAreaToVolumeUnits.SurfaceAreaToVolumeUnitsEnum.SquareFeetOverCubicFeet:
-            pass  # Already in base
-        elif units == SurfaceAreaToVolumeUnits.SurfaceAreaToVolumeUnitsEnum.SquareMetersOverCubicMeters:
-            value *= SQ_FT_OVER_CUB_FT_TO_SQ_M_OVER_CUB_M
-        elif units == SurfaceAreaToVolumeUnits.SurfaceAreaToVolumeUnitsEnum.SquareInchesOverCubicInches:
-            value *= SQ_FT_OVER_CUB_FT_TO_SQ_IN_OVER_CUB_IN
-        elif units == SurfaceAreaToVolumeUnits.SurfaceAreaToVolumeUnitsEnum.SquareCentimetersOverCubicCentimeters:
-            value *= SQ_FT_OVER_CUB_FT_TO_SQ_CM_OVER_CUB_CM
-        
-        return value
-
 
 class SpeedUnits:
-    """Speed/Velocity unit conversions. Base unit: Feet Per Minute"""
-    
     class SpeedUnitsEnum:
-        FeetPerMinute = 0          # base velocity unit
+        FeetPerMinute = 0
         ChainsPerHour = 1
         MetersPerSecond = 2
         MetersPerMinute = 3
         MetersPerHour = 4
         MilesPerHour = 5
         KilometersPerHour = 6
-    
-    @staticmethod
-    def toBaseUnits(value, units):
-        """Convert speed to base units (Feet Per Minute)"""
-        if value == 0.0:
-            return 0.0
-        
-        # Conversion constants to Feet Per Minute
-        METERS_PER_SECOND_TO_FEET_PER_MINUTE = 196.8503937
-        METERS_PER_MINUTE_TO_FEET_PER_MINUTE = 3.28084
-        METERS_PER_HOUR_TO_FEET_PER_MINUTE = 0.0547
-        CHAINS_PER_HOUR_TO_FEET_PER_MINUTE = 1.1
-        MILES_PER_HOUR_TO_FEET_PER_MINUTE = 88.0
-        KILOMETERS_PER_HOUR_TO_FEET_PER_MINUTE = 54.680665
-        
-        if units == SpeedUnits.SpeedUnitsEnum.FeetPerMinute:
-            pass  # Already in base
-        elif units == SpeedUnits.SpeedUnitsEnum.MetersPerSecond:
-            value *= METERS_PER_SECOND_TO_FEET_PER_MINUTE
-        elif units == SpeedUnits.SpeedUnitsEnum.MetersPerMinute:
-            value *= METERS_PER_MINUTE_TO_FEET_PER_MINUTE
-        elif units == SpeedUnits.SpeedUnitsEnum.MetersPerHour:
-            value *= METERS_PER_HOUR_TO_FEET_PER_MINUTE
-        elif units == SpeedUnits.SpeedUnitsEnum.ChainsPerHour:
-            value *= CHAINS_PER_HOUR_TO_FEET_PER_MINUTE
-        elif units == SpeedUnits.SpeedUnitsEnum.MilesPerHour:
-            value *= MILES_PER_HOUR_TO_FEET_PER_MINUTE
-        elif units == SpeedUnits.SpeedUnitsEnum.KilometersPerHour:
-            value *= KILOMETERS_PER_HOUR_TO_FEET_PER_MINUTE
-        
-        return value
-    
-    @staticmethod
-    def fromBaseUnits(value, units):
-        """Convert speed from base units (Feet Per Minute)"""
-        if value == 0.0:
-            return 0.0
-        
-        # Conversion constants from Feet Per Minute
-        FEET_PER_MINUTE_TO_METERS_PER_SECOND = 0.00508
-        FEET_PER_MINUTE_TO_METERS_PER_MINUTE = 0.3048
-        FEET_PER_MINUTE_TO_METERS_PER_HOUR = 18.288
-        FEET_PER_MINUTE_TO_CHAINS_PER_HOUR = 10.0 / 11.0
-        FEET_PER_MINUTE_TO_MILES_PER_HOUR = 0.01136363636
-        FEET_PER_MINUTE_TO_KILOMETERS_PER_HOUR = 0.018288
-        
-        if units == SpeedUnits.SpeedUnitsEnum.FeetPerMinute:
-            pass  # Already in base
-        elif units == SpeedUnits.SpeedUnitsEnum.MetersPerSecond:
-            value *= FEET_PER_MINUTE_TO_METERS_PER_SECOND
-        elif units == SpeedUnits.SpeedUnitsEnum.MetersPerMinute:
-            value *= FEET_PER_MINUTE_TO_METERS_PER_MINUTE
-        elif units == SpeedUnits.SpeedUnitsEnum.MetersPerHour:
-            value *= FEET_PER_MINUTE_TO_METERS_PER_HOUR
-        elif units == SpeedUnits.SpeedUnitsEnum.ChainsPerHour:
-            value *= FEET_PER_MINUTE_TO_CHAINS_PER_HOUR
-        elif units == SpeedUnits.SpeedUnitsEnum.MilesPerHour:
-            value *= FEET_PER_MINUTE_TO_MILES_PER_HOUR
-        elif units == SpeedUnits.SpeedUnitsEnum.KilometersPerHour:
-            value *= FEET_PER_MINUTE_TO_KILOMETERS_PER_HOUR
-        
-        return value
-
 
 class FractionUnits:
-    """Fraction/Percentage unit conversions. Base unit: Fraction"""
-    
     class FractionUnitsEnum:
-        Fraction = 0               # base fraction unit
+        Fraction = 0
         Percent = 1
-    
-    @staticmethod
-    def toBaseUnits(value, units):
-        """Convert fraction to base units (Fraction)"""
-        if value == 0.0:
-            return 0.0
-        
-        if units == FractionUnits.FractionUnitsEnum.Percent:
-            value /= 100.0
-        
-        return value
-    
-    @staticmethod
-    def fromBaseUnits(value, units):
-        """Convert fraction from base units (Fraction)"""
-        if value == 0.0:
-            return 0.0
-        
-        if units == FractionUnits.FractionUnitsEnum.Percent:
-            value *= 100.0
-        
-        return value
-
 
 class SlopeUnits:
-    """Slope unit conversions. Base unit: Degrees"""
-    
     class SlopeUnitsEnum:
-        Degrees = 0                # base slope unit
+        Degrees = 0
         Percent = 1
-    
-    @staticmethod
-    def toBaseUnits(value, units):
-        """Convert slope to base units (Degrees)"""
-        if value == 0.0:
-            return 0.0
-        
-        PI = math.pi
-        
-        if units == SlopeUnits.SlopeUnitsEnum.Percent:
-            # Convert percent slope to degrees
-            value = (180.0 / PI) * math.atan(value / 100.0)
-        
-        return value
-    
-    @staticmethod
-    def fromBaseUnits(value, units):
-        """Convert slope from base units (Degrees)"""
-        if value == 0.0:
-            return 0.0
-        
-        PI = math.pi
-        
-        if units == SlopeUnits.SlopeUnitsEnum.Percent:
-            # Convert degrees to percent slope
-            value = math.tan(value * (PI / 180.0)) * 100.0
-        
-        return value
-
 
 class DensityUnits:
-    """Density unit conversions. Base unit: Pounds Per Cubic Foot"""
-    
     class DensityUnitsEnum:
-        PoundsPerCubicFoot = 0     # base density unit
+        PoundsPerCubicFoot = 0
         KilogramsPerCubicMeter = 1
-    
-    @staticmethod
-    def toBaseUnits(value, units):
-        """Convert density to base units (Pounds Per Cubic Foot)"""
-        if value == 0.0:
-            return 0.0
-        
-        KG_PER_CUB_M_TO_LBS_PER_CUB_FT = 0.062427961
-        
-        if units == DensityUnits.DensityUnitsEnum.PoundsPerCubicFoot:
-            pass  # Already in base
-        elif units == DensityUnits.DensityUnitsEnum.KilogramsPerCubicMeter:
-            value *= KG_PER_CUB_M_TO_LBS_PER_CUB_FT
-        
-        return value
-    
-    @staticmethod
-    def fromBaseUnits(value, units):
-        """Convert density from base units (Pounds Per Cubic Foot)"""
-        if value == 0.0:
-            return 0.0
-        
-        LBS_PER_CUB_FT_TO_KG_PER_CUB_M = 1.0 / 0.062427961
-        
-        if units == DensityUnits.DensityUnitsEnum.PoundsPerCubicFoot:
-            pass  # Already in base
-        elif units == DensityUnits.DensityUnitsEnum.KilogramsPerCubicMeter:
-            value *= LBS_PER_CUB_FT_TO_KG_PER_CUB_M
-        
-        return value
-
 
 class HeatOfCombustionUnits:
-    """Heat of Combustion unit conversions. Base unit: BTU Per Pound"""
-    
     class HeatOfCombustionUnitsEnum:
-        BtusPerPound = 0           # base heat of combustion unit
+        BtusPerPound = 0
         KilojoulesPerKilogram = 1
-    
-    @staticmethod
-    def toBaseUnits(value, units):
-        """Convert heat of combustion to base units (BTU Per Pound)"""
-        if value == 0.0:
-            return 0.0
-        
-        KJ_PER_KG_TO_BTU_PER_LB = 0.42992250433
-        
-        if units == HeatOfCombustionUnits.HeatOfCombustionUnitsEnum.BtusPerPound:
-            pass  # Already in base
-        elif units == HeatOfCombustionUnits.HeatOfCombustionUnitsEnum.KilojoulesPerKilogram:
-            value *= KJ_PER_KG_TO_BTU_PER_LB
-        
-        return value
-    
-    @staticmethod
-    def fromBaseUnits(value, units):
-        """Convert heat of combustion from base units (BTU Per Pound)"""
-        if value == 0.0:
-            return 0.0
-        
-        BTU_PER_LB_TO_KJ_PER_KG = 1.0 / 0.42992250433
-        
-        if units == HeatOfCombustionUnits.HeatOfCombustionUnitsEnum.BtusPerPound:
-            pass  # Already in base
-        elif units == HeatOfCombustionUnits.HeatOfCombustionUnitsEnum.KilojoulesPerKilogram:
-            value *= BTU_PER_LB_TO_KJ_PER_KG
-        
-        return value
-
 
 class HeatSinkUnits:
-    """Heat Sink unit conversions. Base unit: BTU Per Cubic Foot"""
-    
     class HeatSinkUnitsEnum:
-        BtusPerCubicFoot = 0       # base heat sink unit
+        BtusPerCubicFoot = 0
         KilojoulesPerCubicMeter = 1
-    
-    @staticmethod
-    def toBaseUnits(value, units):
-        """Convert heat sink to base units (BTU Per Cubic Foot)"""
-        if value == 0.0:
-            return 0.0
-        
-        KJ_PER_CUB_M_TO_BTU_PER_CUB_FT = 0.0269281218
-        
-        if units == HeatSinkUnits.HeatSinkUnitsEnum.BtusPerCubicFoot:
-            pass  # Already in base
-        elif units == HeatSinkUnits.HeatSinkUnitsEnum.KilojoulesPerCubicMeter:
-            value *= KJ_PER_CUB_M_TO_BTU_PER_CUB_FT
-        
-        return value
-    
-    @staticmethod
-    def fromBaseUnits(value, units):
-        """Convert heat sink from base units (BTU Per Cubic Foot)"""
-        if value == 0.0:
-            return 0.0
-        
-        BTU_PER_CUB_FT_TO_KJ_PER_CUB_M = 1.0 / 0.0269281218
-        
-        if units == HeatSinkUnits.HeatSinkUnitsEnum.BtusPerCubicFoot:
-            pass  # Already in base
-        elif units == HeatSinkUnits.HeatSinkUnitsEnum.KilojoulesPerCubicMeter:
-            value *= BTU_PER_CUB_FT_TO_KJ_PER_CUB_M
-        
-        return value
-
 
 class HeatPerUnitAreaUnits:
-    """Heat Per Unit Area unit conversions. Base unit: BTU Per Square Foot"""
-    
     class HeatPerUnitAreaUnitsEnum:
-        BtusPerSquareFoot = 0      # base HPUA unit
+        BtusPerSquareFoot = 0
         KilojoulesPerSquareMeter = 1
         KilowattSecondsPerSquareMeter = 2
-    
-    @staticmethod
-    def toBaseUnits(value, units):
-        """Convert heat per unit area to base units (BTU Per Square Foot)"""
-        if value == 0.0:
-            return 0.0
-        
-        KJ_PER_SQ_M_TO_BTU_PER_SQ_FT = 0.088
-        KW_S_PER_SQ_M_TO_BTU_PER_SQ_FT = 0.088
-        
-        if units == HeatPerUnitAreaUnits.HeatPerUnitAreaUnitsEnum.BtusPerSquareFoot:
-            pass  # Already in base
-        elif units == HeatPerUnitAreaUnits.HeatPerUnitAreaUnitsEnum.KilojoulesPerSquareMeter:
-            value *= KJ_PER_SQ_M_TO_BTU_PER_SQ_FT
-        elif units == HeatPerUnitAreaUnits.HeatPerUnitAreaUnitsEnum.KilowattSecondsPerSquareMeter:
-            value *= KW_S_PER_SQ_M_TO_BTU_PER_SQ_FT
-        
-        return value
-    
-    @staticmethod
-    def fromBaseUnits(value, units):
-        """Convert heat per unit area from base units (BTU Per Square Foot)"""
-        if value == 0.0:
-            return 0.0
-        
-        BTU_PER_SQ_FT_TO_KJ_PER_SQ_M = 1.0 / 0.088
-        BTU_PER_SQ_FT_TO_KW_S_PER_SQ_M = 1.0 / 0.088
-        
-        if units == HeatPerUnitAreaUnits.HeatPerUnitAreaUnitsEnum.BtusPerSquareFoot:
-            pass  # Already in base
-        elif units == HeatPerUnitAreaUnits.HeatPerUnitAreaUnitsEnum.KilojoulesPerSquareMeter:
-            value *= BTU_PER_SQ_FT_TO_KJ_PER_SQ_M
-        elif units == HeatPerUnitAreaUnits.HeatPerUnitAreaUnitsEnum.KilowattSecondsPerSquareMeter:
-            value *= BTU_PER_SQ_FT_TO_KW_S_PER_SQ_M
-        
-        return value
-
 
 class HeatSourceAndReactionIntensityUnits:
-    """Heat Source and Reaction Intensity unit conversions. Base unit: BTU Per Square Foot Per Minute"""
-    
     class HeatSourceAndReactionIntensityUnitsEnum:
-        BtusPerSquareFootPerMinute = 0      # base reaction intensity unit
+        BtusPerSquareFootPerMinute = 0
         BtusPerSquareFootPerSecond = 1
         KilojoulesPerSquareMeterPerSecond = 2
         KilojoulesPerSquareMeterPerMinute = 3
         KilowattsPerSquareMeter = 4
-    
-    @staticmethod
-    def toBaseUnits(value, units):
-        """Convert heat source/reaction intensity to base units (BTU Per Square Foot Per Minute)"""
-        if value == 0.0:
-            return 0.0
-        
-        BTU_PER_SQ_FT_PER_SEC_TO_PER_MIN = 60.0
-        KJ_PER_SQ_M_PER_SEC_TO_BTU_PER_SQ_FT_PER_MIN = 5.28
-        KJ_PER_SQ_M_PER_MIN_TO_BTU_PER_SQ_FT_PER_MIN = 0.088
-        KW_PER_SQ_M_TO_BTU_PER_SQ_FT_PER_MIN = 0.528
-        
-        if units == HeatSourceAndReactionIntensityUnits.HeatSourceAndReactionIntensityUnitsEnum.BtusPerSquareFootPerMinute:
-            pass  # Already in base
-        elif units == HeatSourceAndReactionIntensityUnits.HeatSourceAndReactionIntensityUnitsEnum.BtusPerSquareFootPerSecond:
-            value *= BTU_PER_SQ_FT_PER_SEC_TO_PER_MIN
-        elif units == HeatSourceAndReactionIntensityUnits.HeatSourceAndReactionIntensityUnitsEnum.KilojoulesPerSquareMeterPerSecond:
-            value *= KJ_PER_SQ_M_PER_SEC_TO_BTU_PER_SQ_FT_PER_MIN
-        elif units == HeatSourceAndReactionIntensityUnits.HeatSourceAndReactionIntensityUnitsEnum.KilojoulesPerSquareMeterPerMinute:
-            value *= KJ_PER_SQ_M_PER_MIN_TO_BTU_PER_SQ_FT_PER_MIN
-        elif units == HeatSourceAndReactionIntensityUnits.HeatSourceAndReactionIntensityUnitsEnum.KilowattsPerSquareMeter:
-            value *= KW_PER_SQ_M_TO_BTU_PER_SQ_FT_PER_MIN
-        
-        return value
-    
-    @staticmethod
-    def fromBaseUnits(value, units):
-        """Convert heat source/reaction intensity from base units (BTU Per Square Foot Per Minute)"""
-        if value == 0.0:
-            return 0.0
-        
-        BTU_PER_SQ_FT_PER_MIN_TO_PER_SEC = 1.0 / 60.0
-        BTU_PER_SQ_FT_PER_MIN_TO_KJ_PER_SQ_M_PER_SEC = 1.0 / 5.28
-        BTU_PER_SQ_FT_PER_MIN_TO_KJ_PER_SQ_M_PER_MIN = 1.0 / 0.088
-        BTU_PER_SQ_FT_PER_MIN_TO_KW_PER_SQ_M = 1.0 / 0.528
-        
-        if units == HeatSourceAndReactionIntensityUnits.HeatSourceAndReactionIntensityUnitsEnum.BtusPerSquareFootPerMinute:
-            pass  # Already in base
-        elif units == HeatSourceAndReactionIntensityUnits.HeatSourceAndReactionIntensityUnitsEnum.BtusPerSquareFootPerSecond:
-            value *= BTU_PER_SQ_FT_PER_MIN_TO_PER_SEC
-        elif units == HeatSourceAndReactionIntensityUnits.HeatSourceAndReactionIntensityUnitsEnum.KilojoulesPerSquareMeterPerSecond:
-            value *= BTU_PER_SQ_FT_PER_MIN_TO_KJ_PER_SQ_M_PER_SEC
-        elif units == HeatSourceAndReactionIntensityUnits.HeatSourceAndReactionIntensityUnitsEnum.KilojoulesPerSquareMeterPerMinute:
-            value *= BTU_PER_SQ_FT_PER_MIN_TO_KJ_PER_SQ_M_PER_MIN
-        elif units == HeatSourceAndReactionIntensityUnits.HeatSourceAndReactionIntensityUnitsEnum.KilowattsPerSquareMeter:
-            value *= BTU_PER_SQ_FT_PER_MIN_TO_KW_PER_SQ_M
-        
-        return value
-
 
 class FirelineIntensityUnits:
-    """Fireline Intensity unit conversions. Base unit: BTU Per Foot Per Second"""
-    
     class FirelineIntensityUnitsEnum:
-        BtusPerFootPerSecond = 0   # base fireline intensity unit
+        BtusPerFootPerSecond = 0
         BtusPerFootPerMinute = 1
         KilojoulesPerMeterPerSecond = 2
         KilojoulesPerMeterPerMinute = 3
         KilowattsPerMeter = 4
-    
-    @staticmethod
-    def toBaseUnits(value, units):
-        """Convert fireline intensity to base units (BTU Per Foot Per Second)"""
-        if value == 0.0:
-            return 0.0
-        
-        BTU_PER_FT_PER_MIN_TO_PER_SEC = 0.01666666666666667
-        KJ_PER_M_PER_SEC_TO_BTU_PER_FT_PER_SEC = 0.2886719
-        KJ_PER_M_PER_MIN_TO_BTU_PER_FT_PER_SEC = 0.00481120819
-        KW_PER_M_TO_BTU_PER_FT_PER_SEC = 0.2886719
-        
-        if units == FirelineIntensityUnits.FirelineIntensityUnitsEnum.BtusPerFootPerSecond:
-            pass  # Already in base
-        elif units == FirelineIntensityUnits.FirelineIntensityUnitsEnum.BtusPerFootPerMinute:
-            value *= BTU_PER_FT_PER_MIN_TO_PER_SEC
-        elif units == FirelineIntensityUnits.FirelineIntensityUnitsEnum.KilojoulesPerMeterPerSecond:
-            value *= KJ_PER_M_PER_SEC_TO_BTU_PER_FT_PER_SEC
-        elif units == FirelineIntensityUnits.FirelineIntensityUnitsEnum.KilojoulesPerMeterPerMinute:
-            value *= KJ_PER_M_PER_MIN_TO_BTU_PER_FT_PER_SEC
-        elif units == FirelineIntensityUnits.FirelineIntensityUnitsEnum.KilowattsPerMeter:
-            value *= KW_PER_M_TO_BTU_PER_FT_PER_SEC
-        
-        return value
-    
-    @staticmethod
-    def fromBaseUnits(value, units):
-        """Convert fireline intensity from base units (BTU Per Foot Per Second)"""
-        if value == 0.0:
-            return 0.0
-        
-        BTU_PER_FT_PER_SEC_TO_PER_MIN = 60.0
-        BTU_PER_FT_PER_SEC_TO_KJ_PER_M_PER_SEC = 3.464140419  # matches C++ BTUS_PER_FOOT_PER_SECOND_TO_KILOWATTS_PER_METER
-        BTU_PER_FT_PER_SEC_TO_KJ_PER_M_PER_MIN = 207.848      # matches C++ BTUS_PER_FOOT_PER_SECOND_TO_KILOJOULES_PER_METER_PER_MINUTE
-        BTU_PER_FT_PER_SEC_TO_KW_PER_M = 3.464140419          # same as KJ/m/s
-        
-        if units == FirelineIntensityUnits.FirelineIntensityUnitsEnum.BtusPerFootPerSecond:
-            pass  # Already in base
-        elif units == FirelineIntensityUnits.FirelineIntensityUnitsEnum.BtusPerFootPerMinute:
-            value *= BTU_PER_FT_PER_SEC_TO_PER_MIN
-        elif units == FirelineIntensityUnits.FirelineIntensityUnitsEnum.KilojoulesPerMeterPerSecond:
-            value *= BTU_PER_FT_PER_SEC_TO_KJ_PER_M_PER_SEC
-        elif units == FirelineIntensityUnits.FirelineIntensityUnitsEnum.KilojoulesPerMeterPerMinute:
-            value *= BTU_PER_FT_PER_SEC_TO_KJ_PER_M_PER_MIN
-        elif units == FirelineIntensityUnits.FirelineIntensityUnitsEnum.KilowattsPerMeter:
-            value *= BTU_PER_FT_PER_SEC_TO_KW_PER_M
-        
-        return value
-
 
 class TemperatureUnits:
-    """Temperature unit conversions. Base unit: Fahrenheit"""
-    
     class TemperatureUnitsEnum:
-        Fahrenheit = 0             # base temperature unit
+        Fahrenheit = 0
         Celsius = 1
         Kelvin = 2
-    
-    @staticmethod
-    def toBaseUnits(value, units):
-        """Convert temperature to base units (Fahrenheit)"""
-        if units == TemperatureUnits.TemperatureUnitsEnum.Fahrenheit:
-            pass  # Already in base
-        elif units == TemperatureUnits.TemperatureUnitsEnum.Celsius:
-            value = (value * 9.0 / 5.0) + 32.0
-        elif units == TemperatureUnits.TemperatureUnitsEnum.Kelvin:
-            value = (value - 273.15) * 9.0 / 5.0 + 32.0
-        
-        return value
-    
-    @staticmethod
-    def fromBaseUnits(value, units):
-        """Convert temperature from base units (Fahrenheit)"""
-        if units == TemperatureUnits.TemperatureUnitsEnum.Fahrenheit:
-            pass  # Already in base
-        elif units == TemperatureUnits.TemperatureUnitsEnum.Celsius:
-            value = (value - 32.0) * 5.0 / 9.0
-        elif units == TemperatureUnits.TemperatureUnitsEnum.Kelvin:
-            value = ((value - 32.0) * 5.0 / 9.0) + 273.15
-        
-        return value
-
 
 class TimeUnits:
-    """Time unit conversions. Base unit: Minutes"""
-    
     class TimeUnitsEnum:
-        Minutes = 0                # base time unit
+        Minutes = 0
         Seconds = 1
         Hours = 2
         Days = 3
         Years = 4
-    
-    @staticmethod
-    def toBaseUnits(value, units):
-        """Convert time to base units (Minutes)"""
-        if value == 0.0:
-            return 0.0
-        
-        SECONDS_TO_MINUTES = 1.0 / 60.0
-        HOURS_TO_MINUTES = 60.0
-        DAYS_TO_MINUTES = 24.0 * 60.0
-        YEARS_TO_MINUTES = 365.25 * 24.0 * 60.0
-        
-        if units == TimeUnits.TimeUnitsEnum.Minutes:
-            pass  # Already in base
-        elif units == TimeUnits.TimeUnitsEnum.Seconds:
-            value *= SECONDS_TO_MINUTES
-        elif units == TimeUnits.TimeUnitsEnum.Hours:
-            value *= HOURS_TO_MINUTES
-        elif units == TimeUnits.TimeUnitsEnum.Days:
-            value *= DAYS_TO_MINUTES
-        elif units == TimeUnits.TimeUnitsEnum.Years:
-            value *= YEARS_TO_MINUTES
-        
-        return value
-    
-    @staticmethod
-    def fromBaseUnits(value, units):
-        """Convert time from base units (Minutes)"""
-        if value == 0.0:
-            return 0.0
-        
-        MINUTES_TO_SECONDS = 60.0
-        MINUTES_TO_HOURS = 1.0 / 60.0
-        MINUTES_TO_DAYS = 1.0 / (24.0 * 60.0)
-        MINUTES_TO_YEARS = 1.0 / (365.25 * 24.0 * 60.0)
-        
-        if units == TimeUnits.TimeUnitsEnum.Minutes:
-            pass  # Already in base
-        elif units == TimeUnits.TimeUnitsEnum.Seconds:
-            value *= MINUTES_TO_SECONDS
-        elif units == TimeUnits.TimeUnitsEnum.Hours:
-            value *= MINUTES_TO_HOURS
-        elif units == TimeUnits.TimeUnitsEnum.Days:
-            value *= MINUTES_TO_DAYS
-        elif units == TimeUnits.TimeUnitsEnum.Years:
-            value *= MINUTES_TO_YEARS
-        
-        return value
 
