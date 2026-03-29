@@ -22,6 +22,7 @@ Index ranges (mirror FineDeadFuelMoistureTool):
 """
 
 import numpy as np
+from typing import Union
 
 # ---------------------------------------------------------------------------
 # Lookup tables (inlined from the original FineDeadFuelMoistureTool class).
@@ -77,30 +78,39 @@ _CORR = np.array([
 ], dtype=float)
 
 
-def calculate_fine_dead_fuel_moisture(dry_bulb_i, rh_i, slope_i, aspect_i,
-                                       shading_i, month_i, elev_i, time_i):
+def calculate_fine_dead_fuel_moisture(
+        dry_bulb_i: Union[int, np.ndarray],
+        rh_i: Union[int, np.ndarray],
+        slope_i: Union[int, np.ndarray],
+        aspect_i: Union[int, np.ndarray],
+        shading_i: Union[int, np.ndarray],
+        month_i: Union[int, np.ndarray],
+        elev_i: Union[int, np.ndarray],
+        time_i: Union[int, np.ndarray]
+) -> np.ndarray:
     """
     Vectorized 1-hr fine dead fuel moisture table lookup.
 
-    Parameters
-    ----------
-    dry_bulb_i : (*S) int — dry bulb temperature index 0–5
-    rh_i       : (*S) int — relative humidity index 0–20
-    slope_i    : (*S) int — slope class index 0–1
-    aspect_i   : (*S) int — aspect class index 0–3
-    shading_i  : (*S) int — shading index 0–1
-    month_i    : (*S) int — month-group index 0–2
-    elev_i     : (*S) int — elevation class index 0–2
-    time_i     : (*S) int — time-of-day index 0–5
+    All inputs are integer class indices, not raw physical values.
+    Use the ``FineDeadFuelMoistureTool`` class (scalar) to convert raw
+    observations to index values before calling this function.
 
-    Returns
-    -------
-    (*S) ndarray — fine dead fuel moisture as fraction (e.g. 0.05)
-
-    Notes
-    -----
-    Returns -0.02 (sentinel) for out-of-range inputs, mirroring the scalar
-    class behaviour (which stores -0.01 per component when out of range).
+    :param dry_bulb_i: Dry bulb temperature class index 0–5 (*S) or scalar.
+    :param rh_i: Relative humidity class index 0–20 (*S) or scalar.
+    :param slope_i: Slope class index 0–1 (*S) or scalar.
+        0 = ≤ 30%, 1 = > 30%.
+    :param aspect_i: Aspect class index 0–3 (*S) or scalar.
+        0 = N/NE, 1 = E/SE, 2 = S/SW, 3 = W/NW.
+    :param shading_i: Shading class index 0–1 (*S) or scalar.
+        0 = unshaded, 1 = shaded.
+    :param month_i: Month-group class index 0–2 (*S) or scalar.
+        0 = May–Jul, 1 = Aug–Oct, 2 = Nov–Apr.
+    :param elev_i: Elevation class index 0–2 (*S) or scalar.
+        0 = below, 1 = same, 2 = above reference elevation.
+    :param time_i: Time-of-day class index 0–5 (*S) or scalar.
+    :return: (*S) ndarray — 1-hr fine dead fuel moisture as fraction
+        (e.g. 0.05 = 5%). Returns ``-0.02`` (sentinel) for out-of-range
+        inputs, mirroring the scalar class behaviour.
     """
     db  = np.asarray(dry_bulb_i, dtype=np.int32)
     rh  = np.asarray(rh_i,       dtype=np.int32)

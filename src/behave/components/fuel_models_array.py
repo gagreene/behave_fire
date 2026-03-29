@@ -17,6 +17,7 @@ Usage
 """
 
 import numpy as np
+from typing import Union
 
 try:
     from .fuel_models import FuelModels
@@ -31,22 +32,29 @@ def build_fuel_lookup_arrays(fuel_models: FuelModels) -> dict:
     """
     Pre-build NumPy arrays of fuel properties indexed by fuel model number.
 
-    Called once at startup.  Each array has shape (_MAX_FM + 1,); index 0 is
-    unused (no fuel model 0); unrecognised / reserved models get 0.0 / False.
+    Called once at startup.  Each array has shape (``_MAX_FM`` + 1,); index 0
+    is unused (no fuel model 0).  Unrecognised or reserved models get
+    ``0.0`` / ``False``.
 
-    Parameters
-    ----------
-    fuel_models : FuelModels
-        Populated FuelModels instance (scalar).
+    :param fuel_models: Populated ``FuelModels`` instance.
+    :return: dict with keys:
 
-    Returns
-    -------
-    dict with keys:
-        'depth', 'moe_dead', 'hoc_dead', 'hoc_live',
-        'dead_1h', 'dead_10h', 'dead_100h', 'live_herb', 'live_woody',
-        'savr_1h', 'savr_lh', 'savr_lw',
-        'is_dynamic' (bool), 'is_defined' (bool)
-    Each array has shape (_MAX_FM + 1,).
+        - ``'depth'``      — fuel bed depth (ft)
+        - ``'moe_dead'``   — moisture of extinction for dead fuel (fraction)
+        - ``'hoc_dead'``   — heat of combustion for dead fuel (BTU/lb)
+        - ``'hoc_live'``   — heat of combustion for live fuel (BTU/lb)
+        - ``'dead_1h'``    — 1-hr dead fuel load (lb/ft²)
+        - ``'dead_10h'``   — 10-hr dead fuel load (lb/ft²)
+        - ``'dead_100h'``  — 100-hr dead fuel load (lb/ft²)
+        - ``'live_herb'``  — live herbaceous fuel load (lb/ft²)
+        - ``'live_woody'`` — live woody fuel load (lb/ft²)
+        - ``'savr_1h'``    — 1-hr dead SAVR (ft²/ft³)
+        - ``'savr_lh'``    — live herbaceous SAVR (ft²/ft³)
+        - ``'savr_lw'``    — live woody SAVR (ft²/ft³)
+        - ``'is_dynamic'`` — bool, True for dynamic (herb-transfer) models
+        - ``'is_defined'`` — bool, True for valid populated models
+
+        Each array has shape (``_MAX_FM`` + 1,).
     """
     depth      = np.zeros(_MAX_FM + 1, dtype=float)
     moe_dead   = np.zeros(_MAX_FM + 1, dtype=float)
@@ -71,6 +79,7 @@ def build_fuel_lookup_arrays(fuel_models: FuelModels) -> dict:
             continue
         if not m.get('is_defined', False):
             continue
+        # Copy fuel model properties into the lookup arrays
         depth[n]      = m['fuel_bed_depth']
         moe_dead[n]   = m['moisture_of_extinction_dead']
         hoc_dead[n]   = m['heat_of_combustion_dead']

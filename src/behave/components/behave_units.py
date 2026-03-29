@@ -25,6 +25,7 @@ Base units (same as scalar module):
 """
 
 import numpy as np
+from typing import Union
 
 # ---------------------------------------------------------------------------
 # Speed  (base = FeetPerMinute = 0)
@@ -50,16 +51,28 @@ _SPEED_FROM_FPM = np.array([
 ])
 
 
-def speed_to_base(value, units):
-    """Convert speed to ft/min.  Always returns ndarray."""
+def speed_to_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+    """
+    Convert speed to ft/min (base unit).
+
+    :param value: Speed value (*S) or scalar, in ``units``.
+    :param units: ``SpeedUnitsEnum`` integer (0=FeetPerMinute, 5=MilesPerHour, etc.).
+    :return: ndarray — speed in ft/min.
+    """
     arr = np.asarray(value, dtype=float)
     if units == 0:
         return arr
     return arr * _SPEED_TO_FPM[units]
 
 
-def speed_from_base(value, units):
-    """Convert speed from ft/min to requested units.  Always returns ndarray."""
+def speed_from_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+    """
+    Convert speed from ft/min to the requested units.
+
+    :param value: Speed value (*S) or scalar in ft/min.
+    :param units: ``SpeedUnitsEnum`` integer for desired output.
+    :return: ndarray — speed in the requested units.
+    """
     arr = np.asarray(value, dtype=float)
     if units == 0:
         return arr
@@ -92,16 +105,28 @@ _LENGTH_FROM_FT = np.array([
 ])
 
 
-def length_to_base(value, units):
-    """Convert length to feet.  Always returns ndarray."""
+def length_to_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+    """
+    Convert length to feet (base unit).
+
+    :param value: Length value (*S) or scalar, in ``units``.
+    :param units: ``LengthUnitsEnum`` integer (0=Feet, 4=Meters, etc.).
+    :return: ndarray — length in feet.
+    """
     arr = np.asarray(value, dtype=float)
     if units == 0:
         return arr
     return arr * _LENGTH_TO_FT[units]
 
 
-def length_from_base(value, units):
-    """Convert length from feet to requested units.  Always returns ndarray."""
+def length_from_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+    """
+    Convert length from feet to the requested units.
+
+    :param value: Length value (*S) or scalar in feet.
+    :param units: ``LengthUnitsEnum`` integer for desired output.
+    :return: ndarray — length in the requested units.
+    """
     arr = np.asarray(value, dtype=float)
     if units == 0:
         return arr
@@ -130,16 +155,28 @@ _AREA_FROM_SQFT = np.array([
 ])
 
 
-def area_to_base(value, units):
-    """Convert area to sq ft.  Always returns ndarray."""
+def area_to_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+    """
+    Convert area to square feet (base unit).
+
+    :param value: Area value (*S) or scalar, in ``units``.
+    :param units: ``AreaUnitsEnum`` integer (0=SquareFeet, 1=Acres, etc.).
+    :return: ndarray — area in square feet.
+    """
     arr = np.asarray(value, dtype=float)
     if units == 0:
         return arr
     return arr * _AREA_TO_SQFT[units]
 
 
-def area_from_base(value, units):
-    """Convert area from sq ft.  Always returns ndarray."""
+def area_from_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+    """
+    Convert area from square feet to the requested units.
+
+    :param value: Area value (*S) or scalar in square feet.
+    :param units: ``AreaUnitsEnum`` integer for desired output.
+    :return: ndarray — area in the requested units.
+    """
     arr = np.asarray(value, dtype=float)
     if units == 0:
         return arr
@@ -150,8 +187,14 @@ def area_from_base(value, units):
 # Fraction / Percentage  (base = Fraction = 0)
 # ---------------------------------------------------------------------------
 
-def fraction_to_base(value, units):
-    """Convert fraction/percent to fraction (base).  Always returns ndarray."""
+def fraction_to_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+    """
+    Convert fraction or percent to fraction (base unit, 0–1).
+
+    :param value: Value (*S) or scalar, in ``units``.
+    :param units: ``FractionUnitsEnum`` integer (0=Fraction, 1=Percent).
+    :return: ndarray — value as a fraction (0–1).
+    """
     arr = np.asarray(value, dtype=float)
     if units == 0:
         return arr
@@ -159,8 +202,14 @@ def fraction_to_base(value, units):
     return arr / 100.0
 
 
-def fraction_from_base(value, units):
-    """Convert fraction to requested units.  Always returns ndarray."""
+def fraction_from_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+    """
+    Convert fraction (0–1) to the requested units.
+
+    :param value: Fraction value (*S) or scalar (0–1).
+    :param units: ``FractionUnitsEnum`` integer for desired output.
+    :return: ndarray — value in the requested units.
+    """
     arr = np.asarray(value, dtype=float)
     if units == 0:
         return arr
@@ -171,8 +220,14 @@ def fraction_from_base(value, units):
 # Temperature  (base = Fahrenheit = 0)
 # ---------------------------------------------------------------------------
 
-def temp_to_base(value, units):
-    """Convert temperature to °F.  Always returns ndarray."""
+def temp_to_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+    """
+    Convert temperature to °F (base unit).
+
+    :param value: Temperature value (*S) or scalar, in ``units``.
+    :param units: ``TemperatureUnitsEnum`` integer (0=Fahrenheit, 1=Celsius, 2=Kelvin).
+    :return: ndarray — temperature in °F.
+    """
     arr = np.asarray(value, dtype=float)
     if units == 0:
         return arr
@@ -183,8 +238,14 @@ def temp_to_base(value, units):
     return arr
 
 
-def temp_from_base(value, units):
-    """Convert temperature from °F to requested units.  Always returns ndarray."""
+def temp_from_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+    """
+    Convert temperature from °F to the requested units.
+
+    :param value: Temperature value (*S) or scalar in °F.
+    :param units: ``TemperatureUnitsEnum`` integer for desired output.
+    :return: ndarray — temperature in the requested units.
+    """
     arr = np.asarray(value, dtype=float)
     if units == 0:
         return arr
@@ -199,17 +260,29 @@ def temp_from_base(value, units):
 # Slope  (base = Degrees = 0)
 # ---------------------------------------------------------------------------
 
-def slope_to_base(value, units):
-    """Convert slope to degrees.  Always returns ndarray."""
+def slope_to_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+    """
+    Convert slope to degrees (base unit).
+
+    :param value: Slope value (*S) or scalar, in ``units``.
+    :param units: ``SlopeUnitsEnum`` integer (0=Degrees, 1=Percent).
+    :return: ndarray — slope in degrees.
+    """
     arr = np.asarray(value, dtype=float)
     if units == 0:
         return arr
-    # units == 1 → Percent
+    # units == 1 → Percent: convert via arctan
     return np.degrees(np.arctan(arr / 100.0))
 
 
-def slope_from_base(value, units):
-    """Convert slope from degrees to requested units.  Always returns ndarray."""
+def slope_from_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+    """
+    Convert slope from degrees to the requested units.
+
+    :param value: Slope value (*S) or scalar in degrees.
+    :param units: ``SlopeUnitsEnum`` integer for desired output.
+    :return: ndarray — slope in the requested units.
+    """
     arr = np.asarray(value, dtype=float)
     if units == 0:
         return arr
@@ -244,16 +317,28 @@ _PRESSURE_FROM_PA = np.array([
 ])
 
 
-def pressure_to_base(value, units):
-    """Convert pressure to Pascals.  Always returns ndarray."""
+def pressure_to_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+    """
+    Convert pressure to Pascals (base unit).
+
+    :param value: Pressure value (*S) or scalar, in ``units``.
+    :param units: ``PressureUnitsEnum`` integer (0=Pascal, 1=HectoPascal, etc.).
+    :return: ndarray — pressure in Pascals.
+    """
     arr = np.asarray(value, dtype=float)
     if units == 0:
         return arr
     return arr * _PRESSURE_TO_PA[units]
 
 
-def pressure_from_base(value, units):
-    """Convert pressure from Pascals to requested units.  Always returns ndarray."""
+def pressure_from_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+    """
+    Convert pressure from Pascals to the requested units.
+
+    :param value: Pressure value (*S) or scalar in Pascals.
+    :param units: ``PressureUnitsEnum`` integer for desired output.
+    :return: ndarray — pressure in the requested units.
+    """
     arr = np.asarray(value, dtype=float)
     if units == 0:
         return arr
@@ -280,16 +365,29 @@ _FLI_FROM_BASE = np.array([
 ])
 
 
-def fireline_intensity_to_base(value, units):
-    """Convert fireline intensity to BTU/ft/s.  Always returns ndarray."""
+def fireline_intensity_to_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+    """
+    Convert fireline intensity to BTU/ft/s (base unit).
+
+    :param value: Fireline intensity (*S) or scalar, in ``units``.
+    :param units: ``FirelineIntensityUnitsEnum`` integer
+        (0=BtusPerFootPerSecond, 4=KilowattsPerMeter, etc.).
+    :return: ndarray — fireline intensity in BTU/ft/s.
+    """
     arr = np.asarray(value, dtype=float)
     if units == 0:
         return arr
     return arr * _FLI_TO_BASE[units]
 
 
-def fireline_intensity_from_base(value, units):
-    """Convert fireline intensity from BTU/ft/s.  Always returns ndarray."""
+def fireline_intensity_from_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+    """
+    Convert fireline intensity from BTU/ft/s to the requested units.
+
+    :param value: Fireline intensity (*S) or scalar in BTU/ft/s.
+    :param units: ``FirelineIntensityUnitsEnum`` integer for desired output.
+    :return: ndarray — fireline intensity in the requested units.
+    """
     arr = np.asarray(value, dtype=float)
     if units == 0:
         return arr
@@ -312,16 +410,29 @@ _HPUA_FROM_BASE = np.array([
 ])
 
 
-def hpua_to_base(value, units):
-    """Convert heat per unit area to BTU/ft².  Always returns ndarray."""
+def hpua_to_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+    """
+    Convert heat per unit area to BTU/ft² (base unit).
+
+    :param value: Heat per unit area (*S) or scalar, in ``units``.
+    :param units: ``HeatPerUnitAreaUnitsEnum`` integer
+        (0=BtusPerSquareFoot, 1=KilojoulesPerSquareMeter, etc.).
+    :return: ndarray — heat per unit area in BTU/ft².
+    """
     arr = np.asarray(value, dtype=float)
     if units == 0:
         return arr
     return arr * _HPUA_TO_BASE[units]
 
 
-def hpua_from_base(value, units):
-    """Convert heat per unit area from BTU/ft².  Always returns ndarray."""
+def hpua_from_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+    """
+    Convert heat per unit area from BTU/ft² to the requested units.
+
+    :param value: Heat per unit area (*S) or scalar in BTU/ft².
+    :param units: ``HeatPerUnitAreaUnitsEnum`` integer for desired output.
+    :return: ndarray — heat per unit area in the requested units.
+    """
     arr = np.asarray(value, dtype=float)
     if units == 0:
         return arr
@@ -348,16 +459,30 @@ _RI_FROM_BASE = np.array([
 ])
 
 
-def reaction_intensity_to_base(value, units):
-    """Convert reaction intensity to BTU/ft²/min.  Always returns ndarray."""
+def reaction_intensity_to_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+    """
+    Convert reaction intensity to BTU/ft²/min (base unit).
+
+    :param value: Reaction intensity (*S) or scalar, in ``units``.
+    :param units: ``HeatSourceAndReactionIntensityUnitsEnum`` integer
+        (0=BtusPerSquareFootPerMinute, 4=KilowattsPerSquareMeter, etc.).
+    :return: ndarray — reaction intensity in BTU/ft²/min.
+    """
     arr = np.asarray(value, dtype=float)
     if units == 0:
         return arr
     return arr * _RI_TO_BASE[units]
 
 
-def reaction_intensity_from_base(value, units):
-    """Convert reaction intensity from BTU/ft²/min.  Always returns ndarray."""
+def reaction_intensity_from_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+    """
+    Convert reaction intensity from BTU/ft²/min to the requested units.
+
+    :param value: Reaction intensity (*S) or scalar in BTU/ft²/min.
+    :param units: ``HeatSourceAndReactionIntensityUnitsEnum`` integer for
+        desired output.
+    :return: ndarray — reaction intensity in the requested units.
+    """
     arr = np.asarray(value, dtype=float)
     if units == 0:
         return arr
@@ -382,16 +507,29 @@ _LOAD_FROM_BASE = np.array([
 ])
 
 
-def loading_to_base(value, units):
-    """Convert loading to lb/ft².  Always returns ndarray."""
+def loading_to_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+    """
+    Convert fuel loading to lb/ft² (base unit).
+
+    :param value: Loading value (*S) or scalar, in ``units``.
+    :param units: ``LoadingUnitsEnum`` integer
+        (0=PoundsPerSquareFoot, 1=TonsPerAcre, etc.).
+    :return: ndarray — loading in lb/ft².
+    """
     arr = np.asarray(value, dtype=float)
     if units == 0:
         return arr
     return arr * _LOAD_TO_BASE[units]
 
 
-def loading_from_base(value, units):
-    """Convert loading from lb/ft².  Always returns ndarray."""
+def loading_from_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+    """
+    Convert fuel loading from lb/ft² to the requested units.
+
+    :param value: Loading value (*S) or scalar in lb/ft².
+    :param units: ``LoadingUnitsEnum`` integer for desired output.
+    :return: ndarray — loading in the requested units.
+    """
     arr = np.asarray(value, dtype=float)
     if units == 0:
         return arr
@@ -412,16 +550,29 @@ _DENSITY_FROM_BASE = np.array([
 ])
 
 
-def density_to_base(value, units):
-    """Convert density to lb/ft³.  Always returns ndarray."""
+def density_to_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+    """
+    Convert density to lb/ft³ (base unit).
+
+    :param value: Density value (*S) or scalar, in ``units``.
+    :param units: ``DensityUnitsEnum`` integer
+        (0=PoundsPerCubicFoot, 1=KilogramsPerCubicMeter).
+    :return: ndarray — density in lb/ft³.
+    """
     arr = np.asarray(value, dtype=float)
     if units == 0:
         return arr
     return arr * _DENSITY_TO_BASE[units]
 
 
-def density_from_base(value, units):
-    """Convert density from lb/ft³.  Always returns ndarray."""
+def density_from_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+    """
+    Convert density from lb/ft³ to the requested units.
+
+    :param value: Density value (*S) or scalar in lb/ft³.
+    :param units: ``DensityUnitsEnum`` integer for desired output.
+    :return: ndarray — density in the requested units.
+    """
     arr = np.asarray(value, dtype=float)
     if units == 0:
         return arr
@@ -448,16 +599,28 @@ _TIME_FROM_MIN = np.array([
 ])
 
 
-def time_to_base(value, units):
-    """Convert time to minutes.  Always returns ndarray."""
+def time_to_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+    """
+    Convert time to minutes (base unit).
+
+    :param value: Time value (*S) or scalar, in ``units``.
+    :param units: ``TimeUnitsEnum`` integer (0=Minutes, 1=Seconds, 2=Hours, etc.).
+    :return: ndarray — time in minutes.
+    """
     arr = np.asarray(value, dtype=float)
     if units == 0:
         return arr
     return arr * _TIME_TO_MIN[units]
 
 
-def time_from_base(value, units):
-    """Convert time from minutes.  Always returns ndarray."""
+def time_from_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+    """
+    Convert time from minutes to the requested units.
+
+    :param value: Time value (*S) or scalar in minutes.
+    :param units: ``TimeUnitsEnum`` integer for desired output.
+    :return: ndarray — time in the requested units.
+    """
     arr = np.asarray(value, dtype=float)
     if units == 0:
         return arr
