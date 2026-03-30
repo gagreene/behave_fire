@@ -7,7 +7,8 @@ name = "behave-fire"
 version = "1.0.0"
 description = "Vectorized Python port of the USFS BEHAVE wildfire fire-behavior modeling system"
 readme = "README.md"
-license = { text = "MIT" }
+license = "MIT"
+license-files = ["LICENSE"]
 requires-python = ">=3.10"
 authors = [
     { name = "Behave Development Team" }
@@ -20,7 +21,6 @@ classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Science/Research",
     "Topic :: Scientific/Engineering",
-    "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
@@ -39,11 +39,14 @@ examples = [
 ]
 dev = [
     "pytest>=9.0.2",
+    "build>=1.0",
+    "twine>=5.0",
 ]
 
 [project.urls]
 "Homepage" = "https://github.com/your-org/behave-fire"
 "Bug Tracker" = "https://github.com/your-org/behave-fire/issues"
+"Changelog" = "https://github.com/your-org/behave-fire/blob/main/CHANGELOG.md"
 
 [tool.setuptools.packages.find]
 where = ["src"]
