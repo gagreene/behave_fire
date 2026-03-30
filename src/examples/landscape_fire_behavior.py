@@ -46,8 +46,8 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 from matplotlib.patches import Patch
 
-from behave.behave import BehaveRun
-from behave.components.fuel_models import FuelModels
+from behave_fire.behave import BehaveRun
+from behave_fire.components.fuel_models import FuelModels
 
 # ---------------------------------------------------------------------------
 # Directories
