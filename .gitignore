@@ -38,3 +38,7 @@ Thumbs.db
 *.tif.aux.xml
 *.ovr
 
+# Example input data and results (large binary rasters)
+src/examples/data/
+src/examples/results/
+
