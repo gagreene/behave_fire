@@ -1,0 +1,55 @@
+{% set name = "behave-fire" %}
+{% set version = "1.0.0" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.org/packages/source/{{ name[0] }}/{{ name }}/behave_fire-{{ version }}.tar.gz
+  sha256: SET_THIS_AFTER_UPLOADING_TO_PYPI
+
+build:
+  noarch: python
+  number: 0
+  script: {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
+
+requirements:
+  host:
+    - python >=3.10
+    - pip
+    - setuptools >=61
+    - wheel
+  run:
+    - python >=3.10
+    - numpy >=2.1.3
+
+test:
+  imports:
+    - behave_fire
+    - behave_fire.components.fuel_models
+    - behave_fire.components.surface
+    - behave_fire.components.crown
+    - behave_fire.components.mortality
+    - behave_fire.components.spot
+  commands:
+    - python -c "from behave_fire import BehaveRun, FuelModels; r = BehaveRun(FuelModels()); print('behave-fire OK')"
+
+about:
+  home: https://github.com/your-org/behave-fire
+  summary: Vectorized Python port of the USFS BEHAVE wildfire fire-behavior modeling system
+  description: |
+    behave-fire is a pure NumPy port of the US Forest Service BEHAVE wildfire
+    fire-behavior modeling system. It provides vectorized (raster-ready) calculations
+    for surface fire spread (Rothermel 1972), crown fire dynamics (Rothermel 1991,
+    Scott & Reinhardt 2001), tree mortality, spotting distances, ignition probability,
+    safety zone sizing, and containment simulation.
+  license: MIT
+  license_file: LICENSE
+  doc_url: https://github.com/your-org/behave-fire
+  dev_url: https://github.com/your-org/behave-fire
+
+extra:
+  recipe-maintainers:
+    - your-github-username
+
