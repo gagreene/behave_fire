@@ -1,6 +1,6 @@
 # behave_fire
 
-A pure Python port of the US Forest Service [BEHAVE](https://www.firelab.org/project/behave) wildfire fire-behavior modeling system. The library targets **100% feature parity** with the C++ reference implementation — same equations, same constant values, and matching method signatures (translated to snake_case). All computation runs on **NumPy arrays**, so it works equally well for a single cell or a 10-million-cell raster.
+A pure Python port of the US Forest Service [Behave<sup>7</sup>](https://www.firelab.org/project/behave) wildfire fire-behavior modeling system. The library targets **100% feature parity** with the C++ reference implementation — same equations, same constant values, and matching method signatures (translated to snake_case). All computation runs on **NumPy arrays**, so it works equally well for a single cell or a 10-million-cell raster.
 
 ---
 
