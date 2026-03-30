@@ -19,9 +19,9 @@ import numpy as np
 from decimal import Decimal, ROUND_HALF_UP
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
-behave_python_dir = os.path.dirname(script_dir)
-if behave_python_dir not in sys.path:
-    sys.path.insert(0, behave_python_dir)
+behave_fire_dir = os.path.dirname(script_dir)
+if behave_fire_dir not in sys.path:
+    sys.path.insert(0, behave_fire_dir)
 
 from components.fuel_models import FuelModels
 from components.species_master_table import SpeciesMasterTable

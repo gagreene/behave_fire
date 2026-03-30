@@ -2,7 +2,7 @@
 landscape_fire_behavior.py
 ==========================
 Simulates surface and crown fire behavior across a synthetic 10 km × 10 km
-rasterized landscape at 30 m resolution using the behave_py array-mode facade.
+rasterized landscape at 30 m resolution using the behave_fire array-mode facade.
 
 Coordinate system : EPSG:32611 (UTM Zone 11N, WGS 84)
 Center            : Easting = 587 000 m, Northing = 5 500 000 m
@@ -326,7 +326,7 @@ print(f"  air temperature  : {air_temp_c.min():.1f} – {air_temp_c.max():.1f} �
 # ===========================================================================
 # 5.  FIRE BEHAVIOR  (surface → crown → scorch → mortality → spotting)
 # ===========================================================================
-print("\n[5/5] Running behave_py …")
+print("\n[5/5] Running behave_fire …")
 
 fm     = FuelModels()
 runner = BehaveRun(fm)
@@ -550,7 +550,7 @@ for val, hexcol in FIRE_TYPE_COLORS.items():
 fig, axes = plt.subplots(3, 4, figsize=(22, 17),
                          constrained_layout=True)
 fig.suptitle(
-    "behave_py — Synthetic Landscape Fire Behavior\n"
+    "behave_fire — Synthetic Landscape Fire Behavior\n"
     f"10 km × 10 km, 30 m resolution  |  EPSG:{EPSG}  |  "
     f"Centre: E{CENTER_E:.0f} N{CENTER_N:.0f}",
     fontsize=13, fontweight="bold",

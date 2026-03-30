@@ -1,4 +1,4 @@
-# behave_py — runtime and development dependencies
+# behave_fire — runtime and development dependencies
 
 # Core (required at all times)
 numpy>=2.1.3
