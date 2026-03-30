@@ -39,7 +39,7 @@ Replace `SET_THIS_AFTER_UPLOADING_TO_PYPI` in `meta.yaml` with the result.
 git clone https://github.com/YOUR-USERNAME/staged-recipes
 cd staged-recipes
 mkdir -p recipes/behave-fire
-cp /path/to/behave_py/conda-recipe/meta.yaml recipes/behave-fire/
+cp /path/to/behave_fire/conda-recipe/meta.yaml recipes/behave-fire/
 git checkout -b add-behave-fire
 git add recipes/behave-fire/meta.yaml
 git commit -m "Add behave-fire recipe"

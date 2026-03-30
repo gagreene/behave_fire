@@ -222,7 +222,7 @@ def _apply_out_units(results: dict, out_units: dict, converters: dict) -> dict:
 
 class BehaveRun:
     """
-    Array-mode facade for behave_py.
+    Array-mode facade for behave_fire.
 
     Accepts NumPy arrays for all spatially-variable inputs.
     Scalar inputs (unit enums, mode strings) remain Python scalars.
