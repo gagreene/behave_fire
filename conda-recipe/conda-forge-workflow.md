@@ -23,11 +23,11 @@ After uploading, grab the hash from PyPI and paste it into `meta.yaml`:
 
 ```bash
 # Option A — from the file you just built
-python -c "import hashlib; print(hashlib.sha256(open('dist/behave_fire-1.0.0.tar.gz','rb').read()).hexdigest())"
+python -c "import hashlib; print(hashlib.sha256(open('dist/behave_fire-1.0.0b1.tar.gz','rb').read()).hexdigest())"
 
 # Option B — download and hash directly from PyPI
-pip download --no-deps --no-binary :all: behave-fire==1.0.0 -d /tmp/cf
-python -c "import hashlib; print(hashlib.sha256(open('/tmp/cf/behave_fire-1.0.0.tar.gz','rb').read()).hexdigest())"
+pip download --no-deps --no-binary :all: behave-fire==1.0.0b1 -d /tmp/cf
+python -c "import hashlib; print(hashlib.sha256(open('/tmp/cf/behave_fire-1.0.0b1.tar.gz','rb').read()).hexdigest())"
 ```
 
 Replace `SET_THIS_AFTER_UPLOADING_TO_PYPI` in `meta.yaml` with the result.
@@ -70,4 +70,5 @@ The package is pure Python (no C extensions), so the same wheel runs on
 Windows, macOS, and Linux across all architectures. `noarch: python` tells
 conda-forge to build it only once instead of once per platform — faster CI
 and smaller download for users.
+
 
