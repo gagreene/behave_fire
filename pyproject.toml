@@ -1,0 +1,54 @@
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "behave-fire"
+version = "1.0.0"
+description = "Vectorized Python port of the USFS BEHAVE wildfire fire-behavior modeling system"
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.10"
+authors = [
+    { name = "Behave Development Team" }
+]
+keywords = [
+    "wildfire", "fire behavior", "BEHAVE", "Rothermel", "surface fire",
+    "crown fire", "fire modeling", "forestry", "numpy"
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "numpy>=2.1.3",
+]
+
+[project.optional-dependencies]
+examples = [
+    "scipy>=1.14.1",
+    "rasterio>=1.3.10",
+    "matplotlib>=3.10.0",
+]
+dev = [
+    "pytest>=9.0.2",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/your-org/behave-fire"
+"Bug Tracker" = "https://github.com/your-org/behave-fire/issues"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-dir]
+"" = "src"
+
+
