@@ -1,6 +1,6 @@
 # behave_fire
 
-A pure Python port of the US Forest Service [Behave<sup>7</sup>](https://www.firelab.org/project/behave) wildfire fire-behavior modeling system. The library targets **100% feature parity** with the C++ reference implementation — same equations, same constant values, and matching method signatures (translated to snake_case). All computation runs on **NumPy arrays**, so it works equally well for a single cell or a 10-million-cell raster.
+A pure Python port of the US Forest Service [Behave<sup>7</sup>](https://www.firelab.org/project/behave) fire behavior modeling system. The library targets **100% feature parity** with the C++ reference implementation — same equations, same constant values, and matching method signatures (translated to snake_case). All computation runs on **NumPy arrays**, so it works equally well for scalar values or a 10-million-cell raster.
 
 ---
 
@@ -297,7 +297,7 @@ pytest
 
 ## Key Design Notes
 
-- **Pure Python / NumPy** — no C extensions required; BLAS-level vectorisation via NumPy broadcasting.
+- **Pure Python / NumPy** — no C extensions required; BLAS-level vectorization via NumPy broadcasting.
 - **US customary internally** — all state is stored in feet, BTU, °F, etc. Metric conversion happens only at call boundaries.
 - **No input validation** — out-of-range inputs return `0.0` silently, matching the C++ guard pattern.
 - **Crown fuel is always FM10 / WAF=0.4** — hardcoded per Rothermel (1991); not configurable.
