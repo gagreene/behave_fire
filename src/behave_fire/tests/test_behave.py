@@ -565,8 +565,8 @@ def test_crown_fire(ti):
                float(surf['flame_length'][0, 0])), 1, ERROR_TOLERANCE)
     report(ti, "Crown L:W ratio uses Rothermel 1991 formula (not surface formula)",
            int(float(crown['crown_length_to_width_ratio'][0, 0]) >= 1.0), 1, ERROR_TOLERANCE)
-    report(ti, "Fire type is integer (0/1/2)",
-           int(crown['fire_type'][0, 0] in (0, 1, 2)), 1, ERROR_TOLERANCE)
+    report(ti, "Fire type is integer (0/1/2/3)",
+           int(crown['fire_type'][0, 0] in (0, 1, 2, 3)), 1, ERROR_TOLERANCE)
 
     # Crown run at 10 mph should produce Crowning (fire_type == 2)
     surf10 = _RUNNER.do_surface_run(
@@ -593,8 +593,8 @@ def test_crown_fire(ti):
         canopy_bulk_density=np.array([[0.03]]),
         moisture_foliar=np.array([[100.0]]),
     )
-    report(ti, "Crown fire type at 10 mph = Crowning (2)",
-           int(crown10['fire_type'][0, 0]), 2, ERROR_TOLERANCE)
+    report(ti, "Crown fire type at 10 mph = Crowning (3)",
+           int(crown10['fire_type'][0, 0]), 3, ERROR_TOLERANCE)
 
     print("Finished Crown fire\n")
 
