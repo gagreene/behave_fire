@@ -160,11 +160,24 @@ _CROWN_KEY_CONVERTERS = {
     'crown_critical_surface_fire_line_intensity':    (fireline_intensity_from_base, 0),
     'crown_fire_heat_per_unit_area':                 (hpua_from_base,               0),
     'canopy_heat_per_unit_area':                     (hpua_from_base,               0),
+    # Scott & Reinhardt CFB intermediates
+    'surface_fire_critical_spread_rate':             (speed_from_base,              0),
+    'crowning_surface_fire_spread_rate':             (speed_from_base,              0),
+    'passive_crown_fire_spread_rate':                (speed_from_base,              0),
+    'passive_crown_fire_heat_per_unit_area':         (hpua_from_base,               0),
+    'passive_crown_fire_line_intensity':             (fireline_intensity_from_base, 0),
+    'passive_crown_fire_flame_length':               (length_from_base,             0),
+    # blended / final head fire outputs
+    'final_spread_rate':                             (speed_from_base,              0),
+    'final_fireline_intensity':                      (fireline_intensity_from_base, 0),
+    'final_heat_per_unit_area':                      (hpua_from_base,               0),
+    'final_flame_length':                            (length_from_base,             0),
     # dimensionless / categorical — no conversion
     'crown_fire_transition_ratio':                   None,
     'crown_fire_active_ratio':                       None,
     'crown_length_to_width_ratio':                   None,
     'fire_type':                                     None,
+    'crown_fraction_burned':                         None,
 }
 
 _MORTALITY_KEY_CONVERTERS = {
@@ -484,7 +497,8 @@ class BehaveRun:
         :param out_units: Optional ``dict`` mapping output key names to
             ``*UnitsEnum`` integers.  Dimensionless / categorical keys
             (``crown_fire_transition_ratio``, ``crown_fire_active_ratio``,
-            ``crown_length_to_width_ratio``, ``fire_type``) are never converted.
+            ``crown_length_to_width_ratio``, ``fire_type``,
+            ``crown_fraction_burned``) are never converted.
 
             **Convertible keys and their defaults:**
 
@@ -498,10 +512,66 @@ class BehaveRun:
             ``crown_critical_surface_fire_line_intensity``    FirelineIntensityUnitsEnum.BtusPerFootPerSecond · 0
             ``crown_fire_heat_per_unit_area``                 HeatPerUnitAreaUnitsEnum.BtusPerSquareFoot · 0
             ``canopy_heat_per_unit_area``                     HeatPerUnitAreaUnitsEnum.BtusPerSquareFoot · 0
+            ``surface_fire_critical_spread_rate``             SpeedUnitsEnum.FeetPerMinute · 0
+            ``crowning_surface_fire_spread_rate``             SpeedUnitsEnum.FeetPerMinute · 0
+            ``passive_crown_fire_spread_rate``                SpeedUnitsEnum.FeetPerMinute · 0
+            ``passive_crown_fire_heat_per_unit_area``         HeatPerUnitAreaUnitsEnum.BtusPerSquareFoot · 0
+            ``passive_crown_fire_line_intensity``             FirelineIntensityUnitsEnum.BtusPerFootPerSecond · 0
+            ``passive_crown_fire_flame_length``               LengthUnitsEnum.Feet · 0
+            ``final_spread_rate``                             SpeedUnitsEnum.FeetPerMinute · 0
+            ``final_fireline_intensity``                      FirelineIntensityUnitsEnum.BtusPerFootPerSecond · 0
+            ``final_heat_per_unit_area``                      HeatPerUnitAreaUnitsEnum.BtusPerSquareFoot · 0
+            ``final_flame_length``                            LengthUnitsEnum.Feet · 0
             ================================================  ================================
 
+            **``fire_type`` values** (dimensionless int, not converted):
+
+            =  ====================  =================================================
+            0  Surface               No crown fire; ``transition_ratio < 1``,
+                                     ``active_ratio < 1``.
+            1  Torching              Passive crown fire; ``transition_ratio ≥ 1``,
+                                     ``active_ratio < 1``.
+            2  ConditionalCrownFire  Active crown fire possible if fire can transition;
+                                     ``transition_ratio < 1``, ``active_ratio ≥ 1``.
+            3  Crowning             Active crown fire; both ratios ≥ 1.
+            =  ====================  =================================================
+
+            **Scott & Reinhardt CFB and intermediate keys:**
+
+            ``crown_fraction_burned`` (dimensionless, 0–1) — fraction of the
+            canopy that is actively burning, using the linear formula from Scott
+            & Reinhardt (2001):
+            ``CFB = (surface_ros − R'initiation) / (R'sa − R'initiation)``,
+            clamped to [0, 1].  ``R'initiation`` is ``surface_fire_critical_spread_rate``
+            (surface ROS at which torching begins); ``R'sa`` is
+            ``crowning_surface_fire_spread_rate`` (surface ROS at which active crown
+            fire is fully achieved).
+
+            ``surface_fire_critical_spread_rate`` (R'initiation) — the surface
+            fire spread rate at which the fireline intensity equals the Van Wagner
+            (1977) crown ignition threshold:
+            ``R'initiation = (60 × crit_surface_fli) / surface_hpua``.
+
+            ``crowning_surface_fire_spread_rate`` (R'sa) — the surface fire spread
+            rate at which the active crown fire spread rate is fully achieved (CFB → 1).
+            Derived by back-solving the FM10 wind equation to find the 20-ft wind
+            speed that drives FM10 to R'active, then running the surface model at
+            that wind speed.
+
+            ``passive_crown_fire_*`` — blended passive crown fire values computed as:
+            ``passive_ros = surface_ros + CFB × (crown_ros − surface_ros)`` and
+            ``passive_hpua = surface_hpua + CFB × canopy_hpua``.
+
+            **Final head fire assignments:**
+
+            * Surface or ConditionalCrownFire → ``final_*`` = surface fire values.
+            * Torching (passive) → ``final_*`` = ``passive_crown_fire_*`` values.
+            * Crowning (active) → ``final_*`` = active ``crown_fire_*`` values.
+
             **SpeedUnitsEnum options** (``crown_fire_spread_rate``,
-            ``crown_critical_fire_spread_rate``):
+            ``crown_critical_fire_spread_rate``, ``surface_fire_critical_spread_rate``,
+            ``crowning_surface_fire_spread_rate``, ``passive_crown_fire_spread_rate``,
+            ``final_spread_rate``):
 
             =  =====================
             0  FeetPerMinute
@@ -513,7 +583,8 @@ class BehaveRun:
             6  KilometersPerHour
             =  =====================
 
-            **LengthUnitsEnum options** (``crown_flame_length``):
+            **LengthUnitsEnum options** (``crown_flame_length``,
+            ``passive_crown_fire_flame_length``, ``final_flame_length``):
 
             =  ============
             0  Feet
@@ -527,7 +598,8 @@ class BehaveRun:
             =  ============
 
             **FirelineIntensityUnitsEnum options** (``crown_fire_line_intensity``,
-            ``crown_critical_surface_fire_line_intensity``):
+            ``crown_critical_surface_fire_line_intensity``,
+            ``passive_crown_fire_line_intensity``, ``final_fireline_intensity``):
 
             =  ==============================
             0  BtusPerFootPerSecond
@@ -538,7 +610,8 @@ class BehaveRun:
             =  ==============================
 
             **HeatPerUnitAreaUnitsEnum options** (``crown_fire_heat_per_unit_area``,
-            ``canopy_heat_per_unit_area``):
+            ``canopy_heat_per_unit_area``, ``passive_crown_fire_heat_per_unit_area``,
+            ``final_heat_per_unit_area``):
 
             =  ==============================
             0  BtusPerSquareFoot
