@@ -1,5 +1,5 @@
 {% set name = "behave-fire" %}
-{% set version = "1.0.0" %}
+{% set version = "1.0.0b1" %}
 
 package:
   name: {{ name|lower }}
@@ -52,4 +52,5 @@ about:
 extra:
   recipe-maintainers:
     - your-github-username
+
 
