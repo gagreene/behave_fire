@@ -348,6 +348,7 @@ runner = BehaveRun(fm)
 surface = runner.do_surface_run(
     fuel_model_grid      = fuel_grid,
     m1h=m1h, m10h=m10h, m100h=m100h, mlh=mlh, mlw=mlw,
+    moisture_units       = 0,          # Fraction (data stored as 0.06, not 6%)
     wind_speed           = wind_speed_kmh,
     wind_speed_units     = 6,          # KilometersPerHour
     wind_direction       = wind_dir_grid,
@@ -356,8 +357,11 @@ surface = runner.do_surface_run(
     slope_units          = 1,          # Percent
     aspect               = aspect_deg,
     canopy_cover         = canopy_cover,
-    canopy_height        = canopy_height_m,     # BehaveRun expects ft; converted below
+    canopy_cover_units   = 0,          # Fraction (data stored as 0–1)
+    canopy_height        = canopy_height_m,
+    canopy_height_units  = 4,          # Meters
     crown_ratio          = crown_ratio,
+    crown_ratio_units    = 0,          # Fraction (data stored as 0–1)
     wind_height_mode     = 'TenMeter',
     waf_method           = 'UseCrownRatio',
     out_units={
@@ -375,19 +379,12 @@ surface = runner.do_surface_run(
     },
 )
 
-# NOTE: BehaveRun.do_surface_run receives canopy_height and canopy_base_height
-# in feet internally (the surface component works in US customary).
-# We must pass metres and rely on the fact that those parameters feed only
-# the WAF calculation via the surface module, which converts them internally.
-# However, do_crown_run passes canopy heights directly to calculate_crown_fire
-# which also works in feet.  We therefore convert m→ft for crown inputs.
-FT_PER_M = 3.28084
-
 # ---- 5b  Crown run ----
 crown = runner.do_crown_run(
     surface_results      = surface,
     fuel_model_grid      = fuel_grid,
     m1h=m1h, m10h=m10h, m100h=m100h, mlh=mlh, mlw=mlw,
+    moisture_units       = 0,          # Fraction (data stored as 0–1)
     wind_speed           = wind_speed_kmh,
     wind_speed_units     = 6,
     wind_direction       = wind_dir_grid,
@@ -395,10 +392,14 @@ crown = runner.do_crown_run(
     slope                = slope_pct,
     slope_units          = 1,
     aspect               = aspect_deg,
-    canopy_base_height   = canopy_base_height_m * FT_PER_M,   # ft
-    canopy_height        = canopy_height_m       * FT_PER_M,  # ft
-    canopy_bulk_density  = canopy_bulk_density_kgm3 / 16.0185,# kg/m³ → lb/ft³
-    moisture_foliar      = moisture_foliar * 100.0,            # fraction → percent
+    canopy_base_height        = canopy_base_height_m,
+    canopy_base_height_units  = 4,                    # Meters
+    canopy_height             = canopy_height_m,
+    canopy_height_units       = 4,                    # Meters
+    canopy_bulk_density       = canopy_bulk_density_kgm3,
+    canopy_bulk_density_units = 1,                    # KilogramsPerCubicMeter
+    moisture_foliar           = moisture_foliar * 100.0,  # fraction → percent (foliar still %)
+
     out_units={
         'crown_fire_spread_rate'             : 3,   # MetersPerMinute
         'crown_critical_fire_spread_rate'    : 3,
@@ -431,17 +432,19 @@ scorch_height_m = runner.calculate_scorch_height(
 # ---- 5d  Mortality  (tree height from canopy_height_m, DBH estimated) ----
 # Estimate DBH (cm) from height via a simple allometric: DBH_cm ≈ 2.5 × H_m^0.8
 dbh_cm = 2.5 * canopy_height_m ** 0.8
-# Convert cm to inches for the API (LengthUnitsEnum.Inches = 1 → internal ft)
-dbh_inches = dbh_cm * 0.393701   # cm → inches
 
 # Equation number: TU/TL zone → ponderosa pine eq. 15, elsewhere → Douglas-fir eq. 5
 eq_grid = np.where(elev >= ELEV_MID, 15, 5).astype(np.int32)
 
 mortality = runner.calculate_crown_scorch_mortality(
-    scorch_height_ft  = scorch_height_m * FT_PER_M,   # API expects ft
-    tree_height_ft    = canopy_height_m * FT_PER_M,
-    crown_ratio       = crown_ratio,
-    dbh_inches        = dbh_inches,
+    scorch_height        = scorch_height_m,
+    scorch_height_units  = 4,   # Meters
+    tree_height          = canopy_height_m,
+    tree_height_units    = 4,   # Meters
+    crown_ratio          = crown_ratio,
+    crown_ratio_units    = 0,   # Fraction (data stored as 0–1)
+    dbh                  = dbh_cm,
+    dbh_units            = 3,   # Centimeters
     equation_number_grid = eq_grid,
     out_units={
         'crown_length_scorch'  : 1,   # Percent
