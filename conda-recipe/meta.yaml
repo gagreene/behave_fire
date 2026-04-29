@@ -1,5 +1,5 @@
 {% set name = "behave-fire" %}
-{% set version = "1.0.0b1" %}
+{% set version = "1.0.0b2" %}
 
 package:
   name: {{ name|lower }}
