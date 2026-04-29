@@ -197,8 +197,9 @@ def fraction_to_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
     """
     arr = np.asarray(value, dtype=float)
     if units == 0:
+        # units == 0 → Fraction (return as is)
         return arr
-    # units == 1 → Percent
+    # units == 1 → Percent (convert to fraction)
     return arr / 100.0
 
 

@@ -283,34 +283,34 @@ class BehaveRun:
         Run the vectorized surface fire pipeline.
 
         :param fuel_model_grid: Integer fuel model number array (*S).
-        :param m1h: 1-hr dead fuel moisture as fraction (*S) or scalar (e.g. 0.06 = 6%).
-        :param m10h: 10-hr dead fuel moisture as fraction (*S) or scalar.
-        :param m100h: 100-hr dead fuel moisture as fraction (*S) or scalar.
-        :param mlh: Live herbaceous fuel moisture as fraction (*S) or scalar.
-        :param mlw: Live woody fuel moisture as fraction (*S) or scalar.
-        :param wind_speed: Wind speed (*S) or scalar, in ``wind_speed_units``.
+        :param m1h: 1-hr dead fuel moisture as array (*S) or scalar, in ``moisture_units``.
+        :param m10h: 10-hr dead fuel moisture as array (*S) or scalar, in ``moisture_units``.
+        :param m100h: 100-hr dead fuel moisture as array (*S) or scalar, in ``moisture_units``.
+        :param mlh: Live herbaceous fuel moisture as array (*S) or scalar, in ``moisture_units``.
+        :param mlw: Live woody fuel moisture as array (*S) or scalar, in ``moisture_units``.
+        :param wind_speed: Wind speed as array (*S) or scalar, in ``wind_speed_units``.
         :param wind_speed_units: Scalar integer ``SpeedUnitsEnum`` value.
-        :param wind_direction: Wind direction in degrees (*S) or scalar.
+        :param wind_direction: Wind direction in degrees as array (*S) or scalar.
             Interpretation depends on ``wind_orientation_mode``.
         :param wind_orientation_mode: ``'RelativeToUpslope'`` or ``'RelativeToNorth'``.
-        :param slope: Slope (*S) or scalar, in the units given by ``slope_units``.
+        :param slope: Slope as array (*S) or scalar, in the units given by ``slope_units``.
         :param slope_units: Scalar integer ``SlopeUnitsEnum`` value
             (0 = Degrees [default], 1 = Percent).
         :param moisture_units: ``FractionUnitsEnum`` integer for m1h–mlw
             (0 = Fraction [default], 1 = Percent).
-        :param aspect: Terrain aspect in degrees (*S) or scalar (0 = north, clockwise).
-        :param canopy_cover: Canopy cover (*S) or scalar, in ``canopy_cover_units``.
+        :param aspect: Terrain aspect in degrees as array (*S) or scalar (0 = north, clockwise).
+        :param canopy_cover: Canopy cover as array (*S) or scalar, in ``canopy_cover_units``.
         :param canopy_cover_units: ``FractionUnitsEnum`` integer
             (0 = Fraction [default], 1 = Percent).
-        :param canopy_height: Canopy height (*S) or scalar, in ``canopy_height_units``.
+        :param canopy_height: Canopy height as array (*S) or scalar, in ``canopy_height_units``.
         :param canopy_height_units: ``LengthUnitsEnum`` integer
             (0 = Feet [default], 4 = Meters).
-        :param canopy_base_height: Height to base of canopy (*S) or scalar, in
+        :param canopy_base_height: Height to base of canopy as array (*S) or scalar, in
             ``canopy_base_height_units``. Used only when ``crown_ratio_units=None``
             to derive crown ratio as ``(canopy_height − canopy_base_height) / canopy_height``.
         :param canopy_base_height_units: ``LengthUnitsEnum`` integer
             (0 = Feet [default], 4 = Meters).
-        :param crown_ratio: Crown ratio (*S) or scalar, in ``crown_ratio_units``.
+        :param crown_ratio: Crown ratio as array (*S) or scalar, in ``crown_ratio_units``.
             Ignored when ``crown_ratio_units=None``.
         :param crown_ratio_units: ``FractionUnitsEnum`` integer
             (0 = Fraction [default], 1 = Percent), or ``None`` to derive crown ratio
@@ -498,7 +498,7 @@ class BehaveRun:
             canopy_height_units: int = 0,
             canopy_bulk_density: Union[float, np.ndarray] = 0.0,
             canopy_bulk_density_units: int = 0,
-            moisture_foliar: Union[float, np.ndarray] = 100.0,
+            moisture_foliar: Union[int, float, np.ndarray] = 100.0,
             out_units: Optional[dict] = None,
     ) -> dict:
         """
@@ -506,39 +506,39 @@ class BehaveRun:
 
         :param surface_results: Output dict from ``do_surface_run()``.
         :param fuel_model_grid: Integer fuel model number array (*S).
-        :param m1h: 1-hr dead fuel moisture as fraction (*S) or scalar.
-        :param m10h: 10-hr dead fuel moisture as fraction (*S) or scalar.
-        :param m100h: 100-hr dead fuel moisture as fraction (*S) or scalar.
-        :param mlh: Live herbaceous fuel moisture as fraction (*S) or scalar.
-        :param mlw: Live woody fuel moisture as fraction (*S) or scalar.
-        :param wind_speed: Wind speed (*S) or scalar, in ``wind_speed_units``.
+        :param m1h: 1-hr dead fuel moisture as array (*S) or scalar, in ``moisture_units``.
+        :param m10h: 10-hr dead fuel moisture as array (*S) or scalar, in ``moisture_units``.
+        :param m100h: 100-hr dead fuel moisture as array (*S) or scalar, in ``moisture_units``.
+        :param mlh: Live herbaceous fuel moisture as array (*S) or scalar, in ``moisture_units``.
+        :param mlw: Live woody fuel moisture as array (*S) or scalar, in ``moisture_units``.
+        :param wind_speed: Wind speed as array (*S) or scalar, in ``wind_speed_units``.
         :param wind_speed_units: Scalar integer ``SpeedUnitsEnum`` value.
-        :param wind_direction: Wind direction in degrees (*S) or scalar.
+        :param wind_direction: Wind direction in degrees as array (*S) or scalar.
             Interpretation depends on ``wind_orientation_mode``.
         :param wind_orientation_mode: ``'RelativeToUpslope'`` — wind direction is
             measured clockwise from the upslope direction; ``'RelativeToNorth'`` —
             wind direction is a standard compass bearing (0° = north, clockwise).
-        :param slope: Slope (*S) or scalar, in the units given by ``slope_units``.
+        :param slope: Slope as array (*S) or scalar, in the units given by ``slope_units``.
         :param slope_units: Scalar integer ``SlopeUnitsEnum`` value
             (0 = Degrees [default], 1 = Percent).
         :param moisture_units: ``FractionUnitsEnum`` integer for m1h–mlw
             (0 = Fraction [default], 1 = Percent).
-        :param aspect: Terrain aspect in degrees (*S) or scalar
+        :param aspect: Terrain aspect in degrees as array (*S) or scalar
             (0 = north, clockwise). Used to resolve wind direction when
             ``wind_orientation_mode='RelativeToNorth'``.
-        :param canopy_base_height: Height to base of canopy (*S) or scalar, in
+        :param canopy_base_height: Height to base of canopy as array (*S) or scalar, in
             ``canopy_base_height_units``.
         :param canopy_base_height_units: ``LengthUnitsEnum`` integer
             (0 = Feet [default], 4 = Meters).
-        :param canopy_height: Total canopy height (*S) or scalar, in
+        :param canopy_height: Total canopy height as array (*S) or scalar, in
             ``canopy_height_units``.
         :param canopy_height_units: ``LengthUnitsEnum`` integer
             (0 = Feet [default], 4 = Meters).
-        :param canopy_bulk_density: Canopy bulk density (*S) or scalar, in
+        :param canopy_bulk_density: Canopy bulk density as array (*S) or scalar, in
             ``canopy_bulk_density_units``.
         :param canopy_bulk_density_units: ``DensityUnitsEnum`` integer
             (0 = PoundsPerCubicFoot [default], 1 = KilogramsPerCubicMeter).
-        :param moisture_foliar: Foliar moisture content (%) (*S) or scalar.
+        :param moisture_foliar: Foliar moisture content (%) as array (*S) or scalar.
         :param out_units: Optional ``dict`` mapping output key names to
             ``*UnitsEnum`` integers.  Dimensionless / categorical keys
             (``crown_fire_transition_ratio``, ``crown_fire_active_ratio``,
@@ -677,9 +677,12 @@ class BehaveRun:
         m100h = fraction_to_base(np.atleast_1d(np.asarray(m100h, dtype=float)), moisture_units)
         mlh   = fraction_to_base(np.atleast_1d(np.asarray(mlh,   dtype=float)), moisture_units)
         mlw   = fraction_to_base(np.atleast_1d(np.asarray(mlw,   dtype=float)), moisture_units)
-        cbh_ft  = length_to_base(np.atleast_1d(np.asarray(canopy_base_height,  dtype=float)), canopy_base_height_units)
-        ch_ft   = length_to_base(np.atleast_1d(np.asarray(canopy_height,       dtype=float)), canopy_height_units)
-        cbd_pcf = density_to_base(np.atleast_1d(np.asarray(canopy_bulk_density, dtype=float)), canopy_bulk_density_units)
+        cbh_ft  = length_to_base(np.atleast_1d(np.asarray(canopy_base_height, dtype=float)),
+                                 canopy_base_height_units)
+        ch_ft   = length_to_base(np.atleast_1d(np.asarray(canopy_height, dtype=float)),
+                                 canopy_height_units)
+        cbd_pcf = density_to_base(np.atleast_1d(np.asarray(canopy_bulk_density, dtype=float)),
+                                  canopy_bulk_density_units)
         results = calculate_crown_fire(
             surface_results=surface_results,
             lut=self._lut,
