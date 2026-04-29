@@ -153,19 +153,19 @@ _RUNNER = BehaveRun(fuel_models=_FM)
 
 # Common GS4 low-moisture inputs (upslope orientation, percent -> degrees slope)
 _FM124 = np.array([[124]], dtype=np.int32)
-_M1H = np.array([[6.0]])    # 6 % (moisture_units=1 Percent by default)
-_M10H = np.array([[7.0]])
-_M100H = np.array([[8.0]])
-_MLH = np.array([[60.0]])
-_MLW = np.array([[90.0]])
+_M1H = np.array([[0.06]])    # 6% as fraction (moisture_units=0 Fraction default)
+_M10H = np.array([[0.07]])
+_M100H = np.array([[0.08]])
+_MLH = np.array([[0.60]])
+_MLW = np.array([[0.90]])
 _WS5 = np.array([[5.0]])  # 5 mph
 _WD0 = np.array([[0.0]])  # upslope
 _SLOPE30_DEG = np.degrees(np.arctan(30.0 / 100.0))  # 30% slope -> degrees
 _SLOPE_ARR = np.array([[_SLOPE30_DEG]])
 _ASP0 = np.array([[0.0]])
-_CC50 = np.array([[50.0]])   # 50 % (canopy_cover_units=1 Percent by default)
-_CH30 = np.array([[9.144]])  # 9.144 m = 30 ft (canopy_height_units=4 Meters by default)
-_CR50 = np.array([[50.0]])   # 50 % (crown_ratio_units=1 Percent by default)
+_CC50 = np.array([[0.50]])   # 50% as fraction (canopy_cover_units=0 Fraction default)
+_CH30 = np.array([[30.0]])   # 30 ft (canopy_height_units=0 Feet default)
+_CR50 = np.array([[0.50]])   # 50% as fraction (crown_ratio_units=0 Fraction default)
 _MPH = SpeedUnits.SpeedUnitsEnum.MilesPerHour
 
 
@@ -263,7 +263,7 @@ def test_surface_fm4_canopy(ti):
         wind_direction=np.array([[90.0]]), wind_orientation_mode='RelativeToNorth',
         slope=np.array([[30.0]]), slope_units=0,
         aspect=np.array([[0.0]]),
-        canopy_cover=np.array([[40.0]]),
+        canopy_cover=np.array([[0.40]]),
         canopy_height=_CH30,
         crown_ratio=_CR50,
     )
@@ -345,16 +345,16 @@ def test_surface_shape_preservation(ti):
         fm_g = np.full(shape, 124, dtype=np.int32)
         res = _RUNNER.do_surface_run(
             fuel_model_grid=fm_g,
-            m1h=np.full(shape, 6.0), m10h=np.full(shape, 7.0),
-            m100h=np.full(shape, 8.0), mlh=np.full(shape, 60.0),
-            mlw=np.full(shape, 90.0),
+            m1h=np.full(shape, 0.06), m10h=np.full(shape, 0.07),
+            m100h=np.full(shape, 0.08), mlh=np.full(shape, 0.60),
+            mlw=np.full(shape, 0.90),
             wind_speed=5.0, wind_speed_units=_MPH,
             wind_direction=0.0, wind_orientation_mode='RelativeToUpslope',
             slope=_SLOPE30_DEG, slope_units=0,
             aspect=0.0,
-            canopy_cover=50.0,
-            canopy_height=9.144,
-            crown_ratio=50.0,
+            canopy_cover=0.50,
+            canopy_height=30.0,
+            crown_ratio=0.50,
         )
         matches = res['spread_rate'].shape == shape
         report(ti, f"Shape {shape} -> output shape {res['spread_rate'].shape}",
@@ -375,16 +375,16 @@ def test_surface_heterogeneous_fuels(ti):
     fm_grid = np.arange(1, 61, dtype=np.int32).reshape(6, 10)
     res = _RUNNER.do_surface_run(
         fuel_model_grid=fm_grid,
-        m1h=np.full((6, 10), 6.0), m10h=np.full((6, 10), 7.0),
-        m100h=np.full((6, 10), 8.0), mlh=np.full((6, 10), 60.0),
-        mlw=np.full((6, 10), 90.0),
+        m1h=np.full((6, 10), 0.06), m10h=np.full((6, 10), 0.07),
+        m100h=np.full((6, 10), 0.08), mlh=np.full((6, 10), 0.60),
+        mlw=np.full((6, 10), 0.90),
         wind_speed=5.0, wind_speed_units=_MPH,
         wind_direction=0.0, wind_orientation_mode='RelativeToUpslope',
         slope=_SLOPE30_DEG, slope_units=0,
         aspect=0.0,
-        canopy_cover=50.0,
-        canopy_height=9.144,
-        crown_ratio=50.0,
+        canopy_cover=0.50,
+        canopy_height=30.0,
+        crown_ratio=0.50,
     )
 
     report(ti, "Heterogeneous FM grid: no NaN in spread_rate",
@@ -414,16 +414,16 @@ def test_surface_mixed_grid(ti):
 
     res = _RUNNER.do_surface_run(
         fuel_model_grid=fm_grid,
-        m1h=np.full((5, 5), 6.0), m10h=np.full((5, 5), 7.0),
-        m100h=np.full((5, 5), 8.0), mlh=np.full((5, 5), 60.0),
-        mlw=np.full((5, 5), 90.0),
+        m1h=np.full((5, 5), 0.06), m10h=np.full((5, 5), 0.07),
+        m100h=np.full((5, 5), 0.08), mlh=np.full((5, 5), 0.60),
+        mlw=np.full((5, 5), 0.90),
         wind_speed=5.0, wind_speed_units=_MPH,
         wind_direction=0.0, wind_orientation_mode='RelativeToUpslope',
         slope=_SLOPE30_DEG, slope_units=0,
         aspect=0.0,
-        canopy_cover=50.0,
-        canopy_height=9.144,
-        crown_ratio=50.0,
+        canopy_cover=0.50,
+        canopy_height=30.0,
+        crown_ratio=0.50,
     )
 
     scalar_ros = 9.763837980768564  # ft/min
@@ -552,9 +552,9 @@ def test_crown_fire(ti):
         wind_direction=_WD0, wind_orientation_mode='RelativeToUpslope',
         slope=_SLOPE_ARR, slope_units=0,
         aspect=_ASP0,
-        canopy_base_height=np.array([[1.829]]),
-        canopy_height=np.array([[9.144]]),
-        canopy_bulk_density=np.array([[0.481]]),
+        canopy_base_height=np.array([[6.0]]),
+        canopy_height=np.array([[30.0]]),
+        canopy_bulk_density=np.array([[0.03]]),
         moisture_foliar=np.array([[100.0]]),
     )
 
@@ -588,9 +588,9 @@ def test_crown_fire(ti):
         wind_direction=_WD0, wind_orientation_mode='RelativeToUpslope',
         slope=_SLOPE_ARR, slope_units=0,
         aspect=_ASP0,
-        canopy_base_height=np.array([[1.829]]),
-        canopy_height=np.array([[9.144]]),
-        canopy_bulk_density=np.array([[0.481]]),
+        canopy_base_height=np.array([[6.0]]),
+        canopy_height=np.array([[30.0]]),
+        canopy_bulk_density=np.array([[0.03]]),
         moisture_foliar=np.array([[100.0]]),
     )
     report(ti, "Crown fire type at 10 mph = Crowning (3)",
@@ -690,12 +690,12 @@ def test_crown_scorch_mortality(ti):
     report(ti, "Undefined equation (0) -> probability = 0",
            float(mort0['probability_mortality'][0]), 0.0, ERROR_TOLERANCE)
 
-    # BehaveRun wrapper (SI defaults: m, %, cm)
+    # BehaveRun wrapper (Imperial defaults: ft, fraction, inches)
     mort_w = _RUNNER.calculate_crown_scorch_mortality(
-        scorch_height=np.array([9.144]),   # 30 ft in meters
-        tree_height=np.array([15.24]),     # 50 ft in meters
-        crown_ratio=np.array([50.0]),      # 0.50 as percent
-        dbh=np.array([25.4]),              # 10 in as cm
+        scorch_height=np.array([30.0]),    # ft (scorch_height_units=0 Feet default)
+        tree_height=np.array([50.0]),      # ft (tree_height_units=0 Feet default)
+        crown_ratio=np.array([0.5]),       # fraction (crown_ratio_units=0 Fraction default)
+        dbh=np.array([10.0]),              # inches (dbh_units=1 Inches default)
         equation_number_grid=np.array([2]),
     )
 
@@ -1051,15 +1051,15 @@ def test_all_fuel_models_no_nan(ti):
     n = len(fm_grid)
     res = _RUNNER.do_surface_run(
         fuel_model_grid=fm_grid,
-        m1h=np.full(n, 6.0), m10h=np.full(n, 7.0), m100h=np.full(n, 8.0),
-        mlh=np.full(n, 60.0), mlw=np.full(n, 90.0),
+        m1h=np.full(n, 0.06), m10h=np.full(n, 0.07), m100h=np.full(n, 0.08),
+        mlh=np.full(n, 0.60), mlw=np.full(n, 0.90),
         wind_speed=5.0, wind_speed_units=_MPH,
         wind_direction=0.0, wind_orientation_mode='RelativeToUpslope',
         slope=_SLOPE30_DEG, slope_units=0,
         aspect=0.0,
-        canopy_cover=50.0,
-        canopy_height=9.144,
-        crown_ratio=50.0,
+        canopy_cover=0.50,
+        canopy_height=30.0,
+        crown_ratio=0.50,
     )
     for key in ('spread_rate', 'flame_length', 'fireline_intensity',
                 'heat_per_unit_area', 'eccentricity'):
@@ -1085,27 +1085,27 @@ def test_scalar_inputs(ti):
     # --- Surface run: scalar vs array ---
     r_arr = _RUNNER.do_surface_run(
         fuel_model_grid=np.array([[124]]),
-        m1h=np.array([[6.0]]), m10h=np.array([[7.0]]),
-        m100h=np.array([[8.0]]), mlh=np.array([[60.0]]),
-        mlw=np.array([[90.0]]),
+        m1h=np.array([[0.06]]), m10h=np.array([[0.07]]),
+        m100h=np.array([[0.08]]), mlh=np.array([[0.60]]),
+        mlw=np.array([[0.90]]),
         wind_speed=np.array([[5.0]]), wind_speed_units=_MPH,
         wind_direction=np.array([[0.0]]), wind_orientation_mode='RelativeToUpslope',
         slope=np.array([[_SLOPE30_DEG]]), slope_units=0,
         aspect=np.array([[0.0]]),
-        canopy_cover=np.array([[50.0]]),
-        canopy_height=np.array([[9.144]]),
-        crown_ratio=np.array([[50.0]]),
+        canopy_cover=np.array([[0.50]]),
+        canopy_height=np.array([[30.0]]),
+        crown_ratio=np.array([[0.50]]),
     )
     r_scl = _RUNNER.do_surface_run(
         fuel_model_grid=124,
-        m1h=6.0, m10h=7.0, m100h=8.0, mlh=60.0, mlw=90.0,
+        m1h=0.06, m10h=0.07, m100h=0.08, mlh=0.60, mlw=0.90,
         wind_speed=5.0, wind_speed_units=_MPH,
         wind_direction=0.0, wind_orientation_mode='RelativeToUpslope',
         slope=_SLOPE30_DEG, slope_units=0,
         aspect=0.0,
-        canopy_cover=50.0,
-        canopy_height=9.144,
-        crown_ratio=50.0,
+        canopy_cover=0.50,
+        canopy_height=30.0,
+        crown_ratio=0.50,
     )
     for key in ('spread_rate', 'flame_length', 'fireline_intensity',
                 'heat_per_unit_area', 'fire_length_to_width_ratio', 'eccentricity'):
@@ -1118,28 +1118,28 @@ def test_scalar_inputs(ti):
     c_arr = _RUNNER.do_crown_run(
         surface_results=surf_arr,
         fuel_model_grid=np.array([[124]]),
-        m1h=np.array([[6.0]]), m10h=np.array([[7.0]]),
-        m100h=np.array([[8.0]]), mlh=np.array([[60.0]]), mlw=np.array([[90.0]]),
+        m1h=np.array([[0.06]]), m10h=np.array([[0.07]]),
+        m100h=np.array([[0.08]]), mlh=np.array([[0.60]]), mlw=np.array([[0.90]]),
         wind_speed=np.array([[5.0]]), wind_speed_units=_MPH,
         wind_direction=np.array([[0.0]]), wind_orientation_mode='RelativeToUpslope',
         slope=np.array([[_SLOPE30_DEG]]), slope_units=0,
         aspect=np.array([[0.0]]),
-        canopy_base_height=np.array([[1.829]]),
-        canopy_height=np.array([[9.144]]),
-        canopy_bulk_density=np.array([[0.481]]),
+        canopy_base_height=np.array([[6.0]]),
+        canopy_height=np.array([[30.0]]),
+        canopy_bulk_density=np.array([[0.03]]),
         moisture_foliar=np.array([[100.0]]),
     )
     c_scl = _RUNNER.do_crown_run(
         surface_results=surf_scl,
         fuel_model_grid=124,
-        m1h=6.0, m10h=7.0, m100h=8.0, mlh=60.0, mlw=90.0,
+        m1h=0.06, m10h=0.07, m100h=0.08, mlh=0.60, mlw=0.90,
         wind_speed=5.0, wind_speed_units=_MPH,
         wind_direction=0.0, wind_orientation_mode='RelativeToUpslope',
         slope=_SLOPE30_DEG, slope_units=0,
         aspect=0.0,
-        canopy_base_height=1.829,
-        canopy_height=9.144,
-        canopy_bulk_density=0.481,
+        canopy_base_height=6.0,
+        canopy_height=30.0,
+        canopy_bulk_density=0.03,
         moisture_foliar=100.0,
     )
     for key in ('crown_fire_spread_rate', 'crown_flame_length',
@@ -1328,6 +1328,148 @@ def test_scalar_inputs(ti):
 
 
 # ---------------------------------------------------------------------------
+# 22. Explicit SI unit args — surface run parity with Imperial defaults
+#     (Option A: same scenario as _surface_run_upslope but with SI values
+#      and explicit unit params — result must be bit-identical)
+# ---------------------------------------------------------------------------
+
+def test_surface_explicit_si_units(ti):
+    print("\n" + "=" * 70)
+    print("Testing Surface — explicit SI unit args match Imperial default run")
+    print("=" * 70)
+
+    r_imperial = _surface_run_upslope()
+
+    r_si = _RUNNER.do_surface_run(
+        fuel_model_grid=_FM124,
+        m1h=np.array([[6.0]]), m10h=np.array([[7.0]]),
+        m100h=np.array([[8.0]]), mlh=np.array([[60.0]]),
+        mlw=np.array([[90.0]]),
+        moisture_units=1,                                        # Percent
+        wind_speed=_WS5, wind_speed_units=_MPH,
+        wind_direction=_WD0, wind_orientation_mode='RelativeToUpslope',
+        slope=_SLOPE_ARR, slope_units=0,
+        aspect=_ASP0,
+        canopy_cover=np.array([[50.0]]), canopy_cover_units=1,   # Percent
+        canopy_height=np.array([[9.144]]), canopy_height_units=4, # Meters
+        crown_ratio=np.array([[50.0]]), crown_ratio_units=1,      # Percent
+    )
+
+    for key in ('spread_rate', 'flame_length', 'fireline_intensity',
+                'heat_per_unit_area', 'fire_length_to_width_ratio', 'eccentricity'):
+        report(ti, f"SI explicit units == Imperial default: {key}",
+               float(r_si[key].flat[0]), float(r_imperial[key].flat[0]), PARITY_TOLERANCE)
+
+    print("Finished Surface explicit SI unit args\n")
+
+
+# ---------------------------------------------------------------------------
+# 23. Explicit SI unit args — crown run parity with Imperial defaults
+# ---------------------------------------------------------------------------
+
+def test_crown_explicit_si_units(ti):
+    print("\n" + "=" * 70)
+    print("Testing Crown — explicit SI unit args match Imperial default run")
+    print("=" * 70)
+
+    # Imperial reference uses exact ft/lb values via the same unit functions the
+    # SI path calls internally — ensures bit-identical physical inputs.
+    from components.behave_units import length_to_base, density_to_base
+    _CBH_FT  = float(length_to_base(1.829, 4))   # 1.829 m → ft
+    _CH_FT   = float(length_to_base(9.144, 4))   # 9.144 m → ft
+    _CBD_PCF = float(density_to_base(0.481, 1))  # 0.481 kg/m³ → lb/ft³
+
+    surf_imperial = _surface_run_upslope()
+    crown_imperial = _RUNNER.do_crown_run(
+        surface_results=surf_imperial,
+        fuel_model_grid=_FM124,
+        m1h=_M1H, m10h=_M10H, m100h=_M100H, mlh=_MLH, mlw=_MLW,
+        wind_speed=_WS5, wind_speed_units=_MPH,
+        wind_direction=_WD0, wind_orientation_mode='RelativeToUpslope',
+        slope=_SLOPE_ARR, slope_units=0,
+        aspect=_ASP0,
+        canopy_base_height=np.array([[_CBH_FT]]),
+        canopy_height=np.array([[_CH_FT]]),
+        canopy_bulk_density=np.array([[_CBD_PCF]]),
+        moisture_foliar=np.array([[100.0]]),
+    )
+
+    surf_si = _RUNNER.do_surface_run(
+        fuel_model_grid=_FM124,
+        m1h=np.array([[6.0]]), m10h=np.array([[7.0]]),
+        m100h=np.array([[8.0]]), mlh=np.array([[60.0]]),
+        mlw=np.array([[90.0]]),
+        moisture_units=1,
+        wind_speed=_WS5, wind_speed_units=_MPH,
+        wind_direction=_WD0, wind_orientation_mode='RelativeToUpslope',
+        slope=_SLOPE_ARR, slope_units=0,
+        aspect=_ASP0,
+        canopy_cover=np.array([[50.0]]), canopy_cover_units=1,
+        canopy_height=np.array([[9.144]]), canopy_height_units=4,
+        crown_ratio=np.array([[50.0]]), crown_ratio_units=1,
+    )
+    crown_si = _RUNNER.do_crown_run(
+        surface_results=surf_si,
+        fuel_model_grid=_FM124,
+        m1h=np.array([[6.0]]), m10h=np.array([[7.0]]),
+        m100h=np.array([[8.0]]), mlh=np.array([[60.0]]),
+        mlw=np.array([[90.0]]),
+        moisture_units=1,
+        wind_speed=_WS5, wind_speed_units=_MPH,
+        wind_direction=_WD0, wind_orientation_mode='RelativeToUpslope',
+        slope=_SLOPE_ARR, slope_units=0,
+        aspect=_ASP0,
+        canopy_base_height=np.array([[1.829]]), canopy_base_height_units=4,  # Meters
+        canopy_height=np.array([[9.144]]), canopy_height_units=4,            # Meters
+        canopy_bulk_density=np.array([[0.481]]), canopy_bulk_density_units=1, # kg/m³
+        moisture_foliar=np.array([[100.0]]),
+    )
+
+    for key in ('crown_fire_spread_rate', 'crown_flame_length',
+                'crown_length_to_width_ratio', 'crown_fraction_burned'):
+        report(ti, f"Crown SI explicit units == Imperial default: {key}",
+               float(crown_si[key].flat[0]), float(crown_imperial[key].flat[0]), ERROR_TOLERANCE)
+
+    print("Finished Crown explicit SI unit args\n")
+
+
+# ---------------------------------------------------------------------------
+# 24. Explicit SI unit args — mortality wrapper parity with Imperial defaults
+# ---------------------------------------------------------------------------
+
+def test_mortality_explicit_si_units(ti):
+    print("\n" + "=" * 70)
+    print("Testing Mortality wrapper — explicit SI unit args match Imperial default run")
+    print("=" * 70)
+
+    mort_imperial = _RUNNER.calculate_crown_scorch_mortality(
+        scorch_height=np.array([30.0]),
+        tree_height=np.array([50.0]),
+        crown_ratio=np.array([0.5]),
+        dbh=np.array([10.0]),
+        equation_number_grid=np.array([2]),
+    )
+
+    mort_si = _RUNNER.calculate_crown_scorch_mortality(
+        scorch_height=np.array([9.144]),
+        tree_height=np.array([15.24]),
+        crown_ratio=np.array([50.0]),
+        dbh=np.array([25.4]),
+        equation_number_grid=np.array([2]),
+        scorch_height_units=4,   # Meters
+        tree_height_units=4,     # Meters
+        crown_ratio_units=1,     # Percent
+        dbh_units=3,             # Centimeters
+    )
+
+    for key in ('crown_length_scorch', 'crown_volume_scorch', 'probability_mortality'):
+        report(ti, f"Mortality SI explicit units == Imperial default: {key}",
+               float(mort_si[key].flat[0]), float(mort_imperial[key].flat[0]), PARITY_TOLERANCE)
+
+    print("Finished Mortality wrapper explicit SI unit args\n")
+
+
+# ---------------------------------------------------------------------------
 # main
 # ---------------------------------------------------------------------------
 
@@ -1359,6 +1501,9 @@ def run_all_tests():
     test_facade_completeness(ti)
     test_all_fuel_models_no_nan(ti)
     test_scalar_inputs(ti)
+    test_surface_explicit_si_units(ti)
+    test_crown_explicit_si_units(ti)
+    test_mortality_explicit_si_units(ti)
 
     return ti.print_summary()
 
