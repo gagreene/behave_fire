@@ -416,7 +416,7 @@ def hpua_to_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
 
     :param value: Heat per unit area (*S) or scalar, in ``units``.
     :param units: ``HeatPerUnitAreaUnitsEnum`` integer
-        (0=BtusPerSquareFoot, 1=KilojoulesPerSquareMeter, etc.).
+        (0=BtusPerSquareFoot, 1=KilojoulesPerSquareMeter, 2=KilowattSecondsPerSquareMeter).
     :return: ndarray — heat per unit area in BTU/ft².
     """
     arr = np.asarray(value, dtype=float)
