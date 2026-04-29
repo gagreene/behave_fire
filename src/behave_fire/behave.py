@@ -57,7 +57,7 @@ try:
         calculate_fire_length,
         calculate_fire_width,
     )
-    from .components.crown import calculate_crown_fire
+    from .components.crown import run_crown_fire
     from .components.mortality import (
         calculate_scorch_height,
         build_mortality_lookup,
@@ -99,7 +99,7 @@ except ImportError:
         calculate_fire_length,
         calculate_fire_width,
     )
-    from components.crown import calculate_crown_fire
+    from components.crown import run_crown_fire
     from components.mortality import (
         calculate_scorch_height,
         build_mortality_lookup,
@@ -683,7 +683,7 @@ class BehaveRun:
                                  canopy_height_units)
         cbd_pcf = density_to_base(np.atleast_1d(np.asarray(canopy_bulk_density, dtype=float)),
                                   canopy_bulk_density_units)
-        results = calculate_crown_fire(
+        results = run_crown_fire(
             surface_results=surface_results,
             lut=self._lut,
             fuel_model_grid=fuel_model_grid,
