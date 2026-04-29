@@ -34,7 +34,7 @@ from components.surface import (
     calculate_fire_area, calculate_fire_perimeter,
     calculate_fire_length, calculate_fire_width,
 )
-from components.crown import calculate_crown_fire
+from components.crown import run_crown_fire
 from components.mortality import (
     calculate_scorch_height, build_mortality_lookup,
     calculate_crown_scorch_mortality,

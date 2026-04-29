@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - Reset `behave.py` facade input-unit defaults to the component-native US customary/base units where unit enums are accepted. Defaults now align with the internal modeling modules (`Fraction`, `Feet`, `PoundsPerCubicFoot`, `Inches`, etc.) instead of metric-facing defaults.
+- Refactored the crown fire pipeline so `run_crown_fire()` is a driver over individually callable `calculate_*` step functions for crown surface spread, crown heat/intensity, critical thresholds, ratios, fire-type classification, crown fraction burned, passive crown behavior, and final behavior assignment.
 - Updated the landscape example and test harness to pass explicit unit enums and values through the revised facade.
 - Standardized package and documentation references from `behave_py` / `BEHAVE` wording to `behave_fire` / `Behave7` where applicable.
 
