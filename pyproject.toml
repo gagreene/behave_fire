@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "behave-fire"
-version = "1.0.0b1"
+version = "1.0.0b2"
 description = "Vectorized Python port of the USFS BEHAVE wildfire fire-behavior modeling system"
 readme = "README.md"
 license = "MIT"
