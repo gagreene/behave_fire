@@ -48,20 +48,20 @@ def _load_surface_modules():
             build_particle_arrays,
             calculate_fuelbed_intermediates,
             calculate_reaction_intensity,
-            calculate_spread_rate,
+            run_surface_fire,
         )
     except ImportError:
         from surface import (
             build_particle_arrays,
             calculate_fuelbed_intermediates,
             calculate_reaction_intensity,
-            calculate_spread_rate,
+            run_surface_fire,
         )
     return (
         build_particle_arrays,
         calculate_fuelbed_intermediates,
         calculate_reaction_intensity,
-        calculate_spread_rate,
+        run_surface_fire,
     )
 
 
@@ -93,6 +93,7 @@ def assign_final_crown_fire_behavior(
         'final_flame_length': final_fl,
     }
 
+
 def calculate_critical_crown_fire_spread_rate(
         canopy_bulk_density: Union[float, np.ndarray],
 ) -> np.ndarray:
@@ -100,6 +101,7 @@ def calculate_critical_crown_fire_spread_rate(
     cbd_kg_m3 = canopy_bulk_density * 16.0185
     safe_cbd = np.where(cbd_kg_m3 > 1e-7, cbd_kg_m3, 1.0)
     return np.where(cbd_kg_m3 > 1e-7, (3.0 / safe_cbd) * 3.28084, 0.0)
+
 
 def calculate_critical_surface_fireline_intensity(
         canopy_base_height: Union[float, np.ndarray],
@@ -110,6 +112,7 @@ def calculate_critical_surface_fireline_intensity(
     cbh_m = np.maximum(canopy_base_height * 0.3048, 0.1)
     crit_fli_kw = (0.010 * cbh_m * (460.0 + 25.9 * mf_pct_safe)) ** 1.5
     return crit_fli_kw * 0.2886719
+
 
 def calculate_crown_fire_ratios(
         surface_fli: Union[float, np.ndarray],
@@ -135,6 +138,7 @@ def calculate_crown_fire_ratios(
         'crown_fire_active_ratio': active_ratio,
     }
 
+
 def calculate_crown_fraction_burned(
         surface_ros: Union[float, np.ndarray],
         surface_critical_ros: Union[float, np.ndarray],
@@ -148,6 +152,7 @@ def calculate_crown_fraction_burned(
         0.0,
     )
     return np.clip(cfb, 0.0, 1.0)
+
 
 def calculate_crown_heat_and_intensity(
         surface_hpua: Union[float, np.ndarray],
@@ -173,6 +178,7 @@ def calculate_crown_heat_and_intensity(
         'crown_fire_line_intensity': crown_fli,
         'crown_flame_length': crown_fl,
     }
+
 
 def calculate_crown_surface_fire(
         lut: dict,
@@ -200,7 +206,7 @@ def calculate_crown_surface_fire(
         build_particle_arrays,
         calc_fuelbed_intermediates,
         calc_reaction_intensity,
-        calc_spread_rate,
+        run_surface_fire,
     ) = _load_surface_modules()
 
     fm10 = np.full(S, 10, dtype=np.int32)
@@ -216,7 +222,7 @@ def calculate_crown_surface_fire(
     ib_crown = calc_fuelbed_intermediates(p=p_crown)
     ri_crown = calc_reaction_intensity(ib=ib_crown)
 
-    crown_surface = calc_spread_rate(
+    crown_surface = run_surface_fire(
         ri=ri_crown,
         ib=ib_crown,
         wind_speed=wind_speed,
@@ -246,6 +252,7 @@ def calculate_crown_surface_fire(
         'crown_length_to_width_ratio': crown_lwr,
     }
 
+
 def calculate_crowning_surface_fire_spread_rate(
         ri_crown: Union[float, np.ndarray],
         ib_crown: dict,
@@ -257,7 +264,7 @@ def calculate_crowning_surface_fire_spread_rate(
     Step 9 - calculate R'sa, the surface ROS at which active crown ROS is
     fully achieved.
     """
-    _, _, _, calc_spread_rate = _load_surface_modules()
+    _, _, _, run_surface_fire = _load_surface_modules()
 
     ros0 = ri_crown * ib_crown['propagating_flux'] / np.where(
         ib_crown['heat_sink'] > 1e-7,
@@ -273,7 +280,7 @@ def calculate_crowning_surface_fire_spread_rate(
     u_mid_fpm = np.where(a_val > 0.0, a_val ** _FM10_WIND_B_INV, 0.0)
     u20_active_fpm = u_mid_fpm / 0.4
 
-    crown_active_surface = calc_spread_rate(
+    crown_active_surface = run_surface_fire(
         ri=ri_crown,
         ib=ib_crown,
         wind_speed=u20_active_fpm,
@@ -290,6 +297,7 @@ def calculate_crowning_surface_fire_spread_rate(
         user_waf=np.full(S, 0.4),
     )
     return crown_active_surface['spread_rate']
+
 
 def calculate_passive_crown_fire_behavior(
         surface_ros: Union[float, np.ndarray],
@@ -310,6 +318,7 @@ def calculate_passive_crown_fire_behavior(
         'passive_crown_fire_flame_length': passive_fl,
     }
 
+
 def calculate_surface_fire_critical_spread_rate(
         critical_surface_fli: Union[float, np.ndarray],
         surface_hpua: Union[float, np.ndarray],
@@ -318,6 +327,7 @@ def calculate_surface_fire_critical_spread_rate(
     safe_surface_hpua = np.where(surface_hpua > 1e-7, surface_hpua, 1.0)
     return np.where(surface_hpua > 1e-7, (60.0 * critical_surface_fli) / safe_surface_hpua, 0.0)
 
+
 def classify_crown_fire_type(
         transition_ratio: Union[float, np.ndarray],
         active_ratio: Union[float, np.ndarray],
@@ -325,8 +335,7 @@ def classify_crown_fire_type(
     """
     Step 7 - classify fire type.
 
-    Fire type values: 0=Surface, 1=Torching, 2=ConditionalCrownFire,
-    3=Crowning.
+    Fire type values: 0=Surface, 1=Torching, 2=ConditionalCrownFire, 3=Crowning.
     """
     fire_type = np.where(
         transition_ratio < 1.0,
@@ -339,6 +348,7 @@ def classify_crown_fire_type(
         'is_passive_crown': fire_type == 1,
         'is_active_crown': fire_type == 3,
     }
+
 
 def coerce_crown_fire_inputs(
         fuel_model_grid: Union[int, np.ndarray],
@@ -375,6 +385,7 @@ def coerce_crown_fire_inputs(
         'S': fm_grid.shape,
     }
 
+
 def get_surface_fire_inputs(surface_results: dict) -> dict:
     """
     Step 1 - retrieve surface fire results needed by the crown pipeline.
@@ -388,6 +399,7 @@ def get_surface_fire_inputs(surface_results: dict) -> dict:
         'surface_fli': surface_results['fireline_intensity'],
         'surface_hpua': surface_results['heat_per_unit_area'],
     }
+
 
 def run_crown_fire(
         surface_results: dict,
