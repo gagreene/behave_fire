@@ -18,10 +18,10 @@ calculate_reaction_intensity(ib)
 calculate_wind_adjustment_factor(canopy_cover, canopy_height, crown_ratio, depth)
     → (*S) array
 
-calculate_spread_rate(ri, ib, wind_speed, wind_speed_units, wind_direction,
-                      wind_orientation_mode, slope, slope_units, aspect,
-                      canopy_cover, canopy_height, crown_ratio,
-                      wind_height_mode, waf_method, user_waf)
+run_surface_fire(ri, ib, wind_speed, wind_speed_units, wind_direction,
+                 wind_orientation_mode, slope, slope_units, aspect,
+                 canopy_cover, canopy_height, crown_ratio,
+                 wind_height_mode, waf_method, user_waf)
     → dict of (*S) arrays
 
 calculate_fire_area(forward_ros, backing_ros, lwr, elapsed_min, is_crown)
@@ -47,6 +47,79 @@ from typing import Union
 # ---------------------------------------------------------------------------
 # V3 — Particle array construction
 # ---------------------------------------------------------------------------
+
+# ---------------------------------------------------------------------------
+# V5 — Full spread rate and fire shape pipeline
+# ---------------------------------------------------------------------------
+
+def _load_surface_unit_converters():
+    try:
+        from .behave_units import speed_to_base, speed_from_base, slope_to_base
+    except ImportError:
+        from behave_units import speed_to_base, speed_from_base, slope_to_base
+    return speed_to_base, speed_from_base, slope_to_base
+
+def _mask_surface_result(
+        value: Union[float, np.ndarray],
+        is_defined: Union[bool, np.ndarray],
+        fill_value: Union[float, np.ndarray] = 0.0,
+) -> np.ndarray:
+    """Mask undefined fuel model cells in a surface output array."""
+    value_arr = np.asarray(value, dtype=float)
+    fill_arr = np.asarray(fill_value, dtype=float)
+    return np.where(is_defined, value_arr, fill_arr)
+
+def _size_sorted_wfl(
+        savr_arr: np.ndarray,
+        frac_arr: np.ndarray,
+        wn_arr: np.ndarray
+) -> np.ndarray:
+    """
+    Compute size-class weighted fuel load (Albini five-bin scheme).
+
+    :param savr_arr: Surface-area-to-volume ratio array, shape (5, *S) (ft²/ft³).
+    :param frac_arr: Per-particle SA fraction array, shape (5, *S) (dimensionless).
+    :param wn_arr: Net fuel load array, shape (5, *S) (lb/ft²).
+    :return: (*S) ndarray — size-class weighted net fuel load (lb/ft²).
+
+    The five SAVR size bins (Albini) with output bin indices:
+
+    .. code-block:: text
+
+        SAVR >= 1200          → bin 0
+        192  <= SAVR < 1200   → bin 1
+        96   <= SAVR < 192    → bin 2
+        48   <= SAVR < 96     → bin 3
+        16   <= SAVR < 48     → bin 4
+    """
+    S_shape = savr_arr.shape[1:]
+    BIN_BOUNDS = [(1200.0, None), (192.0, 1200.0), (96.0, 192.0), (48.0, 96.0), (16.0, 48.0)]
+
+    # Accumulate fraction sum per bin: shape (5-bins, *S)
+    summed = np.zeros((5,) + S_shape)
+    for p_idx in range(5):
+        sv = savr_arr[p_idx]   # (*S)
+        fa = frac_arr[p_idx]   # (*S)
+        for b_idx, (lo, hi) in enumerate(BIN_BOUNDS):
+            if hi is None:
+                mask = sv >= lo
+            else:
+                mask = (sv >= lo) & (sv < hi)
+            summed[b_idx] += np.where(mask, fa, 0.0)
+
+    # Map each particle's SAVR back to the corresponding summed bin fraction
+    wfl = np.zeros(S_shape)
+    for p_idx in range(5):
+        sv = savr_arr[p_idx]
+        assigned = np.zeros(S_shape)
+        for b_idx, (lo, hi) in enumerate(BIN_BOUNDS):
+            if hi is None:
+                mask = sv >= lo
+            else:
+                mask = (sv >= lo) & (sv < hi)
+            assigned += np.where(mask, summed[b_idx], 0.0)
+        wfl += assigned * wn_arr[p_idx]
+    return wfl
 
 def build_particle_arrays(
         lut: dict,
@@ -156,6 +229,232 @@ def build_particle_arrays(
         'is_defined': lut['is_defined'][fm_safe],  # bool
     }
 
+def calculate_backing_spread_rate(
+        spread_rate: Union[float, np.ndarray],
+        eccentricity: Union[float, np.ndarray],
+) -> np.ndarray:
+    """Calculate the backing spread rate (ft/min)."""
+    safe_ecc_denom = 1.0 + eccentricity
+    return np.where(
+        safe_ecc_denom > 1e-7,
+        spread_rate * (1.0 - eccentricity) / safe_ecc_denom,
+        0.0,
+    )
+
+def calculate_direction_of_max_spread(
+        x_component: Union[float, np.ndarray],
+        y_component: Union[float, np.ndarray],
+        rate_vector: Union[float, np.ndarray],
+        wind_orientation_mode: str,
+        aspect: Union[float, np.ndarray] = 0.0,
+) -> np.ndarray:
+    """Calculate direction of maximum spread (degrees)."""
+    aspect = np.asarray(aspect, dtype=float)
+    dir_deg = np.where(rate_vector > 1e-7, np.degrees(np.arctan2(y_component, x_component)), 0.0)
+    dir_deg = np.where(np.abs(dir_deg) < 0.5, 0.0, dir_deg)
+    dir_deg = np.where(dir_deg < -1e-20, dir_deg + 360.0, dir_deg)
+    if 'north' in str(wind_orientation_mode).lower():
+        dir_deg = (dir_deg + aspect + 180.0) % 360.0
+    return dir_deg
+
+def calculate_eccentricity(
+        fire_length_to_width_ratio: Union[float, np.ndarray],
+) -> np.ndarray:
+    """Calculate ellipse eccentricity from the fire length-to-width ratio."""
+    x_ecc = fire_length_to_width_ratio ** 2 - 1.0
+    return np.where(
+        x_ecc > 0,
+        np.sqrt(np.maximum(x_ecc, 0.0)) / fire_length_to_width_ratio,
+        0.0,
+    )
+
+def calculate_effective_wind_speed(
+        spread_rate: Union[float, np.ndarray],
+        no_wind_no_slope_spread_rate: Union[float, np.ndarray],
+        wind_b: Union[float, np.ndarray],
+        wind_c: Union[float, np.ndarray],
+        relative_packing_ratio: Union[float, np.ndarray],
+        wind_e: Union[float, np.ndarray],
+) -> np.ndarray:
+    """Calculate effective wind speed (mph) used for fire shape."""
+    _, speed_from_base, _ = _load_surface_unit_converters()
+    safe_r0 = np.where(no_wind_no_slope_spread_rate > 1e-7, no_wind_no_slope_spread_rate, 1.0)
+    phi_eff = np.where(
+        no_wind_no_slope_spread_rate > 1e-7,
+        spread_rate / safe_r0 - 1.0,
+        0.0,
+    )
+    safe_rpr = np.where(relative_packing_ratio > 1e-7, relative_packing_ratio, 1.0)
+    safe_wc = np.where(wind_c > 1e-7, wind_c, 1.0)
+    safe_wb = np.where(wind_b > 1e-7, wind_b, 1.0)
+    ews_fpm = np.where(
+        (phi_eff > 0) & (wind_b > 1e-7) & (wind_c > 1e-7) & (relative_packing_ratio > 1e-7),
+        ((phi_eff * (safe_rpr ** wind_e)) / safe_wc) ** (1.0 / safe_wb),
+        0.0,
+    )
+    return speed_from_base(ews_fpm, 5)
+
+# ---------------------------------------------------------------------------
+# V5-ext — Fire area and perimeter (§13.2 Gap B)
+# ---------------------------------------------------------------------------
+
+def calculate_fire_area(
+        forward_ros: Union[float, np.ndarray],
+        backing_ros: Union[float, np.ndarray],
+        lwr: Union[float, np.ndarray],
+        elapsed_min: float,
+        is_crown: bool = False
+) -> np.ndarray:
+    """
+    Calculate elliptical fire area.
+
+    :param forward_ros: Forward rate of spread (ft/min) (*S).
+    :param backing_ros: Backing rate of spread (ft/min) (*S).
+    :param lwr: Fire length-to-width ratio (dimensionless) (*S).
+    :param elapsed_min: Elapsed time (minutes) — scalar float.
+    :param is_crown: If ``True``, use circular crown fire approximation.
+        Defaults to ``False``.
+    :return: (*S) ndarray — fire area (ft²).
+    """
+    fros = np.asarray(forward_ros, dtype=float)
+    bros = np.asarray(backing_ros, dtype=float)
+    lwr  = np.asarray(lwr,         dtype=float)
+    safe_lwr = np.where(lwr > 1e-7, lwr, 1.0)
+
+    if is_crown:
+        # Crown fire: circular approximation using forward spread only
+        d = fros * elapsed_min
+        return np.where(lwr > 1e-7, np.pi * d ** 2 / (4.0 * safe_lwr), 0.0)
+    else:
+        # Surface fire: ellipse area = π × a × b
+        ell_b = (fros + bros) / 2.0 * elapsed_min
+        ell_a = np.where(lwr > 1e-7, ell_b / safe_lwr, 0.0)
+        return np.pi * ell_a * ell_b
+
+def calculate_fire_length(
+        forward_ros: Union[float, np.ndarray],
+        backing_ros: Union[float, np.ndarray],
+        elapsed_min: float
+) -> np.ndarray:
+    """
+    Calculate fire ellipse length (major axis × 2).
+
+    :param forward_ros: Forward rate of spread (ft/min).
+    :param backing_ros: Backing rate of spread (ft/min).
+    :param elapsed_min: Elapsed time (minutes).
+    :return: Fire length (ft).
+    """
+    return (np.asarray(forward_ros) + np.asarray(backing_ros)) * elapsed_min
+
+def calculate_fire_length_to_width_ratio(
+        effective_wind_speed: Union[float, np.ndarray],
+) -> np.ndarray:
+    """Calculate the surface fire length-to-width ratio."""
+    return np.where(
+        effective_wind_speed > 1e-7,
+        np.minimum(
+            0.936 * np.exp(0.1147 * effective_wind_speed) +
+            0.461 * np.exp(-0.0692 * effective_wind_speed) - 0.397,
+            8.0,
+        ),
+        1.0,
+    )
+
+def calculate_fire_perimeter(
+        forward_ros: Union[float, np.ndarray],
+        backing_ros: Union[float, np.ndarray],
+        lwr: Union[float, np.ndarray],
+        elapsed_min: float,
+        is_crown: bool = False
+) -> np.ndarray:
+    """
+    Calculate elliptical fire perimeter using Ramanujan's approximation.
+
+    :param forward_ros: Forward rate of spread (ft/min) (*S).
+    :param backing_ros: Backing rate of spread (ft/min) (*S).
+    :param lwr: Fire length-to-width ratio (dimensionless) (*S).
+    :param elapsed_min: Elapsed time (minutes) — scalar float.
+    :param is_crown: If ``True``, use circular crown fire approximation.
+        Defaults to ``False``.
+    :return: (*S) ndarray — fire perimeter (ft).
+    """
+    fros = np.asarray(forward_ros, dtype=float)
+    bros = np.asarray(backing_ros, dtype=float)
+    lwr  = np.asarray(lwr,         dtype=float)
+    safe_lwr = np.where(lwr > 1e-7, lwr, 1.0)
+
+    if is_crown:
+        # Crown fire: semi-circle perimeter approximation
+        d = fros * elapsed_min
+        return np.where(lwr > 1e-7, 0.5 * np.pi * d * (1.0 + 1.0 / safe_lwr), 0.0)
+    else:
+        # Surface fire: Ramanujan ellipse perimeter approximation
+        ell_b = (fros + bros) / 2.0 * elapsed_min
+        ell_a = np.where(lwr > 1e-7, ell_b / safe_lwr, 0.0)
+        apb   = ell_a + ell_b
+        safe_apb2 = np.where(apb > 1e-7, apb ** 2, 1.0)
+        h = np.where(apb > 1e-7, (ell_a - ell_b) ** 2 / safe_apb2, 0.0)
+        return np.where(
+            apb > 1e-7,
+            np.pi * apb * (1.0 + h / 4.0 + h ** 2 / 64.0),
+            0.0
+        )
+
+def calculate_fire_width(
+        forward_ros: Union[float, np.ndarray],
+        backing_ros: Union[float, np.ndarray],
+        lwr: Union[float, np.ndarray],
+        elapsed_min: float
+) -> np.ndarray:
+    """
+    Calculate fire ellipse width (minor axis × 2).
+
+    :param forward_ros: Forward rate of spread (ft/min).
+    :param backing_ros: Backing rate of spread (ft/min).
+    :param lwr: Fire length-to-width ratio (dimensionless).
+    :param elapsed_min: Elapsed time (minutes).
+    :return: Fire width (ft).
+    """
+    fros = np.asarray(forward_ros, dtype=float)
+    bros = np.asarray(backing_ros, dtype=float)
+    lwr  = np.asarray(lwr,         dtype=float)
+    length = (fros + bros) * elapsed_min
+    safe_lwr = np.where(lwr > 1e-7, lwr, 1.0)
+    return np.where(lwr > 1e-7, length / safe_lwr, 0.0)
+
+def calculate_fireline_intensity(
+        spread_rate: Union[float, np.ndarray],
+        heat_per_unit_area: Union[float, np.ndarray],
+) -> np.ndarray:
+    """Calculate fireline intensity (BTU/ft/s)."""
+    return np.asarray(spread_rate, dtype=float) * np.asarray(heat_per_unit_area, dtype=float) / 60.0
+
+def calculate_flame_length(
+        fireline_intensity: Union[float, np.ndarray],
+) -> np.ndarray:
+    """Calculate flame length (ft)."""
+    safe_fli = np.where(fireline_intensity > 0, fireline_intensity, 0.0)
+    return np.where(fireline_intensity > 0, 0.45 * (safe_fli ** 0.46), 0.0)
+
+def calculate_flanking_spread_rate(
+        spread_rate: Union[float, np.ndarray],
+        backing_spread_rate: Union[float, np.ndarray],
+        fire_length_to_width_ratio: Union[float, np.ndarray],
+) -> np.ndarray:
+    """Calculate the flanking spread rate (ft/min)."""
+    safe_lwr = np.where(fire_length_to_width_ratio > 1e-7, fire_length_to_width_ratio, 1.0)
+    return np.where(
+        fire_length_to_width_ratio > 1e-7,
+        (spread_rate + backing_spread_rate) / (2.0 * safe_lwr),
+        0.0,
+    )
+
+def calculate_forward_spread_rate(
+        no_wind_no_slope_spread_rate: Union[float, np.ndarray],
+        rate_vector: Union[float, np.ndarray],
+) -> np.ndarray:
+    """Calculate the forward surface spread rate (ft/min)."""
+    return np.asarray(no_wind_no_slope_spread_rate, dtype=float) + np.asarray(rate_vector, dtype=float)
 
 # ---------------------------------------------------------------------------
 # V3 (continued) — Fuelbed intermediates
@@ -330,59 +629,28 @@ def calculate_fuelbed_intermediates(p: dict) -> dict:
         'is_defined':             p['is_defined'],
     }
 
-
-def _size_sorted_wfl(
-        savr_arr: np.ndarray,
-        frac_arr: np.ndarray,
-        wn_arr: np.ndarray
+def calculate_heat_per_unit_area(
+        reaction_intensity: Union[float, np.ndarray],
+        residence_time: Union[float, np.ndarray],
 ) -> np.ndarray:
-    """
-    Compute size-class weighted fuel load (Albini five-bin scheme).
+    """Calculate heat per unit area (BTU/ft^2)."""
+    return np.asarray(reaction_intensity, dtype=float) * np.asarray(residence_time, dtype=float)
 
-    :param savr_arr: Surface-area-to-volume ratio array, shape (5, *S) (ft²/ft³).
-    :param frac_arr: Per-particle SA fraction array, shape (5, *S) (dimensionless).
-    :param wn_arr: Net fuel load array, shape (5, *S) (lb/ft²).
-    :return: (*S) ndarray — size-class weighted net fuel load (lb/ft²).
+def calculate_midflame_wind_speed(
+        waf: Union[float, np.ndarray],
+        twenty_foot_wind_speed: Union[float, np.ndarray],
+) -> np.ndarray:
+    """Calculate the midflame wind speed (ft/min)."""
+    return np.asarray(waf, dtype=float) * np.asarray(twenty_foot_wind_speed, dtype=float)
 
-    The five SAVR size bins (Albini) with output bin indices:
-
-    .. code-block:: text
-
-        SAVR >= 1200          → bin 0
-        192  <= SAVR < 1200   → bin 1
-        96   <= SAVR < 192    → bin 2
-        48   <= SAVR < 96     → bin 3
-        16   <= SAVR < 48     → bin 4
-    """
-    S_shape = savr_arr.shape[1:]
-    BIN_BOUNDS = [(1200.0, None), (192.0, 1200.0), (96.0, 192.0), (48.0, 96.0), (16.0, 48.0)]
-
-    # Accumulate fraction sum per bin: shape (5-bins, *S)
-    summed = np.zeros((5,) + S_shape)
-    for p_idx in range(5):
-        sv = savr_arr[p_idx]   # (*S)
-        fa = frac_arr[p_idx]   # (*S)
-        for b_idx, (lo, hi) in enumerate(BIN_BOUNDS):
-            if hi is None:
-                mask = sv >= lo
-            else:
-                mask = (sv >= lo) & (sv < hi)
-            summed[b_idx] += np.where(mask, fa, 0.0)
-
-    # Map each particle's SAVR back to the corresponding summed bin fraction
-    wfl = np.zeros(S_shape)
-    for p_idx in range(5):
-        sv = savr_arr[p_idx]
-        assigned = np.zeros(S_shape)
-        for b_idx, (lo, hi) in enumerate(BIN_BOUNDS):
-            if hi is None:
-                mask = sv >= lo
-            else:
-                mask = (sv >= lo) & (sv < hi)
-            assigned += np.where(mask, summed[b_idx], 0.0)
-        wfl += assigned * wn_arr[p_idx]
-    return wfl
-
+def calculate_no_wind_no_slope_spread_rate(
+        ri: Union[float, np.ndarray],
+        propagating_flux: Union[float, np.ndarray],
+        heat_sink: Union[float, np.ndarray],
+) -> np.ndarray:
+    """Calculate the no-wind, no-slope spread rate (ft/min)."""
+    safe_hs = np.where(heat_sink > 1e-7, heat_sink, 1.0)
+    return np.where(heat_sink > 1e-7, ri * propagating_flux / safe_hs, 0.0)
 
 # ---------------------------------------------------------------------------
 # V4 — Reaction Intensity
@@ -432,6 +700,100 @@ def calculate_reaction_intensity(ib: dict) -> np.ndarray:
 
     return np.where(valid, ri_dead + ri_live, 0.0)
 
+def calculate_reaction_intensity_output(
+        reaction_intensity: Union[float, np.ndarray],
+) -> np.ndarray:
+    """Return reaction intensity as a named surface output."""
+    return np.asarray(reaction_intensity, dtype=float)
+
+def calculate_residence_time(
+        sigma: Union[float, np.ndarray],
+) -> np.ndarray:
+    """Calculate residence time (min)."""
+    safe_sigma = np.where(sigma > 1e-7, sigma, 1.0)
+    return np.where(sigma > 1e-7, 384.0 / safe_sigma, 0.0)
+
+def calculate_slope_phi(
+        slope: Union[float, np.ndarray],
+        slope_units: int,
+        packing_ratio: Union[float, np.ndarray],
+        reaction_intensity: Union[float, np.ndarray],
+) -> np.ndarray:
+    """Calculate the slope phi factor."""
+    _, _, slope_to_base = _load_surface_unit_converters()
+    slope_deg = slope_to_base(slope, slope_units)
+    slope_tan = np.tan(np.radians(np.asarray(slope_deg, dtype=float)))
+    safe_pr = np.where(packing_ratio > 1e-7, packing_ratio, 1.0)
+    phi_s = np.where(
+        (slope_tan > 1e-7) & (packing_ratio > 1e-7),
+        5.275 * (safe_pr ** -0.3) * (slope_tan ** 2),
+        0.0,
+    )
+    return np.minimum(phi_s, 0.9 * reaction_intensity)
+
+def calculate_surface_rate_vector(
+        no_wind_no_slope_spread_rate: Union[float, np.ndarray],
+        wind_phi: Union[float, np.ndarray],
+        slope_phi: Union[float, np.ndarray],
+        wind_direction: Union[float, np.ndarray],
+        wind_orientation_mode: str,
+        aspect: Union[float, np.ndarray] = 0.0,
+) -> dict:
+    """Calculate the x/y spread vector components and resultant rate vector."""
+    wind_direction = np.asarray(wind_direction, dtype=float)
+    aspect = np.asarray(aspect, dtype=float)
+    if 'north' in str(wind_orientation_mode).lower():
+        corrected_wind_direction = wind_direction - aspect
+    else:
+        corrected_wind_direction = wind_direction
+    wd_rad = np.radians(corrected_wind_direction)
+
+    slope_rate = no_wind_no_slope_spread_rate * slope_phi
+    wind_rate = no_wind_no_slope_spread_rate * wind_phi
+    x_component = slope_rate + wind_rate * np.cos(wd_rad)
+    y_component = wind_rate * np.sin(wd_rad)
+    return {
+        'x_component': x_component,
+        'y_component': y_component,
+        'rate_vector': np.sqrt(x_component ** 2 + y_component ** 2),
+    }
+
+def calculate_surface_wind_adjustment_factor(
+        canopy_cover: Union[float, np.ndarray],
+        canopy_height: Union[float, np.ndarray],
+        crown_ratio: Union[float, np.ndarray],
+        depth: Union[float, np.ndarray],
+        waf_method: str = 'UseCrownRatio',
+        user_waf: Union[float, np.ndarray, None] = None,
+) -> np.ndarray:
+    """Calculate the wind adjustment factor used to derive midflame wind speed."""
+    if str(waf_method).lower().replace('_', '') == 'userinput' and user_waf is not None:
+        return np.asarray(user_waf, dtype=float)
+    return calculate_wind_adjustment_factor(canopy_cover, canopy_height, crown_ratio, depth)
+
+def calculate_surface_wind_coefficients(
+        sigma: Union[float, np.ndarray],
+) -> dict:
+    """Calculate Albini/Rothermel wind coefficients from sigma."""
+    safe_sigma = np.where(sigma > 1e-7, sigma, 1.0)
+    return {
+        'safe_sigma': safe_sigma,
+        'wind_c': 7.47 * np.exp(-0.133 * (safe_sigma ** 0.55)),
+        'wind_b': 0.02526 * (safe_sigma ** 0.54),
+        'wind_e': 0.715 * np.exp(-0.000359 * safe_sigma),
+    }
+
+def calculate_twenty_foot_wind_speed(
+        wind_speed: Union[float, np.ndarray],
+        wind_speed_units: int,
+        wind_height_mode: str = 'TwentyFoot',
+) -> np.ndarray:
+    """Convert wind speed to 20-ft wind speed in ft/min."""
+    speed_to_base, _, _ = _load_surface_unit_converters()
+    ws_fpm = speed_to_base(wind_speed, wind_speed_units)
+    if '10' in str(wind_height_mode).lower() or 'ten' in str(wind_height_mode).lower():
+        ws_fpm = ws_fpm / 1.15
+    return ws_fpm
 
 # ---------------------------------------------------------------------------
 # V5 — Wind adjustment factor
@@ -483,12 +845,23 @@ def calculate_wind_adjustment_factor(
 
     return np.where(no_canopy, waf_open, waf_canopy)
 
+def calculate_wind_phi(
+        sigma: Union[float, np.ndarray],
+        midflame_wind_speed: Union[float, np.ndarray],
+        wind_b: Union[float, np.ndarray],
+        wind_c: Union[float, np.ndarray],
+        relative_packing_ratio: Union[float, np.ndarray],
+        wind_e: Union[float, np.ndarray],
+) -> np.ndarray:
+    """Calculate the wind phi factor."""
+    safe_rpr = np.where(relative_packing_ratio > 1e-7, relative_packing_ratio, 1.0)
+    return np.where(
+        (sigma > 1e-7) & (midflame_wind_speed > 1e-7),
+        (midflame_wind_speed ** wind_b) * wind_c * (safe_rpr ** (-wind_e)),
+        0.0,
+    )
 
-# ---------------------------------------------------------------------------
-# V5 — Full spread rate and fire shape pipeline
-# ---------------------------------------------------------------------------
-
-def calculate_spread_rate(
+def run_surface_fire(
         ri: Union[float, np.ndarray],
         ib: dict,
         wind_speed: Union[float, np.ndarray],
@@ -538,276 +911,108 @@ def calculate_spread_rate(
         ``reaction_intensity`` (BTU/ft²/min), ``midflame_wind_speed`` (ft/min),
         ``no_wind_no_slope_spread_rate`` (ft/min).
     """
-    try:
-        from .behave_units import speed_to_base, speed_from_base, slope_to_base
-    except ImportError:
-        from behave_units import speed_to_base, speed_from_base, slope_to_base
-
-    # Convert slope to degrees (base unit) using slope_units
-    slope_deg = slope_to_base(slope, slope_units)
-
-    sigma     = ib['sigma']
-    rpr       = ib['relative_packing_ratio']
-    prop_flux = ib['propagating_flux']
-    heat_sink = ib['heat_sink']
-
-    # No-wind no-slope rate of spread
-    safe_hs = np.where(heat_sink > 1e-7, heat_sink, 1.0)
-    r0 = np.where(heat_sink > 1e-7, ri * prop_flux / safe_hs, 0.0)
-
-    # Wind coefficients from Albini / Rothermel (per sigma)
-    safe_sigma = np.where(sigma > 1e-7, sigma, 1.0)
-    wind_c = 7.47   * np.exp(-0.133   * (safe_sigma ** 0.55))
-    wind_b = 0.02526 * (safe_sigma ** 0.54)
-    wind_e = 0.715  * np.exp(-0.000359 * safe_sigma)
-
-    # Convert wind speed to ft/min (base speed unit)
-    ws_fpm = speed_to_base(wind_speed, wind_speed_units)
-    if '10' in str(wind_height_mode).lower() or 'ten' in str(wind_height_mode).lower():
-        # 10-m to 20-ft adjustment (divide by 1.15)
-        ws_fpm = ws_fpm / 1.15
-
-    # Determine wind adjustment factor (WAF)
-    if str(waf_method).lower().replace('_', '') == 'userinput' and user_waf is not None:
-        waf = np.asarray(user_waf, dtype=float)
-    else:
-        waf = calculate_wind_adjustment_factor(
-            canopy_cover, canopy_height, crown_ratio, ib['depth']
-        )
-
-    # Midflame wind speed (ft/min)
-    midflame_ws = waf * ws_fpm
-
-    # Wind phi factor (dimensionless wind effect on spread)
-    safe_rpr = np.where(rpr > 1e-7, rpr, 1.0)
-    phi_w = np.where(
-        (sigma > 1e-7) & (midflame_ws > 1e-7),
-        (midflame_ws ** wind_b) * wind_c * (safe_rpr ** (-wind_e)),
-        0.0
+    sigma = ib['sigma']
+    wind_coeffs = calculate_surface_wind_coefficients(sigma)
+    no_wind_no_slope_spread_rate = calculate_no_wind_no_slope_spread_rate(
+        ri=ri,
+        propagating_flux=ib['propagating_flux'],
+        heat_sink=ib['heat_sink'],
     )
-
-    # Slope phi factor (slope_deg is in degrees after slope_to_base conversion above)
-    slope_tan = np.tan(np.radians(np.asarray(slope_deg, dtype=float)))
-    pr = ib['packing_ratio']
-    safe_pr = np.where(pr > 1e-7, pr, 1.0)
-    phi_s = np.where(
-        (slope_tan > 1e-7) & (pr > 1e-7),
-        5.275 * (safe_pr ** -0.3) * (slope_tan ** 2),
-        0.0
+    twenty_foot_wind_speed = calculate_twenty_foot_wind_speed(
+        wind_speed=wind_speed,
+        wind_speed_units=wind_speed_units,
+        wind_height_mode=wind_height_mode,
     )
-
-    # Cap phi_s at wind-speed limit (prevents slope from exceeding wind energy)
-    wind_speed_limit = 0.9 * ri
-    phi_s = np.minimum(phi_s, wind_speed_limit)
-
-    # Direction of max spread via vector composition (slope + wind vectors)
-    wind_direction = np.asarray(wind_direction, dtype=float)
-    aspect         = np.asarray(aspect,         dtype=float)
-    if 'north' in str(wind_orientation_mode).lower():
-        # Correct wind direction relative to upslope when given as compass bearing
-        corrected_wd = wind_direction - aspect
-    else:
-        corrected_wd = wind_direction
-    wd_rad = np.radians(corrected_wd)
-
-    slope_rate = r0 * phi_s
-    wind_rate  = r0 * phi_w
-    x = slope_rate + wind_rate * np.cos(wd_rad)
-    y = wind_rate * np.sin(wd_rad)
-    rate_vector          = np.sqrt(x ** 2 + y ** 2)
-    forward_spread_rate  = r0 + rate_vector
-
-    # Effective wind speed (mph) for fire shape calculations
-    safe_r0 = np.where(r0 > 1e-7, r0, 1.0)
-    phi_eff = np.where(r0 > 1e-7, forward_spread_rate / safe_r0 - 1.0, 0.0)
-    safe_wc = np.where(wind_c > 1e-7, wind_c, 1.0)
-    safe_wb = np.where(wind_b > 1e-7, wind_b, 1.0)
-    ews_fpm = np.where(
-        (phi_eff > 0) & (wind_b > 1e-7) & (wind_c > 1e-7) & (rpr > 1e-7),
-        ((phi_eff * (safe_rpr ** wind_e)) / safe_wc) ** (1.0 / safe_wb),
-        0.0
+    waf = calculate_surface_wind_adjustment_factor(
+        canopy_cover=canopy_cover,
+        canopy_height=canopy_height,
+        crown_ratio=crown_ratio,
+        depth=ib['depth'],
+        waf_method=waf_method,
+        user_waf=user_waf,
     )
-    ews_mph = speed_from_base(ews_fpm, 5)   # 5 = MilesPerHour
-
-    # Fire L:W ratio (surface formula — crown uses a different formula in crown.py)
-    lwr = np.where(
-        ews_mph > 1e-7,
-        np.minimum(
-            0.936 * np.exp(0.1147 * ews_mph) + 0.461 * np.exp(-0.0692 * ews_mph) - 0.397,
-            8.0
-        ),
-        1.0
+    midflame_wind_speed = calculate_midflame_wind_speed(
+        waf=waf,
+        twenty_foot_wind_speed=twenty_foot_wind_speed,
     )
-
-    # Eccentricity of the fire ellipse
-    x_ecc = lwr ** 2 - 1.0
-    ecc = np.where(x_ecc > 0, np.sqrt(np.maximum(x_ecc, 0.0)) / lwr, 0.0)
-
-    # Backing and flanking spread rates from eccentricity
-    safe_ecc_denom = 1.0 + ecc
-    backing  = np.where(
-        safe_ecc_denom > 1e-7,
-        forward_spread_rate * (1.0 - ecc) / safe_ecc_denom,
-        0.0
+    wind_phi = calculate_wind_phi(
+        sigma=sigma,
+        midflame_wind_speed=midflame_wind_speed,
+        wind_b=wind_coeffs['wind_b'],
+        wind_c=wind_coeffs['wind_c'],
+        relative_packing_ratio=ib['relative_packing_ratio'],
+        wind_e=wind_coeffs['wind_e'],
     )
-    safe_lwr = np.where(lwr > 1e-7, lwr, 1.0)
-    flanking = np.where(
-        lwr > 1e-7,
-        (forward_spread_rate + backing) / (2.0 * safe_lwr),
-        0.0
+    slope_phi = calculate_slope_phi(
+        slope=slope,
+        slope_units=slope_units,
+        packing_ratio=ib['packing_ratio'],
+        reaction_intensity=ri,
     )
+    rate_components = calculate_surface_rate_vector(
+        no_wind_no_slope_spread_rate=no_wind_no_slope_spread_rate,
+        wind_phi=wind_phi,
+        slope_phi=slope_phi,
+        wind_direction=wind_direction,
+        wind_orientation_mode=wind_orientation_mode,
+        aspect=aspect,
+    )
+    spread_rate = calculate_forward_spread_rate(
+        no_wind_no_slope_spread_rate=no_wind_no_slope_spread_rate,
+        rate_vector=rate_components['rate_vector'],
+    )
+    effective_wind_speed = calculate_effective_wind_speed(
+        spread_rate=spread_rate,
+        no_wind_no_slope_spread_rate=no_wind_no_slope_spread_rate,
+        wind_b=wind_coeffs['wind_b'],
+        wind_c=wind_coeffs['wind_c'],
+        relative_packing_ratio=ib['relative_packing_ratio'],
+        wind_e=wind_coeffs['wind_e'],
+    )
+    fire_length_to_width_ratio = calculate_fire_length_to_width_ratio(effective_wind_speed)
+    eccentricity = calculate_eccentricity(fire_length_to_width_ratio)
+    backing_spread_rate = calculate_backing_spread_rate(spread_rate, eccentricity)
+    flanking_spread_rate = calculate_flanking_spread_rate(
+        spread_rate=spread_rate,
+        backing_spread_rate=backing_spread_rate,
+        fire_length_to_width_ratio=fire_length_to_width_ratio,
+    )
+    residence_time = calculate_residence_time(sigma)
+    heat_per_unit_area = calculate_heat_per_unit_area(ri, residence_time)
+    fireline_intensity = calculate_fireline_intensity(spread_rate, heat_per_unit_area)
+    flame_length = calculate_flame_length(fireline_intensity)
+    direction_of_max_spread = calculate_direction_of_max_spread(
+        x_component=rate_components['x_component'],
+        y_component=rate_components['y_component'],
+        rate_vector=rate_components['rate_vector'],
+        wind_orientation_mode=wind_orientation_mode,
+        aspect=aspect,
+    )
+    reaction_intensity = calculate_reaction_intensity_output(ri)
 
-    # Heat per unit area, fireline intensity, and flame length
-    residence_time     = np.where(sigma > 1e-7, 384.0 / safe_sigma, 0.0)  # min
-    hpua               = ri * residence_time                                # BTU/ft²
-    fireline_intensity = forward_spread_rate * hpua / 60.0                  # BTU/ft/s
-    safe_fli = np.where(fireline_intensity > 0, fireline_intensity, 0.0)
-    flame_length = np.where(fireline_intensity > 0, 0.45 * (safe_fli ** 0.46), 0.0)  # ft
-
-    # Direction of max spread (degrees from upslope or north, depending on mode)
-    dir_deg = np.where(rate_vector > 1e-7, np.degrees(np.arctan2(y, x)), 0.0)
-    dir_deg = np.where(np.abs(dir_deg) < 0.5, 0.0, dir_deg)
-    dir_deg = np.where(dir_deg < -1e-20, dir_deg + 360.0, dir_deg)
-    if 'north' in str(wind_orientation_mode).lower():
-        dir_deg = (dir_deg + aspect + 180.0) % 360.0
-
-    # Mask output for undefined fuel model cells
     defined = ib['is_defined']
-    zero    = np.zeros_like(forward_spread_rate)
+    zero = np.zeros_like(spread_rate)
     return {
-        'spread_rate':                    np.where(defined, forward_spread_rate, zero),
-        'backing_spread_rate':            np.where(defined, backing,             zero),
-        'flanking_spread_rate':           np.where(defined, flanking,            zero),
-        'flame_length':                   np.where(defined, flame_length,        zero),
-        'fireline_intensity':             np.where(defined, fireline_intensity,  zero),
-        'heat_per_unit_area':             np.where(defined, hpua,               zero),
-        'effective_wind_speed':           np.where(defined, ews_mph,            zero),
-        'fire_length_to_width_ratio':     np.where(defined, lwr,  np.ones_like(lwr)),
-        'eccentricity':                   np.where(defined, ecc,               zero),
-        'direction_of_max_spread':        np.where(defined, dir_deg,           zero),
-        'residence_time':                 np.where(defined, residence_time,    zero),
-        'reaction_intensity':             np.where(defined, ri,               zero),
-        'midflame_wind_speed':            np.where(defined, midflame_ws,       zero),
-        'no_wind_no_slope_spread_rate':   np.where(defined, r0,               zero),
+        'spread_rate': _mask_surface_result(spread_rate, defined, zero),
+        'backing_spread_rate': _mask_surface_result(backing_spread_rate, defined, zero),
+        'flanking_spread_rate': _mask_surface_result(flanking_spread_rate, defined, zero),
+        'flame_length': _mask_surface_result(flame_length, defined, zero),
+        'fireline_intensity': _mask_surface_result(fireline_intensity, defined, zero),
+        'heat_per_unit_area': _mask_surface_result(heat_per_unit_area, defined, zero),
+        'effective_wind_speed': _mask_surface_result(effective_wind_speed, defined, zero),
+        'fire_length_to_width_ratio': _mask_surface_result(
+            fire_length_to_width_ratio,
+            defined,
+            np.ones_like(fire_length_to_width_ratio),
+        ),
+        'eccentricity': _mask_surface_result(eccentricity, defined, zero),
+        'direction_of_max_spread': _mask_surface_result(direction_of_max_spread, defined, zero),
+        'residence_time': _mask_surface_result(residence_time, defined, zero),
+        'reaction_intensity': _mask_surface_result(reaction_intensity, defined, zero),
+        'midflame_wind_speed': _mask_surface_result(midflame_wind_speed, defined, zero),
+        'no_wind_no_slope_spread_rate': _mask_surface_result(
+            no_wind_no_slope_spread_rate,
+            defined,
+            zero,
+        ),
     }
-
-
-# ---------------------------------------------------------------------------
-# V5-ext — Fire area and perimeter (§13.2 Gap B)
-# ---------------------------------------------------------------------------
-
-def calculate_fire_area(
-        forward_ros: Union[float, np.ndarray],
-        backing_ros: Union[float, np.ndarray],
-        lwr: Union[float, np.ndarray],
-        elapsed_min: float,
-        is_crown: bool = False
-) -> np.ndarray:
-    """
-    Calculate elliptical fire area.
-
-    :param forward_ros: Forward rate of spread (ft/min) (*S).
-    :param backing_ros: Backing rate of spread (ft/min) (*S).
-    :param lwr: Fire length-to-width ratio (dimensionless) (*S).
-    :param elapsed_min: Elapsed time (minutes) — scalar float.
-    :param is_crown: If ``True``, use circular crown fire approximation.
-        Defaults to ``False``.
-    :return: (*S) ndarray — fire area (ft²).
-    """
-    fros = np.asarray(forward_ros, dtype=float)
-    bros = np.asarray(backing_ros, dtype=float)
-    lwr  = np.asarray(lwr,         dtype=float)
-    safe_lwr = np.where(lwr > 1e-7, lwr, 1.0)
-
-    if is_crown:
-        # Crown fire: circular approximation using forward spread only
-        d = fros * elapsed_min
-        return np.where(lwr > 1e-7, np.pi * d ** 2 / (4.0 * safe_lwr), 0.0)
-    else:
-        # Surface fire: ellipse area = π × a × b
-        ell_b = (fros + bros) / 2.0 * elapsed_min
-        ell_a = np.where(lwr > 1e-7, ell_b / safe_lwr, 0.0)
-        return np.pi * ell_a * ell_b
-
-
-def calculate_fire_perimeter(
-        forward_ros: Union[float, np.ndarray],
-        backing_ros: Union[float, np.ndarray],
-        lwr: Union[float, np.ndarray],
-        elapsed_min: float,
-        is_crown: bool = False
-) -> np.ndarray:
-    """
-    Calculate elliptical fire perimeter using Ramanujan's approximation.
-
-    :param forward_ros: Forward rate of spread (ft/min) (*S).
-    :param backing_ros: Backing rate of spread (ft/min) (*S).
-    :param lwr: Fire length-to-width ratio (dimensionless) (*S).
-    :param elapsed_min: Elapsed time (minutes) — scalar float.
-    :param is_crown: If ``True``, use circular crown fire approximation.
-        Defaults to ``False``.
-    :return: (*S) ndarray — fire perimeter (ft).
-    """
-    fros = np.asarray(forward_ros, dtype=float)
-    bros = np.asarray(backing_ros, dtype=float)
-    lwr  = np.asarray(lwr,         dtype=float)
-    safe_lwr = np.where(lwr > 1e-7, lwr, 1.0)
-
-    if is_crown:
-        # Crown fire: semi-circle perimeter approximation
-        d = fros * elapsed_min
-        return np.where(lwr > 1e-7, 0.5 * np.pi * d * (1.0 + 1.0 / safe_lwr), 0.0)
-    else:
-        # Surface fire: Ramanujan ellipse perimeter approximation
-        ell_b = (fros + bros) / 2.0 * elapsed_min
-        ell_a = np.where(lwr > 1e-7, ell_b / safe_lwr, 0.0)
-        apb   = ell_a + ell_b
-        safe_apb2 = np.where(apb > 1e-7, apb ** 2, 1.0)
-        h = np.where(apb > 1e-7, (ell_a - ell_b) ** 2 / safe_apb2, 0.0)
-        return np.where(
-            apb > 1e-7,
-            np.pi * apb * (1.0 + h / 4.0 + h ** 2 / 64.0),
-            0.0
-        )
-
-
-def calculate_fire_length(
-        forward_ros: Union[float, np.ndarray],
-        backing_ros: Union[float, np.ndarray],
-        elapsed_min: float
-) -> np.ndarray:
-    """
-    Calculate fire ellipse length (major axis × 2).
-
-    :param forward_ros: Forward rate of spread (ft/min).
-    :param backing_ros: Backing rate of spread (ft/min).
-    :param elapsed_min: Elapsed time (minutes).
-    :return: Fire length (ft).
-    """
-    return (np.asarray(forward_ros) + np.asarray(backing_ros)) * elapsed_min
-
-
-def calculate_fire_width(
-        forward_ros: Union[float, np.ndarray],
-        backing_ros: Union[float, np.ndarray],
-        lwr: Union[float, np.ndarray],
-        elapsed_min: float
-) -> np.ndarray:
-    """
-    Calculate fire ellipse width (minor axis × 2).
-
-    :param forward_ros: Forward rate of spread (ft/min).
-    :param backing_ros: Backing rate of spread (ft/min).
-    :param lwr: Fire length-to-width ratio (dimensionless).
-    :param elapsed_min: Elapsed time (minutes).
-    :return: Fire width (ft).
-    """
-    fros = np.asarray(forward_ros, dtype=float)
-    bros = np.asarray(backing_ros, dtype=float)
-    lwr  = np.asarray(lwr,         dtype=float)
-    length = (fros + bros) * elapsed_min
-    safe_lwr = np.where(lwr > 1e-7, lwr, 1.0)
-    return np.where(lwr > 1e-7, length / safe_lwr, 0.0)
-
-
-
