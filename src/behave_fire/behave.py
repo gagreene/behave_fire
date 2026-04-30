@@ -51,7 +51,7 @@ try:
         build_particle_arrays,
         calculate_fuelbed_intermediates,
         calculate_reaction_intensity,
-        calculate_spread_rate,
+        run_surface_fire,
         calculate_fire_area,
         calculate_fire_perimeter,
         calculate_fire_length,
@@ -93,7 +93,7 @@ except ImportError:
         build_particle_arrays,
         calculate_fuelbed_intermediates,
         calculate_reaction_intensity,
-        calculate_spread_rate,
+        run_surface_fire,
         calculate_fire_area,
         calculate_fire_perimeter,
         calculate_fire_length,
@@ -452,7 +452,7 @@ class BehaveRun:
         )
         ib = calculate_fuelbed_intermediates(p=p)
         ri = calculate_reaction_intensity(ib=ib)
-        results = calculate_spread_rate(
+        results = run_surface_fire(
             ri=ri,
             ib=ib,
             wind_speed=wind_speed_fpm,
