@@ -1,6 +1,6 @@
 # Behave Fire Behavior Fuel Models
 
-This file lists the defined fuel models available in the vendored `behave_fire` package in this repository, using the numeric model code and alphanumeric ID from `dependencies/behave_fire/src/behave_fire/components/fuel_models.py`.
+This file lists the defined fuel models available in the `behave_fire` repository, using the numeric model code and alphanumeric ID from `src/behave_fire/components/fuel_models.py`.
 
 ## Original 13 Fuel Models
 
