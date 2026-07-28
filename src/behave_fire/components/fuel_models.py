@@ -197,12 +197,16 @@ class FuelModels:
             5.0, 0.40, 8000, 8000,
             1.0*f, 1.0*f, 0, 9.0*f, 0,
             1800, 1600, 1500, True)
+        # moe originally reported as integer 24 (not fraction) in both this port and the
+        # official firelab/behave C++ source (fuelModels.cpp, commit 618a751 "add new
+        # fuel models") — inconsistent with every other model's fraction convention;
+        # corrected here to 0.24.
         rec(110, "V-Hb", "Short Gass, < 0.5 m (Dynamic)",
-            0.35, 24, 19000, 19000,
+            0.35, 0.24, 19000, 19000,
             0.3*f, 0, 0, 1.2*f, 0,
             6000, 6000, 6000, True)
         rec(111, "V-Ha", "Tall Grass, > 0.5 m (Dynamic)",
-            0.6, 24, 19000, 19000,
+            0.6, 0.24, 19000, 19000,
             0.5*f, 0.1*f, 0, 2.5*f, 0.3*f,
             4000, 6000, 4000, True)
         # 112 reserved
