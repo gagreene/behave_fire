@@ -42,3 +42,5 @@ Thumbs.db
 src/examples/data/
 src/examples/results/
 
+# Local development files
+/development/
