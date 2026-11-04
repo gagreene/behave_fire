@@ -45,6 +45,10 @@ jobs:
       - name: Require native execution in the full suite
         shell: bash
         run: '"$NATIVE_PYTHON" -m pytest --require-rust'
+      - name: Record scalar alias compatibility evidence
+        if: always() && env.NATIVE_PYTHON != ''
+        shell: bash
+        run: '"$NATIVE_PYTHON" tools/probe_numpy_aliases.py'
 
   rust-core:
     name: Rust core (${{ matrix.toolchain }})
