@@ -90,6 +90,9 @@ jobs:
       - name: Record float32 direction oracle evidence
         if: always()
         run: uv run --no-sync python tools/probe_direction_oracle.py > numpy-direction-oracle.json
+      - name: Record every independent direction fixture outcome
+        if: always()
+        run: uv run --no-sync python tools/probe_direction_fixtures.py > numpy-direction-fixtures.json
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -100,7 +103,9 @@ jobs:
         if: always()
         with:
           name: numpy-direction-oracle-${{ matrix.os }}
-          path: numpy-direction-oracle.json
+          path: |
+            numpy-direction-oracle.json
+            numpy-direction-fixtures.json
           if-no-files-found: warn
 
   wheel-validation:

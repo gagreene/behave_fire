@@ -15,6 +15,13 @@ def _load(name):
 
 
 class PackagingTests(unittest.TestCase):
+    def test_license_payloads_have_canonical_line_endings(self):
+        root = TOOLS.parent
+        for base in (root, root / "rust/crates/behave-fire"):
+            for name in ("LICENSE", "NOTICE", "LICENSES/NumPy-BSD-3-Clause.txt"):
+                with self.subTest(path=base / name):
+                    self.assertNotIn(b"\r", (base / name).read_bytes())
+
     def test_compiled_sources_are_rejected_before_staging(self):
         builder = _load("build_pure_wheel")
         for suffix in (".so", ".pyd", ".dylib", ".pdb"):
