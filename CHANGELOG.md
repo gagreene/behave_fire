@@ -5,6 +5,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- Corrected centimetre surface-area-to-volume conversion: `1 cm^-1` now converts to `30.48 ft^-1`, with the inverse conversion updated consistently.
+- Converted depth, fuel loading, heat, and SAVR for metric fuel models 110–111, 155–159, 166–172, and 190–193 to internal US customary units, following upstream `f3b2943`. Existing fractional moisture-of-extinction corrections are preserved. Surface results for these models change.
+- Aligned 23 Scott and Burgan static-model flags with upstream: SH2–8, TU2/4/5, TL1–9, and SB1–4. The flags now report static behavior; scalar and mixed-grid checks show unchanged surface results for their zero-herbaceous-load records.
+- Corrected containment descriptions and examples to reflect the simplified fixed-step model, its input-shape limitation, and actual output. Containment calculations are unchanged.
+
+### Changed
+
+- Moved the test suite and fixtures to root `tests/`. Updated pytest discovery, package exclusions, documentation, and the standalone harness to use repository-relative or file-relative paths and canonical package imports.
+- Aligned heat conversions with upstream's Btu convention: the kJ/kg-to-Btu/lb factor changes from `0.429923` to `0.429592` (about 0.077% lower), and the reverse factor changes from `1 / 0.429923` to `2.32779`. This is upstream convention alignment, not a dimensional correction; metric custom-fuel heat values and converted outputs change.
+
+### Deprecated
+
+- Lightning ignition probability now emits `DeprecationWarning`. Upstream removed this model because its scientific basis is no longer considered reliable. Existing signatures, re-exports, and numerical results remain available for compatibility; firebrand ignition remains supported.
+
+### Added
+
+- Pytest regression coverage for unit conversions, metric fuel records, static flags, and lightning compatibility, using portable fixtures without requiring a C++ checkout.
+
 ## [1.0.0b2] - 2026-04-29
 
 ### Added

@@ -1,8 +1,8 @@
 """
 contain.py — Batch Containment Simulation (§13.7)
 
-Fixed-iteration masked RK4 loop approach.  Cells already resolved
-(CONTAINED / OVERRUN / EXHAUSTED) are masked out at each step with
+Fixed-step ellipse-growth and suppression-line accumulation loop.
+Cells already resolved (CONTAINED / OVERRUN) are masked out at each step with
 np.where so their state arrays stop updating.
 
 Status codes (match ContainSim C++ enum):
@@ -12,11 +12,10 @@ Status codes (match ContainSim C++ enum):
     5 = EXHAUSTED
     8 = TIME_LIMIT_EXCEEDED
 
-This is the lowest-priority component.  The implementation here is a
-functional sketch that matches the documented approach in PYTHONIC_ARRAY.md
-§13.7.  It is intentionally simplified relative to the full C++ ContainSim
-(no terrain, single resource, single attack point) and serves as a starting
-point for a fuller implementation.
+This simplified model is not an RK4 integrator or the full C++ ContainSim
+solver. No terrain adjustment or perimeter-point arrays are implemented.
+The upstream firePoints() correction therefore has no corresponding API here.
+The report size sets an overrun threshold rather than the initial ellipse area.
 
 Public API
 ----------
@@ -53,15 +52,17 @@ def run_contain_sim_array(
     Cells that reach a terminal status (CONTAINED / OVERRUN) are frozen via
     ``np.where`` masking so they stop updating while other cells continue.
 
-    :param report_spread_rate: Fire spread rate at report time (ft/min)
-        (*S) or scalar.
+    :param report_spread_rate: Fire spread rate at report time (ft/min).
+        This input defines the simulation shape; other inputs must broadcast
+        to that shape. Scalars produce length-one output arrays.
     :param lw_ratio: Fire length-to-width ratio (dimensionless) (*S) or scalar.
-    :param report_size: Fire size at report time (acres) (*S) or scalar.
+    :param report_size: Reported fire size (acres), used only for the overrun
+        threshold, not to initialize the ellipse area. (*S) or scalar.
     :param production_rate: Suppression line production rate (chains/hr)
         (*S) or scalar.
     :param attack_time: Time from report to initial attack (minutes)
         (*S) or scalar.
-    :param max_steps: Maximum number of RK4 integration steps (default 500).
+    :param max_steps: Maximum number of fixed-step iterations (default 500).
     :param dist_step: Integration distance step (chains, default 0.01).
     :return: dict with keys:
         ``'status'`` (*S) int32 — final status code per cell

@@ -1,12 +1,16 @@
 # Containment Module (`contain.py`)
 
-Vectorized, single-resource fire containment simulation based on BehavePlus §13.7. Uses fixed-step masked RK4 integration over NumPy arrays — all cells advance simultaneously, terminal cells frozen via `np.where` masking.
+Vectorized, simplified single-resource fire containment simulation. A fixed-step loop computes ellipse growth and accumulated suppression line over NumPy arrays; terminal cells are frozen with `np.where` masking. The loop does not implement RK4 or the full Fried and Fried C++ ContainSim solver.
+
+The function returns final scalar measures per cell, with no perimeter-point arrays or point-count API. Upstream's `ContainSim::firePoints()` correction therefore requires no equivalent change here.
 
 **Scope / limitations:**
 - Single resource, single attack point
 - No terrain adjustment
 - Constant ROS (no growth acceleration)
 - Simplified ellipse perimeter/area model
+- Fire size is calculated from elapsed time and spread rate; `report_size` sets the overrun threshold, not the initial ellipse area.
+- `report_spread_rate` must have the full simulation shape. Other inputs must broadcast to that shape; arbitrary mutual broadcasting is not supported.
 
 ---
 
@@ -45,12 +49,12 @@ run_contain_sim_array(
     report_size,          # acres — fire size at report time
     production_rate,      # chains/hr — suppression line production rate
     attack_time,          # minutes — lag from report to initial attack
-    max_steps=500,        # max RK4 integration steps
+    max_steps=500,        # max fixed-step iterations
     dist_step=0.01        # integration distance step (chains)
 ) -> dict
 ```
 
-**Inputs:** scalar or NumPy array (all broadcast together).
+**Inputs:** scalars or NumPy arrays. Scalars produce length-one outputs. For batches, give `report_spread_rate` the target shape and use matching arrays or broadcast-compatible values for the remaining inputs.
 
 **Returns dict:**
 
@@ -95,6 +99,14 @@ else:
     print(f"Status code: {result['status'][0]}")
 ```
 
+Output:
+
+```text
+Status code: 8
+```
+
+The default 500 steps advance the head by 5 chains, corresponding to 11 minutes at 30 ft/min. This ends before the scalar example's 20-minute attack time.
+
 ### Array — batch sweep over attack delay
 
 ```python
@@ -107,7 +119,7 @@ from behave_fire.components.contain import (
 attack_times = np.arange(5, 61, 5)   # 5, 10, 15, ... 60 min
 
 result = run_contain_sim_array(
-    report_spread_rate=30.0,
+    report_spread_rate=np.full(attack_times.shape, 30.0),
     lw_ratio=3.0,
     report_size=2.0,
     production_rate=40.0,
@@ -137,10 +149,18 @@ for t, s, ct, fp, fa in zip(
 
 **Example output:**
 ```
-Attack @  5 min → CONTAINED    contained_time=  12.3 min  perimeter=  3.41 ch  area= 0.18 ac
-Attack @ 10 min → CONTAINED    contained_time=  24.7 min  perimeter=  6.82 ch  area= 0.71 ac
-...
-Attack @ 45 min → OVERRUN      contained_time=   0.0 min  perimeter= 30.11 ch  area=20.34 ac
+Attack @  5 min → TIME_LIMIT   contained_time=   0.0 min  perimeter= 20.94 ch  area= 0.65 ac
+Attack @ 10 min → TIME_LIMIT   contained_time=   0.0 min  perimeter= 20.94 ch  area= 0.65 ac
+Attack @ 15 min → TIME_LIMIT   contained_time=   0.0 min  perimeter= 20.94 ch  area= 0.65 ac
+Attack @ 20 min → TIME_LIMIT   contained_time=   0.0 min  perimeter= 20.94 ch  area= 0.65 ac
+Attack @ 25 min → TIME_LIMIT   contained_time=   0.0 min  perimeter= 20.94 ch  area= 0.65 ac
+Attack @ 30 min → TIME_LIMIT   contained_time=   0.0 min  perimeter= 20.94 ch  area= 0.65 ac
+Attack @ 35 min → TIME_LIMIT   contained_time=   0.0 min  perimeter= 20.94 ch  area= 0.65 ac
+Attack @ 40 min → TIME_LIMIT   contained_time=   0.0 min  perimeter= 20.94 ch  area= 0.65 ac
+Attack @ 45 min → TIME_LIMIT   contained_time=   0.0 min  perimeter= 20.94 ch  area= 0.65 ac
+Attack @ 50 min → TIME_LIMIT   contained_time=   0.0 min  perimeter= 20.94 ch  area= 0.65 ac
+Attack @ 55 min → TIME_LIMIT   contained_time=   0.0 min  perimeter= 20.94 ch  area= 0.65 ac
+Attack @ 60 min → TIME_LIMIT   contained_time=   0.0 min  perimeter= 20.94 ch  area= 0.65 ac
 ```
 
 ---
