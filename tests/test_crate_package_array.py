@@ -20,7 +20,7 @@ def _archive(tmp_path, changes=None):
     files["src/lib.rs"] = b'#![doc = include_str!("../README.md")]\n'
     for name, content in (changes or {}).items():
         if content is None:
-            del files[name]
+            files.pop(name, None)
         else:
             files[name] = content
     path = tmp_path / "behave-fire-0.1.0.crate"
@@ -69,6 +69,12 @@ def test_external_or_generated_includes_fail(tmp_path, source):
 def test_missing_embedded_runtime_table_fails(tmp_path):
     path = _archive(tmp_path, {"src/generated/fuel_models.rs": None})
     with pytest.raises(ValueError, match="missing"):
+        CHECKER.inspect_crate(path)
+
+
+def test_missing_svml_license_fails(tmp_path):
+    path = _archive(tmp_path, {"LICENSES/Intel-SVML-BSD-3-Clause.txt": None})
+    with pytest.raises(ValueError, match="Intel-SVML-BSD-3-Clause"):
         CHECKER.inspect_crate(path)
 
 

@@ -11,7 +11,8 @@ import tomllib
 MAX_COMPRESSED_BYTES = 5 * 1024 * 1024
 REQUIRED_FILES = frozenset({
     "Cargo.toml", "Cargo.lock", "README.md", "LICENSE", "NOTICE",
-    "LICENSES/NumPy-BSD-3-Clause.txt", "examples/standalone.rs",
+    "LICENSES/NumPy-BSD-3-Clause.txt", "LICENSES/Intel-SVML-BSD-3-Clause.txt",
+    "examples/standalone.rs",
     "src/lib.rs", "src/model.rs", "src/grid.rs", "src/math.rs", "src/units.rs",
     "src/fuel_models.rs", "src/species.rs", "src/surface/mod.rs", "src/crown.rs",
     "src/mortality.rs", "src/spot.rs", "src/ignite.rs", "src/safety.rs",

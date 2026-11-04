@@ -42,10 +42,10 @@ initial `0.1.0` is a proposed package version, not publication authorization.
 ## License and provenance
 
 Project-owned code is MIT licensed. The NumPy-derived float32 exponential
-compatibility kernel is BSD-3-Clause licensed; the combined crate declares
-`MIT AND BSD-3-Clause`. Preserve `LICENSE`, `NOTICE`, and
-`LICENSES/NumPy-BSD-3-Clause.txt` when redistributing the corresponding source
-or compiled code.
+kernel and bundled Intel SVML atan2 assembly are BSD-3-Clause licensed; the
+combined crate declares `MIT AND BSD-3-Clause`. Preserve `LICENSE`, `NOTICE`,
+`LICENSES/NumPy-BSD-3-Clause.txt`, and `LICENSES/Intel-SVML-BSD-3-Clause.txt`
+when redistributing the corresponding source or compiled code.
 
 The crate contains newly authored shape/error code and embedded fuel, species,
 and fine dead fuel moisture tables generated from the explicit Python reference
