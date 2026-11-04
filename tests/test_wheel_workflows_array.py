@@ -6,6 +6,15 @@ import unittest
 
 import yaml
 
+
+def test_maturin_action_uses_only_one_compatibility_setting():
+    root = Path(__file__).resolve().parents[1]
+    workflow = yaml.safe_load((root / ".github/workflows/wheel-validation.yml").read_text())
+    steps = workflow["jobs"]["build-native-wheels"]["steps"]
+    build = next(step["with"] for step in steps if step.get("uses") == "PyO3/maturin-action@v1")
+    assert build["manylinux"] == "2_17"
+    assert "--compatibility" not in build["args"]
+
 ROOT = Path(__file__).parents[1]
 
 
