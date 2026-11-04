@@ -49,6 +49,16 @@ jobs:
         if: always() && env.NATIVE_PYTHON != ''
         shell: bash
         run: '"$NATIVE_PYTHON" tools/probe_numpy_aliases.py'
+      - name: Record platform-dependent integer casts
+        if: always() && env.NATIVE_PYTHON != ''
+        shell: bash
+        run: '"$NATIVE_PYTHON" tools/probe_platform_oracle.py --native > numpy-platform-oracle.json'
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: numpy-platform-oracle-${{ matrix.os }}
+          path: numpy-platform-oracle.json
+          if-no-files-found: warn
 
   rust-core:
     name: Rust core (${{ matrix.toolchain }})
