@@ -1,15 +1,16 @@
 # behave-fire
 
-Standalone Rust core for the behave_fire fire-behavior port. This layer provides
+Standalone Rust core for the behave_fire fire-behavior port. The library provides
 checked grid inputs, owned fuel/species data, unit conversions, and complete
 scalar surface and crown pipelines with their component stages. It also includes
 mortality, spotting, ignition, safety zones, vapor pressure deficit, fine dead
 fuel moisture, stateful slope/ellipse tools, and the reference containment model.
-Python execution backends arrive in subsequent implementation layers.
+The optional Python extension uses this same core through a separate, unpublished
+binding crate. Rust applications do not need that extension.
 
 The core has no runtime dependencies and does not require Python, NumPy, C++,
 external data, or a sibling repository. Rust 1.78 and edition 2021 are the tested
-minimum toolchain and edition for this foundation.
+minimum toolchain and edition.
 
 ```rust
 use behave_fire::{GridOutput, GridShape, PerCell};
@@ -28,8 +29,8 @@ assert_eq!(output.cells(), &[false; 6]);
 Empty dimensions represent one scalar cell. A zero dimension represents an empty
 grid. Nonzero dimension products and per-field lengths are checked before work.
 `PerCell` borrows row-major cells or broadcasts an owned scalar. `GridOutput<R>`
-is intended for small generic results; future large surface and crown batches
-use named per-field vectors.
+is intended for small generic results; `SurfaceBatch` and `CrownBatch` use named
+per-field vectors for large surface and crown batches.
 
 `effective_worker_count` caps positive requests by the logical work count. Zero
 requests use available parallelism, and empty work needs no workers. The core
@@ -46,13 +47,13 @@ compatibility kernel is BSD-3-Clause licensed; the combined crate declares
 `LICENSES/NumPy-BSD-3-Clause.txt` when redistributing the corresponding source
 or compiled code.
 
-This layer contains newly authored shape/error code and embedded fuel, species,
+The crate contains newly authored shape/error code and embedded fuel, species,
 and fine dead fuel moisture tables generated from the explicit Python reference
 at commit `7933789f00470c6bbfbe942dc22bdd7f74e192f9`. The tables contain 96 fuel
 records, 24 species records, and 774 moisture entries. Their provenance is
 recorded in the packaged fixtures; `tools/check_rust_tables.py --check` checks
 drift during repository development and CI. Building or using the crate never
-requires that Python tool. Later scientific ports retain applicable source and
+requires that Python tool. Scientific modules retain applicable source and
 data notices and record their provenance.
 
 ## Surface and crown calculations
