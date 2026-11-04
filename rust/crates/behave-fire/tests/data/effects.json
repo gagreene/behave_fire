@@ -1,0 +1,1461 @@
+{
+  "cases": [
+    {
+      "entry_point": "behave_fire.components.mortality.build_mortality_lookup",
+      "id": "build_mortality_lookup/baseline",
+      "inputs": {
+        "species_master_table": {
+          "registry": "standard SpeciesMasterTable"
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [
+          121,
+          3
+        ],
+        "values": [
+          0.0,
+          0.0,
+          0.0,
+          -2.4027,
+          0.0,
+          0.9568,
+          -2.2471,
+          0.0,
+          0.8093,
+          -3.1789,
+          0.0,
+          1.5416,
+          -2.3327,
+          0.0,
+          0.9577,
+          -2.3327,
+          0.0,
+          0.9577,
+          -1.4667,
+          0.0,
+          0.7401,
+          -2.4027,
+          0.0,
+          0.9568,
+          -3.3701,
+          0.0,
+          1.4804,
+          -3.3701,
+          0.0,
+          1.4804,
+          -2.9986,
+          0.0,
+          1.4804,
+          -2.9986,
+          0.0,
+          1.4804,
+          -2.4027,
+          0.0,
+          0.9568,
+          -3.0471,
+          0.0,
+          1.2668,
+          -2.3327,
+          0.0,
+          0.9577,
+          -2.7735,
+          0.0,
+          1.007,
+          -3.3701,
+          0.0,
+          1.4804,
+          -2.2471,
+          0.0,
+          0.8093,
+          -2.4027,
+          0.0,
+          0.9568,
+          -2.2471,
+          0.0,
+          0.8093,
+          -3.3701,
+          0.0,
+          1.4804,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          2.3014,
+          -0.3267,
+          1.1137,
+          -0.8727,
+          -0.1814,
+          4.1947,
+          2.7899,
+          -0.5511,
+          1.2888,
+          1.9438,
+          -0.4602,
+          1.6352,
+          -1.8137,
+          -0.0603,
+          0.8666,
+          -1.6262,
+          -0.0339,
+          0.6901,
+          0.3714,
+          -0.1005,
+          1.5577,
+          -1.4416,
+          -0.1469,
+          1.3159,
+          0.1122,
+          -0.1287,
+          1.2612,
+          1.6779,
+          -1.0299,
+          10.2855,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.mortality.calculate_crown_scorch_mortality",
+      "id": "calculate_crown_scorch_mortality/baseline",
+      "inputs": {
+        "coeffs": {
+          "reference": "species:mortality_coefficients"
+        },
+        "crown_ratio": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.5
+          ]
+        },
+        "dbh_inches": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            12.0
+          ]
+        },
+        "equation_number_grid": {
+          "dtype": "int64",
+          "shape": [
+            1
+          ],
+          "values": [
+            1
+          ]
+        },
+        "scorch_height_ft": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            20.0
+          ]
+        },
+        "tree_height_ft": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            60.0
+          ]
+        }
+      },
+      "output": {
+        "crown_length_scorch": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.0
+          ]
+        },
+        "crown_volume_scorch": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.0
+          ]
+        },
+        "probability_mortality": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.08296703957465054
+          ]
+        }
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.mortality.calculate_scorch_height",
+      "id": "calculate_scorch_height/baseline",
+      "inputs": {
+        "air_temp_f": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            80.0
+          ]
+        },
+        "fireline_intensity_btu_ft_s": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            100.0
+          ]
+        },
+        "midflame_wind_mph": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            5.0
+          ]
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [
+          1
+        ],
+        "values": [
+          15.08106598049722
+        ]
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.ignite.calculate_firebrand_ignition_probability",
+      "id": "calculate_firebrand_ignition_probability/baseline",
+      "inputs": {
+        "air_temp_f": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            80.0
+          ]
+        },
+        "moisture_1h_fraction": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.06
+          ]
+        },
+        "sun_shade_fraction": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.5
+          ]
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [
+          1
+        ],
+        "values": [
+          0.5483170476526804
+        ]
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.ignite.calculate_fuel_temperature",
+      "id": "calculate_fuel_temperature/baseline",
+      "inputs": {
+        "air_temp_f": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            80.0
+          ]
+        },
+        "sun_shade_fraction": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.5
+          ]
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [
+          1
+        ],
+        "values": [
+          95.0
+        ]
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.ignite.calculate_lightning_ignition_probability",
+      "id": "calculate_lightning_ignition_probability/baseline",
+      "inputs": {
+        "charge_type": 0,
+        "duff_depth_inches": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            2.0
+          ]
+        },
+        "fuel_bed_type_grid": {
+          "dtype": "int64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0
+          ]
+        },
+        "moisture_100h_fraction": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.08
+          ]
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [
+          1
+        ],
+        "values": [
+          0.13503555035051068
+        ]
+      },
+      "policy": "acceptance",
+      "warnings": [
+        "DeprecationWarning"
+      ]
+    },
+    {
+      "entry_point": "behave_fire.components.spot.calculate_spotting_from_burning_pile",
+      "id": "calculate_spotting_from_burning_pile/baseline",
+      "inputs": {
+        "cover_height_ft": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            10.0
+          ]
+        },
+        "flame_height_ft": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            5.0
+          ]
+        },
+        "wind_mph": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            5.0
+          ]
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [
+          1
+        ],
+        "values": [
+          29.157674975477576
+        ]
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.spot.calculate_spotting_from_surface_fire",
+      "id": "calculate_spotting_from_surface_fire/baseline",
+      "inputs": {
+        "cover_height_ft": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            10.0
+          ]
+        },
+        "flame_length_ft": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            5.0
+          ]
+        },
+        "wind_mph": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            5.0
+          ]
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [
+          1
+        ],
+        "values": [
+          565.5562062193633
+        ]
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.spot.calculate_spotting_from_torching_trees",
+      "id": "calculate_spotting_from_torching_trees/baseline",
+      "inputs": {
+        "count": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            3.0
+          ]
+        },
+        "cover_height_ft": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            10.0
+          ]
+        },
+        "dbh_in": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            12.0
+          ]
+        },
+        "height_ft": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            60.0
+          ]
+        },
+        "wind_mph": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            5.0
+          ]
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [
+          1
+        ],
+        "values": [
+          101.26121957494824
+        ]
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.safety.calculate_safety_zone",
+      "id": "calculate_safety_zone/baseline",
+      "inputs": {
+        "area_per_equipment_sqft": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            300.0
+          ]
+        },
+        "area_per_person_sqft": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            50.0
+          ]
+        },
+        "flame_height_ft": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            5.0
+          ]
+        },
+        "number_of_equipment": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            1.0
+          ]
+        },
+        "number_of_personnel": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            4.0
+          ]
+        }
+      },
+      "output": {
+        "area": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            3341.9679804783214
+          ]
+        },
+        "radius": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            32.6156626101008
+          ]
+        },
+        "separation_distance": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            20.0
+          ]
+        }
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.ignite.calculate_lightning_ignition_probability",
+      "id": "lightning/charge-0",
+      "inputs": {
+        "charge_type": 0,
+        "duff_depth_inches": {
+          "dtype": "float64",
+          "shape": [
+            8
+          ],
+          "values": [
+            2.0,
+            2.0,
+            2.0,
+            2.0,
+            2.0,
+            2.0,
+            2.0,
+            2.0
+          ]
+        },
+        "fuel_bed_type_grid": {
+          "dtype": "int64",
+          "shape": [
+            8
+          ],
+          "values": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ]
+        },
+        "moisture_100h_fraction": {
+          "dtype": "float64",
+          "shape": [
+            8
+          ],
+          "values": [
+            0.08,
+            0.08,
+            0.08,
+            0.08,
+            0.08,
+            0.08,
+            0.08,
+            0.08
+          ]
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [
+          8
+        ],
+        "values": [
+          0.13503555035051068,
+          0.05562788612121744,
+          0.11500284312574494,
+          0.12840000000000001,
+          0.06234787840824612,
+          0.1470879653325673,
+          0.13760000000000003,
+          0.10395560982343166
+        ]
+      },
+      "warnings": [
+        "DeprecationWarning"
+      ]
+    },
+    {
+      "entry_point": "behave_fire.components.ignite.calculate_lightning_ignition_probability",
+      "id": "lightning/charge-1",
+      "inputs": {
+        "charge_type": 1,
+        "duff_depth_inches": {
+          "dtype": "float64",
+          "shape": [
+            8
+          ],
+          "values": [
+            2.0,
+            2.0,
+            2.0,
+            2.0,
+            2.0,
+            2.0,
+            2.0,
+            2.0
+          ]
+        },
+        "fuel_bed_type_grid": {
+          "dtype": "int64",
+          "shape": [
+            8
+          ],
+          "values": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ]
+        },
+        "moisture_100h_fraction": {
+          "dtype": "float64",
+          "shape": [
+            8
+          ],
+          "values": [
+            0.08,
+            0.08,
+            0.08,
+            0.08,
+            0.08,
+            0.08,
+            0.08,
+            0.08
+          ]
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [
+          8
+        ],
+        "values": [
+          0.41282061583672736,
+          0.16425403302590624,
+          0.478938345257953,
+          0.4945108734305958,
+          0.14191108277255313,
+          0.5325740179957923,
+          0.3740385856878868,
+          0.3650025917993927
+        ]
+      },
+      "warnings": [
+        "DeprecationWarning"
+      ]
+    },
+    {
+      "entry_point": "behave_fire.components.ignite.calculate_lightning_ignition_probability",
+      "id": "lightning/charge-2",
+      "inputs": {
+        "charge_type": 2,
+        "duff_depth_inches": {
+          "dtype": "float64",
+          "shape": [
+            8
+          ],
+          "values": [
+            2.0,
+            2.0,
+            2.0,
+            2.0,
+            2.0,
+            2.0,
+            2.0,
+            2.0
+          ]
+        },
+        "fuel_bed_type_grid": {
+          "dtype": "int64",
+          "shape": [
+            8
+          ],
+          "values": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ]
+        },
+        "moisture_100h_fraction": {
+          "dtype": "float64",
+          "shape": [
+            8
+          ],
+          "values": [
+            0.08,
+            0.08,
+            0.08,
+            0.08,
+            0.08,
+            0.08,
+            0.08,
+            0.08
+          ]
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [
+          8
+        ],
+        "values": [
+          0.2119820134901927,
+          0.08571732881381625,
+          0.21581297721636658,
+          0.22981271194027506,
+          0.08438688601715916,
+          0.25386760192028063,
+          0.20309348823554466,
+          0.17626562383077288
+        ]
+      },
+      "warnings": [
+        "DeprecationWarning"
+      ]
+    },
+    {
+      "entry_point": "behave_fire.components.mortality.calculate_crown_scorch_mortality",
+      "id": "mortality/all-equations",
+      "inputs": {
+        "coeffs": {
+          "reference": "species:mortality_coefficients"
+        },
+        "crown_ratio": {
+          "dtype": "float64",
+          "shape": [
+            33
+          ],
+          "values": [
+            0.5,
+            0.5,
+            0.5,
+            0.5,
+            0.5,
+            0.5,
+            0.5,
+            0.5,
+            0.5,
+            0.5,
+            0.5,
+            0.5,
+            0.5,
+            0.5,
+            0.5,
+            0.5,
+            0.5,
+            0.5,
+            0.5,
+            0.5,
+            0.5,
+            0.5,
+            0.5,
+            0.5,
+            0.5,
+            0.5,
+            0.5,
+            0.5,
+            0.5,
+            0.5,
+            0.5,
+            0.5,
+            0.5
+          ]
+        },
+        "dbh_inches": {
+          "dtype": "float64",
+          "shape": [
+            33
+          ],
+          "values": [
+            12.0,
+            12.0,
+            12.0,
+            12.0,
+            12.0,
+            12.0,
+            12.0,
+            12.0,
+            12.0,
+            12.0,
+            12.0,
+            12.0,
+            12.0,
+            12.0,
+            12.0,
+            12.0,
+            12.0,
+            12.0,
+            12.0,
+            12.0,
+            12.0,
+            12.0,
+            12.0,
+            12.0,
+            12.0,
+            12.0,
+            12.0,
+            12.0,
+            12.0,
+            12.0,
+            12.0,
+            12.0,
+            12.0
+          ]
+        },
+        "equation_number_grid": {
+          "dtype": "int64",
+          "shape": [
+            33
+          ],
+          "values": [
+            -1,
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            100,
+            101,
+            102,
+            103,
+            104,
+            105,
+            106,
+            107,
+            108,
+            109,
+            999
+          ]
+        },
+        "scorch_height_ft": {
+          "dtype": "float64",
+          "shape": [
+            33
+          ],
+          "values": [
+            20.0,
+            20.0,
+            20.0,
+            20.0,
+            20.0,
+            20.0,
+            20.0,
+            20.0,
+            20.0,
+            20.0,
+            20.0,
+            20.0,
+            20.0,
+            20.0,
+            20.0,
+            20.0,
+            20.0,
+            20.0,
+            20.0,
+            20.0,
+            20.0,
+            20.0,
+            20.0,
+            20.0,
+            20.0,
+            20.0,
+            20.0,
+            20.0,
+            20.0,
+            20.0,
+            20.0,
+            20.0,
+            20.0
+          ]
+        },
+        "tree_height_ft": {
+          "dtype": "float64",
+          "shape": [
+            33
+          ],
+          "values": [
+            60.0,
+            60.0,
+            60.0,
+            60.0,
+            60.0,
+            60.0,
+            60.0,
+            60.0,
+            60.0,
+            60.0,
+            60.0,
+            60.0,
+            60.0,
+            60.0,
+            60.0,
+            60.0,
+            60.0,
+            60.0,
+            60.0,
+            60.0,
+            60.0,
+            60.0,
+            60.0,
+            60.0,
+            60.0,
+            60.0,
+            60.0,
+            60.0,
+            60.0,
+            60.0,
+            60.0,
+            60.0,
+            60.0
+          ]
+        }
+      },
+      "output": {
+        "crown_length_scorch": {
+          "dtype": "float64",
+          "shape": [
+            33
+          ],
+          "values": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "crown_volume_scorch": {
+          "dtype": "float64",
+          "shape": [
+            33
+          ],
+          "values": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "probability_mortality": {
+          "dtype": "float64",
+          "shape": [
+            33
+          ],
+          "values": [
+            0.0,
+            0.0,
+            0.08296703957465054,
+            0.09559990665250463,
+            0.0399675197298558,
+            0.08845072779027041,
+            0.08845072779027041,
+            0.1874447159696992,
+            0.08296703957465054,
+            0.03324309489031025,
+            0.03324309489031025,
+            0.0474891605899967,
+            0.0474891605899967,
+            0.08296703957465054,
+            0.045342840012864656,
+            0.08845072779027041,
+            0.058773098326393526,
+            0.03324309489031025,
+            0.09559990665250463,
+            0.08296703957465054,
+            0.09559990665250463,
+            0.03324309489031025,
+            0.16534282858797358,
+            0.045239064819306375,
+            0.021388109343767128,
+            0.02715667959942745,
+            0.07328432937962163,
+            0.11578143958467713,
+            0.3026733038097942,
+            0.03900047834131898,
+            0.19275613017678195,
+            2.2979156790173467e-05,
+            0.0
+          ]
+        }
+      },
+      "warnings": []
+    }
+  ],
+  "provenance": {
+    "oracle": "explicit Python",
+    "python_reference_sha": "7933789f00470c6bbfbe942dc22bdd7f74e192f9",
+    "source_sha256": {
+      "src/behave_fire/__init__.py": "6e49d8e5eddb383cafbf19632a7407cb767fc976ff820b7e635d5d639ab4882f",
+      "src/behave_fire/behave.py": "8b9c35cfe18024ba1186ba5240f939c9b647dcca8d026d7db18c447421e9f6b1",
+      "src/behave_fire/components/__init__.py": "5c88705dcf2a4073bc79bd49e5038172bd0fa5b15ca9e77d6f9717424282519d",
+      "src/behave_fire/components/behave_units.py": "426581d91466c64bdbf60bd8a686030fe8244303cdbd097b1838479937abab77",
+      "src/behave_fire/components/contain.py": "fae224dee8ecdb090e7c3e6dc73a219508a026726e1ab3483776d54121a81bb7",
+      "src/behave_fire/components/crown.py": "0e0f5fe9b8c3074b192528b020232cc95e66470d59daa3a057544c75d7d93a03",
+      "src/behave_fire/components/fine_dead_fuel_moisture_tool.py": "cb11fc2da53c66b7f7753e88aa1d1f2135c91c3e67962912d1b2c097a73a8e60",
+      "src/behave_fire/components/fire_size.py": "23c671131ae710cfa441a14307cc0dfeb2e3d36b276fc112a5308827fe9e40dc",
+      "src/behave_fire/components/fuel_models.py": "ee1b886c72c8bb0e14a4c883745b4dde97ee3e011c7fddddc5e8b63e4588d225",
+      "src/behave_fire/components/fuel_models_array.py": "f60af63d681be852ff4fe6c3864ef55521c745da6ab182382caee4543e057125",
+      "src/behave_fire/components/ignite.py": "f0518ee4bc484f1b5478ad4792ecba77481bb68dda48abd0c45442ecb78523fc",
+      "src/behave_fire/components/mortality.py": "ccdaff07b59ef140786031d8957dd3cdafbbd97fd5e372e5fe4abcb392f5bcac",
+      "src/behave_fire/components/safety.py": "ed27e7cef7aa488a92636f8dfa589fadca3e0c6ba44ccae87a9fd7c8bac168a0",
+      "src/behave_fire/components/slope_tool.py": "754ce32058173b6c149135f9b1ec443f8be21679c7cf6c8e0a64d7ef5f3fb49c",
+      "src/behave_fire/components/species_master_table.py": "afa06eb15e475d252eef8b54d34be0d202c5c0f664d75e2c87c783a3831e8c11",
+      "src/behave_fire/components/spot.py": "a0411ecf7606ee75f4b460c084cb461e0c39619a3c14ad96a4c0217733456a22",
+      "src/behave_fire/components/surface.py": "133c6938ea701599428824d1d210ca2449d9103a5324cffc3c2a0db5330e4550",
+      "src/behave_fire/components/vapor_pressure_deficit_calculator.py": "4b165f3d48a02ab49c0fcdd2a5a7df65bab8b4a6366a280cbbf23041488eb258"
+    }
+  },
+  "schema_version": 1
+}

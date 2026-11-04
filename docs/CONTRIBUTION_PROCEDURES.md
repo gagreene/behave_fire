@@ -33,7 +33,8 @@ Route every change as follows:
 
 | Change | Work branch starts from | PR target |
 | --- | --- | --- |
-| Any change toward the next release (fix, feature, documentation, or data) | `pre_release` | `pre_release` |
+| Standalone change or bottom PR of a next-release stack | `pre_release` | `pre_release` |
+| Upper PR in a dependent next-release stack | Preceding stack branch | Preceding stack branch until it lands, then retarget as the stack advances |
 | Hotfix for a serious defect in released code | `master` (`hotfix/<name>`) | `master` |
 
 Do not classify a change as a patch, minor, or major change when its PR is opened.
@@ -41,9 +42,25 @@ The owner chooses the version when the release is promoted, from the combined
 changes: anything that alters inputs, results, or documented behavior is at least a
 minor release, and only fixes with no such change make a patch release.
 
+### Stacked pull requests
+
+Dependent PRs may target preceding branches within the same repository. The
+bottom PR targets `pre_release`; all PRs in the stack collectively must land on
+`pre_release`. An upper PR's temporary base is not a separate integration destination.
+
+Use `gh stack` to manage the stack when available. Land the bottom PR first, then
+let the stack workflow rebase and retarget remaining PRs as predecessors merge.
+Verify the resulting bases and commit ranges after each transition. Resolve
+conflicts before continuing, and preserve the reviewed scope of each layer.
+
+Every PR keeps its own review and test record. A rebase changes its head commit:
+rerun the full default suite and update the recorded SHA and results before that
+PR merges. Stack management does not grant permission to commit, push, merge,
+delete branches, or update either permanent branch directly.
+
 ### Release notes
 
-A PR on `pre_release` that changes behavior adds its bullet under an `Unreleased`
+A next-release PR, including an upper stacked PR, that changes behavior adds its bullet under an `Unreleased`
 heading at the top of `CHANGELOG.md` (create the heading if it is absent) and does
 not change the package version. Breaking changes, and the action users need to take,
 go in a `Breaking changes and action needed` block of the same section.

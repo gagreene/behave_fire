@@ -1,0 +1,2265 @@
+{
+  "cases": [
+    {
+      "entry_point": "behave_fire.components.crown.assign_final_crown_fire_behavior",
+      "id": "assign_final_crown_fire_behavior/baseline",
+      "inputs": {
+        "crown_fl": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            10.0
+          ]
+        },
+        "crown_fli": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            500.0
+          ]
+        },
+        "crown_hpua": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            2000.0
+          ]
+        },
+        "crown_ros": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            40.0
+          ]
+        },
+        "is_passive_crown": {
+          "dtype": "bool",
+          "shape": [
+            1
+          ],
+          "values": [
+            false
+          ]
+        },
+        "is_surface_fire": {
+          "dtype": "bool",
+          "shape": [
+            1
+          ],
+          "values": [
+            true
+          ]
+        },
+        "passive_fl": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            7.0
+          ]
+        },
+        "passive_fli": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            200.0
+          ]
+        },
+        "passive_hpua": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            1500.0
+          ]
+        },
+        "passive_ros": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            15.0
+          ]
+        },
+        "surface_fli": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            100.0
+          ]
+        },
+        "surface_hpua": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            1000.0
+          ]
+        },
+        "surface_ros": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            10.0
+          ]
+        }
+      },
+      "output": {
+        "final_fireline_intensity": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            100.0
+          ]
+        },
+        "final_flame_length": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            4.308869380063767
+          ]
+        },
+        "final_heat_per_unit_area": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            1000.0
+          ]
+        },
+        "final_spread_rate": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            10.0
+          ]
+        }
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.crown.calculate_critical_crown_fire_spread_rate",
+      "id": "calculate_critical_crown_fire_spread_rate/baseline",
+      "inputs": {
+        "canopy_bulk_density": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.02
+          ]
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [
+          1
+        ],
+        "values": [
+          30.72235228017605
+        ]
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.crown.calculate_critical_surface_fireline_intensity",
+      "id": "calculate_critical_surface_fireline_intensity/baseline",
+      "inputs": {
+        "canopy_base_height": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            6.0
+          ]
+        },
+        "moisture_foliar": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            100.0
+          ]
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [
+          1
+        ],
+        "values": [
+          120.25512367304093
+        ]
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.crown.calculate_crown_fire_ratios",
+      "id": "calculate_crown_fire_ratios/baseline",
+      "inputs": {
+        "critical_crown_ros": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            30.0
+          ]
+        },
+        "critical_surface_fli": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            150.0
+          ]
+        },
+        "crown_ros": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            40.0
+          ]
+        },
+        "surface_fli": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            100.0
+          ]
+        }
+      },
+      "output": {
+        "crown_fire_active_ratio": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            1.3333333333333333
+          ]
+        },
+        "crown_fire_transition_ratio": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.6666666666666666
+          ]
+        }
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.crown.calculate_crown_fraction_burned",
+      "id": "calculate_crown_fraction_burned/baseline",
+      "inputs": {
+        "crowning_surface_ros": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            20.0
+          ]
+        },
+        "surface_critical_ros": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            5.0
+          ]
+        },
+        "surface_ros": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            10.0
+          ]
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [
+          1
+        ],
+        "values": [
+          0.3333333333333333
+        ]
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.crown.calculate_crown_heat_and_intensity",
+      "id": "calculate_crown_heat_and_intensity/baseline",
+      "inputs": {
+        "canopy_base_height": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            6.0
+          ]
+        },
+        "canopy_bulk_density": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.02
+          ]
+        },
+        "canopy_height": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            30.0
+          ]
+        },
+        "crown_ros": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            40.0
+          ]
+        },
+        "surface_hpua": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            1000.0
+          ]
+        }
+      },
+      "output": {
+        "canopy_heat_per_unit_area": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            3840.0
+          ]
+        },
+        "crown_fire_heat_per_unit_area": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            4840.0
+          ]
+        },
+        "crown_fire_line_intensity": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            3226.6666666666665
+          ]
+        },
+        "crown_flame_length": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            43.67162955331226
+          ]
+        },
+        "crown_fuel_load": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.48
+          ]
+        }
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.crown.calculate_crown_surface_fire",
+      "id": "calculate_crown_surface_fire/baseline",
+      "inputs": {
+        "S": [
+          1
+        ],
+        "aspect": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.0
+          ]
+        },
+        "canopy_height": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            30.0
+          ]
+        },
+        "lut": {
+          "reference": "fuels:standard_lookup"
+        },
+        "m100h": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.08
+          ]
+        },
+        "m10h": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.07
+          ]
+        },
+        "m1h": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.06
+          ]
+        },
+        "mlh": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.6
+          ]
+        },
+        "mlw": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.9
+          ]
+        },
+        "slope_deg": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            30.0
+          ]
+        },
+        "wind_direction": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.0
+          ]
+        },
+        "wind_orientation_mode": "RelativeToUpslope",
+        "wind_speed": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            5.0
+          ]
+        },
+        "wind_speed_units": 5
+      },
+      "output": {
+        "crown_fire_spread_rate": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            29.76977218672232
+          ]
+        },
+        "crown_length_to_width_ratio": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            1.5710735913499885
+          ]
+        },
+        "crown_surface": {
+          "backing_spread_rate": {
+            "dtype": "float64",
+            "shape": [
+              1
+            ],
+            "values": [
+              1.255752263203256
+            ]
+          },
+          "direction_of_max_spread": {
+            "dtype": "float64",
+            "shape": [
+              1
+            ],
+            "values": [
+              0.0
+            ]
+          },
+          "eccentricity": {
+            "dtype": "float64",
+            "shape": [
+              1
+            ],
+            "values": [
+              0.7530199951220438
+            ]
+          },
+          "effective_wind_speed": {
+            "dtype": "float64",
+            "shape": [
+              1
+            ],
+            "values": [
+              4.568588730799908
+            ]
+          },
+          "fire_length_to_width_ratio": {
+            "dtype": "float64",
+            "shape": [
+              1
+            ],
+            "values": [
+              1.5197623025355638
+            ]
+          },
+          "fireline_intensity": {
+            "dtype": "float64",
+            "shape": [
+              1
+            ],
+            "values": [
+              191.9305011705305
+            ]
+          },
+          "flame_length": {
+            "dtype": "float64",
+            "shape": [
+              1
+            ],
+            "values": [
+              5.051946614138909
+            ]
+          },
+          "flanking_spread_rate": {
+            "dtype": "float64",
+            "shape": [
+              1
+            ],
+            "values": [
+              3.345542158587573
+            ]
+          },
+          "heat_per_unit_area": {
+            "dtype": "float64",
+            "shape": [
+              1
+            ],
+            "values": [
+              1292.010976547856
+            ]
+          },
+          "midflame_wind_speed": {
+            "dtype": "float64",
+            "shape": [
+              1
+            ],
+            "values": [
+              176.0
+            ]
+          },
+          "no_wind_no_slope_spread_rate": {
+            "dtype": "float64",
+            "shape": [
+              1
+            ],
+            "values": [
+              0.931068635165744
+            ]
+          },
+          "reaction_intensity": {
+            "dtype": "float64",
+            "shape": [
+              1
+            ],
+            "values": [
+              5936.29241146134
+            ]
+          },
+          "residence_time": {
+            "dtype": "float64",
+            "shape": [
+              1
+            ],
+            "values": [
+              0.217646114273842
+            ]
+          },
+          "spread_rate": {
+            "dtype": "float64",
+            "shape": [
+              1
+            ],
+            "values": [
+              8.913105445126444
+            ]
+          }
+        },
+        "ib_crown": {
+          "bulk_density": {
+            "dtype": "float64",
+            "shape": [
+              1
+            ],
+            "values": [
+              0.552
+            ]
+          },
+          "depth": {
+            "dtype": "float64",
+            "shape": [
+              1
+            ],
+            "values": [
+              1.0
+            ]
+          },
+          "frac_dead": {
+            "dtype": "float64",
+            "shape": [
+              1
+            ],
+            "values": [
+              0.6797608881298036
+            ]
+          },
+          "frac_live": {
+            "dtype": "float64",
+            "shape": [
+              1
+            ],
+            "values": [
+              0.3202391118701964
+            ]
+          },
+          "heat_sink": {
+            "dtype": "float64",
+            "shape": [
+              1
+            ],
+            "values": [
+              308.0591522358192
+            ]
+          },
+          "is_defined": {
+            "dtype": "bool",
+            "shape": [
+              1
+            ],
+            "values": [
+              true
+            ]
+          },
+          "moe_dead": {
+            "dtype": "float64",
+            "shape": [
+              1
+            ],
+            "values": [
+              0.25
+            ]
+          },
+          "moe_live": {
+            "dtype": "float64",
+            "shape": [
+              1
+            ],
+            "values": [
+              4.971020315483196
+            ]
+          },
+          "packing_ratio": {
+            "dtype": "float64",
+            "shape": [
+              1
+            ],
+            "values": [
+              0.01725
+            ]
+          },
+          "propagating_flux": {
+            "dtype": "float64",
+            "shape": [
+              1
+            ],
+            "values": [
+              0.04831706299857165
+            ]
+          },
+          "relative_packing_ratio": {
+            "dtype": "float64",
+            "shape": [
+              1
+            ],
+            "values": [
+              2.347622499048028
+            ]
+          },
+          "sigma": {
+            "dtype": "float64",
+            "shape": [
+              1
+            ],
+            "values": [
+              1764.3319812126385
+            ]
+          },
+          "w_heat_dead": {
+            "dtype": "float64",
+            "shape": [
+              1
+            ],
+            "values": [
+              8000.0
+            ]
+          },
+          "w_heat_live": {
+            "dtype": "float64",
+            "shape": [
+              1
+            ],
+            "values": [
+              8000.0
+            ]
+          },
+          "w_moist_dead": {
+            "dtype": "float64",
+            "shape": [
+              1
+            ],
+            "values": [
+              0.06081344221105528
+            ]
+          },
+          "w_moist_live": {
+            "dtype": "float64",
+            "shape": [
+              1
+            ],
+            "values": [
+              0.9
+            ]
+          },
+          "w_silica_dead": {
+            "dtype": "float64",
+            "shape": [
+              1
+            ],
+            "values": [
+              0.01
+            ]
+          },
+          "w_silica_live": {
+            "dtype": "float64",
+            "shape": [
+              1
+            ],
+            "values": [
+              0.01
+            ]
+          },
+          "wfl_dead": {
+            "dtype": "float64",
+            "shape": [
+              1
+            ],
+            "values": [
+              0.13090046199748745
+            ]
+          },
+          "wfl_live": {
+            "dtype": "float64",
+            "shape": [
+              1
+            ],
+            "values": [
+              0.086894
+            ]
+          }
+        },
+        "p_crown": {
+          "depth": {
+            "dtype": "float64",
+            "shape": [
+              1
+            ],
+            "values": [
+              1.0
+            ]
+          },
+          "hoc_dead": {
+            "dtype": "float64",
+            "shape": [
+              1
+            ],
+            "values": [
+              8000.0
+            ]
+          },
+          "hoc_live": {
+            "dtype": "float64",
+            "shape": [
+              1
+            ],
+            "values": [
+              8000.0
+            ]
+          },
+          "is_defined": {
+            "dtype": "bool",
+            "shape": [
+              1
+            ],
+            "values": [
+              true
+            ]
+          },
+          "load_dead": {
+            "dtype": "float64",
+            "shape": [
+              5,
+              1
+            ],
+            "values": [
+              0.138,
+              0.092,
+              0.23,
+              0.0,
+              0.0
+            ]
+          },
+          "load_live": {
+            "dtype": "float64",
+            "shape": [
+              5,
+              1
+            ],
+            "values": [
+              0.0,
+              0.092,
+              0.0,
+              0.0,
+              0.0
+            ]
+          },
+          "moe_dead": {
+            "dtype": "float64",
+            "shape": [
+              1
+            ],
+            "values": [
+              0.25
+            ]
+          },
+          "moisture_dead": {
+            "dtype": "float64",
+            "shape": [
+              5,
+              1
+            ],
+            "values": [
+              0.06,
+              0.07,
+              0.08,
+              0.06,
+              0.0
+            ]
+          },
+          "moisture_live": {
+            "dtype": "float64",
+            "shape": [
+              5,
+              1
+            ],
+            "values": [
+              0.6,
+              0.9,
+              0.0,
+              0.0,
+              0.0
+            ]
+          },
+          "savr_dead": {
+            "dtype": "float64",
+            "shape": [
+              5,
+              1
+            ],
+            "values": [
+              2000.0,
+              109.0,
+              30.0,
+              1500.0,
+              0.0
+            ]
+          },
+          "savr_live": {
+            "dtype": "float64",
+            "shape": [
+              5,
+              1
+            ],
+            "values": [
+              1500.0,
+              1500.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        },
+        "ri_crown": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            5936.29241146134
+          ]
+        }
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.crown.calculate_crowning_surface_fire_spread_rate",
+      "id": "calculate_crowning_surface_fire_spread_rate/baseline",
+      "inputs": {
+        "S": [
+          1
+        ],
+        "canopy_height": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            30.0
+          ]
+        },
+        "critical_crown_ros": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            30.0
+          ]
+        },
+        "ib_crown": {
+          "bulk_density": {
+            "dtype": "float64",
+            "shape": [
+              1
+            ],
+            "values": [
+              0.27985482530937067
+            ]
+          },
+          "depth": {
+            "dtype": "float64",
+            "shape": [
+              1
+            ],
+            "values": [
+              2.1
+            ]
+          },
+          "frac_dead": {
+            "dtype": "float64",
+            "shape": [
+              1
+            ],
+            "values": [
+              0.34973760472360865
+            ]
+          },
+          "frac_live": {
+            "dtype": "float64",
+            "shape": [
+              1
+            ],
+            "values": [
+              0.6502623952763913
+            ]
+          },
+          "heat_sink": {
+            "dtype": "float64",
+            "shape": [
+              1
+            ],
+            "values": [
+              230.2140106057726
+            ]
+          },
+          "is_defined": {
+            "dtype": "bool",
+            "shape": [
+              1
+            ],
+            "values": [
+              true
+            ]
+          },
+          "moe_dead": {
+            "dtype": "float64",
+            "shape": [
+              1
+            ],
+            "values": [
+              0.4
+            ]
+          },
+          "moe_live": {
+            "dtype": "float64",
+            "shape": [
+              1
+            ],
+            "values": [
+              1.3796855050581867
+            ]
+          },
+          "packing_ratio": {
+            "dtype": "float64",
+            "shape": [
+              1
+            ],
+            "values": [
+              0.008745463290917833
+            ]
+          },
+          "propagating_flux": {
+            "dtype": "float64",
+            "shape": [
+              1
+            ],
+            "values": [
+              0.035258653482453904
+            ]
+          },
+          "relative_packing_ratio": {
+            "dtype": "float64",
+            "shape": [
+              1
+            ],
+            "values": [
+              1.1161022669667497
+            ]
+          },
+          "sigma": {
+            "dtype": "float64",
+            "shape": [
+              1
+            ],
+            "values": [
+              1631.1287341340953
+            ]
+          },
+          "w_heat_dead": {
+            "dtype": "float64",
+            "shape": [
+              1
+            ],
+            "values": [
+              8000.0
+            ]
+          },
+          "w_heat_live": {
+            "dtype": "float64",
+            "shape": [
+              1
+            ],
+            "values": [
+              8000.0
+            ]
+          },
+          "w_moist_dead": {
+            "dtype": "float64",
+            "shape": [
+              1
+            ],
+            "values": [
+              0.06005462876437356
+            ]
+          },
+          "w_moist_live": {
+            "dtype": "float64",
+            "shape": [
+              1
+            ],
+            "values": [
+              0.8587400694832488
+            ]
+          },
+          "w_silica_dead": {
+            "dtype": "float64",
+            "shape": [
+              1
+            ],
+            "values": [
+              0.009999999999999998
+            ]
+          },
+          "w_silica_live": {
+            "dtype": "float64",
+            "shape": [
+              1
+            ],
+            "values": [
+              0.01
+            ]
+          },
+          "wfl_dead": {
+            "dtype": "float64",
+            "shape": [
+              1
+            ],
+            "values": [
+              0.17988969211945832
+            ]
+          },
+          "wfl_live": {
+            "dtype": "float64",
+            "shape": [
+              1
+            ],
+            "values": [
+              0.35699324609733696
+            ]
+          }
+        },
+        "ri_crown": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            15618.346005410247
+          ]
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [
+          1
+        ],
+        "values": [
+          11.414932382849063
+        ]
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.crown.calculate_passive_crown_fire_behavior",
+      "id": "calculate_passive_crown_fire_behavior/baseline",
+      "inputs": {
+        "canopy_hpua": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            1000.0
+          ]
+        },
+        "cfb": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.4
+          ]
+        },
+        "crown_ros": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            40.0
+          ]
+        },
+        "surface_hpua": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            1000.0
+          ]
+        },
+        "surface_ros": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            10.0
+          ]
+        }
+      },
+      "output": {
+        "passive_crown_fire_flame_length": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            12.82221258830683
+          ]
+        },
+        "passive_crown_fire_heat_per_unit_area": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            1400.0
+          ]
+        },
+        "passive_crown_fire_line_intensity": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            513.3333333333334
+          ]
+        },
+        "passive_crown_fire_spread_rate": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            22.0
+          ]
+        }
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.crown.calculate_surface_fire_critical_spread_rate",
+      "id": "calculate_surface_fire_critical_spread_rate/baseline",
+      "inputs": {
+        "critical_surface_fli": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            150.0
+          ]
+        },
+        "surface_hpua": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            1000.0
+          ]
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [
+          1
+        ],
+        "values": [
+          9.0
+        ]
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.crown.classify_crown_fire_type",
+      "id": "classify_crown_fire_type/baseline",
+      "inputs": {
+        "active_ratio": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            1.0
+          ]
+        },
+        "transition_ratio": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            1.0
+          ]
+        }
+      },
+      "output": {
+        "fire_type": {
+          "dtype": "int32",
+          "shape": [
+            1
+          ],
+          "values": [
+            3
+          ]
+        },
+        "is_active_crown": {
+          "dtype": "bool",
+          "shape": [
+            1
+          ],
+          "values": [
+            true
+          ]
+        },
+        "is_passive_crown": {
+          "dtype": "bool",
+          "shape": [
+            1
+          ],
+          "values": [
+            false
+          ]
+        },
+        "is_surface_fire": {
+          "dtype": "bool",
+          "shape": [
+            1
+          ],
+          "values": [
+            false
+          ]
+        }
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.crown.coerce_crown_fire_inputs",
+      "id": "coerce_crown_fire_inputs/baseline",
+      "inputs": {
+        "aspect": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.0
+          ]
+        },
+        "canopy_base_height": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            6.0
+          ]
+        },
+        "canopy_bulk_density": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.02
+          ]
+        },
+        "canopy_height": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            30.0
+          ]
+        },
+        "fuel_model_grid": {
+          "dtype": "int64",
+          "shape": [
+            1
+          ],
+          "values": [
+            124
+          ]
+        },
+        "moisture_foliar": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            100.0
+          ]
+        },
+        "slope": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            30.0
+          ]
+        },
+        "slope_units": 0,
+        "wind_direction": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.0
+          ]
+        },
+        "wind_speed": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            5.0
+          ]
+        }
+      },
+      "output": {
+        "S": [
+          1
+        ],
+        "aspect": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.0
+          ]
+        },
+        "cbd": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.02
+          ]
+        },
+        "cbh": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            6.0
+          ]
+        },
+        "ch": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            30.0
+          ]
+        },
+        "fm_grid": {
+          "dtype": "int32",
+          "shape": [
+            1
+          ],
+          "values": [
+            124
+          ]
+        },
+        "mf_pct": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            100.0
+          ]
+        },
+        "slope_deg": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            30.0
+          ]
+        },
+        "wind_dir": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.0
+          ]
+        },
+        "wind_speed": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            5.0
+          ]
+        }
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.crown.get_surface_fire_inputs",
+      "id": "get_surface_fire_inputs/baseline",
+      "inputs": {
+        "surface_results": {
+          "backing_spread_rate": {
+            "dtype": "float64",
+            "shape": [
+              1
+            ],
+            "values": [
+              4.041632504965199
+            ]
+          },
+          "direction_of_max_spread": {
+            "dtype": "float64",
+            "shape": [
+              1
+            ],
+            "values": [
+              0.0
+            ]
+          },
+          "eccentricity": {
+            "dtype": "float64",
+            "shape": [
+              1
+            ],
+            "values": [
+              0.6953216094293053
+            ]
+          },
+          "effective_wind_speed": {
+            "dtype": "float64",
+            "shape": [
+              1
+            ],
+            "values": [
+              3.7051255042421216
+            ]
+          },
+          "fire_length_to_width_ratio": {
+            "dtype": "float64",
+            "shape": [
+              1
+            ],
+            "values": [
+              1.3914036064619277
+            ]
+          },
+          "fireline_intensity": {
+            "dtype": "float64",
+            "shape": [
+              1
+            ],
+            "values": [
+              1378.1422341132102
+            ]
+          },
+          "flame_length": {
+            "dtype": "float64",
+            "shape": [
+              1
+            ],
+            "values": [
+              12.510877541724277
+            ]
+          },
+          "flanking_spread_rate": {
+            "dtype": "float64",
+            "shape": [
+              1
+            ],
+            "values": [
+              9.533712347714209
+            ]
+          },
+          "heat_per_unit_area": {
+            "dtype": "float64",
+            "shape": [
+              1
+            ],
+            "values": [
+              3676.867889438139
+            ]
+          },
+          "midflame_wind_speed": {
+            "dtype": "float64",
+            "shape": [
+              1
+            ],
+            "values": [
+              74.7364097323155
+            ]
+          },
+          "no_wind_no_slope_spread_rate": {
+            "dtype": "float64",
+            "shape": [
+              1
+            ],
+            "values": [
+              2.3920431615990436
+            ]
+          },
+          "reaction_intensity": {
+            "dtype": "float64",
+            "shape": [
+              1
+            ],
+            "values": [
+              15618.346005410247
+            ]
+          },
+          "residence_time": {
+            "dtype": "float64",
+            "shape": [
+              1
+            ],
+            "values": [
+              0.23541979977677918
+            ]
+          },
+          "spread_rate": {
+            "dtype": "float64",
+            "shape": [
+              1
+            ],
+            "values": [
+              22.488850982195125
+            ]
+          }
+        }
+      },
+      "output": {
+        "surface_fli": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            1378.1422341132102
+          ]
+        },
+        "surface_hpua": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            3676.867889438139
+          ]
+        },
+        "surface_ros": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            22.488850982195125
+          ]
+        }
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.crown.run_crown_fire",
+      "id": "run_crown_fire/baseline",
+      "inputs": {
+        "aspect": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.0
+          ]
+        },
+        "canopy_base_height": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            6.0
+          ]
+        },
+        "canopy_bulk_density": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.02
+          ]
+        },
+        "canopy_height": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            30.0
+          ]
+        },
+        "fuel_model_grid": {
+          "dtype": "int64",
+          "shape": [
+            1
+          ],
+          "values": [
+            124
+          ]
+        },
+        "lut": {
+          "reference": "fuels:standard_lookup"
+        },
+        "m100h": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.08
+          ]
+        },
+        "m10h": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.07
+          ]
+        },
+        "m1h": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.06
+          ]
+        },
+        "mlh": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.6
+          ]
+        },
+        "mlw": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.9
+          ]
+        },
+        "moisture_foliar": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            100.0
+          ]
+        },
+        "slope": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            30.0
+          ]
+        },
+        "slope_units": 0,
+        "surface_results": {
+          "backing_spread_rate": {
+            "dtype": "float64",
+            "shape": [
+              1
+            ],
+            "values": [
+              4.041632504965199
+            ]
+          },
+          "direction_of_max_spread": {
+            "dtype": "float64",
+            "shape": [
+              1
+            ],
+            "values": [
+              0.0
+            ]
+          },
+          "eccentricity": {
+            "dtype": "float64",
+            "shape": [
+              1
+            ],
+            "values": [
+              0.6953216094293053
+            ]
+          },
+          "effective_wind_speed": {
+            "dtype": "float64",
+            "shape": [
+              1
+            ],
+            "values": [
+              3.7051255042421216
+            ]
+          },
+          "fire_length_to_width_ratio": {
+            "dtype": "float64",
+            "shape": [
+              1
+            ],
+            "values": [
+              1.3914036064619277
+            ]
+          },
+          "fireline_intensity": {
+            "dtype": "float64",
+            "shape": [
+              1
+            ],
+            "values": [
+              1378.1422341132102
+            ]
+          },
+          "flame_length": {
+            "dtype": "float64",
+            "shape": [
+              1
+            ],
+            "values": [
+              12.510877541724277
+            ]
+          },
+          "flanking_spread_rate": {
+            "dtype": "float64",
+            "shape": [
+              1
+            ],
+            "values": [
+              9.533712347714209
+            ]
+          },
+          "heat_per_unit_area": {
+            "dtype": "float64",
+            "shape": [
+              1
+            ],
+            "values": [
+              3676.867889438139
+            ]
+          },
+          "midflame_wind_speed": {
+            "dtype": "float64",
+            "shape": [
+              1
+            ],
+            "values": [
+              74.7364097323155
+            ]
+          },
+          "no_wind_no_slope_spread_rate": {
+            "dtype": "float64",
+            "shape": [
+              1
+            ],
+            "values": [
+              2.3920431615990436
+            ]
+          },
+          "reaction_intensity": {
+            "dtype": "float64",
+            "shape": [
+              1
+            ],
+            "values": [
+              15618.346005410247
+            ]
+          },
+          "residence_time": {
+            "dtype": "float64",
+            "shape": [
+              1
+            ],
+            "values": [
+              0.23541979977677918
+            ]
+          },
+          "spread_rate": {
+            "dtype": "float64",
+            "shape": [
+              1
+            ],
+            "values": [
+              22.488850982195125
+            ]
+          }
+        },
+        "wind_direction": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.0
+          ]
+        },
+        "wind_orientation_mode": "RelativeToUpslope",
+        "wind_speed": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            5.0
+          ]
+        },
+        "wind_speed_units": 5
+      },
+      "output": {
+        "canopy_heat_per_unit_area": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            3840.0
+          ]
+        },
+        "crown_critical_fire_spread_rate": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            30.72235228017605
+          ]
+        },
+        "crown_critical_surface_fire_line_intensity": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            120.25512367304093
+          ]
+        },
+        "crown_fire_active_ratio": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.9689939076029542
+          ]
+        },
+        "crown_fire_heat_per_unit_area": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            7516.867889438139
+          ]
+        },
+        "crown_fire_line_intensity": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            3729.590743771027
+          ]
+        },
+        "crown_fire_spread_rate": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            29.76977218672232
+          ]
+        },
+        "crown_fire_transition_ratio": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            11.460153979469611
+          ]
+        },
+        "crown_flame_length": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            48.099155119081715
+          ]
+        },
+        "crown_fraction_burned": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            1.0
+          ]
+        },
+        "crown_length_to_width_ratio": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            1.5710735913499885
+          ]
+        },
+        "crowning_surface_fire_spread_rate": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            9.198309065920961
+          ]
+        },
+        "final_fireline_intensity": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            3729.590743771027
+          ]
+        },
+        "final_flame_length": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            48.099155119081715
+          ]
+        },
+        "final_heat_per_unit_area": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            7516.867889438139
+          ]
+        },
+        "final_spread_rate": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            29.76977218672232
+          ]
+        },
+        "fire_type": {
+          "dtype": "int32",
+          "shape": [
+            1
+          ],
+          "values": [
+            1
+          ]
+        },
+        "passive_crown_fire_flame_length": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            48.099155119081715
+          ]
+        },
+        "passive_crown_fire_heat_per_unit_area": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            7516.867889438139
+          ]
+        },
+        "passive_crown_fire_line_intensity": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            3729.590743771027
+          ]
+        },
+        "passive_crown_fire_spread_rate": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            29.76977218672232
+          ]
+        },
+        "surface_fire_critical_spread_rate": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            1.9623515550037953
+          ]
+        }
+      },
+      "policy": "acceptance",
+      "warnings": []
+    }
+  ],
+  "provenance": {
+    "oracle": "explicit Python",
+    "python_reference_sha": "7933789f00470c6bbfbe942dc22bdd7f74e192f9",
+    "source_sha256": {
+      "src/behave_fire/__init__.py": "6e49d8e5eddb383cafbf19632a7407cb767fc976ff820b7e635d5d639ab4882f",
+      "src/behave_fire/behave.py": "8b9c35cfe18024ba1186ba5240f939c9b647dcca8d026d7db18c447421e9f6b1",
+      "src/behave_fire/components/__init__.py": "5c88705dcf2a4073bc79bd49e5038172bd0fa5b15ca9e77d6f9717424282519d",
+      "src/behave_fire/components/behave_units.py": "426581d91466c64bdbf60bd8a686030fe8244303cdbd097b1838479937abab77",
+      "src/behave_fire/components/contain.py": "fae224dee8ecdb090e7c3e6dc73a219508a026726e1ab3483776d54121a81bb7",
+      "src/behave_fire/components/crown.py": "0e0f5fe9b8c3074b192528b020232cc95e66470d59daa3a057544c75d7d93a03",
+      "src/behave_fire/components/fine_dead_fuel_moisture_tool.py": "cb11fc2da53c66b7f7753e88aa1d1f2135c91c3e67962912d1b2c097a73a8e60",
+      "src/behave_fire/components/fire_size.py": "23c671131ae710cfa441a14307cc0dfeb2e3d36b276fc112a5308827fe9e40dc",
+      "src/behave_fire/components/fuel_models.py": "ee1b886c72c8bb0e14a4c883745b4dde97ee3e011c7fddddc5e8b63e4588d225",
+      "src/behave_fire/components/fuel_models_array.py": "f60af63d681be852ff4fe6c3864ef55521c745da6ab182382caee4543e057125",
+      "src/behave_fire/components/ignite.py": "f0518ee4bc484f1b5478ad4792ecba77481bb68dda48abd0c45442ecb78523fc",
+      "src/behave_fire/components/mortality.py": "ccdaff07b59ef140786031d8957dd3cdafbbd97fd5e372e5fe4abcb392f5bcac",
+      "src/behave_fire/components/safety.py": "ed27e7cef7aa488a92636f8dfa589fadca3e0c6ba44ccae87a9fd7c8bac168a0",
+      "src/behave_fire/components/slope_tool.py": "754ce32058173b6c149135f9b1ec443f8be21679c7cf6c8e0a64d7ef5f3fb49c",
+      "src/behave_fire/components/species_master_table.py": "afa06eb15e475d252eef8b54d34be0d202c5c0f664d75e2c87c783a3831e8c11",
+      "src/behave_fire/components/spot.py": "a0411ecf7606ee75f4b460c084cb461e0c39619a3c14ad96a4c0217733456a22",
+      "src/behave_fire/components/surface.py": "133c6938ea701599428824d1d210ca2449d9103a5324cffc3c2a0db5330e4550",
+      "src/behave_fire/components/vapor_pressure_deficit_calculator.py": "4b165f3d48a02ab49c0fcdd2a5a7df65bab8b4a6366a280cbbf23041488eb258"
+    }
+  },
+  "schema_version": 1
+}

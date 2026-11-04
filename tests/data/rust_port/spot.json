@@ -1,0 +1,4805 @@
+{
+  "cases": [
+    {
+      "entry_point": "behave_fire.components.spot.calculate_spotting_from_burning_pile",
+      "id": "calculate_spotting_from_burning_pile/baseline",
+      "inputs": {
+        "cover_height_ft": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            10.0
+          ]
+        },
+        "flame_height_ft": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            5.0
+          ]
+        },
+        "wind_mph": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            5.0
+          ]
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [
+          1
+        ],
+        "values": [
+          29.157674975477576
+        ]
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.spot.calculate_spotting_from_burning_pile",
+      "id": "calculate_spotting_from_burning_pile/dtype-float16",
+      "inputs": {
+        "cover_height_ft": {
+          "dtype": "float16",
+          "shape": [
+            1
+          ],
+          "values": [
+            10.0
+          ]
+        },
+        "flame_height_ft": {
+          "dtype": "float16",
+          "shape": [
+            1
+          ],
+          "values": [
+            5.0
+          ]
+        },
+        "wind_mph": {
+          "dtype": "float16",
+          "shape": [
+            1
+          ],
+          "values": [
+            5.0
+          ]
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [
+          1
+        ],
+        "values": [
+          29.157674975477576
+        ]
+      },
+      "policy": "diagnostic",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.spot.calculate_spotting_from_burning_pile",
+      "id": "calculate_spotting_from_burning_pile/dtype-float16/normalized",
+      "inputs": {
+        "cover_height_ft": {
+          "dtype": "float32",
+          "shape": [
+            1
+          ],
+          "values": [
+            10.0
+          ]
+        },
+        "flame_height_ft": {
+          "dtype": "float32",
+          "shape": [
+            1
+          ],
+          "values": [
+            5.0
+          ]
+        },
+        "wind_mph": {
+          "dtype": "float32",
+          "shape": [
+            1
+          ],
+          "values": [
+            5.0
+          ]
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [
+          1
+        ],
+        "values": [
+          29.157674975477576
+        ]
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.spot.calculate_spotting_from_burning_pile",
+      "id": "calculate_spotting_from_burning_pile/dtype-float32",
+      "inputs": {
+        "cover_height_ft": {
+          "dtype": "float32",
+          "shape": [
+            1
+          ],
+          "values": [
+            10.0
+          ]
+        },
+        "flame_height_ft": {
+          "dtype": "float32",
+          "shape": [
+            1
+          ],
+          "values": [
+            5.0
+          ]
+        },
+        "wind_mph": {
+          "dtype": "float32",
+          "shape": [
+            1
+          ],
+          "values": [
+            5.0
+          ]
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [
+          1
+        ],
+        "values": [
+          29.157674975477576
+        ]
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.spot.calculate_spotting_from_burning_pile",
+      "id": "calculate_spotting_from_burning_pile/dtype-float64",
+      "inputs": {
+        "cover_height_ft": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            10.0
+          ]
+        },
+        "flame_height_ft": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            5.0
+          ]
+        },
+        "wind_mph": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            5.0
+          ]
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [
+          1
+        ],
+        "values": [
+          29.157674975477576
+        ]
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.spot.calculate_spotting_from_burning_pile",
+      "id": "calculate_spotting_from_burning_pile/dtype-int64",
+      "inputs": {
+        "cover_height_ft": {
+          "dtype": "int64",
+          "shape": [
+            1
+          ],
+          "values": [
+            10
+          ]
+        },
+        "flame_height_ft": {
+          "dtype": "int64",
+          "shape": [
+            1
+          ],
+          "values": [
+            5
+          ]
+        },
+        "wind_mph": {
+          "dtype": "int64",
+          "shape": [
+            1
+          ],
+          "values": [
+            5
+          ]
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [
+          1
+        ],
+        "values": [
+          29.157674975477576
+        ]
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.spot.calculate_spotting_from_burning_pile",
+      "id": "calculate_spotting_from_burning_pile/dtype-uint32",
+      "inputs": {
+        "cover_height_ft": {
+          "dtype": "uint32",
+          "shape": [
+            1
+          ],
+          "values": [
+            10
+          ]
+        },
+        "flame_height_ft": {
+          "dtype": "uint32",
+          "shape": [
+            1
+          ],
+          "values": [
+            5
+          ]
+        },
+        "wind_mph": {
+          "dtype": "uint32",
+          "shape": [
+            1
+          ],
+          "values": [
+            5
+          ]
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [
+          1
+        ],
+        "values": [
+          29.157674975477576
+        ]
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.spot.calculate_spotting_from_burning_pile",
+      "id": "calculate_spotting_from_burning_pile/dtype-bool",
+      "inputs": {
+        "cover_height_ft": {
+          "dtype": "bool",
+          "shape": [
+            1
+          ],
+          "values": [
+            true
+          ]
+        },
+        "flame_height_ft": {
+          "dtype": "bool",
+          "shape": [
+            1
+          ],
+          "values": [
+            true
+          ]
+        },
+        "wind_mph": {
+          "dtype": "bool",
+          "shape": [
+            1
+          ],
+          "values": [
+            true
+          ]
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [
+          1
+        ],
+        "values": [
+          2.995850444732822
+        ]
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.spot.calculate_spotting_from_burning_pile",
+      "id": "calculate_spotting_from_burning_pile/dtype-object",
+      "inputs": {
+        "cover_height_ft": {
+          "dtype": "object",
+          "shape": [
+            1
+          ],
+          "values": [
+            10
+          ]
+        },
+        "flame_height_ft": {
+          "dtype": "object",
+          "shape": [
+            1
+          ],
+          "values": [
+            5
+          ]
+        },
+        "wind_mph": {
+          "dtype": "object",
+          "shape": [
+            1
+          ],
+          "values": [
+            5
+          ]
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [
+          1
+        ],
+        "values": [
+          29.157674975477576
+        ]
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.spot.calculate_spotting_from_burning_pile",
+      "id": "calculate_spotting_from_burning_pile/scalar",
+      "inputs": {
+        "cover_height_ft": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            10.0
+          ]
+        },
+        "flame_height_ft": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            5.0
+          ]
+        },
+        "wind_mph": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            5.0
+          ]
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [],
+        "values": [
+          29.157674975477576
+        ]
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.spot.calculate_spotting_from_burning_pile",
+      "id": "calculate_spotting_from_burning_pile/2d",
+      "inputs": {
+        "cover_height_ft": {
+          "dtype": "float64",
+          "shape": [
+            2,
+            2
+          ],
+          "values": [
+            10.0,
+            10.0,
+            10.0,
+            10.0
+          ]
+        },
+        "flame_height_ft": {
+          "dtype": "float64",
+          "shape": [
+            2,
+            2
+          ],
+          "values": [
+            5.0,
+            5.0,
+            5.0,
+            5.0
+          ]
+        },
+        "wind_mph": {
+          "dtype": "float64",
+          "shape": [
+            2,
+            2
+          ],
+          "values": [
+            5.0,
+            5.0,
+            5.0,
+            5.0
+          ]
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [
+          2,
+          2
+        ],
+        "values": [
+          29.157674975477576,
+          29.157674975477576,
+          29.157674975477576,
+          29.157674975477576
+        ]
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.spot.calculate_spotting_from_burning_pile",
+      "id": "calculate_spotting_from_burning_pile/3d",
+      "inputs": {
+        "cover_height_ft": {
+          "dtype": "float64",
+          "shape": [
+            1,
+            2,
+            2
+          ],
+          "values": [
+            10.0,
+            10.0,
+            10.0,
+            10.0
+          ]
+        },
+        "flame_height_ft": {
+          "dtype": "float64",
+          "shape": [
+            1,
+            2,
+            2
+          ],
+          "values": [
+            5.0,
+            5.0,
+            5.0,
+            5.0
+          ]
+        },
+        "wind_mph": {
+          "dtype": "float64",
+          "shape": [
+            1,
+            2,
+            2
+          ],
+          "values": [
+            5.0,
+            5.0,
+            5.0,
+            5.0
+          ]
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [
+          1,
+          2,
+          2
+        ],
+        "values": [
+          29.157674975477576,
+          29.157674975477576,
+          29.157674975477576,
+          29.157674975477576
+        ]
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.spot.calculate_spotting_from_burning_pile",
+      "id": "calculate_spotting_from_burning_pile/empty",
+      "inputs": {
+        "cover_height_ft": {
+          "dtype": "float64",
+          "shape": [
+            0
+          ],
+          "values": []
+        },
+        "flame_height_ft": {
+          "dtype": "float64",
+          "shape": [
+            0
+          ],
+          "values": []
+        },
+        "wind_mph": {
+          "dtype": "float64",
+          "shape": [
+            0
+          ],
+          "values": []
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [
+          0
+        ],
+        "values": []
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.spot.calculate_spotting_from_burning_pile",
+      "id": "calculate_spotting_from_burning_pile/zero",
+      "inputs": {
+        "cover_height_ft": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            10.0
+          ]
+        },
+        "flame_height_ft": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.0
+          ]
+        },
+        "wind_mph": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            5.0
+          ]
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [
+          1
+        ],
+        "values": [
+          0.0
+        ]
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.spot.calculate_spotting_from_burning_pile",
+      "id": "calculate_spotting_from_burning_pile/negative",
+      "inputs": {
+        "cover_height_ft": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            10.0
+          ]
+        },
+        "flame_height_ft": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            -1.0
+          ]
+        },
+        "wind_mph": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            5.0
+          ]
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [
+          1
+        ],
+        "values": [
+          0.0
+        ]
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.spot.calculate_spotting_from_burning_pile",
+      "id": "calculate_spotting_from_burning_pile/nan",
+      "inputs": {
+        "cover_height_ft": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            10.0
+          ]
+        },
+        "flame_height_ft": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            {
+              "float": "nan"
+            }
+          ]
+        },
+        "wind_mph": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            5.0
+          ]
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [
+          1
+        ],
+        "values": [
+          0.0
+        ]
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.spot.calculate_spotting_from_burning_pile",
+      "id": "calculate_spotting_from_burning_pile/positive-infinity",
+      "inputs": {
+        "cover_height_ft": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            10.0
+          ]
+        },
+        "flame_height_ft": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            {
+              "float": "+inf"
+            }
+          ]
+        },
+        "wind_mph": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            5.0
+          ]
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [
+          1
+        ],
+        "values": [
+          {
+            "float": "nan"
+          }
+        ]
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.spot.calculate_spotting_from_burning_pile",
+      "id": "calculate_spotting_from_burning_pile/negative-infinity",
+      "inputs": {
+        "cover_height_ft": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            10.0
+          ]
+        },
+        "flame_height_ft": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            {
+              "float": "-inf"
+            }
+          ]
+        },
+        "wind_mph": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            5.0
+          ]
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [
+          1
+        ],
+        "values": [
+          0.0
+        ]
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.spot.calculate_spotting_from_burning_pile",
+      "id": "calculate_spotting_from_burning_pile/below-threshold",
+      "inputs": {
+        "cover_height_ft": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            10.0
+          ]
+        },
+        "flame_height_ft": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            9.999999999999998e-08
+          ]
+        },
+        "wind_mph": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            5.0
+          ]
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [
+          1
+        ],
+        "values": [
+          0.0
+        ]
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.spot.calculate_spotting_from_burning_pile",
+      "id": "calculate_spotting_from_burning_pile/at-threshold",
+      "inputs": {
+        "cover_height_ft": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            10.0
+          ]
+        },
+        "flame_height_ft": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            1e-07
+          ]
+        },
+        "wind_mph": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            5.0
+          ]
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [
+          1
+        ],
+        "values": [
+          0.0
+        ]
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.spot.calculate_spotting_from_burning_pile",
+      "id": "calculate_spotting_from_burning_pile/above-threshold",
+      "inputs": {
+        "cover_height_ft": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            10.0
+          ]
+        },
+        "flame_height_ft": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            1.0000000000000001e-07
+          ]
+        },
+        "wind_mph": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            5.0
+          ]
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [
+          1
+        ],
+        "values": [
+          19.310390260585514
+        ]
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.spot.calculate_spotting_from_burning_pile",
+      "id": "calculate_spotting_from_burning_pile/float16-overflow",
+      "inputs": {
+        "cover_height_ft": {
+          "dtype": "float16",
+          "shape": [
+            1
+          ],
+          "values": [
+            10.0
+          ]
+        },
+        "flame_height_ft": {
+          "dtype": "float16",
+          "shape": [
+            1
+          ],
+          "values": [
+            300.0
+          ]
+        },
+        "wind_mph": {
+          "dtype": "float16",
+          "shape": [
+            1
+          ],
+          "values": [
+            5.0
+          ]
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [
+          1
+        ],
+        "values": [
+          186.71958901561635
+        ]
+      },
+      "policy": "diagnostic",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.spot.calculate_spotting_from_burning_pile",
+      "id": "calculate_spotting_from_burning_pile/float16-overflow/normalized",
+      "inputs": {
+        "cover_height_ft": {
+          "dtype": "float32",
+          "shape": [
+            1
+          ],
+          "values": [
+            10.0
+          ]
+        },
+        "flame_height_ft": {
+          "dtype": "float32",
+          "shape": [
+            1
+          ],
+          "values": [
+            300.0
+          ]
+        },
+        "wind_mph": {
+          "dtype": "float32",
+          "shape": [
+            1
+          ],
+          "values": [
+            5.0
+          ]
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [
+          1
+        ],
+        "values": [
+          186.71958901561635
+        ]
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.spot.calculate_spotting_from_burning_pile",
+      "id": "calculate_spotting_from_burning_pile/float16-underflow",
+      "inputs": {
+        "cover_height_ft": {
+          "dtype": "float16",
+          "shape": [
+            1
+          ],
+          "values": [
+            10.0
+          ]
+        },
+        "flame_height_ft": {
+          "dtype": "float16",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.0
+          ]
+        },
+        "wind_mph": {
+          "dtype": "float16",
+          "shape": [
+            1
+          ],
+          "values": [
+            5.0
+          ]
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [
+          1
+        ],
+        "values": [
+          0.0
+        ]
+      },
+      "policy": "diagnostic",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.spot.calculate_spotting_from_burning_pile",
+      "id": "calculate_spotting_from_burning_pile/float16-underflow/normalized",
+      "inputs": {
+        "cover_height_ft": {
+          "dtype": "float32",
+          "shape": [
+            1
+          ],
+          "values": [
+            10.0
+          ]
+        },
+        "flame_height_ft": {
+          "dtype": "float32",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.0
+          ]
+        },
+        "wind_mph": {
+          "dtype": "float32",
+          "shape": [
+            1
+          ],
+          "values": [
+            5.0
+          ]
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [
+          1
+        ],
+        "values": [
+          0.0
+        ]
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.spot.calculate_spotting_from_burning_pile",
+      "id": "calculate_spotting_from_burning_pile/masked",
+      "inputs": {
+        "cover_height_ft": {
+          "dtype": "float64",
+          "shape": [
+            2
+          ],
+          "values": [
+            10.0,
+            10.0
+          ]
+        },
+        "flame_height_ft": {
+          "dtype": "float64",
+          "mask": [
+            false,
+            true
+          ],
+          "shape": [
+            2
+          ],
+          "values": [
+            1.0,
+            2.0
+          ]
+        },
+        "wind_mph": {
+          "dtype": "float64",
+          "shape": [
+            2
+          ],
+          "values": [
+            5.0,
+            5.0
+          ]
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [
+          2
+        ],
+        "values": [
+          13.4184338017691,
+          18.621328862448703
+        ]
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.spot.calculate_spotting_from_burning_pile",
+      "id": "calculate_spotting_from_burning_pile/strided",
+      "inputs": {
+        "cover_height_ft": {
+          "dtype": "float64",
+          "shape": [
+            2
+          ],
+          "values": [
+            10.0,
+            10.0
+          ]
+        },
+        "flame_height_ft": {
+          "dtype": "float64",
+          "shape": [
+            2
+          ],
+          "strides": [
+            16
+          ],
+          "values": [
+            0.0,
+            2.0
+          ]
+        },
+        "wind_mph": {
+          "dtype": "float64",
+          "shape": [
+            2
+          ],
+          "values": [
+            5.0,
+            5.0
+          ]
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [
+          2
+        ],
+        "values": [
+          0.0,
+          18.621328862448703
+        ]
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.spot.calculate_spotting_from_burning_pile",
+      "id": "calculate_spotting_from_burning_pile/mixed-dtype",
+      "inputs": {
+        "cover_height_ft": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            10.0
+          ]
+        },
+        "flame_height_ft": {
+          "dtype": "float32",
+          "shape": [
+            1
+          ],
+          "values": [
+            1.0
+          ]
+        },
+        "wind_mph": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            5.0
+          ]
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [
+          1
+        ],
+        "values": [
+          13.4184338017691
+        ]
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.spot.calculate_spotting_from_burning_pile",
+      "exception": "ValueError",
+      "id": "calculate_spotting_from_burning_pile/unsupported-object",
+      "inputs": {
+        "cover_height_ft": {
+          "dtype": "object",
+          "shape": [
+            1
+          ],
+          "values": [
+            10
+          ]
+        },
+        "flame_height_ft": {
+          "dtype": "object",
+          "shape": [
+            1
+          ],
+          "values": [
+            "invalid"
+          ]
+        },
+        "wind_mph": {
+          "dtype": "object",
+          "shape": [
+            1
+          ],
+          "values": [
+            5
+          ]
+        }
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.spot.calculate_spotting_from_burning_pile",
+      "exception": "ValueError",
+      "id": "calculate_spotting_from_burning_pile/incompatible-shape",
+      "inputs": {
+        "cover_height_ft": {
+          "dtype": "float64",
+          "shape": [
+            2
+          ],
+          "values": [
+            10.0,
+            10.0
+          ]
+        },
+        "flame_height_ft": {
+          "dtype": "float64",
+          "shape": [
+            3
+          ],
+          "values": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        "wind_mph": {
+          "dtype": "float64",
+          "shape": [
+            2
+          ],
+          "values": [
+            5.0,
+            5.0
+          ]
+        }
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.spot.calculate_spotting_from_burning_pile",
+      "id": "calculate_spotting_from_burning_pile/read-only",
+      "inputs": {
+        "cover_height_ft": {
+          "dtype": "float64",
+          "shape": [
+            2
+          ],
+          "values": [
+            10.0,
+            10.0
+          ]
+        },
+        "flame_height_ft": {
+          "dtype": "float64",
+          "read_only": true,
+          "shape": [
+            2
+          ],
+          "values": [
+            1.0,
+            1.0
+          ]
+        },
+        "wind_mph": {
+          "dtype": "float64",
+          "shape": [
+            2
+          ],
+          "values": [
+            5.0,
+            5.0
+          ]
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [
+          2
+        ],
+        "values": [
+          13.4184338017691,
+          13.4184338017691
+        ]
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.spot.calculate_spotting_from_surface_fire",
+      "id": "calculate_spotting_from_surface_fire/baseline",
+      "inputs": {
+        "cover_height_ft": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            10.0
+          ]
+        },
+        "flame_length_ft": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            5.0
+          ]
+        },
+        "wind_mph": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            5.0
+          ]
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [
+          1
+        ],
+        "values": [
+          565.5562062193633
+        ]
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.spot.calculate_spotting_from_surface_fire",
+      "id": "calculate_spotting_from_surface_fire/dtype-float16",
+      "inputs": {
+        "cover_height_ft": {
+          "dtype": "float16",
+          "shape": [
+            1
+          ],
+          "values": [
+            10.0
+          ]
+        },
+        "flame_length_ft": {
+          "dtype": "float16",
+          "shape": [
+            1
+          ],
+          "values": [
+            5.0
+          ]
+        },
+        "wind_mph": {
+          "dtype": "float16",
+          "shape": [
+            1
+          ],
+          "values": [
+            5.0
+          ]
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [
+          1
+        ],
+        "values": [
+          565.5562062193633
+        ]
+      },
+      "policy": "diagnostic",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.spot.calculate_spotting_from_surface_fire",
+      "id": "calculate_spotting_from_surface_fire/dtype-float16/normalized",
+      "inputs": {
+        "cover_height_ft": {
+          "dtype": "float32",
+          "shape": [
+            1
+          ],
+          "values": [
+            10.0
+          ]
+        },
+        "flame_length_ft": {
+          "dtype": "float32",
+          "shape": [
+            1
+          ],
+          "values": [
+            5.0
+          ]
+        },
+        "wind_mph": {
+          "dtype": "float32",
+          "shape": [
+            1
+          ],
+          "values": [
+            5.0
+          ]
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [
+          1
+        ],
+        "values": [
+          565.5562062193633
+        ]
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.spot.calculate_spotting_from_surface_fire",
+      "id": "calculate_spotting_from_surface_fire/dtype-float32",
+      "inputs": {
+        "cover_height_ft": {
+          "dtype": "float32",
+          "shape": [
+            1
+          ],
+          "values": [
+            10.0
+          ]
+        },
+        "flame_length_ft": {
+          "dtype": "float32",
+          "shape": [
+            1
+          ],
+          "values": [
+            5.0
+          ]
+        },
+        "wind_mph": {
+          "dtype": "float32",
+          "shape": [
+            1
+          ],
+          "values": [
+            5.0
+          ]
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [
+          1
+        ],
+        "values": [
+          565.5562062193633
+        ]
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.spot.calculate_spotting_from_surface_fire",
+      "id": "calculate_spotting_from_surface_fire/dtype-float64",
+      "inputs": {
+        "cover_height_ft": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            10.0
+          ]
+        },
+        "flame_length_ft": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            5.0
+          ]
+        },
+        "wind_mph": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            5.0
+          ]
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [
+          1
+        ],
+        "values": [
+          565.5562062193633
+        ]
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.spot.calculate_spotting_from_surface_fire",
+      "id": "calculate_spotting_from_surface_fire/dtype-int64",
+      "inputs": {
+        "cover_height_ft": {
+          "dtype": "int64",
+          "shape": [
+            1
+          ],
+          "values": [
+            10
+          ]
+        },
+        "flame_length_ft": {
+          "dtype": "int64",
+          "shape": [
+            1
+          ],
+          "values": [
+            5
+          ]
+        },
+        "wind_mph": {
+          "dtype": "int64",
+          "shape": [
+            1
+          ],
+          "values": [
+            5
+          ]
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [
+          1
+        ],
+        "values": [
+          565.5562062193633
+        ]
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.spot.calculate_spotting_from_surface_fire",
+      "id": "calculate_spotting_from_surface_fire/dtype-uint32",
+      "inputs": {
+        "cover_height_ft": {
+          "dtype": "uint32",
+          "shape": [
+            1
+          ],
+          "values": [
+            10
+          ]
+        },
+        "flame_length_ft": {
+          "dtype": "uint32",
+          "shape": [
+            1
+          ],
+          "values": [
+            5
+          ]
+        },
+        "wind_mph": {
+          "dtype": "uint32",
+          "shape": [
+            1
+          ],
+          "values": [
+            5
+          ]
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [
+          1
+        ],
+        "values": [
+          565.5562062193633
+        ]
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.spot.calculate_spotting_from_surface_fire",
+      "id": "calculate_spotting_from_surface_fire/dtype-bool",
+      "inputs": {
+        "cover_height_ft": {
+          "dtype": "bool",
+          "shape": [
+            1
+          ],
+          "values": [
+            true
+          ]
+        },
+        "flame_length_ft": {
+          "dtype": "bool",
+          "shape": [
+            1
+          ],
+          "values": [
+            true
+          ]
+        },
+        "wind_mph": {
+          "dtype": "bool",
+          "shape": [
+            1
+          ],
+          "values": [
+            true
+          ]
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [
+          1
+        ],
+        "values": [
+          64.27460887690135
+        ]
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.spot.calculate_spotting_from_surface_fire",
+      "id": "calculate_spotting_from_surface_fire/dtype-object",
+      "inputs": {
+        "cover_height_ft": {
+          "dtype": "object",
+          "shape": [
+            1
+          ],
+          "values": [
+            10
+          ]
+        },
+        "flame_length_ft": {
+          "dtype": "object",
+          "shape": [
+            1
+          ],
+          "values": [
+            5
+          ]
+        },
+        "wind_mph": {
+          "dtype": "object",
+          "shape": [
+            1
+          ],
+          "values": [
+            5
+          ]
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [
+          1
+        ],
+        "values": [
+          565.5562062193633
+        ]
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.spot.calculate_spotting_from_surface_fire",
+      "id": "calculate_spotting_from_surface_fire/scalar",
+      "inputs": {
+        "cover_height_ft": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            10.0
+          ]
+        },
+        "flame_length_ft": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            5.0
+          ]
+        },
+        "wind_mph": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            5.0
+          ]
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [],
+        "values": [
+          565.5562062193633
+        ]
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.spot.calculate_spotting_from_surface_fire",
+      "id": "calculate_spotting_from_surface_fire/2d",
+      "inputs": {
+        "cover_height_ft": {
+          "dtype": "float64",
+          "shape": [
+            2,
+            2
+          ],
+          "values": [
+            10.0,
+            10.0,
+            10.0,
+            10.0
+          ]
+        },
+        "flame_length_ft": {
+          "dtype": "float64",
+          "shape": [
+            2,
+            2
+          ],
+          "values": [
+            5.0,
+            5.0,
+            5.0,
+            5.0
+          ]
+        },
+        "wind_mph": {
+          "dtype": "float64",
+          "shape": [
+            2,
+            2
+          ],
+          "values": [
+            5.0,
+            5.0,
+            5.0,
+            5.0
+          ]
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [
+          2,
+          2
+        ],
+        "values": [
+          565.5562062193633,
+          565.5562062193633,
+          565.5562062193633,
+          565.5562062193633
+        ]
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.spot.calculate_spotting_from_surface_fire",
+      "id": "calculate_spotting_from_surface_fire/3d",
+      "inputs": {
+        "cover_height_ft": {
+          "dtype": "float64",
+          "shape": [
+            1,
+            2,
+            2
+          ],
+          "values": [
+            10.0,
+            10.0,
+            10.0,
+            10.0
+          ]
+        },
+        "flame_length_ft": {
+          "dtype": "float64",
+          "shape": [
+            1,
+            2,
+            2
+          ],
+          "values": [
+            5.0,
+            5.0,
+            5.0,
+            5.0
+          ]
+        },
+        "wind_mph": {
+          "dtype": "float64",
+          "shape": [
+            1,
+            2,
+            2
+          ],
+          "values": [
+            5.0,
+            5.0,
+            5.0,
+            5.0
+          ]
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [
+          1,
+          2,
+          2
+        ],
+        "values": [
+          565.5562062193633,
+          565.5562062193633,
+          565.5562062193633,
+          565.5562062193633
+        ]
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.spot.calculate_spotting_from_surface_fire",
+      "id": "calculate_spotting_from_surface_fire/empty",
+      "inputs": {
+        "cover_height_ft": {
+          "dtype": "float64",
+          "shape": [
+            0
+          ],
+          "values": []
+        },
+        "flame_length_ft": {
+          "dtype": "float64",
+          "shape": [
+            0
+          ],
+          "values": []
+        },
+        "wind_mph": {
+          "dtype": "float64",
+          "shape": [
+            0
+          ],
+          "values": []
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [
+          0
+        ],
+        "values": []
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.spot.calculate_spotting_from_surface_fire",
+      "id": "calculate_spotting_from_surface_fire/zero",
+      "inputs": {
+        "cover_height_ft": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            10.0
+          ]
+        },
+        "flame_length_ft": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.0
+          ]
+        },
+        "wind_mph": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            5.0
+          ]
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [
+          1
+        ],
+        "values": [
+          0.0
+        ]
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.spot.calculate_spotting_from_surface_fire",
+      "id": "calculate_spotting_from_surface_fire/negative",
+      "inputs": {
+        "cover_height_ft": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            10.0
+          ]
+        },
+        "flame_length_ft": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            -1.0
+          ]
+        },
+        "wind_mph": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            5.0
+          ]
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [
+          1
+        ],
+        "values": [
+          0.0
+        ]
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.spot.calculate_spotting_from_surface_fire",
+      "id": "calculate_spotting_from_surface_fire/nan",
+      "inputs": {
+        "cover_height_ft": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            10.0
+          ]
+        },
+        "flame_length_ft": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            {
+              "float": "nan"
+            }
+          ]
+        },
+        "wind_mph": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            5.0
+          ]
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [
+          1
+        ],
+        "values": [
+          0.0
+        ]
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.spot.calculate_spotting_from_surface_fire",
+      "id": "calculate_spotting_from_surface_fire/positive-infinity",
+      "inputs": {
+        "cover_height_ft": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            10.0
+          ]
+        },
+        "flame_length_ft": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            {
+              "float": "+inf"
+            }
+          ]
+        },
+        "wind_mph": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            5.0
+          ]
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [
+          1
+        ],
+        "values": [
+          {
+            "float": "nan"
+          }
+        ]
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.spot.calculate_spotting_from_surface_fire",
+      "id": "calculate_spotting_from_surface_fire/negative-infinity",
+      "inputs": {
+        "cover_height_ft": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            10.0
+          ]
+        },
+        "flame_length_ft": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            {
+              "float": "-inf"
+            }
+          ]
+        },
+        "wind_mph": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            5.0
+          ]
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [
+          1
+        ],
+        "values": [
+          0.0
+        ]
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.spot.calculate_spotting_from_surface_fire",
+      "id": "calculate_spotting_from_surface_fire/below-threshold",
+      "inputs": {
+        "cover_height_ft": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            10.0
+          ]
+        },
+        "flame_length_ft": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            9.999999999999998e-08
+          ]
+        },
+        "wind_mph": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            5.0
+          ]
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [
+          1
+        ],
+        "values": [
+          0.0
+        ]
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.spot.calculate_spotting_from_surface_fire",
+      "id": "calculate_spotting_from_surface_fire/at-threshold",
+      "inputs": {
+        "cover_height_ft": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            10.0
+          ]
+        },
+        "flame_length_ft": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            1e-07
+          ]
+        },
+        "wind_mph": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            5.0
+          ]
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [
+          1
+        ],
+        "values": [
+          0.0
+        ]
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.spot.calculate_spotting_from_surface_fire",
+      "id": "calculate_spotting_from_surface_fire/above-threshold",
+      "inputs": {
+        "cover_height_ft": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            10.0
+          ]
+        },
+        "flame_length_ft": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            1.0000000000000001e-07
+          ]
+        },
+        "wind_mph": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            5.0
+          ]
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [
+          1
+        ],
+        "values": [
+          0.0
+        ]
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.spot.calculate_spotting_from_surface_fire",
+      "id": "calculate_spotting_from_surface_fire/float16-overflow",
+      "inputs": {
+        "cover_height_ft": {
+          "dtype": "float16",
+          "shape": [
+            1
+          ],
+          "values": [
+            10.0
+          ]
+        },
+        "flame_length_ft": {
+          "dtype": "float16",
+          "shape": [
+            1
+          ],
+          "values": [
+            300.0
+          ]
+        },
+        "wind_mph": {
+          "dtype": "float16",
+          "shape": [
+            1
+          ],
+          "values": [
+            5.0
+          ]
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [
+          1
+        ],
+        "values": [
+          9907.077182483255
+        ]
+      },
+      "policy": "diagnostic",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.spot.calculate_spotting_from_surface_fire",
+      "id": "calculate_spotting_from_surface_fire/float16-overflow/normalized",
+      "inputs": {
+        "cover_height_ft": {
+          "dtype": "float32",
+          "shape": [
+            1
+          ],
+          "values": [
+            10.0
+          ]
+        },
+        "flame_length_ft": {
+          "dtype": "float32",
+          "shape": [
+            1
+          ],
+          "values": [
+            300.0
+          ]
+        },
+        "wind_mph": {
+          "dtype": "float32",
+          "shape": [
+            1
+          ],
+          "values": [
+            5.0
+          ]
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [
+          1
+        ],
+        "values": [
+          9907.077182483255
+        ]
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.spot.calculate_spotting_from_surface_fire",
+      "id": "calculate_spotting_from_surface_fire/float16-underflow",
+      "inputs": {
+        "cover_height_ft": {
+          "dtype": "float16",
+          "shape": [
+            1
+          ],
+          "values": [
+            10.0
+          ]
+        },
+        "flame_length_ft": {
+          "dtype": "float16",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.0
+          ]
+        },
+        "wind_mph": {
+          "dtype": "float16",
+          "shape": [
+            1
+          ],
+          "values": [
+            5.0
+          ]
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [
+          1
+        ],
+        "values": [
+          0.0
+        ]
+      },
+      "policy": "diagnostic",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.spot.calculate_spotting_from_surface_fire",
+      "id": "calculate_spotting_from_surface_fire/float16-underflow/normalized",
+      "inputs": {
+        "cover_height_ft": {
+          "dtype": "float32",
+          "shape": [
+            1
+          ],
+          "values": [
+            10.0
+          ]
+        },
+        "flame_length_ft": {
+          "dtype": "float32",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.0
+          ]
+        },
+        "wind_mph": {
+          "dtype": "float32",
+          "shape": [
+            1
+          ],
+          "values": [
+            5.0
+          ]
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [
+          1
+        ],
+        "values": [
+          0.0
+        ]
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.spot.calculate_spotting_from_surface_fire",
+      "id": "calculate_spotting_from_surface_fire/masked",
+      "inputs": {
+        "cover_height_ft": {
+          "dtype": "float64",
+          "shape": [
+            2
+          ],
+          "values": [
+            10.0,
+            10.0
+          ]
+        },
+        "flame_length_ft": {
+          "dtype": "float64",
+          "mask": [
+            false,
+            true
+          ],
+          "shape": [
+            2
+          ],
+          "values": [
+            1.0,
+            2.0
+          ]
+        },
+        "wind_mph": {
+          "dtype": "float64",
+          "shape": [
+            2
+          ],
+          "values": [
+            5.0,
+            5.0
+          ]
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [
+          2
+        ],
+        "values": [
+          140.69144948679883,
+          261.9787050643918
+        ]
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.spot.calculate_spotting_from_surface_fire",
+      "id": "calculate_spotting_from_surface_fire/strided",
+      "inputs": {
+        "cover_height_ft": {
+          "dtype": "float64",
+          "shape": [
+            2
+          ],
+          "values": [
+            10.0,
+            10.0
+          ]
+        },
+        "flame_length_ft": {
+          "dtype": "float64",
+          "shape": [
+            2
+          ],
+          "strides": [
+            16
+          ],
+          "values": [
+            0.0,
+            2.0
+          ]
+        },
+        "wind_mph": {
+          "dtype": "float64",
+          "shape": [
+            2
+          ],
+          "values": [
+            5.0,
+            5.0
+          ]
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [
+          2
+        ],
+        "values": [
+          0.0,
+          261.9787050643918
+        ]
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.spot.calculate_spotting_from_surface_fire",
+      "id": "calculate_spotting_from_surface_fire/mixed-dtype",
+      "inputs": {
+        "cover_height_ft": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            10.0
+          ]
+        },
+        "flame_length_ft": {
+          "dtype": "float32",
+          "shape": [
+            1
+          ],
+          "values": [
+            1.0
+          ]
+        },
+        "wind_mph": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            5.0
+          ]
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [
+          1
+        ],
+        "values": [
+          140.69144948679883
+        ]
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.spot.calculate_spotting_from_surface_fire",
+      "exception": "ValueError",
+      "id": "calculate_spotting_from_surface_fire/unsupported-object",
+      "inputs": {
+        "cover_height_ft": {
+          "dtype": "object",
+          "shape": [
+            1
+          ],
+          "values": [
+            10
+          ]
+        },
+        "flame_length_ft": {
+          "dtype": "object",
+          "shape": [
+            1
+          ],
+          "values": [
+            "invalid"
+          ]
+        },
+        "wind_mph": {
+          "dtype": "object",
+          "shape": [
+            1
+          ],
+          "values": [
+            5
+          ]
+        }
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.spot.calculate_spotting_from_surface_fire",
+      "exception": "ValueError",
+      "id": "calculate_spotting_from_surface_fire/incompatible-shape",
+      "inputs": {
+        "cover_height_ft": {
+          "dtype": "float64",
+          "shape": [
+            2
+          ],
+          "values": [
+            10.0,
+            10.0
+          ]
+        },
+        "flame_length_ft": {
+          "dtype": "float64",
+          "shape": [
+            3
+          ],
+          "values": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        "wind_mph": {
+          "dtype": "float64",
+          "shape": [
+            2
+          ],
+          "values": [
+            5.0,
+            5.0
+          ]
+        }
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.spot.calculate_spotting_from_surface_fire",
+      "id": "calculate_spotting_from_surface_fire/read-only",
+      "inputs": {
+        "cover_height_ft": {
+          "dtype": "float64",
+          "shape": [
+            2
+          ],
+          "values": [
+            10.0,
+            10.0
+          ]
+        },
+        "flame_length_ft": {
+          "dtype": "float64",
+          "read_only": true,
+          "shape": [
+            2
+          ],
+          "values": [
+            1.0,
+            1.0
+          ]
+        },
+        "wind_mph": {
+          "dtype": "float64",
+          "shape": [
+            2
+          ],
+          "values": [
+            5.0,
+            5.0
+          ]
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [
+          2
+        ],
+        "values": [
+          140.69144948679883,
+          140.69144948679883
+        ]
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.spot.calculate_spotting_from_torching_trees",
+      "id": "calculate_spotting_from_torching_trees/baseline",
+      "inputs": {
+        "count": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            3.0
+          ]
+        },
+        "cover_height_ft": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            10.0
+          ]
+        },
+        "dbh_in": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            12.0
+          ]
+        },
+        "height_ft": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            60.0
+          ]
+        },
+        "wind_mph": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            5.0
+          ]
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [
+          1
+        ],
+        "values": [
+          101.26121957494824
+        ]
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.spot.calculate_spotting_from_torching_trees",
+      "id": "calculate_spotting_from_torching_trees/dtype-float16",
+      "inputs": {
+        "count": {
+          "dtype": "float16",
+          "shape": [
+            1
+          ],
+          "values": [
+            3.0
+          ]
+        },
+        "cover_height_ft": {
+          "dtype": "float16",
+          "shape": [
+            1
+          ],
+          "values": [
+            10.0
+          ]
+        },
+        "dbh_in": {
+          "dtype": "float16",
+          "shape": [
+            1
+          ],
+          "values": [
+            12.0
+          ]
+        },
+        "height_ft": {
+          "dtype": "float16",
+          "shape": [
+            1
+          ],
+          "values": [
+            60.0
+          ]
+        },
+        "wind_mph": {
+          "dtype": "float16",
+          "shape": [
+            1
+          ],
+          "values": [
+            5.0
+          ]
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [
+          1
+        ],
+        "values": [
+          101.26121957494824
+        ]
+      },
+      "policy": "diagnostic",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.spot.calculate_spotting_from_torching_trees",
+      "id": "calculate_spotting_from_torching_trees/dtype-float16/normalized",
+      "inputs": {
+        "count": {
+          "dtype": "float32",
+          "shape": [
+            1
+          ],
+          "values": [
+            3.0
+          ]
+        },
+        "cover_height_ft": {
+          "dtype": "float32",
+          "shape": [
+            1
+          ],
+          "values": [
+            10.0
+          ]
+        },
+        "dbh_in": {
+          "dtype": "float32",
+          "shape": [
+            1
+          ],
+          "values": [
+            12.0
+          ]
+        },
+        "height_ft": {
+          "dtype": "float32",
+          "shape": [
+            1
+          ],
+          "values": [
+            60.0
+          ]
+        },
+        "wind_mph": {
+          "dtype": "float32",
+          "shape": [
+            1
+          ],
+          "values": [
+            5.0
+          ]
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [
+          1
+        ],
+        "values": [
+          101.26121957494824
+        ]
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.spot.calculate_spotting_from_torching_trees",
+      "id": "calculate_spotting_from_torching_trees/dtype-float32",
+      "inputs": {
+        "count": {
+          "dtype": "float32",
+          "shape": [
+            1
+          ],
+          "values": [
+            3.0
+          ]
+        },
+        "cover_height_ft": {
+          "dtype": "float32",
+          "shape": [
+            1
+          ],
+          "values": [
+            10.0
+          ]
+        },
+        "dbh_in": {
+          "dtype": "float32",
+          "shape": [
+            1
+          ],
+          "values": [
+            12.0
+          ]
+        },
+        "height_ft": {
+          "dtype": "float32",
+          "shape": [
+            1
+          ],
+          "values": [
+            60.0
+          ]
+        },
+        "wind_mph": {
+          "dtype": "float32",
+          "shape": [
+            1
+          ],
+          "values": [
+            5.0
+          ]
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [
+          1
+        ],
+        "values": [
+          101.26121957494824
+        ]
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.spot.calculate_spotting_from_torching_trees",
+      "id": "calculate_spotting_from_torching_trees/dtype-float64",
+      "inputs": {
+        "count": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            3.0
+          ]
+        },
+        "cover_height_ft": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            10.0
+          ]
+        },
+        "dbh_in": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            12.0
+          ]
+        },
+        "height_ft": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            60.0
+          ]
+        },
+        "wind_mph": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            5.0
+          ]
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [
+          1
+        ],
+        "values": [
+          101.26121957494824
+        ]
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.spot.calculate_spotting_from_torching_trees",
+      "id": "calculate_spotting_from_torching_trees/dtype-int64",
+      "inputs": {
+        "count": {
+          "dtype": "int64",
+          "shape": [
+            1
+          ],
+          "values": [
+            3
+          ]
+        },
+        "cover_height_ft": {
+          "dtype": "int64",
+          "shape": [
+            1
+          ],
+          "values": [
+            10
+          ]
+        },
+        "dbh_in": {
+          "dtype": "int64",
+          "shape": [
+            1
+          ],
+          "values": [
+            12
+          ]
+        },
+        "height_ft": {
+          "dtype": "int64",
+          "shape": [
+            1
+          ],
+          "values": [
+            60
+          ]
+        },
+        "wind_mph": {
+          "dtype": "int64",
+          "shape": [
+            1
+          ],
+          "values": [
+            5
+          ]
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [
+          1
+        ],
+        "values": [
+          101.26121957494824
+        ]
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.spot.calculate_spotting_from_torching_trees",
+      "id": "calculate_spotting_from_torching_trees/dtype-uint32",
+      "inputs": {
+        "count": {
+          "dtype": "uint32",
+          "shape": [
+            1
+          ],
+          "values": [
+            3
+          ]
+        },
+        "cover_height_ft": {
+          "dtype": "uint32",
+          "shape": [
+            1
+          ],
+          "values": [
+            10
+          ]
+        },
+        "dbh_in": {
+          "dtype": "uint32",
+          "shape": [
+            1
+          ],
+          "values": [
+            12
+          ]
+        },
+        "height_ft": {
+          "dtype": "uint32",
+          "shape": [
+            1
+          ],
+          "values": [
+            60
+          ]
+        },
+        "wind_mph": {
+          "dtype": "uint32",
+          "shape": [
+            1
+          ],
+          "values": [
+            5
+          ]
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [
+          1
+        ],
+        "values": [
+          101.26121957494824
+        ]
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.spot.calculate_spotting_from_torching_trees",
+      "id": "calculate_spotting_from_torching_trees/dtype-bool",
+      "inputs": {
+        "count": {
+          "dtype": "bool",
+          "shape": [
+            1
+          ],
+          "values": [
+            true
+          ]
+        },
+        "cover_height_ft": {
+          "dtype": "bool",
+          "shape": [
+            1
+          ],
+          "values": [
+            true
+          ]
+        },
+        "dbh_in": {
+          "dtype": "bool",
+          "shape": [
+            1
+          ],
+          "values": [
+            true
+          ]
+        },
+        "height_ft": {
+          "dtype": "bool",
+          "shape": [
+            1
+          ],
+          "values": [
+            true
+          ]
+        },
+        "wind_mph": {
+          "dtype": "bool",
+          "shape": [
+            1
+          ],
+          "values": [
+            true
+          ]
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [
+          1
+        ],
+        "values": [
+          4.664752330796295
+        ]
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.spot.calculate_spotting_from_torching_trees",
+      "id": "calculate_spotting_from_torching_trees/dtype-object",
+      "inputs": {
+        "count": {
+          "dtype": "object",
+          "shape": [
+            1
+          ],
+          "values": [
+            3
+          ]
+        },
+        "cover_height_ft": {
+          "dtype": "object",
+          "shape": [
+            1
+          ],
+          "values": [
+            10
+          ]
+        },
+        "dbh_in": {
+          "dtype": "object",
+          "shape": [
+            1
+          ],
+          "values": [
+            12
+          ]
+        },
+        "height_ft": {
+          "dtype": "object",
+          "shape": [
+            1
+          ],
+          "values": [
+            60
+          ]
+        },
+        "wind_mph": {
+          "dtype": "object",
+          "shape": [
+            1
+          ],
+          "values": [
+            5
+          ]
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [
+          1
+        ],
+        "values": [
+          101.26121957494824
+        ]
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.spot.calculate_spotting_from_torching_trees",
+      "id": "calculate_spotting_from_torching_trees/scalar",
+      "inputs": {
+        "count": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            3.0
+          ]
+        },
+        "cover_height_ft": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            10.0
+          ]
+        },
+        "dbh_in": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            12.0
+          ]
+        },
+        "height_ft": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            60.0
+          ]
+        },
+        "wind_mph": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            5.0
+          ]
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [],
+        "values": [
+          101.26121957494824
+        ]
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.spot.calculate_spotting_from_torching_trees",
+      "id": "calculate_spotting_from_torching_trees/2d",
+      "inputs": {
+        "count": {
+          "dtype": "float64",
+          "shape": [
+            2,
+            2
+          ],
+          "values": [
+            3.0,
+            3.0,
+            3.0,
+            3.0
+          ]
+        },
+        "cover_height_ft": {
+          "dtype": "float64",
+          "shape": [
+            2,
+            2
+          ],
+          "values": [
+            10.0,
+            10.0,
+            10.0,
+            10.0
+          ]
+        },
+        "dbh_in": {
+          "dtype": "float64",
+          "shape": [
+            2,
+            2
+          ],
+          "values": [
+            12.0,
+            12.0,
+            12.0,
+            12.0
+          ]
+        },
+        "height_ft": {
+          "dtype": "float64",
+          "shape": [
+            2,
+            2
+          ],
+          "values": [
+            60.0,
+            60.0,
+            60.0,
+            60.0
+          ]
+        },
+        "wind_mph": {
+          "dtype": "float64",
+          "shape": [
+            2,
+            2
+          ],
+          "values": [
+            5.0,
+            5.0,
+            5.0,
+            5.0
+          ]
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [
+          2,
+          2
+        ],
+        "values": [
+          101.26121957494824,
+          101.26121957494824,
+          101.26121957494824,
+          101.26121957494824
+        ]
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.spot.calculate_spotting_from_torching_trees",
+      "id": "calculate_spotting_from_torching_trees/3d",
+      "inputs": {
+        "count": {
+          "dtype": "float64",
+          "shape": [
+            1,
+            2,
+            2
+          ],
+          "values": [
+            3.0,
+            3.0,
+            3.0,
+            3.0
+          ]
+        },
+        "cover_height_ft": {
+          "dtype": "float64",
+          "shape": [
+            1,
+            2,
+            2
+          ],
+          "values": [
+            10.0,
+            10.0,
+            10.0,
+            10.0
+          ]
+        },
+        "dbh_in": {
+          "dtype": "float64",
+          "shape": [
+            1,
+            2,
+            2
+          ],
+          "values": [
+            12.0,
+            12.0,
+            12.0,
+            12.0
+          ]
+        },
+        "height_ft": {
+          "dtype": "float64",
+          "shape": [
+            1,
+            2,
+            2
+          ],
+          "values": [
+            60.0,
+            60.0,
+            60.0,
+            60.0
+          ]
+        },
+        "wind_mph": {
+          "dtype": "float64",
+          "shape": [
+            1,
+            2,
+            2
+          ],
+          "values": [
+            5.0,
+            5.0,
+            5.0,
+            5.0
+          ]
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [
+          1,
+          2,
+          2
+        ],
+        "values": [
+          101.26121957494824,
+          101.26121957494824,
+          101.26121957494824,
+          101.26121957494824
+        ]
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.spot.calculate_spotting_from_torching_trees",
+      "id": "calculate_spotting_from_torching_trees/empty",
+      "inputs": {
+        "count": {
+          "dtype": "float64",
+          "shape": [
+            0
+          ],
+          "values": []
+        },
+        "cover_height_ft": {
+          "dtype": "float64",
+          "shape": [
+            0
+          ],
+          "values": []
+        },
+        "dbh_in": {
+          "dtype": "float64",
+          "shape": [
+            0
+          ],
+          "values": []
+        },
+        "height_ft": {
+          "dtype": "float64",
+          "shape": [
+            0
+          ],
+          "values": []
+        },
+        "wind_mph": {
+          "dtype": "float64",
+          "shape": [
+            0
+          ],
+          "values": []
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [
+          0
+        ],
+        "values": []
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.spot.calculate_spotting_from_torching_trees",
+      "id": "calculate_spotting_from_torching_trees/zero",
+      "inputs": {
+        "count": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            3.0
+          ]
+        },
+        "cover_height_ft": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            10.0
+          ]
+        },
+        "dbh_in": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.0
+          ]
+        },
+        "height_ft": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            60.0
+          ]
+        },
+        "wind_mph": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            5.0
+          ]
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [
+          1
+        ],
+        "values": [
+          0.0
+        ]
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.spot.calculate_spotting_from_torching_trees",
+      "id": "calculate_spotting_from_torching_trees/negative",
+      "inputs": {
+        "count": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            3.0
+          ]
+        },
+        "cover_height_ft": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            10.0
+          ]
+        },
+        "dbh_in": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            -1.0
+          ]
+        },
+        "height_ft": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            60.0
+          ]
+        },
+        "wind_mph": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            5.0
+          ]
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [
+          1
+        ],
+        "values": [
+          0.0
+        ]
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.spot.calculate_spotting_from_torching_trees",
+      "id": "calculate_spotting_from_torching_trees/nan",
+      "inputs": {
+        "count": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            3.0
+          ]
+        },
+        "cover_height_ft": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            10.0
+          ]
+        },
+        "dbh_in": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            {
+              "float": "nan"
+            }
+          ]
+        },
+        "height_ft": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            60.0
+          ]
+        },
+        "wind_mph": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            5.0
+          ]
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [
+          1
+        ],
+        "values": [
+          0.0
+        ]
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.spot.calculate_spotting_from_torching_trees",
+      "id": "calculate_spotting_from_torching_trees/positive-infinity",
+      "inputs": {
+        "count": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            3.0
+          ]
+        },
+        "cover_height_ft": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            10.0
+          ]
+        },
+        "dbh_in": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            {
+              "float": "+inf"
+            }
+          ]
+        },
+        "height_ft": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            60.0
+          ]
+        },
+        "wind_mph": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            5.0
+          ]
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [
+          1
+        ],
+        "values": [
+          {
+            "float": "nan"
+          }
+        ]
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.spot.calculate_spotting_from_torching_trees",
+      "id": "calculate_spotting_from_torching_trees/negative-infinity",
+      "inputs": {
+        "count": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            3.0
+          ]
+        },
+        "cover_height_ft": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            10.0
+          ]
+        },
+        "dbh_in": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            {
+              "float": "-inf"
+            }
+          ]
+        },
+        "height_ft": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            60.0
+          ]
+        },
+        "wind_mph": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            5.0
+          ]
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [
+          1
+        ],
+        "values": [
+          0.0
+        ]
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.spot.calculate_spotting_from_torching_trees",
+      "id": "calculate_spotting_from_torching_trees/below-threshold",
+      "inputs": {
+        "count": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            3.0
+          ]
+        },
+        "cover_height_ft": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            10.0
+          ]
+        },
+        "dbh_in": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            9.999999999999998e-08
+          ]
+        },
+        "height_ft": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            60.0
+          ]
+        },
+        "wind_mph": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            5.0
+          ]
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [
+          1
+        ],
+        "values": [
+          0.0
+        ]
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.spot.calculate_spotting_from_torching_trees",
+      "id": "calculate_spotting_from_torching_trees/at-threshold",
+      "inputs": {
+        "count": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            3.0
+          ]
+        },
+        "cover_height_ft": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            10.0
+          ]
+        },
+        "dbh_in": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            1e-07
+          ]
+        },
+        "height_ft": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            60.0
+          ]
+        },
+        "wind_mph": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            5.0
+          ]
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [
+          1
+        ],
+        "values": [
+          0.0
+        ]
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.spot.calculate_spotting_from_torching_trees",
+      "id": "calculate_spotting_from_torching_trees/above-threshold",
+      "inputs": {
+        "count": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            3.0
+          ]
+        },
+        "cover_height_ft": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            10.0
+          ]
+        },
+        "dbh_in": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            1.0000000000000001e-07
+          ]
+        },
+        "height_ft": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            60.0
+          ]
+        },
+        "wind_mph": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            5.0
+          ]
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [
+          1
+        ],
+        "values": [
+          68.46722190146808
+        ]
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.spot.calculate_spotting_from_torching_trees",
+      "id": "calculate_spotting_from_torching_trees/float16-overflow",
+      "inputs": {
+        "count": {
+          "dtype": "float16",
+          "shape": [
+            1
+          ],
+          "values": [
+            3.0
+          ]
+        },
+        "cover_height_ft": {
+          "dtype": "float16",
+          "shape": [
+            1
+          ],
+          "values": [
+            10.0
+          ]
+        },
+        "dbh_in": {
+          "dtype": "float16",
+          "shape": [
+            1
+          ],
+          "values": [
+            300.0
+          ]
+        },
+        "height_ft": {
+          "dtype": "float16",
+          "shape": [
+            1
+          ],
+          "values": [
+            60.0
+          ]
+        },
+        "wind_mph": {
+          "dtype": "float16",
+          "shape": [
+            1
+          ],
+          "values": [
+            5.0
+          ]
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [
+          1
+        ],
+        "values": [
+          311.7567315170764
+        ]
+      },
+      "policy": "diagnostic",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.spot.calculate_spotting_from_torching_trees",
+      "id": "calculate_spotting_from_torching_trees/float16-overflow/normalized",
+      "inputs": {
+        "count": {
+          "dtype": "float32",
+          "shape": [
+            1
+          ],
+          "values": [
+            3.0
+          ]
+        },
+        "cover_height_ft": {
+          "dtype": "float32",
+          "shape": [
+            1
+          ],
+          "values": [
+            10.0
+          ]
+        },
+        "dbh_in": {
+          "dtype": "float32",
+          "shape": [
+            1
+          ],
+          "values": [
+            300.0
+          ]
+        },
+        "height_ft": {
+          "dtype": "float32",
+          "shape": [
+            1
+          ],
+          "values": [
+            60.0
+          ]
+        },
+        "wind_mph": {
+          "dtype": "float32",
+          "shape": [
+            1
+          ],
+          "values": [
+            5.0
+          ]
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [
+          1
+        ],
+        "values": [
+          311.7567315170764
+        ]
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.spot.calculate_spotting_from_torching_trees",
+      "id": "calculate_spotting_from_torching_trees/float16-underflow",
+      "inputs": {
+        "count": {
+          "dtype": "float16",
+          "shape": [
+            1
+          ],
+          "values": [
+            3.0
+          ]
+        },
+        "cover_height_ft": {
+          "dtype": "float16",
+          "shape": [
+            1
+          ],
+          "values": [
+            10.0
+          ]
+        },
+        "dbh_in": {
+          "dtype": "float16",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.0
+          ]
+        },
+        "height_ft": {
+          "dtype": "float16",
+          "shape": [
+            1
+          ],
+          "values": [
+            60.0
+          ]
+        },
+        "wind_mph": {
+          "dtype": "float16",
+          "shape": [
+            1
+          ],
+          "values": [
+            5.0
+          ]
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [
+          1
+        ],
+        "values": [
+          0.0
+        ]
+      },
+      "policy": "diagnostic",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.spot.calculate_spotting_from_torching_trees",
+      "id": "calculate_spotting_from_torching_trees/float16-underflow/normalized",
+      "inputs": {
+        "count": {
+          "dtype": "float32",
+          "shape": [
+            1
+          ],
+          "values": [
+            3.0
+          ]
+        },
+        "cover_height_ft": {
+          "dtype": "float32",
+          "shape": [
+            1
+          ],
+          "values": [
+            10.0
+          ]
+        },
+        "dbh_in": {
+          "dtype": "float32",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.0
+          ]
+        },
+        "height_ft": {
+          "dtype": "float32",
+          "shape": [
+            1
+          ],
+          "values": [
+            60.0
+          ]
+        },
+        "wind_mph": {
+          "dtype": "float32",
+          "shape": [
+            1
+          ],
+          "values": [
+            5.0
+          ]
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [
+          1
+        ],
+        "values": [
+          0.0
+        ]
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.spot.calculate_spotting_from_torching_trees",
+      "id": "calculate_spotting_from_torching_trees/masked",
+      "inputs": {
+        "count": {
+          "dtype": "float64",
+          "shape": [
+            2
+          ],
+          "values": [
+            3.0,
+            3.0
+          ]
+        },
+        "cover_height_ft": {
+          "dtype": "float64",
+          "shape": [
+            2
+          ],
+          "values": [
+            10.0,
+            10.0
+          ]
+        },
+        "dbh_in": {
+          "dtype": "float64",
+          "mask": [
+            false,
+            true
+          ],
+          "shape": [
+            2
+          ],
+          "values": [
+            1.0,
+            2.0
+          ]
+        },
+        "height_ft": {
+          "dtype": "float64",
+          "shape": [
+            2
+          ],
+          "values": [
+            60.0,
+            60.0
+          ]
+        },
+        "wind_mph": {
+          "dtype": "float64",
+          "shape": [
+            2
+          ],
+          "values": [
+            5.0,
+            5.0
+          ]
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [
+          2
+        ],
+        "values": [
+          71.98208280849632,
+          75.2884567519687
+        ]
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.spot.calculate_spotting_from_torching_trees",
+      "id": "calculate_spotting_from_torching_trees/strided",
+      "inputs": {
+        "count": {
+          "dtype": "float64",
+          "shape": [
+            2
+          ],
+          "values": [
+            3.0,
+            3.0
+          ]
+        },
+        "cover_height_ft": {
+          "dtype": "float64",
+          "shape": [
+            2
+          ],
+          "values": [
+            10.0,
+            10.0
+          ]
+        },
+        "dbh_in": {
+          "dtype": "float64",
+          "shape": [
+            2
+          ],
+          "strides": [
+            16
+          ],
+          "values": [
+            0.0,
+            2.0
+          ]
+        },
+        "height_ft": {
+          "dtype": "float64",
+          "shape": [
+            2
+          ],
+          "values": [
+            60.0,
+            60.0
+          ]
+        },
+        "wind_mph": {
+          "dtype": "float64",
+          "shape": [
+            2
+          ],
+          "values": [
+            5.0,
+            5.0
+          ]
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [
+          2
+        ],
+        "values": [
+          0.0,
+          75.2884567519687
+        ]
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.spot.calculate_spotting_from_torching_trees",
+      "id": "calculate_spotting_from_torching_trees/mixed-dtype",
+      "inputs": {
+        "count": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            3.0
+          ]
+        },
+        "cover_height_ft": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            10.0
+          ]
+        },
+        "dbh_in": {
+          "dtype": "float32",
+          "shape": [
+            1
+          ],
+          "values": [
+            1.0
+          ]
+        },
+        "height_ft": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            60.0
+          ]
+        },
+        "wind_mph": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            5.0
+          ]
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [
+          1
+        ],
+        "values": [
+          71.98208280849632
+        ]
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.spot.calculate_spotting_from_torching_trees",
+      "exception": "ValueError",
+      "id": "calculate_spotting_from_torching_trees/unsupported-object",
+      "inputs": {
+        "count": {
+          "dtype": "object",
+          "shape": [
+            1
+          ],
+          "values": [
+            3
+          ]
+        },
+        "cover_height_ft": {
+          "dtype": "object",
+          "shape": [
+            1
+          ],
+          "values": [
+            10
+          ]
+        },
+        "dbh_in": {
+          "dtype": "object",
+          "shape": [
+            1
+          ],
+          "values": [
+            "invalid"
+          ]
+        },
+        "height_ft": {
+          "dtype": "object",
+          "shape": [
+            1
+          ],
+          "values": [
+            60
+          ]
+        },
+        "wind_mph": {
+          "dtype": "object",
+          "shape": [
+            1
+          ],
+          "values": [
+            5
+          ]
+        }
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.spot.calculate_spotting_from_torching_trees",
+      "exception": "ValueError",
+      "id": "calculate_spotting_from_torching_trees/incompatible-shape",
+      "inputs": {
+        "count": {
+          "dtype": "float64",
+          "shape": [
+            2
+          ],
+          "values": [
+            3.0,
+            3.0
+          ]
+        },
+        "cover_height_ft": {
+          "dtype": "float64",
+          "shape": [
+            2
+          ],
+          "values": [
+            10.0,
+            10.0
+          ]
+        },
+        "dbh_in": {
+          "dtype": "float64",
+          "shape": [
+            3
+          ],
+          "values": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        "height_ft": {
+          "dtype": "float64",
+          "shape": [
+            2
+          ],
+          "values": [
+            60.0,
+            60.0
+          ]
+        },
+        "wind_mph": {
+          "dtype": "float64",
+          "shape": [
+            2
+          ],
+          "values": [
+            5.0,
+            5.0
+          ]
+        }
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.spot.calculate_spotting_from_torching_trees",
+      "id": "calculate_spotting_from_torching_trees/read-only",
+      "inputs": {
+        "count": {
+          "dtype": "float64",
+          "shape": [
+            2
+          ],
+          "values": [
+            3.0,
+            3.0
+          ]
+        },
+        "cover_height_ft": {
+          "dtype": "float64",
+          "shape": [
+            2
+          ],
+          "values": [
+            10.0,
+            10.0
+          ]
+        },
+        "dbh_in": {
+          "dtype": "float64",
+          "read_only": true,
+          "shape": [
+            2
+          ],
+          "values": [
+            1.0,
+            1.0
+          ]
+        },
+        "height_ft": {
+          "dtype": "float64",
+          "shape": [
+            2
+          ],
+          "values": [
+            60.0,
+            60.0
+          ]
+        },
+        "wind_mph": {
+          "dtype": "float64",
+          "shape": [
+            2
+          ],
+          "values": [
+            5.0,
+            5.0
+          ]
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [
+          2
+        ],
+        "values": [
+          71.98208280849632,
+          71.98208280849632
+        ]
+      },
+      "policy": "acceptance",
+      "warnings": []
+    }
+  ],
+  "provenance": {
+    "oracle": "explicit Python",
+    "python_reference_sha": "7933789f00470c6bbfbe942dc22bdd7f74e192f9",
+    "source_sha256": {
+      "src/behave_fire/__init__.py": "6e49d8e5eddb383cafbf19632a7407cb767fc976ff820b7e635d5d639ab4882f",
+      "src/behave_fire/behave.py": "8b9c35cfe18024ba1186ba5240f939c9b647dcca8d026d7db18c447421e9f6b1",
+      "src/behave_fire/components/__init__.py": "5c88705dcf2a4073bc79bd49e5038172bd0fa5b15ca9e77d6f9717424282519d",
+      "src/behave_fire/components/behave_units.py": "426581d91466c64bdbf60bd8a686030fe8244303cdbd097b1838479937abab77",
+      "src/behave_fire/components/contain.py": "fae224dee8ecdb090e7c3e6dc73a219508a026726e1ab3483776d54121a81bb7",
+      "src/behave_fire/components/crown.py": "0e0f5fe9b8c3074b192528b020232cc95e66470d59daa3a057544c75d7d93a03",
+      "src/behave_fire/components/fine_dead_fuel_moisture_tool.py": "cb11fc2da53c66b7f7753e88aa1d1f2135c91c3e67962912d1b2c097a73a8e60",
+      "src/behave_fire/components/fire_size.py": "23c671131ae710cfa441a14307cc0dfeb2e3d36b276fc112a5308827fe9e40dc",
+      "src/behave_fire/components/fuel_models.py": "ee1b886c72c8bb0e14a4c883745b4dde97ee3e011c7fddddc5e8b63e4588d225",
+      "src/behave_fire/components/fuel_models_array.py": "f60af63d681be852ff4fe6c3864ef55521c745da6ab182382caee4543e057125",
+      "src/behave_fire/components/ignite.py": "f0518ee4bc484f1b5478ad4792ecba77481bb68dda48abd0c45442ecb78523fc",
+      "src/behave_fire/components/mortality.py": "ccdaff07b59ef140786031d8957dd3cdafbbd97fd5e372e5fe4abcb392f5bcac",
+      "src/behave_fire/components/safety.py": "ed27e7cef7aa488a92636f8dfa589fadca3e0c6ba44ccae87a9fd7c8bac168a0",
+      "src/behave_fire/components/slope_tool.py": "754ce32058173b6c149135f9b1ec443f8be21679c7cf6c8e0a64d7ef5f3fb49c",
+      "src/behave_fire/components/species_master_table.py": "afa06eb15e475d252eef8b54d34be0d202c5c0f664d75e2c87c783a3831e8c11",
+      "src/behave_fire/components/spot.py": "a0411ecf7606ee75f4b460c084cb461e0c39619a3c14ad96a4c0217733456a22",
+      "src/behave_fire/components/surface.py": "133c6938ea701599428824d1d210ca2449d9103a5324cffc3c2a0db5330e4550",
+      "src/behave_fire/components/vapor_pressure_deficit_calculator.py": "4b165f3d48a02ab49c0fcdd2a5a7df65bab8b4a6366a280cbbf23041488eb258"
+    }
+  },
+  "schema_version": 1
+}

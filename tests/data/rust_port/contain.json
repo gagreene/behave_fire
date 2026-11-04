@@ -1,0 +1,2919 @@
+{
+  "cases": [
+    {
+      "entry_point": "behave_fire.components.contain.run_contain_sim_array",
+      "id": "run_contain_sim_array/baseline",
+      "inputs": {
+        "attack_time": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.0
+          ]
+        },
+        "lw_ratio": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            2.0
+          ]
+        },
+        "max_steps": 10,
+        "production_rate": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            1000.0
+          ]
+        },
+        "report_size": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            1.0
+          ]
+        },
+        "report_spread_rate": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            1.0
+          ]
+        }
+      },
+      "output": {
+        "contained_time": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.66
+          ]
+        },
+        "final_area": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            3.926990816987241e-06
+          ]
+        },
+        "final_perimeter": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.0471238898038469
+          ]
+        },
+        "status": {
+          "dtype": "int32",
+          "shape": [
+            1
+          ],
+          "values": [
+            3
+          ]
+        }
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.contain.run_contain_sim_array",
+      "id": "run_contain_sim_array/dtype-float16",
+      "inputs": {
+        "attack_time": {
+          "dtype": "float16",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.0
+          ]
+        },
+        "lw_ratio": {
+          "dtype": "float16",
+          "shape": [
+            1
+          ],
+          "values": [
+            2.0
+          ]
+        },
+        "max_steps": 10,
+        "production_rate": {
+          "dtype": "float16",
+          "shape": [
+            1
+          ],
+          "values": [
+            1000.0
+          ]
+        },
+        "report_size": {
+          "dtype": "float16",
+          "shape": [
+            1
+          ],
+          "values": [
+            1.0
+          ]
+        },
+        "report_spread_rate": {
+          "dtype": "float16",
+          "shape": [
+            1
+          ],
+          "values": [
+            1.0
+          ]
+        }
+      },
+      "output": {
+        "contained_time": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.66
+          ]
+        },
+        "final_area": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            3.926990816987241e-06
+          ]
+        },
+        "final_perimeter": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.0471238898038469
+          ]
+        },
+        "status": {
+          "dtype": "int32",
+          "shape": [
+            1
+          ],
+          "values": [
+            3
+          ]
+        }
+      },
+      "policy": "diagnostic",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.contain.run_contain_sim_array",
+      "id": "run_contain_sim_array/dtype-float16/normalized",
+      "inputs": {
+        "attack_time": {
+          "dtype": "float32",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.0
+          ]
+        },
+        "lw_ratio": {
+          "dtype": "float32",
+          "shape": [
+            1
+          ],
+          "values": [
+            2.0
+          ]
+        },
+        "max_steps": 10,
+        "production_rate": {
+          "dtype": "float32",
+          "shape": [
+            1
+          ],
+          "values": [
+            1000.0
+          ]
+        },
+        "report_size": {
+          "dtype": "float32",
+          "shape": [
+            1
+          ],
+          "values": [
+            1.0
+          ]
+        },
+        "report_spread_rate": {
+          "dtype": "float32",
+          "shape": [
+            1
+          ],
+          "values": [
+            1.0
+          ]
+        }
+      },
+      "output": {
+        "contained_time": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.66
+          ]
+        },
+        "final_area": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            3.926990816987241e-06
+          ]
+        },
+        "final_perimeter": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.0471238898038469
+          ]
+        },
+        "status": {
+          "dtype": "int32",
+          "shape": [
+            1
+          ],
+          "values": [
+            3
+          ]
+        }
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.contain.run_contain_sim_array",
+      "id": "run_contain_sim_array/dtype-float32",
+      "inputs": {
+        "attack_time": {
+          "dtype": "float32",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.0
+          ]
+        },
+        "lw_ratio": {
+          "dtype": "float32",
+          "shape": [
+            1
+          ],
+          "values": [
+            2.0
+          ]
+        },
+        "max_steps": 10,
+        "production_rate": {
+          "dtype": "float32",
+          "shape": [
+            1
+          ],
+          "values": [
+            1000.0
+          ]
+        },
+        "report_size": {
+          "dtype": "float32",
+          "shape": [
+            1
+          ],
+          "values": [
+            1.0
+          ]
+        },
+        "report_spread_rate": {
+          "dtype": "float32",
+          "shape": [
+            1
+          ],
+          "values": [
+            1.0
+          ]
+        }
+      },
+      "output": {
+        "contained_time": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.66
+          ]
+        },
+        "final_area": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            3.926990816987241e-06
+          ]
+        },
+        "final_perimeter": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.0471238898038469
+          ]
+        },
+        "status": {
+          "dtype": "int32",
+          "shape": [
+            1
+          ],
+          "values": [
+            3
+          ]
+        }
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.contain.run_contain_sim_array",
+      "id": "run_contain_sim_array/dtype-float64",
+      "inputs": {
+        "attack_time": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.0
+          ]
+        },
+        "lw_ratio": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            2.0
+          ]
+        },
+        "max_steps": 10,
+        "production_rate": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            1000.0
+          ]
+        },
+        "report_size": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            1.0
+          ]
+        },
+        "report_spread_rate": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            1.0
+          ]
+        }
+      },
+      "output": {
+        "contained_time": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.66
+          ]
+        },
+        "final_area": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            3.926990816987241e-06
+          ]
+        },
+        "final_perimeter": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.0471238898038469
+          ]
+        },
+        "status": {
+          "dtype": "int32",
+          "shape": [
+            1
+          ],
+          "values": [
+            3
+          ]
+        }
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.contain.run_contain_sim_array",
+      "id": "run_contain_sim_array/dtype-int64",
+      "inputs": {
+        "attack_time": {
+          "dtype": "int64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0
+          ]
+        },
+        "lw_ratio": {
+          "dtype": "int64",
+          "shape": [
+            1
+          ],
+          "values": [
+            2
+          ]
+        },
+        "max_steps": 10,
+        "production_rate": {
+          "dtype": "int64",
+          "shape": [
+            1
+          ],
+          "values": [
+            1000
+          ]
+        },
+        "report_size": {
+          "dtype": "int64",
+          "shape": [
+            1
+          ],
+          "values": [
+            1
+          ]
+        },
+        "report_spread_rate": {
+          "dtype": "int64",
+          "shape": [
+            1
+          ],
+          "values": [
+            1
+          ]
+        }
+      },
+      "output": {
+        "contained_time": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.66
+          ]
+        },
+        "final_area": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            3.926990816987241e-06
+          ]
+        },
+        "final_perimeter": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.0471238898038469
+          ]
+        },
+        "status": {
+          "dtype": "int32",
+          "shape": [
+            1
+          ],
+          "values": [
+            3
+          ]
+        }
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.contain.run_contain_sim_array",
+      "id": "run_contain_sim_array/dtype-uint32",
+      "inputs": {
+        "attack_time": {
+          "dtype": "uint32",
+          "shape": [
+            1
+          ],
+          "values": [
+            0
+          ]
+        },
+        "lw_ratio": {
+          "dtype": "uint32",
+          "shape": [
+            1
+          ],
+          "values": [
+            2
+          ]
+        },
+        "max_steps": 10,
+        "production_rate": {
+          "dtype": "uint32",
+          "shape": [
+            1
+          ],
+          "values": [
+            1000
+          ]
+        },
+        "report_size": {
+          "dtype": "uint32",
+          "shape": [
+            1
+          ],
+          "values": [
+            1
+          ]
+        },
+        "report_spread_rate": {
+          "dtype": "uint32",
+          "shape": [
+            1
+          ],
+          "values": [
+            1
+          ]
+        }
+      },
+      "output": {
+        "contained_time": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.66
+          ]
+        },
+        "final_area": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            3.926990816987241e-06
+          ]
+        },
+        "final_perimeter": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.0471238898038469
+          ]
+        },
+        "status": {
+          "dtype": "int32",
+          "shape": [
+            1
+          ],
+          "values": [
+            3
+          ]
+        }
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.contain.run_contain_sim_array",
+      "id": "run_contain_sim_array/dtype-bool",
+      "inputs": {
+        "attack_time": {
+          "dtype": "bool",
+          "shape": [
+            1
+          ],
+          "values": [
+            false
+          ]
+        },
+        "lw_ratio": {
+          "dtype": "bool",
+          "shape": [
+            1
+          ],
+          "values": [
+            true
+          ]
+        },
+        "max_steps": 10,
+        "production_rate": {
+          "dtype": "bool",
+          "shape": [
+            1
+          ],
+          "values": [
+            true
+          ]
+        },
+        "report_size": {
+          "dtype": "bool",
+          "shape": [
+            1
+          ],
+          "values": [
+            true
+          ]
+        },
+        "report_spread_rate": {
+          "dtype": "bool",
+          "shape": [
+            1
+          ],
+          "values": [
+            true
+          ]
+        }
+      },
+      "output": {
+        "contained_time": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.0
+          ]
+        },
+        "final_area": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.0007853981633974483
+          ]
+        },
+        "final_perimeter": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.6283185307179586
+          ]
+        },
+        "status": {
+          "dtype": "int32",
+          "shape": [
+            1
+          ],
+          "values": [
+            8
+          ]
+        }
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.contain.run_contain_sim_array",
+      "id": "run_contain_sim_array/dtype-object",
+      "inputs": {
+        "attack_time": {
+          "dtype": "object",
+          "shape": [
+            1
+          ],
+          "values": [
+            0
+          ]
+        },
+        "lw_ratio": {
+          "dtype": "object",
+          "shape": [
+            1
+          ],
+          "values": [
+            2
+          ]
+        },
+        "max_steps": 10,
+        "production_rate": {
+          "dtype": "object",
+          "shape": [
+            1
+          ],
+          "values": [
+            1000
+          ]
+        },
+        "report_size": {
+          "dtype": "object",
+          "shape": [
+            1
+          ],
+          "values": [
+            1
+          ]
+        },
+        "report_spread_rate": {
+          "dtype": "object",
+          "shape": [
+            1
+          ],
+          "values": [
+            1
+          ]
+        }
+      },
+      "output": {
+        "contained_time": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.66
+          ]
+        },
+        "final_area": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            3.926990816987241e-06
+          ]
+        },
+        "final_perimeter": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.0471238898038469
+          ]
+        },
+        "status": {
+          "dtype": "int32",
+          "shape": [
+            1
+          ],
+          "values": [
+            3
+          ]
+        }
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.contain.run_contain_sim_array",
+      "id": "run_contain_sim_array/scalar",
+      "inputs": {
+        "attack_time": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            0.0
+          ]
+        },
+        "lw_ratio": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            2.0
+          ]
+        },
+        "max_steps": 10,
+        "production_rate": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            1000.0
+          ]
+        },
+        "report_size": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            1.0
+          ]
+        },
+        "report_spread_rate": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            1.0
+          ]
+        }
+      },
+      "output": {
+        "contained_time": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.66
+          ]
+        },
+        "final_area": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            3.926990816987241e-06
+          ]
+        },
+        "final_perimeter": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.0471238898038469
+          ]
+        },
+        "status": {
+          "dtype": "int32",
+          "shape": [
+            1
+          ],
+          "values": [
+            3
+          ]
+        }
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.contain.run_contain_sim_array",
+      "id": "run_contain_sim_array/2d",
+      "inputs": {
+        "attack_time": {
+          "dtype": "float64",
+          "shape": [
+            2,
+            2
+          ],
+          "values": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "lw_ratio": {
+          "dtype": "float64",
+          "shape": [
+            2,
+            2
+          ],
+          "values": [
+            2.0,
+            2.0,
+            2.0,
+            2.0
+          ]
+        },
+        "max_steps": 10,
+        "production_rate": {
+          "dtype": "float64",
+          "shape": [
+            2,
+            2
+          ],
+          "values": [
+            1000.0,
+            1000.0,
+            1000.0,
+            1000.0
+          ]
+        },
+        "report_size": {
+          "dtype": "float64",
+          "shape": [
+            2,
+            2
+          ],
+          "values": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        "report_spread_rate": {
+          "dtype": "float64",
+          "shape": [
+            2,
+            2
+          ],
+          "values": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ]
+        }
+      },
+      "output": {
+        "contained_time": {
+          "dtype": "float64",
+          "shape": [
+            2,
+            2
+          ],
+          "values": [
+            0.66,
+            0.66,
+            0.66,
+            0.66
+          ]
+        },
+        "final_area": {
+          "dtype": "float64",
+          "shape": [
+            2,
+            2
+          ],
+          "values": [
+            3.926990816987241e-06,
+            3.926990816987241e-06,
+            3.926990816987241e-06,
+            3.926990816987241e-06
+          ]
+        },
+        "final_perimeter": {
+          "dtype": "float64",
+          "shape": [
+            2,
+            2
+          ],
+          "values": [
+            0.0471238898038469,
+            0.0471238898038469,
+            0.0471238898038469,
+            0.0471238898038469
+          ]
+        },
+        "status": {
+          "dtype": "int32",
+          "shape": [
+            2,
+            2
+          ],
+          "values": [
+            3,
+            3,
+            3,
+            3
+          ]
+        }
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.contain.run_contain_sim_array",
+      "id": "run_contain_sim_array/3d",
+      "inputs": {
+        "attack_time": {
+          "dtype": "float64",
+          "shape": [
+            1,
+            2,
+            2
+          ],
+          "values": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "lw_ratio": {
+          "dtype": "float64",
+          "shape": [
+            1,
+            2,
+            2
+          ],
+          "values": [
+            2.0,
+            2.0,
+            2.0,
+            2.0
+          ]
+        },
+        "max_steps": 10,
+        "production_rate": {
+          "dtype": "float64",
+          "shape": [
+            1,
+            2,
+            2
+          ],
+          "values": [
+            1000.0,
+            1000.0,
+            1000.0,
+            1000.0
+          ]
+        },
+        "report_size": {
+          "dtype": "float64",
+          "shape": [
+            1,
+            2,
+            2
+          ],
+          "values": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        "report_spread_rate": {
+          "dtype": "float64",
+          "shape": [
+            1,
+            2,
+            2
+          ],
+          "values": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ]
+        }
+      },
+      "output": {
+        "contained_time": {
+          "dtype": "float64",
+          "shape": [
+            1,
+            2,
+            2
+          ],
+          "values": [
+            0.66,
+            0.66,
+            0.66,
+            0.66
+          ]
+        },
+        "final_area": {
+          "dtype": "float64",
+          "shape": [
+            1,
+            2,
+            2
+          ],
+          "values": [
+            3.926990816987241e-06,
+            3.926990816987241e-06,
+            3.926990816987241e-06,
+            3.926990816987241e-06
+          ]
+        },
+        "final_perimeter": {
+          "dtype": "float64",
+          "shape": [
+            1,
+            2,
+            2
+          ],
+          "values": [
+            0.0471238898038469,
+            0.0471238898038469,
+            0.0471238898038469,
+            0.0471238898038469
+          ]
+        },
+        "status": {
+          "dtype": "int32",
+          "shape": [
+            1,
+            2,
+            2
+          ],
+          "values": [
+            3,
+            3,
+            3,
+            3
+          ]
+        }
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.contain.run_contain_sim_array",
+      "id": "run_contain_sim_array/empty",
+      "inputs": {
+        "attack_time": {
+          "dtype": "float64",
+          "shape": [
+            0
+          ],
+          "values": []
+        },
+        "lw_ratio": {
+          "dtype": "float64",
+          "shape": [
+            0
+          ],
+          "values": []
+        },
+        "max_steps": 10,
+        "production_rate": {
+          "dtype": "float64",
+          "shape": [
+            0
+          ],
+          "values": []
+        },
+        "report_size": {
+          "dtype": "float64",
+          "shape": [
+            0
+          ],
+          "values": []
+        },
+        "report_spread_rate": {
+          "dtype": "float64",
+          "shape": [
+            0
+          ],
+          "values": []
+        }
+      },
+      "output": {
+        "contained_time": {
+          "dtype": "float64",
+          "shape": [
+            0
+          ],
+          "values": []
+        },
+        "final_area": {
+          "dtype": "float64",
+          "shape": [
+            0
+          ],
+          "values": []
+        },
+        "final_perimeter": {
+          "dtype": "float64",
+          "shape": [
+            0
+          ],
+          "values": []
+        },
+        "status": {
+          "dtype": "int32",
+          "shape": [
+            0
+          ],
+          "values": []
+        }
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.contain.run_contain_sim_array",
+      "id": "run_contain_sim_array/zero",
+      "inputs": {
+        "attack_time": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.0
+          ]
+        },
+        "lw_ratio": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            2.0
+          ]
+        },
+        "max_steps": 10,
+        "production_rate": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            1000.0
+          ]
+        },
+        "report_size": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            1.0
+          ]
+        },
+        "report_spread_rate": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.0
+          ]
+        }
+      },
+      "output": {
+        "contained_time": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.01
+          ]
+        },
+        "final_area": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.0
+          ]
+        },
+        "final_perimeter": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.0
+          ]
+        },
+        "status": {
+          "dtype": "int32",
+          "shape": [
+            1
+          ],
+          "values": [
+            3
+          ]
+        }
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.contain.run_contain_sim_array",
+      "id": "run_contain_sim_array/negative",
+      "inputs": {
+        "attack_time": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.0
+          ]
+        },
+        "lw_ratio": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            2.0
+          ]
+        },
+        "max_steps": 10,
+        "production_rate": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            1000.0
+          ]
+        },
+        "report_size": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            1.0
+          ]
+        },
+        "report_spread_rate": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            -1.0
+          ]
+        }
+      },
+      "output": {
+        "contained_time": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.01
+          ]
+        },
+        "final_area": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            9.015130433855008e-10
+          ]
+        },
+        "final_perimeter": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            -0.0007139983303613166
+          ]
+        },
+        "status": {
+          "dtype": "int32",
+          "shape": [
+            1
+          ],
+          "values": [
+            3
+          ]
+        }
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.contain.run_contain_sim_array",
+      "id": "run_contain_sim_array/nan",
+      "inputs": {
+        "attack_time": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.0
+          ]
+        },
+        "lw_ratio": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            2.0
+          ]
+        },
+        "max_steps": 10,
+        "production_rate": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            1000.0
+          ]
+        },
+        "report_size": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            1.0
+          ]
+        },
+        "report_spread_rate": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            {
+              "float": "nan"
+            }
+          ]
+        }
+      },
+      "output": {
+        "contained_time": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.0
+          ]
+        },
+        "final_area": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            {
+              "float": "nan"
+            }
+          ]
+        },
+        "final_perimeter": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            {
+              "float": "nan"
+            }
+          ]
+        },
+        "status": {
+          "dtype": "int32",
+          "shape": [
+            1
+          ],
+          "values": [
+            8
+          ]
+        }
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.contain.run_contain_sim_array",
+      "id": "run_contain_sim_array/positive-infinity",
+      "inputs": {
+        "attack_time": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.0
+          ]
+        },
+        "lw_ratio": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            2.0
+          ]
+        },
+        "max_steps": 10,
+        "production_rate": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            1000.0
+          ]
+        },
+        "report_size": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            1.0
+          ]
+        },
+        "report_spread_rate": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            {
+              "float": "+inf"
+            }
+          ]
+        }
+      },
+      "output": {
+        "contained_time": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.0
+          ]
+        },
+        "final_area": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            {
+              "float": "nan"
+            }
+          ]
+        },
+        "final_perimeter": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            {
+              "float": "nan"
+            }
+          ]
+        },
+        "status": {
+          "dtype": "int32",
+          "shape": [
+            1
+          ],
+          "values": [
+            8
+          ]
+        }
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.contain.run_contain_sim_array",
+      "id": "run_contain_sim_array/negative-infinity",
+      "inputs": {
+        "attack_time": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.0
+          ]
+        },
+        "lw_ratio": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            2.0
+          ]
+        },
+        "max_steps": 10,
+        "production_rate": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            1000.0
+          ]
+        },
+        "report_size": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            1.0
+          ]
+        },
+        "report_spread_rate": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            {
+              "float": "-inf"
+            }
+          ]
+        }
+      },
+      "output": {
+        "contained_time": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.01
+          ]
+        },
+        "final_area": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            {
+              "float": "+inf"
+            }
+          ]
+        },
+        "final_perimeter": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            {
+              "float": "-inf"
+            }
+          ]
+        },
+        "status": {
+          "dtype": "int32",
+          "shape": [
+            1
+          ],
+          "values": [
+            3
+          ]
+        }
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.contain.run_contain_sim_array",
+      "id": "run_contain_sim_array/below-threshold",
+      "inputs": {
+        "attack_time": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.0
+          ]
+        },
+        "lw_ratio": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            2.0
+          ]
+        },
+        "max_steps": 10,
+        "production_rate": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            1000.0
+          ]
+        },
+        "report_size": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            1.0
+          ]
+        },
+        "report_spread_rate": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            9.999999999999998e-08
+          ]
+        }
+      },
+      "output": {
+        "contained_time": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.01
+          ]
+        },
+        "final_area": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            9.015130433855002e-24
+          ]
+        },
+        "final_perimeter": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            7.139983303613164e-11
+          ]
+        },
+        "status": {
+          "dtype": "int32",
+          "shape": [
+            1
+          ],
+          "values": [
+            3
+          ]
+        }
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.contain.run_contain_sim_array",
+      "id": "run_contain_sim_array/at-threshold",
+      "inputs": {
+        "attack_time": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.0
+          ]
+        },
+        "lw_ratio": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            2.0
+          ]
+        },
+        "max_steps": 10,
+        "production_rate": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            1000.0
+          ]
+        },
+        "report_size": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            1.0
+          ]
+        },
+        "report_spread_rate": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            1e-07
+          ]
+        }
+      },
+      "output": {
+        "contained_time": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.01
+          ]
+        },
+        "final_area": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            9.015130433855007e-24
+          ]
+        },
+        "final_perimeter": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            7.139983303613166e-11
+          ]
+        },
+        "status": {
+          "dtype": "int32",
+          "shape": [
+            1
+          ],
+          "values": [
+            3
+          ]
+        }
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.contain.run_contain_sim_array",
+      "id": "run_contain_sim_array/above-threshold",
+      "inputs": {
+        "attack_time": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.0
+          ]
+        },
+        "lw_ratio": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            2.0
+          ]
+        },
+        "max_steps": 10,
+        "production_rate": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            1000.0
+          ]
+        },
+        "report_size": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            1.0
+          ]
+        },
+        "report_spread_rate": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            1.0000000000000001e-07
+          ]
+        }
+      },
+      "output": {
+        "contained_time": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.01
+          ]
+        },
+        "final_area": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            9.015130433855011e-24
+          ]
+        },
+        "final_perimeter": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            7.139983303613167e-11
+          ]
+        },
+        "status": {
+          "dtype": "int32",
+          "shape": [
+            1
+          ],
+          "values": [
+            3
+          ]
+        }
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.contain.run_contain_sim_array",
+      "id": "run_contain_sim_array/float16-overflow",
+      "inputs": {
+        "attack_time": {
+          "dtype": "float16",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.0
+          ]
+        },
+        "lw_ratio": {
+          "dtype": "float16",
+          "shape": [
+            1
+          ],
+          "values": [
+            2.0
+          ]
+        },
+        "max_steps": 10,
+        "production_rate": {
+          "dtype": "float16",
+          "shape": [
+            1
+          ],
+          "values": [
+            1000.0
+          ]
+        },
+        "report_size": {
+          "dtype": "float16",
+          "shape": [
+            1
+          ],
+          "values": [
+            1.0
+          ]
+        },
+        "report_spread_rate": {
+          "dtype": "float16",
+          "shape": [
+            1
+          ],
+          "values": [
+            300.0
+          ]
+        }
+      },
+      "output": {
+        "contained_time": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.0
+          ]
+        },
+        "final_area": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.00039269908169872427
+          ]
+        },
+        "final_perimeter": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.4712388980384691
+          ]
+        },
+        "status": {
+          "dtype": "int32",
+          "shape": [
+            1
+          ],
+          "values": [
+            8
+          ]
+        }
+      },
+      "policy": "diagnostic",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.contain.run_contain_sim_array",
+      "id": "run_contain_sim_array/float16-overflow/normalized",
+      "inputs": {
+        "attack_time": {
+          "dtype": "float32",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.0
+          ]
+        },
+        "lw_ratio": {
+          "dtype": "float32",
+          "shape": [
+            1
+          ],
+          "values": [
+            2.0
+          ]
+        },
+        "max_steps": 10,
+        "production_rate": {
+          "dtype": "float32",
+          "shape": [
+            1
+          ],
+          "values": [
+            1000.0
+          ]
+        },
+        "report_size": {
+          "dtype": "float32",
+          "shape": [
+            1
+          ],
+          "values": [
+            1.0
+          ]
+        },
+        "report_spread_rate": {
+          "dtype": "float32",
+          "shape": [
+            1
+          ],
+          "values": [
+            300.0
+          ]
+        }
+      },
+      "output": {
+        "contained_time": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.0
+          ]
+        },
+        "final_area": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.00039269908169872427
+          ]
+        },
+        "final_perimeter": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.4712388980384691
+          ]
+        },
+        "status": {
+          "dtype": "int32",
+          "shape": [
+            1
+          ],
+          "values": [
+            8
+          ]
+        }
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.contain.run_contain_sim_array",
+      "id": "run_contain_sim_array/float16-underflow",
+      "inputs": {
+        "attack_time": {
+          "dtype": "float16",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.0
+          ]
+        },
+        "lw_ratio": {
+          "dtype": "float16",
+          "shape": [
+            1
+          ],
+          "values": [
+            2.0
+          ]
+        },
+        "max_steps": 10,
+        "production_rate": {
+          "dtype": "float16",
+          "shape": [
+            1
+          ],
+          "values": [
+            1000.0
+          ]
+        },
+        "report_size": {
+          "dtype": "float16",
+          "shape": [
+            1
+          ],
+          "values": [
+            1.0
+          ]
+        },
+        "report_spread_rate": {
+          "dtype": "float16",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.0
+          ]
+        }
+      },
+      "output": {
+        "contained_time": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.01
+          ]
+        },
+        "final_area": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.0
+          ]
+        },
+        "final_perimeter": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.0
+          ]
+        },
+        "status": {
+          "dtype": "int32",
+          "shape": [
+            1
+          ],
+          "values": [
+            3
+          ]
+        }
+      },
+      "policy": "diagnostic",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.contain.run_contain_sim_array",
+      "id": "run_contain_sim_array/float16-underflow/normalized",
+      "inputs": {
+        "attack_time": {
+          "dtype": "float32",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.0
+          ]
+        },
+        "lw_ratio": {
+          "dtype": "float32",
+          "shape": [
+            1
+          ],
+          "values": [
+            2.0
+          ]
+        },
+        "max_steps": 10,
+        "production_rate": {
+          "dtype": "float32",
+          "shape": [
+            1
+          ],
+          "values": [
+            1000.0
+          ]
+        },
+        "report_size": {
+          "dtype": "float32",
+          "shape": [
+            1
+          ],
+          "values": [
+            1.0
+          ]
+        },
+        "report_spread_rate": {
+          "dtype": "float32",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.0
+          ]
+        }
+      },
+      "output": {
+        "contained_time": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.01
+          ]
+        },
+        "final_area": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.0
+          ]
+        },
+        "final_perimeter": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.0
+          ]
+        },
+        "status": {
+          "dtype": "int32",
+          "shape": [
+            1
+          ],
+          "values": [
+            3
+          ]
+        }
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.contain.run_contain_sim_array",
+      "id": "run_contain_sim_array/masked",
+      "inputs": {
+        "attack_time": {
+          "dtype": "float64",
+          "shape": [
+            2
+          ],
+          "values": [
+            0.0,
+            0.0
+          ]
+        },
+        "lw_ratio": {
+          "dtype": "float64",
+          "shape": [
+            2
+          ],
+          "values": [
+            2.0,
+            2.0
+          ]
+        },
+        "max_steps": 10,
+        "production_rate": {
+          "dtype": "float64",
+          "shape": [
+            2
+          ],
+          "values": [
+            1000.0,
+            1000.0
+          ]
+        },
+        "report_size": {
+          "dtype": "float64",
+          "shape": [
+            2
+          ],
+          "values": [
+            1.0,
+            1.0
+          ]
+        },
+        "report_spread_rate": {
+          "dtype": "float64",
+          "mask": [
+            false,
+            true
+          ],
+          "shape": [
+            2
+          ],
+          "values": [
+            1.0,
+            2.0
+          ]
+        }
+      },
+      "output": {
+        "contained_time": {
+          "dtype": "float64",
+          "shape": [
+            2
+          ],
+          "values": [
+            0.66,
+            0.33
+          ]
+        },
+        "final_area": {
+          "dtype": "float64",
+          "shape": [
+            2
+          ],
+          "values": [
+            3.926990816987241e-06,
+            3.926990816987241e-06
+          ]
+        },
+        "final_perimeter": {
+          "dtype": "float64",
+          "shape": [
+            2
+          ],
+          "values": [
+            0.0471238898038469,
+            0.0471238898038469
+          ]
+        },
+        "status": {
+          "dtype": "int32",
+          "shape": [
+            2
+          ],
+          "values": [
+            3,
+            3
+          ]
+        }
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.contain.run_contain_sim_array",
+      "id": "run_contain_sim_array/strided",
+      "inputs": {
+        "attack_time": {
+          "dtype": "float64",
+          "shape": [
+            2
+          ],
+          "values": [
+            0.0,
+            0.0
+          ]
+        },
+        "lw_ratio": {
+          "dtype": "float64",
+          "shape": [
+            2
+          ],
+          "values": [
+            2.0,
+            2.0
+          ]
+        },
+        "max_steps": 10,
+        "production_rate": {
+          "dtype": "float64",
+          "shape": [
+            2
+          ],
+          "values": [
+            1000.0,
+            1000.0
+          ]
+        },
+        "report_size": {
+          "dtype": "float64",
+          "shape": [
+            2
+          ],
+          "values": [
+            1.0,
+            1.0
+          ]
+        },
+        "report_spread_rate": {
+          "dtype": "float64",
+          "shape": [
+            2
+          ],
+          "strides": [
+            16
+          ],
+          "values": [
+            0.0,
+            2.0
+          ]
+        }
+      },
+      "output": {
+        "contained_time": {
+          "dtype": "float64",
+          "shape": [
+            2
+          ],
+          "values": [
+            0.01,
+            0.33
+          ]
+        },
+        "final_area": {
+          "dtype": "float64",
+          "shape": [
+            2
+          ],
+          "values": [
+            0.0,
+            3.926990816987241e-06
+          ]
+        },
+        "final_perimeter": {
+          "dtype": "float64",
+          "shape": [
+            2
+          ],
+          "values": [
+            0.0,
+            0.0471238898038469
+          ]
+        },
+        "status": {
+          "dtype": "int32",
+          "shape": [
+            2
+          ],
+          "values": [
+            3,
+            3
+          ]
+        }
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.contain.run_contain_sim_array",
+      "id": "run_contain_sim_array/mixed-dtype",
+      "inputs": {
+        "attack_time": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.0
+          ]
+        },
+        "lw_ratio": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            2.0
+          ]
+        },
+        "max_steps": 10,
+        "production_rate": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            1000.0
+          ]
+        },
+        "report_size": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            1.0
+          ]
+        },
+        "report_spread_rate": {
+          "dtype": "float32",
+          "shape": [
+            1
+          ],
+          "values": [
+            1.0
+          ]
+        }
+      },
+      "output": {
+        "contained_time": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.66
+          ]
+        },
+        "final_area": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            3.926990816987241e-06
+          ]
+        },
+        "final_perimeter": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.0471238898038469
+          ]
+        },
+        "status": {
+          "dtype": "int32",
+          "shape": [
+            1
+          ],
+          "values": [
+            3
+          ]
+        }
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.contain.run_contain_sim_array",
+      "exception": "ValueError",
+      "id": "run_contain_sim_array/unsupported-object",
+      "inputs": {
+        "attack_time": {
+          "dtype": "object",
+          "shape": [
+            1
+          ],
+          "values": [
+            0
+          ]
+        },
+        "lw_ratio": {
+          "dtype": "object",
+          "shape": [
+            1
+          ],
+          "values": [
+            2
+          ]
+        },
+        "max_steps": 10,
+        "production_rate": {
+          "dtype": "object",
+          "shape": [
+            1
+          ],
+          "values": [
+            1000
+          ]
+        },
+        "report_size": {
+          "dtype": "object",
+          "shape": [
+            1
+          ],
+          "values": [
+            1
+          ]
+        },
+        "report_spread_rate": {
+          "dtype": "object",
+          "shape": [
+            1
+          ],
+          "values": [
+            "invalid"
+          ]
+        }
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.contain.run_contain_sim_array",
+      "exception": "ValueError",
+      "id": "run_contain_sim_array/incompatible-shape",
+      "inputs": {
+        "attack_time": {
+          "dtype": "float64",
+          "shape": [
+            2
+          ],
+          "values": [
+            0.0,
+            0.0
+          ]
+        },
+        "lw_ratio": {
+          "dtype": "float64",
+          "shape": [
+            2
+          ],
+          "values": [
+            2.0,
+            2.0
+          ]
+        },
+        "max_steps": 10,
+        "production_rate": {
+          "dtype": "float64",
+          "shape": [
+            2
+          ],
+          "values": [
+            1000.0,
+            1000.0
+          ]
+        },
+        "report_size": {
+          "dtype": "float64",
+          "shape": [
+            2
+          ],
+          "values": [
+            1.0,
+            1.0
+          ]
+        },
+        "report_spread_rate": {
+          "dtype": "float64",
+          "shape": [
+            3
+          ],
+          "values": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        }
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.contain.run_contain_sim_array",
+      "id": "run_contain_sim_array/read-only",
+      "inputs": {
+        "attack_time": {
+          "dtype": "float64",
+          "shape": [
+            2
+          ],
+          "values": [
+            0.0,
+            0.0
+          ]
+        },
+        "lw_ratio": {
+          "dtype": "float64",
+          "shape": [
+            2
+          ],
+          "values": [
+            2.0,
+            2.0
+          ]
+        },
+        "max_steps": 10,
+        "production_rate": {
+          "dtype": "float64",
+          "shape": [
+            2
+          ],
+          "values": [
+            1000.0,
+            1000.0
+          ]
+        },
+        "report_size": {
+          "dtype": "float64",
+          "shape": [
+            2
+          ],
+          "values": [
+            1.0,
+            1.0
+          ]
+        },
+        "report_spread_rate": {
+          "dtype": "float64",
+          "read_only": true,
+          "shape": [
+            2
+          ],
+          "values": [
+            1.0,
+            1.0
+          ]
+        }
+      },
+      "output": {
+        "contained_time": {
+          "dtype": "float64",
+          "shape": [
+            2
+          ],
+          "values": [
+            0.66,
+            0.66
+          ]
+        },
+        "final_area": {
+          "dtype": "float64",
+          "shape": [
+            2
+          ],
+          "values": [
+            3.926990816987241e-06,
+            3.926990816987241e-06
+          ]
+        },
+        "final_perimeter": {
+          "dtype": "float64",
+          "shape": [
+            2
+          ],
+          "values": [
+            0.0471238898038469,
+            0.0471238898038469
+          ]
+        },
+        "status": {
+          "dtype": "int32",
+          "shape": [
+            2
+          ],
+          "values": [
+            3,
+            3
+          ]
+        }
+      },
+      "policy": "acceptance",
+      "warnings": []
+    }
+  ],
+  "provenance": {
+    "oracle": "explicit Python",
+    "python_reference_sha": "7933789f00470c6bbfbe942dc22bdd7f74e192f9",
+    "source_sha256": {
+      "src/behave_fire/__init__.py": "6e49d8e5eddb383cafbf19632a7407cb767fc976ff820b7e635d5d639ab4882f",
+      "src/behave_fire/behave.py": "8b9c35cfe18024ba1186ba5240f939c9b647dcca8d026d7db18c447421e9f6b1",
+      "src/behave_fire/components/__init__.py": "5c88705dcf2a4073bc79bd49e5038172bd0fa5b15ca9e77d6f9717424282519d",
+      "src/behave_fire/components/behave_units.py": "426581d91466c64bdbf60bd8a686030fe8244303cdbd097b1838479937abab77",
+      "src/behave_fire/components/contain.py": "fae224dee8ecdb090e7c3e6dc73a219508a026726e1ab3483776d54121a81bb7",
+      "src/behave_fire/components/crown.py": "0e0f5fe9b8c3074b192528b020232cc95e66470d59daa3a057544c75d7d93a03",
+      "src/behave_fire/components/fine_dead_fuel_moisture_tool.py": "cb11fc2da53c66b7f7753e88aa1d1f2135c91c3e67962912d1b2c097a73a8e60",
+      "src/behave_fire/components/fire_size.py": "23c671131ae710cfa441a14307cc0dfeb2e3d36b276fc112a5308827fe9e40dc",
+      "src/behave_fire/components/fuel_models.py": "ee1b886c72c8bb0e14a4c883745b4dde97ee3e011c7fddddc5e8b63e4588d225",
+      "src/behave_fire/components/fuel_models_array.py": "f60af63d681be852ff4fe6c3864ef55521c745da6ab182382caee4543e057125",
+      "src/behave_fire/components/ignite.py": "f0518ee4bc484f1b5478ad4792ecba77481bb68dda48abd0c45442ecb78523fc",
+      "src/behave_fire/components/mortality.py": "ccdaff07b59ef140786031d8957dd3cdafbbd97fd5e372e5fe4abcb392f5bcac",
+      "src/behave_fire/components/safety.py": "ed27e7cef7aa488a92636f8dfa589fadca3e0c6ba44ccae87a9fd7c8bac168a0",
+      "src/behave_fire/components/slope_tool.py": "754ce32058173b6c149135f9b1ec443f8be21679c7cf6c8e0a64d7ef5f3fb49c",
+      "src/behave_fire/components/species_master_table.py": "afa06eb15e475d252eef8b54d34be0d202c5c0f664d75e2c87c783a3831e8c11",
+      "src/behave_fire/components/spot.py": "a0411ecf7606ee75f4b460c084cb461e0c39619a3c14ad96a4c0217733456a22",
+      "src/behave_fire/components/surface.py": "133c6938ea701599428824d1d210ca2449d9103a5324cffc3c2a0db5330e4550",
+      "src/behave_fire/components/vapor_pressure_deficit_calculator.py": "4b165f3d48a02ab49c0fcdd2a5a7df65bab8b4a6366a280cbbf23041488eb258"
+    }
+  },
+  "schema_version": 1
+}
