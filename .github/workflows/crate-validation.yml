@@ -88,7 +88,7 @@ jobs:
           mkdir standalone
           tar -xzf "artifacts/behave-fire-${CORE_VERSION}.crate" -C standalone
           cd standalone
-          cargo test --manifest-path "behave-fire-${CORE_VERSION}/Cargo.toml" --locked
+          cargo test --manifest-path "behave-fire-${CORE_VERSION}/Cargo.toml" --locked --no-fail-fast
           cargo run --manifest-path "behave-fire-${CORE_VERSION}/Cargo.toml" --example standalone --locked
           mkdir -p consumer/src
           cp ../artifacts/rust_consumer.rs consumer/src/main.rs
