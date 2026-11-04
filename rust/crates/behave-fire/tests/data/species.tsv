@@ -1,0 +1,24 @@
+ABAM	Abies amabilis	Pacific silver fir	1	26	1	true	false	false	false	false	true	false	false	false	0	-1
+ABBA	Abies balsamea	balsam fir	1	10	2	false	false	true	false	false	false	false	false	false	0	-1
+ABCO	Abies concolor	white fir	10	27	2	false	true	true	true	false	true	true	false	true	0	-1
+ABGR	Abies grandis	grand fir	11	25	3	false	true	false	true	true	true	false	false	false	0	-1
+ABLA	Abies lasiocarpa	corkbark fir	11	20	4	true	true	false	true	true	true	true	false	true	0	-1
+ABMA	Abies magnifica	California red fir	16	18	5	false	true	false	true	false	true	false	false	false	0	-1
+ABPR	Abies procera	noble fir	1	24	7	false	true	false	false	false	true	false	false	false	0	-1
+ACRU	Acer rubrum	red maple	100	7	21	false	false	true	false	false	false	true	true	false	1	-1
+COFL2	Cornus florida	flowering dogwood	101	20	34	false	false	true	false	false	false	true	true	false	1	-1
+LAOC	Larix occidentalis	western larch	14	36	14	false	true	false	true	true	true	false	false	false	0	-1
+NYSY	Nyssa sylvatica	blackgum	102	32	39	false	false	true	false	false	false	false	true	false	1	-1
+OXAR	Oxydendrum arboreum	sourwood	103	15	39	false	false	true	false	false	false	false	true	false	1	-1
+PIEN	Picea engelmannii	Engelmann spruce	15	15	1	false	true	false	true	true	true	true	false	true	0	-1
+PIGL	Picea glauca	white spruce	3	4	1	true	false	true	false	true	false	true	false	false	0	-1
+PIPO	Pinus ponderosa	ponderosa pine	2	31	12	false	true	false	true	true	true	false	false	true	0	-1
+PSME	Pseudotsuga menziesii	Douglas-fir	13	22	16	false	true	false	true	true	true	true	false	true	0	-1
+QUMA3	Quercus marilandica	blackjack oak	106	16	28	false	false	true	false	false	false	true	true	false	1	-1
+QUEMON	Quercus montana	chestnut oak	107	28	28	false	false	true	false	false	false	false	true	false	1	-1
+QUVE	Quercus velutina	black oak	108	24	28	false	false	true	false	false	false	true	true	false	1	-1
+SAAL5	Sassafras albidum	sassafras	109	14	39	false	false	true	false	false	false	false	true	false	1	-1
+TSCA	Tsuga canadensis	eastern hemlock	1	18	19	false	false	true	false	false	false	false	true	false	0	-1
+TSHE	Tsuga heterophylla	western hemlock	1	19	19	true	true	false	false	true	true	false	false	false	0	-1
+PIAL	Pinus albicaulis	whitebark pine	1	39	11	false	false	false	true	true	true	false	false	false	0	-1
+PIBA	Pinus balfouriana	foxtail pine	1	39	15	false	true	false	false	false	false	false	false	false	0	-1

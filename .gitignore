@@ -45,3 +45,9 @@ src/examples/results/
 # Local development files
 /development/
 /.superpowers/
+
+# Rust build outputs and native extension artifacts
+/rust/target/
+*.so
+*.dylib
+*.pdb
