@@ -12,6 +12,9 @@ if getattr(_native, '__binding_api_version__', None) != BINDING_API_VERSION:
     raise ImportError('Rust backend has an incompatible binding API; rebuild or reinstall behave-fire.')
 _ATAN2_PROFILE_CACHE = None
 _ATAN2_PROFILE_LOCK = Lock()
+# NumPy AVX512 gather/scatter limit after its unsigned sizeof(float) division.
+# Negative byte strides fail this predicate in the supported NumPy sources.
+_ATAN2_MAX_STRIDE_BYTES = (0x7fffffff // 16) * 4 + 3
 _RETAIN = {'calculate_backing_spread_rate', 'calculate_eccentricity', 'calculate_fire_length', 'calculate_fire_length_to_width_ratio', 'calculate_flame_length', 'calculate_flanking_spread_rate', 'calculate_no_wind_no_slope_spread_rate', 'calculate_residence_time', 'calculate_wind_phi', 'calculate_effective_wind_speed', 'calculate_surface_wind_coefficients', 'calculate_fuelbed_intermediates', 'calculate_reaction_intensity', 'calculate_direction_of_max_spread', 'calculate_slope_phi', 'calculate_surface_rate_vector'}
 _PARTICLES = ('load_dead', 'load_live', 'savr_dead', 'savr_live', 'moisture_dead', 'moisture_live')
 _PARTICLE_FIELDS = _PARTICLES + ('hoc_dead', 'hoc_live', 'depth', 'moe_dead', 'is_defined')
@@ -271,7 +274,7 @@ def _call(operation, arguments):
                     mask_metadata['_weak_bool.' + name] = np.asarray(1.0)
                 elif isinstance(value, int):
                     mask_metadata['_weak_integer.' + name] = np.asarray(1.0)
-            if np.asarray(value).dtype == np.float32:
+            if numeric.dtype.kind == 'f' and numeric.dtype.itemsize == 4:
                 mask_metadata['_single.' + name] = np.asarray(1.0)
             if name in ('is_surface_fire', 'is_passive_crown', 'is_active_crown'):
                 value = np.asarray(value, dtype=bool)
@@ -322,7 +325,7 @@ def _call(operation, arguments):
     input_shapes = {key: value.shape for key, value in arrays.items()}
     arrays.update(mask_metadata)
     arrays['_simd_exp'] = np.asarray(_math_profile(), dtype=float)
-    arrays['_svml_atan2'] = np.asarray(_atan2_math_profile() if direction_float32 and all(shape) else 0, dtype=float)
+    arrays['_svml_atan2'] = np.asarray(_direction_math_profile(arguments) if direction_float32 and all(shape) else 0, dtype=float)
     arrays = {key: _broadcast_buffer(value, shape) for key, value in arrays.items()}
     integers = {key: (kind, _broadcast_buffer(bits, shape)) for key, (kind, bits) in integers.items()}
     if name == 'run_crown_fire' and 0 in shape:
@@ -447,6 +450,53 @@ def _crown_dependencies(wind_orientation_mode):
     }
 
 
+def _direction_math_profile(arguments):
+    """Preserve the reference atan2 inner-loop eligibility before owned copying.
+
+    :param arguments: Normalized original direction operands, before rate/aspect broadcasting.
+    :return: Scalar kernel selector or per-cell selectors when iterator chunks differ.
+    """
+    if _atan2_math_profile() == 0:
+        return 0
+    operands = [np.asarray(arguments[key]) for key in ('y_component', 'x_component')]
+    if any(value.size == 0 for value in operands):
+        return 0
+    buffer_size = np.getbufsize()
+    shapes = [value.shape for value in operands if value.ndim]
+    trivial = (all(value.ndim == 0 or (value.ndim == 1 and
+                   ((value.dtype == np.float32 and value.flags.aligned) or value.size <= buffer_size))
+                   for value in operands)
+               and all(shape == shapes[0] for shape in shapes))
+    if trivial:
+        # NumPy pre-copies scalar/small 1-D cast or unaligned operands, while
+        # retaining even singleton negative/large strides of aligned float32.
+        strides = [0 if not value.ndim else value.strides[0]
+                   if value.dtype == np.float32 and value.flags.aligned else 4 for value in operands]
+        return int(all(0 <= stride <= _ATAN2_MAX_STRIDE_BYTES for stride in strides))
+    if all(0 <= stride <= _ATAN2_MAX_STRIDE_BYTES for value in operands for stride in value.strides):
+        return 1
+    # The buffered K-order iterator determines effective strides after casting,
+    # alignment copies, broadcasting, and axis ordering. No mathematical ufunc
+    # executes on these operands; the allocated output stores selectors only.
+    with np.errstate(all='ignore'):
+        with np.nditer(operands + [None],
+                       flags=['external_loop', 'buffered', 'grow_inner', 'zerosize_ok', 'refs_ok', 'copy_if_overlap'],
+                       op_flags=[['readonly', 'aligned'], ['readonly', 'aligned'],
+                                 ['writeonly', 'allocate', 'aligned', 'no_broadcast', 'no_subtype']],
+                       op_dtypes=[np.float32] * 3, order='K', casting='unsafe', buffersize=buffer_size) as iterator:
+            result = iterator.operands[2]
+            first = None
+            mixed = False
+            for chunk in iterator:
+                selected = int(all(0 <= value.strides[0] <= _ATAN2_MAX_STRIDE_BYTES for value in chunk))
+                chunk[2].fill(selected)
+                if first is None:
+                    first = selected
+                else:
+                    mixed |= selected != first
+    return result if mixed else int(first)
+
+
 def _math_profile():
     """Read NumPy's active float32 exponential implementation metadata.
 
@@ -468,7 +518,7 @@ def _normalize(value):
     :param value: Scalar or array input.
     :return: Input preserving its shape and mask, with float16 widened.
     """
-    if isinstance(value, (np.ndarray, np.generic)) and value.dtype == np.float16:
+    if isinstance(value, (np.ndarray, np.generic)) and value.dtype.kind == 'f' and value.dtype.itemsize == 2:
         return value.astype(np.float32)
     return value
 

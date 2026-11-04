@@ -170,9 +170,199 @@ fn number_value(v: &Value) -> f64 {
     number(v)
 }
 
+fn same_direction_json(left: &Value, right: &Value) -> bool {
+    // Numeric Value equality merges positive and negative zero; canonical bytes do not.
+    serde_json::to_vec(left).unwrap() == serde_json::to_vec(right).unwrap()
+}
+
+fn surface_direction_cases_for_profile(
+    cases: &Value,
+    evidence: &Value,
+    fingerprint: [u32; 2],
+) -> Value {
+    let profiles: Value =
+        serde_json::from_str(include_str!("data/integer_direction_platform.json")).unwrap();
+    assert_eq!(
+        profiles["profiles"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .filter(|profile| profile["atan2_f32_bits"] == serde_json::json!(fingerprint))
+            .count(),
+        1,
+        "unreviewed float32 atan2 profile: {fingerprint:08x?}"
+    );
+    assert_eq!(evidence["schema"], 1);
+    assert_eq!(evidence["fixture"], "port_surface_single.json");
+    assert_eq!(evidence["case_index"], 11);
+    assert_eq!(evidence["cell_index"], 8);
+    assert_eq!(
+        evidence["atan2_f32_bits"],
+        serde_json::json!([1070141531_u32, 1078530010_u32])
+    );
+    let original = &cases[11];
+    assert_eq!(original["name"], "calculate_direction_of_max_spread");
+    assert!(
+        same_direction_json(original, &evidence["original_case"]),
+        "surface direction operation/input/options/frozen-output identity drift"
+    );
+    let captured = &evidence["output"];
+    assert_eq!(captured.as_object().unwrap().len(), 7);
+    assert_eq!(captured["dtype"], original["output"]["dtype"]);
+    let values = original["output"]["values"].as_array().unwrap();
+    let observed = captured["values"].as_array().unwrap();
+    assert_eq!(
+        captured["values"][8],
+        serde_json::json!(71.80140686035156_f64),
+        "independently captured macOS value drift"
+    );
+    assert_eq!(observed.len(), values.len());
+    assert_eq!(captured["shape"], serde_json::json!([values.len()]));
+    assert_eq!(captured["masked_array"], false);
+    assert_eq!(captured["scalar_array"], false);
+    assert_eq!(captured["numpy_scalar"], false);
+    assert_eq!(
+        captured["masks"],
+        serde_json::json!(vec![false; values.len()])
+    );
+    let changed: Vec<_> = values
+        .iter()
+        .zip(observed)
+        .enumerate()
+        .filter_map(|(index, (frozen, actual))| {
+            (!same_direction_json(frozen, actual)).then_some(index)
+        })
+        .collect();
+    assert_eq!(
+        changed,
+        vec![8],
+        "capture changes outside the reviewed cell"
+    );
+    let mut selected = cases.clone();
+    if evidence["atan2_f32_bits"] == serde_json::json!(fingerprint) {
+        selected[11]["output"]["values"][8] = observed[8].clone();
+    }
+    selected
+}
+
+fn surface_direction_math_fingerprint() -> [u32; 2] {
+    // Keep the two black-box libc sentinels identical to integer_surface_parity.
+    let negative_one = std::hint::black_box(-1.0f32);
+    [
+        std::hint::black_box(65534.0f32)
+            .atan2(negative_one)
+            .to_bits(),
+        std::hint::black_box(0.0f32).atan2(negative_one).to_bits(),
+    ]
+}
+
+#[test]
+fn surface_direction_oracle_changes_only_the_captured_cell() {
+    let cases: Value = serde_json::from_str(include_str!("data/port_surface_single.json")).unwrap();
+    let evidence: Value =
+        serde_json::from_str(include_str!("data/surface_direction_platform.json")).unwrap();
+    let fingerprint: [u32; 2] = serde_json::from_value(evidence["atan2_f32_bits"].clone()).unwrap();
+    let actual = surface_direction_cases_for_profile(&cases, &evidence, fingerprint);
+    let mut expected = cases.clone();
+    expected[11]["output"]["values"][8] = evidence["output"]["values"][8].clone();
+    assert!(
+        same_direction_json(&actual, &expected),
+        "only the captured cell may change"
+    );
+    check(
+        number(&evidence["output"]["values"][8]),
+        value(&actual[11]["output"], 8),
+        "independent macOS direction capture",
+        1e-9,
+    );
+    for profile in [[1070141531, 1078530011], [1070141530, 1078530011]] {
+        assert!(
+            same_direction_json(
+                &surface_direction_cases_for_profile(&cases, &evidence, profile),
+                &cases
+            ),
+            "other known profiles retain the frozen fixture"
+        );
+    }
+}
+
+#[test]
+fn surface_direction_oracle_rejects_case_identity_drift() {
+    let cases: Value = serde_json::from_str(include_str!("data/port_surface_single.json")).unwrap();
+    let evidence: Value =
+        serde_json::from_str(include_str!("data/surface_direction_platform.json")).unwrap();
+    for (pointer, replacement) in [
+        ("/11/name", serde_json::json!("another_operation")),
+        ("/11/inputs/aspect", serde_json::json!(-849.0)),
+        (
+            "/11/inputs/wind_orientation_mode",
+            serde_json::json!("Upslope"),
+        ),
+        ("/11/inputs/x_component/values/2", serde_json::json!(0.0)),
+        ("/11/inputs/x_component/dtype", serde_json::json!("float64")),
+        ("/11/output/values/8", serde_json::json!(71.0)),
+        ("/11/output/dtype", serde_json::json!("float32")),
+    ] {
+        let mut changed = cases.clone();
+        *changed.pointer_mut(pointer).unwrap() = replacement;
+        assert!(
+            std::panic::catch_unwind(|| {
+                surface_direction_cases_for_profile(&changed, &evidence, [1070141531, 1078530010])
+            })
+            .is_err(),
+            "identity drift accepted at {pointer}"
+        );
+    }
+}
+
+#[test]
+fn surface_direction_oracle_rejects_expanded_or_structural_overrides() {
+    let cases: Value = serde_json::from_str(include_str!("data/port_surface_single.json")).unwrap();
+    let evidence: Value =
+        serde_json::from_str(include_str!("data/surface_direction_platform.json")).unwrap();
+    for (pointer, replacement) in [
+        ("/case_index", serde_json::json!(12)),
+        ("/cell_index", serde_json::json!(7)),
+        ("/output/values/7", serde_json::json!(126.0)),
+        ("/output/values/8", serde_json::json!(70.0)),
+        ("/output/dtype", serde_json::json!("float32")),
+        ("/output/shape", serde_json::json!([2, 7])),
+        ("/output/masks/0", serde_json::json!(true)),
+        ("/atan2_f32_bits/0", serde_json::json!(0)),
+    ] {
+        let mut changed = evidence.clone();
+        *changed.pointer_mut(pointer).unwrap() = replacement;
+        assert!(
+            std::panic::catch_unwind(|| {
+                surface_direction_cases_for_profile(&cases, &changed, [1070141531, 1078530010])
+            })
+            .is_err(),
+            "override expansion accepted at {pointer}"
+        );
+    }
+}
+
+#[test]
+fn surface_direction_oracle_rejects_unknown_profiles() {
+    let cases: Value = serde_json::from_str(include_str!("data/port_surface_single.json")).unwrap();
+    let evidence: Value =
+        serde_json::from_str(include_str!("data/surface_direction_platform.json")).unwrap();
+    assert!(std::panic::catch_unwind(|| {
+        surface_direction_cases_for_profile(&cases, &evidence, [0, 0])
+    })
+    .is_err());
+}
+
 #[test]
 fn float32_thresholds_and_nonfinite_stages_match_numpy() {
     let cases: Value = serde_json::from_str(include_str!("data/port_surface_single.json")).unwrap();
+    let evidence: Value =
+        serde_json::from_str(include_str!("data/surface_direction_platform.json")).unwrap();
+    let cases = surface_direction_cases_for_profile(
+        &cases,
+        &evidence,
+        surface_direction_math_fingerprint(),
+    );
     for c in cases.as_array().unwrap() {
         let name = c["name"].as_str().unwrap();
         let i = &c["inputs"];

@@ -49,6 +49,24 @@ def _direction(selected, reference, normalize_half_loop):
     _compare(actual, expected)
 
 
+def _direction_reversed(selected, reference):
+    """Check scalar-loop direction parity for reversed float32 operands.
+
+    :param selected: Installed native surface backend.
+    :param reference: Installed explicit Python surface backend.
+    :return: None; raises on dtype, shape, or strict North-direction differences.
+    """
+    import numpy as np
+    x = np.full(7, -1., dtype=np.float32)[::-1]
+    y = np.full(7, np.finfo(np.float32).max, dtype=np.float32)[::-1]
+    rate = np.ones(7)
+    expected = reference.calculate_direction_of_max_spread(x, y, rate, "RelativeToNorth", 95.)
+    actual = selected.calculate_direction_of_max_spread(x, y, rate, "RelativeToNorth", 95.)
+    assert actual.dtype == expected.dtype == np.float64
+    assert actual.shape == expected.shape == (7,)
+    _compare(actual, expected)
+
+
 def _surface(model, grid):
     """Calculate a fixed non-contiguous GS4 surface scenario.
 
@@ -119,6 +137,7 @@ def main():
     if arguments.expect == "rust":
         for normalize_half_loop in (False, True):
             _direction(selected.surface, python.surface, normalize_half_loop)
+        _direction_reversed(selected.surface, python.surface)
     for module, function, values in (
         ("safety", "calculate_safety_zone", (5., 2., 50., 1., 300.)),
         ("vapor_pressure_deficit_calculator", "calculate_vpd", (25., 1, .5, 0, True)),
@@ -145,9 +164,15 @@ def main():
         libc = subprocess.run(["ldd", "--version"], capture_output=True, text=True)
         assert "musl" in libc.stdout + libc.stderr and platform.machine() == "x86_64", identity
         identity["musl"] = (libc.stdout + libc.stderr).strip()
-    print(json.dumps({"result": "passed", "python": sys.version, "executable": sys.executable, "identity": identity,
-                      "numpy": np.__version__, "version": bf.__version__, "backend": automatic.backend_in_use,
-                      "package": str(package)}, indent=2))
+    report = {"result": "passed", "python": sys.version, "executable": sys.executable, "identity": identity,
+              "numpy": np.__version__, "version": bf.__version__, "backend": automatic.backend_in_use,
+              "package": str(package)}
+    if arguments.expect == "rust":
+        from behave_fire import _rust
+        from behave_fire.rust import _bridge
+        report["calibrated_atan2_profile"] = _bridge._atan2_math_profile()
+        report["svml_candidate_available"] = _rust.atan2_profile_candidates()[3] is not None
+    print(json.dumps(report, indent=2))
 
 
 if __name__ == "__main__":
