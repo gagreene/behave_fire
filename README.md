@@ -1,6 +1,6 @@
 # behave_fire
 
-A pure Python port of the US Forest Service [Behave<sup>7</sup>](https://www.firelab.org/project/behave) fire behavior modeling system. The library targets **100% feature parity** with the C++ reference implementation — same equations, same constant values, and matching method signatures (translated to snake_case). All computation runs on **NumPy arrays**, so it works equally well for scalar values or a 10-million-cell raster.
+A NumPy-based Python port of the US Forest Service [Behave<sup>7</sup>](https://www.firelab.org/project/behave) fire behavior modeling system, supporting scalar and array calculations. Upstream alignment is ongoing; full C++ parity has not been established. Fuel data and heat constants follow `firelab/behave` at `f3b2943`, with an intentional correction of metric-model moisture percentages to fractions. Containment is a simplified growth model, and lightning ignition remains available only as a deprecated compatibility API.
 
 ---
 
@@ -27,9 +27,9 @@ A pure Python port of the US Forest Service [Behave<sup>7</sup>](https://www.fir
 | **Crown fire** | Rothermel (1991) & Scott–Reinhardt (2005) — transition ratio, active ratio, fire-type classification (surface / torching / conditional / active crown) |
 | **Tree mortality** | Crown scorch (Van Wagner), bole char, and crown damage equations for 300+ species / 9 GACC regions |
 | **Spotting** | Albini firebrand lofting model for burning piles, surface fires, and torching trees |
-| **Ignition** | Firebrand and lightning ignition probability |
+| **Ignition** | Firebrand ignition probability; deprecated lightning calculation retained for compatibility |
 | **Safety zones** | Minimum separation distance, zone radius, and personnel capacity from radiant heat |
-| **Containment** | Fried & Fried (1995) single-resource Runge-Kutta ODE containment simulation (standalone function) |
+| **Containment** | Simplified fixed-step ellipse growth and suppression-line accumulation (standalone function) |
 | **Support tools** | Fine dead fuel moisture (Nelson 2000 LUT), slope tool, vapor pressure deficit calculator |
 | **Unit system** | 18 physical-quantity classes with full metric ↔ US-customary conversion |
 
@@ -60,8 +60,9 @@ behave_fire/
 │   │   │   ├── slope_tool.py
 │   │   │   └── vapor_pressure_deficit_calculator.py
 │   │   └── tests/
-│   │       ├── conftest.py          # Belt-and-suspenders sys.path guard for pytest
-│   │       └── test_behave.py       # Standalone test script (mirrors testBehave.cpp)
+│   │       ├── data/                # Pinned upstream and legacy compatibility fixtures
+│   │       ├── test_upstream_*_array.py # Collected regression tests
+│   │       └── test_behave.py       # Standalone legacy test harness
 │   └── examples/
 │       ├── landscape_fire_behavior.py   # Full 10 km × 10 km raster demo
 │       ├── data/                        # Auto-generated GeoTIFF inputs
@@ -238,7 +239,7 @@ The single public entry point for array/raster fire behavior calculations. Key m
 
 ### Containment simulation
 
-`run_contain_sim_array()` in `contain.py` is a standalone vectorized function (not a `BehaveRun` method). It implements a simplified single-resource Runge-Kutta ODE containment model and returns a status grid with the following codes:
+`run_contain_sim_array()` in `contain.py` is a standalone vectorized function (not a `BehaveRun` method). A fixed-step loop accumulates ellipse growth and suppression line; it does not implement RK4 or the full C++ ContainSim solver. No perimeter-point arrays are returned. See [the containment documentation](docs/CONTAINMENT_MODULE.md) for shape requirements, limitations, and runnable examples. Status codes are:
 
 | Code | Meaning |
 |------|---------|
@@ -247,6 +248,10 @@ The single public entry point for array/raster fire behavior calculations. Key m
 | `4` | OVERRUN |
 | `5` | EXHAUSTED |
 | `8` | TIME_LIMIT_EXCEEDED |
+
+### Ignition support
+
+Firebrand ignition remains supported. `calculate_lightning_ignition_probability()` emits `DeprecationWarning` because upstream Behave removed the model, citing an unreliable scientific basis. The function and its package re-export retain their existing signatures and numerical results for compatibility. No replacement lightning model or removal version is specified.
 
 ### Crown fire type classification
 
@@ -279,21 +284,23 @@ Expected runtime: ~10–30 seconds on a modern laptop.
 
 ## Running the Tests
 
-The test suite mirrors the C++ `testBehave.cpp` reference and uses a custom accumulator. Run it directly:
+Run the collected unit, fuel, and ignition regressions from the project root:
 
 ```bash
-cd src/behave_fire
-python tests/test_behave.py
+python -m pytest
 ```
 
-A pytest-compatible subset can be run from the project root, but currently requires test files matching `test_*_array.py` to be present in `src/behave/tests/`:
+Pytest imports the package through `src` and collects `test_*_array.py` under `src/behave_fire/tests/`. Fixtures include pinned upstream records and explicitly labeled legacy lightning results. These checks do not establish full C++ numerical parity.
+
+Run the legacy accumulator harness separately, also from the project root:
 
 ```bash
-# from project root
-pytest
+python -c "import runpy, sys; sys.path.insert(0, 'src'); runpy.run_path('src/behave_fire/tests/test_behave.py', run_name='__main__')"
 ```
 
 ---
+
+Expected lightning deprecation warnings may appear. The harness retains legacy imports; process isolation prevents its duplicate module aliases from affecting pytest.
 
 ## Key Design Notes
 

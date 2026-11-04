@@ -2,7 +2,9 @@
 ignite.py — Vectorized Ignition Probability (§13.3)
 
 Implements fuel temperature adjustment and probability-of-ignition calculations
-for both firebrand and lightning ignition sources.
+for firebrand ignition. The legacy lightning calculation remains available
+for compatibility and emits DeprecationWarning; upstream removed it because
+its scientific basis is no longer considered reliable.
 
 Public API
 ----------
@@ -33,6 +35,8 @@ Charge types:
     1: positive
     2: unknown (weighted average of negative and positive)
 """
+
+import warnings
 
 import numpy as np
 from typing import Union
@@ -123,6 +127,10 @@ def calculate_lightning_ignition_probability(
     """
     Probability of ignition from a lightning strike (Latham 1991).
 
+    Deprecated: upstream Behave removed this model because its scientific
+    basis is no longer considered reliable. Retained for compatibility only;
+    firebrand ignition remains supported.
+
     Different equation forms are used for each fuel bed type:
     - Types 0, 1, 2, 7: exponential in moisture
     - Type 3: linear in moisture
@@ -139,6 +147,13 @@ def calculate_lightning_ignition_probability(
         0 = negative, 1 = positive, 2 = unknown (frequency-weighted average).
     :return: (*S) ndarray — probability of ignition [0, 1].
     """
+    warnings.warn(
+        "Lightning ignition probability is deprecated: upstream Behave removed "
+        "this model because its scientific basis is no longer considered reliable. "
+        "Retained for compatibility only.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
     ft  = np.clip(np.asarray(fuel_bed_type_grid, dtype=np.int32), 0, 7)
     # Convert fraction → percent, cap at 40%
     m   = np.minimum(np.asarray(moisture_100h_fraction, dtype=float) * 100.0, 40.0)

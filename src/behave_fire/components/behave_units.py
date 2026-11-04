@@ -742,8 +742,8 @@ class SurfaceAreaToVolumeUnits:
         SquareCentimetersOverCubicCentimeters = 3
 
     # Conversion factors to ft²/ft³ (base)
-    _TO_BASE = [1.0, 0.3048, 12.0, 0.032808]
-    _FROM_BASE = [1.0, 1.0 / 0.3048, 1.0 / 12.0, 1.0 / 0.032808]
+    _TO_BASE = [1.0, 0.3048, 12.0, 30.48]
+    _FROM_BASE = [1.0 / factor for factor in _TO_BASE]
 
     @staticmethod
     def toBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
@@ -751,8 +751,7 @@ class SurfaceAreaToVolumeUnits:
         arr = np.asarray(value, dtype=float)
         if units == 0:
             return arr
-        factors = [1.0, 0.3048, 12.0, 0.032808]
-        return arr * factors[units]
+        return arr * SurfaceAreaToVolumeUnits._TO_BASE[units]
 
     @staticmethod
     def fromBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
@@ -760,8 +759,7 @@ class SurfaceAreaToVolumeUnits:
         arr = np.asarray(value, dtype=float)
         if units == 0:
             return arr
-        factors = [1.0, 1.0 / 0.3048, 1.0 / 12.0, 1.0 / 0.032808]
-        return arr * factors[units]
+        return arr * SurfaceAreaToVolumeUnits._FROM_BASE[units]
 
 class SpeedUnits:
     class SpeedUnitsEnum:
@@ -839,8 +837,8 @@ class HeatOfCombustionUnits:
         arr = np.asarray(value, dtype=float)
         if units == 0:
             return arr
-        # 1 kJ/kg ≈ 0.429923 BTU/lb
-        return arr * 0.429923
+        # Match the Btu convention in firelab/behave (f3b2943).
+        return arr * 0.429592
 
     @staticmethod
     def fromBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
@@ -848,7 +846,8 @@ class HeatOfCombustionUnits:
         arr = np.asarray(value, dtype=float)
         if units == 0:
             return arr
-        return arr / 0.429923
+        # Upstream specifies the reverse factor independently.
+        return arr * 2.32779
 
 
 class HeatSinkUnits:
