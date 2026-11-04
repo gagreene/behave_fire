@@ -6,6 +6,16 @@ The Python backend at commit `7933789f00470c6bbfbe942dc22bdd7f74e192f9` is the b
 
 The planned Rust backend widens float16 inputs to float32 before applying each entry point's ordinary normalization. Helpers retaining input precision therefore return float32; operations that already normalize to float64 continue returning float64. Rust acceptance uses explicit Python with the same normalized inputs. Original float16 results are diagnostic only: widening can change rounding, overflow, underflow, non-finite results, exceptions, and classification thresholds. For example, `calculate_eccentricity(np.array([300], dtype=np.float16))` returns infinity, while the float32 route returns approximately 0.9999944. Select Python for exact original float16 semantics.
 
+This policy also applies when NumPy would create a float16 intermediate from
+other input dtypes. NumPy's `arctan2` chooses a float16 loop for some boolean,
+int8, and uint8 combinations in `calculate_direction_of_max_spread`. Rust
+widens those x/y operands to float32 before that operation, using structural
+ufunc dtype resolution rather than executing the Python calculation. The
+acceptance oracle applies the same normalization. Upslope direction may return
+float32 instead of float16; north-oriented results retain their later float64
+promotion but can differ numerically from original float16 intermediates.
+Other integer operations retain their own wrapping and promotion contracts.
+
 Float64 and float32 routes preserve the reference within `rtol=1e-9, atol=1e-12` and `rtol=1e-6, atol=1e-7`, respectively. Shapes, statuses, masks, NaN positions, and exception classes match the applicable oracle; message wording is not guaranteed. Any further difference must be recorded with an executable scenario before being accepted.
 
 ## Existing limitations retained

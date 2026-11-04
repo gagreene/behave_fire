@@ -6,9 +6,11 @@ mod error;
 mod grid;
 mod model;
 
+pub mod crown;
 pub mod fuel_models;
 pub mod math;
 pub mod species;
+pub mod surface;
 pub mod units;
 
 /// Embedded tables with no build-time or runtime Python dependency.
