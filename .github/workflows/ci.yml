@@ -93,6 +93,21 @@ jobs:
       - name: Record every independent direction fixture outcome
         if: always()
         run: uv run --no-sync python tools/probe_direction_fixtures.py > numpy-direction-fixtures.json
+      - name: Record independent direction fixtures without AVX512 dispatch
+        if: always()
+        shell: bash
+        run: |
+          uv run --no-sync python - <<'PY'
+          import os
+          import subprocess
+          import sys
+          from numpy._core import _multiarray_umath
+          features = _multiarray_umath.__cpu_features__
+          disabled = sorted(name for name in features if name.startswith("AVX512") or name == "X86_V4")
+          environment = dict(os.environ, NPY_DISABLE_CPU_FEATURES=",".join(disabled))
+          with open("numpy-direction-fixtures-baseline.json", "w") as output:
+              subprocess.run([sys.executable, "tools/probe_direction_fixtures.py"], env=environment, stdout=output, check=True)
+          PY
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -106,6 +121,7 @@ jobs:
           path: |
             numpy-direction-oracle.json
             numpy-direction-fixtures.json
+            numpy-direction-fixtures-baseline.json
           if-no-files-found: warn
 
   wheel-validation:

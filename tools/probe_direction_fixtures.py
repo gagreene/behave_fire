@@ -2,6 +2,7 @@
 
 import hashlib
 import json
+import os
 from pathlib import Path
 import platform
 import warnings
@@ -72,6 +73,10 @@ def main():
     report = {"platform": platform.platform(), "machine": platform.machine(),
               "libc": platform.libc_ver(), "numpy": np.__version__,
               "fixture_sha256": hashlib.sha256(source).hexdigest(), "cases": []}
+    from numpy._core import _multiarray_umath
+    report["disabled_cpu_features"] = os.environ.get("NPY_DISABLE_CPU_FEATURES", "")
+    report["cpu_features"] = getattr(_multiarray_umath, "__cpu_features__", {})
+    report["cpu_targets"] = getattr(_multiarray_umath, "__cpu_targets_info__", {})
     for index, case in enumerate(fixture):
         inputs = {key: _decode(value) for key, value in case["inputs"].items()}
         if case["normalize_half_loop"]:
