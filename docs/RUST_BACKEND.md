@@ -94,6 +94,19 @@ Separately compare the widened route with original float16 behavior as a diagnos
 
 Characterize float16/32/64, signed/unsigned integers, booleans, and object inputs for each public helper. Preserve successful numeric coercion and existing exception types against the selected oracle. Additional floating dtypes require an explicit documented contract before claiming support. Match NumPy's clipping, remainder, promotion, tie-breaking, and branch semantics deliberately; do not globally relax tolerances to conceal defects.
 
+The supported native arithmetic boundary is bool, fixed-width signed/unsigned
+integers, and float32/float64 after normalization. Preserve characterized
+numeric-object coercion, output boxing, and exception behavior; do not reject an
+input solely because its dtype is object. Preserve large-Python-integer inputs
+when the reference explicitly coerces them to a supported real dtype before
+arithmetic. General arbitrary-precision integer outputs and opaque custom
+Python-object arithmetic require explicit Python; native calls reject unsupported
+inputs with `TypeError` before detached execution. This includes the object result
+of `calculate_fire_length(2**64, 0, 1)`. Do not silently approximate such results
+or fall back during a calculation. Preserve exact fixed-width wrapping and weak
+integer prefixes on supported paths, and complex intermediates generated from
+supported real inputs. See [BACKEND_DIFFERENCES.md](BACKEND_DIFFERENCES.md).
+
 Characterize scalar, length-one, 1D/2D/3D, empty, mixed-fuel, and non-contiguous input behavior by entry point. Preserve documented shape restrictions, including containment's report-spread-rate-defined shape. Exception classes match the reference; exact message text is not an API guarantee. Malformed boundary shapes/types must raise `ValueError` or `TypeError`, never a Rust panic or PyO3 `PanicException`. Add malformed-input/fuzz cases.
 
 Masked-array policy is to reproduce each entry point's observed behavior, including its output type and whether the mask affects values, disappears, or survives. Local probes show differing behavior: unit conversion discards the mask and uses underlying values, while eccentricity produces an ordinary array with masked positions affected by the masked computation. Do not globally strip masks during copying or invent uniform mask propagation. Pass data and mask metadata separately when the native implementation needs them. Freeze these cases in Task 1 and verify them in Tasks 7–8.

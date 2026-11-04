@@ -31,7 +31,7 @@ pub mod generated {
 pub use error::BehaveError;
 pub use fuel_models::{FuelModel, FuelModels};
 pub use grid::{effective_worker_count, GridOutput, GridShape, PerCell};
-pub use model::BehaveRun;
+pub use model::{canopy_crown_ratio, BehaveRun};
 pub use species::{SpeciesMasterTable, SpeciesRecord};
 
 /// Version of the standalone Rust core, independent of the Python distribution.

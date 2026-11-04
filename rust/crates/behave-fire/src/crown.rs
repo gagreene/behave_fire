@@ -1,12 +1,14 @@
 //! Crown fire stages in reference base units: ft, ft/min, lb/ft³, BTU/ft², BTU/ft/s.
 use crate::math::{np_max, np_min};
 pub mod masked;
+mod record;
 use crate::{
     fuel_models::FuelModels,
     surface::{self, FuelbedIntermediates, Particles, SurfaceInput, SurfaceResult},
     units::{SlopeUnit, SpeedUnit},
     BehaveError,
 };
+pub use record::{run_with_surface_inputs, MaskedCrownResult};
 
 /// Scalar crown inputs with an already calculated component-base-unit surface result.
 #[derive(Clone, Debug, PartialEq)]

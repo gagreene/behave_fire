@@ -10,6 +10,14 @@ use crate::{
 #[path = "masked_records.rs"]
 mod records;
 pub use records::*;
+#[path = "integers.rs"]
+mod integers;
+pub use integers::{IntegerKind, IntegerValue};
+#[path = "complex.rs"]
+mod complex;
+pub use complex::ComplexValue;
+#[path = "objects.rs"]
+mod objects;
 
 #[cfg(test)]
 mod tests {
@@ -55,6 +63,10 @@ pub struct MaskedCondition {
     pub value: bool,
     /// Whether the entire condition has shape ().
     pub is_scalar_array: bool,
+    /// An eagerly evaluated source comparison failed before selection.
+    pub error: Option<MaskedError>,
+    /// The condition has zero logical elements; its scalar prototype is not a data-loop result.
+    pub empty_array: bool,
 }
 impl MaskedCondition {
     /// Construct a condition from independently evaluated raw data and rank metadata.
@@ -62,21 +74,35 @@ impl MaskedCondition {
         Self {
             value,
             is_scalar_array,
+            error: None,
+            empty_array: false,
         }
     }
     /// Combine conditions using NumPy's Boolean AND broadcasting rank.
     pub fn and(self, other: Self) -> Self {
-        Self::new(
-            self.value && other.value,
-            self.is_scalar_array && other.is_scalar_array,
-        )
+        Self {
+            value: self.value && other.value,
+            is_scalar_array: self.is_scalar_array && other.is_scalar_array,
+            error: self.error.or(other.error),
+            empty_array: self.empty_array || other.empty_array,
+        }
     }
     /// Combine conditions using NumPy's Boolean OR broadcasting rank.
     pub fn or(self, other: Self) -> Self {
-        Self::new(
-            self.value || other.value,
-            self.is_scalar_array && other.is_scalar_array,
-        )
+        Self {
+            value: self.value || other.value,
+            is_scalar_array: self.is_scalar_array && other.is_scalar_array,
+            error: self.error.or(other.error),
+            empty_array: self.empty_array || other.empty_array,
+        }
+    }
+    /// Attach zero-work provenance without erasing an earlier scalar exception.
+    pub fn with_empty_array(mut self, empty: bool) -> Self {
+        self.empty_array = empty;
+        if empty {
+            self.is_scalar_array = false;
+        }
+        self
     }
 }
 
@@ -119,6 +145,19 @@ pub struct MaskedValue {
     pub fill_value: Option<f64>,
     /// Float32 math implementation profile, propagated through intermediate expressions.
     pub math_profile: MathProfile,
+    /// Exact integer dtype/bits, retained until an operation explicitly promotes to floating point.
+    pub integer: Option<IntegerValue>,
+    /// Source-compatible operation failure propagated through eager expressions.
+    pub error: Option<MaskedError>,
+    /// Generated complex data; Some(0+0j) still requires a complex output dtype.
+    pub complex: Option<ComplexValue>,
+    /// NumPy object dtype is required for the selected supported numeric payload.
+    pub object_result: bool,
+    /// A boxed numeric object payload is a NumPy scalar rather than a builtin Python scalar.
+    pub object_numpy_scalar: bool,
+    /// The original array has zero logical elements; data-loop checks must not inspect its prototype.
+    pub empty_array: bool,
+    wide_integer: Option<integers::WideInteger>,
     weak: bool,
 }
 
@@ -136,6 +175,13 @@ impl MaskedValue {
             is_numpy_scalar: false,
             fill_value: None,
             math_profile: MathProfile::native_default(),
+            integer: None,
+            error: None,
+            wide_integer: None,
+            complex: None,
+            object_result: false,
+            object_numpy_scalar: false,
+            empty_array: false,
             weak: false,
         }
     }
@@ -157,19 +203,61 @@ impl MaskedValue {
     }
     /// Normalize to a plain float64 ndarray, like `np.asarray(value, dtype=float)`.
     pub fn as_array_f64(self) -> Self {
-        Self::plain(self.value)
+        if self.complex.is_some() {
+            return integers::failure(self, MaskedError::UnsupportedComplexOperation);
+        }
+        let mut source = self;
+        source.object_result = false;
+        let value = integers::to_float(source, Precision::F64);
+        let mut result = Self::plain(value.value)
             .with_scalar_array(self.is_scalar_array)
-            .with_math_profile(self.math_profile)
+            .with_math_profile(self.math_profile);
+        result = result.with_empty_array(self.empty_array);
+        result.error = value.error;
+        result
     }
     /// Strip array masks while retaining dtype and rank, like `np.asarray(value)` without a dtype argument.
     pub fn as_array(self) -> Self {
-        Self::new(self.value, false, false, self.precision)
-            .with_scalar_array(self.is_scalar_array)
-            .with_math_profile(self.math_profile)
+        let mut result = self;
+        if let Some(wide) = self.wide_integer {
+            if self.integer.is_some_and(|x| x.kind == IntegerKind::Bool) {
+                result = result.with_integer(self.integer.unwrap());
+            } else if let Some(integer) = wide.fixed() {
+                result = result.with_integer(integer);
+            } else {
+                result.object_result = true;
+            }
+        }
+        result.mask = false;
+        result.is_masked_array = false;
+        result.is_numpy_scalar = false;
+        result.fill_value = None;
+        result.weak = false;
+        if !result.object_result {
+            result.wide_integer = None;
+        }
+        result
     }
     /// Attach the source array's rank without changing its numeric data or mask.
     pub fn with_scalar_array(mut self, is_scalar_array: bool) -> Self {
         self.is_scalar_array = is_scalar_array;
+        self
+    }
+    /// Attach an owned numeric-object payload kind; no Python object is retained in native code.
+    pub fn with_object_payload(mut self, numpy_scalar: bool) -> Self {
+        self.object_result = true;
+        self.object_numpy_scalar = numpy_scalar;
+        self.weak = false;
+        self.is_numpy_scalar = false;
+        self
+    }
+    /// Attach zero logical work while preserving dtype-cast and previously computed scalar errors.
+    pub fn with_empty_array(mut self, empty: bool) -> Self {
+        self.empty_array = empty;
+        if empty {
+            self.is_scalar_array = false;
+            self.is_numpy_scalar = false;
+        }
         self
     }
     /// Preserve NumPy scalar dispatch, which differs from zero-dimensional ndarray arithmetic with MaskedArrays.
@@ -191,42 +279,50 @@ impl MaskedValue {
     /// Add arrays using MaskedArray operator restoration when either source has that subclass.
     pub fn add(self, other: Self) -> Self {
         arithmetic(self, other, Operation::Add)
+            .with_empty_array(self.empty_array || other.empty_array)
     }
     /// Subtract arrays using MaskedArray operator restoration.
     pub fn sub(self, other: Self) -> Self {
         arithmetic(self, other, Operation::Sub)
+            .with_empty_array(self.empty_array || other.empty_array)
     }
     /// Multiply arrays using MaskedArray operator restoration.
     pub fn mul(self, other: Self) -> Self {
         arithmetic(self, other, Operation::Mul)
+            .with_empty_array(self.empty_array || other.empty_array)
     }
     /// Divide arrays, adding MaskedArray domain masks and restoring the raw numerator.
     pub fn div(self, other: Self) -> Self {
         arithmetic(self, other, Operation::Div)
+            .with_empty_array(self.empty_array || other.empty_array)
     }
     /// Raise to a power, preserving MaskedArray raw bases and filling nonfinite results with 1e20.
     pub fn pow(self, other: Self) -> Self {
         arithmetic(self, other, Operation::Pow)
+            .with_empty_array(self.empty_array || other.empty_array)
     }
     /// Apply NumPy's unary negative ufunc, which computes raw masked data.
     pub fn negative(self) -> Self {
         self.unary(Unary::Negative)
+            .with_empty_array(self.empty_array)
     }
     /// Apply NumPy's exponential ufunc while propagating the source element mask.
     pub fn exp(self) -> Self {
-        self.unary(Unary::Exp)
+        self.unary(Unary::Exp).with_empty_array(self.empty_array)
     }
     /// Apply NumPy's square-root ufunc and its masked/domain-zero fill.
     pub fn sqrt(self) -> Self {
-        self.unary(Unary::Sqrt)
+        self.unary(Unary::Sqrt).with_empty_array(self.empty_array)
     }
     /// Apply NumPy's minimum ufunc to raw values, preserving masks and array class.
     pub fn minimum(self, other: Self) -> Self {
         ufunc_binary(self, other, BinaryUfunc::Minimum)
+            .with_empty_array(self.empty_array || other.empty_array)
     }
     /// Apply NumPy's maximum ufunc to raw values, preserving masks and array class.
     pub fn maximum(self, other: Self) -> Self {
         ufunc_binary(self, other, BinaryUfunc::Maximum)
+            .with_empty_array(self.empty_array || other.empty_array)
     }
     /// Compare raw values after NumPy-style operand promotion; the source mask does not fill the condition.
     pub fn greater(self, other: Self) -> bool {
@@ -234,6 +330,15 @@ impl MaskedValue {
             || (other.is_scalar_array && other.is_masked_array && other.mask)
         {
             return false;
+        }
+        if self.object_result || other.object_result {
+            return objects::compare(self, other, 0).unwrap_or(false);
+        }
+        if self.complex.is_some() || other.complex.is_some() {
+            return complex::compare(self, other, 0).unwrap_or(false);
+        }
+        if integers::is_integer(self) || integers::is_integer(other) {
+            return integers::compare(self, other, 0);
         }
         let p = promote(self, other, self.is_masked_array || other.is_masked_array);
         round(self.value, p) > round(other.value, p)
@@ -245,6 +350,15 @@ impl MaskedValue {
         {
             return false;
         }
+        if self.object_result || other.object_result {
+            return objects::compare(self, other, 1).unwrap_or(false);
+        }
+        if self.complex.is_some() || other.complex.is_some() {
+            return complex::compare(self, other, 1).unwrap_or(false);
+        }
+        if integers::is_integer(self) || integers::is_integer(other) {
+            return integers::compare(self, other, 1);
+        }
         let p = promote(self, other, self.is_masked_array || other.is_masked_array);
         round(self.value, p) < round(other.value, p)
     }
@@ -255,6 +369,15 @@ impl MaskedValue {
         {
             return false;
         }
+        if self.object_result || other.object_result {
+            return objects::compare(self, other, 2).unwrap_or(false);
+        }
+        if self.complex.is_some() || other.complex.is_some() {
+            return complex::compare(self, other, 2).unwrap_or(false);
+        }
+        if integers::is_integer(self) || integers::is_integer(other) {
+            return integers::compare(self, other, 2);
+        }
         let p = promote(self, other, self.is_masked_array || other.is_masked_array);
         round(self.value, p) >= round(other.value, p)
     }
@@ -264,36 +387,88 @@ impl MaskedValue {
     }
     /// Compare raw values while retaining the broadcast rank of the comparison result.
     pub fn greater_condition(self, other: Self) -> MaskedCondition {
-        MaskedCondition::new(
+        let mut condition = MaskedCondition::new(
             self.greater(other),
             self.is_scalar_array && other.is_scalar_array,
-        )
+        );
+        condition.error = self.error.or(other.error);
+        condition = condition.with_empty_array(self.empty_array || other.empty_array);
+        if condition.error.is_none() {
+            condition.error = self.comparison_error(other, 0);
+        }
+        condition
     }
     /// Compare raw values while retaining the broadcast rank of the comparison result.
     pub fn less_condition(self, other: Self) -> MaskedCondition {
-        MaskedCondition::new(
+        let mut condition = MaskedCondition::new(
             self.less(other),
             self.is_scalar_array && other.is_scalar_array,
-        )
+        );
+        condition.error = self.error.or(other.error);
+        condition = condition.with_empty_array(self.empty_array || other.empty_array);
+        if condition.error.is_none() {
+            condition.error = self.comparison_error(other, 1);
+        }
+        condition
     }
     /// Compare raw values while retaining the broadcast rank of the comparison result.
     pub fn greater_equal_condition(self, other: Self) -> MaskedCondition {
-        MaskedCondition::new(
+        let mut condition = MaskedCondition::new(
             self.greater_equal(other),
             self.is_scalar_array && other.is_scalar_array,
-        )
+        );
+        condition.error = self.error.or(other.error);
+        condition = condition.with_empty_array(self.empty_array || other.empty_array);
+        if condition.error.is_none() {
+            condition.error = self.comparison_error(other, 2);
+        }
+        condition
+    }
+    /// Retain deferred comparison failures for checked selection rather than fabricating numeric equality.
+    fn comparison_error(self, other: Self, operation: u8) -> Option<MaskedError> {
+        if self.empty_array || other.empty_array {
+            return None;
+        }
+        if self.object_result || other.object_result {
+            return objects::compare(self, other, operation).err();
+        }
+        if self.complex.is_some() || other.complex.is_some() {
+            return complex::compare(self, other, operation).err();
+        }
+        if integers::is_integer(self) || integers::is_integer(other) {
+            return integers::compare_checked(self, other, operation).err();
+        }
+        None
     }
     /// Select raw branch data as a plain ndarray, broadcasting the condition and both branches.
     pub fn select_with_condition(condition: MaskedCondition, yes: Self, no: Self) -> Self {
+        if let Some(error) = condition.error.or(yes.error).or(no.error) {
+            return integers::failure(yes, error);
+        }
+        if complex::object_branch(yes) || complex::object_branch(no) {
+            return objects::select(condition, yes, no);
+        }
+        if yes.complex.is_some() || no.complex.is_some() {
+            return complex::select(condition, yes, no)
+                .with_empty_array(condition.empty_array || yes.empty_array || no.empty_array);
+        }
+        if integers::is_integer(yes) || integers::is_integer(no) {
+            return integers::select(condition, yes, no)
+                .with_empty_array(condition.empty_array || yes.empty_array || no.empty_array);
+        }
         let p = promote(yes, no, false);
-        Self::new(
+        let mut result = Self::new(
             if condition.value { yes.value } else { no.value },
             false,
             false,
             p,
         )
         .with_scalar_array(condition.is_scalar_array && yes.is_scalar_array && no.is_scalar_array)
-        .with_math_profile(profile(yes, no))
+        .with_math_profile(profile(yes, no));
+        result =
+            result.with_empty_array(condition.empty_array || yes.empty_array || no.empty_array);
+        result.error = condition.error.or(yes.error).or(no.error);
+        result
     }
     /// Construct a weak Python float scalar for stage constants and reusable expression composition.
     pub fn scalar(value: f64) -> Self {
@@ -303,6 +478,23 @@ impl MaskedValue {
     }
     /// Apply a unary ufunc with the array's current precision.
     fn unary(self, operation: Unary) -> Self {
+        if self.error.is_some() {
+            return self;
+        }
+        if self.object_result {
+            return objects::unary(self, operation);
+        }
+        if self.complex.is_some() {
+            return complex::unary(self, operation);
+        }
+        if integers::is_integer(self) {
+            return integers::unary(self, operation);
+        }
+        if self.weak && matches!(operation, Unary::Negative) {
+            let mut result = self;
+            result.value = -result.value;
+            return result;
+        }
         // NumPy's domained unary ufunc wrapper on 0D MaskedArrays returns a
         // fresh unmasked 0D view of the raw result (including invalid NaNs).
         if self.is_scalar_array && self.is_masked_array && matches!(operation, Unary::Sqrt) {
@@ -404,14 +596,55 @@ enum BinaryUfunc {
 
 /// A NumPy mask expression that is not accepted by the public Python stage.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[non_exhaustive]
 pub enum MaskedError {
     /// Zero-dimensional masked comparisons become float64 MaskedConstants, which cannot be combined with bitwise AND.
     InvalidBooleanAnd,
+    /// A weak Python integer does not fit the resolved NumPy integer dtype.
+    IntegerOutOfBounds,
+    /// NumPy does not define subtraction between Boolean operands.
+    BooleanSubtract,
+    /// NumPy does not define unary negative for Boolean operands.
+    BooleanNegative,
+    /// Integer power has a negative integer exponent.
+    NegativeIntegerPower,
+    /// Ordinary Python scalar division or zero power divides by zero.
+    PythonZeroDivision,
+    /// The source operation would require an arbitrary Python object integer outside the declared fixed-width boundary.
+    UnsupportedIntegerObject,
+    /// Ordinary Python real/complex power or integer-to-float conversion overflowed.
+    PythonFloatOverflow,
+    /// This generated complex operation has no real-numeric NumPy loop.
+    UnsupportedComplexOperation,
+    /// A masked object scalar arithmetic loop produced a builtin result without ndarray attributes.
+    PythonObjectAttribute,
+    /// NumPy has no supported numeric payload method/loop for this object operation.
+    UnsupportedObjectLoop,
+}
+impl MaskedError {
+    /// Return the Python exception class selected by the thin binding adapter.
+    pub fn python_exception(self) -> &'static str {
+        match self {
+            Self::IntegerOutOfBounds | Self::PythonFloatOverflow => "OverflowError",
+            Self::BooleanSubtract
+            | Self::BooleanNegative
+            | Self::InvalidBooleanAnd
+            | Self::UnsupportedIntegerObject
+            | Self::UnsupportedComplexOperation
+            | Self::UnsupportedObjectLoop => "TypeError",
+            Self::NegativeIntegerPower => "ValueError",
+            Self::PythonZeroDivision => "ZeroDivisionError",
+            Self::PythonObjectAttribute => "AttributeError",
+        }
+    }
 }
 /// Validate the inputs used in a source `comparison & comparison` expression.
 ///
 /// Adapters map this error to TypeError, matching NumPy, before calling a stage.
 pub fn validate_condition_and(operands: &[MaskedValue]) -> Result<(), MaskedError> {
+    if let Some(error) = operands.iter().find_map(|x| x.error) {
+        return Err(error);
+    }
     if operands
         .iter()
         .any(|x| x.is_scalar_array && x.is_masked_array && x.mask)
@@ -423,6 +656,9 @@ pub fn validate_condition_and(operands: &[MaskedValue]) -> Result<(), MaskedErro
 }
 /// Implement NumPy's scalar masked singleton and scalar arithmetic subclass normalization.
 fn finish(mut value: MaskedValue, arithmetic: bool) -> MaskedValue {
+    if value.error.is_some() {
+        return value;
+    }
     if value.is_masked_array && value.is_scalar_array {
         if value.mask {
             return MaskedValue::masked(0.0, true)
@@ -505,6 +741,37 @@ fn promote(a: MaskedValue, b: MaskedValue, strong_constants: bool) -> Precision 
 }
 /// Evaluate arithmetic independently of NumPy, including operator-specific mask/domain restoration.
 fn arithmetic(a: MaskedValue, b: MaskedValue, operation: Operation) -> MaskedValue {
+    if let Some(error) = a.error.or(b.error) {
+        return integers::failure(a, error);
+    }
+    if a.object_result || b.object_result {
+        return objects::arithmetic(a, b, operation);
+    }
+    if a.complex.is_some() || b.complex.is_some() {
+        return complex::arithmetic(a, b, operation);
+    }
+    if a.weak
+        && b.weak
+        && ((matches!(operation, Operation::Div) && b.value == 0.0)
+            || (matches!(operation, Operation::Pow) && a.value == 0.0 && b.value < 0.0))
+    {
+        return integers::failure(a, MaskedError::PythonZeroDivision);
+    }
+    if integers::is_integer(a) || integers::is_integer(b) {
+        return integers::arithmetic(a, b, operation);
+    }
+    arithmetic_float(a, b, operation)
+}
+/// Evaluate the already promoted floating loop without altering its existing numerical operation order.
+fn arithmetic_float(a: MaskedValue, b: MaskedValue, operation: Operation) -> MaskedValue {
+    if let Some(error) = a.error.or(b.error) {
+        return integers::failure(a, error);
+    }
+    if matches!(operation, Operation::Pow) {
+        if let Some(result) = complex::real_power(a, b) {
+            return result;
+        }
+    }
     let ma = a.is_masked_array || b.is_masked_array;
     let ufunc = a.is_numpy_scalar && b.is_masked_array;
     let p = promote(a, b, ma);
@@ -533,6 +800,15 @@ fn arithmetic(a: MaskedValue, b: MaskedValue, operation: Operation) -> MaskedVal
         },
     };
     let mut mask = a.mask || b.mask;
+    if a.weak
+        && b.weak
+        && matches!(operation, Operation::Pow)
+        && a.value.is_finite()
+        && b.value.is_finite()
+        && raw.is_infinite()
+    {
+        return integers::failure(a, MaskedError::PythonFloatOverflow);
+    }
     let mut value = if ma && mask && !ufunc { x } else { raw };
     if ma {
         match operation {
@@ -567,6 +843,25 @@ fn arithmetic(a: MaskedValue, b: MaskedValue, operation: Operation) -> MaskedVal
 }
 /// Evaluate raw ufunc results, with mask propagation rather than operator restoration.
 fn ufunc_binary(a: MaskedValue, b: MaskedValue, operation: BinaryUfunc) -> MaskedValue {
+    if let Some(error) = a.error.or(b.error) {
+        return integers::failure(a, error);
+    }
+    if a.object_result || b.object_result {
+        return objects::ufunc(a, b, operation);
+    }
+    if a.complex.is_some() || b.complex.is_some() {
+        return complex::ufunc(a, b, operation);
+    }
+    if integers::is_integer(a) || integers::is_integer(b) {
+        return integers::ufunc(a, b, operation);
+    }
+    ufunc_binary_float(a, b, operation)
+}
+/// Evaluate the already resolved floating ufunc loop.
+fn ufunc_binary_float(a: MaskedValue, b: MaskedValue, operation: BinaryUfunc) -> MaskedValue {
+    if let Some(error) = a.error.or(b.error) {
+        return integers::failure(a, error);
+    }
     let p = promote(a, b, false);
     let x = round(a.value, p);
     let y = round(b.value, p);
@@ -642,7 +937,7 @@ pub fn calculate_fire_area(
         MaskedValue::select_with_condition(
             ratio.greater_condition(c(1e-7)),
             c(std::f64::consts::PI)
-                .mul(d.pow(c(2.0)))
+                .mul(d.pow(MaskedValue::python_int(2)))
                 .div(c(4.0).mul(safe)),
             c(0.0),
         )
@@ -687,24 +982,76 @@ pub fn calculate_fire_perimeter(
         let apb = ell_a.add(ell_b);
         let safe2 = MaskedValue::select_with_condition(
             apb.greater_condition(c(1e-7)),
-            apb.pow(c(2.0)),
+            apb.pow(MaskedValue::python_int(2)),
             c(1.0),
         );
         let h = MaskedValue::select_with_condition(
             apb.greater_condition(c(1e-7)),
-            ell_a.sub(ell_b).pow(c(2.0)).div(safe2),
+            ell_a.sub(ell_b).pow(MaskedValue::python_int(2)).div(safe2),
             c(0.0),
         );
         MaskedValue::select_with_condition(
             apb.greater_condition(c(1e-7)),
-            c(std::f64::consts::PI)
-                .mul(apb)
-                .mul(c(1.0).add(h.div(c(4.0))).add(h.pow(c(2.0)).div(c(64.0)))),
+            c(std::f64::consts::PI).mul(apb).mul(
+                c(1.0)
+                    .add(h.div(c(4.0)))
+                    .add(h.pow(MaskedValue::python_int(2)).div(c(64.0))),
+            ),
             c(0.0),
         )
     }
 }
 
+/// Calculate backing spread with NumPy.ma intermediate arithmetic, returning ft/min.
+/// Wind coefficient fields with independent object/dtype/empty metadata.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct MaskedWindCoefficients {
+    /// Sigma after the source guard and selection.
+    pub safe_sigma: MaskedValue,
+    /// Wind coefficient C.
+    pub wind_c: MaskedValue,
+    /// Wind exponent B.
+    pub wind_b: MaskedValue,
+    /// Packing exponent E.
+    pub wind_e: MaskedValue,
+}
+impl MaskedWindCoefficients {
+    /// Return the exact source dictionary keys.
+    pub fn named_values(&self) -> [(&'static str, MaskedValue); 4] {
+        [
+            ("safe_sigma", self.safe_sigma),
+            ("wind_c", self.wind_c),
+            ("wind_b", self.wind_b),
+            ("wind_e", self.wind_e),
+        ]
+    }
+}
+/// Calculate guarded wind coefficients using the same numeric-object and zero-work operations as NumPy.
+pub fn calculate_surface_wind_coefficients(sigma: MaskedValue) -> MaskedWindCoefficients {
+    let safe_sigma =
+        MaskedValue::select_with_condition(sigma.greater_condition(c(1e-7)), sigma, c(1.));
+    MaskedWindCoefficients {
+        safe_sigma,
+        wind_c: c(7.47).mul(c(-0.133).mul(safe_sigma.pow(c(0.55))).exp()),
+        wind_b: c(0.02526).mul(safe_sigma.pow(c(0.54))),
+        wind_e: c(0.715).mul(c(-0.000359).mul(safe_sigma).exp()),
+    }
+}
+/// Calculate residence time while retaining object-loop boxing and empty-array dtype.
+pub fn calculate_residence_time(sigma: MaskedValue) -> MaskedValue {
+    let safe = MaskedValue::select_with_condition(sigma.greater_condition(c(1e-7)), sigma, c(1.));
+    MaskedValue::select_with_condition(sigma.greater_condition(c(1e-7)), c(384.).div(safe), c(0.))
+}
+/// Calculate surface flame length after its source np.where normalization, including numeric-object loops.
+pub fn calculate_flame_length(intensity: MaskedValue) -> MaskedValue {
+    let safe =
+        MaskedValue::select_with_condition(intensity.greater_condition(c(0.)), intensity, c(0.));
+    MaskedValue::select_with_condition(
+        intensity.greater_condition(c(0.)),
+        c(0.45).mul(safe.pow(c(0.46))),
+        c(0.),
+    )
+}
 /// Calculate backing spread with NumPy.ma intermediate arithmetic, returning ft/min.
 pub fn calculate_backing_spread_rate(
     spread_rate: MaskedValue,
@@ -719,7 +1066,7 @@ pub fn calculate_backing_spread_rate(
 }
 /// Calculate eccentricity while preserving masked power, domain-fill, and final `np.where` behavior.
 pub fn calculate_eccentricity(ratio: MaskedValue) -> MaskedValue {
-    let x = ratio.pow(c(2.0)).sub(c(1.0));
+    let x = ratio.pow(MaskedValue::python_int(2)).sub(c(1.0));
     MaskedValue::select_with_condition(
         x.greater_condition(c(0.0)),
         x.maximum(c(0.0)).sqrt().div(ratio),
@@ -766,7 +1113,7 @@ pub fn calculate_effective_wind_speed(
         speed,
         c(0.0),
     );
-    MaskedValue::plain(selected.value * 0.01136363636).with_scalar_array(selected.is_scalar_array)
+    selected.as_array_f64().mul(c(0.01136363636))
 }
 /// Calculate flanking ft/min with masked addition and division prior to final plain selection.
 pub fn calculate_flanking_spread_rate(
@@ -821,14 +1168,21 @@ pub fn calculate_slope_phi(
     packing: MaskedValue,
     ri: MaskedValue,
 ) -> MaskedValue {
+    let slope = slope.as_array_f64();
+    if slope.error.is_some() {
+        return slope;
+    }
     let tan = MaskedValue::plain(units.to_base(slope.value).to_radians().tan())
-        .with_scalar_array(slope.is_scalar_array);
+        .with_scalar_array(slope.is_scalar_array)
+        .with_empty_array(slope.empty_array);
     let safe =
         MaskedValue::select_with_condition(packing.greater_condition(c(1e-7)), packing, c(1.0));
     let phi = MaskedValue::select_with_condition(
         tan.greater_condition(c(1e-7))
             .and(packing.greater_condition(c(1e-7))),
-        c(5.275).mul(safe.pow(c(-0.3))).mul(tan.pow(c(2.0))),
+        c(5.275)
+            .mul(safe.pow(c(-0.3)))
+            .mul(tan.pow(MaskedValue::python_int(2))),
         c(0.0),
     );
     phi.minimum(c(0.9).mul(ri))
@@ -842,20 +1196,39 @@ pub fn calculate_surface_rate_vector(
     orientation: &str,
     aspect: MaskedValue,
 ) -> MaskedRateVector {
-    let degrees = if super::wind::contains_ascii(orientation, "north") {
+    let direction = direction.as_array_f64();
+    let aspect = aspect.as_array_f64();
+    if let Some(error) = direction.error.or(aspect.error) {
+        let value = integers::failure(direction, error);
+        return MaskedRateVector {
+            x_component: value,
+            y_component: value,
+            rate_vector: value,
+        };
+    }
+    let north = super::wind::contains_ascii(orientation, "north");
+    let degrees = if north {
         direction.value - aspect.value
     } else {
         direction.value
     };
     let rad = degrees.to_radians();
+    let scalar = direction.is_scalar_array && (!north || aspect.is_scalar_array);
+    let empty = direction.empty_array || (north && aspect.empty_array);
     let slope = r0.mul(slope_phi);
     let wind = r0.mul(wind_phi);
-    let scalar_direction = direction.is_scalar_array
-        && (!super::wind::contains_ascii(orientation, "north") || aspect.is_scalar_array);
-    let x_component =
-        slope.add(wind.mul(MaskedValue::plain(rad.cos()).with_scalar_array(scalar_direction)));
-    let y_component = wind.mul(MaskedValue::plain(rad.sin()).with_scalar_array(scalar_direction));
-    let rate_vector = x_component.pow(c(2.0)).add(y_component.pow(c(2.0))).sqrt();
+    let cosine = MaskedValue::plain(rad.cos())
+        .with_scalar_array(scalar)
+        .with_empty_array(empty);
+    let sine = MaskedValue::plain(rad.sin())
+        .with_scalar_array(scalar)
+        .with_empty_array(empty);
+    let x_component = slope.add(wind.mul(cosine));
+    let y_component = wind.mul(sine);
+    let rate_vector = x_component
+        .pow(MaskedValue::python_int(2))
+        .add(y_component.pow(MaskedValue::python_int(2)))
+        .sqrt();
     MaskedRateVector {
         x_component,
         y_component,
@@ -870,25 +1243,37 @@ pub fn calculate_direction_of_max_spread(
     orientation: &str,
     aspect: MaskedValue,
 ) -> MaskedValue {
-    let angle = ufunc_binary(y, x, BinaryUfunc::Atan2).unary(Unary::Degrees);
+    let aspect = aspect.as_array_f64();
+    if aspect.error.is_some() {
+        return aspect;
+    }
+    let angle = ufunc_binary(y, x, BinaryUfunc::Atan2)
+        .unary(Unary::Degrees)
+        .with_empty_array(x.empty_array || y.empty_array);
     let mut result =
-        MaskedValue::select_with_condition(rate.greater_condition(c(1e-7)), angle, c(0.0));
-    result = MaskedValue::select_with_condition(
-        MaskedCondition::new(
-            result.value.abs() < round(0.5, result.precision),
-            result.is_scalar_array,
-        ),
-        c(0.0),
-        result,
-    );
+        MaskedValue::select_with_condition(rate.greater_condition(c(1e-7)), angle, c(0.));
+    let snap = MaskedCondition::new(
+        result.value.abs() < round(0.5, result.precision),
+        result.is_scalar_array,
+    )
+    .with_empty_array(result.empty_array);
+    result = MaskedValue::select_with_condition(snap, c(0.), result);
     result = MaskedValue::select_with_condition(
         result.less_condition(c(-1e-20)),
-        result.add(c(360.0)),
+        result.add(c(360.)),
         result,
     );
     if super::wind::contains_ascii(orientation, "north") {
-        result = MaskedValue::plain(np_remainder(result.value + aspect.value + 180.0, 360.0))
-            .with_scalar_array(result.is_scalar_array && aspect.is_scalar_array);
+        result = result.add(aspect).add(c(180.));
+        if result.error.is_some() || result.object_result {
+            return result;
+        }
+        let mut value = MaskedValue::plain(np_remainder(result.value, 360.))
+            .with_scalar_array(result.is_scalar_array)
+            .with_empty_array(result.empty_array)
+            .with_math_profile(result.math_profile);
+        value.is_numpy_scalar = result.is_scalar_array;
+        result = value;
     }
     result
 }

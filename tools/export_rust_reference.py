@@ -236,8 +236,11 @@ def _envelope(payload):
     :param payload: Document fields.
     :return: Document with versioned provenance.
     """
+    # Backend selection and native adapters are not part of the frozen explicit
+    # Python scientific reference. Hash its facade and component sources only.
+    paths = [SOURCE / "behave.py", *sorted((SOURCE / "components").glob("*.py"))]
     hashes = {path.relative_to(ROOT).as_posix(): hashlib.sha256(path.read_bytes().replace(b"\r\n", b"\n")).hexdigest()
-              for path in sorted(SOURCE.rglob("*.py"))}
+              for path in paths}
     return {"schema_version": 1, "provenance": {"python_reference_sha": REFERENCE_SHA,
             "source_sha256": hashes, "oracle": "explicit Python"}, **payload}
 

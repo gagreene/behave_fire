@@ -18,6 +18,22 @@ Other integer operations retain their own wrapping and promotion contracts.
 
 Float64 and float32 routes preserve the reference within `rtol=1e-9, atol=1e-12` and `rtol=1e-6, atol=1e-7`, respectively. Shapes, statuses, masks, NaN positions, and exception classes match the applicable oracle; message wording is not guaranteed. Any further difference must be recorded with an executable scenario before being accepted.
 
+## Native object boundary
+
+Native arithmetic accepts booleans, fixed-width signed/unsigned integers, and
+float32/float64 values after the documented float16 widening. Characterized
+numeric-object coercion, output boxing, and exception behavior remain supported;
+`dtype=object` alone is not a reason to reject an input. Large Python integers
+remain accepted wherever the reference entry point explicitly converts them to
+a supported real dtype before calculation. General arbitrary-precision integer
+outputs and opaque custom Python-object arithmetic require the explicit Python
+backend. Rust raises `TypeError` instead of truncating values, silently changing
+the result dtype, or falling back during a calculation.
+For example, Python's `calculate_fire_length(2**64, 0, 1)` produces an object
+array containing the exact integer; this raw-object route is unsupported by Rust.
+Complex intermediates generated from supported real inputs are a separate case:
+the native calculation preserves their resulting dtype and exception behavior.
+
 ## Existing limitations retained
 
 - Containment uses a simplified fixed-step growth/line-production loop, not the full C++ ContainSim solver or RK4. The spread-rate input defines the batch shape, and report size sets the overrun threshold rather than the initial ellipse.

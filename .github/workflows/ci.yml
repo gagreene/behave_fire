@@ -12,6 +12,40 @@ permissions:
   contents: read
 
 jobs:
+  native-python:
+    name: Native Python (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, macos-15, windows-2025]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Create an isolated native test environment
+        shell: bash
+        run: |
+          python -m venv .venv-native
+          if [ "$RUNNER_OS" = Windows ]; then
+            native_python=.venv-native/Scripts/python.exe
+          else
+            native_python=.venv-native/bin/python
+          fi
+          "$native_python" -m pip install --only-binary=:all: numpy==2.1.3 'pytest>=9.0.2' maturin==1.10.0
+          echo "NATIVE_PYTHON=$native_python" >> "$GITHUB_ENV"
+          echo "VIRTUAL_ENV=$GITHUB_WORKSPACE/.venv-native" >> "$GITHUB_ENV"
+      - name: Build the explicit development backend
+        shell: bash
+        env:
+          MATURIN_NO_INSTALL_RUST: "1"
+        run: '"$NATIVE_PYTHON" -m maturin develop --release --manifest-path rust/crates/behave-py/Cargo.toml'
+      - name: Require native execution in the full suite
+        shell: bash
+        run: '"$NATIVE_PYTHON" -m pytest --require-rust'
+
   rust-core:
     name: Rust core (${{ matrix.toolchain }})
     runs-on: ubuntu-latest
