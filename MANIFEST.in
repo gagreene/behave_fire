@@ -1,7 +1,2 @@
-include LICENSE
-include README.md
-include CHANGELOG.md
-include pyproject.toml
-recursive-include src/behave_fire *.py
-prune tests
-
+# Retired: Maturin uses pyproject.toml and the Git index for source packaging.
+# Run tools/check_sdist.py --check-tracked . before building an sdist.

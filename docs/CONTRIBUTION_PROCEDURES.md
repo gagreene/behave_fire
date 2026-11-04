@@ -160,3 +160,7 @@ checked box records the author's local test result; it does not replace review o
 the test output or prove that other operating systems passed.
 
 Coding agents must obtain direct permission before pushing release tags.
+
+## Python packaging and source tests
+
+Use the procedures in [RELEASING.md](RELEASING.md) for Maturin native builds, the universal fallback wheel, and source distribution validation. Python-only source tests must use `uv sync --locked --no-install-project --extra test --extra dev` and `uv run --no-sync python -m pytest`; never install the project editable in that route. The native test route must run `python -m pytest --require-rust` against a built extension. The test extra contains pytest and PyYAML, without optional raster dependencies. All Python package release tags target approved released commits on `master`; the standalone Rust core has its own version and tag namespace.

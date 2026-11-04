@@ -1,0 +1,73 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: "Build only by default. TestPyPI requires separate owner approval and environment setup."
+        type: choice
+        options: [build-only, testpypi]
+        default: build-only
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+
+jobs:
+  validation:
+    uses: ./.github/workflows/ci.yml
+
+  release-policy:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - name: Require an authorized release commit and matching binding version
+        shell: bash
+        run: |
+          git diff --exit-code
+          git diff --cached --exit-code
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
+            git merge-base --is-ancestor "$GITHUB_SHA" origin/master
+            python -c 'import os,tomllib; from pathlib import Path; import sys; sys.path.insert(0,"tools"); from build_pure_wheel import python_version; value=tomllib.loads(Path("rust/crates/behave-py/Cargo.toml").read_text())["package"]["version"]; assert os.environ["GITHUB_REF_NAME"] == "v"+python_version(value), (os.environ["GITHUB_REF_NAME"],value)'
+            test "$(git cat-file -t "$GITHUB_REF_NAME")" = tag
+          fi
+
+  publish-testpypi:
+    if: github.event_name == 'workflow_dispatch' && inputs.target == 'testpypi' && vars.TESTPYPI_PUBLISHING_ENABLED == 'true'
+    needs: [validation, release-policy]
+    runs-on: ubuntu-24.04
+    environment:
+      name: testpypi
+      url: https://test.pypi.org/project/behave-fire/
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: distributions
+          path: dist
+      - uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
+
+  publish-pypi:
+    if: startsWith(github.ref, 'refs/tags/v') && vars.PYPI_PUBLISHING_ENABLED == 'true'
+    needs: [validation, release-policy]
+    runs-on: ubuntu-24.04
+    environment:
+      name: pypi
+      url: https://pypi.org/project/behave-fire/
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: distributions
+          path: dist
+      - uses: pypa/gh-action-pypi-publish@release/v1
