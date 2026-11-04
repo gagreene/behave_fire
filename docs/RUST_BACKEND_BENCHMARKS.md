@@ -1,6 +1,6 @@
 # Rust backend execution measurements
 
-Measured on 2026-11-04 against the integrated release build, with binding API 2, the complete backend enabled, and exact integer-alias, object, empty, complex, and weak-scalar transport. The Windows calibration selects the platform-libm atan2 profile; Linux SVML timing is not measured here. These measurements supersede the earlier development tables.
+Measured on 2026-11-04 against the release build committed as `6a0ec1c0cc00bf66dbeeceb0bc1c0e7e0a57a5f9`, with binding API 2, the complete backend enabled, and exact integer-alias, object, empty, complex, and weak-scalar transport. The Windows calibration selects the platform-libm atan2 profile; Linux SVML timing is not measured here. These measurements supersede the earlier development tables. Later float32 direction-layout refinements are outside these measured surface and Crown routes.
 
 ## Method
 

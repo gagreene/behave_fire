@@ -26,7 +26,7 @@ jobs:
           components: rustfmt, clippy
       - run: cargo fmt --manifest-path rust/Cargo.toml --all -- --check
       - run: cargo clippy --manifest-path rust/Cargo.toml --workspace --all-targets --locked -- -D warnings
-      - run: cargo test --manifest-path rust/Cargo.toml -p behave-fire --locked
+      - run: cargo test --manifest-path rust/Cargo.toml -p behave-fire --locked --no-fail-fast
       - run: cargo doc --manifest-path rust/Cargo.toml --workspace --no-deps --locked
         env:
           RUSTDOCFLAGS: -D warnings
@@ -45,7 +45,7 @@ jobs:
         with:
           toolchain: ${{ steps.msrv.outputs.version }}
       - run: cargo check --manifest-path rust/Cargo.toml --workspace --all-targets --locked
-      - run: cargo test --manifest-path rust/Cargo.toml -p behave-fire --locked
+      - run: cargo test --manifest-path rust/Cargo.toml -p behave-fire --locked --no-fail-fast
 
   python-only:
     runs-on: ubuntu-24.04
@@ -93,6 +93,9 @@ jobs:
       - name: Record every independent direction fixture outcome
         if: always()
         run: uv run --no-sync python tools/probe_direction_fixtures.py > numpy-direction-fixtures.json
+      - name: Record direction layout and all core direction oracles
+        if: always()
+        run: uv run --no-sync python tools/probe_direction_layout.py > numpy-direction-layout.json
       - name: Record independent direction fixtures without AVX512 dispatch
         if: always()
         shell: bash
@@ -107,6 +110,8 @@ jobs:
           environment = dict(os.environ, NPY_DISABLE_CPU_FEATURES=",".join(disabled))
           with open("numpy-direction-fixtures-baseline.json", "w") as output:
               subprocess.run([sys.executable, "tools/probe_direction_fixtures.py"], env=environment, stdout=output, check=True)
+          with open("numpy-direction-layout-baseline.json", "w") as output:
+              subprocess.run([sys.executable, "tools/probe_direction_layout.py"], env=environment, stdout=output, check=True)
           PY
       - uses: actions/upload-artifact@v4
         if: always()
@@ -122,6 +127,8 @@ jobs:
             numpy-direction-oracle.json
             numpy-direction-fixtures.json
             numpy-direction-fixtures-baseline.json
+            numpy-direction-layout.json
+            numpy-direction-layout-baseline.json
           if-no-files-found: warn
 
   wheel-validation:
