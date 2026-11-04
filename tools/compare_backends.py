@@ -62,7 +62,7 @@ def main(argv=None):
             if case.get("policy", "acceptance") == "acceptance":
                 scenarios.append((path.stem, case))
     random.Random(arguments.seed).shuffle(scenarios)
-    report = {"seed": arguments.seed, "oracle": "Frozen reference cases with float16/internal-half widening; numeric-object fixtures retain their original acceptance outcomes", "domains": {}, "failures": []}
+    report = {"seed": arguments.seed, "oracle": "Frozen reference cases with float16/internal-half widening; four exact reviewed invalid-int32-cast inputs use live explicit Python only when the host cast differs; frozen cast differences remain diagnostics", "domains": {}, "failures": [], "platform_cast_diagnostics": []}
     original_assertion = parity_support.assert_result
     for domain, case in scenarios:
         summary = report["domains"].setdefault(domain, dict(scenarios=0, passed=0, array_fields=0, missing_fields=0, dtype_differences=0, shape_differences=0, mask_differences=0, maximum_absolute_error=0.0, maximum_relative_error=0.0))
@@ -80,6 +80,16 @@ def main(argv=None):
 
         parity_support.assert_result = observed
         try:
+            from rust_reference_platform import reference_outputs
+            outputs = reference_outputs(case, parity_support.encode_value)
+            if outputs is not None:
+                current, original_cast = outputs
+                report["platform_cast_diagnostics"].append({
+                    "domain": domain, "scenario": case["id"],
+                    "frozen_output": case["output"], "current_python_output": current,
+                    "original_cast_replay_matches_frozen": parity_support.contracts_match(original_cast, case["output"], True),
+                    "current_python_matches_frozen": parity_support.contracts_match(current, case["output"], True),
+                })
             with warnings.catch_warnings(), np.errstate(all="ignore"):
                 warnings.simplefilter("ignore")
                 parity_support.run_case(case)

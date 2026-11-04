@@ -40,6 +40,10 @@ pub fn output(value: MaskedValue, key: &str) -> Result<Cell, String> {
         u8::from(value.object_numpy_scalar) as f64,
     );
     result.insert(
+        format!("__integer_type.{key}"),
+        value.numpy_integer_type.map_or(-1.0, f64::from),
+    );
+    result.insert(
         format!("__integer_dtype.{key}"),
         value.integer.map_or(-1.0, |v| v.kind.code() as f64),
     );

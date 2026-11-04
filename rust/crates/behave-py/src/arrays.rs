@@ -176,6 +176,11 @@ impl Arguments {
                     != 0.0,
             );
         }
+        value = value.with_numpy_integer_type(
+            self.optional(&format!("_integer_type.{name}"), index)
+                .filter(|number| (0.0..=10.0).contains(number))
+                .map(|number| number as u8),
+        );
         Ok(value.with_empty_array(self.optional(&format!("_empty.{name}"), index).is_some()))
     }
     pub fn n(&self, name: &str, index: usize) -> Result<f64, String> {
@@ -325,6 +330,7 @@ pub fn batch<'py>(
                     let retain = name.starts_with("__single.")
                         || name.starts_with("__masked.")
                         || name.starts_with("__integer_dtype.")
+                        || name.starts_with("__integer_type.")
                         || name.starts_with("__complex.")
                         || name.starts_with("__object.")
                         || name.starts_with("__object_numpy.")

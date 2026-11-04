@@ -3,12 +3,17 @@
 from importlib import import_module
 import json
 from pathlib import Path
+import sys
 import warnings
 
 import numpy as np
 import pytest
 
 ROOT = next(parent for parent in Path(__file__).resolve().parents if (parent / "pytest.ini").is_file())
+TOOLS = Path(__file__).resolve().parents[1] / "tools"
+sys.path.insert(0, str(TOOLS))
+from export_rust_reference import contracts_match, encode_value
+from rust_reference_platform import acceptance_output
 
 
 
@@ -42,7 +47,10 @@ def assert_result(actual, expected):
         np.testing.assert_array_equal(np.isnan(actual_data), np.isnan(wanted_data))
         np.testing.assert_array_equal(np.isposinf(actual_data), np.isposinf(wanted_data))
         np.testing.assert_array_equal(np.isneginf(actual_data), np.isneginf(wanted_data))
-        np.testing.assert_allclose(actual_data, wanted_data, rtol=1e-6 if wanted.dtype == np.float32 else 1e-9, atol=1e-7 if wanted.dtype == np.float32 else 1e-12)
+        if wanted.dtype.kind in "biu":
+            np.testing.assert_array_equal(actual_data, wanted_data)
+        else:
+            np.testing.assert_allclose(actual_data, wanted_data, rtol=1e-6 if wanted.dtype == np.float32 else 1e-9, atol=1e-7 if wanted.dtype == np.float32 else 1e-12)
     else:
         assert actual == expected
 
@@ -146,7 +154,7 @@ def run_case(case):
                 operation(**arguments)
         else:
             result = operation(**arguments)
-            assert_result(result, case["output"])
+            assert_result(result, acceptance_output(case, encode_value, contracts_match))
     if 'warnings' in case:
         assert sorted(set(type(item.message).__name__ for item in caught))==case['warnings']
     if "receiver_after" in case:

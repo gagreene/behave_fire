@@ -199,10 +199,18 @@ impl MaskedValue {
     /// Attach exact fixed-width input/output data while retaining masks, rank, and math profile.
     pub fn with_integer(mut self, integer: IntegerValue) -> Self {
         let integer = IntegerValue::from_bits(integer.kind, integer.raw_bits);
+        if self.integer.map(|value| value.kind) != Some(integer.kind) {
+            self.numpy_integer_type = None;
+        }
         self.value = integer.as_f64();
         self.integer = Some(integer);
         self.precision = Precision::F64;
         self.wide_integer = None;
+        self
+    }
+    /// Attach an exact NumPy integer type number after fixed-width data normalization.
+    pub fn with_numpy_integer_type(mut self, type_number: Option<u8>) -> Self {
+        self.numpy_integer_type = type_number.filter(|number| *number <= 10);
         self
     }
     /// Construct an ordinary weak Python signed integer, distinct from NumPy integer scalars.
@@ -345,6 +353,7 @@ pub(super) fn to_float(mut value: MaskedValue, precision: Precision) -> MaskedVa
     };
     value.precision = precision;
     value.integer = None;
+    value.numpy_integer_type = None;
     value.wide_integer = None;
     value
 }
@@ -522,6 +531,37 @@ fn weak_arithmetic(a: MaskedValue, b: MaskedValue, operation: Operation) -> Mask
         },
     )
 }
+/// Resolve an exact integer alias after the ordinary numeric promotion has selected its width.
+fn result_numpy_integer_type(
+    a: MaskedValue,
+    b: MaskedValue,
+    kind: IntegerKind,
+    scalar_arithmetic: bool,
+) -> Option<u8> {
+    let matching = |value: MaskedValue| {
+        if !value.weak && value.integer.is_some_and(|integer| integer.kind == kind) {
+            value.numpy_integer_type
+        } else {
+            None
+        }
+    };
+    let left = matching(a);
+    let right = matching(b);
+    // NumPy numeric scalar slots preserve the left scalar class when the other
+    // scalar fits its numeric kind; ndarray/ufunc promotion instead resolves
+    // equal-width aliases by their common dtype descriptor.
+    if scalar_arithmetic && a.is_numpy_scalar && (b.is_numpy_scalar || b.weak) && left.is_some() {
+        return left;
+    }
+    if scalar_arithmetic && a.weak && b.is_numpy_scalar && right.is_some() {
+        return right;
+    }
+    match (left, right) {
+        (Some(left), Some(right)) => Some(left.max(right)),
+        (Some(number), None) | (None, Some(number)) => Some(number),
+        (None, None) => None,
+    }
+}
 /// Evaluate a fixed-width arithmetic loop before any float conversion.
 pub(super) fn arithmetic(a: MaskedValue, b: MaskedValue, operation: Operation) -> MaskedValue {
     let ma = a.is_masked_array || b.is_masked_array;
@@ -636,6 +676,7 @@ pub(super) fn arithmetic(a: MaskedValue, b: MaskedValue, operation: Operation) -
     };
     let result = MaskedValue::new(integer.as_f64(), mask, ma, Precision::F64)
         .with_integer(integer)
+        .with_numpy_integer_type(result_numpy_integer_type(a, b, kind, true))
         .with_scalar_array(a.is_scalar_array && b.is_scalar_array)
         .with_numpy_scalar(a.is_scalar_array && b.is_scalar_array && !ma)
         .with_fill_value(fill)
@@ -697,6 +738,7 @@ pub(super) fn select(condition: MaskedCondition, yes: MaskedValue, no: MaskedVal
     };
     let mut result = MaskedValue::plain(integer.as_f64())
         .with_integer(integer)
+        .with_numpy_integer_type(result_numpy_integer_type(yes, no, kind, false))
         .with_scalar_array(condition.is_scalar_array && yes.is_scalar_array && no.is_scalar_array)
         .with_math_profile(super::profile(yes, no));
     result.error = condition.error.or(yes.error).or(no.error);
@@ -939,6 +981,7 @@ pub(super) fn ufunc(a: MaskedValue, b: MaskedValue, operation: BinaryUfunc) -> M
     finish(
         MaskedValue::new(integer.as_f64(), a.mask || b.mask, ma, Precision::F64)
             .with_integer(integer)
+            .with_numpy_integer_type(result_numpy_integer_type(a, b, kind, false))
             .with_scalar_array(a.is_scalar_array && b.is_scalar_array)
             .with_numpy_scalar(a.is_scalar_array && b.is_scalar_array && !ma)
             .with_fill_value(if a.is_masked_array {
@@ -989,6 +1032,12 @@ pub(super) fn sum(values: [MaskedValue; 5], scalar: bool) -> MaskedValue {
     finish(
         MaskedValue::new(integer.as_f64(), mask, ma, Precision::F64)
             .with_integer(integer)
+            .with_numpy_integer_type(
+                values
+                    .iter()
+                    .find(|value| value.integer.is_some_and(|integer| integer.kind == kind))
+                    .and_then(|value| value.numpy_integer_type),
+            )
             .with_scalar_array(scalar)
             .with_numpy_scalar(scalar && !ma)
             .with_math_profile(values[0].math_profile),

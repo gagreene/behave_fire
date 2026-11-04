@@ -147,6 +147,8 @@ pub struct MaskedValue {
     pub math_profile: MathProfile,
     /// Exact integer dtype/bits, retained until an operation explicitly promotes to floating point.
     pub integer: Option<IntegerValue>,
+    /// Exact NumPy integer type number, distinguishing equal-width C-type aliases.
+    pub numpy_integer_type: Option<u8>,
     /// Source-compatible operation failure propagated through eager expressions.
     pub error: Option<MaskedError>,
     /// Generated complex data; Some(0+0j) still requires a complex output dtype.
@@ -176,6 +178,7 @@ impl MaskedValue {
             fill_value: None,
             math_profile: MathProfile::native_default(),
             integer: None,
+            numpy_integer_type: None,
             error: None,
             wide_integer: None,
             complex: None,

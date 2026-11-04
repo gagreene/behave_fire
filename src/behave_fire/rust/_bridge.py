@@ -177,12 +177,14 @@ def _call(operation, arguments):
             if numeric.size == 0:
                 mask_metadata['_empty.' + name] = np.asarray(1.0)
             if numeric.dtype.kind == 'O':
-                kinds, bits, numpy_payload = _object_buffers(numeric)
+                kinds, bits, numpy_payload, type_numbers = _object_buffers(numeric)
                 mask_metadata['_object.' + name] = np.asarray(1.0)
                 mask_metadata['_object_kind.' + name] = kinds
+                mask_metadata['_integer_type.' + name] = type_numbers
                 mask_metadata['_object_numpy.' + name] = numpy_payload
                 integers[name] = ('uint64', bits)
             if numeric.dtype.kind in 'biu':
+                mask_metadata['_integer_type.' + name] = np.asarray(numeric.dtype.num, dtype=float)
                 integers[name] = (numeric.dtype.name, np.asarray(np.ma.getdata(numeric), dtype=np.uint64))
             if np.ma.isMaskedArray(value):
                 mask_metadata['_masked.' + name] = np.asarray(1.0)
@@ -299,7 +301,7 @@ def _call(operation, arguments):
                     del result[key]
         else:
             result[field] = _restore_shape(result[field], target)
-            for prefix in ('__mask.', '__masked.', '__single.', '__integer_dtype.', '__integer_low.', '__integer_high.', '__complex.', '__imag.', '__object.', '__object_numpy.'):
+            for prefix in ('__mask.', '__masked.', '__single.', '__integer_dtype.', '__integer_low.', '__integer_high.', '__integer_type.', '__complex.', '__imag.', '__object.', '__object_numpy.'):
                 if prefix + field in result and result[prefix + field].ndim:
                     result[prefix + field] = _restore_shape(result[prefix + field], target)
     metadata = {key: result.pop(key) for key in list(result) if key.startswith('__')}
@@ -372,7 +374,7 @@ def _numeric_object(value):
     :param value: Candidate object scalar or array.
     :return: Whether every payload belongs to the supported real numeric domain.
     """
-    integer_types = (bool, int, np.bool_, np.int8, np.int16, np.int32, np.int64, np.longlong, np.uint8, np.uint16, np.uint32, np.uint64, np.ulonglong)
+    integer_types = (bool, int, np.bool_, np.int8, np.int16, np.intc, np.int32, np.int64, np.longlong, np.uint8, np.uint16, np.uintc, np.uint32, np.uint64, np.ulonglong)
     floating_types = (float, np.float16, np.float32, np.float64)
     for item in np.ma.getdata(np.asanyarray(value)).flat:
         if type(item) in integer_types:
@@ -386,16 +388,19 @@ def _object_buffers(value):
     """Encode supported object payloads without numerical arithmetic.
 
     :param value: Object array containing supported real scalar payloads.
-    :return: Per-element dtype codes, exact integer bits, and NumPy scalar flags.
+    :return: Per-element dtype codes, exact integer bits, NumPy scalar flags, and exact integer type numbers.
     """
     values = np.asarray(np.ma.getdata(value), dtype=object)
     kinds = np.full(values.shape, 9.0)
     bits = np.zeros(values.shape, dtype=np.uint64)
     numpy_payload = np.zeros(values.shape, dtype=float)
+    type_numbers = np.full(values.shape, -1.0)
     names = ('int8', 'int16', 'int32', 'int64', 'uint8', 'uint16', 'uint32', 'uint64', 'bool')
     for index in np.ndindex(values.shape):
         item = values[index]
         numpy_payload[index] = isinstance(item, np.generic)
+        if isinstance(item, (np.integer, np.bool_)):
+            type_numbers[index] = item.dtype.num
         if isinstance(item, (bool, np.bool_)):
             kinds[index] = 8
             bits[index] = int(item)
@@ -404,7 +409,7 @@ def _object_buffers(value):
             bits[index] = int(item) & (1 << 64) - 1
         elif isinstance(item, np.float32):
             kinds[index] = 10
-    return (kinds, bits, numpy_payload)
+    return (kinds, bits, numpy_payload, type_numbers)
 
 def _partition_fields(operation, arguments, fields):
     """Marshal independent output dependency groups without forcing shared axes.
@@ -477,6 +482,8 @@ def _restore_payload(value, metadata, key):
         return value
     names = ('int8', 'int16', 'int32', 'int64', 'uint8', 'uint16', 'uint32', 'uint64', 'bool')
     integer = metadata.get('__integer_dtype.' + key, np.asarray(-1.0))
+    type_numbers = metadata.get('__integer_type.' + key, np.asarray(-1.0))
+    type_chars = '?bBhHiIlLqQ'
     single = metadata['__single.' + key]
     complex_kind = metadata.get('__complex.' + key, np.asarray(0.0))
     object_kind = metadata.get('__object.' + key, np.asarray(0.0))
@@ -487,6 +494,7 @@ def _restore_payload(value, metadata, key):
         result = np.empty(value.shape, dtype=object)
         flags = np.broadcast_to(metadata.get('__object_numpy.' + key, np.asarray(0.0)), value.shape)
         integers = np.broadcast_to(integer, value.shape)
+        exact_types = np.broadcast_to(type_numbers, value.shape)
         singles = np.broadcast_to(single, value.shape)
         complexes = np.broadcast_to(complex_kind, value.shape)
         imaginary = np.broadcast_to(metadata.get('__imag.' + key, np.asarray(0.0)), value.shape)
@@ -494,7 +502,8 @@ def _restore_payload(value, metadata, key):
             if complexes[index]:
                 payload = np.asarray(complex(value[index], imaginary[index]), dtype=np.complex64 if singles[index] else np.complex128)[()]
             elif integers[index] >= 0:
-                payload = bits[index].astype(names[int(integers[index])])
+                dtype = type_chars[int(exact_types[index])] if exact_types[index] >= 0 else names[int(integers[index])]
+                payload = bits[index].astype(dtype)
             else:
                 payload = np.asarray(value[index], dtype=np.float32 if singles[index] else np.float64)[()]
             result[index] = payload if flags[index] else payload.item()
@@ -508,7 +517,9 @@ def _restore_payload(value, metadata, key):
         code = int(integer.ravel()[0])
         if not 0 <= code <= 8 or not np.all(integer == code):
             raise ValueError('native output has inconsistent integer dtype metadata')
-        return np.empty(value.shape, dtype=names[code]) if bits is None else bits.astype(names[code])
+        exact_type = int(type_numbers.ravel()[0]) if type_numbers.size else -1
+        dtype = type_chars[exact_type] if exact_type >= 0 else names[code]
+        return np.empty(value.shape, dtype=dtype) if bits is None else bits.astype(dtype)
     return value.astype(np.float32 if np.all(single) else np.float64) if key != 'is_defined' else value
 
 def _restore_shape(value, shape):
