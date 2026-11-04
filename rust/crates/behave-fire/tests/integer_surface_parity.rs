@@ -339,5 +339,153 @@ fn integer_direction_uses_targeted_float32_normalization_for_half_loops() {
         }
     }
     assert!(widened > 10);
-    replay(&cases);
+    let evidence: Value =
+        serde_json::from_str(include_str!("data/integer_direction_platform.json")).unwrap();
+    replay(&direction_cases_for_profile(
+        &cases,
+        &evidence,
+        direction_math_fingerprint(),
+    ));
+}
+
+fn direction_cases_for_profile(cases: &Value, evidence: &Value, fingerprint: [u32; 2]) -> Value {
+    let profiles: Vec<_> = evidence["profiles"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .filter(|profile| profile["atan2_f32_bits"] == serde_json::json!(fingerprint))
+        .collect();
+    assert_eq!(
+        profiles.len(),
+        1,
+        "unreviewed float32 atan2 profile: {fingerprint:08x?}"
+    );
+    let mut selected = cases.clone();
+    for replacement in profiles[0]["overrides"].as_array().unwrap() {
+        let index = replacement["case_index"].as_u64().unwrap() as usize;
+        let original = &cases[index];
+        let identity = serde_json::json!({
+            "name": original["name"],
+            "inputs": original["inputs"],
+            "options": original["options"],
+            "normalize_half_loop": original["normalize_half_loop"],
+            "original_loop_dtype": original["original_loop_dtype"],
+        });
+        assert_eq!(
+            identity.to_string(),
+            replacement["identity"].to_string(),
+            "direction input identity drift at {index}"
+        );
+        assert_eq!(
+            original["output"].to_string(),
+            replacement["frozen_output"].to_string(),
+            "frozen direction output drift at {index}"
+        );
+        let mut frozen_metadata = original["output"].clone();
+        let mut captured_metadata = replacement["output"].clone();
+        frozen_metadata.as_object_mut().unwrap().remove("values");
+        captured_metadata.as_object_mut().unwrap().remove("values");
+        assert_eq!(
+            frozen_metadata, captured_metadata,
+            "direction structural oracle drift at {index}"
+        );
+        assert_eq!(
+            original["output"]["values"].as_array().unwrap().len(),
+            replacement["output"]["values"].as_array().unwrap().len()
+        );
+        selected[index]["output"] = replacement["output"].clone();
+    }
+    selected
+}
+
+fn direction_math_fingerprint() -> [u32; 2] {
+    let negative_one = std::hint::black_box(-1.0f32);
+    [
+        std::hint::black_box(65534.0f32)
+            .atan2(negative_one)
+            .to_bits(),
+        std::hint::black_box(0.0f32).atan2(negative_one).to_bits(),
+    ]
+}
+
+#[test]
+fn direction_oracle_rejects_changed_inputs() {
+    let mut cases: Value =
+        serde_json::from_str(include_str!("data/integer_direction.json")).unwrap();
+    let evidence: Value =
+        serde_json::from_str(include_str!("data/integer_direction_platform.json")).unwrap();
+    let profile = evidence["profiles"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|profile| !profile["overrides"].as_array().unwrap().is_empty())
+        .unwrap();
+    let fingerprint: [u32; 2] = serde_json::from_value(profile["atan2_f32_bits"].clone()).unwrap();
+    let index = profile["overrides"][0]["case_index"].as_u64().unwrap() as usize;
+    cases[index]["inputs"]["aspect"]["values"][0] = serde_json::json!(96.0);
+    assert!(std::panic::catch_unwind(|| direction_cases_for_profile(
+        &cases,
+        &evidence,
+        fingerprint
+    ))
+    .is_err());
+}
+
+#[test]
+fn direction_oracle_rejects_changed_zero_sign() {
+    let mut cases: Value =
+        serde_json::from_str(include_str!("data/integer_direction.json")).unwrap();
+    let evidence: Value =
+        serde_json::from_str(include_str!("data/integer_direction_platform.json")).unwrap();
+    let profile = evidence["profiles"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|profile| !profile["overrides"].as_array().unwrap().is_empty())
+        .unwrap();
+    let fingerprint: [u32; 2] = serde_json::from_value(profile["atan2_f32_bits"].clone()).unwrap();
+    let index = profile["overrides"][0]["case_index"].as_u64().unwrap() as usize;
+    assert_eq!(
+        number(&cases[index]["inputs"]["x_component"]["values"][3]),
+        0.0
+    );
+    cases[index]["inputs"]["x_component"]["values"][3] = serde_json::json!(-0.0);
+    assert!(std::panic::catch_unwind(|| direction_cases_for_profile(
+        &cases,
+        &evidence,
+        fingerprint
+    ))
+    .is_err());
+}
+
+#[test]
+fn direction_oracle_rejects_structural_changes() {
+    let cases: Value = serde_json::from_str(include_str!("data/integer_direction.json")).unwrap();
+    let mut evidence: Value =
+        serde_json::from_str(include_str!("data/integer_direction_platform.json")).unwrap();
+    let profile = evidence["profiles"]
+        .as_array_mut()
+        .unwrap()
+        .iter_mut()
+        .find(|profile| !profile["overrides"].as_array().unwrap().is_empty())
+        .unwrap();
+    let fingerprint: [u32; 2] = serde_json::from_value(profile["atan2_f32_bits"].clone()).unwrap();
+    profile["overrides"][0]["output"]["dtype"] = serde_json::json!("float32");
+    assert!(std::panic::catch_unwind(|| direction_cases_for_profile(
+        &cases,
+        &evidence,
+        fingerprint
+    ))
+    .is_err());
+}
+
+#[test]
+fn direction_oracle_rejects_unknown_math_profiles() {
+    let cases: Value = serde_json::from_str(include_str!("data/integer_direction.json")).unwrap();
+    let evidence: Value =
+        serde_json::from_str(include_str!("data/integer_direction_platform.json")).unwrap();
+    assert!(
+        std::panic::catch_unwind(|| direction_cases_for_profile(&cases, &evidence, [0, 0]))
+            .is_err()
+    );
 }

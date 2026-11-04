@@ -7,6 +7,7 @@ import tarfile
 
 REQUIRED = {
     "pyproject.toml", "README.md", "LICENSE", "NOTICE", "LICENSES/NumPy-BSD-3-Clause.txt",
+    "LICENSES/Intel-SVML-BSD-3-Clause.txt",
     "src/behave_fire/__init__.py", "rust/Cargo.toml", "rust/Cargo.lock",
     "rust/crates/behave-fire/Cargo.toml", "rust/crates/behave-fire/src/lib.rs",
     "rust/crates/behave-py/Cargo.toml", "rust/crates/behave-py/src/lib.rs",

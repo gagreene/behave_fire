@@ -29,7 +29,7 @@ def read_metadata(wheel):
             fields[key] = sorted(values)
         prefix = name.rsplit("/", 1)[0] + "/licenses/"
         licenses = {item.removeprefix(prefix): archive.read(item) for item in archive.namelist() if item.startswith(prefix) and not item.endswith("/")}
-        assert set(licenses) == {"LICENSE", "NOTICE", "LICENSES/NumPy-BSD-3-Clause.txt"}, licenses.keys()
+        assert set(licenses) == {"LICENSE", "NOTICE", "LICENSES/NumPy-BSD-3-Clause.txt", "LICENSES/Intel-SVML-BSD-3-Clause.txt"}, licenses.keys()
         return fields, message.get_payload(decode=True).decode("utf-8").replace("\r\n", "\n").rstrip("\n"), licenses
 
 

@@ -38,6 +38,16 @@ class ArchiveTests(unittest.TestCase):
                 with self.assertRaises(ValueError):
                     checker.check_archive(archive)
 
+    def test_archive_requires_svml_notice(self):
+        checker = _load("check_sdist")
+        with tempfile.TemporaryDirectory() as temporary:
+            archive = Path(temporary) / "source.tar.gz"
+            with tarfile.open(archive, "w:gz") as handle:
+                for name in checker.REQUIRED - {"LICENSES/Intel-SVML-BSD-3-Clause.txt"}:
+                    handle.addfile(tarfile.TarInfo("package/" + name))
+            with self.assertRaisesRegex(ValueError, "Intel-SVML-BSD-3-Clause"):
+                checker.check_archive(archive)
+
     def test_expected_inventory_rejects_missing_embedded_table(self):
         checker = _load("check_sdist")
         with tempfile.TemporaryDirectory() as temporary:

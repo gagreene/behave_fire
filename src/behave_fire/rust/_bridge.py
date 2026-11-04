@@ -1,13 +1,17 @@
 """Structural array normalization for explicit native calculations."""
 from importlib import import_module
+from threading import Lock
 import numpy as np
+from .._backend_contract import BINDING_API_VERSION
 from ._threads import _THREADS
 try:
     _native = import_module('behave_fire._rust')
 except ImportError as error:
     raise ImportError('Rust backend unavailable; install a native behave-fire wheel or build the extension.') from error
-if getattr(_native, '__binding_api_version__', None) != 1:
+if getattr(_native, '__binding_api_version__', None) != BINDING_API_VERSION:
     raise ImportError('Rust backend has an incompatible binding API; rebuild or reinstall behave-fire.')
+_ATAN2_PROFILE_CACHE = None
+_ATAN2_PROFILE_LOCK = Lock()
 _RETAIN = {'calculate_backing_spread_rate', 'calculate_eccentricity', 'calculate_fire_length', 'calculate_fire_length_to_width_ratio', 'calculate_flame_length', 'calculate_flanking_spread_rate', 'calculate_no_wind_no_slope_spread_rate', 'calculate_residence_time', 'calculate_wind_phi', 'calculate_effective_wind_speed', 'calculate_surface_wind_coefficients', 'calculate_fuelbed_intermediates', 'calculate_reaction_intensity', 'calculate_direction_of_max_spread', 'calculate_slope_phi', 'calculate_surface_rate_vector'}
 _PARTICLES = ('load_dead', 'load_live', 'savr_dead', 'savr_live', 'moisture_dead', 'moisture_live')
 _PARTICLE_FIELDS = _PARTICLES + ('hoc_dead', 'hoc_live', 'depth', 'moe_dead', 'is_defined')
@@ -24,6 +28,27 @@ _EMPTY_KEYS.update({'assign_final_crown_fire_behavior': ('final_spread_rate', 'f
 _EMPTY_KEYS['calculate_crown_surface_fire'] = tuple(('p_crown.' + key for key in _EMPTY_KEYS['build_particle_arrays'])) + tuple(('ib_crown.' + key for key in _EMPTY_KEYS['calculate_fuelbed_intermediates'])) + tuple(('crown_surface.' + key for key in _EMPTY_KEYS['run_surface_fire'])) + ('ri_crown', 'crown_fire_spread_rate', 'crown_length_to_width_ratio')
 
 
+def _atan2_math_profile():
+    """Identify the linked NumPy atan2 kernel once from fixed intrinsic probes.
+
+    :return: One for guarded SVML or zero for scalar libm; unknown kernels raise.
+    """
+    global _ATAN2_PROFILE_CACHE
+    with _ATAN2_PROFILE_LOCK:
+        if _ATAN2_PROFILE_CACHE is None:
+            try:
+                _ATAN2_PROFILE_CACHE = (_calibrate_atan2_profile(), None)
+            except Exception as error:
+                _ATAN2_PROFILE_CACHE = (None, 'Rust backend cannot identify the NumPy float32 atan2 kernel: '
+                                        f'{error}. Rebuild or reinstall compatible NumPy and behave-fire, then restart '
+                                        'the process, or select backend="python" explicitly.')
+        selected, failure = _ATAN2_PROFILE_CACHE
+        if failure is not None:
+            # Store only text, never an exception/traceback that could retain caller arrays.
+            raise RuntimeError(failure) from None
+        return selected
+
+
 def _broadcast_buffer(value, shape):
     """Validate broadcasting while retaining scalar buffers as single values.
 
@@ -33,6 +58,47 @@ def _broadcast_buffer(value, shape):
     """
     broadcast = np.broadcast_to(value, shape)
     return value if value.size == 1 else broadcast
+
+
+def _calibrate_atan2_profile():
+    """Compare fixed finite NumPy primitive results with native candidate kernels.
+
+    :return: The unique matching native profile; rejects malformed or ambiguous candidates.
+    """
+    record = _native.atan2_profile_candidates()
+    if not isinstance(record, (tuple, list)) or len(record) != 4:
+        raise RuntimeError('malformed native atan2 configuration record')
+    y_bits, x_bits, libm_bits, svml_bits = record
+    y = _calibration_bits(y_bits, 'y operands').view(np.float32)
+    x = _calibration_bits(x_bits, 'x operands').view(np.float32)
+    libm = _calibration_bits(libm_bits, 'libm results')
+    svml = None if svml_bits is None else _calibration_bits(svml_bits, 'SVML results')
+    if not (np.isfinite(y).all() and np.isfinite(x).all()):
+        raise RuntimeError('native atan2 configuration operands must be finite')
+    # Configuration identification only: no caller inputs or fire formulas enter this ufunc.
+    with np.errstate(all='ignore'):
+        observed = np.arctan2(y, x)
+    if not isinstance(observed, np.ndarray) or observed.dtype != np.float32 or observed.shape != (16,):
+        raise RuntimeError('unexpected NumPy atan2 configuration result')
+    bits = observed.view(np.uint32)
+    matches = [index for index, candidate in enumerate((libm, svml))
+               if candidate is not None and np.array_equal(bits, candidate)]
+    if len(matches) != 1:
+        raise RuntimeError('native atan2 candidates are ambiguous' if matches else 'no native atan2 candidate matches NumPy')
+    return matches[0]
+
+
+def _calibration_bits(value, name):
+    """Validate the bounded native configuration protocol before constructing arrays.
+
+    :param value: Sixteen unsigned binary32 payloads from the no-argument native helper.
+    :param name: Diagnostic field name.
+    :return: Owned uint32 array; malformed records raise without executing a probe.
+    """
+    if (not isinstance(value, (tuple, list)) or len(value) != 16
+            or any(type(bit) is not int or not 0 <= bit <= 0xffffffff for bit in value)):
+        raise RuntimeError(f'malformed native atan2 {name}')
+    return np.array(value, dtype=np.uint32)
 
 
 def _call(operation, arguments):
@@ -50,8 +116,9 @@ def _call(operation, arguments):
     arguments = dict(arguments)
     original_arguments = dict(arguments)
     name = operation.rsplit('.', 1)[1]
+    direction_float32 = False
     if operation == 'surface.calculate_direction_of_max_spread':
-        arguments = _normalize_direction(arguments)
+        arguments, direction_float32 = _normalize_direction(arguments)
     if operation == 'contain.run_contain_sim_array':
         import operator
         arguments['max_steps'] = operator.index(arguments['max_steps'])
@@ -255,6 +322,7 @@ def _call(operation, arguments):
     input_shapes = {key: value.shape for key, value in arrays.items()}
     arrays.update(mask_metadata)
     arrays['_simd_exp'] = np.asarray(_math_profile(), dtype=float)
+    arrays['_svml_atan2'] = np.asarray(_atan2_math_profile() if direction_float32 and all(shape) else 0, dtype=float)
     arrays = {key: _broadcast_buffer(value, shape) for key, value in arrays.items()}
     integers = {key: (kind, _broadcast_buffer(bits, shape)) for key, (kind, bits) in integers.items()}
     if name == 'run_crown_fire' and 0 in shape:
@@ -409,7 +477,7 @@ def _normalize_direction(arguments):
     """Widen operands when NumPy would select an internal float16 atan2 loop.
 
     :param arguments: Bound direction-helper inputs.
-    :return: Inputs with only float16-loop operands widened to float32.
+    :return: Normalized inputs and whether the resulting atan2 loop uses float32.
     """
     result = dict(arguments)
     operands = [_normalize(result[key]) for key in ('y_component', 'x_component')]
@@ -420,7 +488,7 @@ def _normalize_direction(arguments):
             result[key] = value.astype(np.float32) if isinstance(value, (np.ndarray, np.generic)) else np.float32(value)
         else:
             result[key] = value
-    return result
+    return result, resolved[2] in (np.dtype('float16'), np.dtype('float32'))
 
 
 def _numeric_kind(value):

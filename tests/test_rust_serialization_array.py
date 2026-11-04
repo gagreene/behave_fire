@@ -156,7 +156,7 @@ def test_native_versioned_pickle_round_trip(name,protocol):
     original=_instance(name)
     state=original.__getstate__()
     assert state.get('schema_version')==1
-    assert state.get('binding_api_version')==1
+    assert state.get('binding_api_version')==2
     assert state.get('backend')=='rust'
     restored=pickle.loads(pickle.dumps(original,protocol=protocol))
     assert type(restored) is type(original)

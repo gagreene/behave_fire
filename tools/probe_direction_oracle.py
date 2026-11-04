@@ -43,8 +43,11 @@ def main():
         atan2f.restype = ctypes.c_float
     try:
         from behave_fire.rust import surface as native
+        from behave_fire.rust import _bridge
         from behave_fire import _rust
         report["native_extension"] = _rust.__file__
+        report["calibrated_atan2_profile"] = _bridge._atan2_math_profile()
+        report["svml_candidate_available"] = _rust.atan2_profile_candidates()[3] is not None
     except ImportError:
         native = None
     report["cases"] = []

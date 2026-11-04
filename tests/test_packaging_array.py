@@ -18,7 +18,7 @@ class PackagingTests(unittest.TestCase):
     def test_license_payloads_have_canonical_line_endings(self):
         root = TOOLS.parent
         for base in (root, root / "rust/crates/behave-fire"):
-            for name in ("LICENSE", "NOTICE", "LICENSES/NumPy-BSD-3-Clause.txt"):
+            for name in ("LICENSE", "NOTICE", "LICENSES/NumPy-BSD-3-Clause.txt", "LICENSES/Intel-SVML-BSD-3-Clause.txt"):
                 with self.subTest(path=base / name):
                     self.assertNotIn(b"\r", (base / name).read_bytes())
 
@@ -58,7 +58,7 @@ class PackagingTests(unittest.TestCase):
             (root / "rust/crates/behave-py").mkdir(parents=True)
             (root / "rust/crates/behave-py/Cargo.toml").write_text('[package]\nversion="1.0.0-beta.2"\n')
             (root / "pyproject.toml").write_bytes((TOOLS.parent / "pyproject.toml").read_bytes())
-            for file in ("README.md", "LICENSE", "NOTICE", "LICENSES/NumPy-BSD-3-Clause.txt"):
+            for file in ("README.md", "LICENSE", "NOTICE", "LICENSES/NumPy-BSD-3-Clause.txt", "LICENSES/Intel-SVML-BSD-3-Clause.txt"):
                 (root / file).parent.mkdir(parents=True, exist_ok=True)
                 (root / file).write_text("test notice")
             stage = root / "stage"
@@ -69,6 +69,7 @@ class PackagingTests(unittest.TestCase):
             original["version"] = "1.0.0b2"
             self.assertEqual(actual, original)
             self.assertTrue((stage / "LICENSES/NumPy-BSD-3-Clause.txt").is_file())
+            self.assertTrue((stage / "LICENSES/Intel-SVML-BSD-3-Clause.txt").is_file())
             self.assertFalse((stage / "rust").exists())
 
     def test_version_mapping_rejects_unsupported_cargo_prerelease(self):

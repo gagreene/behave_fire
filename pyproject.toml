@@ -8,7 +8,7 @@ dynamic = ["version"]
 description = "Vectorized Python port of the USFS BEHAVE wildfire fire-behavior modeling system"
 readme = {file = "README.md", content-type = "text/markdown; charset=UTF-8; variant=GFM"}
 license = "MIT AND BSD-3-Clause"
-license-files = ["LICENSE", "NOTICE", "LICENSES/NumPy-BSD-3-Clause.txt"]
+license-files = ["LICENSE", "NOTICE", "LICENSES/NumPy-BSD-3-Clause.txt", "LICENSES/Intel-SVML-BSD-3-Clause.txt"]
 requires-python = ">=3.11"
 authors = [{ name = "Behave Development Team" }]
 keywords = ["wildfire", "fire behavior", "BEHAVE", "Rothermel", "surface fire", "crown fire", "fire modeling", "forestry", "numpy"]

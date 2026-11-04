@@ -16,7 +16,7 @@ def _wheel(directory, tag, notice):
     metadata = "Metadata-Version: 2.4\nName: behave-fire\nVersion: 1.0.0b2\nLicense-Expression: MIT AND BSD-3-Clause\n\nDescription\n"
     with zipfile.ZipFile(path, "w") as archive:
         archive.writestr(prefix + "METADATA", metadata)
-        for name, content in (("LICENSE", "MIT"), ("NOTICE", notice), ("LICENSES/NumPy-BSD-3-Clause.txt", "BSD-3-Clause")):
+        for name, content in (("LICENSE", "MIT"), ("NOTICE", notice), ("LICENSES/NumPy-BSD-3-Clause.txt", "BSD-3-Clause"), ("LICENSES/Intel-SVML-BSD-3-Clause.txt", "Intel BSD-3-Clause")):
             archive.writestr(prefix + "licenses/" + name, content)
     return path
 
