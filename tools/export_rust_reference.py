@@ -539,6 +539,11 @@ def build_inventory():
                 base = "behave_fire" if route == "behave_fire" else route
                 for name in node.names:
                     canonical = f"{base}.{node.module}.{name.name}"
+                    # Frozen aliases describe historical public routes. The
+                    # root composition facade retains this route, while its
+                    # intentional class-identity change is tested separately.
+                    if canonical == "behave_fire.auto.BehaveRun":
+                        canonical = "behave_fire.behave.BehaveRun"
                     aliases.setdefault(canonical, []).append(f"{route}.{name.asname or name.name}")
     entries = []
     def add(obj, name, domain, kind):

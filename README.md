@@ -329,7 +329,89 @@ For a full architecture reference, gotcha catalogue, and Mermaid data-flow diagr
 - Fried, J. S. & Fried, B. D. (1996). *Simulating wildfire containment with realistic tactics.* Forest Science, 42(3), 267–281.
 - Ryan, K. C. & Reinhardt, E. D. (1988). *Predicting postfire mortality of seven western conifers.* Canadian Journal of Forest Research, 18(10), 1291–1297.
 
+## Select a calculation backend
 
+The package root selects an implementation when a model is constructed. Importing
+the package or its explicit Python namespace does not probe the native extension.
 
+```python
+from behave_fire import BehaveRun, FuelModels, available_backends, get_backend
+from behave_fire.python import BehaveRun as PythonBehaveRun
+from behave_fire.rust import BehaveRun as RustBehaveRun
 
+fuels = FuelModels()
+model = BehaveRun(fuels, backend="auto", threads=1)
+print(model.backend_in_use)  # "python" or "rust"; read-only
+python_model = BehaveRun(fuels, backend="python")
+rust_model = BehaveRun(fuels, backend="rust", threads=4)
+contain = get_backend("rust").contain.run_contain_sim_array
+```
 
+`available_backends()` reports Python and, when compatible and complete, Rust.
+`get_backend("python")` and `get_backend("rust")` expose their model, registries,
+and component modules. Standalone imports include `from behave_fire.python import
+contain` and `from behave_fire.rust import contain`. Historical imports such as
+`behave_fire.components.surface` continue to use Python. Nested component import
+paths under the new namespaces are not required; access their module attributes.
+
+`backend="auto"` prefers a compatible, complete Rust extension. An absent extension
+selects Python silently. A present extension with a loader error, incompatible API,
+or an incomplete advertised operation inventory selects Python and emits `BehaveBackendWarning`, a
+`RuntimeWarning` subclass, once per process, with its cause. An availability query
+can cache the extension status but does not consume that warning. Forced Rust
+raises a chained `ImportError` for any unavailable or incomplete extension. Explicit
+native imports permit compatible incomplete development extensions; an unsupported
+operation raises `NotImplementedError`. Calculation and facade errors propagate.
+
+Configure strict fallback handling before the first warned automatic selection:
+
+```python
+import warnings
+from behave_fire import BehaveBackendWarning, BehaveRun, FuelModels
+
+warnings.simplefilter("error", BehaveBackendWarning)
+model = BehaveRun(FuelModels())
+```
+
+A warning promoted to an error does not consume the warning, so subsequent attempts
+remain strict. Changing filters after a warning was already emitted cannot make
+that process's once-only warning retroactively strict. Create a new process to
+reset the cached extension outcome and warning state.
+
+The automatic facade uses composition. Its class identity and default `repr`
+therefore differ from the historical Python facade, and an automatic model is not
+an `isinstance` of `behave_fire.behave.BehaveRun`. Use
+`from behave_fire.python import BehaveRun` (the historical class alias) or
+`from behave_fire.behave import BehaveRun` for legacy subclassing and type checks.
+Root registry and unit enum identities are unchanged. Historical static calls on
+the root class, such as `BehaveRun.calculate_fire_area(...)`, keep using Python
+without probing Rust. Calls on model instances always use their selected backend.
+All 11 calculation signatures remain discoverable.
+
+Each model caches its numerical fuel snapshot at construction. Later changes to
+the input registry do not update that model. The automatic facade accepts either
+registry type, converting a native registry snapshot for its Python route.
+Explicit Python accepts its original registry; use a native registry's
+`to_python()` conversion when needed. Native registries also expose
+`FuelModels.from_python(registry)`. Pickle and deepcopy preserve the selected
+backend, thread setting, and actual cached snapshot. Native unpickling requires a
+compatible native extension and never silently selects Python. Deep copies own
+independent numerical state; shallow copies retain the reference sharing behavior.
+
+Native `threads=1` runs serially, `threads=0` uses available parallelism, and a
+positive count requests that many workers, capped by actual work. Negative and
+non-integer counts are rejected on the native route. The automatic Python route
+ignores `threads`; explicit Python retains its original constructor without that
+argument. Create another model to choose a different backend.
+
+Rust widens float16 inputs to float32 before normal entry-point normalization.
+Automatic selection can therefore return float32 where Python returns float16;
+overflow, NaNs, and classification thresholds may also differ. Select Python when
+the historical float16 semantics are required. See `docs/BACKEND_DIFFERENCES.md`.
+
+Compatible native binary wheels and the universal Python fallback wheel install
+without compiling behave-fire. Compiler-free installation of the complete
+environment additionally requires binary wheels for all dependencies on a verified
+interpreter/platform combination (`pip install --only-binary=:all: behave-fire`).
+Source, editable, Git, and sdist builds require Rust. The universal wheel contains
+no extension and selects Python automatically.

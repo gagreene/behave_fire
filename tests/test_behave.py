@@ -29,7 +29,9 @@ from behave_fire.components.behave_units import (
     AreaUnits, LengthUnits, FractionUnits, SpeedUnits, SlopeUnits,
     FirelineIntensityUnits, TemperatureUnits, HeatPerUnitAreaUnits,
 )
-from behave_fire import BehaveRun
+# Keep this legacy harness on the explicit Python reference; native parity is
+# exercised by the required-Rust pytest suite.
+from behave_fire.behave import BehaveRun
 from behave_fire.components.surface import (
     calculate_fire_area, calculate_fire_perimeter,
     calculate_fire_length, calculate_fire_width,

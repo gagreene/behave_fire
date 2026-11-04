@@ -288,7 +288,10 @@ def test_root_class_identity_and_explicit_python_subclassing():
     class CustomRun(BehaveRun):
         pass
 
-    assert RootBehaveRun is BehaveRun
+    assert RootBehaveRun is not BehaveRun
+    automatic = RootBehaveRun(FuelModels(), backend="python")
+    assert automatic.backend_in_use == "python"
+    assert not isinstance(automatic, BehaveRun)
     assert isinstance(CustomRun(FuelModels()), BehaveRun)
 
 

@@ -2,10 +2,11 @@
 
 Use ``from behave_fire.rust import BehaveRun, FuelModels`` to require the native backend.
 The registry is snapshotted at construction; calculations use standalone Rust science.
-The keyword-only ``threads`` request is retained with serialized model state.
+The keyword-only ``threads`` request bounds per-call native workers and is serialized.
 """
 from __future__ import annotations
 from ._bridge import _call, _validate_threads
+from ._threads import _threaded_method, _threaded_static
 from ._serialization import NativeState as _NativeState
 import numpy as np
 from typing import Union, Optional
@@ -63,6 +64,7 @@ class BehaveRun(_NativeState):
         self._lut = build_fuel_lookup_arrays(fuel_models)
         self._mortality_coeffs = build_mortality_lookup()
 
+    @_threaded_method
     def do_surface_run(
             self,
             fuel_model_grid: Union[int, np.ndarray],
@@ -248,12 +250,10 @@ class BehaveRun(_NativeState):
             crown_ratio = fraction_to_base(np.atleast_1d(np.asarray(crown_ratio, dtype=float)), crown_ratio_units)
         wind_speed_fpm = speed_to_base(np.atleast_1d(np.asarray(wind_speed, dtype=float)), wind_speed_units)
         slope_deg = slope_to_base(np.atleast_1d(np.asarray(slope, dtype=float)), slope_units)
-        p = build_particle_arrays(lut=self._lut, fuel_model_grid=fuel_model_grid, m1h=m1h, m10h=m10h, m100h=m100h, mlh=mlh, mlw=mlw)
-        ib = calculate_fuelbed_intermediates(p=p)
-        ri = calculate_reaction_intensity(ib=ib)
-        results = run_surface_fire(ri=ri, ib=ib, wind_speed=wind_speed_fpm, wind_speed_units=0, wind_direction=wind_direction, wind_orientation_mode=wind_orientation_mode, slope=slope_deg, slope_units=0, aspect=aspect, canopy_cover=canopy_cover, canopy_height=canopy_height_ft, crown_ratio=crown_ratio, wind_height_mode=wind_height_mode, waf_method=waf_method, user_waf=user_waf)
+        results = _call('model.run_surface', dict(lut=self._lut, fuel_model_grid=fuel_model_grid, m1h=m1h, m10h=m10h, m100h=m100h, mlh=mlh, mlw=mlw, wind_speed=wind_speed_fpm, wind_speed_units=0, wind_direction=wind_direction, wind_orientation_mode=wind_orientation_mode, slope=slope_deg, slope_units=0, aspect=aspect, canopy_cover=canopy_cover, canopy_height=canopy_height_ft, crown_ratio=crown_ratio, wind_height_mode=wind_height_mode, waf_method=waf_method, user_waf=user_waf))
         return _apply_out_units(results, out_units or {}, _SURFACE_KEY_CONVERTERS)
 
+    @_threaded_method
     def do_crown_run(
             self,
             surface_results: dict,
@@ -457,7 +457,7 @@ class BehaveRun(_NativeState):
         results = run_crown_fire(surface_results=surface_results, lut=self._lut, fuel_model_grid=fuel_model_grid, m1h=m1h, m10h=m10h, m100h=m100h, mlh=mlh, mlw=mlw, wind_speed=wind_speed_fpm, wind_speed_units=0, wind_direction=wind_direction, wind_orientation_mode=wind_orientation_mode, slope=slope_deg, slope_units=0, aspect=aspect, canopy_base_height=cbh_ft, canopy_height=ch_ft, canopy_bulk_density=cbd_pcf, moisture_foliar=moisture_foliar)
         return _apply_out_units(results, out_units or {}, _CROWN_KEY_CONVERTERS)
 
-    @staticmethod
+    @_threaded_static
     def calculate_scorch_height(
             fireline_intensity: Union[float, np.ndarray],
             fireline_intensity_units: int,
@@ -502,6 +502,7 @@ class BehaveRun(_NativeState):
         result = calculate_scorch_height(fireline_intensity_btu_ft_s=fi, midflame_wind_mph=ws_mph, air_temp_f=t_f)
         return length_from_base(value=result, units=out_units)
 
+    @_threaded_method
     def calculate_crown_scorch_mortality(
             self,
             scorch_height: Union[float, np.ndarray],
@@ -562,7 +563,7 @@ class BehaveRun(_NativeState):
         results = calculate_crown_scorch_mortality(scorch_height_ft=scorch_ft, tree_height_ft=tree_ht_ft, crown_ratio=cr_frac, dbh_inches=dbh_in, equation_number_grid=equation_number_grid, coeffs=self._mortality_coeffs)
         return _apply_out_units(results, out_units or {}, _MORTALITY_KEY_CONVERTERS)
 
-    @staticmethod
+    @_threaded_static
     def calculate_spotting_from_surface_fire(
             flame_length: Union[float, np.ndarray],
             flame_length_units: int,
@@ -602,7 +603,7 @@ class BehaveRun(_NativeState):
         result = calculate_spotting_from_surface_fire(flame_length_ft=fl_ft, wind_mph=ws_mph, cover_height_ft=ch_ft)
         return length_from_base(value=result, units=out_units)
 
-    @staticmethod
+    @_threaded_static
     def calculate_spotting_from_burning_pile(
             flame_height: Union[float, np.ndarray],
             flame_height_units: int,
@@ -642,7 +643,7 @@ class BehaveRun(_NativeState):
         result = calculate_spotting_from_burning_pile(flame_height_ft=fh_ft, wind_mph=ws_mph, cover_height_ft=ch_ft)
         return length_from_base(value=result, units=out_units)
 
-    @staticmethod
+    @_threaded_static
     def calculate_spotting_from_torching_trees(
             dbh: Union[float, np.ndarray],
             dbh_units: int,
@@ -689,7 +690,7 @@ class BehaveRun(_NativeState):
         result = calculate_spotting_from_torching_trees(dbh_in=dbh_in, height_ft=ht_ft, count=count, wind_mph=ws_mph, cover_height_ft=ch_ft)
         return length_from_base(value=result, units=out_units)
 
-    @staticmethod
+    @_threaded_static
     def calculate_fire_area(
             forward_ros: Union[float, np.ndarray],
             backing_ros: Union[float, np.ndarray],
@@ -733,7 +734,7 @@ class BehaveRun(_NativeState):
         result = calculate_fire_area(forward_ros=fros_fpm, backing_ros=bros_fpm, lwr=lwr, elapsed_min=elapsed_min, is_crown=is_crown)
         return area_from_base(value=result, units=out_units)
 
-    @staticmethod
+    @_threaded_static
     def calculate_fire_perimeter(
             forward_ros: Union[float, np.ndarray],
             backing_ros: Union[float, np.ndarray],
@@ -779,7 +780,7 @@ class BehaveRun(_NativeState):
         result = calculate_fire_perimeter(forward_ros=fros_fpm, backing_ros=bros_fpm, lwr=lwr, elapsed_min=elapsed_min, is_crown=is_crown)
         return length_from_base(value=result, units=out_units)
 
-    @staticmethod
+    @_threaded_static
     def calculate_fire_length(
             forward_ros: Union[float, np.ndarray],
             backing_ros: Union[float, np.ndarray],
@@ -818,7 +819,7 @@ class BehaveRun(_NativeState):
         result = calculate_fire_length(forward_ros=fros_fpm, backing_ros=bros_fpm, elapsed_min=elapsed_min)
         return length_from_base(value=result, units=out_units)
 
-    @staticmethod
+    @_threaded_static
     def calculate_fire_width(
             forward_ros: Union[float, np.ndarray],
             backing_ros: Union[float, np.ndarray],

@@ -15,7 +15,7 @@ fn _rust(module: &Bound<'_, PyModule>) -> PyResult<()> {
     module.add("__binding_version__", env!("CARGO_PKG_VERSION"))?;
     module.add("__core_version__", behave_fire::VERSION)?;
     module.add("__binding_api_version__", 1_u32)?;
-    module.add("__backend_complete__", false)?;
+    module.add("__backend_complete__", true)?;
     module.add(
         "__capabilities__",
         pyo3::types::PyTuple::new(module.py(), capabilities::OPERATIONS.iter().copied())?,
@@ -44,3 +44,5 @@ mod contain;
 mod units;
 
 mod model;
+
+mod parallel;
