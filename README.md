@@ -43,30 +43,30 @@ behave_fire/
 │   ├── behave_fire/                 # Main package
 │   │   ├── behave.py                # BehaveRun — public facade / entry point
 │   │   ├── __init__.py              # Package exports
-│   │   ├── components/
-│   │   │   ├── behave_units.py      # Unit conversion backbone (18 classes)
-│   │   │   ├── fuel_models.py       # ~60 standard fuel model records (Scott-Burgan 40 + classic 13)
-│   │   │   ├── fuel_models_array.py # NumPy lookup arrays for vectorised fuel access
-│   │   │   ├── surface.py           # Surface fire (Rothermel 1972)
-│   │   │   ├── crown.py             # Crown fire dynamics
-│   │   │   ├── fire_size.py         # Elliptical fire geometry helpers
-│   │   │   ├── mortality.py         # Tree mortality
-│   │   │   ├── spot.py              # Spotting distances
-│   │   │   ├── ignite.py            # Ignition probability
-│   │   │   ├── safety.py            # Safety zone calculations
-│   │   │   ├── contain.py           # Containment simulation (standalone function)
-│   │   │   ├── species_master_table.py  # Tree species database
-│   │   │   ├── fine_dead_fuel_moisture_tool.py
-│   │   │   ├── slope_tool.py
-│   │   │   └── vapor_pressure_deficit_calculator.py
-│   │   └── tests/
-│   │       ├── data/                # Pinned upstream and legacy compatibility fixtures
-│   │       ├── test_upstream_*_array.py # Collected regression tests
-│   │       └── test_behave.py       # Standalone legacy test harness
+│   │   └── components/
+│   │       ├── behave_units.py      # Unit conversion backbone (18 classes)
+│   │       ├── fuel_models.py       # ~60 standard fuel model records (Scott-Burgan 40 + classic 13)
+│   │       ├── fuel_models_array.py # NumPy lookup arrays for vectorised fuel access
+│   │       ├── surface.py           # Surface fire (Rothermel 1972)
+│   │       ├── crown.py             # Crown fire dynamics
+│   │       ├── fire_size.py         # Elliptical fire geometry helpers
+│   │       ├── mortality.py         # Tree mortality
+│   │       ├── spot.py              # Spotting distances
+│   │       ├── ignite.py            # Ignition probability
+│   │       ├── safety.py            # Safety zone calculations
+│   │       ├── contain.py           # Containment simulation (standalone function)
+│   │       ├── species_master_table.py  # Tree species database
+│   │       ├── fine_dead_fuel_moisture_tool.py
+│   │       ├── slope_tool.py
+│   │       └── vapor_pressure_deficit_calculator.py
 │   └── examples/
 │       ├── landscape_fire_behavior.py   # Full 10 km × 10 km raster demo
 │       ├── data/                        # Auto-generated GeoTIFF inputs
 │       └── results/                     # GeoTIFF outputs + summary PNG
+├── tests/
+│   ├── data/                        # Pinned upstream and legacy compatibility fixtures
+│   ├── test_upstream_*_array.py      # Collected regression tests
+│   └── test_behave.py               # Standalone legacy test harness
 ├── pytest.ini
 ├── CODEBASE.md                      # Architecture reference
 └── README.md
@@ -290,17 +290,17 @@ Run the collected unit, fuel, and ignition regressions from the project root:
 python -m pytest
 ```
 
-Pytest imports the package through `src` and collects `test_*_array.py` under `src/behave_fire/tests/`. Fixtures include pinned upstream records and explicitly labeled legacy lightning results. These checks do not establish full C++ numerical parity.
+Pytest imports the package through `src` and collects `test_*_array.py` under root `tests/`. Fixtures are loaded relative to their test files from `tests/data/` and include pinned upstream records and explicitly labeled legacy lightning results. These checks do not establish full C++ numerical parity.
 
 Run the legacy accumulator harness separately, also from the project root:
 
 ```bash
-python -c "import runpy, sys; sys.path.insert(0, 'src'); runpy.run_path('src/behave_fire/tests/test_behave.py', run_name='__main__')"
+python tests/test_behave.py
 ```
 
 ---
 
-Expected lightning deprecation warnings may appear. The harness retains legacy imports; process isolation prevents its duplicate module aliases from affecting pytest.
+Expected lightning deprecation warnings may appear. The standalone harness locates `src/` relative to its own file and uses the same canonical `behave_fire` imports as pytest. No machine-specific paths or `PYTHONPATH` settings are required.
 
 ## Key Design Notes
 

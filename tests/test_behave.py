@@ -1,4 +1,4 @@
-﻿"""
+"""
 test_behave.py — Test suite for the vectorized array modules.
 
 Structure:
@@ -9,50 +9,50 @@ Structure:
   - Every numerical expected value is obtained from the array BehaveRun
     path so array parity is the primary assertion.
 
-Run from src/behave_fire/:
+Run from the repository root:
     python tests/test_behave.py
 """
 
 import sys
-import os
+from pathlib import Path
 import numpy as np
 from decimal import Decimal, ROUND_HALF_UP
 
-script_dir = os.path.dirname(os.path.abspath(__file__))
-behave_fire_dir = os.path.dirname(script_dir)
-if behave_fire_dir not in sys.path:
-    sys.path.insert(0, behave_fire_dir)
+# Locate the source package relative to this file, independent of the working directory.
+source_dir = Path(__file__).resolve().parents[1] / "src"
+if str(source_dir) not in sys.path:
+    sys.path.insert(0, str(source_dir))
 
-from components.fuel_models import FuelModels
-from components.species_master_table import SpeciesMasterTable
-from components.behave_units import (
+from behave_fire.components.fuel_models import FuelModels
+from behave_fire.components.species_master_table import SpeciesMasterTable
+from behave_fire.components.behave_units import (
     AreaUnits, LengthUnits, FractionUnits, SpeedUnits, SlopeUnits,
     FirelineIntensityUnits, TemperatureUnits, HeatPerUnitAreaUnits,
 )
 from behave_fire import BehaveRun
-from components.surface import (
+from behave_fire.components.surface import (
     calculate_fire_area, calculate_fire_perimeter,
     calculate_fire_length, calculate_fire_width,
 )
-from components.crown import run_crown_fire
-from components.mortality import (
+from behave_fire.components.crown import run_crown_fire
+from behave_fire.components.mortality import (
     calculate_scorch_height, build_mortality_lookup,
     calculate_crown_scorch_mortality,
 )
-from components.ignite import (
+from behave_fire.components.ignite import (
     calculate_firebrand_ignition_probability,
     calculate_lightning_ignition_probability,
 )
-from components.safety import calculate_safety_zone
-from components.spot import (
+from behave_fire.components.safety import calculate_safety_zone
+from behave_fire.components.spot import (
     calculate_spotting_from_surface_fire,
     calculate_spotting_from_burning_pile,
 )
-from components.fine_dead_fuel_moisture_tool import (
+from behave_fire.components.fine_dead_fuel_moisture_tool import (
     calculate_fine_dead_fuel_moisture,
 )
-from components.vapor_pressure_deficit_calculator import calculate_vpd
-from components.fuel_models_array import build_fuel_lookup_arrays
+from behave_fire.components.vapor_pressure_deficit_calculator import calculate_vpd
+from behave_fire.components.fuel_models_array import build_fuel_lookup_arrays
 
 # ---------------------------------------------------------------------------
 # Shared tolerance and helpers — identical to test_behave.py
@@ -451,7 +451,7 @@ def test_surface_unit_conversion(ti):
     ros_fpm = r['spread_rate'][0, 0]
 
     # Convert from ft/min using the same factor table as scalar path
-    from components.behave_units import speed_from_base
+    from behave_fire.components.behave_units import speed_from_base
     cases = [
         ("chains per hour", 1, 8.876216),
         ("feet per minute", 0, 9.763838),
@@ -618,7 +618,7 @@ def test_scorch_height(ti):
            round_to_six(sh1), 7.617325, ERROR_TOLERANCE)
 
     # Case 2: 55 BTU/ft/s, 300 ft/min -> 300/88 mph, 70 degF  -> expected 9.923720 ft
-    from components.behave_units import speed_to_base, speed_from_base
+    from behave_fire.components.behave_units import speed_to_base, speed_from_base
     ws_mph = speed_from_base(300.0, 5).item()  # fpm -> mph = 300/88
     sh2 = calculate_scorch_height(
         fireline_intensity_btu_ft_s=np.array([55.0]),
@@ -1168,7 +1168,7 @@ def test_scalar_inputs(ti):
            float(sh_scl.flat[0]), float(sh_arr.flat[0]), PARITY_TOLERANCE)
 
     # --- Mortality: scalar vs array ---
-    from components.mortality import build_mortality_lookup, calculate_crown_scorch_mortality
+    from behave_fire.components.mortality import build_mortality_lookup, calculate_crown_scorch_mortality
     coeffs = build_mortality_lookup()
     m_arr = calculate_crown_scorch_mortality(
         scorch_height_ft=np.array([30.0]),
@@ -1194,7 +1194,7 @@ def test_scalar_inputs(ti):
            float(m_arr['probability_mortality'].flat[0]), PARITY_TOLERANCE)
 
     # --- Ignite: scalar vs array ---
-    from components.ignite import (
+    from behave_fire.components.ignite import (
         calculate_firebrand_ignition_probability,
         calculate_lightning_ignition_probability,
     )
@@ -1223,7 +1223,7 @@ def test_scalar_inputs(ti):
     )
 
     # --- Safety zone: scalar vs array ---
-    from components.safety import calculate_safety_zone
+    from behave_fire.components.safety import calculate_safety_zone
     sz_arr = calculate_safety_zone(
         flame_height_ft=np.array([5.0]),
         number_of_personnel=6,
@@ -1244,7 +1244,7 @@ def test_scalar_inputs(ti):
                float(sz_scl[key].flat[0]), float(sz_arr[key].flat[0]), PARITY_TOLERANCE)
 
     # --- Spot: scalar vs array ---
-    from components.spot import (
+    from behave_fire.components.spot import (
         calculate_spotting_from_surface_fire,
         calculate_spotting_from_burning_pile,
     )
@@ -1271,7 +1271,7 @@ def test_scalar_inputs(ti):
     )
 
     # --- Fine dead fuel moisture: scalar vs array ---
-    from components.fine_dead_fuel_moisture_tool import calculate_fine_dead_fuel_moisture
+    from behave_fire.components.fine_dead_fuel_moisture_tool import calculate_fine_dead_fuel_moisture
     fdm_arr = calculate_fine_dead_fuel_moisture(
         dry_bulb_i=np.array([0]), rh_i=np.array([0]),
         slope_i=np.array([0]), aspect_i=np.array([0]),
@@ -1287,7 +1287,7 @@ def test_scalar_inputs(ti):
            float(fdm_scl.flat[0]), float(fdm_arr.flat[0]), PARITY_TOLERANCE)
 
     # --- VPD: scalar vs array ---
-    from components.vapor_pressure_deficit_calculator import calculate_vpd
+    from behave_fire.components.vapor_pressure_deficit_calculator import calculate_vpd
     vpd_arr = calculate_vpd(
         temperature=np.array([50.0]), temp_units=0,
         relative_humidity=np.array([50.0]), rh_units=1,
@@ -1302,7 +1302,7 @@ def test_scalar_inputs(ti):
            float(vpd_scl['vpd'].flat[0]), float(vpd_arr['vpd'].flat[0]), PARITY_TOLERANCE)
 
     # --- Fire size helpers: scalar vs array ---
-    from components.surface import (
+    from behave_fire.components.surface import (
         calculate_fire_area, calculate_fire_perimeter,
         calculate_fire_length, calculate_fire_width,
     )
@@ -1374,7 +1374,7 @@ def test_crown_explicit_si_units(ti):
 
     # Imperial reference uses exact ft/lb values via the same unit functions the
     # SI path calls internally — ensures bit-identical physical inputs.
-    from components.behave_units import length_to_base, density_to_base
+    from behave_fire.components.behave_units import length_to_base, density_to_base
     _CBH_FT  = float(length_to_base(1.829, 4))   # 1.829 m → ft
     _CH_FT   = float(length_to_base(9.144, 4))   # 9.144 m → ft
     _CBD_PCF = float(density_to_base(0.481, 1))  # 0.481 kg/m³ → lb/ft³

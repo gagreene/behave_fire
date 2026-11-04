@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Moved the test suite and fixtures to root `tests/`. Updated pytest discovery, package exclusions, documentation, and the standalone harness to use repository-relative or file-relative paths and canonical package imports.
 - Aligned heat conversions with upstream's Btu convention: the kJ/kg-to-Btu/lb factor changes from `0.429923` to `0.429592` (about 0.077% lower), and the reverse factor changes from `1 / 0.429923` to `2.32779`. This is upstream convention alignment, not a dimensional correction; metric custom-fuel heat values and converted outputs change.
 
 ### Deprecated
