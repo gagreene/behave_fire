@@ -1,6 +1,117 @@
 {
   "cases": [
     {
+      "entry_point": "behave_fire.components.crown.classify_crown_fire_type",
+      "id": "crown/classification-threshold-matrix",
+      "inputs": {
+        "active_ratio": {
+          "dtype": "float64",
+          "shape": [
+            9
+          ],
+          "values": [
+            0.9999999999999999,
+            1.0,
+            1.0000000000000002,
+            0.9999999999999999,
+            1.0,
+            1.0000000000000002,
+            0.9999999999999999,
+            1.0,
+            1.0000000000000002
+          ]
+        },
+        "transition_ratio": {
+          "dtype": "float64",
+          "shape": [
+            9
+          ],
+          "values": [
+            0.9999999999999999,
+            0.9999999999999999,
+            0.9999999999999999,
+            1.0,
+            1.0,
+            1.0,
+            1.0000000000000002,
+            1.0000000000000002,
+            1.0000000000000002
+          ]
+        }
+      },
+      "output": {
+        "fire_type": {
+          "dtype": "int32",
+          "shape": [
+            9
+          ],
+          "values": [
+            0,
+            2,
+            2,
+            1,
+            3,
+            3,
+            1,
+            3,
+            3
+          ]
+        },
+        "is_active_crown": {
+          "dtype": "bool",
+          "shape": [
+            9
+          ],
+          "values": [
+            false,
+            false,
+            false,
+            false,
+            true,
+            true,
+            false,
+            true,
+            true
+          ]
+        },
+        "is_passive_crown": {
+          "dtype": "bool",
+          "shape": [
+            9
+          ],
+          "values": [
+            false,
+            false,
+            false,
+            true,
+            false,
+            false,
+            true,
+            false,
+            false
+          ]
+        },
+        "is_surface_fire": {
+          "dtype": "bool",
+          "shape": [
+            9
+          ],
+          "values": [
+            true,
+            true,
+            true,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false
+          ]
+        }
+      },
+      "warnings": []
+    },
+    {
       "entry_point": "behave_fire.components.ignite.calculate_lightning_ignition_probability",
       "id": "lightning/charge-0",
       "inputs": {

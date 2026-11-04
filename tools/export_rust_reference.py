@@ -59,6 +59,10 @@ def _boundary_cases():
     :return: Domain-grouped portable scientific boundary cases.
     """
     cases = []
+    ratios = np.array([np.nextafter(1., 0.), 1., np.nextafter(1., 2.)])
+    cases.append(_case(crown.classify_crown_fire_type,
+                       {"transition_ratio": np.repeat(ratios, 3), "active_ratio": np.tile(ratios, 3)},
+                       "crown/classification-threshold-matrix"))
     for charge in range(3):
         values = _context((8,))
         values.update({"fuel_bed_type_grid": np.arange(8), "charge_type": charge})
@@ -285,13 +289,40 @@ def _registry_cases():
                 inputs = dict(values)
                 if profile == "absent":
                     inputs.update({"fuel_model_number": 261, "species_code": "MISSING", "index": -1})
+                before = _registry_state(instance)
                 case = _case(getattr(instance, name), inputs, f"{cls.__name__}.{name}/{profile}")
+                case["receiver_before"] = before
+                case["receiver_after"] = _registry_state(instance)
                 if isinstance(instance, FuelModels):
                     case["selected_record_after"] = encode_value(instance.fuel_models_.get(inputs["fuel_model_number"]))
                 elif isinstance(instance, SpeciesMasterTable):
                     case["record_count_after"] = instance.get_number_of_records()
                 cases.append(case)
     return cases
+
+
+def _registry_state(instance):
+    """Encode a replayable registry snapshot using standard-table references.
+
+    :param instance: Fuel registry, species table, or species record to snapshot.
+    :return: Complete receiver state with explicit custom or mutated records.
+    """
+    if isinstance(instance, FuelModels):
+        standard = FuelModels().fuel_models_
+        overrides = [{"number": number, "record": encode_value(record)}
+                     for number, record in sorted(instance.fuel_models_.items())
+                     if number not in standard or encode_value(record) != encode_value(standard[number])]
+        return {"registry": "FuelModels", "base": {"reference": "fuels:standard_records"},
+                "overrides": overrides, "removed": sorted(standard.keys() - instance.fuel_models_.keys())}
+    if isinstance(instance, SpeciesMasterTable):
+        standard = [encode_value(record) for record in SpeciesMasterTable().records]
+        records = []
+        for record in instance.records:
+            encoded = encode_value(record)
+            records.append({"reference_index": standard.index(encoded)} if encoded in standard else {"record": encoded})
+        return {"registry": "SpeciesMasterTable", "base": {"reference": "species:standard_records"},
+                "records": records}
+    return {"registry": "SpeciesMasterTableRecord", "record": encode_value(instance)}
 
 
 def _stateful_cases():
@@ -424,7 +455,7 @@ def build_documents():
         "fine_dead_fuel_moisture_correction": encode_value(fine_dead_fuel_moisture_tool._CORR),
         "lightning_coefficients": encode_value(ignite._LIG_COEFFS)})
     for group, prefix in (("effects", "lightning/"), ("effects", "mortality/"),
-                          ("surface", "surface/wind-"), ("containment", "containment/")):
+                          ("surface", "surface/wind-"), ("containment", "containment/"), ("crown", "crown/")):
         documents[f"rust/crates/behave-fire/tests/data/{group}.json"]["cases"].extend(
             case for case in cases["boundaries"] if case["id"].startswith(prefix))
     return documents
@@ -526,9 +557,9 @@ def contracts_match(actual, expected, calculated=False, dtype="float64"):
     if isinstance(expected, list):
         return len(actual) == len(expected) and all(
             contracts_match(left, right, calculated, dtype) for left, right in zip(actual, expected))
+    if isinstance(expected, float) and actual == expected == 0.:
+        return math.copysign(1., actual) == math.copysign(1., expected)
     if calculated and isinstance(expected, float):
-        if actual == expected == 0.:
-            return math.copysign(1., actual) == math.copysign(1., expected)
         relative, absolute = {"float16": (5e-3, 5e-4), "float32": (1e-6, 1e-7)}.get(dtype, (1e-9, 1e-12))
         return math.isclose(actual, expected, rel_tol=relative, abs_tol=absolute)
     return actual == expected

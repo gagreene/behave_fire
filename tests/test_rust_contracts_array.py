@@ -14,10 +14,21 @@ import pytest
 from behave_fire.behave import BehaveRun
 from behave_fire.components.contain import run_contain_sim_array
 from behave_fire.components.fuel_models import FuelModels
+from behave_fire.components.species_master_table import SpeciesMasterTable, SpeciesMasterTableRecord
 from behave_fire.components.surface import calculate_eccentricity
 
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+def _decode_value(value):
+    if isinstance(value, dict):
+        if "dtype" in value and "shape" in value and "values" in value:
+            return np.array([_decode_value(item) for item in value["values"]], dtype=value["dtype"]).reshape(value["shape"])
+        return {key: _decode_value(item) for key, item in value.items()}
+    if isinstance(value, list):
+        return [_decode_value(item) for item in value]
+    return value
 
 
 def _exporter():
@@ -57,6 +68,29 @@ def test_export_comparison_accepts_roundoff_but_rejects_science_and_metadata_dri
     assert not exporter.contracts_match(perturbed, expected)
 
 
+@pytest.mark.parametrize("location", ["inputs", "output"])
+@pytest.mark.parametrize("actual,expected", [(-0.0, 0.0), (0.0, -0.0)])
+def test_export_comparison_rejects_changed_zero_sign(location, actual, expected):
+    exporter = _exporter()
+    assert not exporter.contracts_match({location: {"value": actual}}, {location: {"value": expected}})
+    assert exporter.contracts_match({location: {"value": actual}}, {location: {"value": actual}})
+
+
+def test_export_crown_threshold_matrix_preserves_all_four_classifications():
+    documents = _exporter().build_documents()
+    root_cases = documents["tests/data/rust_port/boundaries.json"]["cases"]
+    core_cases = documents["rust/crates/behave-fire/tests/data/crown.json"]["cases"]
+    for cases in (root_cases, core_cases):
+        matches = [case for case in cases if case["id"] == "crown/classification-threshold-matrix"]
+        assert len(matches) == 1
+        case = matches[0]
+        below, above = np.nextafter(1., 0.), np.nextafter(1., 2.)
+        assert case["inputs"]["transition_ratio"]["values"] == [below] * 3 + [1.] * 3 + [above] * 3
+        assert case["inputs"]["active_ratio"]["values"] == [below, 1., above] * 3
+        assert case["output"]["fire_type"]["values"] == [0, 2, 2, 1, 3, 3, 1, 3, 3]
+        assert set(case["output"]["fire_type"]["values"]) == {0, 1, 2, 3}
+
+
 def test_export_inventory_covers_facade_and_standalone_routes():
     document = _exporter().build_inventory()
     entries = {item["python_name"]: item for item in document["entries"]}
@@ -83,6 +117,52 @@ def test_export_portable_values_preserve_nonfinite_dtype_shape_and_mask():
                                   {"float": "-inf"}, -0.0]
     assert encoded["mask"] == [False, True, False, False]
     assert np.signbit(encoded["values"][3])
+
+
+def test_export_registry_receivers_replay_custom_clear_and_species_insert():
+    exporter = _exporter()
+    documents = exporter.build_documents()
+    cases = {case["id"]: case for case in documents["tests/data/rust_port/registries.json"]["cases"]}
+    clear = cases["FuelModels.clear_custom_fuel_model/baseline"]
+    assert "receiver_before" in clear
+    assert clear["receiver_before"]["base"] == {"reference": "fuels:standard_records"}
+    fuels = FuelModels()
+    fuels.fuel_models_ = {slot["number"]: deepcopy(slot["record"])
+                         for slot in documents["tests/data/rust_port/fuels.json"]["slots"] if slot["record"] is not None}
+    for change in clear["receiver_before"]["overrides"]:
+        fuels.fuel_models_[change["number"]] = _decode_value(change["record"])
+    for number in clear["receiver_before"]["removed"]:
+        del fuels.fuel_models_[number]
+    assert fuels.get_fuelbed_depth(250) == 2.0
+    assert fuels.clear_custom_fuel_model(**clear["inputs"]) == clear["output"] is True
+    assert fuels.get(250) is None
+    assert clear["receiver_after"] == {"registry": "FuelModels", "base": {"reference": "fuels:standard_records"},
+                                        "overrides": [], "removed": []}
+    for name in ("insert_record", "add_species_record"):
+        case = cases[f"SpeciesMasterTable.{name}/baseline"]
+        standard = documents["tests/data/rust_port/species.json"]["records"]
+        table = SpeciesMasterTable()
+        table.records = [SpeciesMasterTableRecord(**deepcopy(standard[item["reference_index"]]))
+                         if "reference_index" in item else SpeciesMasterTableRecord(**deepcopy(item["record"]))
+                         for item in case["receiver_before"]["records"]]
+        arguments = deepcopy(case["inputs"])
+        if name == "add_species_record":
+            arguments["record"] = SpeciesMasterTableRecord(**arguments["record"])
+        getattr(table, name)(**arguments)
+        assert len(table.records) == 25
+        assert exporter.encode_value(vars(table.records[-1])) == case["receiver_after"]["records"][-1]["record"]
+        assert table.records[-1].scientific_name == "Contract species"
+        assert table.records[-1].species_code == ("pipo" if name == "insert_record" else "CUSTOM")
+        expected = {"species_code": "pipo", "scientific_name": "Contract species", "common_name": "Contract species",
+                    "mortality_equation_number": 2, "bark_equation_number": 31, "crown_coefficient_code": 12,
+                    "alaska": False, "california": True, "eastern_area": False, "great_basin": True,
+                    "northern_rockies": True, "northwest": True, "rocky_mountain": False,
+                    "southern_area": False, "southwest": True, "equation_type": 0, "crown_damage_equation_code": -1}
+        if name == "add_species_record":
+            expected.update(species_code="CUSTOM", mortality_equation_number=-1, bark_equation_number=-1,
+                            crown_coefficient_code=0, california=False, great_basin=False, northern_rockies=False,
+                            northwest=False, southwest=False, equation_type=-1)
+        assert exporter.encode_value(vars(table.records[-1])) == expected
 
 
 def test_export_scenarios_cover_static_facade_methods_and_stateful_helpers():
