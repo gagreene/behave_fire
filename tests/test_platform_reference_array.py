@@ -78,6 +78,7 @@ def test_canonical_export_keeps_original_golden_after_arm_cast(monkeypatch, doma
 
 
 @pytest.mark.parametrize("domain,name", SPECS)
+@pytest.mark.rust
 def test_compare_reports_frozen_diagnostic_and_retains_live_gate(monkeypatch, tmp_path, capsys, domain, name):
     from behave_fire import rust
     from importlib import import_module
@@ -171,6 +172,7 @@ def test_policy_excludes_other_inputs_and_cases(monkeypatch, domain, name):
 
 
 @pytest.mark.parametrize("domain,name", SPECS)
+@pytest.mark.rust
 def test_run_case_rejects_frozen_native_output_and_accepts_live_python(monkeypatch, domain, name):
     from behave_fire import rust
     from importlib import import_module
