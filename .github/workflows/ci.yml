@@ -87,11 +87,20 @@ jobs:
       - name: Record platform-dependent integer casts
         if: always()
         run: uv run --no-sync python tools/probe_platform_oracle.py --native > numpy-platform-oracle.json
+      - name: Record float32 direction oracle evidence
+        if: always()
+        run: uv run --no-sync python tools/probe_direction_oracle.py > numpy-direction-oracle.json
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: numpy-platform-oracle-${{ matrix.os }}
           path: numpy-platform-oracle.json
+          if-no-files-found: warn
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: numpy-direction-oracle-${{ matrix.os }}
+          path: numpy-direction-oracle.json
           if-no-files-found: warn
 
   wheel-validation:
