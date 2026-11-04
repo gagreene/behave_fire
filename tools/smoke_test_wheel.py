@@ -29,6 +29,26 @@ def _compare(actual, expected):
         np.testing.assert_allclose(np.ma.getdata(actual), np.ma.getdata(expected), rtol=1e-9, atol=1e-12, equal_nan=True)
 
 
+def _direction(selected, reference, normalize_half_loop):
+    """Check platform-dependent float32 angles after float64 North promotion.
+
+    :param selected: Installed selected surface backend.
+    :param reference: Installed explicit Python surface backend.
+    :param normalize_half_loop: Whether the integer operands select float16.
+    :return: None; raises AssertionError on structure or strict live parity differences.
+    """
+    import numpy as np
+    x = np.array([-1], dtype=np.int8)
+    y = np.array([False], dtype=np.bool_) if normalize_half_loop else np.array([65534], dtype=np.uint16)
+    reference_x, reference_y = (x.astype(np.float32), y.astype(np.float32)) if normalize_half_loop else (x, y)
+    expected = reference.calculate_direction_of_max_spread(reference_x, reference_y, np.ones(1), "RelativeToNorth", 95.0)
+    actual = selected.calculate_direction_of_max_spread(x, y, np.ones(1), "RelativeToNorth", 95.0)
+    assert actual.dtype == expected.dtype == np.float64
+    assert actual.shape == expected.shape == (1,)
+    assert np.ma.isMaskedArray(actual) == np.ma.isMaskedArray(expected)
+    _compare(actual, expected)
+
+
 def _surface(model, grid):
     """Calculate a fixed non-contiguous GS4 surface scenario.
 
@@ -96,6 +116,9 @@ def main():
     _compare(_surface(snapshot_actual, grid), before)
     selected = bf.get_backend(arguments.expect)
     python = bf.get_backend("python")
+    if arguments.expect == "rust":
+        for normalize_half_loop in (False, True):
+            _direction(selected.surface, python.surface, normalize_half_loop)
     for module, function, values in (
         ("safety", "calculate_safety_zone", (5., 2., 50., 1., 300.)),
         ("vapor_pressure_deficit_calculator", "calculate_vpd", (25., 1, .5, 0, True)),
