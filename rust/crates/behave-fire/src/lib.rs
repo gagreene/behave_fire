@@ -6,12 +6,21 @@ mod error;
 mod grid;
 mod model;
 
+pub mod contain;
 pub mod crown;
+pub mod fine_dead_fuel_moisture;
+pub mod fire_size;
 pub mod fuel_models;
+pub mod ignite;
 pub mod math;
+pub mod mortality;
+pub mod safety;
+pub mod slope;
 pub mod species;
+pub mod spot;
 pub mod surface;
 pub mod units;
+pub mod vapor_pressure_deficit;
 
 /// Embedded tables with no build-time or runtime Python dependency.
 pub mod generated {
