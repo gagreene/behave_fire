@@ -33,6 +33,15 @@ def _assert_floating(actual, expected, single=False):
                                atol=1e-7 if single else 1e-12, equal_nan=True)
 
 
+def _numeric_family(value):
+    families = ((bool, np.bool_), (int, np.integer), (float, np.floating),
+                (complex, np.complexfloating))
+    for index, family in enumerate(families):
+        if isinstance(value, family):
+            return index
+    raise AssertionError(f"unsupported boxed numeric payload: {type(value).__name__}")
+
+
 def assert_result(actual, expected):
     if hasattr(actual, "__dict__") and not isinstance(actual, (np.ndarray, int, float, str)):
         actual = vars(actual)
@@ -67,6 +76,10 @@ def assert_result(actual, expected):
             # Read the encoded entries directly: float coercion loses integers
             # above 2**53 and obscures the boxed bool/integer distinction.
             for left, right in zip(actual_data.ravel(), expected["values"]):
+                payload = decode(right)
+                if isinstance(payload, np.ndarray) and payload.ndim == 0:
+                    payload = payload[()]
+                assert _numeric_family(left) == _numeric_family(payload)
                 assert_result(left, right)
         elif wanted.dtype.kind in "biu":
             np.testing.assert_array_equal(actual_data, wanted_data)

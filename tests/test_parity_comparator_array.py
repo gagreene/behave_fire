@@ -22,6 +22,18 @@ def test_boxed_integral_payloads_require_exact_values_and_kinds(actual, expected
         assert_result(actual, encode_value(expected))
 
 
+@pytest.mark.parametrize("actual, expected", [
+    (left, right) for left in (True, 1, 1.0, complex(1., 0.))
+    for right in (True, 1, 1.0, complex(1., 0.)) if type(left) is not type(right)
+])
+def test_boxed_numeric_families_match_in_both_directions(actual, expected):
+    # The old codec preserves bool/int/float families. Complex expected values
+    # use a live record because the historical JSON exporter cannot encode them.
+    record = {"dtype": "object", "shape": [1], "values": [expected]}
+    with pytest.raises(AssertionError):
+        assert_result(np.array([actual], dtype=object), record)
+
+
 @pytest.mark.parametrize("actual, expected", [(np.array([1.0]), 1.0), (np.array(1.0), 1.0), (1.0, np.array([1.0]))])
 def test_scalar_array_structure_changes_fail(actual, expected):
     with pytest.raises(AssertionError):
