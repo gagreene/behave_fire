@@ -1,0 +1,12 @@
+{
+  "fuel_records": 96,
+  "moisture_cells": 774,
+  "reference_revision": "7933789f00470c6bbfbe942dc22bdd7f74e192f9",
+  "source_sha256_lf": {
+    "behave_units": "426581d91466c64bdbf60bd8a686030fe8244303cdbd097b1838479937abab77",
+    "fine_dead_fuel_moisture_tool": "cb11fc2da53c66b7f7753e88aa1d1f2135c91c3e67962912d1b2c097a73a8e60",
+    "fuel_models": "ee1b886c72c8bb0e14a4c883745b4dde97ee3e011c7fddddc5e8b63e4588d225",
+    "species_master_table": "afa06eb15e475d252eef8b54d34be0d202c5c0f664d75e2c87c783a3831e8c11"
+  },
+  "species_records": 24
+}

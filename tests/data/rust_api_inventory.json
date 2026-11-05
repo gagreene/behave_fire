@@ -10,7 +10,7 @@
       "python_name": "behave_fire.behave.BehaveRun",
       "role": "computation or state",
       "rust_core": "model::BehaveRun",
-      "signature": "(fuel_models: behave_fire.components.fuel_models.FuelModels)",
+      "signature": "(fuel_models: FuelModels)",
       "status": "planned"
     },
     {
@@ -20,7 +20,7 @@
       "python_name": "behave_fire.behave.BehaveRun.__init__",
       "role": "computation or state",
       "rust_core": "model::BehaveRun::__init__",
-      "signature": "(self, fuel_models: behave_fire.components.fuel_models.FuelModels)",
+      "signature": "(self, fuel_models: FuelModels)",
       "status": "planned"
     },
     {
@@ -30,7 +30,7 @@
       "python_name": "behave_fire.behave.BehaveRun.calculate_crown_scorch_mortality",
       "role": "computation or state",
       "rust_core": "model::BehaveRun::calculate_crown_scorch_mortality",
-      "signature": "(self, scorch_height: Union[float, numpy.ndarray], tree_height: Union[float, numpy.ndarray], crown_ratio: Union[float, numpy.ndarray], dbh: Union[float, numpy.ndarray], equation_number_grid: Union[int, numpy.ndarray], scorch_height_units: int = 0, tree_height_units: int = 0, crown_ratio_units: int = 0, dbh_units: int = 1, out_units: Optional[dict] = None) -> dict",
+      "signature": "(self, scorch_height: Union[float, np.ndarray], tree_height: Union[float, np.ndarray], crown_ratio: Union[float, np.ndarray], dbh: Union[float, np.ndarray], equation_number_grid: Union[int, np.ndarray], scorch_height_units: int=0, tree_height_units: int=0, crown_ratio_units: int=0, dbh_units: int=1, out_units: Optional[dict]=None) -> dict",
       "status": "planned"
     },
     {
@@ -40,7 +40,7 @@
       "python_name": "behave_fire.behave.BehaveRun.calculate_fire_area",
       "role": "computation or state",
       "rust_core": "model::BehaveRun::calculate_fire_area",
-      "signature": "(forward_ros: Union[float, numpy.ndarray], backing_ros: Union[float, numpy.ndarray], ros_units: int, lwr: Union[float, numpy.ndarray], elapsed_time: float, elapsed_time_units: int, is_crown: bool = False, out_units: int = 0) -> numpy.ndarray",
+      "signature": "(forward_ros: Union[float, np.ndarray], backing_ros: Union[float, np.ndarray], ros_units: int, lwr: Union[float, np.ndarray], elapsed_time: float, elapsed_time_units: int, is_crown: bool=False, out_units: int=0) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -50,7 +50,7 @@
       "python_name": "behave_fire.behave.BehaveRun.calculate_fire_length",
       "role": "computation or state",
       "rust_core": "model::BehaveRun::calculate_fire_length",
-      "signature": "(forward_ros: Union[float, numpy.ndarray], backing_ros: Union[float, numpy.ndarray], ros_units: int, elapsed_time: float, elapsed_time_units: int, out_units: int = 0) -> numpy.ndarray",
+      "signature": "(forward_ros: Union[float, np.ndarray], backing_ros: Union[float, np.ndarray], ros_units: int, elapsed_time: float, elapsed_time_units: int, out_units: int=0) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -60,7 +60,7 @@
       "python_name": "behave_fire.behave.BehaveRun.calculate_fire_perimeter",
       "role": "computation or state",
       "rust_core": "model::BehaveRun::calculate_fire_perimeter",
-      "signature": "(forward_ros: Union[float, numpy.ndarray], backing_ros: Union[float, numpy.ndarray], ros_units: int, lwr: Union[float, numpy.ndarray], elapsed_time: float, elapsed_time_units: int, is_crown: bool = False, out_units: int = 0) -> numpy.ndarray",
+      "signature": "(forward_ros: Union[float, np.ndarray], backing_ros: Union[float, np.ndarray], ros_units: int, lwr: Union[float, np.ndarray], elapsed_time: float, elapsed_time_units: int, is_crown: bool=False, out_units: int=0) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -70,7 +70,7 @@
       "python_name": "behave_fire.behave.BehaveRun.calculate_fire_width",
       "role": "computation or state",
       "rust_core": "model::BehaveRun::calculate_fire_width",
-      "signature": "(forward_ros: Union[float, numpy.ndarray], backing_ros: Union[float, numpy.ndarray], ros_units: int, lwr: Union[float, numpy.ndarray], elapsed_time: float, elapsed_time_units: int, out_units: int = 0) -> numpy.ndarray",
+      "signature": "(forward_ros: Union[float, np.ndarray], backing_ros: Union[float, np.ndarray], ros_units: int, lwr: Union[float, np.ndarray], elapsed_time: float, elapsed_time_units: int, out_units: int=0) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -80,7 +80,7 @@
       "python_name": "behave_fire.behave.BehaveRun.calculate_scorch_height",
       "role": "computation or state",
       "rust_core": "model::BehaveRun::calculate_scorch_height",
-      "signature": "(fireline_intensity: Union[float, numpy.ndarray], fireline_intensity_units: int, midflame_wind_speed: Union[float, numpy.ndarray], wind_speed_units: int, air_temperature: Union[float, numpy.ndarray], temperature_units: int, out_units: int = 0) -> numpy.ndarray",
+      "signature": "(fireline_intensity: Union[float, np.ndarray], fireline_intensity_units: int, midflame_wind_speed: Union[float, np.ndarray], wind_speed_units: int, air_temperature: Union[float, np.ndarray], temperature_units: int, out_units: int=0) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -90,7 +90,7 @@
       "python_name": "behave_fire.behave.BehaveRun.calculate_spotting_from_burning_pile",
       "role": "computation or state",
       "rust_core": "model::BehaveRun::calculate_spotting_from_burning_pile",
-      "signature": "(flame_height: Union[float, numpy.ndarray], flame_height_units: int, wind_speed: Union[float, numpy.ndarray], wind_speed_units: int, cover_height: Union[float, numpy.ndarray], cover_height_units: int, out_units: int = 0) -> numpy.ndarray",
+      "signature": "(flame_height: Union[float, np.ndarray], flame_height_units: int, wind_speed: Union[float, np.ndarray], wind_speed_units: int, cover_height: Union[float, np.ndarray], cover_height_units: int, out_units: int=0) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -100,7 +100,7 @@
       "python_name": "behave_fire.behave.BehaveRun.calculate_spotting_from_surface_fire",
       "role": "computation or state",
       "rust_core": "model::BehaveRun::calculate_spotting_from_surface_fire",
-      "signature": "(flame_length: Union[float, numpy.ndarray], flame_length_units: int, wind_speed: Union[float, numpy.ndarray], wind_speed_units: int, cover_height: Union[float, numpy.ndarray], cover_height_units: int, out_units: int = 0) -> numpy.ndarray",
+      "signature": "(flame_length: Union[float, np.ndarray], flame_length_units: int, wind_speed: Union[float, np.ndarray], wind_speed_units: int, cover_height: Union[float, np.ndarray], cover_height_units: int, out_units: int=0) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -110,7 +110,7 @@
       "python_name": "behave_fire.behave.BehaveRun.calculate_spotting_from_torching_trees",
       "role": "computation or state",
       "rust_core": "model::BehaveRun::calculate_spotting_from_torching_trees",
-      "signature": "(dbh: Union[float, numpy.ndarray], dbh_units: int, height: Union[float, numpy.ndarray], height_units: int, count: Union[int, float, numpy.ndarray], wind_speed: Union[float, numpy.ndarray], wind_speed_units: int, cover_height: Union[float, numpy.ndarray], cover_height_units: int, out_units: int = 0) -> numpy.ndarray",
+      "signature": "(dbh: Union[float, np.ndarray], dbh_units: int, height: Union[float, np.ndarray], height_units: int, count: Union[int, float, np.ndarray], wind_speed: Union[float, np.ndarray], wind_speed_units: int, cover_height: Union[float, np.ndarray], cover_height_units: int, out_units: int=0) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -120,7 +120,7 @@
       "python_name": "behave_fire.behave.BehaveRun.do_crown_run",
       "role": "computation or state",
       "rust_core": "model::BehaveRun::do_crown_run",
-      "signature": "(self, surface_results: dict, fuel_model_grid: Union[int, numpy.ndarray], m1h: Union[float, numpy.ndarray], m10h: Union[float, numpy.ndarray], m100h: Union[float, numpy.ndarray], mlh: Union[float, numpy.ndarray], mlw: Union[float, numpy.ndarray], wind_speed: Union[float, numpy.ndarray], wind_speed_units: int, wind_direction: Union[float, numpy.ndarray], wind_orientation_mode: str, slope: Union[float, numpy.ndarray], slope_units: int = 0, moisture_units: int = 0, aspect: Union[float, numpy.ndarray] = 0.0, canopy_base_height: Union[float, numpy.ndarray] = 0.0, canopy_base_height_units: int = 0, canopy_height: Union[float, numpy.ndarray] = 0.0, canopy_height_units: int = 0, canopy_bulk_density: Union[float, numpy.ndarray] = 0.0, canopy_bulk_density_units: int = 0, moisture_foliar: Union[int, float, numpy.ndarray] = 100.0, out_units: Optional[dict] = None) -> dict",
+      "signature": "(self, surface_results: dict, fuel_model_grid: Union[int, np.ndarray], m1h: Union[float, np.ndarray], m10h: Union[float, np.ndarray], m100h: Union[float, np.ndarray], mlh: Union[float, np.ndarray], mlw: Union[float, np.ndarray], wind_speed: Union[float, np.ndarray], wind_speed_units: int, wind_direction: Union[float, np.ndarray], wind_orientation_mode: str, slope: Union[float, np.ndarray], slope_units: int=0, moisture_units: int=0, aspect: Union[float, np.ndarray]=0.0, canopy_base_height: Union[float, np.ndarray]=0.0, canopy_base_height_units: int=0, canopy_height: Union[float, np.ndarray]=0.0, canopy_height_units: int=0, canopy_bulk_density: Union[float, np.ndarray]=0.0, canopy_bulk_density_units: int=0, moisture_foliar: Union[int, float, np.ndarray]=100.0, out_units: Optional[dict]=None) -> dict",
       "status": "planned"
     },
     {
@@ -130,7 +130,7 @@
       "python_name": "behave_fire.behave.BehaveRun.do_surface_run",
       "role": "computation or state",
       "rust_core": "model::BehaveRun::do_surface_run",
-      "signature": "(self, fuel_model_grid: Union[int, numpy.ndarray], m1h: Union[float, numpy.ndarray], m10h: Union[float, numpy.ndarray], m100h: Union[float, numpy.ndarray], mlh: Union[float, numpy.ndarray], mlw: Union[float, numpy.ndarray], wind_speed: Union[float, numpy.ndarray], wind_speed_units: int, wind_direction: Union[float, numpy.ndarray], wind_orientation_mode: str, slope: Union[float, numpy.ndarray], slope_units: int = 0, moisture_units: int = 0, aspect: Union[float, numpy.ndarray] = 0.0, canopy_cover: Union[float, numpy.ndarray] = 0.0, canopy_cover_units: int = 0, canopy_height: Union[float, numpy.ndarray] = 0.0, canopy_height_units: int = 0, canopy_base_height: Union[float, numpy.ndarray] = 0.0, canopy_base_height_units: int = 0, crown_ratio: Union[float, numpy.ndarray] = 0.0, crown_ratio_units: Optional[int] = 0, wind_height_mode: str = 'TwentyFoot', waf_method: str = 'UseCrownRatio', user_waf: Union[float, numpy.ndarray, NoneType] = None, out_units: Optional[dict] = None) -> dict",
+      "signature": "(self, fuel_model_grid: Union[int, np.ndarray], m1h: Union[float, np.ndarray], m10h: Union[float, np.ndarray], m100h: Union[float, np.ndarray], mlh: Union[float, np.ndarray], mlw: Union[float, np.ndarray], wind_speed: Union[float, np.ndarray], wind_speed_units: int, wind_direction: Union[float, np.ndarray], wind_orientation_mode: str, slope: Union[float, np.ndarray], slope_units: int=0, moisture_units: int=0, aspect: Union[float, np.ndarray]=0.0, canopy_cover: Union[float, np.ndarray]=0.0, canopy_cover_units: int=0, canopy_height: Union[float, np.ndarray]=0.0, canopy_height_units: int=0, canopy_base_height: Union[float, np.ndarray]=0.0, canopy_base_height_units: int=0, crown_ratio: Union[float, np.ndarray]=0.0, crown_ratio_units: Optional[int]=0, wind_height_mode: str='TwentyFoot', waf_method: str='UseCrownRatio', user_waf: Union[float, np.ndarray, None]=None, out_units: Optional[dict]=None) -> dict",
       "status": "planned"
     },
     {
@@ -171,7 +171,7 @@
       "python_name": "behave_fire.components.behave_units.AreaUnits.fromBaseUnits",
       "role": "computation or state",
       "rust_core": "units::AreaUnits::fromBaseUnits",
-      "signature": "(value: Union[float, numpy.ndarray], units: int) -> numpy.ndarray",
+      "signature": "(value: Union[float, np.ndarray], units: int) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -181,7 +181,7 @@
       "python_name": "behave_fire.components.behave_units.AreaUnits.toBaseUnits",
       "role": "computation or state",
       "rust_core": "units::AreaUnits::toBaseUnits",
-      "signature": "(value: Union[float, numpy.ndarray], units: int) -> numpy.ndarray",
+      "signature": "(value: Union[float, np.ndarray], units: int) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -218,7 +218,7 @@
       "python_name": "behave_fire.components.behave_units.BasalAreaUnits.fromBaseUnits",
       "role": "computation or state",
       "rust_core": "units::BasalAreaUnits::fromBaseUnits",
-      "signature": "(value: Union[float, numpy.ndarray], units: int) -> numpy.ndarray",
+      "signature": "(value: Union[float, np.ndarray], units: int) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -228,7 +228,7 @@
       "python_name": "behave_fire.components.behave_units.BasalAreaUnits.toBaseUnits",
       "role": "computation or state",
       "rust_core": "units::BasalAreaUnits::toBaseUnits",
-      "signature": "(value: Union[float, numpy.ndarray], units: int) -> numpy.ndarray",
+      "signature": "(value: Union[float, np.ndarray], units: int) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -265,7 +265,7 @@
       "python_name": "behave_fire.components.behave_units.DensityUnits.fromBaseUnits",
       "role": "computation or state",
       "rust_core": "units::DensityUnits::fromBaseUnits",
-      "signature": "(value: Union[float, numpy.ndarray], units: int) -> numpy.ndarray",
+      "signature": "(value: Union[float, np.ndarray], units: int) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -275,7 +275,7 @@
       "python_name": "behave_fire.components.behave_units.DensityUnits.toBaseUnits",
       "role": "computation or state",
       "rust_core": "units::DensityUnits::toBaseUnits",
-      "signature": "(value: Union[float, numpy.ndarray], units: int) -> numpy.ndarray",
+      "signature": "(value: Union[float, np.ndarray], units: int) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -315,7 +315,7 @@
       "python_name": "behave_fire.components.behave_units.FirelineIntensityUnits.fromBaseUnits",
       "role": "computation or state",
       "rust_core": "units::FirelineIntensityUnits::fromBaseUnits",
-      "signature": "(value: Union[float, numpy.ndarray], units: int) -> numpy.ndarray",
+      "signature": "(value: Union[float, np.ndarray], units: int) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -325,7 +325,7 @@
       "python_name": "behave_fire.components.behave_units.FirelineIntensityUnits.toBaseUnits",
       "role": "computation or state",
       "rust_core": "units::FirelineIntensityUnits::toBaseUnits",
-      "signature": "(value: Union[float, numpy.ndarray], units: int) -> numpy.ndarray",
+      "signature": "(value: Union[float, np.ndarray], units: int) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -362,7 +362,7 @@
       "python_name": "behave_fire.components.behave_units.FractionUnits.fromBaseUnits",
       "role": "computation or state",
       "rust_core": "units::FractionUnits::fromBaseUnits",
-      "signature": "(value: Union[float, numpy.ndarray], units: int) -> numpy.ndarray",
+      "signature": "(value: Union[float, np.ndarray], units: int) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -372,7 +372,7 @@
       "python_name": "behave_fire.components.behave_units.FractionUnits.toBaseUnits",
       "role": "computation or state",
       "rust_core": "units::FractionUnits::toBaseUnits",
-      "signature": "(value: Union[float, numpy.ndarray], units: int) -> numpy.ndarray",
+      "signature": "(value: Union[float, np.ndarray], units: int) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -409,7 +409,7 @@
       "python_name": "behave_fire.components.behave_units.HeatOfCombustionUnits.fromBaseUnits",
       "role": "computation or state",
       "rust_core": "units::HeatOfCombustionUnits::fromBaseUnits",
-      "signature": "(value: Union[float, numpy.ndarray], units: int) -> numpy.ndarray",
+      "signature": "(value: Union[float, np.ndarray], units: int) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -419,7 +419,7 @@
       "python_name": "behave_fire.components.behave_units.HeatOfCombustionUnits.toBaseUnits",
       "role": "computation or state",
       "rust_core": "units::HeatOfCombustionUnits::toBaseUnits",
-      "signature": "(value: Union[float, numpy.ndarray], units: int) -> numpy.ndarray",
+      "signature": "(value: Union[float, np.ndarray], units: int) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -457,7 +457,7 @@
       "python_name": "behave_fire.components.behave_units.HeatPerUnitAreaUnits.fromBaseUnits",
       "role": "computation or state",
       "rust_core": "units::HeatPerUnitAreaUnits::fromBaseUnits",
-      "signature": "(value: Union[float, numpy.ndarray], units: int) -> numpy.ndarray",
+      "signature": "(value: Union[float, np.ndarray], units: int) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -467,7 +467,7 @@
       "python_name": "behave_fire.components.behave_units.HeatPerUnitAreaUnits.toBaseUnits",
       "role": "computation or state",
       "rust_core": "units::HeatPerUnitAreaUnits::toBaseUnits",
-      "signature": "(value: Union[float, numpy.ndarray], units: int) -> numpy.ndarray",
+      "signature": "(value: Union[float, np.ndarray], units: int) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -504,7 +504,7 @@
       "python_name": "behave_fire.components.behave_units.HeatSinkUnits.fromBaseUnits",
       "role": "computation or state",
       "rust_core": "units::HeatSinkUnits::fromBaseUnits",
-      "signature": "(value: Union[float, numpy.ndarray], units: int) -> numpy.ndarray",
+      "signature": "(value: Union[float, np.ndarray], units: int) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -514,7 +514,7 @@
       "python_name": "behave_fire.components.behave_units.HeatSinkUnits.toBaseUnits",
       "role": "computation or state",
       "rust_core": "units::HeatSinkUnits::toBaseUnits",
-      "signature": "(value: Union[float, numpy.ndarray], units: int) -> numpy.ndarray",
+      "signature": "(value: Union[float, np.ndarray], units: int) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -554,7 +554,7 @@
       "python_name": "behave_fire.components.behave_units.HeatSourceAndReactionIntensityUnits.fromBaseUnits",
       "role": "computation or state",
       "rust_core": "units::HeatSourceAndReactionIntensityUnits::fromBaseUnits",
-      "signature": "(value: Union[float, numpy.ndarray], units: int) -> numpy.ndarray",
+      "signature": "(value: Union[float, np.ndarray], units: int) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -564,7 +564,7 @@
       "python_name": "behave_fire.components.behave_units.HeatSourceAndReactionIntensityUnits.toBaseUnits",
       "role": "computation or state",
       "rust_core": "units::HeatSourceAndReactionIntensityUnits::toBaseUnits",
-      "signature": "(value: Union[float, numpy.ndarray], units: int) -> numpy.ndarray",
+      "signature": "(value: Union[float, np.ndarray], units: int) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -607,7 +607,7 @@
       "python_name": "behave_fire.components.behave_units.LengthUnits.fromBaseUnits",
       "role": "computation or state",
       "rust_core": "units::LengthUnits::fromBaseUnits",
-      "signature": "(value: Union[float, numpy.ndarray], units: int) -> numpy.ndarray",
+      "signature": "(value: Union[float, np.ndarray], units: int) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -617,7 +617,7 @@
       "python_name": "behave_fire.components.behave_units.LengthUnits.toBaseUnits",
       "role": "computation or state",
       "rust_core": "units::LengthUnits::toBaseUnits",
-      "signature": "(value: Union[float, numpy.ndarray], units: int) -> numpy.ndarray",
+      "signature": "(value: Union[float, np.ndarray], units: int) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -656,7 +656,7 @@
       "python_name": "behave_fire.components.behave_units.LoadingUnits.fromBaseUnits",
       "role": "computation or state",
       "rust_core": "units::LoadingUnits::fromBaseUnits",
-      "signature": "(value: Union[float, numpy.ndarray], units: int) -> numpy.ndarray",
+      "signature": "(value: Union[float, np.ndarray], units: int) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -666,7 +666,7 @@
       "python_name": "behave_fire.components.behave_units.LoadingUnits.toBaseUnits",
       "role": "computation or state",
       "rust_core": "units::LoadingUnits::toBaseUnits",
-      "signature": "(value: Union[float, numpy.ndarray], units: int) -> numpy.ndarray",
+      "signature": "(value: Union[float, np.ndarray], units: int) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -710,7 +710,7 @@
       "python_name": "behave_fire.components.behave_units.PressureUnits.fromBaseUnits",
       "role": "computation or state",
       "rust_core": "units::PressureUnits::fromBaseUnits",
-      "signature": "(value: Union[float, numpy.ndarray], units: int) -> numpy.ndarray",
+      "signature": "(value: Union[float, np.ndarray], units: int) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -720,7 +720,7 @@
       "python_name": "behave_fire.components.behave_units.PressureUnits.toBaseUnits",
       "role": "computation or state",
       "rust_core": "units::PressureUnits::toBaseUnits",
-      "signature": "(value: Union[float, numpy.ndarray], units: int) -> numpy.ndarray",
+      "signature": "(value: Union[float, np.ndarray], units: int) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -757,7 +757,7 @@
       "python_name": "behave_fire.components.behave_units.SlopeUnits.fromBaseUnits",
       "role": "computation or state",
       "rust_core": "units::SlopeUnits::fromBaseUnits",
-      "signature": "(value: Union[float, numpy.ndarray], units: int) -> numpy.ndarray",
+      "signature": "(value: Union[float, np.ndarray], units: int) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -767,7 +767,7 @@
       "python_name": "behave_fire.components.behave_units.SlopeUnits.toBaseUnits",
       "role": "computation or state",
       "rust_core": "units::SlopeUnits::toBaseUnits",
-      "signature": "(value: Union[float, numpy.ndarray], units: int) -> numpy.ndarray",
+      "signature": "(value: Union[float, np.ndarray], units: int) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -809,7 +809,7 @@
       "python_name": "behave_fire.components.behave_units.SpeedUnits.fromBaseUnits",
       "role": "computation or state",
       "rust_core": "units::SpeedUnits::fromBaseUnits",
-      "signature": "(value: Union[float, numpy.ndarray], units: int) -> numpy.ndarray",
+      "signature": "(value: Union[float, np.ndarray], units: int) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -819,7 +819,7 @@
       "python_name": "behave_fire.components.behave_units.SpeedUnits.toBaseUnits",
       "role": "computation or state",
       "rust_core": "units::SpeedUnits::toBaseUnits",
-      "signature": "(value: Union[float, numpy.ndarray], units: int) -> numpy.ndarray",
+      "signature": "(value: Union[float, np.ndarray], units: int) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -858,7 +858,7 @@
       "python_name": "behave_fire.components.behave_units.SurfaceAreaToVolumeUnits.fromBaseUnits",
       "role": "computation or state",
       "rust_core": "units::SurfaceAreaToVolumeUnits::fromBaseUnits",
-      "signature": "(value: Union[float, numpy.ndarray], units: int) -> numpy.ndarray",
+      "signature": "(value: Union[float, np.ndarray], units: int) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -868,7 +868,7 @@
       "python_name": "behave_fire.components.behave_units.SurfaceAreaToVolumeUnits.toBaseUnits",
       "role": "computation or state",
       "rust_core": "units::SurfaceAreaToVolumeUnits::toBaseUnits",
-      "signature": "(value: Union[float, numpy.ndarray], units: int) -> numpy.ndarray",
+      "signature": "(value: Union[float, np.ndarray], units: int) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -906,7 +906,7 @@
       "python_name": "behave_fire.components.behave_units.TemperatureUnits.fromBaseUnits",
       "role": "computation or state",
       "rust_core": "units::TemperatureUnits::fromBaseUnits",
-      "signature": "(value: Union[float, numpy.ndarray], units: int) -> numpy.ndarray",
+      "signature": "(value: Union[float, np.ndarray], units: int) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -916,7 +916,7 @@
       "python_name": "behave_fire.components.behave_units.TemperatureUnits.toBaseUnits",
       "role": "computation or state",
       "rust_core": "units::TemperatureUnits::toBaseUnits",
-      "signature": "(value: Union[float, numpy.ndarray], units: int) -> numpy.ndarray",
+      "signature": "(value: Union[float, np.ndarray], units: int) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -956,7 +956,7 @@
       "python_name": "behave_fire.components.behave_units.TimeUnits.fromBaseUnits",
       "role": "computation or state",
       "rust_core": "units::TimeUnits::fromBaseUnits",
-      "signature": "(value: Union[float, numpy.ndarray], units: int) -> numpy.ndarray",
+      "signature": "(value: Union[float, np.ndarray], units: int) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -966,7 +966,7 @@
       "python_name": "behave_fire.components.behave_units.TimeUnits.toBaseUnits",
       "role": "computation or state",
       "rust_core": "units::TimeUnits::toBaseUnits",
-      "signature": "(value: Union[float, numpy.ndarray], units: int) -> numpy.ndarray",
+      "signature": "(value: Union[float, np.ndarray], units: int) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -978,7 +978,7 @@
       "python_name": "behave_fire.components.behave_units.area_from_base",
       "role": "computation or state",
       "rust_core": "units::area_from_base",
-      "signature": "(value: Union[float, numpy.ndarray], units: int) -> numpy.ndarray",
+      "signature": "(value: Union[float, np.ndarray], units: int) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -990,7 +990,7 @@
       "python_name": "behave_fire.components.behave_units.area_to_base",
       "role": "computation or state",
       "rust_core": "units::area_to_base",
-      "signature": "(value: Union[float, numpy.ndarray], units: int) -> numpy.ndarray",
+      "signature": "(value: Union[float, np.ndarray], units: int) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -1002,7 +1002,7 @@
       "python_name": "behave_fire.components.behave_units.density_from_base",
       "role": "computation or state",
       "rust_core": "units::density_from_base",
-      "signature": "(value: Union[float, numpy.ndarray], units: int) -> numpy.ndarray",
+      "signature": "(value: Union[float, np.ndarray], units: int) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -1014,7 +1014,7 @@
       "python_name": "behave_fire.components.behave_units.density_to_base",
       "role": "computation or state",
       "rust_core": "units::density_to_base",
-      "signature": "(value: Union[float, numpy.ndarray], units: int) -> numpy.ndarray",
+      "signature": "(value: Union[float, np.ndarray], units: int) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -1026,7 +1026,7 @@
       "python_name": "behave_fire.components.behave_units.fireline_intensity_from_base",
       "role": "computation or state",
       "rust_core": "units::fireline_intensity_from_base",
-      "signature": "(value: Union[float, numpy.ndarray], units: int) -> numpy.ndarray",
+      "signature": "(value: Union[float, np.ndarray], units: int) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -1038,7 +1038,7 @@
       "python_name": "behave_fire.components.behave_units.fireline_intensity_to_base",
       "role": "computation or state",
       "rust_core": "units::fireline_intensity_to_base",
-      "signature": "(value: Union[float, numpy.ndarray], units: int) -> numpy.ndarray",
+      "signature": "(value: Union[float, np.ndarray], units: int) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -1050,7 +1050,7 @@
       "python_name": "behave_fire.components.behave_units.fraction_from_base",
       "role": "computation or state",
       "rust_core": "units::fraction_from_base",
-      "signature": "(value: Union[float, numpy.ndarray], units: int) -> numpy.ndarray",
+      "signature": "(value: Union[float, np.ndarray], units: int) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -1062,7 +1062,7 @@
       "python_name": "behave_fire.components.behave_units.fraction_to_base",
       "role": "computation or state",
       "rust_core": "units::fraction_to_base",
-      "signature": "(value: Union[float, numpy.ndarray], units: int) -> numpy.ndarray",
+      "signature": "(value: Union[float, np.ndarray], units: int) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -1074,7 +1074,7 @@
       "python_name": "behave_fire.components.behave_units.hpua_from_base",
       "role": "computation or state",
       "rust_core": "units::hpua_from_base",
-      "signature": "(value: Union[float, numpy.ndarray], units: int) -> numpy.ndarray",
+      "signature": "(value: Union[float, np.ndarray], units: int) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -1086,7 +1086,7 @@
       "python_name": "behave_fire.components.behave_units.hpua_to_base",
       "role": "computation or state",
       "rust_core": "units::hpua_to_base",
-      "signature": "(value: Union[float, numpy.ndarray], units: int) -> numpy.ndarray",
+      "signature": "(value: Union[float, np.ndarray], units: int) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -1098,7 +1098,7 @@
       "python_name": "behave_fire.components.behave_units.length_from_base",
       "role": "computation or state",
       "rust_core": "units::length_from_base",
-      "signature": "(value: Union[float, numpy.ndarray], units: int) -> numpy.ndarray",
+      "signature": "(value: Union[float, np.ndarray], units: int) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -1110,7 +1110,7 @@
       "python_name": "behave_fire.components.behave_units.length_to_base",
       "role": "computation or state",
       "rust_core": "units::length_to_base",
-      "signature": "(value: Union[float, numpy.ndarray], units: int) -> numpy.ndarray",
+      "signature": "(value: Union[float, np.ndarray], units: int) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -1122,7 +1122,7 @@
       "python_name": "behave_fire.components.behave_units.loading_from_base",
       "role": "computation or state",
       "rust_core": "units::loading_from_base",
-      "signature": "(value: Union[float, numpy.ndarray], units: int) -> numpy.ndarray",
+      "signature": "(value: Union[float, np.ndarray], units: int) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -1134,7 +1134,7 @@
       "python_name": "behave_fire.components.behave_units.loading_to_base",
       "role": "computation or state",
       "rust_core": "units::loading_to_base",
-      "signature": "(value: Union[float, numpy.ndarray], units: int) -> numpy.ndarray",
+      "signature": "(value: Union[float, np.ndarray], units: int) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -1146,7 +1146,7 @@
       "python_name": "behave_fire.components.behave_units.pressure_from_base",
       "role": "computation or state",
       "rust_core": "units::pressure_from_base",
-      "signature": "(value: Union[float, numpy.ndarray], units: int) -> numpy.ndarray",
+      "signature": "(value: Union[float, np.ndarray], units: int) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -1158,7 +1158,7 @@
       "python_name": "behave_fire.components.behave_units.pressure_to_base",
       "role": "computation or state",
       "rust_core": "units::pressure_to_base",
-      "signature": "(value: Union[float, numpy.ndarray], units: int) -> numpy.ndarray",
+      "signature": "(value: Union[float, np.ndarray], units: int) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -1168,7 +1168,7 @@
       "python_name": "behave_fire.components.behave_units.reaction_intensity_from_base",
       "role": "computation or state",
       "rust_core": "units::reaction_intensity_from_base",
-      "signature": "(value: Union[float, numpy.ndarray], units: int) -> numpy.ndarray",
+      "signature": "(value: Union[float, np.ndarray], units: int) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -1178,7 +1178,7 @@
       "python_name": "behave_fire.components.behave_units.reaction_intensity_to_base",
       "role": "computation or state",
       "rust_core": "units::reaction_intensity_to_base",
-      "signature": "(value: Union[float, numpy.ndarray], units: int) -> numpy.ndarray",
+      "signature": "(value: Union[float, np.ndarray], units: int) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -1190,7 +1190,7 @@
       "python_name": "behave_fire.components.behave_units.slope_from_base",
       "role": "computation or state",
       "rust_core": "units::slope_from_base",
-      "signature": "(value: Union[float, numpy.ndarray], units: int) -> numpy.ndarray",
+      "signature": "(value: Union[float, np.ndarray], units: int) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -1202,7 +1202,7 @@
       "python_name": "behave_fire.components.behave_units.slope_to_base",
       "role": "computation or state",
       "rust_core": "units::slope_to_base",
-      "signature": "(value: Union[float, numpy.ndarray], units: int) -> numpy.ndarray",
+      "signature": "(value: Union[float, np.ndarray], units: int) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -1214,7 +1214,7 @@
       "python_name": "behave_fire.components.behave_units.speed_from_base",
       "role": "computation or state",
       "rust_core": "units::speed_from_base",
-      "signature": "(value: Union[float, numpy.ndarray], units: int) -> numpy.ndarray",
+      "signature": "(value: Union[float, np.ndarray], units: int) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -1226,7 +1226,7 @@
       "python_name": "behave_fire.components.behave_units.speed_to_base",
       "role": "computation or state",
       "rust_core": "units::speed_to_base",
-      "signature": "(value: Union[float, numpy.ndarray], units: int) -> numpy.ndarray",
+      "signature": "(value: Union[float, np.ndarray], units: int) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -1238,7 +1238,7 @@
       "python_name": "behave_fire.components.behave_units.temp_from_base",
       "role": "computation or state",
       "rust_core": "units::temp_from_base",
-      "signature": "(value: Union[float, numpy.ndarray], units: int) -> numpy.ndarray",
+      "signature": "(value: Union[float, np.ndarray], units: int) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -1250,7 +1250,7 @@
       "python_name": "behave_fire.components.behave_units.temp_to_base",
       "role": "computation or state",
       "rust_core": "units::temp_to_base",
-      "signature": "(value: Union[float, numpy.ndarray], units: int) -> numpy.ndarray",
+      "signature": "(value: Union[float, np.ndarray], units: int) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -1262,7 +1262,7 @@
       "python_name": "behave_fire.components.behave_units.time_from_base",
       "role": "computation or state",
       "rust_core": "units::time_from_base",
-      "signature": "(value: Union[float, numpy.ndarray], units: int) -> numpy.ndarray",
+      "signature": "(value: Union[float, np.ndarray], units: int) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -1274,7 +1274,7 @@
       "python_name": "behave_fire.components.behave_units.time_to_base",
       "role": "computation or state",
       "rust_core": "units::time_to_base",
-      "signature": "(value: Union[float, numpy.ndarray], units: int) -> numpy.ndarray",
+      "signature": "(value: Union[float, np.ndarray], units: int) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -1334,7 +1334,7 @@
       "python_name": "behave_fire.components.contain.run_contain_sim_array",
       "role": "computation or state",
       "rust_core": "contain::run_contain_sim_array",
-      "signature": "(report_spread_rate: Union[float, numpy.ndarray], lw_ratio: Union[float, numpy.ndarray], report_size: Union[float, numpy.ndarray], production_rate: Union[float, numpy.ndarray], attack_time: Union[float, numpy.ndarray], max_steps: int = 500, dist_step: float = 0.01) -> dict",
+      "signature": "(report_spread_rate: Union[float, np.ndarray], lw_ratio: Union[float, np.ndarray], report_size: Union[float, np.ndarray], production_rate: Union[float, np.ndarray], attack_time: Union[float, np.ndarray], max_steps: int=500, dist_step: float=0.01) -> dict",
       "status": "planned"
     },
     {
@@ -1346,7 +1346,7 @@
       "python_name": "behave_fire.components.crown.assign_final_crown_fire_behavior",
       "role": "computation or state",
       "rust_core": "crown::assign_final_crown_fire_behavior",
-      "signature": "(is_surface_fire: Union[bool, numpy.ndarray], is_passive_crown: Union[bool, numpy.ndarray], surface_ros: Union[float, numpy.ndarray], surface_hpua: Union[float, numpy.ndarray], surface_fli: Union[float, numpy.ndarray], passive_ros: Union[float, numpy.ndarray], passive_hpua: Union[float, numpy.ndarray], passive_fli: Union[float, numpy.ndarray], passive_fl: Union[float, numpy.ndarray], crown_ros: Union[float, numpy.ndarray], crown_hpua: Union[float, numpy.ndarray], crown_fli: Union[float, numpy.ndarray], crown_fl: Union[float, numpy.ndarray]) -> dict",
+      "signature": "(is_surface_fire: Union[bool, np.ndarray], is_passive_crown: Union[bool, np.ndarray], surface_ros: Union[float, np.ndarray], surface_hpua: Union[float, np.ndarray], surface_fli: Union[float, np.ndarray], passive_ros: Union[float, np.ndarray], passive_hpua: Union[float, np.ndarray], passive_fli: Union[float, np.ndarray], passive_fl: Union[float, np.ndarray], crown_ros: Union[float, np.ndarray], crown_hpua: Union[float, np.ndarray], crown_fli: Union[float, np.ndarray], crown_fl: Union[float, np.ndarray]) -> dict",
       "status": "planned"
     },
     {
@@ -1358,7 +1358,7 @@
       "python_name": "behave_fire.components.crown.calculate_critical_crown_fire_spread_rate",
       "role": "computation or state",
       "rust_core": "crown::calculate_critical_crown_fire_spread_rate",
-      "signature": "(canopy_bulk_density: Union[float, numpy.ndarray]) -> numpy.ndarray",
+      "signature": "(canopy_bulk_density: Union[float, np.ndarray]) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -1370,7 +1370,7 @@
       "python_name": "behave_fire.components.crown.calculate_critical_surface_fireline_intensity",
       "role": "computation or state",
       "rust_core": "crown::calculate_critical_surface_fireline_intensity",
-      "signature": "(canopy_base_height: Union[float, numpy.ndarray], moisture_foliar: Union[float, numpy.ndarray]) -> numpy.ndarray",
+      "signature": "(canopy_base_height: Union[float, np.ndarray], moisture_foliar: Union[float, np.ndarray]) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -1382,7 +1382,7 @@
       "python_name": "behave_fire.components.crown.calculate_crown_fire_ratios",
       "role": "computation or state",
       "rust_core": "crown::calculate_crown_fire_ratios",
-      "signature": "(surface_fli: Union[float, numpy.ndarray], crown_ros: Union[float, numpy.ndarray], critical_surface_fli: Union[float, numpy.ndarray], critical_crown_ros: Union[float, numpy.ndarray]) -> dict",
+      "signature": "(surface_fli: Union[float, np.ndarray], crown_ros: Union[float, np.ndarray], critical_surface_fli: Union[float, np.ndarray], critical_crown_ros: Union[float, np.ndarray]) -> dict",
       "status": "planned"
     },
     {
@@ -1394,7 +1394,7 @@
       "python_name": "behave_fire.components.crown.calculate_crown_fraction_burned",
       "role": "computation or state",
       "rust_core": "crown::calculate_crown_fraction_burned",
-      "signature": "(surface_ros: Union[float, numpy.ndarray], surface_critical_ros: Union[float, numpy.ndarray], crowning_surface_ros: Union[float, numpy.ndarray]) -> numpy.ndarray",
+      "signature": "(surface_ros: Union[float, np.ndarray], surface_critical_ros: Union[float, np.ndarray], crowning_surface_ros: Union[float, np.ndarray]) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -1406,7 +1406,7 @@
       "python_name": "behave_fire.components.crown.calculate_crown_heat_and_intensity",
       "role": "computation or state",
       "rust_core": "crown::calculate_crown_heat_and_intensity",
-      "signature": "(surface_hpua: Union[float, numpy.ndarray], crown_ros: Union[float, numpy.ndarray], canopy_base_height: Union[float, numpy.ndarray], canopy_height: Union[float, numpy.ndarray], canopy_bulk_density: Union[float, numpy.ndarray]) -> dict",
+      "signature": "(surface_hpua: Union[float, np.ndarray], crown_ros: Union[float, np.ndarray], canopy_base_height: Union[float, np.ndarray], canopy_height: Union[float, np.ndarray], canopy_bulk_density: Union[float, np.ndarray]) -> dict",
       "status": "planned"
     },
     {
@@ -1418,7 +1418,7 @@
       "python_name": "behave_fire.components.crown.calculate_crown_surface_fire",
       "role": "computation or state",
       "rust_core": "crown::calculate_crown_surface_fire",
-      "signature": "(lut: dict, S: tuple, m1h: Union[float, numpy.ndarray], m10h: Union[float, numpy.ndarray], m100h: Union[float, numpy.ndarray], mlh: Union[float, numpy.ndarray], mlw: Union[float, numpy.ndarray], wind_speed: Union[float, numpy.ndarray], wind_speed_units: int, wind_direction: Union[float, numpy.ndarray], wind_orientation_mode: str, slope_deg: Union[float, numpy.ndarray], aspect: Union[float, numpy.ndarray], canopy_height: Union[float, numpy.ndarray]) -> dict",
+      "signature": "(lut: dict, S: tuple, m1h: Union[float, np.ndarray], m10h: Union[float, np.ndarray], m100h: Union[float, np.ndarray], mlh: Union[float, np.ndarray], mlw: Union[float, np.ndarray], wind_speed: Union[float, np.ndarray], wind_speed_units: int, wind_direction: Union[float, np.ndarray], wind_orientation_mode: str, slope_deg: Union[float, np.ndarray], aspect: Union[float, np.ndarray], canopy_height: Union[float, np.ndarray]) -> dict",
       "status": "planned"
     },
     {
@@ -1430,7 +1430,7 @@
       "python_name": "behave_fire.components.crown.calculate_crowning_surface_fire_spread_rate",
       "role": "computation or state",
       "rust_core": "crown::calculate_crowning_surface_fire_spread_rate",
-      "signature": "(ri_crown: Union[float, numpy.ndarray], ib_crown: dict, critical_crown_ros: Union[float, numpy.ndarray], S: tuple, canopy_height: Union[float, numpy.ndarray]) -> numpy.ndarray",
+      "signature": "(ri_crown: Union[float, np.ndarray], ib_crown: dict, critical_crown_ros: Union[float, np.ndarray], S: tuple, canopy_height: Union[float, np.ndarray]) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -1442,7 +1442,7 @@
       "python_name": "behave_fire.components.crown.calculate_passive_crown_fire_behavior",
       "role": "computation or state",
       "rust_core": "crown::calculate_passive_crown_fire_behavior",
-      "signature": "(surface_ros: Union[float, numpy.ndarray], surface_hpua: Union[float, numpy.ndarray], crown_ros: Union[float, numpy.ndarray], canopy_hpua: Union[float, numpy.ndarray], cfb: Union[float, numpy.ndarray]) -> dict",
+      "signature": "(surface_ros: Union[float, np.ndarray], surface_hpua: Union[float, np.ndarray], crown_ros: Union[float, np.ndarray], canopy_hpua: Union[float, np.ndarray], cfb: Union[float, np.ndarray]) -> dict",
       "status": "planned"
     },
     {
@@ -1454,7 +1454,7 @@
       "python_name": "behave_fire.components.crown.calculate_surface_fire_critical_spread_rate",
       "role": "computation or state",
       "rust_core": "crown::calculate_surface_fire_critical_spread_rate",
-      "signature": "(critical_surface_fli: Union[float, numpy.ndarray], surface_hpua: Union[float, numpy.ndarray]) -> numpy.ndarray",
+      "signature": "(critical_surface_fli: Union[float, np.ndarray], surface_hpua: Union[float, np.ndarray]) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -1466,7 +1466,7 @@
       "python_name": "behave_fire.components.crown.classify_crown_fire_type",
       "role": "computation or state",
       "rust_core": "crown::classify_crown_fire_type",
-      "signature": "(transition_ratio: Union[float, numpy.ndarray], active_ratio: Union[float, numpy.ndarray]) -> dict",
+      "signature": "(transition_ratio: Union[float, np.ndarray], active_ratio: Union[float, np.ndarray]) -> dict",
       "status": "planned"
     },
     {
@@ -1478,7 +1478,7 @@
       "python_name": "behave_fire.components.crown.coerce_crown_fire_inputs",
       "role": "Python array adaptation with native data transformation counterpart",
       "rust_core": "crown::coerce_crown_fire_inputs",
-      "signature": "(fuel_model_grid: Union[int, numpy.ndarray], wind_speed: Union[float, numpy.ndarray], wind_direction: Union[float, numpy.ndarray], slope: Union[float, numpy.ndarray], slope_units: int = 0, aspect: Union[float, numpy.ndarray] = 0.0, canopy_base_height: Union[float, numpy.ndarray] = 0.0, canopy_height: Union[float, numpy.ndarray] = 0.0, canopy_bulk_density: Union[float, numpy.ndarray] = 0.0, moisture_foliar: Union[float, numpy.ndarray] = 100.0) -> dict",
+      "signature": "(fuel_model_grid: Union[int, np.ndarray], wind_speed: Union[float, np.ndarray], wind_direction: Union[float, np.ndarray], slope: Union[float, np.ndarray], slope_units: int=0, aspect: Union[float, np.ndarray]=0.0, canopy_base_height: Union[float, np.ndarray]=0.0, canopy_height: Union[float, np.ndarray]=0.0, canopy_bulk_density: Union[float, np.ndarray]=0.0, moisture_foliar: Union[float, np.ndarray]=100.0) -> dict",
       "status": "planned"
     },
     {
@@ -1502,7 +1502,7 @@
       "python_name": "behave_fire.components.crown.run_crown_fire",
       "role": "computation or state",
       "rust_core": "crown::run_crown_fire",
-      "signature": "(surface_results: dict, lut: dict, fuel_model_grid: Union[int, numpy.ndarray], m1h: Union[float, numpy.ndarray], m10h: Union[float, numpy.ndarray], m100h: Union[float, numpy.ndarray], mlh: Union[float, numpy.ndarray], mlw: Union[float, numpy.ndarray], wind_speed: Union[float, numpy.ndarray], wind_speed_units: int, wind_direction: Union[float, numpy.ndarray], wind_orientation_mode: str, slope: Union[float, numpy.ndarray], slope_units: int = 0, aspect: Union[float, numpy.ndarray] = 0.0, canopy_base_height: Union[float, numpy.ndarray] = 0.0, canopy_height: Union[float, numpy.ndarray] = 0.0, canopy_bulk_density: Union[float, numpy.ndarray] = 0.0, moisture_foliar: Union[float, numpy.ndarray] = 100.0) -> dict",
+      "signature": "(surface_results: dict, lut: dict, fuel_model_grid: Union[int, np.ndarray], m1h: Union[float, np.ndarray], m10h: Union[float, np.ndarray], m100h: Union[float, np.ndarray], mlh: Union[float, np.ndarray], mlw: Union[float, np.ndarray], wind_speed: Union[float, np.ndarray], wind_speed_units: int, wind_direction: Union[float, np.ndarray], wind_orientation_mode: str, slope: Union[float, np.ndarray], slope_units: int=0, aspect: Union[float, np.ndarray]=0.0, canopy_base_height: Union[float, np.ndarray]=0.0, canopy_height: Union[float, np.ndarray]=0.0, canopy_bulk_density: Union[float, np.ndarray]=0.0, moisture_foliar: Union[float, np.ndarray]=100.0) -> dict",
       "status": "planned"
     },
     {
@@ -1514,7 +1514,7 @@
       "python_name": "behave_fire.components.fine_dead_fuel_moisture_tool.calculate_fine_dead_fuel_moisture",
       "role": "computation or state",
       "rust_core": "fine_dead_fuel_moisture::calculate_fine_dead_fuel_moisture",
-      "signature": "(dry_bulb_i: Union[int, numpy.ndarray], rh_i: Union[int, numpy.ndarray], slope_i: Union[int, numpy.ndarray], aspect_i: Union[int, numpy.ndarray], shading_i: Union[int, numpy.ndarray], month_i: Union[int, numpy.ndarray], elev_i: Union[int, numpy.ndarray], time_i: Union[int, numpy.ndarray]) -> numpy.ndarray",
+      "signature": "(dry_bulb_i: Union[int, np.ndarray], rh_i: Union[int, np.ndarray], slope_i: Union[int, np.ndarray], aspect_i: Union[int, np.ndarray], shading_i: Union[int, np.ndarray], month_i: Union[int, np.ndarray], elev_i: Union[int, np.ndarray], time_i: Union[int, np.ndarray]) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -1999,7 +1999,7 @@
       "python_name": "behave_fire.components.fuel_models_array.build_fuel_lookup_arrays",
       "role": "Python array adaptation with native data transformation counterpart",
       "rust_core": "fuel_models::build_fuel_lookup_arrays",
-      "signature": "(fuel_models: behave_fire.components.fuel_models.FuelModels) -> dict",
+      "signature": "(fuel_models: FuelModels) -> dict",
       "status": "planned"
     },
     {
@@ -2011,7 +2011,7 @@
       "python_name": "behave_fire.components.ignite.calculate_firebrand_ignition_probability",
       "role": "computation or state",
       "rust_core": "ignite::calculate_firebrand_ignition_probability",
-      "signature": "(air_temp_f: Union[float, numpy.ndarray], sun_shade_fraction: Union[float, numpy.ndarray], moisture_1h_fraction: Union[float, numpy.ndarray]) -> numpy.ndarray",
+      "signature": "(air_temp_f: Union[float, np.ndarray], sun_shade_fraction: Union[float, np.ndarray], moisture_1h_fraction: Union[float, np.ndarray]) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -2021,7 +2021,7 @@
       "python_name": "behave_fire.components.ignite.calculate_fuel_temperature",
       "role": "computation or state",
       "rust_core": "ignite::calculate_fuel_temperature",
-      "signature": "(air_temp_f: Union[float, numpy.ndarray], sun_shade_fraction: Union[float, numpy.ndarray]) -> numpy.ndarray",
+      "signature": "(air_temp_f: Union[float, np.ndarray], sun_shade_fraction: Union[float, np.ndarray]) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -2033,7 +2033,7 @@
       "python_name": "behave_fire.components.ignite.calculate_lightning_ignition_probability",
       "role": "computation or state",
       "rust_core": "ignite::calculate_lightning_ignition_probability",
-      "signature": "(fuel_bed_type_grid: Union[int, numpy.ndarray], moisture_100h_fraction: Union[float, numpy.ndarray], duff_depth_inches: Union[float, numpy.ndarray], charge_type: int) -> numpy.ndarray",
+      "signature": "(fuel_bed_type_grid: Union[int, np.ndarray], moisture_100h_fraction: Union[float, np.ndarray], duff_depth_inches: Union[float, np.ndarray], charge_type: int) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -2045,7 +2045,7 @@
       "python_name": "behave_fire.components.mortality.build_mortality_lookup",
       "role": "computation or state",
       "rust_core": "mortality::build_mortality_lookup",
-      "signature": "(species_master_table: Optional[ForwardRef('SpeciesMasterTable')] = None) -> numpy.ndarray",
+      "signature": "(species_master_table: Optional['SpeciesMasterTable']=None) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -2057,7 +2057,7 @@
       "python_name": "behave_fire.components.mortality.calculate_crown_scorch_mortality",
       "role": "computation or state",
       "rust_core": "mortality::calculate_crown_scorch_mortality",
-      "signature": "(scorch_height_ft: Union[float, numpy.ndarray], tree_height_ft: Union[float, numpy.ndarray], crown_ratio: Union[float, numpy.ndarray], dbh_inches: Union[float, numpy.ndarray], equation_number_grid: Union[int, numpy.ndarray], coeffs: numpy.ndarray) -> dict",
+      "signature": "(scorch_height_ft: Union[float, np.ndarray], tree_height_ft: Union[float, np.ndarray], crown_ratio: Union[float, np.ndarray], dbh_inches: Union[float, np.ndarray], equation_number_grid: Union[int, np.ndarray], coeffs: np.ndarray) -> dict",
       "status": "planned"
     },
     {
@@ -2069,7 +2069,7 @@
       "python_name": "behave_fire.components.mortality.calculate_scorch_height",
       "role": "computation or state",
       "rust_core": "mortality::calculate_scorch_height",
-      "signature": "(fireline_intensity_btu_ft_s: Union[float, numpy.ndarray], midflame_wind_mph: Union[float, numpy.ndarray], air_temp_f: Union[float, numpy.ndarray]) -> numpy.ndarray",
+      "signature": "(fireline_intensity_btu_ft_s: Union[float, np.ndarray], midflame_wind_mph: Union[float, np.ndarray], air_temp_f: Union[float, np.ndarray]) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -2081,7 +2081,7 @@
       "python_name": "behave_fire.components.safety.calculate_safety_zone",
       "role": "computation or state",
       "rust_core": "safety::calculate_safety_zone",
-      "signature": "(flame_height_ft: Union[float, numpy.ndarray], number_of_personnel: Union[int, float, numpy.ndarray], area_per_person_sqft: Union[float, numpy.ndarray], number_of_equipment: Union[int, float, numpy.ndarray], area_per_equipment_sqft: Union[float, numpy.ndarray]) -> dict",
+      "signature": "(flame_height_ft: Union[float, np.ndarray], number_of_personnel: Union[int, float, np.ndarray], area_per_person_sqft: Union[float, np.ndarray], number_of_equipment: Union[int, float, np.ndarray], area_per_equipment_sqft: Union[float, np.ndarray]) -> dict",
       "status": "planned"
     },
     {
@@ -2264,7 +2264,7 @@
       "python_name": "behave_fire.components.species_master_table.CrownDamageEquationCode",
       "role": "computation or state",
       "rust_core": "species::CrownDamageEquationCode",
-      "signature": "(*values)",
+      "signature": "(value)",
       "status": "planned"
     },
     {
@@ -2280,7 +2280,7 @@
       "python_name": "behave_fire.components.species_master_table.EquationType",
       "role": "computation or state",
       "rust_core": "species::EquationType",
-      "signature": "(*values)",
+      "signature": "(value)",
       "status": "planned"
     },
     {
@@ -2302,7 +2302,7 @@
       "python_name": "behave_fire.components.species_master_table.GACC",
       "role": "computation or state",
       "rust_core": "species::GACC",
-      "signature": "(*values)",
+      "signature": "(value)",
       "status": "planned"
     },
     {
@@ -2477,7 +2477,7 @@
       "python_name": "behave_fire.components.species_master_table.SpeciesMasterTableRecord",
       "role": "computation or state",
       "rust_core": "species::SpeciesMasterTableRecord",
-      "signature": "(species_code='', scientific_name='', common_name='', mortality_equation_number=-1, bark_equation_number=-1, crown_coefficient_code=0, alaska=False, california=False, eastern_area=False, great_basin=False, northern_rockies=False, northwest=False, rocky_mountain=False, southern_area=False, southwest=False, equation_type=<EquationType.NotSet: -1>, crown_damage_equation_code=<CrownDamageEquationCode.NotSet: -1>)",
+      "signature": "(species_code='', scientific_name='', common_name='', mortality_equation_number=-1, bark_equation_number=-1, crown_coefficient_code=0, alaska=False, california=False, eastern_area=False, great_basin=False, northern_rockies=False, northwest=False, rocky_mountain=False, southern_area=False, southwest=False, equation_type=EquationType.NotSet, crown_damage_equation_code=CrownDamageEquationCode.NotSet)",
       "status": "planned"
     },
     {
@@ -2487,7 +2487,7 @@
       "python_name": "behave_fire.components.species_master_table.SpeciesMasterTableRecord.__init__",
       "role": "computation or state",
       "rust_core": "species::SpeciesMasterTableRecord::__init__",
-      "signature": "(self, species_code='', scientific_name='', common_name='', mortality_equation_number=-1, bark_equation_number=-1, crown_coefficient_code=0, alaska=False, california=False, eastern_area=False, great_basin=False, northern_rockies=False, northwest=False, rocky_mountain=False, southern_area=False, southwest=False, equation_type=<EquationType.NotSet: -1>, crown_damage_equation_code=<CrownDamageEquationCode.NotSet: -1>)",
+      "signature": "(self, species_code='', scientific_name='', common_name='', mortality_equation_number=-1, bark_equation_number=-1, crown_coefficient_code=0, alaska=False, california=False, eastern_area=False, great_basin=False, northern_rockies=False, northwest=False, rocky_mountain=False, southern_area=False, southwest=False, equation_type=EquationType.NotSet, crown_damage_equation_code=CrownDamageEquationCode.NotSet)",
       "status": "planned"
     },
     {
@@ -2519,7 +2519,7 @@
       "python_name": "behave_fire.components.spot.calculate_spotting_from_burning_pile",
       "role": "computation or state",
       "rust_core": "spot::calculate_spotting_from_burning_pile",
-      "signature": "(flame_height_ft: Union[float, numpy.ndarray], wind_mph: Union[float, numpy.ndarray], cover_height_ft: Union[float, numpy.ndarray]) -> numpy.ndarray",
+      "signature": "(flame_height_ft: Union[float, np.ndarray], wind_mph: Union[float, np.ndarray], cover_height_ft: Union[float, np.ndarray]) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -2531,7 +2531,7 @@
       "python_name": "behave_fire.components.spot.calculate_spotting_from_surface_fire",
       "role": "computation or state",
       "rust_core": "spot::calculate_spotting_from_surface_fire",
-      "signature": "(flame_length_ft: Union[float, numpy.ndarray], wind_mph: Union[float, numpy.ndarray], cover_height_ft: Union[float, numpy.ndarray]) -> numpy.ndarray",
+      "signature": "(flame_length_ft: Union[float, np.ndarray], wind_mph: Union[float, np.ndarray], cover_height_ft: Union[float, np.ndarray]) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -2543,7 +2543,7 @@
       "python_name": "behave_fire.components.spot.calculate_spotting_from_torching_trees",
       "role": "computation or state",
       "rust_core": "spot::calculate_spotting_from_torching_trees",
-      "signature": "(dbh_in: Union[float, numpy.ndarray], height_ft: Union[float, numpy.ndarray], count: Union[int, float, numpy.ndarray], wind_mph: Union[float, numpy.ndarray], cover_height_ft: Union[float, numpy.ndarray]) -> numpy.ndarray",
+      "signature": "(dbh_in: Union[float, np.ndarray], height_ft: Union[float, np.ndarray], count: Union[int, float, np.ndarray], wind_mph: Union[float, np.ndarray], cover_height_ft: Union[float, np.ndarray]) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -2555,7 +2555,7 @@
       "python_name": "behave_fire.components.surface.build_particle_arrays",
       "role": "computation or state",
       "rust_core": "surface::build_particle_arrays",
-      "signature": "(lut: dict, fuel_model_grid: Union[int, numpy.ndarray], m1h: Union[float, numpy.ndarray], m10h: Union[float, numpy.ndarray], m100h: Union[float, numpy.ndarray], mlh: Union[float, numpy.ndarray], mlw: Union[float, numpy.ndarray]) -> dict",
+      "signature": "(lut: dict, fuel_model_grid: Union[int, np.ndarray], m1h: Union[float, np.ndarray], m10h: Union[float, np.ndarray], m100h: Union[float, np.ndarray], mlh: Union[float, np.ndarray], mlw: Union[float, np.ndarray]) -> dict",
       "status": "planned"
     },
     {
@@ -2567,7 +2567,7 @@
       "python_name": "behave_fire.components.surface.calculate_backing_spread_rate",
       "role": "computation or state",
       "rust_core": "surface::calculate_backing_spread_rate",
-      "signature": "(spread_rate: Union[float, numpy.ndarray], eccentricity: Union[float, numpy.ndarray]) -> numpy.ndarray",
+      "signature": "(spread_rate: Union[float, np.ndarray], eccentricity: Union[float, np.ndarray]) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -2579,7 +2579,7 @@
       "python_name": "behave_fire.components.surface.calculate_direction_of_max_spread",
       "role": "computation or state",
       "rust_core": "surface::calculate_direction_of_max_spread",
-      "signature": "(x_component: Union[float, numpy.ndarray], y_component: Union[float, numpy.ndarray], rate_vector: Union[float, numpy.ndarray], wind_orientation_mode: str, aspect: Union[float, numpy.ndarray] = 0.0) -> numpy.ndarray",
+      "signature": "(x_component: Union[float, np.ndarray], y_component: Union[float, np.ndarray], rate_vector: Union[float, np.ndarray], wind_orientation_mode: str, aspect: Union[float, np.ndarray]=0.0) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -2591,7 +2591,7 @@
       "python_name": "behave_fire.components.surface.calculate_eccentricity",
       "role": "computation or state",
       "rust_core": "surface::calculate_eccentricity",
-      "signature": "(fire_length_to_width_ratio: Union[float, numpy.ndarray]) -> numpy.ndarray",
+      "signature": "(fire_length_to_width_ratio: Union[float, np.ndarray]) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -2603,7 +2603,7 @@
       "python_name": "behave_fire.components.surface.calculate_effective_wind_speed",
       "role": "computation or state",
       "rust_core": "surface::calculate_effective_wind_speed",
-      "signature": "(spread_rate: Union[float, numpy.ndarray], no_wind_no_slope_spread_rate: Union[float, numpy.ndarray], wind_b: Union[float, numpy.ndarray], wind_c: Union[float, numpy.ndarray], relative_packing_ratio: Union[float, numpy.ndarray], wind_e: Union[float, numpy.ndarray]) -> numpy.ndarray",
+      "signature": "(spread_rate: Union[float, np.ndarray], no_wind_no_slope_spread_rate: Union[float, np.ndarray], wind_b: Union[float, np.ndarray], wind_c: Union[float, np.ndarray], relative_packing_ratio: Union[float, np.ndarray], wind_e: Union[float, np.ndarray]) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -2615,7 +2615,7 @@
       "python_name": "behave_fire.components.surface.calculate_fire_area",
       "role": "computation or state",
       "rust_core": "surface::calculate_fire_area",
-      "signature": "(forward_ros: Union[float, numpy.ndarray], backing_ros: Union[float, numpy.ndarray], lwr: Union[float, numpy.ndarray], elapsed_min: float, is_crown: bool = False) -> numpy.ndarray",
+      "signature": "(forward_ros: Union[float, np.ndarray], backing_ros: Union[float, np.ndarray], lwr: Union[float, np.ndarray], elapsed_min: float, is_crown: bool=False) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -2627,7 +2627,7 @@
       "python_name": "behave_fire.components.surface.calculate_fire_length",
       "role": "computation or state",
       "rust_core": "surface::calculate_fire_length",
-      "signature": "(forward_ros: Union[float, numpy.ndarray], backing_ros: Union[float, numpy.ndarray], elapsed_min: float) -> numpy.ndarray",
+      "signature": "(forward_ros: Union[float, np.ndarray], backing_ros: Union[float, np.ndarray], elapsed_min: float) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -2639,7 +2639,7 @@
       "python_name": "behave_fire.components.surface.calculate_fire_length_to_width_ratio",
       "role": "computation or state",
       "rust_core": "surface::calculate_fire_length_to_width_ratio",
-      "signature": "(effective_wind_speed: Union[float, numpy.ndarray]) -> numpy.ndarray",
+      "signature": "(effective_wind_speed: Union[float, np.ndarray]) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -2651,7 +2651,7 @@
       "python_name": "behave_fire.components.surface.calculate_fire_perimeter",
       "role": "computation or state",
       "rust_core": "surface::calculate_fire_perimeter",
-      "signature": "(forward_ros: Union[float, numpy.ndarray], backing_ros: Union[float, numpy.ndarray], lwr: Union[float, numpy.ndarray], elapsed_min: float, is_crown: bool = False) -> numpy.ndarray",
+      "signature": "(forward_ros: Union[float, np.ndarray], backing_ros: Union[float, np.ndarray], lwr: Union[float, np.ndarray], elapsed_min: float, is_crown: bool=False) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -2663,7 +2663,7 @@
       "python_name": "behave_fire.components.surface.calculate_fire_width",
       "role": "computation or state",
       "rust_core": "surface::calculate_fire_width",
-      "signature": "(forward_ros: Union[float, numpy.ndarray], backing_ros: Union[float, numpy.ndarray], lwr: Union[float, numpy.ndarray], elapsed_min: float) -> numpy.ndarray",
+      "signature": "(forward_ros: Union[float, np.ndarray], backing_ros: Union[float, np.ndarray], lwr: Union[float, np.ndarray], elapsed_min: float) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -2675,7 +2675,7 @@
       "python_name": "behave_fire.components.surface.calculate_fireline_intensity",
       "role": "computation or state",
       "rust_core": "surface::calculate_fireline_intensity",
-      "signature": "(spread_rate: Union[float, numpy.ndarray], heat_per_unit_area: Union[float, numpy.ndarray]) -> numpy.ndarray",
+      "signature": "(spread_rate: Union[float, np.ndarray], heat_per_unit_area: Union[float, np.ndarray]) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -2687,7 +2687,7 @@
       "python_name": "behave_fire.components.surface.calculate_flame_length",
       "role": "computation or state",
       "rust_core": "surface::calculate_flame_length",
-      "signature": "(fireline_intensity: Union[float, numpy.ndarray]) -> numpy.ndarray",
+      "signature": "(fireline_intensity: Union[float, np.ndarray]) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -2699,7 +2699,7 @@
       "python_name": "behave_fire.components.surface.calculate_flanking_spread_rate",
       "role": "computation or state",
       "rust_core": "surface::calculate_flanking_spread_rate",
-      "signature": "(spread_rate: Union[float, numpy.ndarray], backing_spread_rate: Union[float, numpy.ndarray], fire_length_to_width_ratio: Union[float, numpy.ndarray]) -> numpy.ndarray",
+      "signature": "(spread_rate: Union[float, np.ndarray], backing_spread_rate: Union[float, np.ndarray], fire_length_to_width_ratio: Union[float, np.ndarray]) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -2711,7 +2711,7 @@
       "python_name": "behave_fire.components.surface.calculate_forward_spread_rate",
       "role": "computation or state",
       "rust_core": "surface::calculate_forward_spread_rate",
-      "signature": "(no_wind_no_slope_spread_rate: Union[float, numpy.ndarray], rate_vector: Union[float, numpy.ndarray]) -> numpy.ndarray",
+      "signature": "(no_wind_no_slope_spread_rate: Union[float, np.ndarray], rate_vector: Union[float, np.ndarray]) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -2735,7 +2735,7 @@
       "python_name": "behave_fire.components.surface.calculate_heat_per_unit_area",
       "role": "computation or state",
       "rust_core": "surface::calculate_heat_per_unit_area",
-      "signature": "(reaction_intensity: Union[float, numpy.ndarray], residence_time: Union[float, numpy.ndarray]) -> numpy.ndarray",
+      "signature": "(reaction_intensity: Union[float, np.ndarray], residence_time: Union[float, np.ndarray]) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -2747,7 +2747,7 @@
       "python_name": "behave_fire.components.surface.calculate_midflame_wind_speed",
       "role": "computation or state",
       "rust_core": "surface::calculate_midflame_wind_speed",
-      "signature": "(waf: Union[float, numpy.ndarray], twenty_foot_wind_speed: Union[float, numpy.ndarray]) -> numpy.ndarray",
+      "signature": "(waf: Union[float, np.ndarray], twenty_foot_wind_speed: Union[float, np.ndarray]) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -2759,7 +2759,7 @@
       "python_name": "behave_fire.components.surface.calculate_no_wind_no_slope_spread_rate",
       "role": "computation or state",
       "rust_core": "surface::calculate_no_wind_no_slope_spread_rate",
-      "signature": "(ri: Union[float, numpy.ndarray], propagating_flux: Union[float, numpy.ndarray], heat_sink: Union[float, numpy.ndarray]) -> numpy.ndarray",
+      "signature": "(ri: Union[float, np.ndarray], propagating_flux: Union[float, np.ndarray], heat_sink: Union[float, np.ndarray]) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -2771,7 +2771,7 @@
       "python_name": "behave_fire.components.surface.calculate_reaction_intensity",
       "role": "computation or state",
       "rust_core": "surface::calculate_reaction_intensity",
-      "signature": "(ib: dict) -> numpy.ndarray",
+      "signature": "(ib: dict) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -2783,7 +2783,7 @@
       "python_name": "behave_fire.components.surface.calculate_reaction_intensity_output",
       "role": "computation or state",
       "rust_core": "surface::calculate_reaction_intensity_output",
-      "signature": "(reaction_intensity: Union[float, numpy.ndarray]) -> numpy.ndarray",
+      "signature": "(reaction_intensity: Union[float, np.ndarray]) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -2795,7 +2795,7 @@
       "python_name": "behave_fire.components.surface.calculate_residence_time",
       "role": "computation or state",
       "rust_core": "surface::calculate_residence_time",
-      "signature": "(sigma: Union[float, numpy.ndarray]) -> numpy.ndarray",
+      "signature": "(sigma: Union[float, np.ndarray]) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -2807,7 +2807,7 @@
       "python_name": "behave_fire.components.surface.calculate_slope_phi",
       "role": "computation or state",
       "rust_core": "surface::calculate_slope_phi",
-      "signature": "(slope: Union[float, numpy.ndarray], slope_units: int, packing_ratio: Union[float, numpy.ndarray], reaction_intensity: Union[float, numpy.ndarray]) -> numpy.ndarray",
+      "signature": "(slope: Union[float, np.ndarray], slope_units: int, packing_ratio: Union[float, np.ndarray], reaction_intensity: Union[float, np.ndarray]) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -2819,7 +2819,7 @@
       "python_name": "behave_fire.components.surface.calculate_surface_rate_vector",
       "role": "computation or state",
       "rust_core": "surface::calculate_surface_rate_vector",
-      "signature": "(no_wind_no_slope_spread_rate: Union[float, numpy.ndarray], wind_phi: Union[float, numpy.ndarray], slope_phi: Union[float, numpy.ndarray], wind_direction: Union[float, numpy.ndarray], wind_orientation_mode: str, aspect: Union[float, numpy.ndarray] = 0.0) -> dict",
+      "signature": "(no_wind_no_slope_spread_rate: Union[float, np.ndarray], wind_phi: Union[float, np.ndarray], slope_phi: Union[float, np.ndarray], wind_direction: Union[float, np.ndarray], wind_orientation_mode: str, aspect: Union[float, np.ndarray]=0.0) -> dict",
       "status": "planned"
     },
     {
@@ -2831,7 +2831,7 @@
       "python_name": "behave_fire.components.surface.calculate_surface_wind_adjustment_factor",
       "role": "computation or state",
       "rust_core": "surface::calculate_surface_wind_adjustment_factor",
-      "signature": "(canopy_cover: Union[float, numpy.ndarray], canopy_height: Union[float, numpy.ndarray], crown_ratio: Union[float, numpy.ndarray], depth: Union[float, numpy.ndarray], waf_method: str = 'UseCrownRatio', user_waf: Union[float, numpy.ndarray, NoneType] = None) -> numpy.ndarray",
+      "signature": "(canopy_cover: Union[float, np.ndarray], canopy_height: Union[float, np.ndarray], crown_ratio: Union[float, np.ndarray], depth: Union[float, np.ndarray], waf_method: str='UseCrownRatio', user_waf: Union[float, np.ndarray, None]=None) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -2843,7 +2843,7 @@
       "python_name": "behave_fire.components.surface.calculate_surface_wind_coefficients",
       "role": "computation or state",
       "rust_core": "surface::calculate_surface_wind_coefficients",
-      "signature": "(sigma: Union[float, numpy.ndarray]) -> dict",
+      "signature": "(sigma: Union[float, np.ndarray]) -> dict",
       "status": "planned"
     },
     {
@@ -2855,7 +2855,7 @@
       "python_name": "behave_fire.components.surface.calculate_twenty_foot_wind_speed",
       "role": "computation or state",
       "rust_core": "surface::calculate_twenty_foot_wind_speed",
-      "signature": "(wind_speed: Union[float, numpy.ndarray], wind_speed_units: int, wind_height_mode: str = 'TwentyFoot') -> numpy.ndarray",
+      "signature": "(wind_speed: Union[float, np.ndarray], wind_speed_units: int, wind_height_mode: str='TwentyFoot') -> np.ndarray",
       "status": "planned"
     },
     {
@@ -2865,7 +2865,7 @@
       "python_name": "behave_fire.components.surface.calculate_wind_adjustment_factor",
       "role": "computation or state",
       "rust_core": "surface::calculate_wind_adjustment_factor",
-      "signature": "(canopy_cover: Union[float, numpy.ndarray], canopy_height: Union[float, numpy.ndarray], crown_ratio: Union[float, numpy.ndarray], depth: Union[float, numpy.ndarray]) -> numpy.ndarray",
+      "signature": "(canopy_cover: Union[float, np.ndarray], canopy_height: Union[float, np.ndarray], crown_ratio: Union[float, np.ndarray], depth: Union[float, np.ndarray]) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -2877,7 +2877,7 @@
       "python_name": "behave_fire.components.surface.calculate_wind_phi",
       "role": "computation or state",
       "rust_core": "surface::calculate_wind_phi",
-      "signature": "(sigma: Union[float, numpy.ndarray], midflame_wind_speed: Union[float, numpy.ndarray], wind_b: Union[float, numpy.ndarray], wind_c: Union[float, numpy.ndarray], relative_packing_ratio: Union[float, numpy.ndarray], wind_e: Union[float, numpy.ndarray]) -> numpy.ndarray",
+      "signature": "(sigma: Union[float, np.ndarray], midflame_wind_speed: Union[float, np.ndarray], wind_b: Union[float, np.ndarray], wind_c: Union[float, np.ndarray], relative_packing_ratio: Union[float, np.ndarray], wind_e: Union[float, np.ndarray]) -> np.ndarray",
       "status": "planned"
     },
     {
@@ -2889,7 +2889,7 @@
       "python_name": "behave_fire.components.surface.run_surface_fire",
       "role": "computation or state",
       "rust_core": "surface::run_surface_fire",
-      "signature": "(ri: Union[float, numpy.ndarray], ib: dict, wind_speed: Union[float, numpy.ndarray], wind_speed_units: int, wind_direction: Union[float, numpy.ndarray], wind_orientation_mode: str, slope: Union[float, numpy.ndarray], slope_units: int = 0, aspect: Union[float, numpy.ndarray] = 0.0, canopy_cover: Union[float, numpy.ndarray] = 0.0, canopy_height: Union[float, numpy.ndarray] = 0.0, crown_ratio: Union[float, numpy.ndarray] = 0.0, wind_height_mode: str = 'TwentyFoot', waf_method: str = 'UseCrownRatio', user_waf: Union[float, numpy.ndarray, NoneType] = None) -> dict",
+      "signature": "(ri: Union[float, np.ndarray], ib: dict, wind_speed: Union[float, np.ndarray], wind_speed_units: int, wind_direction: Union[float, np.ndarray], wind_orientation_mode: str, slope: Union[float, np.ndarray], slope_units: int=0, aspect: Union[float, np.ndarray]=0.0, canopy_cover: Union[float, np.ndarray]=0.0, canopy_height: Union[float, np.ndarray]=0.0, crown_ratio: Union[float, np.ndarray]=0.0, wind_height_mode: str='TwentyFoot', waf_method: str='UseCrownRatio', user_waf: Union[float, np.ndarray, None]=None) -> dict",
       "status": "planned"
     },
     {
@@ -2901,7 +2901,7 @@
       "python_name": "behave_fire.components.vapor_pressure_deficit_calculator.calculate_vpd",
       "role": "computation or state",
       "rust_core": "vapor_pressure_deficit::calculate_vpd",
-      "signature": "(temperature: Union[float, numpy.ndarray], temp_units: int, relative_humidity: Union[float, numpy.ndarray], rh_units: int, output_units: int = 0) -> dict",
+      "signature": "(temperature: Union[float, np.ndarray], temp_units: int, relative_humidity: Union[float, np.ndarray], rh_units: int, output_units: int=0) -> dict",
       "status": "planned"
     }
   ],

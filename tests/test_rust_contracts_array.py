@@ -107,6 +107,20 @@ def test_export_inventory_covers_facade_and_standalone_routes():
     assert entries["behave_fire.components.surface.calculate_eccentricity"]["rust_core"] == "surface::calculate_eccentricity"
 
 
+def test_export_inventory_signatures_preserve_source_annotations_and_defaults():
+    entries = {entry["python_name"]: entry for entry in _exporter().build_inventory()["entries"]}
+    assert entries["behave_fire.components.behave_units.speed_to_base"]["signature"] == (
+        "(value: Union[float, np.ndarray], units: int) -> np.ndarray")
+    for name in ("CrownDamageEquationCode", "EquationType", "GACC"):
+        assert entries[f"behave_fire.components.species_master_table.{name}"]["signature"] == "(value)"
+    assert entries["behave_fire.components.fuel_models.FuelModels.get_fuelbed_depth"]["signature"] == (
+        "(self, fuel_model_number, length_units=None)")
+    assert "moisture_foliar: Union[float, np.ndarray]=100.0" in entries[
+        "behave_fire.components.crown.coerce_crown_fire_inputs"]["signature"]
+    assert "equation_type=EquationType.NotSet" in entries[
+        "behave_fire.components.species_master_table.SpeciesMasterTableRecord"]["signature"]
+
+
 def test_export_portable_values_preserve_nonfinite_dtype_shape_and_mask():
     values = np.ma.array([[np.nan, np.inf, -np.inf, -0.0]], mask=[[0, 1, 0, 0]])
     encoded = _exporter().encode_value(values)
@@ -186,6 +200,17 @@ def test_export_science_cases_cover_lightning_equations_and_terminal_states():
     assert mixed["output"]["status"]["values"] == [3, 4, 8]
 
 
+def test_first_contract_difference_names_signature_path_and_respects_output_tolerance():
+    exporter = _exporter()
+    assert hasattr(exporter, "first_contract_difference"), "Portable drift diagnostics are missing"
+    expected = {"entries": [{"signature": "(value)"}]}
+    actual = {"entries": [{"signature": "(*values)"}]}
+    assert exporter.first_contract_difference(actual, expected) == (
+        "$.entries[0].signature: actual='(*values)', expected='(value)'")
+    assert exporter.first_contract_difference(
+        {"output": 1. + 1e-12}, {"output": 1.}) is None
+
+
 def test_float16_eccentricity_normalization_changes_overflow_contract():
     with np.errstate(all="ignore"):
         original = calculate_eccentricity(np.array([300], dtype=np.float16))
@@ -226,7 +251,8 @@ def test_reference_documents_are_deterministic_and_match_reviewed_fixtures():
     second = exporter.build_documents()
     assert first == second
     for name, document in first.items():
-        assert exporter.contracts_match(document, json.loads((ROOT / name).read_text(encoding="utf-8")))
+        expected = json.loads((ROOT / name).read_text(encoding="utf-8"))
+        assert exporter.contracts_match(document, expected), f"{name}: {exporter.first_contract_difference(document, expected)}"
         assert document["provenance"]["python_reference_sha"] == "7933789f00470c6bbfbe942dc22bdd7f74e192f9"
 
 

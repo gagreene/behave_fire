@@ -6,6 +6,8 @@ action; ``--check`` only reads fixtures and reports drift. The exporter imports
 """
 
 import argparse
+import ast
+from copy import deepcopy
 from enum import Enum
 import hashlib
 import importlib
@@ -197,6 +199,25 @@ def _context(shape=(1,), dtype="float64"):
     return values
 
 
+def _declared_signature(node, constructor=False):
+    """Render a signature from its source declaration without runtime type reprs.
+
+    :param node: Function declaration whose annotations and defaults are retained.
+    :param constructor: Whether to omit the constructor's receiver parameter.
+    :return: Canonical source signature including declared return annotation.
+    """
+    arguments = deepcopy(node.args)
+    if constructor:
+        if arguments.posonlyargs:
+            arguments.posonlyargs = arguments.posonlyargs[1:]
+        else:
+            arguments.args = arguments.args[1:]
+    signature = f"({ast.unparse(arguments)})"
+    if node.returns is not None and not constructor:
+        signature += f" -> {ast.unparse(node.returns)}"
+    return signature
+
+
 def _domain(module):
     """Map Python module names onto the planned standalone Rust modules.
 
@@ -323,6 +344,39 @@ def _registry_state(instance):
         return {"registry": "SpeciesMasterTable", "base": {"reference": "species:standard_records"},
                 "records": records}
     return {"registry": "SpeciesMasterTableRecord", "record": encode_value(instance)}
+
+
+def _source_signatures():
+    """Collect source-defined functions, methods, and constructor signatures.
+
+    :return: Canonical names mapped to signatures with unevaluated annotations.
+    """
+    signatures = {}
+
+    def collect(node, prefix):
+        """Collect one declaration and its directly declared class members.
+
+        :param node: Function or class source declaration.
+        :param prefix: Enclosing module or class name.
+        :return: None; appends declarations to the signature mapping.
+        """
+        name = f"{prefix}.{node.name}"
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            signatures[name] = _declared_signature(node)
+        elif isinstance(node, ast.ClassDef):
+            constructor = next((member for member in node.body
+                                if isinstance(member, ast.FunctionDef) and member.name == "__init__"), None)
+            signatures[name] = _declared_signature(constructor, constructor=True) if constructor else "()"
+            for member in node.body:
+                if isinstance(member, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+                    collect(member, name)
+
+    for module in _modules():
+        tree = ast.parse(Path(module.__file__).read_text(encoding="utf-8-sig"))
+        for declaration in tree.body:
+            if isinstance(declaration, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+                collect(declaration, module.__name__)
+    return signatures
 
 
 def _stateful_cases():
@@ -469,7 +523,7 @@ def build_inventory():
     aliases = {}
     # Read export declarations statically: importing the root automatic facade
     # would select a backend in future releases and invalidate this oracle.
-    import ast
+    signatures = _source_signatures()
     for path, route in ((SOURCE / "__init__.py", "behave_fire"),
                         (SOURCE / "components/__init__.py", "behave_fire.components")):
         tree = ast.parse(path.read_text(encoding="utf-8"))
@@ -489,10 +543,7 @@ def build_inventory():
         :param kind: Member category.
         :return: None; appends an inventory entry.
         """
-        try:
-            signature = str(inspect.signature(obj))
-        except (TypeError, ValueError):
-            signature = None
+        signature = signatures[name]
         parts = name.split(".")
         suffix = "::".join(parts[3:] if ".components." in name else parts[2:])
         entry = {"python_name": name, "kind": kind, "signature": signature,
@@ -503,6 +554,7 @@ def build_inventory():
         if parts[-1] in ("coerce_crown_fire_inputs", "get_surface_fire_inputs", "build_fuel_lookup_arrays"):
             entry["role"] = "Python array adaptation with native data transformation counterpart"
         if inspect.isclass(obj) and issubclass(obj, Enum):
+            entry["signature"] = "(value)"
             entry["members"] = {key: value.value for key, value in obj.__members__.items()}
             entry["kind"] = "enum"
         elif inspect.isclass(obj) and name.endswith("Enum"):
@@ -602,6 +654,44 @@ def encode_value(value):
     raise TypeError(f"Unsupported reference type: {type(value).__name__}")
 
 
+def first_contract_difference(
+        actual,
+        expected,
+        calculated=False,
+        dtype="float64",
+        path="$",
+):
+    """Locate the first mismatch using the same strict and numerical policies.
+
+    :param actual: Newly calculated portable document or value.
+    :param expected: Reviewed portable document or value.
+    :param calculated: Whether values belong to a computed output or state.
+    :param dtype: Dtype controlling floating tolerance within an output array.
+    :param path: JSON-style location of the current value.
+    :return: First differing path and values, or None when contracts agree.
+    """
+    if contracts_match(actual, expected, calculated, dtype):
+        return None
+    if type(actual) is type(expected) and isinstance(expected, dict):
+        if actual.keys() != expected.keys():
+            return f"{path}: actual keys={sorted(actual)}, expected keys={sorted(expected)}"
+        dtype = expected.get("dtype", dtype)
+        computed_fields = ("output", "state_before", "state_after", "p", "ib", "ib_crown", "ri", "ri_crown", "surface_results")
+        for key in sorted(expected):
+            difference = first_contract_difference(
+                actual[key], expected[key], calculated or key in computed_fields, dtype, f"{path}.{key}")
+            if difference is not None:
+                return difference
+    elif type(actual) is type(expected) and isinstance(expected, list):
+        if len(actual) != len(expected):
+            return f"{path}: actual length={len(actual)}, expected length={len(expected)}"
+        for index, (left, right) in enumerate(zip(actual, expected)):
+            difference = first_contract_difference(left, right, calculated, dtype, f"{path}[{index}]")
+            if difference is not None:
+                return difference
+    return f"{path}: actual={actual!r}, expected={expected!r}"
+
+
 def main(argv=None):
     """Write reviewed fixtures or check existing artifacts without modifying them.
 
@@ -618,11 +708,11 @@ def main(argv=None):
         serialized = json.dumps(document, sort_keys=True, indent=2, allow_nan=False) + "\n"
         if options.check:
             try:
-                matches = contracts_match(document, json.loads(target.read_text(encoding="utf-8")))
-            except (OSError, ValueError):
-                matches = False
-            if not matches:
-                changed.append(name)
+                difference = first_contract_difference(document, json.loads(target.read_text(encoding="utf-8")))
+            except (OSError, ValueError) as error:
+                difference = f"unreadable JSON: {error}"
+            if difference is not None:
+                changed.append(f"{name}: {difference}")
         else:
             target.parent.mkdir(parents=True, exist_ok=True)
             target.write_text(serialized, encoding="utf-8", newline="\n")
