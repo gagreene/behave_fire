@@ -1,6 +1,7 @@
 """Scoped worker settings for historical static and bound model calls."""
 from contextvars import ContextVar
 from functools import wraps
+from ._ownership import _owned_inputs
 
 _THREADS = ContextVar("behave_fire_native_threads", default=1)
 
@@ -30,7 +31,8 @@ class _ThreadedCall:
                 model = args[0] if args else kwargs.get("self")
             token = _THREADS.set(1 if model is None else model.threads)
             try:
-                return target(*args, **kwargs)
+                with _owned_inputs() as owner:
+                    return target(*owner.snapshot(args), **owner.snapshot(kwargs))
             finally:
                 _THREADS.reset(token)
 

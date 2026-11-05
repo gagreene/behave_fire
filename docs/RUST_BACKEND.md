@@ -6,7 +6,7 @@ Port the current Python calculation library to a self-sufficient Rust crate, pro
 
 Behavior reference: `behave_fire` commit `7933789f00470c6bbfbe942dc22bdd7f74e192f9`. Architecture reference: sibling `../cffdrs` at `ec7d01909b7ef00ddc359cf4ff02f15b9786a380`. Read-only reference files include its `rust/Cargo.toml`, both crate manifests, `src/cffdrs/cffbps/auto.py`, Rust facade, `tools/smoke_test_wheel.py`, and `.github/workflows/{ci,release,release-crate}.yml`.
 
-This tracked contract defines the Rust port being implemented through a dependent PR stack. Native functionality is not yet available in the contracts layer. Later layers must satisfy these contracts before advertising support. Release and registry operations require separate authorization.
+This tracked contract defines the implemented Rust backend and its dependent PR stack. Native execution is available through the explicit and automatic interfaces when the compiled extension is installed; the pure wheel retains Python execution. Release and registry operations require separate authorization.
 
 ## Chosen architecture
 
@@ -145,6 +145,13 @@ Provide public typed scalar input/result structs and computational functions for
 Propose an initial core version of `0.1.0`, subject to release authorization. Mark extensible result structs and error/status enums `#[non_exhaustive]` where practical; provide constructors/accessors and document public stages as versioned API. Use named per-field vectors for high-volume surface/crown batch results so bindings can transfer each field into NumPy without transposing an array of structs. Retain `GridOutput<R>` only for small generic results if useful; benchmark any remaining copy cost explicitly.
 
 The Python binding accepts dynamically dimensioned NumPy arrays. Normalize supported inputs and copy logical row-major values into owned buffers before releasing the GIL with `Python::detach`. Never retain Python-owned mutable array slices across detached execution. Support C-contiguous, Fortran-contiguous, sliced, reversed, broadcast, and read-only arrays according to the documented contract. Return fresh arrays with the normalized reference shapes and dtypes, including the stated float16 widening. Python inputs must remain unchanged.
+
+A public calculation spanning multiple native stages snapshots its caller arrays,
+masks, and nested containers before the first stage. The facade, field partitions,
+empty-output reconstruction, and result metadata restoration share that snapshot.
+Nested stages reuse owned buffers and views. Direction-kernel selection uses the
+original normalized operand layout before copying, preserving reversed and
+strided float32 atan2 behavior.
 
 `threads=1` is serial; `threads=0` uses available parallelism; a positive count requests that many workers, capped by actual work. Reject negative and non-integer values in Rust-facing APIs. The automatic Python route ignores `threads`, matching cffdrs. Parallelize independent cells without changing within-cell arithmetic or reduction order. Use scoped standard-library threads in the core, bounded per call; avoid a global thread pool and accidental oversubscription. Thread counts must produce identical per-cell results. Tune serial thresholds from measurements rather than copying cffdrs's 4,096-cell threshold without evidence.
 

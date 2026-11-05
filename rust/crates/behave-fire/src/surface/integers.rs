@@ -706,13 +706,17 @@ fn masked_divide(a: MaskedValue, b: MaskedValue, p: Precision) -> MaskedValue {
     let domain = original_absolute(a) * f64::MIN_POSITIVE >= original_absolute(b);
     let ufunc = a.is_numpy_scalar && b.is_masked_array;
     let mask = a.mask || b.mask || domain || (!ufunc && !raw.is_finite());
-    let value = if ufunc && domain {
+    let mut value = if ufunc && domain {
         1.0
     } else if mask && !ufunc {
         x
     } else {
         raw
     };
+    if !ufunc && !(a.is_scalar_array && b.is_scalar_array) && value == 0.0 {
+        // Match MaskedArray's cleared-result plus mask * numerator restoration.
+        value = if mask { 0.0 + x } else { raw + 0.0 * x };
+    }
     let result = MaskedValue::new(value, mask, true, p)
         .with_scalar_array(a.is_scalar_array && b.is_scalar_array)
         .with_fill_value(if a.is_masked_array {

@@ -110,6 +110,13 @@ fn check(actual: MaskedValue, expected: &Value, n: usize, context: &str) {
         );
         let b = number(&expected["values"][n]);
         let a = actual.value;
+        if a == 0.0 && b == 0.0 {
+            assert_eq!(
+                a.is_sign_negative(),
+                b.is_sign_negative(),
+                "zero sign {context}"
+            );
+        }
         if b.is_nan() {
             assert!(a.is_nan(), "{context}: {a} != NaN");
         } else if b.is_infinite() {
@@ -218,6 +225,29 @@ fn replay(cases: &Value) {
             }
         }
     }
+}
+
+#[test]
+fn comparator_rejects_zero_sign_changes_but_allows_roundoff() {
+    let expected = serde_json::json!({"values": [-0.0], "masks": [false],
+        "dtype": "float64", "masked_array": false, "scalar_array": false,
+        "numpy_scalar": false});
+    assert!(std::panic::catch_unwind(|| check(
+        MaskedValue::plain(0.0),
+        &expected,
+        0,
+        "negative control"
+    ))
+    .is_err());
+    let expected = serde_json::json!({"values": [1.0], "masks": [false],
+        "dtype": "float64", "masked_array": false, "scalar_array": false,
+        "numpy_scalar": false});
+    check(
+        MaskedValue::plain(1.0 + 1e-10),
+        &expected,
+        0,
+        "allowed roundoff",
+    );
 }
 
 #[test]

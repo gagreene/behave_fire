@@ -105,10 +105,37 @@ def _calibration_bits(value, name):
 
 
 def _call(operation, arguments):
+    """Own a public operation's inputs before its first detached native stage.
+
+    :param operation: Fully qualified explicit component operation.
+    :param arguments: Bound argument mapping in public signature order.
+    :return: Fresh result computed exclusively from the shared input snapshot.
+    """
+    from ._ownership import _owned_inputs
+
+    _validate_raw_arithmetic(operation, arguments)
+    direction_profile = 0
+    if operation == 'surface.calculate_direction_of_max_spread':
+        normalized, single = _normalize_direction(arguments)
+        shape_fields = ('x_component', 'y_component', 'rate_vector')
+        if 'north' in str(arguments['wind_orientation_mode']).lower():
+            shape_fields += ('aspect',)
+        shape = np.broadcast_shapes(*(np.shape(normalized[key]) for key in shape_fields))
+        if single and all(shape):
+            # Select using original layout: a contiguous copy can select a
+            # different NumPy float32 atan2 kernel for reversed/strided inputs.
+            direction_profile = _direction_math_profile(normalized)
+    with _owned_inputs() as owner:
+        result = _call_owned(operation, owner.snapshot(arguments), direction_profile)
+        return owner.remember(result)
+
+
+def _call_owned(operation, arguments, direction_profile):
     """Normalize structural inputs and call the owned native batch boundary.
 
     :param operation: Fully qualified explicit component operation.
     :param arguments: Bound argument mapping in public signature order.
+    :param direction_profile: Atan2 selector captured before copying original operands.
     :return: Fresh arrays in the reference result structure.
     """
     arrays = {}
@@ -325,11 +352,9 @@ def _call(operation, arguments):
     input_shapes = {key: value.shape for key, value in arrays.items()}
     arrays.update(mask_metadata)
     arrays['_simd_exp'] = np.asarray(_math_profile(), dtype=float)
-    arrays['_svml_atan2'] = np.asarray(_direction_math_profile(arguments) if direction_float32 and all(shape) else 0, dtype=float)
+    arrays['_svml_atan2'] = np.asarray(direction_profile if direction_float32 and all(shape) else 0, dtype=float)
     arrays = {key: _broadcast_buffer(value, shape) for key, value in arrays.items()}
     integers = {key: (kind, _broadcast_buffer(bits, shape)) for key, (kind, bits) in integers.items()}
-    if name == 'run_crown_fire' and 0 in shape:
-        original_arguments = _snapshot_inputs(original_arguments)
     result = _native.batch(operation, arrays, strings, shape, single, integers, threads=_THREADS.get())
     if not result and 0 in shape:
         result = {key: np.empty(shape) for key in _EMPTY_KEYS.get(name, ('',))}
@@ -635,7 +660,7 @@ def _real_coercion(operation, parameter):
     if module == 'mortality':
         return None if parameter.startswith('coefficients.') else np.float64
     if module == 'crown':
-        if name in ('run_crown_fire', 'calculate_crown_surface_fire') and (not parameter.startswith(('surface_results.', 'model.'))):
+        if name in ('coerce_crown_fire_inputs', 'run_crown_fire', 'calculate_crown_surface_fire') and (not parameter.startswith(('surface_results.', 'model.'))):
             return np.float64
         return None
     normalized = {'build_particle_arrays': ('m1h', 'm10h', 'm100h', 'mlh', 'mlw'), 'calculate_direction_of_max_spread': ('aspect',), 'calculate_fire_area': ('forward_ros', 'backing_ros', 'lwr'), 'calculate_fire_perimeter': ('forward_ros', 'backing_ros', 'lwr'), 'calculate_fire_width': ('forward_ros', 'backing_ros', 'lwr'), 'calculate_fireline_intensity': ('spread_rate', 'heat_per_unit_area'), 'calculate_forward_spread_rate': ('no_wind_no_slope_spread_rate', 'rate_vector'), 'calculate_heat_per_unit_area': ('reaction_intensity', 'residence_time'), 'calculate_midflame_wind_speed': ('waf', 'twenty_foot_wind_speed'), 'calculate_reaction_intensity_output': ('reaction_intensity',), 'calculate_slope_phi': ('slope',), 'calculate_surface_rate_vector': ('wind_direction', 'aspect'), 'calculate_surface_wind_adjustment_factor': ('canopy_cover', 'canopy_height', 'crown_ratio', 'depth', 'user_waf'), 'calculate_twenty_foot_wind_speed': ('wind_speed',), 'calculate_wind_adjustment_factor': ('canopy_cover', 'canopy_height', 'crown_ratio', 'depth'), 'run_surface_fire': ('wind_speed', 'wind_direction', 'slope', 'aspect', 'canopy_cover', 'canopy_height', 'crown_ratio', 'user_waf', 'ib.depth')}
@@ -738,28 +763,6 @@ def _restore_shape(value, shape):
     return np.array(value[selectors], copy=True).reshape(shape)
 
 
-def _snapshot_inputs(value):
-    """Own numeric inputs reused after an empty pipeline's first detached call.
-
-    :param value: Public numeric value or nested input mapping.
-    :return: Independent array and mask buffers preserving scalar kinds and shapes.
-    """
-    if isinstance(value, dict):
-        return {key: _snapshot_inputs(item) for key, item in value.items()}
-    if np.ma.isMaskedArray(value):
-        result = np.ma.array(np.ma.getdata(value).copy(), mask=np.ma.getmaskarray(value).copy(), copy=False)
-        if value._fill_value is not None:
-            result._fill_value = value._fill_value.copy()
-        return result
-    if isinstance(value, np.ndarray):
-        return value.copy()
-    if isinstance(value, tuple):
-        return tuple(_snapshot_inputs(item) for item in value)
-    if isinstance(value, list):
-        return [_snapshot_inputs(item) for item in value]
-    return value
-
-
 def _state(instance, domain, method, arguments):
     """Copy helper state into a checked native operation and restore its snapshot.
 
@@ -771,6 +774,18 @@ def _state(instance, domain, method, arguments):
     """
     arguments = {key: value for key, value in arguments.items() if key != 'self'}
     state = dict(vars(instance))
+    coerced = set()
+    if domain == 'fire_size':
+        coerced.add('elapsed_time')
+        if method == 'calculate_fire_basic_dimensions':
+            coerced.add('forward_spread_rate')
+            if arguments['wind_speed_units'] != 5:
+                coerced.add('effective_wind_speed')
+    elif domain == 'slope_tool':
+        coerced.update({'calculate_horizontal_distance': ('calculated_map_distance', 'max_slope_steepness'),
+                        'calculate_slope_from_map_measurements': ('map_distance',)}.get(method, ()))
+    _validate_raw_arithmetic(domain + '.' + method, {key: value for key, value in arguments.items() if key not in coerced})
+    _validate_raw_arithmetic(domain + '.' + method, state)
     if domain == 'fire_size':
         state['spread_rates_are_numpy_'] = isinstance(state.get('forward_spread_rate_'), (np.ndarray, np.generic))
         state['effective_wind_is_numpy_'] = isinstance(state.get('effective_wind_speed_'), (np.ndarray, np.generic))
@@ -815,6 +830,42 @@ def _unit_code(kind, units):
         return 1 if units == 1 else 2 if units == 2 else 0
     indices = list(range(_UNIT_COUNTS[kind])) if kind == 'SurfaceAreaToVolume' else np.arange(_UNIT_COUNTS[kind])
     return indices[units]
+
+
+def _validate_raw_arithmetic(operation, arguments, prefix=''):
+    """Reject numeric subclasses before array coercion can erase their operators.
+
+    :param operation: Fully qualified native calculation route.
+    :param arguments: Original named inputs, including nested scientific fields.
+    :param prefix: Dotted path of an enclosing input dictionary.
+    :return: None; unsupported custom arithmetic raises TypeError before native calls.
+    """
+    controls = {'S', 'charge_type', 'index', 'is_crown', 'is_surface_fire',
+                'is_passive_crown', 'is_active_crown', 'max_steps',
+                'wind_orientation_mode', 'wind_height_mode', 'waf_method'}
+    for name, value in arguments.items():
+        parameter = prefix + name
+        if isinstance(value, dict):
+            _validate_raw_arithmetic(operation, value, parameter + '.')
+        elif not (name.endswith('units') or name in controls
+                  or _real_coercion(operation, parameter) is not None):
+            _validate_raw_scalar(value)
+
+
+def _validate_raw_scalar(value):
+    """Check raw scalar payloads before NumPy can discard their Python subclass.
+
+    :param value: Scalar or sequence used in non-coercing native arithmetic.
+    :return: None; custom numeric subclasses raise TypeError.
+    """
+    if isinstance(value, (tuple, list)):
+        for item in value:
+            _validate_raw_scalar(item)
+    elif isinstance(value, np.generic):
+        if type(value) is not np.dtype(value.dtype).type:
+            raise TypeError('Unsupported opaque custom numeric arithmetic requires the explicit Python backend.')
+    elif isinstance(value, (int, float)) and type(value) not in (bool, int, float):
+        raise TypeError('Unsupported opaque custom numeric arithmetic requires the explicit Python backend.')
 
 
 def _validate_threads(threads):

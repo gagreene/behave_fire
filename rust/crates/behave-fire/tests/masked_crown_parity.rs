@@ -140,6 +140,13 @@ fn check(a: MaskedValue, b: &Value, n: usize, ctx: &str) {
         "scalar rank {ctx}"
     );
     let expected = number(&b["values"][n]);
+    if a.value == 0.0 && expected == 0.0 {
+        assert_eq!(
+            a.value.is_sign_negative(),
+            expected.is_sign_negative(),
+            "zero sign {ctx}"
+        );
+    }
     assert!(
         if expected.is_nan() {
             a.value.is_nan()
@@ -173,7 +180,7 @@ fn check(a: MaskedValue, b: &Value, n: usize, ctx: &str) {
         if wanted.is_nan() {
             assert!(actual.is_nan(), "fill {ctx}: {actual:?} != NaN");
         } else {
-            assert_eq!(actual, wanted, "fill {ctx}");
+            assert_eq!(actual.to_bits(), wanted.to_bits(), "fill {ctx}");
         }
     } else {
         assert!(

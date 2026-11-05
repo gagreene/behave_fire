@@ -62,6 +62,13 @@ fn check(actual: MaskedValue, expected: &Value, n: usize, context: &str) {
         "NumPy scalar {context}"
     );
     let target = number(&expected["values"][index]);
+    if actual.value == 0.0 && target == 0.0 {
+        assert_eq!(
+            actual.value.is_sign_negative(),
+            target.is_sign_negative(),
+            "zero sign {context}"
+        );
+    }
     assert!(
         if target.is_nan() {
             actual.value.is_nan()
@@ -95,7 +102,7 @@ fn check(actual: MaskedValue, expected: &Value, n: usize, context: &str) {
             if expected_fill.is_nan() {
                 actual_fill.is_nan()
             } else {
-                actual_fill == expected_fill
+                actual_fill.to_bits() == expected_fill.to_bits()
             },
             "fill {context}: {actual_fill:?} != {expected_fill:?}"
         );

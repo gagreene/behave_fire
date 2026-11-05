@@ -14,6 +14,9 @@ use behave_fire::{
     vapor_pressure_deficit,
 };
 fn close(actual: f64, expected: f64) {
+    if actual == 0.0 && expected == 0.0 {
+        assert_eq!(actual.is_sign_negative(), expected.is_sign_negative());
+    }
     assert!(
         (actual.is_nan() && expected.is_nan())
             || actual == expected

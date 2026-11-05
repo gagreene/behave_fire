@@ -133,3 +133,6 @@ jobs:
 
   wheel-validation:
     uses: ./.github/workflows/wheel-validation.yml
+
+  crate-validation:
+    uses: ./.github/workflows/crate-validation.yml

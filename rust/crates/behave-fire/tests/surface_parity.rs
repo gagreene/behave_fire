@@ -556,6 +556,13 @@ fn all_single(v: &Value) -> bool {
     }
 }
 fn check(a: f64, b: f64, ctx: &str, tol: f64) {
+    if a == 0.0 && b == 0.0 {
+        assert_eq!(
+            a.is_sign_negative(),
+            b.is_sign_negative(),
+            "zero sign {ctx}"
+        );
+    }
     if b.is_nan() {
         assert!(a.is_nan(), "{ctx}: {a} != NaN")
     } else if b.is_infinite() {
