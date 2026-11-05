@@ -18,6 +18,8 @@ Other integer operations retain their own wrapping and promotion contracts.
 
 Float64 and float32 routes preserve the reference within `rtol=1e-9, atol=1e-12` and `rtol=1e-6, atol=1e-7`, respectively. Shapes, statuses, masks, NaN positions, and exception classes match the applicable oracle; message wording is not guaranteed. Any further difference must be recorded with an executable scenario before being accepted.
 
+Float32 atan2 can use platform libm or NumPy's linked SVML kernel. One float32 rounding difference remains visible when North-oriented results later promote to float64. The native binding identifies the linked implementation using a bounded calibration over fixed finite constants, without passing user inputs to Python calculations. The guarded native SVML implementation reproduces that profile where available. Rust-only tests retain the original Windows fixture unchanged and use independently captured, exact-input scalar-profile variants in `integer_direction_platform.json`; unknown profiles fail explicitly. No numerical tolerance is widened.
+
 ## Native object boundary
 
 Native arithmetic accepts booleans, fixed-width signed/unsigned integers, and

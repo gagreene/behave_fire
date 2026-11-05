@@ -1,0 +1,217 @@
+name: Wheel validation
+
+on:
+  workflow_call:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-pure-wheel:
+    runs-on: ubuntu-24.04
+    container: python:3.11-slim
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build universal project wheel without invoking Rust
+        run: |
+          if command -v cargo || command -v rustc; then echo "unexpected Rust toolchain"; exit 1; fi
+          python -m pip install --only-binary=:all: build
+          python tools/build_pure_wheel.py --out-dir dist
+      - uses: actions/upload-artifact@v4
+        with:
+          name: distributions-pure
+          path: dist/*.whl
+          if-no-files-found: error
+
+  build-native-wheels:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {os: ubuntu-24.04, target: x86_64, artifact: linux-x86_64}
+          - {os: ubuntu-24.04-arm, target: aarch64, artifact: linux-aarch64}
+          - {os: macos-15-intel, target: x86_64, artifact: macos-x86_64}
+          - {os: macos-15, target: aarch64, artifact: macos-arm64}
+          - {os: windows-2025, target: x86_64, artifact: windows-x86_64}
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - uses: PyO3/maturin-action@v1
+        with:
+          maturin-version: "1.10.0"
+          command: build
+          target: ${{ matrix.target }}
+          args: --release --locked --out dist --interpreter ${{ runner.os == 'Linux' && 'python3.11' || 'python' }}
+          manylinux: "2_17"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: distributions-${{ matrix.artifact }}
+          path: dist/*.whl
+          if-no-files-found: error
+
+  build-sdist:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - uses: dtolnay/rust-toolchain@stable
+      - run: >-
+          python -m pip install --only-binary=:all: build
+      - run: python tools/check_sdist.py --check-tracked . --inventory sdist-expected.txt
+      - run: python -m build --sdist --outdir dist
+      - run: python tools/check_sdist.py dist/*.tar.gz --inventory sdist-expected.txt > sdist-inventory.txt
+      - name: Rebuild using only the extracted source distribution
+        shell: bash
+        run: |
+          mkdir "$RUNNER_TEMP/sdist-source"
+          tar -xf dist/*.tar.gz -C "$RUNNER_TEMP/sdist-source" --strip-components=1
+          cp tools/smoke_test_wheel.py "$RUNNER_TEMP/smoke_test_wheel.py"
+          cd "$RUNNER_TEMP/sdist-source"
+          test ! -e .git
+          python -m build --wheel --outdir "$RUNNER_TEMP/sdist-wheel"
+          python -m venv "$RUNNER_TEMP/sdist-venv"
+          "$RUNNER_TEMP/sdist-venv/bin/python" -m pip install --only-binary=:all: "$RUNNER_TEMP"/sdist-wheel/*.whl
+          version=$("$RUNNER_TEMP/sdist-venv/bin/python" -c 'import importlib.metadata; print(importlib.metadata.version("behave-fire"))')
+          cd "$RUNNER_TEMP"
+          "$RUNNER_TEMP/sdist-venv/bin/python" -I smoke_test_wheel.py --expect rust --version "$version"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: distributions-sdist
+          path: dist/*.tar.gz
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sdist-evidence
+          path: sdist-inventory.txt
+
+  test-native-platforms:
+    needs: [build-native-wheels, build-pure-wheel]
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.11", "3.12", "3.13", "3.14"]
+        platform:
+          - {os: ubuntu-24.04, artifact: linux-x86_64}
+          - {os: ubuntu-24.04-arm, artifact: linux-aarch64}
+          - {os: macos-15-intel, artifact: macos-x86_64}
+          - {os: macos-15, artifact: macos-arm64}
+          - {os: windows-2025, artifact: windows-x86_64}
+    runs-on: ${{ matrix.platform.os }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: tools
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python }}
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: distributions-*
+          path: ${{ runner.temp }}/artifacts
+          merge-multiple: true
+      - name: Stage smoke scripts outside checkout and test both artifacts
+        shell: bash
+        run: |
+          cp tools/{test_wheel_install,smoke_test_wheel}.py "$RUNNER_TEMP/"
+          cd "$RUNNER_TEMP"
+          python test_wheel_install.py --wheels artifacts --expect-choice rust --report-dir evidence
+      - name: Preserve exact dependency and project wheel choices
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: evidence-${{ matrix.platform.artifact }}-${{ matrix.python }}
+          path: ${{ runner.temp }}/evidence
+
+  test-alpine-fallback:
+    needs: [build-native-wheels, build-pure-wheel]
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {python: "3.11", image: "python:3.11-alpine@sha256:09d17d5e4c16d0a7a1eea690bcb7c6ab8616b211f8421e429e97c1bef5bd0ed2"}
+          - {python: "3.12", image: "python:3.12-alpine@sha256:e6dae589c1c05976188fd3bd019afd091445fc533ed2ea29001beddc7368a9c8"}
+          - {python: "3.13", image: "python:3.13-alpine@sha256:7984cf56ceaddebe4fefeb75d64000b9f45d8b77b11a09b24524da6cdc3af0c8"}
+          - {python: "3.14", image: "python:3.14-alpine@sha256:eb2c62658b8d51bff0acc408504b76521d02030de56a8a3c1e830083e89b89d2"}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: tools
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: distributions-*
+          path: ${{ runner.temp }}/alpine/wheels
+          merge-multiple: true
+      - name: Run container Python against staged artifacts only
+        shell: bash
+        run: |
+          cp tools/{test_wheel_install,smoke_test_wheel}.py "$RUNNER_TEMP/alpine/"
+          docker run --rm --platform linux/amd64 -v "$RUNNER_TEMP/alpine:/artifacts" -w /tmp '${{ matrix.image }}' python /artifacts/test_wheel_install.py --wheels /artifacts/wheels --expect-choice python --identity musl-x86_64 --report-dir /artifacts/evidence
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: evidence-alpine-${{ matrix.python }}
+          path: ${{ runner.temp }}/alpine/evidence
+
+  test-windows-arm64-fallback:
+    needs: [build-native-wheels, build-pure-wheel]
+    runs-on: windows-11-arm
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.11", "3.12", "3.13", "3.14"]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: tools
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python }}
+          architecture: arm64
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: distributions-*
+          path: ${{ runner.temp }}/artifacts
+          merge-multiple: true
+      - name: Measure native interpreter, marker, and wheel-selection behavior
+        shell: pwsh
+        run: |
+          Copy-Item tools/test_wheel_install.py,tools/smoke_test_wheel.py $env:RUNNER_TEMP
+          Set-Location $env:RUNNER_TEMP
+          python test_wheel_install.py --wheels artifacts --expect-choice python --identity windows-arm64 --report-dir evidence
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: evidence-windows-arm64-${{ matrix.python }}
+          path: ${{ runner.temp }}/evidence
+
+  check-distributions:
+    needs: [build-sdist, test-native-platforms, test-alpine-fallback, test-windows-arm64-fallback]
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: tools
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: distributions-*
+          path: dist
+          merge-multiple: true
+      - run: >-
+          python -m pip install --only-binary=:all: twine packaging
+      - run: python tools/check_wheel_metadata.py dist
+      - run: python -m twine check dist/*
+      - uses: actions/upload-artifact@v4
+        with:
+          name: distributions
+          path: dist/*
+          if-no-files-found: error

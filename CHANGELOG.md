@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Breaking changes
+
+- Drop Python 3.10 support; require Python 3.11 or newer. Standard CPython 3.11-3.14 are the certification targets. Free-threaded interpreters and PyPy are not supported.
+- Source/Git/editable/`--no-binary` project builds now use Maturin and require Rust. Binary native and universal pure-Python wheels share metadata and runtime APIs.
+
+### Packaging
+
+- Add native ABI3 wheels, a universal pure-Python fallback wheel, isolated installed-artifact validation, and a tracked-input source-distribution check.
+- Require NumPy >=2.3.3 for Python >=3.14 or native Windows ARM64; keep NumPy >=2.1.3 elsewhere.
+- Add optional `test` dependencies without raster libraries, and a uv lockfile for dependency-only source tests.
+- Preserve MIT and upstream BSD-3-Clause notices in both native and pure artifacts.
+
 ### Removed
 
 - Removed the unpublished conda recipe and its obsolete publishing instructions. Python package delivery continues through wheels and source distributions.

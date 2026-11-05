@@ -1,65 +1,61 @@
 [build-system]
-requires = ["setuptools>=61", "wheel"]
-build-backend = "setuptools.build_meta"
+requires = ["maturin>=1.10,<2"]
+build-backend = "maturin"
 
 [project]
 name = "behave-fire"
-version = "1.0.0b2"
+dynamic = ["version"]
 description = "Vectorized Python port of the USFS BEHAVE wildfire fire-behavior modeling system"
-readme = "README.md"
-license = "MIT"
-license-files = ["LICENSE"]
-requires-python = ">=3.10"
-authors = [
-    { name = "Behave Development Team" }
-]
-keywords = [
-    "wildfire", "fire behavior", "BEHAVE", "Rothermel", "surface fire",
-    "crown fire", "fire modeling", "forestry", "numpy"
-]
+readme = {file = "README.md", content-type = "text/markdown; charset=UTF-8; variant=GFM"}
+license = "MIT AND BSD-3-Clause"
+license-files = ["LICENSE", "NOTICE", "LICENSES/NumPy-BSD-3-Clause.txt", "LICENSES/Intel-SVML-BSD-3-Clause.txt"]
+requires-python = ">=3.11"
+authors = [{ name = "Behave Development Team" }]
+keywords = ["wildfire", "fire behavior", "BEHAVE", "Rothermel", "surface fire", "crown fire", "fire modeling", "forestry", "numpy"]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Science/Research",
     "Topic :: Scientific/Engineering",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Operating System :: OS Independent",
 ]
 dependencies = [
-    "numpy>=2.1.3",
+    "numpy>=2.1.3; (python_full_version < '3.14' and platform_machine != 'ARM64') or (python_full_version < '3.14' and platform_system != 'Windows')",
+    "numpy>=2.3.3; (platform_machine == 'ARM64' and platform_system == 'Windows') or python_full_version >= '3.14'",
 ]
 
 [project.optional-dependencies]
-examples = [
-    "scipy>=1.14.1",
-    "rasterio>=1.3.10",
-    "matplotlib>=3.10.0",
-]
-dev = [
-    "pytest>=9.0.2",
-    "build>=1.0",
-    "twine>=5.0",
-]
+examples = ["scipy>=1.14.1", "rasterio>=1.3.10", "matplotlib>=3.10.0"]
+test = ["pytest>=9.0.2", "pyyaml>=6.0.2"]
+dev = ["build>=1.2.2", "twine>=6.1", "packaging>=24.2", "ruff>=0.11"]
 
 [project.urls]
-"Homepage" = "https://github.com/your-org/behave-fire"
-"Bug Tracker" = "https://github.com/your-org/behave-fire/issues"
-"Changelog" = "https://github.com/your-org/behave-fire/blob/main/CHANGELOG.md"
+Homepage = "https://github.com/gagreene/behave_fire"
+Repository = "https://github.com/gagreene/behave_fire"
+"Bug Tracker" = "https://github.com/gagreene/behave_fire/issues"
+Changelog = "https://github.com/gagreene/behave_fire/blob/pre_release/CHANGELOG.md"
 
-[tool.setuptools.packages.find]
-where = ["src"]
-
-[tool.setuptools.package-dir]
-"" = "src"
-
-# Development extension settings; the packaging backend switches atomically in
-# the wheel layer after native and pure artifact validation is implemented.
 [tool.maturin]
 manifest-path = "rust/crates/behave-py/Cargo.toml"
 python-source = "src"
 module-name = "behave_fire._rust"
 bindings = "pyo3"
+sdist-generator = "git"
+include = [
+    { path = "rust/Cargo.toml", format = "sdist" },
+    { path = "rust/Cargo.lock", format = "sdist" },
+    { path = "rust/crates/behave-fire/**", format = "sdist" },
+    { path = "rust/crates/behave-py/**", format = "sdist" },
+    { path = "tools/*.py", format = "sdist" },
+    { path = "LICENSES/**", format = "sdist" },
+    { path = "NOTICE", format = "sdist" },
+]
+exclude = [".superpowers/**", ".claude/**", ".idea/**", "rust/target/**", "**/__pycache__/**", "**/*.pyc", "dist/**", "build/**", "**/*.pdb", "**/*.crate", "**/*.egg-info/**", "tests/data/rust_port/**"]
 
-
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]

@@ -76,7 +76,7 @@ behave_fire/
 
 ## Requirements
 
-- Python ≥ 3.10
+- Python ≥ 3.11
 - [NumPy](https://numpy.org/)
 - [SciPy](https://scipy.org/) *(used in the landscape example)*
 - [rasterio](https://rasterio.readthedocs.io/) *(used in the landscape example)*
@@ -92,7 +92,17 @@ pip install numpy scipy rasterio matplotlib
 
 ## Installation
 
-Clone the repository and add `src/` to your Python path:
+Requirements: **Python >= 3.11** and NumPy >= 2.1.3 (NumPy >= 2.3.3 for Python >= 3.14 or native Windows ARM64). Supported interpreter targets are standard CPython 3.11-3.14; PyPy and free-threaded CPython 3.13t/3.14t are not supported. ABI3 wheels do not cover free-threaded interpreters.
+
+Native wheels target manylinux 2_17 x86-64/aarch64, macOS x86-64/arm64, and Windows x86-64. A universal pure-Python wheel provides the project fallback without Rust. A complete compiler-free install also needs binary NumPy for the interpreter/platform. Alpine/musl x86-64 and native Windows ARM64 are additional fallback certification targets; all remote matrix rows remain unverified until their actual jobs pass. See [release validation](docs/RELEASING.md) for exact floors and evidence. Optional examples dependencies have a separate availability scope.
+
+```sh
+pip install --only-binary=:all: behave-fire
+```
+
+Source, Git, editable, and `--no-binary` project installs require Rust. Dependency-only Python source tests use `uv sync --locked --no-install-project --extra test --extra dev`, followed by `uv run --no-sync python -m pytest`.
+
+For Python-only source use, clone the repository and add `src/` to your Python path:
 
 ```bash
 git clone <repo-url>
@@ -304,7 +314,7 @@ Expected lightning deprecation warnings may appear. The standalone harness locat
 
 ## Key Design Notes
 
-- **Pure Python / NumPy** — no C extensions required; BLAS-level vectorization via NumPy broadcasting.
+- **Python / NumPy and optional Rust** — source-only Python remains available; compatible native wheels select the Rust backend automatically.
 - **US customary internally** — all state is stored in feet, BTU, °F, etc. Metric conversion happens only at call boundaries.
 - **No input validation** — out-of-range inputs return `0.0` silently, matching the C++ guard pattern.
 - **Crown fuel is always FM10 / WAF=0.4** — hardcoded per Rothermel (1991); not configurable.

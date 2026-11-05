@@ -101,10 +101,14 @@ impl Arguments {
         use behave_fire::surface::masked::{
             IntegerKind, IntegerValue, MaskedValue, MathProfile, Precision,
         };
-        let profile = if self.optional("_simd_exp", index).unwrap_or(0.0) != 0.0 {
-            MathProfile::NumpySimd
-        } else {
-            MathProfile::Libm
+        let profile = match (
+            self.optional("_simd_exp", index).unwrap_or(0.0) != 0.0,
+            self.optional("_svml_atan2", index).unwrap_or(0.0) != 0.0,
+        ) {
+            (true, true) => MathProfile::NumpySimdSvmlAtan2,
+            (false, true) => MathProfile::LibmSvmlAtan2,
+            (true, false) => MathProfile::NumpySimd,
+            (false, false) => MathProfile::Libm,
         };
         let mut integer = self
             .integer(name, index)

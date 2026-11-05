@@ -19,3 +19,15 @@ build's capability/dispatch metadata; do not infer universal parity from one
 platform's frozen fixtures. Native default selection uses x86 AVX2 plus FMA
 hardware capability and otherwise selects the scalar profile. Compiled NumPy
 dispatch availability and disabled CPU features may require an explicit override.
+
+The guarded AVX512 float32 atan2 kernel vendors Intel SVML assembly from the
+NumPy/SVML repository at commit bd9d46e0c627ab16f3d2641f7cdb1bc15d303ba4:
+https://github.com/numpy/SVML/tree/bd9d46e0c627ab16f3d2641f7cdb1bc15d303ba4
+
+The assembly retains its Copyright (C) 2023 Intel Corporation and BSD-3-Clause
+SPDX header. The repository also carries Copyright (c) 2005-2021, NumPy
+Developers. Both notices and the BSD-3-Clause conditions are reproduced in
+LICENSES/Intel-SVML-BSD-3-Clause.txt. Preserve that file and the source header.
+This kernel reproduces NumPy's dispatched float32 intermediates. The Rust core
+assembles the bundled source through LLVM; no external C/C++ compiler or
+Python runtime is required. Runtime capability checks guard its private entry.

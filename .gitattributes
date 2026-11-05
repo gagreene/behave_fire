@@ -3,3 +3,11 @@ tests/data/rust_api_inventory.json linguist-generated=true
 tests/data/rust_port/*.json linguist-generated=true
 rust/crates/behave-fire/tests/data/* linguist-generated=true
 rust/crates/behave-fire/src/generated/*.rs linguist-generated=true
+
+# Release artifacts preserve identical notice bytes on every build platform.
+LICENSE text eol=lf
+NOTICE text eol=lf
+LICENSES/* text eol=lf
+rust/crates/behave-fire/LICENSE text eol=lf
+rust/crates/behave-fire/NOTICE text eol=lf
+rust/crates/behave-fire/LICENSES/* text eol=lf

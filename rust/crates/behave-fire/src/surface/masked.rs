@@ -23,6 +23,56 @@ mod objects;
 mod tests {
     use super::{MaskedValue, MathProfile};
     #[test]
+    fn atan2_configuration_probes_distinguish_available_native_kernels() {
+        let (y, x, libm, svml) = super::atan2_profile_candidates();
+        assert!(y
+            .into_iter()
+            .chain(x)
+            .all(|bits| f32::from_bits(bits).is_finite()));
+        assert_eq!(svml.is_some(), crate::svml::available());
+        if let Some(svml) = svml {
+            assert_ne!(
+                libm, svml,
+                "fixed configuration probes must distinguish the available kernels"
+            );
+        }
+    }
+    #[test]
+    fn atan2_profile_does_not_change_exponential_dispatch() {
+        for (baseline, svml) in [
+            (MathProfile::Libm, MathProfile::LibmSvmlAtan2),
+            (MathProfile::NumpySimd, MathProfile::NumpySimdSvmlAtan2),
+        ] {
+            let value = MaskedValue::plain_f32(-138.0f32 / 3500.0f32);
+            assert_eq!(
+                value.with_math_profile(baseline).exp().value.to_bits(),
+                value.with_math_profile(svml).exp().value.to_bits()
+            );
+        }
+    }
+    #[test]
+    fn forced_svml_profile_is_explicit_and_safe_on_unsupported_targets() {
+        let value = |input| {
+            MaskedValue::plain_f32(input).with_math_profile(MathProfile::NumpySimdSvmlAtan2)
+        };
+        let result = super::calculate_direction_of_max_spread(
+            value(-1.0),
+            value(65534.0),
+            MaskedValue::plain(1.0),
+            "RelativeToNorth",
+            MaskedValue::plain(95.0),
+        );
+        if crate::svml::available() {
+            assert_eq!(result.error, None);
+            assert_eq!(result.value, 5.0008697509765625);
+        } else {
+            assert_eq!(
+                result.error,
+                Some(super::MaskedError::UnsupportedMathProfile)
+            );
+        }
+    }
+    #[test]
     fn masked_float32_comparisons_promote_python_constants_to_float64() {
         let threshold = MaskedValue::scalar(1e-7);
         assert!(MaskedValue::masked_f32(1e-7, false).greater(threshold));
@@ -111,8 +161,12 @@ impl MaskedCondition {
 pub enum MathProfile {
     /// NumPy's AVX2/FMA or AVX512 float32 exponential formula, evaluated portably with scalar FMA.
     NumpySimd,
+    /// NumPy's SIMD exponential and its independently selected AVX512 SVML atan2.
+    NumpySimdSvmlAtan2,
     /// The Rust/platform libc scalar exponential, matching NumPy's non-SIMD fallback.
     Libm,
+    /// Scalar exponential with independently selected AVX512 SVML atan2.
+    LibmSvmlAtan2,
 }
 impl MathProfile {
     /// Select the usual NumPy profile for native hardware; bindings should override from actual NumPy capability metadata.
@@ -522,8 +576,10 @@ impl MaskedValue {
                         match operation {
                             Unary::Negative => -x,
                             Unary::Exp => match self.math_profile {
-                                MathProfile::NumpySimd => numpy_simd_exp_f32(x),
-                                MathProfile::Libm => x.exp(),
+                                MathProfile::NumpySimd | MathProfile::NumpySimdSvmlAtan2 => {
+                                    numpy_simd_exp_f32(x)
+                                }
+                                MathProfile::Libm | MathProfile::LibmSvmlAtan2 => x.exp(),
                             },
                             Unary::Sqrt => x.sqrt(),
                             Unary::Degrees => x * (180.0f32 / std::f32::consts::PI),
@@ -623,6 +679,8 @@ pub enum MaskedError {
     PythonObjectAttribute,
     /// NumPy has no supported numeric payload method/loop for this object operation.
     UnsupportedObjectLoop,
+    /// The requested SVML profile cannot execute safely on this target or CPU.
+    UnsupportedMathProfile,
 }
 impl MaskedError {
     /// Return the Python exception class selected by the thin binding adapter.
@@ -638,6 +696,7 @@ impl MaskedError {
             Self::NegativeIntegerPower => "ValueError",
             Self::PythonZeroDivision => "ZeroDivisionError",
             Self::PythonObjectAttribute => "AttributeError",
+            Self::UnsupportedMathProfile => "RuntimeError",
         }
     }
 }
@@ -683,6 +742,36 @@ fn round(value: f64, precision: Precision) -> f64 {
         Precision::F32 => (value as f32) as f64,
         Precision::F64 => value,
     }
+}
+
+/// Return fixed finite operands and the available native atan2 implementation fingerprints.
+///
+/// Configuration only: no caller data is accepted. Operands cover quadrants and
+/// the independently observed (126, -127) and (65534, -1) implementation differences.
+/// SVML results are absent unless the audited runtime CPU guard accepts this host.
+pub fn atan2_profile_candidates() -> ([u32; 16], [u32; 16], [u32; 16], Option<[u32; 16]>) {
+    let y = [
+        126.0f32, 65534.0, 2.0, 1.0, 3.0, 127.0, 65535.0, 32767.0, -126.0, -65534.0, -1.0, 0.0,
+        -0.0, 1.0, -1.0, 5.0,
+    ];
+    let x = [
+        -127.0f32, -1.0, 2.0, 2.0, 1.0, -128.0, -127.0, -128.0, -127.0, -1.0, -1.0, -1.0, -1.0,
+        0.0, 0.0, 17.0,
+    ];
+    let libm = std::array::from_fn(|index| {
+        std::hint::black_box(y[index])
+            .atan2(std::hint::black_box(x[index]))
+            .to_bits()
+    });
+    let svml = (|| {
+        let mut bits = [0; 16];
+        for index in 0..16 {
+            // The call retains its own CPU guard even after the capability query.
+            bits[index] = crate::svml::atan2f(y[index], x[index])?.to_bits();
+        }
+        Some(bits)
+    })();
+    (y.map(f32::to_bits), x.map(f32::to_bits), libm, svml)
 }
 
 /// Evaluate NumPy's float32 range-reduced rational exponential using portable scalar FMA.
@@ -872,7 +961,19 @@ fn ufunc_binary_float(a: MaskedValue, b: MaskedValue, operation: BinaryUfunc) ->
         BinaryUfunc::Minimum => np_min(x, y),
         BinaryUfunc::Maximum => np_max(x, y),
         BinaryUfunc::Atan2 => match p {
-            Precision::F32 => (x as f32).atan2(y as f32) as f64,
+            Precision::F32 => {
+                if matches!(
+                    profile(a, b),
+                    MathProfile::NumpySimdSvmlAtan2 | MathProfile::LibmSvmlAtan2
+                ) {
+                    match crate::svml::atan2f(x as f32, y as f32) {
+                        Some(value) => value as f64,
+                        None => return integers::failure(a, MaskedError::UnsupportedMathProfile),
+                    }
+                } else {
+                    (x as f32).atan2(y as f32) as f64
+                }
+            }
             Precision::F64 => x.atan2(y),
         },
     };

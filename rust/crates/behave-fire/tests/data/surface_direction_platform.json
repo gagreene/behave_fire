@@ -1,0 +1,147 @@
+{
+  "schema": 1,
+  "fixture": "port_surface_single.json",
+  "case_index": 11,
+  "cell_index": 8,
+  "atan2_f32_bits": [
+    1070141531,
+    1078530010
+  ],
+  "original_case": {
+    "name": "calculate_direction_of_max_spread",
+    "inputs": {
+      "x_component": {
+        "dtype": "float32",
+        "values": [
+          "-inf",
+          -3.0,
+          -0.0,
+          0.0,
+          9.999999406318238e-08,
+          1.0000000116860974e-07,
+          1.000000082740371e-07,
+          0.10000000149011612,
+          1.0,
+          3.0,
+          20.0,
+          2000.0,
+          "+inf",
+          "nan"
+        ]
+      },
+      "y_component": {
+        "dtype": "float32",
+        "values": [
+          0.4000000059604645,
+          0.4000000059604645,
+          0.4000000059604645,
+          0.4000000059604645,
+          0.4000000059604645,
+          0.4000000059604645,
+          0.4000000059604645,
+          0.4000000059604645,
+          0.4000000059604645,
+          0.4000000059604645,
+          0.4000000059604645,
+          0.4000000059604645,
+          0.4000000059604645,
+          0.4000000059604645
+        ]
+      },
+      "rate_vector": {
+        "dtype": "float32",
+        "values": [
+          "-inf",
+          -3.0,
+          -0.0,
+          0.0,
+          9.999999406318238e-08,
+          1.0000000116860974e-07,
+          1.000000082740371e-07,
+          0.10000000149011612,
+          1.0,
+          3.0,
+          20.0,
+          2000.0,
+          "+inf",
+          "nan"
+        ]
+      },
+      "wind_orientation_mode": "North",
+      "aspect": -850.0
+    },
+    "output": {
+      "dtype": "float64",
+      "values": [
+        50.0,
+        50.0,
+        50.0,
+        50.0,
+        50.0,
+        50.0,
+        139.99998474121094,
+        125.96375274658203,
+        71.8014087677002,
+        57.594643115997314,
+        51.14576280117035,
+        50.0,
+        50.0,
+        50.0
+      ]
+    }
+  },
+  "output": {
+    "dtype": "float64",
+    "shape": [
+      14
+    ],
+    "values": [
+      50.0,
+      50.0,
+      50.0,
+      50.0,
+      50.0,
+      50.0,
+      139.99998474121094,
+      125.96375274658203,
+      71.80140686035156,
+      57.594643115997314,
+      51.14576280117035,
+      50.0,
+      50.0,
+      50.0
+    ],
+    "masks": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ],
+    "masked_array": false,
+    "scalar_array": false,
+    "numpy_scalar": false
+  },
+  "provenance": {
+    "run": "https://github.com/gagreene/behave_fire/actions/runs/41927463808",
+    "commit": "51bd6f6f453bf2d3451ad32f09c0bf7a0ea45354",
+    "artifact": "numpy-direction-oracle-macos-15",
+    "capture": "numpy-direction-layout-baseline.json",
+    "capture_sha256": "a374d1e3c6d352dc37616ae1086aad40ddc1124ab80c708eb9dfcd7a9335fd23",
+    "fixture_sha256": "2508cbd636afa14509189275be94145cfd51193a17d4d168840e9c69bf4e6e38",
+    "case_sha256": "44eaebdd7379b757205ff0fd417bcb089c5ac0c6a37eb91f665c71cfc5a7fc07",
+    "platform": "macOS-15.8.2-arm64-arm-64bit",
+    "numpy": "2.5.4",
+    "oracle": "Explicit behave_fire.components.surface.calculate_direction_of_max_spread, independently captured in a fresh process with AVX512/X86_V4 dispatch disabled; no native output selects expectations.",
+    "scope": "The 909-record independent audit across seven original core direction corpora found exactly this one additional non-integer scalar-profile difference on macOS."
+  }
+}

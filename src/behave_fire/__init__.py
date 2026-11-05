@@ -24,7 +24,9 @@ from .components.behave_units import (
     TemperatureUnits, TimeUnits,
 )
 
-__version__ = "1.0.0b2"
+from ._version import get_version as _get_version
+
+__version__ = _get_version()
 __author__ = "Behave Development Team"
 __all__ = [
     'BehaveRun',

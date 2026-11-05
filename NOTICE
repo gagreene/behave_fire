@@ -1,0 +1,33 @@
+The portable float32 exponential formula in src/surface/masked.rs derives from
+NumPy 2.1.3's AVX2/FMA and AVX512 exponential implementation and coefficient data:
+
+https://github.com/numpy/numpy/blob/v2.1.3/numpy/_core/src/umath/loops_exponent_log.dispatch.c.src
+https://github.com/numpy/numpy/blob/v2.1.3/numpy/_core/src/umath/npy_simd_data.h
+
+Copyright (c) 2005-2024, NumPy Developers. All rights reserved.
+The derived implementation is distributed under the BSD 3-Clause terms in
+LICENSES/NumPy-BSD-3-Clause.txt. Preserve this notice and the accompanying license
+when redistributing the derived implementation. The enclosing crate's MIT license
+does not replace these terms.
+
+MathProfile::NumpySimd evaluates that formula with portable Rust f32 arithmetic
+and scalar fused multiply-add; no CPU intrinsics or external runtime dependency
+is required. MathProfile::Libm uses the platform scalar exponential. NumPy's
+float32 CPU dispatch can produce different rounded intermediate results across
+these profiles. Bindings should select the profile using the installed NumPy
+build's capability/dispatch metadata; do not infer universal parity from one
+platform's frozen fixtures. Native default selection uses x86 AVX2 plus FMA
+hardware capability and otherwise selects the scalar profile. Compiled NumPy
+dispatch availability and disabled CPU features may require an explicit override.
+
+The guarded AVX512 float32 atan2 kernel vendors Intel SVML assembly from the
+NumPy/SVML repository at commit bd9d46e0c627ab16f3d2641f7cdb1bc15d303ba4:
+https://github.com/numpy/SVML/tree/bd9d46e0c627ab16f3d2641f7cdb1bc15d303ba4
+
+The assembly retains its Copyright (C) 2023 Intel Corporation and BSD-3-Clause
+SPDX header. The repository also carries Copyright (c) 2005-2021, NumPy
+Developers. Both notices and the BSD-3-Clause conditions are reproduced in
+LICENSES/Intel-SVML-BSD-3-Clause.txt. Preserve that file and the source header.
+This kernel reproduces NumPy's dispatched float32 intermediates. The Rust core
+assembles the bundled source through LLVM; no external C/C++ compiler or
+Python runtime is required. Runtime capability checks guard its private entry.
