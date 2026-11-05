@@ -1,0 +1,1815 @@
+{
+  "cases": [
+    {
+      "entry_point": "behave_fire.components.vapor_pressure_deficit_calculator.calculate_vpd",
+      "id": "calculate_vpd/baseline",
+      "inputs": {
+        "relative_humidity": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.3
+          ]
+        },
+        "rh_units": 0,
+        "temp_units": 0,
+        "temperature": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            80.0
+          ]
+        }
+      },
+      "output": {
+        "actual_vp": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            1049.1410693580247
+          ]
+        },
+        "saturated_vp": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            3497.136897860082
+          ]
+        },
+        "vpd": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            2447.9958285020575
+          ]
+        }
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.vapor_pressure_deficit_calculator.calculate_vpd",
+      "id": "calculate_vpd/dtype-float16",
+      "inputs": {
+        "relative_humidity": {
+          "dtype": "float16",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.300048828125
+          ]
+        },
+        "rh_units": 0,
+        "temp_units": 0,
+        "temperature": {
+          "dtype": "float16",
+          "shape": [
+            1
+          ],
+          "values": [
+            80.0
+          ]
+        }
+      },
+      "output": {
+        "actual_vp": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            1049.3118279956154
+          ]
+        },
+        "saturated_vp": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            3497.136897860082
+          ]
+        },
+        "vpd": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            2447.8250698644665
+          ]
+        }
+      },
+      "policy": "diagnostic",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.vapor_pressure_deficit_calculator.calculate_vpd",
+      "id": "calculate_vpd/dtype-float16/normalized",
+      "inputs": {
+        "relative_humidity": {
+          "dtype": "float32",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.300048828125
+          ]
+        },
+        "rh_units": 0,
+        "temp_units": 0,
+        "temperature": {
+          "dtype": "float32",
+          "shape": [
+            1
+          ],
+          "values": [
+            80.0
+          ]
+        }
+      },
+      "output": {
+        "actual_vp": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            1049.3118279956154
+          ]
+        },
+        "saturated_vp": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            3497.136897860082
+          ]
+        },
+        "vpd": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            2447.8250698644665
+          ]
+        }
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.vapor_pressure_deficit_calculator.calculate_vpd",
+      "id": "calculate_vpd/dtype-float32",
+      "inputs": {
+        "relative_humidity": {
+          "dtype": "float32",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.30000001192092896
+          ]
+        },
+        "rh_units": 0,
+        "temp_units": 0,
+        "temperature": {
+          "dtype": "float32",
+          "shape": [
+            1
+          ],
+          "values": [
+            80.0
+          ]
+        }
+      },
+      "output": {
+        "actual_vp": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            1049.1411110471452
+          ]
+        },
+        "saturated_vp": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            3497.136897860082
+          ]
+        },
+        "vpd": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            2447.995786812937
+          ]
+        }
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.vapor_pressure_deficit_calculator.calculate_vpd",
+      "id": "calculate_vpd/dtype-float64",
+      "inputs": {
+        "relative_humidity": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.3
+          ]
+        },
+        "rh_units": 0,
+        "temp_units": 0,
+        "temperature": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            80.0
+          ]
+        }
+      },
+      "output": {
+        "actual_vp": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            1049.1410693580247
+          ]
+        },
+        "saturated_vp": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            3497.136897860082
+          ]
+        },
+        "vpd": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            2447.9958285020575
+          ]
+        }
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.vapor_pressure_deficit_calculator.calculate_vpd",
+      "id": "calculate_vpd/dtype-int64",
+      "inputs": {
+        "relative_humidity": {
+          "dtype": "int64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0
+          ]
+        },
+        "rh_units": 0,
+        "temp_units": 0,
+        "temperature": {
+          "dtype": "int64",
+          "shape": [
+            1
+          ],
+          "values": [
+            80
+          ]
+        }
+      },
+      "output": {
+        "actual_vp": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.0
+          ]
+        },
+        "saturated_vp": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            3497.136897860082
+          ]
+        },
+        "vpd": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            3497.136897860082
+          ]
+        }
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.vapor_pressure_deficit_calculator.calculate_vpd",
+      "id": "calculate_vpd/dtype-uint32",
+      "inputs": {
+        "relative_humidity": {
+          "dtype": "uint32",
+          "shape": [
+            1
+          ],
+          "values": [
+            0
+          ]
+        },
+        "rh_units": 0,
+        "temp_units": 0,
+        "temperature": {
+          "dtype": "uint32",
+          "shape": [
+            1
+          ],
+          "values": [
+            80
+          ]
+        }
+      },
+      "output": {
+        "actual_vp": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.0
+          ]
+        },
+        "saturated_vp": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            3497.136897860082
+          ]
+        },
+        "vpd": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            3497.136897860082
+          ]
+        }
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.vapor_pressure_deficit_calculator.calculate_vpd",
+      "id": "calculate_vpd/dtype-bool",
+      "inputs": {
+        "relative_humidity": {
+          "dtype": "bool",
+          "shape": [
+            1
+          ],
+          "values": [
+            true
+          ]
+        },
+        "rh_units": 0,
+        "temp_units": 0,
+        "temperature": {
+          "dtype": "bool",
+          "shape": [
+            1
+          ],
+          "values": [
+            true
+          ]
+        }
+      },
+      "output": {
+        "actual_vp": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            158.17123036179956
+          ]
+        },
+        "saturated_vp": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            158.17123036179956
+          ]
+        },
+        "vpd": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.0
+          ]
+        }
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.vapor_pressure_deficit_calculator.calculate_vpd",
+      "id": "calculate_vpd/dtype-object",
+      "inputs": {
+        "relative_humidity": {
+          "dtype": "object",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.3
+          ]
+        },
+        "rh_units": 0,
+        "temp_units": 0,
+        "temperature": {
+          "dtype": "object",
+          "shape": [
+            1
+          ],
+          "values": [
+            80
+          ]
+        }
+      },
+      "output": {
+        "actual_vp": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            1049.1410693580247
+          ]
+        },
+        "saturated_vp": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            3497.136897860082
+          ]
+        },
+        "vpd": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            2447.9958285020575
+          ]
+        }
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.vapor_pressure_deficit_calculator.calculate_vpd",
+      "id": "calculate_vpd/scalar",
+      "inputs": {
+        "relative_humidity": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            0.3
+          ]
+        },
+        "rh_units": 0,
+        "temp_units": 0,
+        "temperature": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            80.0
+          ]
+        }
+      },
+      "output": {
+        "actual_vp": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            1049.1410693580247
+          ]
+        },
+        "saturated_vp": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            3497.136897860082
+          ]
+        },
+        "vpd": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            2447.9958285020575
+          ]
+        }
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.vapor_pressure_deficit_calculator.calculate_vpd",
+      "id": "calculate_vpd/2d",
+      "inputs": {
+        "relative_humidity": {
+          "dtype": "float64",
+          "shape": [
+            2,
+            2
+          ],
+          "values": [
+            0.3,
+            0.3,
+            0.3,
+            0.3
+          ]
+        },
+        "rh_units": 0,
+        "temp_units": 0,
+        "temperature": {
+          "dtype": "float64",
+          "shape": [
+            2,
+            2
+          ],
+          "values": [
+            80.0,
+            80.0,
+            80.0,
+            80.0
+          ]
+        }
+      },
+      "output": {
+        "actual_vp": {
+          "dtype": "float64",
+          "shape": [
+            2,
+            2
+          ],
+          "values": [
+            1049.1410693580247,
+            1049.1410693580247,
+            1049.1410693580247,
+            1049.1410693580247
+          ]
+        },
+        "saturated_vp": {
+          "dtype": "float64",
+          "shape": [
+            2,
+            2
+          ],
+          "values": [
+            3497.136897860082,
+            3497.136897860082,
+            3497.136897860082,
+            3497.136897860082
+          ]
+        },
+        "vpd": {
+          "dtype": "float64",
+          "shape": [
+            2,
+            2
+          ],
+          "values": [
+            2447.9958285020575,
+            2447.9958285020575,
+            2447.9958285020575,
+            2447.9958285020575
+          ]
+        }
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.vapor_pressure_deficit_calculator.calculate_vpd",
+      "id": "calculate_vpd/3d",
+      "inputs": {
+        "relative_humidity": {
+          "dtype": "float64",
+          "shape": [
+            1,
+            2,
+            2
+          ],
+          "values": [
+            0.3,
+            0.3,
+            0.3,
+            0.3
+          ]
+        },
+        "rh_units": 0,
+        "temp_units": 0,
+        "temperature": {
+          "dtype": "float64",
+          "shape": [
+            1,
+            2,
+            2
+          ],
+          "values": [
+            80.0,
+            80.0,
+            80.0,
+            80.0
+          ]
+        }
+      },
+      "output": {
+        "actual_vp": {
+          "dtype": "float64",
+          "shape": [
+            1,
+            2,
+            2
+          ],
+          "values": [
+            1049.1410693580247,
+            1049.1410693580247,
+            1049.1410693580247,
+            1049.1410693580247
+          ]
+        },
+        "saturated_vp": {
+          "dtype": "float64",
+          "shape": [
+            1,
+            2,
+            2
+          ],
+          "values": [
+            3497.136897860082,
+            3497.136897860082,
+            3497.136897860082,
+            3497.136897860082
+          ]
+        },
+        "vpd": {
+          "dtype": "float64",
+          "shape": [
+            1,
+            2,
+            2
+          ],
+          "values": [
+            2447.9958285020575,
+            2447.9958285020575,
+            2447.9958285020575,
+            2447.9958285020575
+          ]
+        }
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.vapor_pressure_deficit_calculator.calculate_vpd",
+      "id": "calculate_vpd/empty",
+      "inputs": {
+        "relative_humidity": {
+          "dtype": "float64",
+          "shape": [
+            0
+          ],
+          "values": []
+        },
+        "rh_units": 0,
+        "temp_units": 0,
+        "temperature": {
+          "dtype": "float64",
+          "shape": [
+            0
+          ],
+          "values": []
+        }
+      },
+      "output": {
+        "actual_vp": {
+          "dtype": "float64",
+          "shape": [
+            0
+          ],
+          "values": []
+        },
+        "saturated_vp": {
+          "dtype": "float64",
+          "shape": [
+            0
+          ],
+          "values": []
+        },
+        "vpd": {
+          "dtype": "float64",
+          "shape": [
+            0
+          ],
+          "values": []
+        }
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.vapor_pressure_deficit_calculator.calculate_vpd",
+      "id": "calculate_vpd/zero",
+      "inputs": {
+        "relative_humidity": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.3
+          ]
+        },
+        "rh_units": 0,
+        "temp_units": 0,
+        "temperature": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.0
+          ]
+        }
+      },
+      "output": {
+        "actual_vp": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            45.2671134869953
+          ]
+        },
+        "saturated_vp": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            150.89037828998434
+          ]
+        },
+        "vpd": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            105.62326480298903
+          ]
+        }
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.vapor_pressure_deficit_calculator.calculate_vpd",
+      "id": "calculate_vpd/negative",
+      "inputs": {
+        "relative_humidity": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.3
+          ]
+        },
+        "rh_units": 0,
+        "temp_units": 0,
+        "temperature": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            -1.0
+          ]
+        }
+      },
+      "output": {
+        "actual_vp": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            43.1730772883861
+          ]
+        },
+        "saturated_vp": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            143.91025762795365
+          ]
+        },
+        "vpd": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            100.73718033956757
+          ]
+        }
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.vapor_pressure_deficit_calculator.calculate_vpd",
+      "id": "calculate_vpd/nan",
+      "inputs": {
+        "relative_humidity": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.3
+          ]
+        },
+        "rh_units": 0,
+        "temp_units": 0,
+        "temperature": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            {
+              "float": "nan"
+            }
+          ]
+        }
+      },
+      "output": {
+        "actual_vp": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            {
+              "float": "nan"
+            }
+          ]
+        },
+        "saturated_vp": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            {
+              "float": "nan"
+            }
+          ]
+        },
+        "vpd": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            {
+              "float": "nan"
+            }
+          ]
+        }
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.vapor_pressure_deficit_calculator.calculate_vpd",
+      "id": "calculate_vpd/positive-infinity",
+      "inputs": {
+        "relative_humidity": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.3
+          ]
+        },
+        "rh_units": 0,
+        "temp_units": 0,
+        "temperature": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            {
+              "float": "+inf"
+            }
+          ]
+        }
+      },
+      "output": {
+        "actual_vp": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            {
+              "float": "nan"
+            }
+          ]
+        },
+        "saturated_vp": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            {
+              "float": "nan"
+            }
+          ]
+        },
+        "vpd": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            {
+              "float": "nan"
+            }
+          ]
+        }
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.vapor_pressure_deficit_calculator.calculate_vpd",
+      "id": "calculate_vpd/negative-infinity",
+      "inputs": {
+        "relative_humidity": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.3
+          ]
+        },
+        "rh_units": 0,
+        "temp_units": 0,
+        "temperature": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            {
+              "float": "-inf"
+            }
+          ]
+        }
+      },
+      "output": {
+        "actual_vp": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            {
+              "float": "nan"
+            }
+          ]
+        },
+        "saturated_vp": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            {
+              "float": "nan"
+            }
+          ]
+        },
+        "vpd": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            {
+              "float": "nan"
+            }
+          ]
+        }
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.vapor_pressure_deficit_calculator.calculate_vpd",
+      "id": "calculate_vpd/below-threshold",
+      "inputs": {
+        "relative_humidity": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.3
+          ]
+        },
+        "rh_units": 0,
+        "temp_units": 0,
+        "temperature": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            9.999999999999998e-08
+          ]
+        }
+      },
+      "output": {
+        "actual_vp": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            45.26711370085453
+          ]
+        },
+        "saturated_vp": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            150.89037900284845
+          ]
+        },
+        "vpd": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            105.62326530199391
+          ]
+        }
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.vapor_pressure_deficit_calculator.calculate_vpd",
+      "id": "calculate_vpd/at-threshold",
+      "inputs": {
+        "relative_humidity": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.3
+          ]
+        },
+        "rh_units": 0,
+        "temp_units": 0,
+        "temperature": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            1e-07
+          ]
+        }
+      },
+      "output": {
+        "actual_vp": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            45.26711370085453
+          ]
+        },
+        "saturated_vp": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            150.89037900284845
+          ]
+        },
+        "vpd": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            105.62326530199391
+          ]
+        }
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.vapor_pressure_deficit_calculator.calculate_vpd",
+      "id": "calculate_vpd/above-threshold",
+      "inputs": {
+        "relative_humidity": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.3
+          ]
+        },
+        "rh_units": 0,
+        "temp_units": 0,
+        "temperature": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            1.0000000000000001e-07
+          ]
+        }
+      },
+      "output": {
+        "actual_vp": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            45.26711370085453
+          ]
+        },
+        "saturated_vp": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            150.89037900284845
+          ]
+        },
+        "vpd": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            105.62326530199391
+          ]
+        }
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.vapor_pressure_deficit_calculator.calculate_vpd",
+      "id": "calculate_vpd/float16-overflow",
+      "inputs": {
+        "relative_humidity": {
+          "dtype": "float16",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.300048828125
+          ]
+        },
+        "rh_units": 0,
+        "temp_units": 0,
+        "temperature": {
+          "dtype": "float16",
+          "shape": [
+            1
+          ],
+          "values": [
+            300.0
+          ]
+        }
+      },
+      "output": {
+        "actual_vp": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            142802.89599793428
+          ]
+        },
+        "saturated_vp": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            475932.1904048322
+          ]
+        },
+        "vpd": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            333129.2944068979
+          ]
+        }
+      },
+      "policy": "diagnostic",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.vapor_pressure_deficit_calculator.calculate_vpd",
+      "id": "calculate_vpd/float16-overflow/normalized",
+      "inputs": {
+        "relative_humidity": {
+          "dtype": "float32",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.300048828125
+          ]
+        },
+        "rh_units": 0,
+        "temp_units": 0,
+        "temperature": {
+          "dtype": "float32",
+          "shape": [
+            1
+          ],
+          "values": [
+            300.0
+          ]
+        }
+      },
+      "output": {
+        "actual_vp": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            142802.89599793428
+          ]
+        },
+        "saturated_vp": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            475932.1904048322
+          ]
+        },
+        "vpd": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            333129.2944068979
+          ]
+        }
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.vapor_pressure_deficit_calculator.calculate_vpd",
+      "id": "calculate_vpd/float16-underflow",
+      "inputs": {
+        "relative_humidity": {
+          "dtype": "float16",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.300048828125
+          ]
+        },
+        "rh_units": 0,
+        "temp_units": 0,
+        "temperature": {
+          "dtype": "float16",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.0
+          ]
+        }
+      },
+      "output": {
+        "actual_vp": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            45.27448118124774
+          ]
+        },
+        "saturated_vp": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            150.89037828998434
+          ]
+        },
+        "vpd": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            105.6158971087366
+          ]
+        }
+      },
+      "policy": "diagnostic",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.vapor_pressure_deficit_calculator.calculate_vpd",
+      "id": "calculate_vpd/float16-underflow/normalized",
+      "inputs": {
+        "relative_humidity": {
+          "dtype": "float32",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.300048828125
+          ]
+        },
+        "rh_units": 0,
+        "temp_units": 0,
+        "temperature": {
+          "dtype": "float32",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.0
+          ]
+        }
+      },
+      "output": {
+        "actual_vp": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            45.27448118124774
+          ]
+        },
+        "saturated_vp": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            150.89037828998434
+          ]
+        },
+        "vpd": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            105.6158971087366
+          ]
+        }
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.vapor_pressure_deficit_calculator.calculate_vpd",
+      "id": "calculate_vpd/masked",
+      "inputs": {
+        "relative_humidity": {
+          "dtype": "float64",
+          "shape": [
+            2
+          ],
+          "values": [
+            0.3,
+            0.3
+          ]
+        },
+        "rh_units": 0,
+        "temp_units": 0,
+        "temperature": {
+          "dtype": "float64",
+          "mask": [
+            false,
+            true
+          ],
+          "shape": [
+            2
+          ],
+          "values": [
+            1.0,
+            2.0
+          ]
+        }
+      },
+      "output": {
+        "actual_vp": {
+          "dtype": "float64",
+          "shape": [
+            2
+          ],
+          "values": [
+            47.451369108539865,
+            49.729217602900725
+          ]
+        },
+        "saturated_vp": {
+          "dtype": "float64",
+          "shape": [
+            2
+          ],
+          "values": [
+            158.17123036179956,
+            165.76405867633576
+          ]
+        },
+        "vpd": {
+          "dtype": "float64",
+          "shape": [
+            2
+          ],
+          "values": [
+            110.7198612532597,
+            116.03484107343505
+          ]
+        }
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.vapor_pressure_deficit_calculator.calculate_vpd",
+      "id": "calculate_vpd/strided",
+      "inputs": {
+        "relative_humidity": {
+          "dtype": "float64",
+          "shape": [
+            2
+          ],
+          "values": [
+            0.3,
+            0.3
+          ]
+        },
+        "rh_units": 0,
+        "temp_units": 0,
+        "temperature": {
+          "dtype": "float64",
+          "shape": [
+            2
+          ],
+          "strides": [
+            16
+          ],
+          "values": [
+            0.0,
+            2.0
+          ]
+        }
+      },
+      "output": {
+        "actual_vp": {
+          "dtype": "float64",
+          "shape": [
+            2
+          ],
+          "values": [
+            45.2671134869953,
+            49.729217602900725
+          ]
+        },
+        "saturated_vp": {
+          "dtype": "float64",
+          "shape": [
+            2
+          ],
+          "values": [
+            150.89037828998434,
+            165.76405867633576
+          ]
+        },
+        "vpd": {
+          "dtype": "float64",
+          "shape": [
+            2
+          ],
+          "values": [
+            105.62326480298903,
+            116.03484107343505
+          ]
+        }
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.vapor_pressure_deficit_calculator.calculate_vpd",
+      "id": "calculate_vpd/mixed-dtype",
+      "inputs": {
+        "relative_humidity": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.3
+          ]
+        },
+        "rh_units": 0,
+        "temp_units": 0,
+        "temperature": {
+          "dtype": "float32",
+          "shape": [
+            1
+          ],
+          "values": [
+            1.0
+          ]
+        }
+      },
+      "output": {
+        "actual_vp": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            47.451369108539865
+          ]
+        },
+        "saturated_vp": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            158.17123036179956
+          ]
+        },
+        "vpd": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            110.7198612532597
+          ]
+        }
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.vapor_pressure_deficit_calculator.calculate_vpd",
+      "exception": "ValueError",
+      "id": "calculate_vpd/unsupported-object",
+      "inputs": {
+        "relative_humidity": {
+          "dtype": "object",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.3
+          ]
+        },
+        "rh_units": 0,
+        "temp_units": 0,
+        "temperature": {
+          "dtype": "object",
+          "shape": [
+            1
+          ],
+          "values": [
+            "invalid"
+          ]
+        }
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.vapor_pressure_deficit_calculator.calculate_vpd",
+      "exception": "ValueError",
+      "id": "calculate_vpd/incompatible-shape",
+      "inputs": {
+        "relative_humidity": {
+          "dtype": "float64",
+          "shape": [
+            2
+          ],
+          "values": [
+            0.3,
+            0.3
+          ]
+        },
+        "rh_units": 0,
+        "temp_units": 0,
+        "temperature": {
+          "dtype": "float64",
+          "shape": [
+            3
+          ],
+          "values": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        }
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.vapor_pressure_deficit_calculator.calculate_vpd",
+      "id": "calculate_vpd/read-only",
+      "inputs": {
+        "relative_humidity": {
+          "dtype": "float64",
+          "shape": [
+            2
+          ],
+          "values": [
+            0.3,
+            0.3
+          ]
+        },
+        "rh_units": 0,
+        "temp_units": 0,
+        "temperature": {
+          "dtype": "float64",
+          "read_only": true,
+          "shape": [
+            2
+          ],
+          "values": [
+            1.0,
+            1.0
+          ]
+        }
+      },
+      "output": {
+        "actual_vp": {
+          "dtype": "float64",
+          "shape": [
+            2
+          ],
+          "values": [
+            47.451369108539865,
+            47.451369108539865
+          ]
+        },
+        "saturated_vp": {
+          "dtype": "float64",
+          "shape": [
+            2
+          ],
+          "values": [
+            158.17123036179956,
+            158.17123036179956
+          ]
+        },
+        "vpd": {
+          "dtype": "float64",
+          "shape": [
+            2
+          ],
+          "values": [
+            110.7198612532597,
+            110.7198612532597
+          ]
+        }
+      },
+      "policy": "acceptance",
+      "warnings": []
+    }
+  ],
+  "provenance": {
+    "oracle": "explicit Python",
+    "python_reference_sha": "7933789f00470c6bbfbe942dc22bdd7f74e192f9",
+    "source_sha256": {
+      "src/behave_fire/__init__.py": "6e49d8e5eddb383cafbf19632a7407cb767fc976ff820b7e635d5d639ab4882f",
+      "src/behave_fire/behave.py": "8b9c35cfe18024ba1186ba5240f939c9b647dcca8d026d7db18c447421e9f6b1",
+      "src/behave_fire/components/__init__.py": "5c88705dcf2a4073bc79bd49e5038172bd0fa5b15ca9e77d6f9717424282519d",
+      "src/behave_fire/components/behave_units.py": "426581d91466c64bdbf60bd8a686030fe8244303cdbd097b1838479937abab77",
+      "src/behave_fire/components/contain.py": "fae224dee8ecdb090e7c3e6dc73a219508a026726e1ab3483776d54121a81bb7",
+      "src/behave_fire/components/crown.py": "0e0f5fe9b8c3074b192528b020232cc95e66470d59daa3a057544c75d7d93a03",
+      "src/behave_fire/components/fine_dead_fuel_moisture_tool.py": "cb11fc2da53c66b7f7753e88aa1d1f2135c91c3e67962912d1b2c097a73a8e60",
+      "src/behave_fire/components/fire_size.py": "23c671131ae710cfa441a14307cc0dfeb2e3d36b276fc112a5308827fe9e40dc",
+      "src/behave_fire/components/fuel_models.py": "ee1b886c72c8bb0e14a4c883745b4dde97ee3e011c7fddddc5e8b63e4588d225",
+      "src/behave_fire/components/fuel_models_array.py": "f60af63d681be852ff4fe6c3864ef55521c745da6ab182382caee4543e057125",
+      "src/behave_fire/components/ignite.py": "f0518ee4bc484f1b5478ad4792ecba77481bb68dda48abd0c45442ecb78523fc",
+      "src/behave_fire/components/mortality.py": "ccdaff07b59ef140786031d8957dd3cdafbbd97fd5e372e5fe4abcb392f5bcac",
+      "src/behave_fire/components/safety.py": "ed27e7cef7aa488a92636f8dfa589fadca3e0c6ba44ccae87a9fd7c8bac168a0",
+      "src/behave_fire/components/slope_tool.py": "754ce32058173b6c149135f9b1ec443f8be21679c7cf6c8e0a64d7ef5f3fb49c",
+      "src/behave_fire/components/species_master_table.py": "afa06eb15e475d252eef8b54d34be0d202c5c0f664d75e2c87c783a3831e8c11",
+      "src/behave_fire/components/spot.py": "a0411ecf7606ee75f4b460c084cb461e0c39619a3c14ad96a4c0217733456a22",
+      "src/behave_fire/components/surface.py": "133c6938ea701599428824d1d210ca2449d9103a5324cffc3c2a0db5330e4550",
+      "src/behave_fire/components/vapor_pressure_deficit_calculator.py": "4b165f3d48a02ab49c0fcdd2a5a7df65bab8b4a6366a280cbbf23041488eb258"
+    }
+  },
+  "schema_version": 1
+}

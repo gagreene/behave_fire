@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Removed
+
+- Removed the unpublished conda recipe and its obsolete publishing instructions. Python package delivery continues through wheels and source distributions.
+
 ### Fixed
 
 - Corrected centimetre surface-area-to-volume conversion: `1 cm^-1` now converts to `30.48 ft^-1`, with the inverse conversion updated consistently.

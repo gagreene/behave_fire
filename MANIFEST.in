@@ -4,5 +4,4 @@ include CHANGELOG.md
 include pyproject.toml
 recursive-include src/behave_fire *.py
 prune tests
-prune conda-recipe
 

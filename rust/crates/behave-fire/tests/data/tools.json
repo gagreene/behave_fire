@@ -1,0 +1,7896 @@
+{
+  "cases": [
+    {
+      "entry_point": "behave_fire.components.fine_dead_fuel_moisture_tool.calculate_fine_dead_fuel_moisture",
+      "id": "calculate_fine_dead_fuel_moisture/baseline",
+      "inputs": {
+        "aspect_i": {
+          "dtype": "int64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0
+          ]
+        },
+        "dry_bulb_i": {
+          "dtype": "int64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0
+          ]
+        },
+        "elev_i": {
+          "dtype": "int64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0
+          ]
+        },
+        "month_i": {
+          "dtype": "int64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0
+          ]
+        },
+        "rh_i": {
+          "dtype": "int64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0
+          ]
+        },
+        "shading_i": {
+          "dtype": "int64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0
+          ]
+        },
+        "slope_i": {
+          "dtype": "int64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0
+          ]
+        },
+        "time_i": {
+          "dtype": "int64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0
+          ]
+        }
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [
+          1
+        ],
+        "values": [
+          0.03
+        ]
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.vapor_pressure_deficit_calculator.calculate_vpd",
+      "id": "calculate_vpd/baseline",
+      "inputs": {
+        "relative_humidity": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            0.3
+          ]
+        },
+        "rh_units": 0,
+        "temp_units": 0,
+        "temperature": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            80.0
+          ]
+        }
+      },
+      "output": {
+        "actual_vp": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            1049.1410693580247
+          ]
+        },
+        "saturated_vp": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            3497.136897860082
+          ]
+        },
+        "vpd": {
+          "dtype": "float64",
+          "shape": [
+            1
+          ],
+          "values": [
+            2447.9958285020575
+          ]
+        }
+      },
+      "policy": "acceptance",
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.fire_size.FireSize.calculate_backing_spread_rate",
+      "id": "FireSize.calculate_backing_spread_rate/baseline",
+      "inputs": {},
+      "output": null,
+      "state_after": {
+        "backing_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            1.2518732040192728
+          ]
+        },
+        "eccentricity_": 0.7774818145707344,
+        "effective_wind_speed_": 5.0,
+        "elapsed_time_": 0.0,
+        "elliptical_a_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            3.538182024739927
+          ]
+        },
+        "elliptical_b_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            5.625936602009636
+          ]
+        },
+        "elliptical_c_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            4.374063397990364
+          ]
+        },
+        "fire_length_to_width_ratio_": 1.5900642088709862,
+        "flanking_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            3.538182024739927
+          ]
+        },
+        "forward_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            10.0
+          ]
+        },
+        "heading_to_backing_ratio_": 7.988029432928135
+      },
+      "state_before": {
+        "backing_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            1.2518732040192728
+          ]
+        },
+        "eccentricity_": 0.7774818145707344,
+        "effective_wind_speed_": 5.0,
+        "elapsed_time_": 0.0,
+        "elliptical_a_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            3.538182024739927
+          ]
+        },
+        "elliptical_b_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            5.625936602009636
+          ]
+        },
+        "elliptical_c_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            4.374063397990364
+          ]
+        },
+        "fire_length_to_width_ratio_": 1.5900642088709862,
+        "flanking_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            3.538182024739927
+          ]
+        },
+        "forward_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            10.0
+          ]
+        },
+        "heading_to_backing_ratio_": 7.988029432928135
+      },
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.fire_size.FireSize.calculate_crown_fire_length_to_width_ratio",
+      "id": "FireSize.calculate_crown_fire_length_to_width_ratio/baseline",
+      "inputs": {},
+      "output": null,
+      "state_after": {
+        "backing_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            1.2518732040192728
+          ]
+        },
+        "eccentricity_": 0.7774818145707344,
+        "effective_wind_speed_": 5.0,
+        "elapsed_time_": 0.0,
+        "elliptical_a_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            3.538182024739927
+          ]
+        },
+        "elliptical_b_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            5.625936602009636
+          ]
+        },
+        "elliptical_c_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            4.374063397990364
+          ]
+        },
+        "fire_length_to_width_ratio_": 1.625,
+        "flanking_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            3.538182024739927
+          ]
+        },
+        "forward_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            10.0
+          ]
+        },
+        "heading_to_backing_ratio_": 7.988029432928135
+      },
+      "state_before": {
+        "backing_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            1.2518732040192728
+          ]
+        },
+        "eccentricity_": 0.7774818145707344,
+        "effective_wind_speed_": 5.0,
+        "elapsed_time_": 0.0,
+        "elliptical_a_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            3.538182024739927
+          ]
+        },
+        "elliptical_b_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            5.625936602009636
+          ]
+        },
+        "elliptical_c_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            4.374063397990364
+          ]
+        },
+        "fire_length_to_width_ratio_": 1.5900642088709862,
+        "flanking_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            3.538182024739927
+          ]
+        },
+        "forward_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            10.0
+          ]
+        },
+        "heading_to_backing_ratio_": 7.988029432928135
+      },
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.fire_size.FireSize.calculate_elliptical_dimensions",
+      "id": "FireSize.calculate_elliptical_dimensions/baseline",
+      "inputs": {},
+      "output": null,
+      "state_after": {
+        "backing_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            1.2518732040192728
+          ]
+        },
+        "eccentricity_": 0.7774818145707344,
+        "effective_wind_speed_": 5.0,
+        "elapsed_time_": 0.0,
+        "elliptical_a_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            3.538182024739927
+          ]
+        },
+        "elliptical_b_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            5.625936602009636
+          ]
+        },
+        "elliptical_c_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            4.374063397990364
+          ]
+        },
+        "fire_length_to_width_ratio_": 1.5900642088709862,
+        "flanking_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            3.538182024739927
+          ]
+        },
+        "forward_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            10.0
+          ]
+        },
+        "heading_to_backing_ratio_": 7.988029432928135
+      },
+      "state_before": {
+        "backing_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            1.2518732040192728
+          ]
+        },
+        "eccentricity_": 0.7774818145707344,
+        "effective_wind_speed_": 5.0,
+        "elapsed_time_": 0.0,
+        "elliptical_a_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            3.538182024739927
+          ]
+        },
+        "elliptical_b_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            5.625936602009636
+          ]
+        },
+        "elliptical_c_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            4.374063397990364
+          ]
+        },
+        "fire_length_to_width_ratio_": 1.5900642088709862,
+        "flanking_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            3.538182024739927
+          ]
+        },
+        "forward_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            10.0
+          ]
+        },
+        "heading_to_backing_ratio_": 7.988029432928135
+      },
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.fire_size.FireSize.calculate_fire_basic_dimensions",
+      "id": "FireSize.calculate_fire_basic_dimensions/baseline",
+      "inputs": {
+        "effective_wind_speed": 5.0,
+        "forward_spread_rate": 10.0,
+        "is_crown": false,
+        "spread_rate_units": 0,
+        "wind_speed_units": 5
+      },
+      "output": null,
+      "state_after": {
+        "backing_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            1.2518732040192728
+          ]
+        },
+        "eccentricity_": 0.7774818145707344,
+        "effective_wind_speed_": 5.0,
+        "elapsed_time_": 0.0,
+        "elliptical_a_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            3.538182024739927
+          ]
+        },
+        "elliptical_b_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            5.625936602009636
+          ]
+        },
+        "elliptical_c_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            4.374063397990364
+          ]
+        },
+        "fire_length_to_width_ratio_": 1.5900642088709862,
+        "flanking_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            3.538182024739927
+          ]
+        },
+        "forward_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            10.0
+          ]
+        },
+        "heading_to_backing_ratio_": 7.988029432928135
+      },
+      "state_before": {
+        "backing_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            1.2518732040192728
+          ]
+        },
+        "eccentricity_": 0.7774818145707344,
+        "effective_wind_speed_": 5.0,
+        "elapsed_time_": 0.0,
+        "elliptical_a_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            3.538182024739927
+          ]
+        },
+        "elliptical_b_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            5.625936602009636
+          ]
+        },
+        "elliptical_c_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            4.374063397990364
+          ]
+        },
+        "fire_length_to_width_ratio_": 1.5900642088709862,
+        "flanking_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            3.538182024739927
+          ]
+        },
+        "forward_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            10.0
+          ]
+        },
+        "heading_to_backing_ratio_": 7.988029432928135
+      },
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.fire_size.FireSize.calculate_fire_eccentricity",
+      "id": "FireSize.calculate_fire_eccentricity/baseline",
+      "inputs": {},
+      "output": null,
+      "state_after": {
+        "backing_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            1.2518732040192728
+          ]
+        },
+        "eccentricity_": 0.7774818145707344,
+        "effective_wind_speed_": 5.0,
+        "elapsed_time_": 0.0,
+        "elliptical_a_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            3.538182024739927
+          ]
+        },
+        "elliptical_b_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            5.625936602009636
+          ]
+        },
+        "elliptical_c_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            4.374063397990364
+          ]
+        },
+        "fire_length_to_width_ratio_": 1.5900642088709862,
+        "flanking_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            3.538182024739927
+          ]
+        },
+        "forward_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            10.0
+          ]
+        },
+        "heading_to_backing_ratio_": 7.988029432928135
+      },
+      "state_before": {
+        "backing_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            1.2518732040192728
+          ]
+        },
+        "eccentricity_": 0.7774818145707344,
+        "effective_wind_speed_": 5.0,
+        "elapsed_time_": 0.0,
+        "elliptical_a_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            3.538182024739927
+          ]
+        },
+        "elliptical_b_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            5.625936602009636
+          ]
+        },
+        "elliptical_c_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            4.374063397990364
+          ]
+        },
+        "fire_length_to_width_ratio_": 1.5900642088709862,
+        "flanking_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            3.538182024739927
+          ]
+        },
+        "forward_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            10.0
+          ]
+        },
+        "heading_to_backing_ratio_": 7.988029432928135
+      },
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.fire_size.FireSize.calculate_flanking_spread_rate",
+      "id": "FireSize.calculate_flanking_spread_rate/baseline",
+      "inputs": {},
+      "output": null,
+      "state_after": {
+        "backing_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            1.2518732040192728
+          ]
+        },
+        "eccentricity_": 0.7774818145707344,
+        "effective_wind_speed_": 5.0,
+        "elapsed_time_": 0.0,
+        "elliptical_a_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            3.538182024739927
+          ]
+        },
+        "elliptical_b_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            5.625936602009636
+          ]
+        },
+        "elliptical_c_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            4.374063397990364
+          ]
+        },
+        "fire_length_to_width_ratio_": 1.5900642088709862,
+        "flanking_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            3.538182024739927
+          ]
+        },
+        "forward_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            10.0
+          ]
+        },
+        "heading_to_backing_ratio_": 7.988029432928135
+      },
+      "state_before": {
+        "backing_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            1.2518732040192728
+          ]
+        },
+        "eccentricity_": 0.7774818145707344,
+        "effective_wind_speed_": 5.0,
+        "elapsed_time_": 0.0,
+        "elliptical_a_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            3.538182024739927
+          ]
+        },
+        "elliptical_b_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            5.625936602009636
+          ]
+        },
+        "elliptical_c_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            4.374063397990364
+          ]
+        },
+        "fire_length_to_width_ratio_": 1.5900642088709862,
+        "flanking_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            3.538182024739927
+          ]
+        },
+        "forward_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            10.0
+          ]
+        },
+        "heading_to_backing_ratio_": 7.988029432928135
+      },
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.fire_size.FireSize.calculate_surface_fire_length_to_width_ratio",
+      "id": "FireSize.calculate_surface_fire_length_to_width_ratio/baseline",
+      "inputs": {},
+      "output": null,
+      "state_after": {
+        "backing_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            1.2518732040192728
+          ]
+        },
+        "eccentricity_": 0.7774818145707344,
+        "effective_wind_speed_": 5.0,
+        "elapsed_time_": 0.0,
+        "elliptical_a_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            3.538182024739927
+          ]
+        },
+        "elliptical_b_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            5.625936602009636
+          ]
+        },
+        "elliptical_c_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            4.374063397990364
+          ]
+        },
+        "fire_length_to_width_ratio_": 1.5900642088709862,
+        "flanking_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            3.538182024739927
+          ]
+        },
+        "forward_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            10.0
+          ]
+        },
+        "heading_to_backing_ratio_": 7.988029432928135
+      },
+      "state_before": {
+        "backing_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            1.2518732040192728
+          ]
+        },
+        "eccentricity_": 0.7774818145707344,
+        "effective_wind_speed_": 5.0,
+        "elapsed_time_": 0.0,
+        "elliptical_a_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            3.538182024739927
+          ]
+        },
+        "elliptical_b_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            5.625936602009636
+          ]
+        },
+        "elliptical_c_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            4.374063397990364
+          ]
+        },
+        "fire_length_to_width_ratio_": 1.5900642088709862,
+        "flanking_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            3.538182024739927
+          ]
+        },
+        "forward_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            10.0
+          ]
+        },
+        "heading_to_backing_ratio_": 7.988029432928135
+      },
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.fire_size.FireSize.get_backing_spread_rate",
+      "id": "FireSize.get_backing_spread_rate/baseline",
+      "inputs": {
+        "spread_rate_units": 0
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [],
+        "values": [
+          1.2518732040192728
+        ]
+      },
+      "state_after": {
+        "backing_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            1.2518732040192728
+          ]
+        },
+        "eccentricity_": 0.7774818145707344,
+        "effective_wind_speed_": 5.0,
+        "elapsed_time_": 0.0,
+        "elliptical_a_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            3.538182024739927
+          ]
+        },
+        "elliptical_b_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            5.625936602009636
+          ]
+        },
+        "elliptical_c_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            4.374063397990364
+          ]
+        },
+        "fire_length_to_width_ratio_": 1.5900642088709862,
+        "flanking_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            3.538182024739927
+          ]
+        },
+        "forward_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            10.0
+          ]
+        },
+        "heading_to_backing_ratio_": 7.988029432928135
+      },
+      "state_before": {
+        "backing_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            1.2518732040192728
+          ]
+        },
+        "eccentricity_": 0.7774818145707344,
+        "effective_wind_speed_": 5.0,
+        "elapsed_time_": 0.0,
+        "elliptical_a_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            3.538182024739927
+          ]
+        },
+        "elliptical_b_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            5.625936602009636
+          ]
+        },
+        "elliptical_c_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            4.374063397990364
+          ]
+        },
+        "fire_length_to_width_ratio_": 1.5900642088709862,
+        "flanking_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            3.538182024739927
+          ]
+        },
+        "forward_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            10.0
+          ]
+        },
+        "heading_to_backing_ratio_": 7.988029432928135
+      },
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.fire_size.FireSize.get_eccentricity",
+      "id": "FireSize.get_eccentricity/baseline",
+      "inputs": {},
+      "output": 0.7774818145707344,
+      "state_after": {
+        "backing_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            1.2518732040192728
+          ]
+        },
+        "eccentricity_": 0.7774818145707344,
+        "effective_wind_speed_": 5.0,
+        "elapsed_time_": 0.0,
+        "elliptical_a_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            3.538182024739927
+          ]
+        },
+        "elliptical_b_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            5.625936602009636
+          ]
+        },
+        "elliptical_c_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            4.374063397990364
+          ]
+        },
+        "fire_length_to_width_ratio_": 1.5900642088709862,
+        "flanking_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            3.538182024739927
+          ]
+        },
+        "forward_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            10.0
+          ]
+        },
+        "heading_to_backing_ratio_": 7.988029432928135
+      },
+      "state_before": {
+        "backing_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            1.2518732040192728
+          ]
+        },
+        "eccentricity_": 0.7774818145707344,
+        "effective_wind_speed_": 5.0,
+        "elapsed_time_": 0.0,
+        "elliptical_a_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            3.538182024739927
+          ]
+        },
+        "elliptical_b_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            5.625936602009636
+          ]
+        },
+        "elliptical_c_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            4.374063397990364
+          ]
+        },
+        "fire_length_to_width_ratio_": 1.5900642088709862,
+        "flanking_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            3.538182024739927
+          ]
+        },
+        "forward_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            10.0
+          ]
+        },
+        "heading_to_backing_ratio_": 7.988029432928135
+      },
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.fire_size.FireSize.get_elliptical_a",
+      "id": "FireSize.get_elliptical_a/baseline",
+      "inputs": {
+        "elapsed_time": 10.0,
+        "length_units": 0,
+        "time_units": 0
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [],
+        "values": [
+          35.38182024739927
+        ]
+      },
+      "state_after": {
+        "backing_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            1.2518732040192728
+          ]
+        },
+        "eccentricity_": 0.7774818145707344,
+        "effective_wind_speed_": 5.0,
+        "elapsed_time_": 0.0,
+        "elliptical_a_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            3.538182024739927
+          ]
+        },
+        "elliptical_b_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            5.625936602009636
+          ]
+        },
+        "elliptical_c_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            4.374063397990364
+          ]
+        },
+        "fire_length_to_width_ratio_": 1.5900642088709862,
+        "flanking_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            3.538182024739927
+          ]
+        },
+        "forward_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            10.0
+          ]
+        },
+        "heading_to_backing_ratio_": 7.988029432928135
+      },
+      "state_before": {
+        "backing_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            1.2518732040192728
+          ]
+        },
+        "eccentricity_": 0.7774818145707344,
+        "effective_wind_speed_": 5.0,
+        "elapsed_time_": 0.0,
+        "elliptical_a_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            3.538182024739927
+          ]
+        },
+        "elliptical_b_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            5.625936602009636
+          ]
+        },
+        "elliptical_c_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            4.374063397990364
+          ]
+        },
+        "fire_length_to_width_ratio_": 1.5900642088709862,
+        "flanking_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            3.538182024739927
+          ]
+        },
+        "forward_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            10.0
+          ]
+        },
+        "heading_to_backing_ratio_": 7.988029432928135
+      },
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.fire_size.FireSize.get_elliptical_b",
+      "id": "FireSize.get_elliptical_b/baseline",
+      "inputs": {
+        "elapsed_time": 10.0,
+        "length_units": 0,
+        "time_units": 0
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [],
+        "values": [
+          56.259366020096365
+        ]
+      },
+      "state_after": {
+        "backing_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            1.2518732040192728
+          ]
+        },
+        "eccentricity_": 0.7774818145707344,
+        "effective_wind_speed_": 5.0,
+        "elapsed_time_": 0.0,
+        "elliptical_a_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            3.538182024739927
+          ]
+        },
+        "elliptical_b_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            5.625936602009636
+          ]
+        },
+        "elliptical_c_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            4.374063397990364
+          ]
+        },
+        "fire_length_to_width_ratio_": 1.5900642088709862,
+        "flanking_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            3.538182024739927
+          ]
+        },
+        "forward_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            10.0
+          ]
+        },
+        "heading_to_backing_ratio_": 7.988029432928135
+      },
+      "state_before": {
+        "backing_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            1.2518732040192728
+          ]
+        },
+        "eccentricity_": 0.7774818145707344,
+        "effective_wind_speed_": 5.0,
+        "elapsed_time_": 0.0,
+        "elliptical_a_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            3.538182024739927
+          ]
+        },
+        "elliptical_b_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            5.625936602009636
+          ]
+        },
+        "elliptical_c_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            4.374063397990364
+          ]
+        },
+        "fire_length_to_width_ratio_": 1.5900642088709862,
+        "flanking_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            3.538182024739927
+          ]
+        },
+        "forward_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            10.0
+          ]
+        },
+        "heading_to_backing_ratio_": 7.988029432928135
+      },
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.fire_size.FireSize.get_elliptical_c",
+      "id": "FireSize.get_elliptical_c/baseline",
+      "inputs": {
+        "elapsed_time": 10.0,
+        "length_units": 0,
+        "time_units": 0
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [],
+        "values": [
+          43.740633979903635
+        ]
+      },
+      "state_after": {
+        "backing_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            1.2518732040192728
+          ]
+        },
+        "eccentricity_": 0.7774818145707344,
+        "effective_wind_speed_": 5.0,
+        "elapsed_time_": 0.0,
+        "elliptical_a_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            3.538182024739927
+          ]
+        },
+        "elliptical_b_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            5.625936602009636
+          ]
+        },
+        "elliptical_c_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            4.374063397990364
+          ]
+        },
+        "fire_length_to_width_ratio_": 1.5900642088709862,
+        "flanking_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            3.538182024739927
+          ]
+        },
+        "forward_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            10.0
+          ]
+        },
+        "heading_to_backing_ratio_": 7.988029432928135
+      },
+      "state_before": {
+        "backing_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            1.2518732040192728
+          ]
+        },
+        "eccentricity_": 0.7774818145707344,
+        "effective_wind_speed_": 5.0,
+        "elapsed_time_": 0.0,
+        "elliptical_a_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            3.538182024739927
+          ]
+        },
+        "elliptical_b_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            5.625936602009636
+          ]
+        },
+        "elliptical_c_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            4.374063397990364
+          ]
+        },
+        "fire_length_to_width_ratio_": 1.5900642088709862,
+        "flanking_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            3.538182024739927
+          ]
+        },
+        "forward_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            10.0
+          ]
+        },
+        "heading_to_backing_ratio_": 7.988029432928135
+      },
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.fire_size.FireSize.get_fire_area",
+      "id": "FireSize.get_fire_area/baseline",
+      "inputs": {
+        "area_units": 0,
+        "elapsed_time": 10.0,
+        "is_crown": false,
+        "time_units": 0
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [],
+        "values": [
+          6253.5248264527745
+        ]
+      },
+      "state_after": {
+        "backing_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            1.2518732040192728
+          ]
+        },
+        "eccentricity_": 0.7774818145707344,
+        "effective_wind_speed_": 5.0,
+        "elapsed_time_": 0.0,
+        "elliptical_a_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            3.538182024739927
+          ]
+        },
+        "elliptical_b_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            5.625936602009636
+          ]
+        },
+        "elliptical_c_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            4.374063397990364
+          ]
+        },
+        "fire_length_to_width_ratio_": 1.5900642088709862,
+        "flanking_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            3.538182024739927
+          ]
+        },
+        "forward_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            10.0
+          ]
+        },
+        "heading_to_backing_ratio_": 7.988029432928135
+      },
+      "state_before": {
+        "backing_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            1.2518732040192728
+          ]
+        },
+        "eccentricity_": 0.7774818145707344,
+        "effective_wind_speed_": 5.0,
+        "elapsed_time_": 0.0,
+        "elliptical_a_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            3.538182024739927
+          ]
+        },
+        "elliptical_b_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            5.625936602009636
+          ]
+        },
+        "elliptical_c_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            4.374063397990364
+          ]
+        },
+        "fire_length_to_width_ratio_": 1.5900642088709862,
+        "flanking_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            3.538182024739927
+          ]
+        },
+        "forward_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            10.0
+          ]
+        },
+        "heading_to_backing_ratio_": 7.988029432928135
+      },
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.fire_size.FireSize.get_fire_length",
+      "id": "FireSize.get_fire_length/baseline",
+      "inputs": {
+        "elapsed_time": 10.0,
+        "length_units": 0,
+        "time_units": 0
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [],
+        "values": [
+          112.51873204019273
+        ]
+      },
+      "state_after": {
+        "backing_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            1.2518732040192728
+          ]
+        },
+        "eccentricity_": 0.7774818145707344,
+        "effective_wind_speed_": 5.0,
+        "elapsed_time_": 0.0,
+        "elliptical_a_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            3.538182024739927
+          ]
+        },
+        "elliptical_b_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            5.625936602009636
+          ]
+        },
+        "elliptical_c_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            4.374063397990364
+          ]
+        },
+        "fire_length_to_width_ratio_": 1.5900642088709862,
+        "flanking_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            3.538182024739927
+          ]
+        },
+        "forward_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            10.0
+          ]
+        },
+        "heading_to_backing_ratio_": 7.988029432928135
+      },
+      "state_before": {
+        "backing_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            1.2518732040192728
+          ]
+        },
+        "eccentricity_": 0.7774818145707344,
+        "effective_wind_speed_": 5.0,
+        "elapsed_time_": 0.0,
+        "elliptical_a_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            3.538182024739927
+          ]
+        },
+        "elliptical_b_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            5.625936602009636
+          ]
+        },
+        "elliptical_c_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            4.374063397990364
+          ]
+        },
+        "fire_length_to_width_ratio_": 1.5900642088709862,
+        "flanking_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            3.538182024739927
+          ]
+        },
+        "forward_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            10.0
+          ]
+        },
+        "heading_to_backing_ratio_": 7.988029432928135
+      },
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.fire_size.FireSize.get_fire_length_to_width_ratio",
+      "id": "FireSize.get_fire_length_to_width_ratio/baseline",
+      "inputs": {},
+      "output": 1.5900642088709862,
+      "state_after": {
+        "backing_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            1.2518732040192728
+          ]
+        },
+        "eccentricity_": 0.7774818145707344,
+        "effective_wind_speed_": 5.0,
+        "elapsed_time_": 0.0,
+        "elliptical_a_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            3.538182024739927
+          ]
+        },
+        "elliptical_b_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            5.625936602009636
+          ]
+        },
+        "elliptical_c_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            4.374063397990364
+          ]
+        },
+        "fire_length_to_width_ratio_": 1.5900642088709862,
+        "flanking_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            3.538182024739927
+          ]
+        },
+        "forward_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            10.0
+          ]
+        },
+        "heading_to_backing_ratio_": 7.988029432928135
+      },
+      "state_before": {
+        "backing_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            1.2518732040192728
+          ]
+        },
+        "eccentricity_": 0.7774818145707344,
+        "effective_wind_speed_": 5.0,
+        "elapsed_time_": 0.0,
+        "elliptical_a_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            3.538182024739927
+          ]
+        },
+        "elliptical_b_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            5.625936602009636
+          ]
+        },
+        "elliptical_c_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            4.374063397990364
+          ]
+        },
+        "fire_length_to_width_ratio_": 1.5900642088709862,
+        "flanking_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            3.538182024739927
+          ]
+        },
+        "forward_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            10.0
+          ]
+        },
+        "heading_to_backing_ratio_": 7.988029432928135
+      },
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.fire_size.FireSize.get_fire_perimeter",
+      "id": "FireSize.get_fire_perimeter/baseline",
+      "inputs": {
+        "elapsed_time": 10.0,
+        "is_crown": false,
+        "length_units": 0,
+        "time_units": 0
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [],
+        "values": [
+          291.6469753429357
+        ]
+      },
+      "state_after": {
+        "backing_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            1.2518732040192728
+          ]
+        },
+        "eccentricity_": 0.7774818145707344,
+        "effective_wind_speed_": 5.0,
+        "elapsed_time_": 0.0,
+        "elliptical_a_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            3.538182024739927
+          ]
+        },
+        "elliptical_b_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            5.625936602009636
+          ]
+        },
+        "elliptical_c_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            4.374063397990364
+          ]
+        },
+        "fire_length_to_width_ratio_": 1.5900642088709862,
+        "flanking_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            3.538182024739927
+          ]
+        },
+        "forward_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            10.0
+          ]
+        },
+        "heading_to_backing_ratio_": 7.988029432928135
+      },
+      "state_before": {
+        "backing_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            1.2518732040192728
+          ]
+        },
+        "eccentricity_": 0.7774818145707344,
+        "effective_wind_speed_": 5.0,
+        "elapsed_time_": 0.0,
+        "elliptical_a_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            3.538182024739927
+          ]
+        },
+        "elliptical_b_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            5.625936602009636
+          ]
+        },
+        "elliptical_c_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            4.374063397990364
+          ]
+        },
+        "fire_length_to_width_ratio_": 1.5900642088709862,
+        "flanking_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            3.538182024739927
+          ]
+        },
+        "forward_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            10.0
+          ]
+        },
+        "heading_to_backing_ratio_": 7.988029432928135
+      },
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.fire_size.FireSize.get_flanking_spread_rate",
+      "id": "FireSize.get_flanking_spread_rate/baseline",
+      "inputs": {
+        "spread_rate_units": 0
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [],
+        "values": [
+          3.538182024739927
+        ]
+      },
+      "state_after": {
+        "backing_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            1.2518732040192728
+          ]
+        },
+        "eccentricity_": 0.7774818145707344,
+        "effective_wind_speed_": 5.0,
+        "elapsed_time_": 0.0,
+        "elliptical_a_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            3.538182024739927
+          ]
+        },
+        "elliptical_b_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            5.625936602009636
+          ]
+        },
+        "elliptical_c_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            4.374063397990364
+          ]
+        },
+        "fire_length_to_width_ratio_": 1.5900642088709862,
+        "flanking_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            3.538182024739927
+          ]
+        },
+        "forward_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            10.0
+          ]
+        },
+        "heading_to_backing_ratio_": 7.988029432928135
+      },
+      "state_before": {
+        "backing_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            1.2518732040192728
+          ]
+        },
+        "eccentricity_": 0.7774818145707344,
+        "effective_wind_speed_": 5.0,
+        "elapsed_time_": 0.0,
+        "elliptical_a_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            3.538182024739927
+          ]
+        },
+        "elliptical_b_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            5.625936602009636
+          ]
+        },
+        "elliptical_c_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            4.374063397990364
+          ]
+        },
+        "fire_length_to_width_ratio_": 1.5900642088709862,
+        "flanking_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            3.538182024739927
+          ]
+        },
+        "forward_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            10.0
+          ]
+        },
+        "heading_to_backing_ratio_": 7.988029432928135
+      },
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.fire_size.FireSize.get_heading_to_backing_ratio",
+      "id": "FireSize.get_heading_to_backing_ratio/baseline",
+      "inputs": {},
+      "output": 7.988029432928135,
+      "state_after": {
+        "backing_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            1.2518732040192728
+          ]
+        },
+        "eccentricity_": 0.7774818145707344,
+        "effective_wind_speed_": 5.0,
+        "elapsed_time_": 0.0,
+        "elliptical_a_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            3.538182024739927
+          ]
+        },
+        "elliptical_b_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            5.625936602009636
+          ]
+        },
+        "elliptical_c_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            4.374063397990364
+          ]
+        },
+        "fire_length_to_width_ratio_": 1.5900642088709862,
+        "flanking_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            3.538182024739927
+          ]
+        },
+        "forward_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            10.0
+          ]
+        },
+        "heading_to_backing_ratio_": 7.988029432928135
+      },
+      "state_before": {
+        "backing_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            1.2518732040192728
+          ]
+        },
+        "eccentricity_": 0.7774818145707344,
+        "effective_wind_speed_": 5.0,
+        "elapsed_time_": 0.0,
+        "elliptical_a_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            3.538182024739927
+          ]
+        },
+        "elliptical_b_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            5.625936602009636
+          ]
+        },
+        "elliptical_c_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            4.374063397990364
+          ]
+        },
+        "fire_length_to_width_ratio_": 1.5900642088709862,
+        "flanking_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            3.538182024739927
+          ]
+        },
+        "forward_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            10.0
+          ]
+        },
+        "heading_to_backing_ratio_": 7.988029432928135
+      },
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.fire_size.FireSize.get_max_fire_width",
+      "id": "FireSize.get_max_fire_width/baseline",
+      "inputs": {
+        "elapsed_time": 10.0,
+        "length_units": 0,
+        "time_units": 0
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [],
+        "values": [
+          70.76364049479854
+        ]
+      },
+      "state_after": {
+        "backing_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            1.2518732040192728
+          ]
+        },
+        "eccentricity_": 0.7774818145707344,
+        "effective_wind_speed_": 5.0,
+        "elapsed_time_": 0.0,
+        "elliptical_a_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            3.538182024739927
+          ]
+        },
+        "elliptical_b_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            5.625936602009636
+          ]
+        },
+        "elliptical_c_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            4.374063397990364
+          ]
+        },
+        "fire_length_to_width_ratio_": 1.5900642088709862,
+        "flanking_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            3.538182024739927
+          ]
+        },
+        "forward_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            10.0
+          ]
+        },
+        "heading_to_backing_ratio_": 7.988029432928135
+      },
+      "state_before": {
+        "backing_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            1.2518732040192728
+          ]
+        },
+        "eccentricity_": 0.7774818145707344,
+        "effective_wind_speed_": 5.0,
+        "elapsed_time_": 0.0,
+        "elliptical_a_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            3.538182024739927
+          ]
+        },
+        "elliptical_b_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            5.625936602009636
+          ]
+        },
+        "elliptical_c_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            4.374063397990364
+          ]
+        },
+        "fire_length_to_width_ratio_": 1.5900642088709862,
+        "flanking_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            3.538182024739927
+          ]
+        },
+        "forward_spread_rate_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            10.0
+          ]
+        },
+        "heading_to_backing_ratio_": 7.988029432928135
+      },
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.slope_tool.SlopeTool.calculate_horizontal_distance",
+      "id": "SlopeTool.calculate_horizontal_distance/baseline",
+      "inputs": {
+        "calculated_map_distance": 10.0,
+        "distance_units": 0,
+        "max_slope_steepness": 30.0,
+        "slope_units": 0
+      },
+      "output": null,
+      "state_after": {
+        "centimeters_per_kilometer_": [
+          50.5051,
+          25.2525,
+          12.6263,
+          10.0,
+          6.3131,
+          4.7348,
+          4.1667,
+          3.1566,
+          2.0,
+          1.6,
+          1.5783,
+          1.0,
+          0.7891,
+          0.4,
+          0.3946,
+          0.1973,
+          0.1,
+          0.0986
+        ],
+        "horizontal_distances_": [
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              8.660254037844041
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              8.756408079383258
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.013878188659614
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.35414346693448
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.682458365518155
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.915912340642066
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.9999999999996
+            ]
+          }
+        ],
+        "inches_per_mile_": [
+          32.0,
+          16.0,
+          8.0,
+          6.336,
+          4.0,
+          3.0,
+          2.64,
+          2.0,
+          1.2672,
+          1.0138,
+          1.0,
+          0.6336,
+          0.5,
+          0.2534,
+          0.25,
+          0.125,
+          0.0634,
+          0.0625
+        ],
+        "kilometers_per_centimeter_": [
+          0.0198,
+          0.0396,
+          0.0792,
+          0.1,
+          0.1584,
+          0.2112,
+          0.24,
+          0.3168,
+          0.5,
+          0.625,
+          0.6336,
+          1.0,
+          1.2672,
+          2.5,
+          2.5344,
+          5.0688,
+          10.0,
+          10.1376
+        ],
+        "max_slope_in_degrees_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            30.0
+          ]
+        },
+        "max_slope_in_percent_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            57.735026918962575
+          ]
+        },
+        "miles_per_inch_": [
+          0.03125,
+          0.0625,
+          0.125,
+          0.15783,
+          0.25,
+          0.3333,
+          0.37879,
+          0.5,
+          0.78914,
+          0.98643,
+          1.0,
+          1.57828,
+          2.0,
+          3.94571,
+          4.0,
+          8.0,
+          15.78283,
+          16.0
+        ],
+        "representative_fractions_": [
+          1980,
+          3960,
+          7920,
+          10000,
+          15840,
+          21120,
+          24000,
+          31680,
+          50000,
+          62500,
+          63360,
+          100000,
+          126720,
+          250000,
+          253440,
+          506880,
+          1000000,
+          1013760
+        ],
+        "slope_elevation_change_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            60.0
+          ]
+        },
+        "slope_from_map_measurements_": 0.1432391503683123,
+        "slope_horizontal_distance_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            23999.99999999904
+          ]
+        }
+      },
+      "state_before": {
+        "centimeters_per_kilometer_": [
+          50.5051,
+          25.2525,
+          12.6263,
+          10.0,
+          6.3131,
+          4.7348,
+          4.1667,
+          3.1566,
+          2.0,
+          1.6,
+          1.5783,
+          1.0,
+          0.7891,
+          0.4,
+          0.3946,
+          0.1973,
+          0.1,
+          0.0986
+        ],
+        "horizontal_distances_": [
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              8.660254037844041
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              8.756408079383258
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.013878188659614
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.35414346693448
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.682458365518155
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.915912340642066
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.9999999999996
+            ]
+          }
+        ],
+        "inches_per_mile_": [
+          32.0,
+          16.0,
+          8.0,
+          6.336,
+          4.0,
+          3.0,
+          2.64,
+          2.0,
+          1.2672,
+          1.0138,
+          1.0,
+          0.6336,
+          0.5,
+          0.2534,
+          0.25,
+          0.125,
+          0.0634,
+          0.0625
+        ],
+        "kilometers_per_centimeter_": [
+          0.0198,
+          0.0396,
+          0.0792,
+          0.1,
+          0.1584,
+          0.2112,
+          0.24,
+          0.3168,
+          0.5,
+          0.625,
+          0.6336,
+          1.0,
+          1.2672,
+          2.5,
+          2.5344,
+          5.0688,
+          10.0,
+          10.1376
+        ],
+        "max_slope_in_degrees_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            30.0
+          ]
+        },
+        "max_slope_in_percent_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            57.735026918962575
+          ]
+        },
+        "miles_per_inch_": [
+          0.03125,
+          0.0625,
+          0.125,
+          0.15783,
+          0.25,
+          0.3333,
+          0.37879,
+          0.5,
+          0.78914,
+          0.98643,
+          1.0,
+          1.57828,
+          2.0,
+          3.94571,
+          4.0,
+          8.0,
+          15.78283,
+          16.0
+        ],
+        "representative_fractions_": [
+          1980,
+          3960,
+          7920,
+          10000,
+          15840,
+          21120,
+          24000,
+          31680,
+          50000,
+          62500,
+          63360,
+          100000,
+          126720,
+          250000,
+          253440,
+          506880,
+          1000000,
+          1013760
+        ],
+        "slope_elevation_change_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            60.0
+          ]
+        },
+        "slope_from_map_measurements_": 0.1432391503683123,
+        "slope_horizontal_distance_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            23999.99999999904
+          ]
+        }
+      },
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.slope_tool.SlopeTool.calculate_slope_from_map_measurements",
+      "id": "SlopeTool.calculate_slope_from_map_measurements/baseline",
+      "inputs": {
+        "contour_interval": 20.0,
+        "contour_units": 0,
+        "distance_units": 0,
+        "map_distance": 1.0,
+        "map_representative_fraction": 24000,
+        "number_of_contours": 3
+      },
+      "output": null,
+      "state_after": {
+        "centimeters_per_kilometer_": [
+          50.5051,
+          25.2525,
+          12.6263,
+          10.0,
+          6.3131,
+          4.7348,
+          4.1667,
+          3.1566,
+          2.0,
+          1.6,
+          1.5783,
+          1.0,
+          0.7891,
+          0.4,
+          0.3946,
+          0.1973,
+          0.1,
+          0.0986
+        ],
+        "horizontal_distances_": [
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              8.660254037844041
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              8.756408079383258
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.013878188659614
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.35414346693448
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.682458365518155
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.915912340642066
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.9999999999996
+            ]
+          }
+        ],
+        "inches_per_mile_": [
+          32.0,
+          16.0,
+          8.0,
+          6.336,
+          4.0,
+          3.0,
+          2.64,
+          2.0,
+          1.2672,
+          1.0138,
+          1.0,
+          0.6336,
+          0.5,
+          0.2534,
+          0.25,
+          0.125,
+          0.0634,
+          0.0625
+        ],
+        "kilometers_per_centimeter_": [
+          0.0198,
+          0.0396,
+          0.0792,
+          0.1,
+          0.1584,
+          0.2112,
+          0.24,
+          0.3168,
+          0.5,
+          0.625,
+          0.6336,
+          1.0,
+          1.2672,
+          2.5,
+          2.5344,
+          5.0688,
+          10.0,
+          10.1376
+        ],
+        "max_slope_in_degrees_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            30.0
+          ]
+        },
+        "max_slope_in_percent_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            57.735026918962575
+          ]
+        },
+        "miles_per_inch_": [
+          0.03125,
+          0.0625,
+          0.125,
+          0.15783,
+          0.25,
+          0.3333,
+          0.37879,
+          0.5,
+          0.78914,
+          0.98643,
+          1.0,
+          1.57828,
+          2.0,
+          3.94571,
+          4.0,
+          8.0,
+          15.78283,
+          16.0
+        ],
+        "representative_fractions_": [
+          1980,
+          3960,
+          7920,
+          10000,
+          15840,
+          21120,
+          24000,
+          31680,
+          50000,
+          62500,
+          63360,
+          100000,
+          126720,
+          250000,
+          253440,
+          506880,
+          1000000,
+          1013760
+        ],
+        "slope_elevation_change_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            60.0
+          ]
+        },
+        "slope_from_map_measurements_": 0.1432391503683123,
+        "slope_horizontal_distance_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            23999.99999999904
+          ]
+        }
+      },
+      "state_before": {
+        "centimeters_per_kilometer_": [
+          50.5051,
+          25.2525,
+          12.6263,
+          10.0,
+          6.3131,
+          4.7348,
+          4.1667,
+          3.1566,
+          2.0,
+          1.6,
+          1.5783,
+          1.0,
+          0.7891,
+          0.4,
+          0.3946,
+          0.1973,
+          0.1,
+          0.0986
+        ],
+        "horizontal_distances_": [
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              8.660254037844041
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              8.756408079383258
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.013878188659614
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.35414346693448
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.682458365518155
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.915912340642066
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.9999999999996
+            ]
+          }
+        ],
+        "inches_per_mile_": [
+          32.0,
+          16.0,
+          8.0,
+          6.336,
+          4.0,
+          3.0,
+          2.64,
+          2.0,
+          1.2672,
+          1.0138,
+          1.0,
+          0.6336,
+          0.5,
+          0.2534,
+          0.25,
+          0.125,
+          0.0634,
+          0.0625
+        ],
+        "kilometers_per_centimeter_": [
+          0.0198,
+          0.0396,
+          0.0792,
+          0.1,
+          0.1584,
+          0.2112,
+          0.24,
+          0.3168,
+          0.5,
+          0.625,
+          0.6336,
+          1.0,
+          1.2672,
+          2.5,
+          2.5344,
+          5.0688,
+          10.0,
+          10.1376
+        ],
+        "max_slope_in_degrees_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            30.0
+          ]
+        },
+        "max_slope_in_percent_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            57.735026918962575
+          ]
+        },
+        "miles_per_inch_": [
+          0.03125,
+          0.0625,
+          0.125,
+          0.15783,
+          0.25,
+          0.3333,
+          0.37879,
+          0.5,
+          0.78914,
+          0.98643,
+          1.0,
+          1.57828,
+          2.0,
+          3.94571,
+          4.0,
+          8.0,
+          15.78283,
+          16.0
+        ],
+        "representative_fractions_": [
+          1980,
+          3960,
+          7920,
+          10000,
+          15840,
+          21120,
+          24000,
+          31680,
+          50000,
+          62500,
+          63360,
+          100000,
+          126720,
+          250000,
+          253440,
+          506880,
+          1000000,
+          1013760
+        ],
+        "slope_elevation_change_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            60.0
+          ]
+        },
+        "slope_from_map_measurements_": 0.1432391503683123,
+        "slope_horizontal_distance_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            23999.99999999904
+          ]
+        }
+      },
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.slope_tool.SlopeTool.get_centimeters_per_kilometer_at_index",
+      "id": "SlopeTool.get_centimeters_per_kilometer_at_index/baseline",
+      "inputs": {
+        "index": 0
+      },
+      "output": 50.5051,
+      "state_after": {
+        "centimeters_per_kilometer_": [
+          50.5051,
+          25.2525,
+          12.6263,
+          10.0,
+          6.3131,
+          4.7348,
+          4.1667,
+          3.1566,
+          2.0,
+          1.6,
+          1.5783,
+          1.0,
+          0.7891,
+          0.4,
+          0.3946,
+          0.1973,
+          0.1,
+          0.0986
+        ],
+        "horizontal_distances_": [
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              8.660254037844041
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              8.756408079383258
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.013878188659614
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.35414346693448
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.682458365518155
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.915912340642066
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.9999999999996
+            ]
+          }
+        ],
+        "inches_per_mile_": [
+          32.0,
+          16.0,
+          8.0,
+          6.336,
+          4.0,
+          3.0,
+          2.64,
+          2.0,
+          1.2672,
+          1.0138,
+          1.0,
+          0.6336,
+          0.5,
+          0.2534,
+          0.25,
+          0.125,
+          0.0634,
+          0.0625
+        ],
+        "kilometers_per_centimeter_": [
+          0.0198,
+          0.0396,
+          0.0792,
+          0.1,
+          0.1584,
+          0.2112,
+          0.24,
+          0.3168,
+          0.5,
+          0.625,
+          0.6336,
+          1.0,
+          1.2672,
+          2.5,
+          2.5344,
+          5.0688,
+          10.0,
+          10.1376
+        ],
+        "max_slope_in_degrees_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            30.0
+          ]
+        },
+        "max_slope_in_percent_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            57.735026918962575
+          ]
+        },
+        "miles_per_inch_": [
+          0.03125,
+          0.0625,
+          0.125,
+          0.15783,
+          0.25,
+          0.3333,
+          0.37879,
+          0.5,
+          0.78914,
+          0.98643,
+          1.0,
+          1.57828,
+          2.0,
+          3.94571,
+          4.0,
+          8.0,
+          15.78283,
+          16.0
+        ],
+        "representative_fractions_": [
+          1980,
+          3960,
+          7920,
+          10000,
+          15840,
+          21120,
+          24000,
+          31680,
+          50000,
+          62500,
+          63360,
+          100000,
+          126720,
+          250000,
+          253440,
+          506880,
+          1000000,
+          1013760
+        ],
+        "slope_elevation_change_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            60.0
+          ]
+        },
+        "slope_from_map_measurements_": 0.1432391503683123,
+        "slope_horizontal_distance_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            23999.99999999904
+          ]
+        }
+      },
+      "state_before": {
+        "centimeters_per_kilometer_": [
+          50.5051,
+          25.2525,
+          12.6263,
+          10.0,
+          6.3131,
+          4.7348,
+          4.1667,
+          3.1566,
+          2.0,
+          1.6,
+          1.5783,
+          1.0,
+          0.7891,
+          0.4,
+          0.3946,
+          0.1973,
+          0.1,
+          0.0986
+        ],
+        "horizontal_distances_": [
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              8.660254037844041
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              8.756408079383258
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.013878188659614
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.35414346693448
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.682458365518155
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.915912340642066
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.9999999999996
+            ]
+          }
+        ],
+        "inches_per_mile_": [
+          32.0,
+          16.0,
+          8.0,
+          6.336,
+          4.0,
+          3.0,
+          2.64,
+          2.0,
+          1.2672,
+          1.0138,
+          1.0,
+          0.6336,
+          0.5,
+          0.2534,
+          0.25,
+          0.125,
+          0.0634,
+          0.0625
+        ],
+        "kilometers_per_centimeter_": [
+          0.0198,
+          0.0396,
+          0.0792,
+          0.1,
+          0.1584,
+          0.2112,
+          0.24,
+          0.3168,
+          0.5,
+          0.625,
+          0.6336,
+          1.0,
+          1.2672,
+          2.5,
+          2.5344,
+          5.0688,
+          10.0,
+          10.1376
+        ],
+        "max_slope_in_degrees_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            30.0
+          ]
+        },
+        "max_slope_in_percent_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            57.735026918962575
+          ]
+        },
+        "miles_per_inch_": [
+          0.03125,
+          0.0625,
+          0.125,
+          0.15783,
+          0.25,
+          0.3333,
+          0.37879,
+          0.5,
+          0.78914,
+          0.98643,
+          1.0,
+          1.57828,
+          2.0,
+          3.94571,
+          4.0,
+          8.0,
+          15.78283,
+          16.0
+        ],
+        "representative_fractions_": [
+          1980,
+          3960,
+          7920,
+          10000,
+          15840,
+          21120,
+          24000,
+          31680,
+          50000,
+          62500,
+          63360,
+          100000,
+          126720,
+          250000,
+          253440,
+          506880,
+          1000000,
+          1013760
+        ],
+        "slope_elevation_change_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            60.0
+          ]
+        },
+        "slope_from_map_measurements_": 0.1432391503683123,
+        "slope_horizontal_distance_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            23999.99999999904
+          ]
+        }
+      },
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.slope_tool.SlopeTool.get_horizontal_distance_at_index",
+      "id": "SlopeTool.get_horizontal_distance_at_index/baseline",
+      "inputs": {
+        "index": 0,
+        "map_distance_units": 0
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [],
+        "values": [
+          8.660254037844041
+        ]
+      },
+      "state_after": {
+        "centimeters_per_kilometer_": [
+          50.5051,
+          25.2525,
+          12.6263,
+          10.0,
+          6.3131,
+          4.7348,
+          4.1667,
+          3.1566,
+          2.0,
+          1.6,
+          1.5783,
+          1.0,
+          0.7891,
+          0.4,
+          0.3946,
+          0.1973,
+          0.1,
+          0.0986
+        ],
+        "horizontal_distances_": [
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              8.660254037844041
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              8.756408079383258
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.013878188659614
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.35414346693448
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.682458365518155
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.915912340642066
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.9999999999996
+            ]
+          }
+        ],
+        "inches_per_mile_": [
+          32.0,
+          16.0,
+          8.0,
+          6.336,
+          4.0,
+          3.0,
+          2.64,
+          2.0,
+          1.2672,
+          1.0138,
+          1.0,
+          0.6336,
+          0.5,
+          0.2534,
+          0.25,
+          0.125,
+          0.0634,
+          0.0625
+        ],
+        "kilometers_per_centimeter_": [
+          0.0198,
+          0.0396,
+          0.0792,
+          0.1,
+          0.1584,
+          0.2112,
+          0.24,
+          0.3168,
+          0.5,
+          0.625,
+          0.6336,
+          1.0,
+          1.2672,
+          2.5,
+          2.5344,
+          5.0688,
+          10.0,
+          10.1376
+        ],
+        "max_slope_in_degrees_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            30.0
+          ]
+        },
+        "max_slope_in_percent_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            57.735026918962575
+          ]
+        },
+        "miles_per_inch_": [
+          0.03125,
+          0.0625,
+          0.125,
+          0.15783,
+          0.25,
+          0.3333,
+          0.37879,
+          0.5,
+          0.78914,
+          0.98643,
+          1.0,
+          1.57828,
+          2.0,
+          3.94571,
+          4.0,
+          8.0,
+          15.78283,
+          16.0
+        ],
+        "representative_fractions_": [
+          1980,
+          3960,
+          7920,
+          10000,
+          15840,
+          21120,
+          24000,
+          31680,
+          50000,
+          62500,
+          63360,
+          100000,
+          126720,
+          250000,
+          253440,
+          506880,
+          1000000,
+          1013760
+        ],
+        "slope_elevation_change_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            60.0
+          ]
+        },
+        "slope_from_map_measurements_": 0.1432391503683123,
+        "slope_horizontal_distance_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            23999.99999999904
+          ]
+        }
+      },
+      "state_before": {
+        "centimeters_per_kilometer_": [
+          50.5051,
+          25.2525,
+          12.6263,
+          10.0,
+          6.3131,
+          4.7348,
+          4.1667,
+          3.1566,
+          2.0,
+          1.6,
+          1.5783,
+          1.0,
+          0.7891,
+          0.4,
+          0.3946,
+          0.1973,
+          0.1,
+          0.0986
+        ],
+        "horizontal_distances_": [
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              8.660254037844041
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              8.756408079383258
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.013878188659614
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.35414346693448
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.682458365518155
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.915912340642066
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.9999999999996
+            ]
+          }
+        ],
+        "inches_per_mile_": [
+          32.0,
+          16.0,
+          8.0,
+          6.336,
+          4.0,
+          3.0,
+          2.64,
+          2.0,
+          1.2672,
+          1.0138,
+          1.0,
+          0.6336,
+          0.5,
+          0.2534,
+          0.25,
+          0.125,
+          0.0634,
+          0.0625
+        ],
+        "kilometers_per_centimeter_": [
+          0.0198,
+          0.0396,
+          0.0792,
+          0.1,
+          0.1584,
+          0.2112,
+          0.24,
+          0.3168,
+          0.5,
+          0.625,
+          0.6336,
+          1.0,
+          1.2672,
+          2.5,
+          2.5344,
+          5.0688,
+          10.0,
+          10.1376
+        ],
+        "max_slope_in_degrees_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            30.0
+          ]
+        },
+        "max_slope_in_percent_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            57.735026918962575
+          ]
+        },
+        "miles_per_inch_": [
+          0.03125,
+          0.0625,
+          0.125,
+          0.15783,
+          0.25,
+          0.3333,
+          0.37879,
+          0.5,
+          0.78914,
+          0.98643,
+          1.0,
+          1.57828,
+          2.0,
+          3.94571,
+          4.0,
+          8.0,
+          15.78283,
+          16.0
+        ],
+        "representative_fractions_": [
+          1980,
+          3960,
+          7920,
+          10000,
+          15840,
+          21120,
+          24000,
+          31680,
+          50000,
+          62500,
+          63360,
+          100000,
+          126720,
+          250000,
+          253440,
+          506880,
+          1000000,
+          1013760
+        ],
+        "slope_elevation_change_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            60.0
+          ]
+        },
+        "slope_from_map_measurements_": 0.1432391503683123,
+        "slope_horizontal_distance_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            23999.99999999904
+          ]
+        }
+      },
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.slope_tool.SlopeTool.get_inches_per_mile_at_index",
+      "id": "SlopeTool.get_inches_per_mile_at_index/baseline",
+      "inputs": {
+        "index": 0
+      },
+      "output": 32.0,
+      "state_after": {
+        "centimeters_per_kilometer_": [
+          50.5051,
+          25.2525,
+          12.6263,
+          10.0,
+          6.3131,
+          4.7348,
+          4.1667,
+          3.1566,
+          2.0,
+          1.6,
+          1.5783,
+          1.0,
+          0.7891,
+          0.4,
+          0.3946,
+          0.1973,
+          0.1,
+          0.0986
+        ],
+        "horizontal_distances_": [
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              8.660254037844041
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              8.756408079383258
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.013878188659614
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.35414346693448
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.682458365518155
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.915912340642066
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.9999999999996
+            ]
+          }
+        ],
+        "inches_per_mile_": [
+          32.0,
+          16.0,
+          8.0,
+          6.336,
+          4.0,
+          3.0,
+          2.64,
+          2.0,
+          1.2672,
+          1.0138,
+          1.0,
+          0.6336,
+          0.5,
+          0.2534,
+          0.25,
+          0.125,
+          0.0634,
+          0.0625
+        ],
+        "kilometers_per_centimeter_": [
+          0.0198,
+          0.0396,
+          0.0792,
+          0.1,
+          0.1584,
+          0.2112,
+          0.24,
+          0.3168,
+          0.5,
+          0.625,
+          0.6336,
+          1.0,
+          1.2672,
+          2.5,
+          2.5344,
+          5.0688,
+          10.0,
+          10.1376
+        ],
+        "max_slope_in_degrees_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            30.0
+          ]
+        },
+        "max_slope_in_percent_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            57.735026918962575
+          ]
+        },
+        "miles_per_inch_": [
+          0.03125,
+          0.0625,
+          0.125,
+          0.15783,
+          0.25,
+          0.3333,
+          0.37879,
+          0.5,
+          0.78914,
+          0.98643,
+          1.0,
+          1.57828,
+          2.0,
+          3.94571,
+          4.0,
+          8.0,
+          15.78283,
+          16.0
+        ],
+        "representative_fractions_": [
+          1980,
+          3960,
+          7920,
+          10000,
+          15840,
+          21120,
+          24000,
+          31680,
+          50000,
+          62500,
+          63360,
+          100000,
+          126720,
+          250000,
+          253440,
+          506880,
+          1000000,
+          1013760
+        ],
+        "slope_elevation_change_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            60.0
+          ]
+        },
+        "slope_from_map_measurements_": 0.1432391503683123,
+        "slope_horizontal_distance_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            23999.99999999904
+          ]
+        }
+      },
+      "state_before": {
+        "centimeters_per_kilometer_": [
+          50.5051,
+          25.2525,
+          12.6263,
+          10.0,
+          6.3131,
+          4.7348,
+          4.1667,
+          3.1566,
+          2.0,
+          1.6,
+          1.5783,
+          1.0,
+          0.7891,
+          0.4,
+          0.3946,
+          0.1973,
+          0.1,
+          0.0986
+        ],
+        "horizontal_distances_": [
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              8.660254037844041
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              8.756408079383258
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.013878188659614
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.35414346693448
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.682458365518155
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.915912340642066
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.9999999999996
+            ]
+          }
+        ],
+        "inches_per_mile_": [
+          32.0,
+          16.0,
+          8.0,
+          6.336,
+          4.0,
+          3.0,
+          2.64,
+          2.0,
+          1.2672,
+          1.0138,
+          1.0,
+          0.6336,
+          0.5,
+          0.2534,
+          0.25,
+          0.125,
+          0.0634,
+          0.0625
+        ],
+        "kilometers_per_centimeter_": [
+          0.0198,
+          0.0396,
+          0.0792,
+          0.1,
+          0.1584,
+          0.2112,
+          0.24,
+          0.3168,
+          0.5,
+          0.625,
+          0.6336,
+          1.0,
+          1.2672,
+          2.5,
+          2.5344,
+          5.0688,
+          10.0,
+          10.1376
+        ],
+        "max_slope_in_degrees_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            30.0
+          ]
+        },
+        "max_slope_in_percent_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            57.735026918962575
+          ]
+        },
+        "miles_per_inch_": [
+          0.03125,
+          0.0625,
+          0.125,
+          0.15783,
+          0.25,
+          0.3333,
+          0.37879,
+          0.5,
+          0.78914,
+          0.98643,
+          1.0,
+          1.57828,
+          2.0,
+          3.94571,
+          4.0,
+          8.0,
+          15.78283,
+          16.0
+        ],
+        "representative_fractions_": [
+          1980,
+          3960,
+          7920,
+          10000,
+          15840,
+          21120,
+          24000,
+          31680,
+          50000,
+          62500,
+          63360,
+          100000,
+          126720,
+          250000,
+          253440,
+          506880,
+          1000000,
+          1013760
+        ],
+        "slope_elevation_change_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            60.0
+          ]
+        },
+        "slope_from_map_measurements_": 0.1432391503683123,
+        "slope_horizontal_distance_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            23999.99999999904
+          ]
+        }
+      },
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.slope_tool.SlopeTool.get_kilometers_per_centimeter_at_index",
+      "id": "SlopeTool.get_kilometers_per_centimeter_at_index/baseline",
+      "inputs": {
+        "index": 0
+      },
+      "output": 0.0198,
+      "state_after": {
+        "centimeters_per_kilometer_": [
+          50.5051,
+          25.2525,
+          12.6263,
+          10.0,
+          6.3131,
+          4.7348,
+          4.1667,
+          3.1566,
+          2.0,
+          1.6,
+          1.5783,
+          1.0,
+          0.7891,
+          0.4,
+          0.3946,
+          0.1973,
+          0.1,
+          0.0986
+        ],
+        "horizontal_distances_": [
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              8.660254037844041
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              8.756408079383258
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.013878188659614
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.35414346693448
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.682458365518155
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.915912340642066
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.9999999999996
+            ]
+          }
+        ],
+        "inches_per_mile_": [
+          32.0,
+          16.0,
+          8.0,
+          6.336,
+          4.0,
+          3.0,
+          2.64,
+          2.0,
+          1.2672,
+          1.0138,
+          1.0,
+          0.6336,
+          0.5,
+          0.2534,
+          0.25,
+          0.125,
+          0.0634,
+          0.0625
+        ],
+        "kilometers_per_centimeter_": [
+          0.0198,
+          0.0396,
+          0.0792,
+          0.1,
+          0.1584,
+          0.2112,
+          0.24,
+          0.3168,
+          0.5,
+          0.625,
+          0.6336,
+          1.0,
+          1.2672,
+          2.5,
+          2.5344,
+          5.0688,
+          10.0,
+          10.1376
+        ],
+        "max_slope_in_degrees_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            30.0
+          ]
+        },
+        "max_slope_in_percent_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            57.735026918962575
+          ]
+        },
+        "miles_per_inch_": [
+          0.03125,
+          0.0625,
+          0.125,
+          0.15783,
+          0.25,
+          0.3333,
+          0.37879,
+          0.5,
+          0.78914,
+          0.98643,
+          1.0,
+          1.57828,
+          2.0,
+          3.94571,
+          4.0,
+          8.0,
+          15.78283,
+          16.0
+        ],
+        "representative_fractions_": [
+          1980,
+          3960,
+          7920,
+          10000,
+          15840,
+          21120,
+          24000,
+          31680,
+          50000,
+          62500,
+          63360,
+          100000,
+          126720,
+          250000,
+          253440,
+          506880,
+          1000000,
+          1013760
+        ],
+        "slope_elevation_change_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            60.0
+          ]
+        },
+        "slope_from_map_measurements_": 0.1432391503683123,
+        "slope_horizontal_distance_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            23999.99999999904
+          ]
+        }
+      },
+      "state_before": {
+        "centimeters_per_kilometer_": [
+          50.5051,
+          25.2525,
+          12.6263,
+          10.0,
+          6.3131,
+          4.7348,
+          4.1667,
+          3.1566,
+          2.0,
+          1.6,
+          1.5783,
+          1.0,
+          0.7891,
+          0.4,
+          0.3946,
+          0.1973,
+          0.1,
+          0.0986
+        ],
+        "horizontal_distances_": [
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              8.660254037844041
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              8.756408079383258
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.013878188659614
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.35414346693448
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.682458365518155
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.915912340642066
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.9999999999996
+            ]
+          }
+        ],
+        "inches_per_mile_": [
+          32.0,
+          16.0,
+          8.0,
+          6.336,
+          4.0,
+          3.0,
+          2.64,
+          2.0,
+          1.2672,
+          1.0138,
+          1.0,
+          0.6336,
+          0.5,
+          0.2534,
+          0.25,
+          0.125,
+          0.0634,
+          0.0625
+        ],
+        "kilometers_per_centimeter_": [
+          0.0198,
+          0.0396,
+          0.0792,
+          0.1,
+          0.1584,
+          0.2112,
+          0.24,
+          0.3168,
+          0.5,
+          0.625,
+          0.6336,
+          1.0,
+          1.2672,
+          2.5,
+          2.5344,
+          5.0688,
+          10.0,
+          10.1376
+        ],
+        "max_slope_in_degrees_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            30.0
+          ]
+        },
+        "max_slope_in_percent_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            57.735026918962575
+          ]
+        },
+        "miles_per_inch_": [
+          0.03125,
+          0.0625,
+          0.125,
+          0.15783,
+          0.25,
+          0.3333,
+          0.37879,
+          0.5,
+          0.78914,
+          0.98643,
+          1.0,
+          1.57828,
+          2.0,
+          3.94571,
+          4.0,
+          8.0,
+          15.78283,
+          16.0
+        ],
+        "representative_fractions_": [
+          1980,
+          3960,
+          7920,
+          10000,
+          15840,
+          21120,
+          24000,
+          31680,
+          50000,
+          62500,
+          63360,
+          100000,
+          126720,
+          250000,
+          253440,
+          506880,
+          1000000,
+          1013760
+        ],
+        "slope_elevation_change_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            60.0
+          ]
+        },
+        "slope_from_map_measurements_": 0.1432391503683123,
+        "slope_horizontal_distance_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            23999.99999999904
+          ]
+        }
+      },
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.slope_tool.SlopeTool.get_miles_per_inch_at_index",
+      "id": "SlopeTool.get_miles_per_inch_at_index/baseline",
+      "inputs": {
+        "index": 0
+      },
+      "output": 0.03125,
+      "state_after": {
+        "centimeters_per_kilometer_": [
+          50.5051,
+          25.2525,
+          12.6263,
+          10.0,
+          6.3131,
+          4.7348,
+          4.1667,
+          3.1566,
+          2.0,
+          1.6,
+          1.5783,
+          1.0,
+          0.7891,
+          0.4,
+          0.3946,
+          0.1973,
+          0.1,
+          0.0986
+        ],
+        "horizontal_distances_": [
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              8.660254037844041
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              8.756408079383258
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.013878188659614
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.35414346693448
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.682458365518155
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.915912340642066
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.9999999999996
+            ]
+          }
+        ],
+        "inches_per_mile_": [
+          32.0,
+          16.0,
+          8.0,
+          6.336,
+          4.0,
+          3.0,
+          2.64,
+          2.0,
+          1.2672,
+          1.0138,
+          1.0,
+          0.6336,
+          0.5,
+          0.2534,
+          0.25,
+          0.125,
+          0.0634,
+          0.0625
+        ],
+        "kilometers_per_centimeter_": [
+          0.0198,
+          0.0396,
+          0.0792,
+          0.1,
+          0.1584,
+          0.2112,
+          0.24,
+          0.3168,
+          0.5,
+          0.625,
+          0.6336,
+          1.0,
+          1.2672,
+          2.5,
+          2.5344,
+          5.0688,
+          10.0,
+          10.1376
+        ],
+        "max_slope_in_degrees_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            30.0
+          ]
+        },
+        "max_slope_in_percent_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            57.735026918962575
+          ]
+        },
+        "miles_per_inch_": [
+          0.03125,
+          0.0625,
+          0.125,
+          0.15783,
+          0.25,
+          0.3333,
+          0.37879,
+          0.5,
+          0.78914,
+          0.98643,
+          1.0,
+          1.57828,
+          2.0,
+          3.94571,
+          4.0,
+          8.0,
+          15.78283,
+          16.0
+        ],
+        "representative_fractions_": [
+          1980,
+          3960,
+          7920,
+          10000,
+          15840,
+          21120,
+          24000,
+          31680,
+          50000,
+          62500,
+          63360,
+          100000,
+          126720,
+          250000,
+          253440,
+          506880,
+          1000000,
+          1013760
+        ],
+        "slope_elevation_change_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            60.0
+          ]
+        },
+        "slope_from_map_measurements_": 0.1432391503683123,
+        "slope_horizontal_distance_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            23999.99999999904
+          ]
+        }
+      },
+      "state_before": {
+        "centimeters_per_kilometer_": [
+          50.5051,
+          25.2525,
+          12.6263,
+          10.0,
+          6.3131,
+          4.7348,
+          4.1667,
+          3.1566,
+          2.0,
+          1.6,
+          1.5783,
+          1.0,
+          0.7891,
+          0.4,
+          0.3946,
+          0.1973,
+          0.1,
+          0.0986
+        ],
+        "horizontal_distances_": [
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              8.660254037844041
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              8.756408079383258
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.013878188659614
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.35414346693448
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.682458365518155
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.915912340642066
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.9999999999996
+            ]
+          }
+        ],
+        "inches_per_mile_": [
+          32.0,
+          16.0,
+          8.0,
+          6.336,
+          4.0,
+          3.0,
+          2.64,
+          2.0,
+          1.2672,
+          1.0138,
+          1.0,
+          0.6336,
+          0.5,
+          0.2534,
+          0.25,
+          0.125,
+          0.0634,
+          0.0625
+        ],
+        "kilometers_per_centimeter_": [
+          0.0198,
+          0.0396,
+          0.0792,
+          0.1,
+          0.1584,
+          0.2112,
+          0.24,
+          0.3168,
+          0.5,
+          0.625,
+          0.6336,
+          1.0,
+          1.2672,
+          2.5,
+          2.5344,
+          5.0688,
+          10.0,
+          10.1376
+        ],
+        "max_slope_in_degrees_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            30.0
+          ]
+        },
+        "max_slope_in_percent_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            57.735026918962575
+          ]
+        },
+        "miles_per_inch_": [
+          0.03125,
+          0.0625,
+          0.125,
+          0.15783,
+          0.25,
+          0.3333,
+          0.37879,
+          0.5,
+          0.78914,
+          0.98643,
+          1.0,
+          1.57828,
+          2.0,
+          3.94571,
+          4.0,
+          8.0,
+          15.78283,
+          16.0
+        ],
+        "representative_fractions_": [
+          1980,
+          3960,
+          7920,
+          10000,
+          15840,
+          21120,
+          24000,
+          31680,
+          50000,
+          62500,
+          63360,
+          100000,
+          126720,
+          250000,
+          253440,
+          506880,
+          1000000,
+          1013760
+        ],
+        "slope_elevation_change_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            60.0
+          ]
+        },
+        "slope_from_map_measurements_": 0.1432391503683123,
+        "slope_horizontal_distance_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            23999.99999999904
+          ]
+        }
+      },
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.slope_tool.SlopeTool.get_number_of_horizontal_distances",
+      "id": "SlopeTool.get_number_of_horizontal_distances/baseline",
+      "inputs": {},
+      "output": 7,
+      "state_after": {
+        "centimeters_per_kilometer_": [
+          50.5051,
+          25.2525,
+          12.6263,
+          10.0,
+          6.3131,
+          4.7348,
+          4.1667,
+          3.1566,
+          2.0,
+          1.6,
+          1.5783,
+          1.0,
+          0.7891,
+          0.4,
+          0.3946,
+          0.1973,
+          0.1,
+          0.0986
+        ],
+        "horizontal_distances_": [
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              8.660254037844041
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              8.756408079383258
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.013878188659614
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.35414346693448
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.682458365518155
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.915912340642066
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.9999999999996
+            ]
+          }
+        ],
+        "inches_per_mile_": [
+          32.0,
+          16.0,
+          8.0,
+          6.336,
+          4.0,
+          3.0,
+          2.64,
+          2.0,
+          1.2672,
+          1.0138,
+          1.0,
+          0.6336,
+          0.5,
+          0.2534,
+          0.25,
+          0.125,
+          0.0634,
+          0.0625
+        ],
+        "kilometers_per_centimeter_": [
+          0.0198,
+          0.0396,
+          0.0792,
+          0.1,
+          0.1584,
+          0.2112,
+          0.24,
+          0.3168,
+          0.5,
+          0.625,
+          0.6336,
+          1.0,
+          1.2672,
+          2.5,
+          2.5344,
+          5.0688,
+          10.0,
+          10.1376
+        ],
+        "max_slope_in_degrees_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            30.0
+          ]
+        },
+        "max_slope_in_percent_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            57.735026918962575
+          ]
+        },
+        "miles_per_inch_": [
+          0.03125,
+          0.0625,
+          0.125,
+          0.15783,
+          0.25,
+          0.3333,
+          0.37879,
+          0.5,
+          0.78914,
+          0.98643,
+          1.0,
+          1.57828,
+          2.0,
+          3.94571,
+          4.0,
+          8.0,
+          15.78283,
+          16.0
+        ],
+        "representative_fractions_": [
+          1980,
+          3960,
+          7920,
+          10000,
+          15840,
+          21120,
+          24000,
+          31680,
+          50000,
+          62500,
+          63360,
+          100000,
+          126720,
+          250000,
+          253440,
+          506880,
+          1000000,
+          1013760
+        ],
+        "slope_elevation_change_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            60.0
+          ]
+        },
+        "slope_from_map_measurements_": 0.1432391503683123,
+        "slope_horizontal_distance_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            23999.99999999904
+          ]
+        }
+      },
+      "state_before": {
+        "centimeters_per_kilometer_": [
+          50.5051,
+          25.2525,
+          12.6263,
+          10.0,
+          6.3131,
+          4.7348,
+          4.1667,
+          3.1566,
+          2.0,
+          1.6,
+          1.5783,
+          1.0,
+          0.7891,
+          0.4,
+          0.3946,
+          0.1973,
+          0.1,
+          0.0986
+        ],
+        "horizontal_distances_": [
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              8.660254037844041
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              8.756408079383258
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.013878188659614
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.35414346693448
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.682458365518155
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.915912340642066
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.9999999999996
+            ]
+          }
+        ],
+        "inches_per_mile_": [
+          32.0,
+          16.0,
+          8.0,
+          6.336,
+          4.0,
+          3.0,
+          2.64,
+          2.0,
+          1.2672,
+          1.0138,
+          1.0,
+          0.6336,
+          0.5,
+          0.2534,
+          0.25,
+          0.125,
+          0.0634,
+          0.0625
+        ],
+        "kilometers_per_centimeter_": [
+          0.0198,
+          0.0396,
+          0.0792,
+          0.1,
+          0.1584,
+          0.2112,
+          0.24,
+          0.3168,
+          0.5,
+          0.625,
+          0.6336,
+          1.0,
+          1.2672,
+          2.5,
+          2.5344,
+          5.0688,
+          10.0,
+          10.1376
+        ],
+        "max_slope_in_degrees_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            30.0
+          ]
+        },
+        "max_slope_in_percent_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            57.735026918962575
+          ]
+        },
+        "miles_per_inch_": [
+          0.03125,
+          0.0625,
+          0.125,
+          0.15783,
+          0.25,
+          0.3333,
+          0.37879,
+          0.5,
+          0.78914,
+          0.98643,
+          1.0,
+          1.57828,
+          2.0,
+          3.94571,
+          4.0,
+          8.0,
+          15.78283,
+          16.0
+        ],
+        "representative_fractions_": [
+          1980,
+          3960,
+          7920,
+          10000,
+          15840,
+          21120,
+          24000,
+          31680,
+          50000,
+          62500,
+          63360,
+          100000,
+          126720,
+          250000,
+          253440,
+          506880,
+          1000000,
+          1013760
+        ],
+        "slope_elevation_change_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            60.0
+          ]
+        },
+        "slope_from_map_measurements_": 0.1432391503683123,
+        "slope_horizontal_distance_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            23999.99999999904
+          ]
+        }
+      },
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.slope_tool.SlopeTool.get_number_of_representative_fractions",
+      "id": "SlopeTool.get_number_of_representative_fractions/baseline",
+      "inputs": {},
+      "output": 18,
+      "state_after": {
+        "centimeters_per_kilometer_": [
+          50.5051,
+          25.2525,
+          12.6263,
+          10.0,
+          6.3131,
+          4.7348,
+          4.1667,
+          3.1566,
+          2.0,
+          1.6,
+          1.5783,
+          1.0,
+          0.7891,
+          0.4,
+          0.3946,
+          0.1973,
+          0.1,
+          0.0986
+        ],
+        "horizontal_distances_": [
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              8.660254037844041
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              8.756408079383258
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.013878188659614
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.35414346693448
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.682458365518155
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.915912340642066
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.9999999999996
+            ]
+          }
+        ],
+        "inches_per_mile_": [
+          32.0,
+          16.0,
+          8.0,
+          6.336,
+          4.0,
+          3.0,
+          2.64,
+          2.0,
+          1.2672,
+          1.0138,
+          1.0,
+          0.6336,
+          0.5,
+          0.2534,
+          0.25,
+          0.125,
+          0.0634,
+          0.0625
+        ],
+        "kilometers_per_centimeter_": [
+          0.0198,
+          0.0396,
+          0.0792,
+          0.1,
+          0.1584,
+          0.2112,
+          0.24,
+          0.3168,
+          0.5,
+          0.625,
+          0.6336,
+          1.0,
+          1.2672,
+          2.5,
+          2.5344,
+          5.0688,
+          10.0,
+          10.1376
+        ],
+        "max_slope_in_degrees_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            30.0
+          ]
+        },
+        "max_slope_in_percent_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            57.735026918962575
+          ]
+        },
+        "miles_per_inch_": [
+          0.03125,
+          0.0625,
+          0.125,
+          0.15783,
+          0.25,
+          0.3333,
+          0.37879,
+          0.5,
+          0.78914,
+          0.98643,
+          1.0,
+          1.57828,
+          2.0,
+          3.94571,
+          4.0,
+          8.0,
+          15.78283,
+          16.0
+        ],
+        "representative_fractions_": [
+          1980,
+          3960,
+          7920,
+          10000,
+          15840,
+          21120,
+          24000,
+          31680,
+          50000,
+          62500,
+          63360,
+          100000,
+          126720,
+          250000,
+          253440,
+          506880,
+          1000000,
+          1013760
+        ],
+        "slope_elevation_change_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            60.0
+          ]
+        },
+        "slope_from_map_measurements_": 0.1432391503683123,
+        "slope_horizontal_distance_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            23999.99999999904
+          ]
+        }
+      },
+      "state_before": {
+        "centimeters_per_kilometer_": [
+          50.5051,
+          25.2525,
+          12.6263,
+          10.0,
+          6.3131,
+          4.7348,
+          4.1667,
+          3.1566,
+          2.0,
+          1.6,
+          1.5783,
+          1.0,
+          0.7891,
+          0.4,
+          0.3946,
+          0.1973,
+          0.1,
+          0.0986
+        ],
+        "horizontal_distances_": [
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              8.660254037844041
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              8.756408079383258
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.013878188659614
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.35414346693448
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.682458365518155
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.915912340642066
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.9999999999996
+            ]
+          }
+        ],
+        "inches_per_mile_": [
+          32.0,
+          16.0,
+          8.0,
+          6.336,
+          4.0,
+          3.0,
+          2.64,
+          2.0,
+          1.2672,
+          1.0138,
+          1.0,
+          0.6336,
+          0.5,
+          0.2534,
+          0.25,
+          0.125,
+          0.0634,
+          0.0625
+        ],
+        "kilometers_per_centimeter_": [
+          0.0198,
+          0.0396,
+          0.0792,
+          0.1,
+          0.1584,
+          0.2112,
+          0.24,
+          0.3168,
+          0.5,
+          0.625,
+          0.6336,
+          1.0,
+          1.2672,
+          2.5,
+          2.5344,
+          5.0688,
+          10.0,
+          10.1376
+        ],
+        "max_slope_in_degrees_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            30.0
+          ]
+        },
+        "max_slope_in_percent_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            57.735026918962575
+          ]
+        },
+        "miles_per_inch_": [
+          0.03125,
+          0.0625,
+          0.125,
+          0.15783,
+          0.25,
+          0.3333,
+          0.37879,
+          0.5,
+          0.78914,
+          0.98643,
+          1.0,
+          1.57828,
+          2.0,
+          3.94571,
+          4.0,
+          8.0,
+          15.78283,
+          16.0
+        ],
+        "representative_fractions_": [
+          1980,
+          3960,
+          7920,
+          10000,
+          15840,
+          21120,
+          24000,
+          31680,
+          50000,
+          62500,
+          63360,
+          100000,
+          126720,
+          250000,
+          253440,
+          506880,
+          1000000,
+          1013760
+        ],
+        "slope_elevation_change_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            60.0
+          ]
+        },
+        "slope_from_map_measurements_": 0.1432391503683123,
+        "slope_horizontal_distance_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            23999.99999999904
+          ]
+        }
+      },
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.slope_tool.SlopeTool.get_representative_fraction_at_index",
+      "id": "SlopeTool.get_representative_fraction_at_index/baseline",
+      "inputs": {
+        "index": 0
+      },
+      "output": 1980,
+      "state_after": {
+        "centimeters_per_kilometer_": [
+          50.5051,
+          25.2525,
+          12.6263,
+          10.0,
+          6.3131,
+          4.7348,
+          4.1667,
+          3.1566,
+          2.0,
+          1.6,
+          1.5783,
+          1.0,
+          0.7891,
+          0.4,
+          0.3946,
+          0.1973,
+          0.1,
+          0.0986
+        ],
+        "horizontal_distances_": [
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              8.660254037844041
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              8.756408079383258
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.013878188659614
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.35414346693448
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.682458365518155
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.915912340642066
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.9999999999996
+            ]
+          }
+        ],
+        "inches_per_mile_": [
+          32.0,
+          16.0,
+          8.0,
+          6.336,
+          4.0,
+          3.0,
+          2.64,
+          2.0,
+          1.2672,
+          1.0138,
+          1.0,
+          0.6336,
+          0.5,
+          0.2534,
+          0.25,
+          0.125,
+          0.0634,
+          0.0625
+        ],
+        "kilometers_per_centimeter_": [
+          0.0198,
+          0.0396,
+          0.0792,
+          0.1,
+          0.1584,
+          0.2112,
+          0.24,
+          0.3168,
+          0.5,
+          0.625,
+          0.6336,
+          1.0,
+          1.2672,
+          2.5,
+          2.5344,
+          5.0688,
+          10.0,
+          10.1376
+        ],
+        "max_slope_in_degrees_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            30.0
+          ]
+        },
+        "max_slope_in_percent_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            57.735026918962575
+          ]
+        },
+        "miles_per_inch_": [
+          0.03125,
+          0.0625,
+          0.125,
+          0.15783,
+          0.25,
+          0.3333,
+          0.37879,
+          0.5,
+          0.78914,
+          0.98643,
+          1.0,
+          1.57828,
+          2.0,
+          3.94571,
+          4.0,
+          8.0,
+          15.78283,
+          16.0
+        ],
+        "representative_fractions_": [
+          1980,
+          3960,
+          7920,
+          10000,
+          15840,
+          21120,
+          24000,
+          31680,
+          50000,
+          62500,
+          63360,
+          100000,
+          126720,
+          250000,
+          253440,
+          506880,
+          1000000,
+          1013760
+        ],
+        "slope_elevation_change_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            60.0
+          ]
+        },
+        "slope_from_map_measurements_": 0.1432391503683123,
+        "slope_horizontal_distance_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            23999.99999999904
+          ]
+        }
+      },
+      "state_before": {
+        "centimeters_per_kilometer_": [
+          50.5051,
+          25.2525,
+          12.6263,
+          10.0,
+          6.3131,
+          4.7348,
+          4.1667,
+          3.1566,
+          2.0,
+          1.6,
+          1.5783,
+          1.0,
+          0.7891,
+          0.4,
+          0.3946,
+          0.1973,
+          0.1,
+          0.0986
+        ],
+        "horizontal_distances_": [
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              8.660254037844041
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              8.756408079383258
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.013878188659614
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.35414346693448
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.682458365518155
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.915912340642066
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.9999999999996
+            ]
+          }
+        ],
+        "inches_per_mile_": [
+          32.0,
+          16.0,
+          8.0,
+          6.336,
+          4.0,
+          3.0,
+          2.64,
+          2.0,
+          1.2672,
+          1.0138,
+          1.0,
+          0.6336,
+          0.5,
+          0.2534,
+          0.25,
+          0.125,
+          0.0634,
+          0.0625
+        ],
+        "kilometers_per_centimeter_": [
+          0.0198,
+          0.0396,
+          0.0792,
+          0.1,
+          0.1584,
+          0.2112,
+          0.24,
+          0.3168,
+          0.5,
+          0.625,
+          0.6336,
+          1.0,
+          1.2672,
+          2.5,
+          2.5344,
+          5.0688,
+          10.0,
+          10.1376
+        ],
+        "max_slope_in_degrees_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            30.0
+          ]
+        },
+        "max_slope_in_percent_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            57.735026918962575
+          ]
+        },
+        "miles_per_inch_": [
+          0.03125,
+          0.0625,
+          0.125,
+          0.15783,
+          0.25,
+          0.3333,
+          0.37879,
+          0.5,
+          0.78914,
+          0.98643,
+          1.0,
+          1.57828,
+          2.0,
+          3.94571,
+          4.0,
+          8.0,
+          15.78283,
+          16.0
+        ],
+        "representative_fractions_": [
+          1980,
+          3960,
+          7920,
+          10000,
+          15840,
+          21120,
+          24000,
+          31680,
+          50000,
+          62500,
+          63360,
+          100000,
+          126720,
+          250000,
+          253440,
+          506880,
+          1000000,
+          1013760
+        ],
+        "slope_elevation_change_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            60.0
+          ]
+        },
+        "slope_from_map_measurements_": 0.1432391503683123,
+        "slope_horizontal_distance_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            23999.99999999904
+          ]
+        }
+      },
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.slope_tool.SlopeTool.get_slope_elevation_change_from_map_measurements",
+      "id": "SlopeTool.get_slope_elevation_change_from_map_measurements/baseline",
+      "inputs": {
+        "elevation_units": 0
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [],
+        "values": [
+          60.0
+        ]
+      },
+      "state_after": {
+        "centimeters_per_kilometer_": [
+          50.5051,
+          25.2525,
+          12.6263,
+          10.0,
+          6.3131,
+          4.7348,
+          4.1667,
+          3.1566,
+          2.0,
+          1.6,
+          1.5783,
+          1.0,
+          0.7891,
+          0.4,
+          0.3946,
+          0.1973,
+          0.1,
+          0.0986
+        ],
+        "horizontal_distances_": [
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              8.660254037844041
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              8.756408079383258
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.013878188659614
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.35414346693448
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.682458365518155
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.915912340642066
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.9999999999996
+            ]
+          }
+        ],
+        "inches_per_mile_": [
+          32.0,
+          16.0,
+          8.0,
+          6.336,
+          4.0,
+          3.0,
+          2.64,
+          2.0,
+          1.2672,
+          1.0138,
+          1.0,
+          0.6336,
+          0.5,
+          0.2534,
+          0.25,
+          0.125,
+          0.0634,
+          0.0625
+        ],
+        "kilometers_per_centimeter_": [
+          0.0198,
+          0.0396,
+          0.0792,
+          0.1,
+          0.1584,
+          0.2112,
+          0.24,
+          0.3168,
+          0.5,
+          0.625,
+          0.6336,
+          1.0,
+          1.2672,
+          2.5,
+          2.5344,
+          5.0688,
+          10.0,
+          10.1376
+        ],
+        "max_slope_in_degrees_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            30.0
+          ]
+        },
+        "max_slope_in_percent_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            57.735026918962575
+          ]
+        },
+        "miles_per_inch_": [
+          0.03125,
+          0.0625,
+          0.125,
+          0.15783,
+          0.25,
+          0.3333,
+          0.37879,
+          0.5,
+          0.78914,
+          0.98643,
+          1.0,
+          1.57828,
+          2.0,
+          3.94571,
+          4.0,
+          8.0,
+          15.78283,
+          16.0
+        ],
+        "representative_fractions_": [
+          1980,
+          3960,
+          7920,
+          10000,
+          15840,
+          21120,
+          24000,
+          31680,
+          50000,
+          62500,
+          63360,
+          100000,
+          126720,
+          250000,
+          253440,
+          506880,
+          1000000,
+          1013760
+        ],
+        "slope_elevation_change_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            60.0
+          ]
+        },
+        "slope_from_map_measurements_": 0.1432391503683123,
+        "slope_horizontal_distance_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            23999.99999999904
+          ]
+        }
+      },
+      "state_before": {
+        "centimeters_per_kilometer_": [
+          50.5051,
+          25.2525,
+          12.6263,
+          10.0,
+          6.3131,
+          4.7348,
+          4.1667,
+          3.1566,
+          2.0,
+          1.6,
+          1.5783,
+          1.0,
+          0.7891,
+          0.4,
+          0.3946,
+          0.1973,
+          0.1,
+          0.0986
+        ],
+        "horizontal_distances_": [
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              8.660254037844041
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              8.756408079383258
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.013878188659614
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.35414346693448
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.682458365518155
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.915912340642066
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.9999999999996
+            ]
+          }
+        ],
+        "inches_per_mile_": [
+          32.0,
+          16.0,
+          8.0,
+          6.336,
+          4.0,
+          3.0,
+          2.64,
+          2.0,
+          1.2672,
+          1.0138,
+          1.0,
+          0.6336,
+          0.5,
+          0.2534,
+          0.25,
+          0.125,
+          0.0634,
+          0.0625
+        ],
+        "kilometers_per_centimeter_": [
+          0.0198,
+          0.0396,
+          0.0792,
+          0.1,
+          0.1584,
+          0.2112,
+          0.24,
+          0.3168,
+          0.5,
+          0.625,
+          0.6336,
+          1.0,
+          1.2672,
+          2.5,
+          2.5344,
+          5.0688,
+          10.0,
+          10.1376
+        ],
+        "max_slope_in_degrees_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            30.0
+          ]
+        },
+        "max_slope_in_percent_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            57.735026918962575
+          ]
+        },
+        "miles_per_inch_": [
+          0.03125,
+          0.0625,
+          0.125,
+          0.15783,
+          0.25,
+          0.3333,
+          0.37879,
+          0.5,
+          0.78914,
+          0.98643,
+          1.0,
+          1.57828,
+          2.0,
+          3.94571,
+          4.0,
+          8.0,
+          15.78283,
+          16.0
+        ],
+        "representative_fractions_": [
+          1980,
+          3960,
+          7920,
+          10000,
+          15840,
+          21120,
+          24000,
+          31680,
+          50000,
+          62500,
+          63360,
+          100000,
+          126720,
+          250000,
+          253440,
+          506880,
+          1000000,
+          1013760
+        ],
+        "slope_elevation_change_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            60.0
+          ]
+        },
+        "slope_from_map_measurements_": 0.1432391503683123,
+        "slope_horizontal_distance_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            23999.99999999904
+          ]
+        }
+      },
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.slope_tool.SlopeTool.get_slope_from_map_measurements",
+      "id": "SlopeTool.get_slope_from_map_measurements/baseline",
+      "inputs": {
+        "slope_units": 0
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [],
+        "values": [
+          0.1432391503683123
+        ]
+      },
+      "state_after": {
+        "centimeters_per_kilometer_": [
+          50.5051,
+          25.2525,
+          12.6263,
+          10.0,
+          6.3131,
+          4.7348,
+          4.1667,
+          3.1566,
+          2.0,
+          1.6,
+          1.5783,
+          1.0,
+          0.7891,
+          0.4,
+          0.3946,
+          0.1973,
+          0.1,
+          0.0986
+        ],
+        "horizontal_distances_": [
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              8.660254037844041
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              8.756408079383258
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.013878188659614
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.35414346693448
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.682458365518155
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.915912340642066
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.9999999999996
+            ]
+          }
+        ],
+        "inches_per_mile_": [
+          32.0,
+          16.0,
+          8.0,
+          6.336,
+          4.0,
+          3.0,
+          2.64,
+          2.0,
+          1.2672,
+          1.0138,
+          1.0,
+          0.6336,
+          0.5,
+          0.2534,
+          0.25,
+          0.125,
+          0.0634,
+          0.0625
+        ],
+        "kilometers_per_centimeter_": [
+          0.0198,
+          0.0396,
+          0.0792,
+          0.1,
+          0.1584,
+          0.2112,
+          0.24,
+          0.3168,
+          0.5,
+          0.625,
+          0.6336,
+          1.0,
+          1.2672,
+          2.5,
+          2.5344,
+          5.0688,
+          10.0,
+          10.1376
+        ],
+        "max_slope_in_degrees_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            30.0
+          ]
+        },
+        "max_slope_in_percent_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            57.735026918962575
+          ]
+        },
+        "miles_per_inch_": [
+          0.03125,
+          0.0625,
+          0.125,
+          0.15783,
+          0.25,
+          0.3333,
+          0.37879,
+          0.5,
+          0.78914,
+          0.98643,
+          1.0,
+          1.57828,
+          2.0,
+          3.94571,
+          4.0,
+          8.0,
+          15.78283,
+          16.0
+        ],
+        "representative_fractions_": [
+          1980,
+          3960,
+          7920,
+          10000,
+          15840,
+          21120,
+          24000,
+          31680,
+          50000,
+          62500,
+          63360,
+          100000,
+          126720,
+          250000,
+          253440,
+          506880,
+          1000000,
+          1013760
+        ],
+        "slope_elevation_change_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            60.0
+          ]
+        },
+        "slope_from_map_measurements_": 0.1432391503683123,
+        "slope_horizontal_distance_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            23999.99999999904
+          ]
+        }
+      },
+      "state_before": {
+        "centimeters_per_kilometer_": [
+          50.5051,
+          25.2525,
+          12.6263,
+          10.0,
+          6.3131,
+          4.7348,
+          4.1667,
+          3.1566,
+          2.0,
+          1.6,
+          1.5783,
+          1.0,
+          0.7891,
+          0.4,
+          0.3946,
+          0.1973,
+          0.1,
+          0.0986
+        ],
+        "horizontal_distances_": [
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              8.660254037844041
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              8.756408079383258
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.013878188659614
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.35414346693448
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.682458365518155
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.915912340642066
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.9999999999996
+            ]
+          }
+        ],
+        "inches_per_mile_": [
+          32.0,
+          16.0,
+          8.0,
+          6.336,
+          4.0,
+          3.0,
+          2.64,
+          2.0,
+          1.2672,
+          1.0138,
+          1.0,
+          0.6336,
+          0.5,
+          0.2534,
+          0.25,
+          0.125,
+          0.0634,
+          0.0625
+        ],
+        "kilometers_per_centimeter_": [
+          0.0198,
+          0.0396,
+          0.0792,
+          0.1,
+          0.1584,
+          0.2112,
+          0.24,
+          0.3168,
+          0.5,
+          0.625,
+          0.6336,
+          1.0,
+          1.2672,
+          2.5,
+          2.5344,
+          5.0688,
+          10.0,
+          10.1376
+        ],
+        "max_slope_in_degrees_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            30.0
+          ]
+        },
+        "max_slope_in_percent_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            57.735026918962575
+          ]
+        },
+        "miles_per_inch_": [
+          0.03125,
+          0.0625,
+          0.125,
+          0.15783,
+          0.25,
+          0.3333,
+          0.37879,
+          0.5,
+          0.78914,
+          0.98643,
+          1.0,
+          1.57828,
+          2.0,
+          3.94571,
+          4.0,
+          8.0,
+          15.78283,
+          16.0
+        ],
+        "representative_fractions_": [
+          1980,
+          3960,
+          7920,
+          10000,
+          15840,
+          21120,
+          24000,
+          31680,
+          50000,
+          62500,
+          63360,
+          100000,
+          126720,
+          250000,
+          253440,
+          506880,
+          1000000,
+          1013760
+        ],
+        "slope_elevation_change_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            60.0
+          ]
+        },
+        "slope_from_map_measurements_": 0.1432391503683123,
+        "slope_horizontal_distance_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            23999.99999999904
+          ]
+        }
+      },
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.slope_tool.SlopeTool.get_slope_from_map_measurements_in_degrees",
+      "id": "SlopeTool.get_slope_from_map_measurements_in_degrees/baseline",
+      "inputs": {},
+      "output": {
+        "dtype": "float64",
+        "shape": [],
+        "values": [
+          0.1432391503683123
+        ]
+      },
+      "state_after": {
+        "centimeters_per_kilometer_": [
+          50.5051,
+          25.2525,
+          12.6263,
+          10.0,
+          6.3131,
+          4.7348,
+          4.1667,
+          3.1566,
+          2.0,
+          1.6,
+          1.5783,
+          1.0,
+          0.7891,
+          0.4,
+          0.3946,
+          0.1973,
+          0.1,
+          0.0986
+        ],
+        "horizontal_distances_": [
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              8.660254037844041
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              8.756408079383258
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.013878188659614
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.35414346693448
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.682458365518155
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.915912340642066
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.9999999999996
+            ]
+          }
+        ],
+        "inches_per_mile_": [
+          32.0,
+          16.0,
+          8.0,
+          6.336,
+          4.0,
+          3.0,
+          2.64,
+          2.0,
+          1.2672,
+          1.0138,
+          1.0,
+          0.6336,
+          0.5,
+          0.2534,
+          0.25,
+          0.125,
+          0.0634,
+          0.0625
+        ],
+        "kilometers_per_centimeter_": [
+          0.0198,
+          0.0396,
+          0.0792,
+          0.1,
+          0.1584,
+          0.2112,
+          0.24,
+          0.3168,
+          0.5,
+          0.625,
+          0.6336,
+          1.0,
+          1.2672,
+          2.5,
+          2.5344,
+          5.0688,
+          10.0,
+          10.1376
+        ],
+        "max_slope_in_degrees_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            30.0
+          ]
+        },
+        "max_slope_in_percent_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            57.735026918962575
+          ]
+        },
+        "miles_per_inch_": [
+          0.03125,
+          0.0625,
+          0.125,
+          0.15783,
+          0.25,
+          0.3333,
+          0.37879,
+          0.5,
+          0.78914,
+          0.98643,
+          1.0,
+          1.57828,
+          2.0,
+          3.94571,
+          4.0,
+          8.0,
+          15.78283,
+          16.0
+        ],
+        "representative_fractions_": [
+          1980,
+          3960,
+          7920,
+          10000,
+          15840,
+          21120,
+          24000,
+          31680,
+          50000,
+          62500,
+          63360,
+          100000,
+          126720,
+          250000,
+          253440,
+          506880,
+          1000000,
+          1013760
+        ],
+        "slope_elevation_change_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            60.0
+          ]
+        },
+        "slope_from_map_measurements_": 0.1432391503683123,
+        "slope_horizontal_distance_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            23999.99999999904
+          ]
+        }
+      },
+      "state_before": {
+        "centimeters_per_kilometer_": [
+          50.5051,
+          25.2525,
+          12.6263,
+          10.0,
+          6.3131,
+          4.7348,
+          4.1667,
+          3.1566,
+          2.0,
+          1.6,
+          1.5783,
+          1.0,
+          0.7891,
+          0.4,
+          0.3946,
+          0.1973,
+          0.1,
+          0.0986
+        ],
+        "horizontal_distances_": [
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              8.660254037844041
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              8.756408079383258
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.013878188659614
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.35414346693448
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.682458365518155
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.915912340642066
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.9999999999996
+            ]
+          }
+        ],
+        "inches_per_mile_": [
+          32.0,
+          16.0,
+          8.0,
+          6.336,
+          4.0,
+          3.0,
+          2.64,
+          2.0,
+          1.2672,
+          1.0138,
+          1.0,
+          0.6336,
+          0.5,
+          0.2534,
+          0.25,
+          0.125,
+          0.0634,
+          0.0625
+        ],
+        "kilometers_per_centimeter_": [
+          0.0198,
+          0.0396,
+          0.0792,
+          0.1,
+          0.1584,
+          0.2112,
+          0.24,
+          0.3168,
+          0.5,
+          0.625,
+          0.6336,
+          1.0,
+          1.2672,
+          2.5,
+          2.5344,
+          5.0688,
+          10.0,
+          10.1376
+        ],
+        "max_slope_in_degrees_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            30.0
+          ]
+        },
+        "max_slope_in_percent_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            57.735026918962575
+          ]
+        },
+        "miles_per_inch_": [
+          0.03125,
+          0.0625,
+          0.125,
+          0.15783,
+          0.25,
+          0.3333,
+          0.37879,
+          0.5,
+          0.78914,
+          0.98643,
+          1.0,
+          1.57828,
+          2.0,
+          3.94571,
+          4.0,
+          8.0,
+          15.78283,
+          16.0
+        ],
+        "representative_fractions_": [
+          1980,
+          3960,
+          7920,
+          10000,
+          15840,
+          21120,
+          24000,
+          31680,
+          50000,
+          62500,
+          63360,
+          100000,
+          126720,
+          250000,
+          253440,
+          506880,
+          1000000,
+          1013760
+        ],
+        "slope_elevation_change_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            60.0
+          ]
+        },
+        "slope_from_map_measurements_": 0.1432391503683123,
+        "slope_horizontal_distance_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            23999.99999999904
+          ]
+        }
+      },
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.slope_tool.SlopeTool.get_slope_from_map_measurements_in_percent",
+      "id": "SlopeTool.get_slope_from_map_measurements_in_percent/baseline",
+      "inputs": {},
+      "output": {
+        "dtype": "float64",
+        "shape": [],
+        "values": [
+          0.25000000000001005
+        ]
+      },
+      "state_after": {
+        "centimeters_per_kilometer_": [
+          50.5051,
+          25.2525,
+          12.6263,
+          10.0,
+          6.3131,
+          4.7348,
+          4.1667,
+          3.1566,
+          2.0,
+          1.6,
+          1.5783,
+          1.0,
+          0.7891,
+          0.4,
+          0.3946,
+          0.1973,
+          0.1,
+          0.0986
+        ],
+        "horizontal_distances_": [
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              8.660254037844041
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              8.756408079383258
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.013878188659614
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.35414346693448
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.682458365518155
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.915912340642066
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.9999999999996
+            ]
+          }
+        ],
+        "inches_per_mile_": [
+          32.0,
+          16.0,
+          8.0,
+          6.336,
+          4.0,
+          3.0,
+          2.64,
+          2.0,
+          1.2672,
+          1.0138,
+          1.0,
+          0.6336,
+          0.5,
+          0.2534,
+          0.25,
+          0.125,
+          0.0634,
+          0.0625
+        ],
+        "kilometers_per_centimeter_": [
+          0.0198,
+          0.0396,
+          0.0792,
+          0.1,
+          0.1584,
+          0.2112,
+          0.24,
+          0.3168,
+          0.5,
+          0.625,
+          0.6336,
+          1.0,
+          1.2672,
+          2.5,
+          2.5344,
+          5.0688,
+          10.0,
+          10.1376
+        ],
+        "max_slope_in_degrees_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            30.0
+          ]
+        },
+        "max_slope_in_percent_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            57.735026918962575
+          ]
+        },
+        "miles_per_inch_": [
+          0.03125,
+          0.0625,
+          0.125,
+          0.15783,
+          0.25,
+          0.3333,
+          0.37879,
+          0.5,
+          0.78914,
+          0.98643,
+          1.0,
+          1.57828,
+          2.0,
+          3.94571,
+          4.0,
+          8.0,
+          15.78283,
+          16.0
+        ],
+        "representative_fractions_": [
+          1980,
+          3960,
+          7920,
+          10000,
+          15840,
+          21120,
+          24000,
+          31680,
+          50000,
+          62500,
+          63360,
+          100000,
+          126720,
+          250000,
+          253440,
+          506880,
+          1000000,
+          1013760
+        ],
+        "slope_elevation_change_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            60.0
+          ]
+        },
+        "slope_from_map_measurements_": 0.1432391503683123,
+        "slope_horizontal_distance_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            23999.99999999904
+          ]
+        }
+      },
+      "state_before": {
+        "centimeters_per_kilometer_": [
+          50.5051,
+          25.2525,
+          12.6263,
+          10.0,
+          6.3131,
+          4.7348,
+          4.1667,
+          3.1566,
+          2.0,
+          1.6,
+          1.5783,
+          1.0,
+          0.7891,
+          0.4,
+          0.3946,
+          0.1973,
+          0.1,
+          0.0986
+        ],
+        "horizontal_distances_": [
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              8.660254037844041
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              8.756408079383258
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.013878188659614
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.35414346693448
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.682458365518155
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.915912340642066
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.9999999999996
+            ]
+          }
+        ],
+        "inches_per_mile_": [
+          32.0,
+          16.0,
+          8.0,
+          6.336,
+          4.0,
+          3.0,
+          2.64,
+          2.0,
+          1.2672,
+          1.0138,
+          1.0,
+          0.6336,
+          0.5,
+          0.2534,
+          0.25,
+          0.125,
+          0.0634,
+          0.0625
+        ],
+        "kilometers_per_centimeter_": [
+          0.0198,
+          0.0396,
+          0.0792,
+          0.1,
+          0.1584,
+          0.2112,
+          0.24,
+          0.3168,
+          0.5,
+          0.625,
+          0.6336,
+          1.0,
+          1.2672,
+          2.5,
+          2.5344,
+          5.0688,
+          10.0,
+          10.1376
+        ],
+        "max_slope_in_degrees_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            30.0
+          ]
+        },
+        "max_slope_in_percent_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            57.735026918962575
+          ]
+        },
+        "miles_per_inch_": [
+          0.03125,
+          0.0625,
+          0.125,
+          0.15783,
+          0.25,
+          0.3333,
+          0.37879,
+          0.5,
+          0.78914,
+          0.98643,
+          1.0,
+          1.57828,
+          2.0,
+          3.94571,
+          4.0,
+          8.0,
+          15.78283,
+          16.0
+        ],
+        "representative_fractions_": [
+          1980,
+          3960,
+          7920,
+          10000,
+          15840,
+          21120,
+          24000,
+          31680,
+          50000,
+          62500,
+          63360,
+          100000,
+          126720,
+          250000,
+          253440,
+          506880,
+          1000000,
+          1013760
+        ],
+        "slope_elevation_change_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            60.0
+          ]
+        },
+        "slope_from_map_measurements_": 0.1432391503683123,
+        "slope_horizontal_distance_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            23999.99999999904
+          ]
+        }
+      },
+      "warnings": []
+    },
+    {
+      "entry_point": "behave_fire.components.slope_tool.SlopeTool.get_slope_horizontal_distance_from_map_measurements",
+      "id": "SlopeTool.get_slope_horizontal_distance_from_map_measurements/baseline",
+      "inputs": {
+        "distance_units": 0
+      },
+      "output": {
+        "dtype": "float64",
+        "shape": [],
+        "values": [
+          23999.99999999904
+        ]
+      },
+      "state_after": {
+        "centimeters_per_kilometer_": [
+          50.5051,
+          25.2525,
+          12.6263,
+          10.0,
+          6.3131,
+          4.7348,
+          4.1667,
+          3.1566,
+          2.0,
+          1.6,
+          1.5783,
+          1.0,
+          0.7891,
+          0.4,
+          0.3946,
+          0.1973,
+          0.1,
+          0.0986
+        ],
+        "horizontal_distances_": [
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              8.660254037844041
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              8.756408079383258
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.013878188659614
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.35414346693448
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.682458365518155
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.915912340642066
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.9999999999996
+            ]
+          }
+        ],
+        "inches_per_mile_": [
+          32.0,
+          16.0,
+          8.0,
+          6.336,
+          4.0,
+          3.0,
+          2.64,
+          2.0,
+          1.2672,
+          1.0138,
+          1.0,
+          0.6336,
+          0.5,
+          0.2534,
+          0.25,
+          0.125,
+          0.0634,
+          0.0625
+        ],
+        "kilometers_per_centimeter_": [
+          0.0198,
+          0.0396,
+          0.0792,
+          0.1,
+          0.1584,
+          0.2112,
+          0.24,
+          0.3168,
+          0.5,
+          0.625,
+          0.6336,
+          1.0,
+          1.2672,
+          2.5,
+          2.5344,
+          5.0688,
+          10.0,
+          10.1376
+        ],
+        "max_slope_in_degrees_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            30.0
+          ]
+        },
+        "max_slope_in_percent_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            57.735026918962575
+          ]
+        },
+        "miles_per_inch_": [
+          0.03125,
+          0.0625,
+          0.125,
+          0.15783,
+          0.25,
+          0.3333,
+          0.37879,
+          0.5,
+          0.78914,
+          0.98643,
+          1.0,
+          1.57828,
+          2.0,
+          3.94571,
+          4.0,
+          8.0,
+          15.78283,
+          16.0
+        ],
+        "representative_fractions_": [
+          1980,
+          3960,
+          7920,
+          10000,
+          15840,
+          21120,
+          24000,
+          31680,
+          50000,
+          62500,
+          63360,
+          100000,
+          126720,
+          250000,
+          253440,
+          506880,
+          1000000,
+          1013760
+        ],
+        "slope_elevation_change_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            60.0
+          ]
+        },
+        "slope_from_map_measurements_": 0.1432391503683123,
+        "slope_horizontal_distance_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            23999.99999999904
+          ]
+        }
+      },
+      "state_before": {
+        "centimeters_per_kilometer_": [
+          50.5051,
+          25.2525,
+          12.6263,
+          10.0,
+          6.3131,
+          4.7348,
+          4.1667,
+          3.1566,
+          2.0,
+          1.6,
+          1.5783,
+          1.0,
+          0.7891,
+          0.4,
+          0.3946,
+          0.1973,
+          0.1,
+          0.0986
+        ],
+        "horizontal_distances_": [
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              8.660254037844041
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              8.756408079383258
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.013878188659614
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.35414346693448
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.682458365518155
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.915912340642066
+            ]
+          },
+          {
+            "dtype": "float64",
+            "shape": [],
+            "values": [
+              9.9999999999996
+            ]
+          }
+        ],
+        "inches_per_mile_": [
+          32.0,
+          16.0,
+          8.0,
+          6.336,
+          4.0,
+          3.0,
+          2.64,
+          2.0,
+          1.2672,
+          1.0138,
+          1.0,
+          0.6336,
+          0.5,
+          0.2534,
+          0.25,
+          0.125,
+          0.0634,
+          0.0625
+        ],
+        "kilometers_per_centimeter_": [
+          0.0198,
+          0.0396,
+          0.0792,
+          0.1,
+          0.1584,
+          0.2112,
+          0.24,
+          0.3168,
+          0.5,
+          0.625,
+          0.6336,
+          1.0,
+          1.2672,
+          2.5,
+          2.5344,
+          5.0688,
+          10.0,
+          10.1376
+        ],
+        "max_slope_in_degrees_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            30.0
+          ]
+        },
+        "max_slope_in_percent_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            57.735026918962575
+          ]
+        },
+        "miles_per_inch_": [
+          0.03125,
+          0.0625,
+          0.125,
+          0.15783,
+          0.25,
+          0.3333,
+          0.37879,
+          0.5,
+          0.78914,
+          0.98643,
+          1.0,
+          1.57828,
+          2.0,
+          3.94571,
+          4.0,
+          8.0,
+          15.78283,
+          16.0
+        ],
+        "representative_fractions_": [
+          1980,
+          3960,
+          7920,
+          10000,
+          15840,
+          21120,
+          24000,
+          31680,
+          50000,
+          62500,
+          63360,
+          100000,
+          126720,
+          250000,
+          253440,
+          506880,
+          1000000,
+          1013760
+        ],
+        "slope_elevation_change_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            60.0
+          ]
+        },
+        "slope_from_map_measurements_": 0.1432391503683123,
+        "slope_horizontal_distance_": {
+          "dtype": "float64",
+          "shape": [],
+          "values": [
+            23999.99999999904
+          ]
+        }
+      },
+      "warnings": []
+    }
+  ],
+  "provenance": {
+    "oracle": "explicit Python",
+    "python_reference_sha": "7933789f00470c6bbfbe942dc22bdd7f74e192f9",
+    "source_sha256": {
+      "src/behave_fire/__init__.py": "6e49d8e5eddb383cafbf19632a7407cb767fc976ff820b7e635d5d639ab4882f",
+      "src/behave_fire/behave.py": "8b9c35cfe18024ba1186ba5240f939c9b647dcca8d026d7db18c447421e9f6b1",
+      "src/behave_fire/components/__init__.py": "5c88705dcf2a4073bc79bd49e5038172bd0fa5b15ca9e77d6f9717424282519d",
+      "src/behave_fire/components/behave_units.py": "426581d91466c64bdbf60bd8a686030fe8244303cdbd097b1838479937abab77",
+      "src/behave_fire/components/contain.py": "fae224dee8ecdb090e7c3e6dc73a219508a026726e1ab3483776d54121a81bb7",
+      "src/behave_fire/components/crown.py": "0e0f5fe9b8c3074b192528b020232cc95e66470d59daa3a057544c75d7d93a03",
+      "src/behave_fire/components/fine_dead_fuel_moisture_tool.py": "cb11fc2da53c66b7f7753e88aa1d1f2135c91c3e67962912d1b2c097a73a8e60",
+      "src/behave_fire/components/fire_size.py": "23c671131ae710cfa441a14307cc0dfeb2e3d36b276fc112a5308827fe9e40dc",
+      "src/behave_fire/components/fuel_models.py": "ee1b886c72c8bb0e14a4c883745b4dde97ee3e011c7fddddc5e8b63e4588d225",
+      "src/behave_fire/components/fuel_models_array.py": "f60af63d681be852ff4fe6c3864ef55521c745da6ab182382caee4543e057125",
+      "src/behave_fire/components/ignite.py": "f0518ee4bc484f1b5478ad4792ecba77481bb68dda48abd0c45442ecb78523fc",
+      "src/behave_fire/components/mortality.py": "ccdaff07b59ef140786031d8957dd3cdafbbd97fd5e372e5fe4abcb392f5bcac",
+      "src/behave_fire/components/safety.py": "ed27e7cef7aa488a92636f8dfa589fadca3e0c6ba44ccae87a9fd7c8bac168a0",
+      "src/behave_fire/components/slope_tool.py": "754ce32058173b6c149135f9b1ec443f8be21679c7cf6c8e0a64d7ef5f3fb49c",
+      "src/behave_fire/components/species_master_table.py": "afa06eb15e475d252eef8b54d34be0d202c5c0f664d75e2c87c783a3831e8c11",
+      "src/behave_fire/components/spot.py": "a0411ecf7606ee75f4b460c084cb461e0c39619a3c14ad96a4c0217733456a22",
+      "src/behave_fire/components/surface.py": "133c6938ea701599428824d1d210ca2449d9103a5324cffc3c2a0db5330e4550",
+      "src/behave_fire/components/vapor_pressure_deficit_calculator.py": "4b165f3d48a02ab49c0fcdd2a5a7df65bab8b4a6366a280cbbf23041488eb258"
+    }
+  },
+  "schema_version": 1
+}

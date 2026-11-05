@@ -1,0 +1,5 @@
+# Generated contracts and tables are checked through deterministic exporters.
+tests/data/rust_api_inventory.json linguist-generated=true
+tests/data/rust_port/*.json linguist-generated=true
+rust/crates/behave-fire/tests/data/* linguist-generated=true
+rust/crates/behave-fire/src/generated/*.rs linguist-generated=true

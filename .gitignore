@@ -44,3 +44,4 @@ src/examples/results/
 
 # Local development files
 /development/
+/.superpowers/
