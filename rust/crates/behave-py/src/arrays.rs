@@ -49,6 +49,19 @@ impl Arguments {
         bits.get(if bits.len() == 1 { 0 } else { index })
             .map(|value| (kind.as_str(), *value))
     }
+    pub fn has_crown_python_payloads(&self) -> bool {
+        self.values.keys().any(|key| {
+            key.starts_with("_object.")
+                || (key.starts_with("_weak.")
+                    && !matches!(
+                        key.as_str(),
+                        "_weak.wind_speed_units"
+                            | "_weak.slope_units"
+                            | "_weak.aspect"
+                            | "_weak.moisture_foliar"
+                    ))
+        })
+    }
     pub fn has_python_payloads(&self) -> bool {
         self.values
             .keys()
@@ -205,7 +218,9 @@ impl Arguments {
 }
 
 #[pyfunction]
-#[pyo3(signature=(operation, arrays, strings, shape, single, integers=None))]
+#[pyo3(signature=(operation, arrays, strings, shape, single, integers=None, threads=None, profile=false, _owned_callback=None))]
+// Keep the existing keyword-based Python boundary explicit for PyO3.
+#[allow(clippy::too_many_arguments)]
 pub fn batch<'py>(
     py: Python<'py>,
     operation: &str,
@@ -214,7 +229,26 @@ pub fn batch<'py>(
     shape: &Bound<'py, PyAny>,
     single: bool,
     integers: Option<&Bound<'py, PyDict>>,
+    threads: Option<&Bound<'py, PyAny>>,
+    profile: bool,
+    _owned_callback: Option<&Bound<'py, PyAny>>,
 ) -> PyResult<Bound<'py, PyDict>> {
+    let started = std::time::Instant::now();
+    let requested = if let Some(value) = threads {
+        let value = value
+            .call_method0("__index__")
+            .map_err(|_| pyo3::exceptions::PyTypeError::new_err("threads must be an integer"))?;
+        if value.lt(0)? {
+            return Err(PyValueError::new_err("threads must be nonnegative"));
+        }
+        if value.gt(usize::MAX)? {
+            usize::MAX
+        } else {
+            value.extract::<usize>()?
+        }
+    } else {
+        1
+    };
     if !crate::dispatch::supported(operation) {
         return Err(PyNotImplementedError::new_err(format!(
             "Native operation is unavailable: {operation}"
@@ -253,6 +287,13 @@ pub fn batch<'py>(
             "shape exceeds the maximum native array byte length",
         ));
     }
+    // Keep measured thresholds at pipeline boundaries, not in generic map_chunks.
+    let threshold = if matches!(operation, "model.run_surface" | "crown.run_crown_fire") {
+        behave_fire::batch::PIPELINE_PARALLEL_MIN_CELLS
+    } else {
+        10_000
+    };
+    let requested = if count < threshold { 1 } else { requested };
     let mut values = BTreeMap::new();
     for (key, value) in arrays.iter() {
         let key: String = key.extract()?;
@@ -321,12 +362,25 @@ pub fn batch<'py>(
         strings,
         integers: owned_integers,
     };
+    let operation = operation.to_owned();
+    let copied = started.elapsed().as_secs_f64();
+    if let Some(callback) = _owned_callback {
+        callback.call0()?;
+    }
+    let mut concatenate_seconds = 0.0;
+    let mut appended_bytes = 0usize;
+    let detached_started = std::time::Instant::now();
     let result = py
         .detach(|| {
             let mut output: BTreeMap<String, Vec<f64>> = BTreeMap::new();
             if count == 0 {
                 let prototype = arguments.empty_prototype();
-                for (name, value) in crate::dispatch::evaluate(operation, &prototype, 0, single)? {
+                let fields = if operation == "model.run_surface" {
+                    crate::structures::surface_output(crate::parallel::surface(&prototype, 0)?)
+                } else {
+                    crate::dispatch::evaluate(&operation, &prototype, 0, single)?
+                };
+                for (name, value) in fields {
                     let retain = name.starts_with("__single.")
                         || name.starts_with("__masked.")
                         || name.starts_with("__integer_dtype.")
@@ -339,26 +393,35 @@ pub fn batch<'py>(
                 }
                 return Ok::<_, String>(output);
             }
-            for i in 0..count {
-                for (name, value) in crate::dispatch::evaluate(operation, &arguments, i, single)? {
-                    let values = match output.entry(name) {
-                        std::collections::btree_map::Entry::Occupied(entry) => entry.into_mut(),
-                        std::collections::btree_map::Entry::Vacant(entry) => {
-                            let mut values = Vec::new();
-                            values
-                                .try_reserve_exact(count)
-                                .map_err(|error| format!("MemoryError: {error}"))?;
-                            entry.insert(values)
-                        }
-                    };
-                    values.push(value);
-                }
+            if let Some(result) =
+                crate::parallel::evaluate(&operation, &arguments, &shape, requested)
+            {
+                return result.map(|(columns, seconds, bytes)| {
+                    concatenate_seconds = seconds;
+                    appended_bytes = bytes;
+                    columns
+                });
             }
+            let chunks = behave_fire::map_chunks(count, requested, |range| {
+                crate::parallel::chunk(&operation, &arguments, range, single)
+            })
+            .map_err(crate::parallel::error)?;
+            appended_bytes = chunks
+                .iter()
+                .skip(1)
+                .flat_map(|chunk| chunk.values())
+                .map(|values| values.len() * std::mem::size_of::<f64>())
+                .sum();
+            let concatenate_started = std::time::Instant::now();
+            output = crate::parallel::merge(chunks, count)?;
+            concatenate_seconds = concatenate_started.elapsed().as_secs_f64();
             Ok::<_, String>(output)
         })
         .map_err(|error| {
             if error.starts_with("Native operation") {
                 PyNotImplementedError::new_err(error)
+            } else if error.starts_with("RuntimeError:") {
+                pyo3::exceptions::PyRuntimeError::new_err(error)
             } else if error.starts_with("TypeError:") {
                 pyo3::exceptions::PyTypeError::new_err(error)
             } else if error.starts_with("AttributeError:") {
@@ -373,6 +436,8 @@ pub fn batch<'py>(
                 PyValueError::new_err(error)
             }
         })?;
+    let detached_seconds = detached_started.elapsed().as_secs_f64();
+    let transfer_started = std::time::Instant::now();
     let output = PyDict::new(py);
     for (name, values) in result {
         let dimensions = if count == 0 && values.len() == 1 {
@@ -390,6 +455,22 @@ pub fn batch<'py>(
         let array = ArrayD::from_shape_vec(IxDyn(dimensions), values)
             .map_err(|e| PyValueError::new_err(e.to_string()))?;
         output.set_item(name, array.into_pyarray(py))?;
+    }
+    if profile {
+        for (name, value) in [
+            ("__timing.owned_copy_seconds", copied),
+            ("__timing.detached_seconds", detached_seconds),
+            (
+                "__timing.numpy_transfer_seconds",
+                transfer_started.elapsed().as_secs_f64(),
+            ),
+            ("__timing.concatenate_seconds", concatenate_seconds),
+            ("__timing.appended_bytes", appended_bytes as f64),
+        ] {
+            let array = ArrayD::from_shape_vec(IxDyn(&[]), vec![value])
+                .map_err(|error| PyValueError::new_err(error.to_string()))?;
+            output.set_item(name, array.into_pyarray(py))?;
+        }
     }
     Ok(output)
 }

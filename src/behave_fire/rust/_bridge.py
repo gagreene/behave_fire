@@ -1,6 +1,7 @@
 """Structural array normalization for explicit native calculations."""
 from importlib import import_module
 import numpy as np
+from ._threads import _THREADS
 try:
     _native = import_module('behave_fire._rust')
 except ImportError as error:
@@ -22,6 +23,7 @@ _EMPTY_KEYS['calculate_fuelbed_intermediates'] = ('sigma', 'bulk_density', 'pack
 _EMPTY_KEYS.update({'assign_final_crown_fire_behavior': ('final_spread_rate', 'final_heat_per_unit_area', 'final_fireline_intensity', 'final_flame_length'), 'calculate_crown_fire_ratios': ('crown_fire_transition_ratio', 'crown_fire_active_ratio'), 'calculate_crown_heat_and_intensity': ('crown_fuel_load', 'canopy_heat_per_unit_area', 'crown_fire_heat_per_unit_area', 'crown_fire_line_intensity', 'crown_flame_length'), 'calculate_passive_crown_fire_behavior': ('passive_crown_fire_spread_rate', 'passive_crown_fire_heat_per_unit_area', 'passive_crown_fire_line_intensity', 'passive_crown_fire_flame_length'), 'classify_crown_fire_type': ('fire_type', 'is_surface_fire', 'is_passive_crown', 'is_active_crown'), 'run_crown_fire': ('crown_fire_spread_rate', 'crown_critical_fire_spread_rate', 'crown_flame_length', 'crown_fire_line_intensity', 'crown_critical_surface_fire_line_intensity', 'crown_fire_heat_per_unit_area', 'canopy_heat_per_unit_area', 'crown_fire_transition_ratio', 'crown_fire_active_ratio', 'crown_length_to_width_ratio', 'fire_type', 'surface_fire_critical_spread_rate', 'crowning_surface_fire_spread_rate', 'crown_fraction_burned', 'passive_crown_fire_spread_rate', 'passive_crown_fire_heat_per_unit_area', 'passive_crown_fire_line_intensity', 'passive_crown_fire_flame_length', 'final_spread_rate', 'final_heat_per_unit_area', 'final_fireline_intensity', 'final_flame_length')})
 _EMPTY_KEYS['calculate_crown_surface_fire'] = tuple(('p_crown.' + key for key in _EMPTY_KEYS['build_particle_arrays'])) + tuple(('ib_crown.' + key for key in _EMPTY_KEYS['calculate_fuelbed_intermediates'])) + tuple(('crown_surface.' + key for key in _EMPTY_KEYS['run_surface_fire'])) + ('ri_crown', 'crown_fire_spread_rate', 'crown_length_to_width_ratio')
 
+
 def _broadcast_buffer(value, shape):
     """Validate broadcasting while retaining scalar buffers as single values.
 
@@ -31,6 +33,7 @@ def _broadcast_buffer(value, shape):
     """
     broadcast = np.broadcast_to(value, shape)
     return value if value.size == 1 else broadcast
+
 
 def _call(operation, arguments):
     """Normalize structural inputs and call the owned native batch boundary.
@@ -72,10 +75,10 @@ def _call(operation, arguments):
             arguments[field] = _unit_code(kind, arguments[field])
     if operation == 'vapor_pressure_deficit_calculator.calculate_vpd':
         arguments['output_units'] = _unit_code('Pressure', arguments['output_units'])
-    if name in ('calculate_direction_of_max_spread', 'calculate_surface_rate_vector', 'run_surface_fire') and 'north' not in arguments['wind_orientation_mode'].lower():
+    if name in ('calculate_direction_of_max_spread', 'calculate_surface_rate_vector', 'run_surface_fire', 'run_surface', 'run_crown_fire') and 'north' not in arguments['wind_orientation_mode'].lower():
         np.asarray(arguments['aspect'], dtype=float)
         arguments['aspect'] = 0.0
-    if name in ('calculate_surface_wind_adjustment_factor', 'run_surface_fire'):
+    if name in ('calculate_surface_wind_adjustment_factor', 'run_surface_fire', 'run_surface'):
         supplied = arguments.get('user_waf') is not None and arguments['waf_method'].replace('_', '').lower() == 'userinput'
         if supplied and name == 'calculate_surface_wind_adjustment_factor':
             return _call('units.Fraction.to_base', {'value': arguments['user_waf'], 'units': 0})
@@ -98,7 +101,7 @@ def _call(operation, arguments):
         return result
     if operation == 'mortality.build_mortality_lookup':
         return np.array(_native.defaults('mortality'), dtype=np.float64)
-    if operation == 'surface.build_particle_arrays':
+    if operation in ('surface.build_particle_arrays', 'model.run_surface'):
         lookup = arguments.pop('lut')
         grid = np.atleast_1d(np.asarray(arguments.pop('fuel_model_grid'), dtype=np.int32))
         index = np.clip(grid, 0, lookup['depth'].shape[0] - 1)
@@ -254,7 +257,9 @@ def _call(operation, arguments):
     arrays['_simd_exp'] = np.asarray(_math_profile(), dtype=float)
     arrays = {key: _broadcast_buffer(value, shape) for key, value in arrays.items()}
     integers = {key: (kind, _broadcast_buffer(bits, shape)) for key, (kind, bits) in integers.items()}
-    result = _native.batch(operation, arrays, strings, shape, single, integers)
+    if name == 'run_crown_fire' and 0 in shape:
+        original_arguments = _snapshot_inputs(original_arguments)
+    result = _native.batch(operation, arrays, strings, shape, single, integers, threads=_THREADS.get())
     if not result and 0 in shape:
         result = {key: np.empty(shape) for key in _EMPTY_KEYS.get(name, ('',))}
     promoted = name in ('calculate_effective_wind_speed', 'run_surface_fire', 'calculate_fuelbed_intermediates', 'calculate_slope_phi', 'calculate_surface_rate_vector') or (name == 'calculate_direction_of_max_spread' and 'north' in strings['wind_orientation_mode'].lower())
@@ -292,8 +297,13 @@ def _call(operation, arguments):
             result[prefix]['is_defined'] = result[prefix]['is_defined'].astype(bool)
     dependencies = {'calculate_crown_scorch_mortality': {'crown_length_scorch': ('scorch_height_ft', 'tree_height_ft', 'crown_ratio'), 'crown_volume_scorch': ('scorch_height_ft', 'tree_height_ft', 'crown_ratio')}, 'calculate_safety_zone': {'separation_distance': ('flame_height_ft',)}, 'calculate_vpd': {'saturated_vp': ('temperature',)}, 'calculate_crown_fire_ratios': {'crown_fire_transition_ratio': ('surface_fli', 'critical_surface_fli'), 'crown_fire_active_ratio': ('crown_ros', 'critical_crown_ros')}, 'calculate_crown_heat_and_intensity': {'crown_fuel_load': ('canopy_base_height', 'canopy_height', 'canopy_bulk_density'), 'canopy_heat_per_unit_area': ('canopy_base_height', 'canopy_height', 'canopy_bulk_density'), 'crown_fire_heat_per_unit_area': ('surface_hpua', 'canopy_base_height', 'canopy_height', 'canopy_bulk_density')}, 'calculate_passive_crown_fire_behavior': {'passive_crown_fire_spread_rate': ('surface_ros', 'crown_ros', 'cfb'), 'passive_crown_fire_heat_per_unit_area': ('surface_hpua', 'canopy_hpua', 'cfb')}}
     dependencies['calculate_vpd']['saturated_vp'] = ('temperature', 'temp_units', 'output_units')
+    if name == 'run_crown_fire':
+        dependencies[name] = _crown_dependencies(arguments['wind_orientation_mode'])
     for field, sources in dependencies.get(name, {}).items():
-        target = np.broadcast_shapes(*(input_shapes.get(key, np.shape(original_arguments[key])) for key in sources))
+        if name == 'run_crown_fire':
+            target = np.broadcast_shapes(*(np.shape(original_arguments['surface_results'][key.partition('.')[2]]) if key.startswith('surface_results.') else np.atleast_1d(original_arguments[key]).shape for key in sources))
+        else:
+            target = np.broadcast_shapes(*(input_shapes.get(key, np.shape(original_arguments[key])) for key in sources))
         if result[field].size == 0 and all((size > 0 for size in target)):
             result[field] = _recompute_field(operation, original_arguments, field, sources)
             for key in list(result):
@@ -301,9 +311,9 @@ def _call(operation, arguments):
                     del result[key]
         else:
             result[field] = _restore_shape(result[field], target)
-            for prefix in ('__mask.', '__masked.', '__single.', '__integer_dtype.', '__integer_low.', '__integer_high.', '__integer_type.', '__complex.', '__imag.', '__object.', '__object_numpy.'):
-                if prefix + field in result and result[prefix + field].ndim:
-                    result[prefix + field] = _restore_shape(result[prefix + field], target)
+            for key in list(result):
+                if key.startswith('__') and key.partition('.')[2] == field and result[key].ndim:
+                    result[key] = _restore_shape(result[key], target)
     metadata = {key: result.pop(key) for key in list(result) if key.startswith('__')}
     for key in result:
         result[key] = _restore_payload(result[key], metadata, key)
@@ -316,6 +326,58 @@ def _call(operation, arguments):
     if box_surface or box_crown:
         result = {key: value if '__object.' + key in metadata else value.astype(object) for key, value in result.items()}
     return result[''] if '' in result else result
+
+
+def _crown_dependencies(wind_orientation_mode):
+    """Describe each crown output's independent NumPy broadcast dependencies.
+
+    :param wind_orientation_mode: Direction convention deciding whether aspect participates.
+    :return: Output names mapped to original public input names; no numerical work occurs.
+    """
+    fuel = ('fuel_model_grid',)
+    spread = fuel + ('wind_speed', 'wind_direction', 'slope') + (('aspect',) if 'north' in wind_orientation_mode.lower() else ())
+    canopy_heat = ('canopy_base_height', 'canopy_height', 'canopy_bulk_density')
+    critical_intensity = ('canopy_base_height', 'moisture_foliar')
+    critical_spread = ('canopy_bulk_density',)
+    surface_ros = ('surface_results.spread_rate',)
+    surface_fli = ('surface_results.fireline_intensity',)
+    surface_hpua = ('surface_results.heat_per_unit_area',)
+    crown_heat = surface_hpua + canopy_heat
+    crown_intensity = crown_heat + spread
+    transition = surface_fli + critical_intensity
+    active = spread + critical_spread
+    classification = transition + active
+    surface_critical = critical_intensity + surface_hpua
+    crowning_surface = fuel + critical_spread
+    fraction_burned = surface_ros + surface_critical + crowning_surface
+    passive_spread = surface_ros + fraction_burned + spread
+    passive_heat = surface_hpua + fraction_burned + canopy_heat
+    passive_intensity = passive_spread + passive_heat
+    return {
+        'crown_fire_spread_rate': spread,
+        'crown_flame_length': crown_intensity,
+        'crown_fire_line_intensity': crown_intensity,
+        'crown_fire_heat_per_unit_area': crown_heat,
+        'canopy_heat_per_unit_area': canopy_heat,
+        'crown_critical_surface_fire_line_intensity': critical_intensity,
+        'crown_critical_fire_spread_rate': critical_spread,
+        'crown_fire_transition_ratio': transition,
+        'crown_fire_active_ratio': active,
+        'crown_length_to_width_ratio': spread,
+        'fire_type': classification,
+        'surface_fire_critical_spread_rate': surface_critical,
+        'crowning_surface_fire_spread_rate': crowning_surface,
+        'crown_fraction_burned': fraction_burned,
+        'passive_crown_fire_spread_rate': passive_spread,
+        'passive_crown_fire_heat_per_unit_area': passive_heat,
+        'passive_crown_fire_line_intensity': passive_intensity,
+        'passive_crown_fire_flame_length': passive_intensity,
+        'final_spread_rate': classification + surface_ros + passive_spread + spread,
+        'final_heat_per_unit_area': classification + surface_hpua + passive_heat + crown_heat,
+        'final_fireline_intensity': classification + surface_fli + passive_intensity + crown_intensity,
+        'final_flame_length': classification + surface_fli + passive_intensity + crown_intensity,
+    }
+
 
 def _math_profile():
     """Read NumPy's active float32 exponential implementation metadata.
@@ -331,6 +393,7 @@ def _math_profile():
     grouped = any((target in targets and features.get(target, False) for target in ('X86_V3', 'X86_V4')))
     return int(grouped or ('AVX2' in targets and features.get('AVX2', False) and features.get('FMA3', False)))
 
+
 def _normalize(value):
     """Widen float16 before each entry point's ordinary coercion.
 
@@ -340,6 +403,7 @@ def _normalize(value):
     if isinstance(value, (np.ndarray, np.generic)) and value.dtype == np.float16:
         return value.astype(np.float32)
     return value
+
 
 def _normalize_direction(arguments):
     """Widen operands when NumPy would select an internal float16 atan2 loop.
@@ -358,6 +422,7 @@ def _normalize_direction(arguments):
             result[key] = value
     return result
 
+
 def _numeric_kind(value):
     """Classify scalar arithmetic without coercing away its precision.
 
@@ -367,6 +432,7 @@ def _numeric_kind(value):
     if isinstance(value, (np.ndarray, np.generic)):
         return 2 if value.dtype in (np.dtype('float16'), np.dtype('float32')) else 1
     return 0
+
 
 def _numeric_object(value):
     """Recognize supported boxed numeric payloads without executing custom operators.
@@ -383,6 +449,7 @@ def _numeric_object(value):
         elif type(item) not in floating_types:
             return False
     return True
+
 
 def _object_buffers(value):
     """Encode supported object payloads without numerical arithmetic.
@@ -411,6 +478,7 @@ def _object_buffers(value):
             kinds[index] = 10
     return (kinds, bits, numpy_payload, type_numbers)
 
+
 def _partition_fields(operation, arguments, fields):
     """Marshal independent output dependency groups without forcing shared axes.
 
@@ -433,6 +501,7 @@ def _partition_fields(operation, arguments, fields):
         result[field] = _call(operation, scoped)[field]
     return result
 
+
 def _real_coercion(operation, parameter):
     """Describe explicit reference coercion before numerical arithmetic.
 
@@ -454,6 +523,7 @@ def _real_coercion(operation, parameter):
     normalized = {'build_particle_arrays': ('m1h', 'm10h', 'm100h', 'mlh', 'mlw'), 'calculate_direction_of_max_spread': ('aspect',), 'calculate_fire_area': ('forward_ros', 'backing_ros', 'lwr'), 'calculate_fire_perimeter': ('forward_ros', 'backing_ros', 'lwr'), 'calculate_fire_width': ('forward_ros', 'backing_ros', 'lwr'), 'calculate_fireline_intensity': ('spread_rate', 'heat_per_unit_area'), 'calculate_forward_spread_rate': ('no_wind_no_slope_spread_rate', 'rate_vector'), 'calculate_heat_per_unit_area': ('reaction_intensity', 'residence_time'), 'calculate_midflame_wind_speed': ('waf', 'twenty_foot_wind_speed'), 'calculate_reaction_intensity_output': ('reaction_intensity',), 'calculate_slope_phi': ('slope',), 'calculate_surface_rate_vector': ('wind_direction', 'aspect'), 'calculate_surface_wind_adjustment_factor': ('canopy_cover', 'canopy_height', 'crown_ratio', 'depth', 'user_waf'), 'calculate_twenty_foot_wind_speed': ('wind_speed',), 'calculate_wind_adjustment_factor': ('canopy_cover', 'canopy_height', 'crown_ratio', 'depth'), 'run_surface_fire': ('wind_speed', 'wind_direction', 'slope', 'aspect', 'canopy_cover', 'canopy_height', 'crown_ratio', 'user_waf', 'ib.depth')}
     return np.float64 if parameter in normalized.get(name, ()) else None
 
+
 def _recompute_field(operation, arguments, field, dependencies):
     """Evaluate an independent nonempty field when another output has zero cells.
 
@@ -463,12 +533,26 @@ def _recompute_field(operation, arguments, field, dependencies):
     :param dependencies: Public inputs that determine this output field.
     :return: Owned field computed in the native core over its own input shape.
     """
+    if operation == 'crown.run_crown_fire':
+        scoped = dict(arguments)
+        retain_fuel = 'fuel_model_grid' in dependencies
+        if not retain_fuel:
+            scoped['fuel_model_grid'] = np.array([10], dtype=np.int32)
+            for key in ('m1h', 'm10h', 'm100h', 'mlh', 'mlw'):
+                scoped[key] = np.ones(1)
+        for key in ('wind_speed', 'wind_direction', 'slope', 'aspect', 'canopy_base_height', 'canopy_height', 'canopy_bulk_density', 'moisture_foliar'):
+            if key not in dependencies:
+                scoped[key] = 1.0
+        scoped['surface_results'] = {key: value if 'surface_results.' + key in dependencies else 1.0 for key, value in arguments['surface_results'].items()}
+        scoped['_native_partition'] = True
+        return _call(operation, scoped)[field]
     scoped = {key: value if key in dependencies or key.endswith('units') or isinstance(value, str) else 1.0 for key, value in arguments.items()}
     if 'coeffs' in arguments:
         scoped['coeffs'] = np.array(_native.defaults('mortality'))
         scoped['equation_number_grid'] = 0
     scoped['_native_partition'] = True
     return _call(operation, scoped)[field]
+
 
 def _restore_payload(value, metadata, key):
     """Reconstruct owned typed outputs from native scalar metadata.
@@ -522,6 +606,7 @@ def _restore_payload(value, metadata, key):
         return np.empty(value.shape, dtype=dtype) if bits is None else bits.astype(dtype)
     return value.astype(np.float32 if np.all(single) else np.float64) if key != 'is_defined' else value
 
+
 def _restore_shape(value, shape):
     """Restore an output's independent broadcast shape.
 
@@ -533,6 +618,29 @@ def _restore_shape(value, shape):
         return value
     selectors = (0,) * (value.ndim - len(shape)) + tuple((slice(0, 1) if size == 1 else slice(None) for size in shape))
     return np.array(value[selectors], copy=True).reshape(shape)
+
+
+def _snapshot_inputs(value):
+    """Own numeric inputs reused after an empty pipeline's first detached call.
+
+    :param value: Public numeric value or nested input mapping.
+    :return: Independent array and mask buffers preserving scalar kinds and shapes.
+    """
+    if isinstance(value, dict):
+        return {key: _snapshot_inputs(item) for key, item in value.items()}
+    if np.ma.isMaskedArray(value):
+        result = np.ma.array(np.ma.getdata(value).copy(), mask=np.ma.getmaskarray(value).copy(), copy=False)
+        if value._fill_value is not None:
+            result._fill_value = value._fill_value.copy()
+        return result
+    if isinstance(value, np.ndarray):
+        return value.copy()
+    if isinstance(value, tuple):
+        return tuple(_snapshot_inputs(item) for item in value)
+    if isinstance(value, list):
+        return [_snapshot_inputs(item) for item in value]
+    return value
+
 
 def _state(instance, domain, method, arguments):
     """Copy helper state into a checked native operation and restore its snapshot.
@@ -573,6 +681,7 @@ def _state(instance, domain, method, arguments):
         return int(result)
     return result
 
+
 def _unit_code(kind, units):
     """Normalize the reference's scalar branch or table-index unit convention.
 
@@ -588,6 +697,7 @@ def _unit_code(kind, units):
         return 1 if units == 1 else 2 if units == 2 else 0
     indices = list(range(_UNIT_COUNTS[kind])) if kind == 'SurfaceAreaToVolume' else np.arange(_UNIT_COUNTS[kind])
     return indices[units]
+
 
 def _validate_threads(threads):
     """Validate the explicit native worker-count option.

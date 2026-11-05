@@ -9,10 +9,11 @@ This package provides vectorized (NumPy array) fire behavior modeling:
 - Ignition potential assessment
 - Safety zone calculations
 
-Main entry point: BehaveRun class in behave.py
+Main entry point: automatic BehaveRun facade in auto.py.
+The explicit Python compatibility class remains in behave.py.
 """
 
-from .behave import BehaveRun
+from .auto import BehaveBackendWarning, BehaveRun, available_backends, get_backend
 from .components.fuel_models import FuelModels
 from .components.species_master_table import SpeciesMasterTable
 from .components.behave_units import (
@@ -27,6 +28,9 @@ __version__ = "1.0.0b2"
 __author__ = "Behave Development Team"
 __all__ = [
     'BehaveRun',
+    'BehaveBackendWarning',
+    'available_backends',
+    'get_backend',
     'FuelModels',
     'SpeciesMasterTable',
     'AreaUnits',

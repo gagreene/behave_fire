@@ -102,9 +102,16 @@ impl SurfaceInput {
 
 /// Run particle construction, fuelbed weighting, reaction intensity, and spread locally for one cell.
 pub fn run(input: &SurfaceInput, fuels: &FuelModels) -> Result<SurfaceResult, BehaveError> {
-    let p = build_particle_arrays(
-        fuels,
-        input.fuel_model_grid,
+    run_with_fuel(input, fuels.for_grid(input.fuel_model_grid))
+}
+
+/// Run all scalar stages from an exact raw fuel lookup record.
+pub fn run_with_fuel(
+    input: &SurfaceInput,
+    fuel: &crate::FuelModel,
+) -> Result<SurfaceResult, BehaveError> {
+    let p = build_particle_arrays_from_fuel(
+        fuel,
         input.m1h,
         input.m10h,
         input.m100h,

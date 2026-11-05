@@ -71,6 +71,7 @@ pub fn supported(operation: &str) -> bool {
             | "ignite.calculate_fuel_temperature"
             | "ignite.calculate_lightning_ignition_probability"
             | "model.canopy_crown_ratio"
+            | "model.run_surface"
             | "mortality.calculate_crown_scorch_mortality"
             | "mortality.calculate_scorch_height"
             | "safety.calculate_safety_zone"

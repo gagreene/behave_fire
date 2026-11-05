@@ -5,7 +5,9 @@
 mod error;
 mod grid;
 mod model;
+mod parallel;
 
+pub mod batch;
 pub mod contain;
 pub mod crown;
 pub mod fine_dead_fuel_moisture;
@@ -32,6 +34,7 @@ pub use error::BehaveError;
 pub use fuel_models::{FuelModel, FuelModels};
 pub use grid::{effective_worker_count, GridOutput, GridShape, PerCell};
 pub use model::{canopy_crown_ratio, BehaveRun};
+pub use parallel::{map_chunks, ParallelError};
 pub use species::{SpeciesMasterTable, SpeciesRecord};
 
 /// Version of the standalone Rust core, independent of the Python distribution.

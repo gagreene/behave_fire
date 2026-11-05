@@ -6,7 +6,7 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from behave_fire import BehaveRun
+from behave_fire.behave import BehaveRun
 from behave_fire.components.fuel_models import FuelModels
 from behave_fire.components.fuel_models_array import build_fuel_lookup_arrays
 
