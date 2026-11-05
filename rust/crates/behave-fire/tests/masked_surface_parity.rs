@@ -268,6 +268,13 @@ fn check(actual: MaskedValue, expected: &Value, n: usize, context: &str) {
     );
     let b = number(&expected["values"][n]);
     let a = actual.value;
+    if a == 0.0 && b == 0.0 {
+        assert_eq!(
+            a.is_sign_negative(),
+            b.is_sign_negative(),
+            "zero sign {context}"
+        );
+    }
     if b.is_nan() {
         assert!(a.is_nan(), "{context}: {a} != NaN");
     } else if b.is_infinite() {
@@ -308,7 +315,11 @@ fn assert_metadata(actual: MaskedValue, expected: &Value, context: &str) {
         if expected_fill.is_nan() {
             assert!(actual_fill.is_nan(), "fill {context}: {actual_fill} != NaN");
         } else {
-            assert_eq!(actual_fill, expected_fill, "fill {context}");
+            assert_eq!(
+                actual_fill.to_bits(),
+                expected_fill.to_bits(),
+                "fill {context}"
+            );
         }
     } else {
         assert!(

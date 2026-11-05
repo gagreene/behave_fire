@@ -105,10 +105,36 @@ def _calibration_bits(value, name):
 
 
 def _call(operation, arguments):
+    """Own a public operation's inputs before its first detached native stage.
+
+    :param operation: Fully qualified explicit component operation.
+    :param arguments: Bound argument mapping in public signature order.
+    :return: Fresh result computed exclusively from the shared input snapshot.
+    """
+    from ._ownership import _owned_inputs
+
+    direction_profile = 0
+    if operation == 'surface.calculate_direction_of_max_spread':
+        normalized, single = _normalize_direction(arguments)
+        shape_fields = ('x_component', 'y_component', 'rate_vector')
+        if 'north' in str(arguments['wind_orientation_mode']).lower():
+            shape_fields += ('aspect',)
+        shape = np.broadcast_shapes(*(np.shape(normalized[key]) for key in shape_fields))
+        if single and all(shape):
+            # Select using original layout: a contiguous copy can select a
+            # different NumPy float32 atan2 kernel for reversed/strided inputs.
+            direction_profile = _direction_math_profile(normalized)
+    with _owned_inputs() as owner:
+        result = _call_owned(operation, owner.snapshot(arguments), direction_profile)
+        return owner.remember(result)
+
+
+def _call_owned(operation, arguments, direction_profile):
     """Normalize structural inputs and call the owned native batch boundary.
 
     :param operation: Fully qualified explicit component operation.
     :param arguments: Bound argument mapping in public signature order.
+    :param direction_profile: Atan2 selector captured before copying original operands.
     :return: Fresh arrays in the reference result structure.
     """
     arrays = {}
@@ -325,11 +351,9 @@ def _call(operation, arguments):
     input_shapes = {key: value.shape for key, value in arrays.items()}
     arrays.update(mask_metadata)
     arrays['_simd_exp'] = np.asarray(_math_profile(), dtype=float)
-    arrays['_svml_atan2'] = np.asarray(_direction_math_profile(arguments) if direction_float32 and all(shape) else 0, dtype=float)
+    arrays['_svml_atan2'] = np.asarray(direction_profile if direction_float32 and all(shape) else 0, dtype=float)
     arrays = {key: _broadcast_buffer(value, shape) for key, value in arrays.items()}
     integers = {key: (kind, _broadcast_buffer(bits, shape)) for key, (kind, bits) in integers.items()}
-    if name == 'run_crown_fire' and 0 in shape:
-        original_arguments = _snapshot_inputs(original_arguments)
     result = _native.batch(operation, arrays, strings, shape, single, integers, threads=_THREADS.get())
     if not result and 0 in shape:
         result = {key: np.empty(shape) for key in _EMPTY_KEYS.get(name, ('',))}
@@ -736,28 +760,6 @@ def _restore_shape(value, shape):
         return value
     selectors = (0,) * (value.ndim - len(shape)) + tuple((slice(0, 1) if size == 1 else slice(None) for size in shape))
     return np.array(value[selectors], copy=True).reshape(shape)
-
-
-def _snapshot_inputs(value):
-    """Own numeric inputs reused after an empty pipeline's first detached call.
-
-    :param value: Public numeric value or nested input mapping.
-    :return: Independent array and mask buffers preserving scalar kinds and shapes.
-    """
-    if isinstance(value, dict):
-        return {key: _snapshot_inputs(item) for key, item in value.items()}
-    if np.ma.isMaskedArray(value):
-        result = np.ma.array(np.ma.getdata(value).copy(), mask=np.ma.getmaskarray(value).copy(), copy=False)
-        if value._fill_value is not None:
-            result._fill_value = value._fill_value.copy()
-        return result
-    if isinstance(value, np.ndarray):
-        return value.copy()
-    if isinstance(value, tuple):
-        return tuple(_snapshot_inputs(item) for item in value)
-    if isinstance(value, list):
-        return [_snapshot_inputs(item) for item in value]
-    return value
 
 
 def _state(instance, domain, method, arguments):

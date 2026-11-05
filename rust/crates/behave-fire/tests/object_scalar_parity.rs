@@ -162,6 +162,13 @@ fn invoke(name: &str, i: &Value, opts: &Value, n: usize) -> Vec<(&'static str, M
     vec![("", result)]
 }
 fn near(a: f64, b: f64, p: Precision, context: &str) {
+    if a == 0.0 && b == 0.0 {
+        assert_eq!(
+            a.is_sign_negative(),
+            b.is_sign_negative(),
+            "zero sign {context}"
+        );
+    }
     if b.is_nan() {
         assert!(a.is_nan(), "{context}: {a} != NaN");
     } else if b.is_infinite() {

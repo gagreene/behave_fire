@@ -912,6 +912,11 @@ fn arithmetic_float(a: MaskedValue, b: MaskedValue, operation: Operation) -> Mas
                 } else if mask && !ufunc {
                     value = x;
                 }
+                if !ufunc && !(a.is_scalar_array && b.is_scalar_array) && value == 0.0 {
+                    // MaskedArray division clears masked results to +0 and
+                    // adds mask * numerator, including at unmasked positions.
+                    value = if mask { 0.0 + x } else { raw + 0.0 * x };
+                }
             }
             Operation::Pow if !ufunc && !value.is_finite() => {
                 mask = true;

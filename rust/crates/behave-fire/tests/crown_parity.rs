@@ -307,6 +307,13 @@ fn supplied_surface_and_live_model_ten_table_are_used() {
 }
 fn check(actual: f64, expected: &Value, n: usize, ctx: &str) {
     let target = value(expected, n);
+    if actual == 0.0 && target == 0.0 {
+        assert_eq!(
+            actual.is_sign_negative(),
+            target.is_sign_negative(),
+            "zero sign {ctx}"
+        );
+    }
     let tolerance = if expected["dtype"] == "float32" {
         1e-6
     } else {

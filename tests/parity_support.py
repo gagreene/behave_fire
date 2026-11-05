@@ -18,13 +18,30 @@ from rust_reference_platform import acceptance_output
 
 
 
+def _assert_floating(actual, expected, single=False):
+    actual, expected = np.asarray(actual), np.asarray(expected)
+    if np.iscomplexobj(expected) or np.iscomplexobj(actual):
+        _assert_floating(actual.real, expected.real, single)
+        _assert_floating(actual.imag, expected.imag, single)
+        return
+    np.testing.assert_array_equal(np.isnan(actual), np.isnan(expected))
+    np.testing.assert_array_equal(np.isposinf(actual), np.isposinf(expected))
+    np.testing.assert_array_equal(np.isneginf(actual), np.isneginf(expected))
+    zeros = (actual == 0) & (expected == 0)
+    np.testing.assert_array_equal(np.signbit(actual[zeros]), np.signbit(expected[zeros]))
+    np.testing.assert_allclose(actual, expected, rtol=1e-6 if single else 1e-9,
+                               atol=1e-7 if single else 1e-12, equal_nan=True)
+
+
 def assert_result(actual, expected):
     if hasattr(actual, "__dict__") and not isinstance(actual, (np.ndarray, int, float, str)):
         actual = vars(actual)
     if isinstance(expected, dict) and 'float' in expected:
-        np.testing.assert_allclose(actual,decode(expected),rtol=1e-9,atol=1e-12,equal_nan=True)
-    elif isinstance(expected, float):
-        np.testing.assert_allclose(actual,expected,rtol=1e-9,atol=1e-12,equal_nan=True)
+        assert not isinstance(actual, np.ndarray)
+        _assert_floating(actual, decode(expected))
+    elif isinstance(expected, (float, complex)):
+        assert not isinstance(actual, np.ndarray)
+        _assert_floating(actual, expected)
     elif isinstance(expected, list):
         assert len(actual) == len(expected)
         for left, right in zip(actual, expected):
@@ -36,21 +53,31 @@ def assert_result(actual, expected):
             assert_result(actual[key], expected[key])
     elif isinstance(expected, dict) and "dtype" in expected:
         wanted = decode(expected)
+        # Historical shape=[] records conflate NumPy scalars and zero-rank
+        # arrays. Enforce array structure only when the record distinguishes it.
+        if expected["shape"]:
+            assert isinstance(actual, np.ndarray)
         actual = np.asanyarray(actual)
         assert actual.shape == wanted.shape
         assert actual.dtype == wanted.dtype
         assert np.ma.isMaskedArray(actual) == np.ma.isMaskedArray(wanted)
         np.testing.assert_array_equal(np.ma.getmaskarray(actual), np.ma.getmaskarray(wanted))
-        if wanted.dtype == object:
-            actual, wanted = actual.astype(float), wanted.astype(float)
         actual_data, wanted_data = np.ma.getdata(actual), np.ma.getdata(wanted)
-        np.testing.assert_array_equal(np.isnan(actual_data), np.isnan(wanted_data))
-        np.testing.assert_array_equal(np.isposinf(actual_data), np.isposinf(wanted_data))
-        np.testing.assert_array_equal(np.isneginf(actual_data), np.isneginf(wanted_data))
-        if wanted.dtype.kind in "biu":
+        if wanted.dtype == object:
+            # Read the encoded entries directly: float coercion loses integers
+            # above 2**53 and obscures the boxed bool/integer distinction.
+            for left, right in zip(actual_data.ravel(), expected["values"]):
+                assert_result(left, right)
+        elif wanted.dtype.kind in "biu":
             np.testing.assert_array_equal(actual_data, wanted_data)
         else:
-            np.testing.assert_allclose(actual_data, wanted_data, rtol=1e-6 if wanted.dtype == np.float32 else 1e-9, atol=1e-7 if wanted.dtype == np.float32 else 1e-12)
+            _assert_floating(actual_data, wanted_data, wanted.dtype in (np.dtype("float32"), np.dtype("complex64")))
+    elif isinstance(expected, bool):
+        assert isinstance(actual, (bool, np.bool_))
+        assert actual == expected
+    elif isinstance(expected, int):
+        assert isinstance(actual, (int, np.integer)) and not isinstance(actual, (bool, np.bool_))
+        assert actual == expected
     else:
         assert actual == expected
 

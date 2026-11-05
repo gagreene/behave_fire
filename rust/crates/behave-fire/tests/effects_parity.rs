@@ -6,6 +6,9 @@ use behave_fire::{
     vapor_pressure_deficit,
 };
 fn close(actual: f64, expected: f64) {
+    if actual == 0.0 && expected == 0.0 {
+        assert_eq!(actual.is_sign_negative(), expected.is_sign_negative());
+    }
     assert!(
         (actual.is_nan() && expected.is_nan())
             || actual == expected
@@ -14,6 +17,11 @@ fn close(actual: f64, expected: f64) {
                 && (actual - expected).abs() <= (1e-12 + 1e-9 * expected.abs())),
         "actual={actual:?}, expected={expected:?}"
     );
+}
+#[test]
+fn comparator_rejects_zero_sign_changes_but_allows_roundoff() {
+    assert!(std::panic::catch_unwind(|| close(0.0, -0.0)).is_err());
+    close(1.0 + 1e-10, 1.0);
 }
 // build_mortality_lookup/baseline
 #[test]
