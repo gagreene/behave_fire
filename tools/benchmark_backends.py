@@ -1,42 +1,111 @@
-"""Measure explicit Python and release Rust backends in independent processes.
+"""Measure explicit Python and release Rust in paired fresh processes.
 
-Run after ``maturin develop --release``. Timings are diagnostics, not correctness
-assertions. Peak working set includes the interpreter, inputs, and model state.
-Native stage timings include real owned copies and chunk concatenation.
-Detached intervals also include native setup, allocation, and result metadata work.
-Use --operations typed-crown to measure the typed supplied-surface fallback separately.
+Correctness checks use separate workers, keeping oracle arrays out of timed
+peak memory. Profiling is opt-in and cannot certify performance. The first call
+warms the implementation for the subsequent warmed observations.
 """
+
 from __future__ import annotations
 
 import argparse
+import contextlib
 import ctypes
+import hashlib
+from importlib.machinery import EXTENSION_SUFFIXES
+import io
 import json
 import os
 from pathlib import Path
 import platform
+import statistics
 import subprocess
 import sys
 import threading
 import time
 
+from performance_cases import OPERATIONS, assert_outputs, build_inputs, paired_schedule, supplied_surface
 
-def _inputs(cells):
-    """Build identical normalized one-dimensional input arrays.
 
-    :param cells: Logical cell count.
-    :return: Surface keyword arguments containing matching moisture arrays.
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "src"))
+
+
+def _campaign(arguments):
+    """Run separate validation and shuffled timing blocks, retaining partial failures.
+
+    :param arguments: Parsed campaign controls.
+    :return: Complete or partial JSON-compatible measurement report.
     """
-    import numpy as np
-    return dict(fuel_model_grid=np.full(cells, 10, dtype=np.int32),
-                m1h=np.full(cells, .06), m10h=np.full(cells, .07),
-                m100h=np.full(cells, .08), mlh=np.full(cells, .6),
-                mlw=np.full(cells, .9), wind_speed=np.full(cells, 8.0),
-                wind_speed_units=0, wind_direction=np.full(cells, 35.0),
-                wind_orientation_mode="RelativeToUpslope", slope=np.full(cells, 12.0))
+    report = {"schema_version": 1, "preset": arguments.preset, "profile": arguments.profile,
+              "physical_cores": arguments.physical_cores or _physical_cores(),
+              "records": [], "validations": [], "errors": [],
+              "baseline": _read_rows(arguments.baseline, "records"),
+              "allocations": [row for path in arguments.allocations for row in _read_rows(path, "allocations")]}
+    for dataset in arguments.datasets:
+        for cells in arguments.sizes:
+            for operation in arguments.operations:
+                validation_failed = False
+                for threads in arguments.worker_threads:
+                    command = _command(arguments, cells, operation, dataset, "rust", threads, True)
+                    try:
+                        completed = subprocess.run(command, capture_output=True, text=True, timeout=arguments.timeout)
+                        if completed.returncode:
+                            raise RuntimeError(completed.stderr or completed.stdout)
+                        result = json.loads(completed.stdout)
+                        report["validations"].append(result)
+                        if not result.get("passed"):
+                            report["errors"].append(result)
+                            validation_failed = True
+                    except (OSError, subprocess.TimeoutExpired, ValueError, RuntimeError) as error:
+                        report["errors"].append({"kind": "validation", "dataset": dataset, "cells": cells,
+                                                  "operation": operation, "threads": threads, "error": str(error)})
+                        validation_failed = True
+                    _save(report, arguments.output)
+                if arguments.validate_only or validation_failed:
+                    continue
+                for block, backend, threads in paired_schedule(arguments.repetitions, arguments.seed,
+                                                               arguments.worker_threads):
+                    command = _command(arguments, cells, operation, dataset, backend, threads, False)
+                    try:
+                        completed = subprocess.run(command, capture_output=True, text=True, timeout=arguments.timeout)
+                        if completed.returncode:
+                            raise RuntimeError(completed.stderr or completed.stdout)
+                        result = json.loads(completed.stdout)
+                        result["block"] = block
+                        report["records"].append(result)
+                        print(json.dumps(result, allow_nan=False), flush=True)
+                    except (OSError, subprocess.TimeoutExpired, ValueError, RuntimeError) as error:
+                        report["errors"].append({"kind": "timing", "dataset": dataset, "cells": cells,
+                                                  "operation": operation, "backend": backend,
+                                                  "threads": threads, "block": block, "error": str(error)})
+                    _save(report, arguments.output)
+    return report
+
+
+def _command(arguments, cells, operation, dataset, backend, threads, validation):
+    """Construct a worker argument vector without invoking a shell.
+
+    :param arguments: Campaign configuration.
+    :param cells: Logical cell count.
+    :param operation: Route to measure or validate.
+    :param dataset: Deterministic input dataset.
+    :param backend: Explicit implementation selector.
+    :param threads: Native worker request.
+    :param validation: Whether to compare results instead of timing calls.
+    :return: Worker command using the current configured interpreter.
+    """
+    command = [sys.executable, "-B", str(Path(__file__).resolve()), "--worker", "--backend", backend,
+               "--threads", str(threads), "--cells", str(cells), "--operation", operation,
+               "--dataset", dataset, "--seed", str(arguments.seed), "--warm-calls", str(arguments.warm_calls)]
+    if validation:
+        command.append("--validate-only")
+    elif arguments.profile:
+        command.append("--profile")
+    return command
 
 
 def _memory():
-    """Read current and peak process resident bytes with native OS APIs.
+    """Read current and peak resident bytes through native operating-system APIs.
 
     :return: Current and lifetime peak resident bytes; current is None on POSIX.
     """
@@ -65,141 +134,291 @@ def _memory():
     return None, peak if sys.platform == "darwin" else peak * 1024
 
 
-def _worker(arguments):
-    """Measure one isolated backend invocation and emit a structured record.
+def _model_call(arguments, backend):
+    """Prepare a model and identical inputs outside the timed interval.
 
-    :param arguments: Parsed backend, size, worker request, and operation.
-    :return: JSON-compatible measurement record, including native copy timings.
+    :param arguments: Worker route, dataset, size, seed, and worker count.
+    :param backend: Explicit Python or Rust implementation.
+    :return: Callable retaining its explicit model and prepared inputs.
     """
     import numpy as np
     from behave_fire.python import BehaveRun as PythonRun, FuelModels
-    inputs = _inputs(arguments.cells)
-    native_samples = []
-    if arguments.backend == "rust":
-        from behave_fire.rust import BehaveRun, _bridge
-        original = _bridge._native.batch
-
-        def profile(*args, **kwargs):
-            """Collect private native timers around the ordinary model boundary.
-
-            :param args: Native batch positional arguments.
-            :param kwargs: Native batch keyword arguments.
-            :return: Ordinary batch result with optional diagnostic metadata.
-            """
-            kwargs["profile"] = True
-            started = time.perf_counter()
-            result = original(*args, **kwargs)
-            sample = {key.removeprefix("__timing."): float(value.item())
-                      for key, value in result.items() if key.startswith("__timing.")}
-            sample["native_boundary_total_seconds"] = time.perf_counter() - started
-            sample["native_output_bytes"] = sum(value.nbytes for key, value in result.items() if not key.startswith("__timing."))
-            sample["native_metadata_bytes"] = sum(value.nbytes for key, value in result.items() if key.startswith("__") and not key.startswith("__timing."))
-            sample["operation"] = args[0]
-            native_samples.append(sample)
-            return result
-
-        _bridge._native.batch = profile
+    inputs = build_inputs(arguments.cells, arguments.dataset, arguments.seed)
+    if backend == "rust":
+        from behave_fire.rust import BehaveRun
         model = BehaveRun(FuelModels(), threads=arguments.threads)
     else:
         model = PythonRun(FuelModels())
-    if arguments.operation in ("crown", "typed-crown"):
-        prototype = PythonRun(FuelModels()).do_surface_run(**_inputs(1))
-        surface = {key: np.full(arguments.cells, value.item(), dtype=value.dtype)
-                   for key, value in prototype.items()}
-        if arguments.operation == "typed-crown":
-            surface["spread_rate"] = surface["spread_rate"].astype(np.float32)
-            surface["fireline_intensity"] = np.full(arguments.cells, 200, dtype=np.uint16)
-            surface["heat_per_unit_area"] = np.ma.array(surface["heat_per_unit_area"], mask=np.arange(arguments.cells) % 7 == 0)
+    if arguments.operation == "surface":
         def call():
-            """Invoke the crown pipeline with identical supplied surface values.
+            """Invoke Surface with normalized shape-matching input arrays.
 
-            :return: Crown result arrays from the selected explicit backend.
-            """
-            return model.do_crown_run(surface_results=surface, **inputs,
-                                      canopy_base_height=4.0, canopy_height=30.0,
-                                      canopy_bulk_density=.01, moisture_foliar=100.0)
-    else:
-        def call():
-            """Invoke the surface pipeline with matching moisture array shapes.
-
-            :return: Surface result arrays from the selected explicit backend.
+            :return: Complete Surface output dictionary.
             """
             return model.do_surface_run(**inputs)
-    native_samples.clear()
+    else:
+        surface = supplied_surface(inputs, arguments.operation, PythonRun(FuelModels()),
+                                   uniform=arguments.dataset == "uniform")
+        canopy = dict(canopy_base_height=4.0, canopy_height=30.0, canopy_bulk_density=.01, moisture_foliar=100.0)
+        if arguments.dataset == "heterogeneous":
+            phase = ((np.arange(arguments.cells) + arguments.seed) % 17) / 16
+            canopy = dict(canopy_base_height=1 + 5 * phase, canopy_height=15 + 25 * phase,
+                          canopy_bulk_density=.005 + .02 * phase, moisture_foliar=80 + 40 * phase)
+
+        def call():
+            """Invoke Crown with independently typed supplied Surface fields.
+
+            :return: Complete Crown output dictionary.
+            """
+            return model.do_crown_run(surface_results=surface, **inputs, **canopy)
+    return call
+
+
+def _physical_cores():
+    """Read physical core availability without substituting logical CPU count.
+
+    :return: Physical core count when verifiable, otherwise None.
+    """
+    try:
+        if os.name == "nt":
+            command = ["powershell.exe", "-NoProfile", "-Command",
+                       "(Get-CimInstance Win32_Processor | Measure-Object NumberOfCores -Sum).Sum"]
+            return int(subprocess.check_output(command, text=True, timeout=30).strip())
+        if sys.platform == "darwin":
+            return int(subprocess.check_output(["sysctl", "-n", "hw.physicalcpu"], text=True, timeout=30))
+        records = Path("/proc/cpuinfo").read_text(encoding="utf-8").split("\n\n")
+        available = os.sched_getaffinity(0) if hasattr(os, "sched_getaffinity") else None
+        cores = set()
+        for record in records:
+            fields = dict(line.split(":", 1) for line in record.splitlines() if ":" in line)
+            fields = {key.strip(): value.strip() for key, value in fields.items()}
+            if "physical id" in fields and "core id" in fields:
+                if available is None or int(fields["processor"]) in available:
+                    cores.add((fields["physical id"], fields["core id"]))
+        return len(cores) or None
+    except (OSError, ValueError, subprocess.SubprocessError):
+        return None
+
+
+def _profile_batch(original, samples):
+    """Instrument the current native batch entry point for diagnostics only.
+
+    :param original: Unmodified native batch function.
+    :param samples: Destination for per-boundary diagnostic samples.
+    :return: Instrumented callable preserving ordinary batch results.
+    """
+    def profile(*args, **kwargs):
+        """Collect diagnostic timers around one native boundary call.
+
+        :param args: Native positional arguments.
+        :param kwargs: Native keyword arguments.
+        :return: Ordinary result with optional diagnostic metadata.
+        """
+        kwargs["profile"] = True
+        started = time.perf_counter()
+        result = original(*args, **kwargs)
+        sample = {key.removeprefix("__timing."): float(value.item())
+                  for key, value in result.items() if key.startswith("__timing.")}
+        sample["native_boundary_total_seconds"] = time.perf_counter() - started
+        sample["native_output_bytes"] = sum(value.nbytes for key, value in result.items()
+                                            if not key.startswith("__timing."))
+        sample["native_metadata_bytes"] = sum(value.nbytes for key, value in result.items()
+                                              if key.startswith("__") and not key.startswith("__timing."))
+        sample["operation"] = args[0]
+        samples.append(sample)
+        return result
+    return profile
+
+
+def _provenance(arguments):
+    """Hash sources, native binary, and NumPy build after measurements finish.
+
+    :param arguments: Worker input identity.
+    :return: Version and hash fields without developer-machine absolute paths.
+    """
+    import numpy as np
+    paths = sorted((ROOT / "src/behave_fire").rglob("*.py"))
+    paths += sorted((ROOT / "rust/crates").glob("*/src/**/*.rs"))
+    paths += [ROOT / "rust/Cargo.toml", ROOT / "rust/crates/behave-fire/Cargo.toml",
+              ROOT / "rust/crates/behave-py/Cargo.toml", ROOT / "rust/Cargo.lock",
+              ROOT / "pyproject.toml", Path(__file__).resolve(), ROOT / "tools/performance_cases.py"]
+    digest = hashlib.sha256()
+    for path in paths:
+        digest.update(path.relative_to(ROOT).as_posix().encode())
+        digest.update(path.read_bytes().replace(b"\r\n", b"\n"))
+    candidates = [ROOT / "src/behave_fire" / ("_rust" + suffix) for suffix in EXTENSION_SUFFIXES]
+    extension = next((path for path in candidates if path.is_file()), None)
+    with contextlib.redirect_stdout(io.StringIO()) as build:
+        np.show_config()
+    return {"python": sys.version, "numpy": np.__version__,
+            "numpy_build": hashlib.sha256(build.getvalue().encode()).hexdigest(),
+            "platform": platform.platform(), "cpu_count": os.cpu_count(),
+            "source_hash": digest.hexdigest(),
+            "extension_hash": hashlib.sha256(extension.read_bytes()).hexdigest() if extension else None,
+            "seed": arguments.seed}
+
+
+def _read_rows(path, field):
+    """Load report rows or probe JSON/JSONL without inventing absent evidence.
+
+    :param path: Optional evidence file.
+    :param field: Report field to extract.
+    :return: Existing rows, or an empty list when no file is supplied.
+    """
+    if path is None:
+        return []
+    text = path.read_text(encoding="utf-8-sig")
+    try:
+        value = json.loads(text)
+    except json.JSONDecodeError:
+        return [json.loads(line) for line in text.splitlines() if line.strip()]
+    if isinstance(value, list):
+        return value
+    return value[field] if field in value else [value]
+
+
+def _save(report, destination):
+    """Persist partial evidence after every observation.
+
+    :param report: JSON-compatible campaign evidence.
+    :param destination: Optional output path.
+    :return: None; writes the report when a destination is supplied.
+    """
+    if destination is not None:
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        destination.write_text(json.dumps(report, indent=2, allow_nan=False), encoding="utf-8")
+
+
+def _validation_worker(arguments):
+    """Compare full outputs separately from all timing and memory observations.
+
+    :param arguments: Operation, dtype layout, dataset, seed, and worker request.
+    :return: Validation status and matching input/source provenance.
+    """
+    expected = _model_call(arguments, "python")()
+    actual = _model_call(arguments, "rust")()
+    result = dict(kind="validation", dataset=arguments.dataset, operation=arguments.operation,
+                  cells=arguments.cells, threads=arguments.threads, output_fields=len(expected), passed=False)
+    try:
+        assert_outputs(actual, expected)
+        result["passed"] = True
+    except AssertionError as error:
+        result["error"] = str(error)
+    result.update(_provenance(arguments))
+    return result
+
+
+def _worker(arguments):
+    """Measure first and warmed calls without retaining separate oracle arrays.
+
+    :param arguments: Backend, route, size, worker count, and profiling controls.
+    :return: Legacy first-call keys, repeated observations, and exact provenance.
+    """
+    import_started = time.perf_counter()
+    import numpy as np
+    from behave_fire.python import BehaveRun as PythonRun
+    if arguments.backend == "rust":
+        from behave_fire.rust import _bridge
+    import_seconds = time.perf_counter() - import_started
+    samples = []
+    if arguments.backend == "rust" and arguments.profile:
+        _bridge._native.batch = _profile_batch(_bridge._native.batch, samples)
+    created = time.perf_counter()
+    call = _model_call(arguments, arguments.backend)
+    construction_seconds = time.perf_counter() - created
+    samples.clear()
     before_current, before_peak = _memory()
     stop = threading.Event()
     sampled = [before_current or 0]
 
     def sample_memory():
-        """Sample current working set until the invocation finishes.
+        """Sample resident memory until all worker calls finish.
 
-        :return: None; appends process memory measurements.
+        :return: None; appends current-working-set measurements when available.
         """
         while not stop.wait(.005):
             sampled.append(_memory()[0] or 0)
 
     sampler = threading.Thread(target=sample_memory)
     sampler.start()
-    started = time.perf_counter()
+    durations = []
+    calls = []
     try:
-        result = call()
-        total = time.perf_counter() - started
+        for _ in range(arguments.warm_calls + 1):
+            result = None
+            samples.clear()
+            started = time.perf_counter()
+            result = call()
+            durations.append(time.perf_counter() - started)
+            calls.append(list(samples))
         current, peak = _memory()
     finally:
         stop.set()
         sampler.join()
-    native_total = sum(sample["native_boundary_total_seconds"] for sample in native_samples)
-    sums = {key: sum(sample[key] for sample in native_samples)
+    first_samples = calls[0]
+    sums = {key: sum(sample.get(key, 0) for sample in first_samples)
             for key in ("owned_copy_seconds", "detached_seconds", "concatenate_seconds",
-                        "numpy_transfer_seconds", "appended_bytes")}
-    output_bytes = sum(value.nbytes for value in result.values())
-    return dict(backend=arguments.backend, threads=arguments.threads, cells=arguments.cells,
-                operation=arguments.operation, total_seconds=total,
-                python_marshalling_and_output_seconds=total-native_total,
-                native_stages=sums, native_calls=native_samples, output_bytes=output_bytes,
-                working_set_before_bytes=before_current, lifetime_peak_before_bytes=before_peak,
-                lifetime_peak_after_bytes=peak, sampled_peak_during_call_bytes=max(sampled+[current or 0]),
-                python=sys.version, numpy=np.__version__, platform=platform.platform(),
-                cpu_count=os.cpu_count())
+                        "numpy_transfer_seconds", "appended_bytes")} if arguments.profile else None
+    native_total = sum(sample["native_boundary_total_seconds"] for sample in first_samples)
+    record = dict(kind="timing", backend=arguments.backend, threads=arguments.threads,
+                  dataset=arguments.dataset, cells=arguments.cells, operation=arguments.operation,
+                  first_seconds=durations[0], total_seconds=durations[0], warm_seconds=durations[1:],
+                  profile=arguments.profile, import_seconds=import_seconds,
+                  construction_and_inputs_seconds=construction_seconds,
+                  python_marshalling_and_output_seconds=(durations[0] - native_total) if arguments.profile else None,
+                  native_stages=sums, native_calls=first_samples, warm_native_calls=calls[1:],
+                  output_bytes=sum(value.nbytes for value in result.values()),
+                  working_set_before_bytes=before_current, lifetime_peak_before_bytes=before_peak,
+                  lifetime_peak_after_bytes=peak, peak_bytes=peak,
+                  sampled_peak_during_call_bytes=max(sampled + [current or 0]))
+    record.update(_provenance(arguments))
+    return record
 
 
 def main():
-    """Run isolated measurements or emit one worker record.
+    """Run paired campaigns or one worker using the original CLI selectors.
 
-    :return: None; writes JSON measurements to standard output and optional file.
+    :return: None; prints JSON measurements and exits nonzero on worker failures.
     """
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--sizes", type=int, nargs="+", default=[1, 10_000, 1_000_000])
     parser.add_argument("--worker-threads", type=int, nargs="+", default=[1, 4, 0])
-    parser.add_argument("--operations", nargs="+", default=["surface", "crown"])
+    parser.add_argument("--operations", choices=OPERATIONS, nargs="+")
     parser.add_argument("--output", type=Path)
     parser.add_argument("--worker", action="store_true")
     parser.add_argument("--backend", choices=["python", "rust"])
     parser.add_argument("--threads", type=int, default=1)
     parser.add_argument("--cells", type=int)
-    parser.add_argument("--operation", choices=["surface", "crown", "typed-crown"], default="surface")
-    arguments = parser.parse_args()
-    if arguments.worker:
-        print(json.dumps(_worker(arguments)), flush=True)
-        return
-    records = []
-    for cells in arguments.sizes:
-        for operation in arguments.operations:
-            for backend, workers in [("python", 1)] + [("rust", value) for value in arguments.worker_threads]:
-                command = [sys.executable, str(Path(__file__).resolve()), "--worker", "--backend", backend,
-                           "--threads", str(workers), "--cells", str(cells), "--operation", operation]
-                completed = subprocess.run(command, capture_output=True, text=True, check=False)
-                if completed.returncode:
-                    record = dict(backend=backend, threads=workers, cells=cells, operation=operation,
-                                  error=completed.stderr, returncode=completed.returncode)
-                else:
-                    record = json.loads(completed.stdout)
-                records.append(record)
-                print(json.dumps(record), flush=True)
-                if arguments.output:
-                    arguments.output.write_text(json.dumps(records, indent=2), encoding="utf-8")
-    if any("error" in record for record in records):
-        raise SystemExit(1)
+    parser.add_argument("--operation", choices=OPERATIONS, default="surface")
+    parser.add_argument("--dataset", choices=["uniform", "heterogeneous"], default="uniform")
+    parser.add_argument("--datasets", choices=["uniform", "heterogeneous"], nargs="+")
+    parser.add_argument("--seed", type=int, default=20261105)
+    parser.add_argument("--preset", choices=["screen", "acceptance"], default="screen")
+    parser.add_argument("--repetitions", type=int)
+    parser.add_argument("--warm-calls", type=int)
+    parser.add_argument("--profile", action="store_true")
+    parser.add_argument("--validate-only", action="store_true")
+    parser.add_argument("--baseline", type=Path)
+    parser.add_argument("--allocations", type=Path, nargs="*", default=[])
+    parser.add_argument("--physical-cores", type=int)
+    parser.add_argument("--timeout", type=float, default=1800)
+    args = parser.parse_args()
+    args.repetitions = args.repetitions if args.repetitions is not None else (7 if args.preset == "acceptance" else 3)
+    args.warm_calls = args.warm_calls if args.warm_calls is not None else (5 if args.preset == "acceptance" else 1)
+    args.datasets = args.datasets or (["uniform", "heterogeneous"] if args.preset == "acceptance" else ["uniform"])
+    args.operations = args.operations or (list(OPERATIONS) if args.preset == "acceptance" else ["surface", "crown"])
+    if args.repetitions < 1 or args.warm_calls < 0 or any(size < 0 for size in args.sizes):
+        parser.error("Require positive repetitions and nonnegative sizes/warmed-call counts")
+    if args.worker:
+        if args.cells is None or args.cells < 0 or args.backend is None or args.threads < 0:
+            parser.error("A worker requires nonnegative --cells/--threads and an explicit --backend")
+        result = _validation_worker(args) if args.validate_only else _worker(args)
+        print(json.dumps(result, allow_nan=False), flush=True)
+    else:
+        result = _campaign(args)
+        _save(result, args.output)
+        if result["errors"]:
+            raise SystemExit(1)
 
 
 if __name__ == "__main__":
