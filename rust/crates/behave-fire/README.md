@@ -2,8 +2,10 @@
 
 Standalone Rust core for the behave_fire fire-behavior port. This layer provides
 checked grid inputs, owned fuel/species data, unit conversions, and complete
-scalar surface and crown pipelines with their component stages. Other domains
-and Python execution backends arrive in subsequent implementation layers.
+scalar surface and crown pipelines with their component stages. It also includes
+mortality, spotting, ignition, safety zones, vapor pressure deficit, fine dead
+fuel moisture, stateful slope/ellipse tools, and the reference containment model.
+Python execution backends arrive in subsequent implementation layers.
 
 The core has no runtime dependencies and does not require Python, NumPy, C++,
 external data, or a sibling repository. Rust 1.78 and edition 2021 are the tested
@@ -77,3 +79,29 @@ documented NumPy masked-array stage behavior. Float32 NumPy exponential dispatch
 can differ by a few ULPs from scalar libc; select the matching `MathProfile` when
 matching a particular NumPy build. No Python runtime is used by either profile.
 The Python bindings remain incomplete at this layer.
+
+## Effects and utility calculations
+
+`BehaveRun` provides all eleven calculation routes of the Python facade. Rust
+scalar methods use documented base units, with conversion functions in `units`
+for callers using other units. Stateful helpers preserve their checked geometry
+errors and numeric-kind metadata; `GeometryError` distinguishes domain,
+overflow, and division-by-zero errors.
+
+```rust
+use behave_fire::{BehaveRun, FuelModels};
+
+let model = BehaveRun::new(FuelModels::default());
+let scorch_ft = BehaveRun::calculate_scorch_height(100.0, 5.0, 77.0);
+let mortality = model.calculate_crown_scorch_mortality(
+    scorch_ft, 80.0, 0.5, 12.0, 1,
+);
+assert!((0.0..=1.0).contains(&mortality.probability_mortality));
+```
+
+Containment intentionally reproduces the Python fixed-step approximation and
+its status codes; it does not implement RK4 or the complete upstream ContainSim.
+Lightning ignition remains available as a deprecated compatibility calculation.
+
+Run `cargo run --example standalone` from this crate directory for a complete
+default/custom-fuel surface and mortality example with registry snapshots.
