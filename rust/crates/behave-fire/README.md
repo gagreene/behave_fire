@@ -1,9 +1,9 @@
 # behave-fire
 
-Standalone Rust foundation for the behave_fire fire-behavior port. This initial
-version provides checked grid inputs and owned typed outputs. Scientific models
-are added in later implementation layers; this foundation does not perform fire
-calculations yet.
+Standalone Rust core for the behave_fire fire-behavior port. This layer provides
+checked grid inputs, owned fuel/species data, unit conversions, and complete
+scalar surface and crown pipelines with their component stages. Other domains
+and Python execution backends arrive in subsequent implementation layers.
 
 The core has no runtime dependencies and does not require Python, NumPy, C++,
 external data, or a sibling repository. Rust 1.78 and edition 2021 are the tested
@@ -38,8 +38,11 @@ initial `0.1.0` is a proposed package version, not publication authorization.
 
 ## License and provenance
 
-MIT licensed. The crate includes the repository's existing MIT license and
-copyright notice in `LICENSE`.
+Project-owned code is MIT licensed. The NumPy-derived float32 exponential
+compatibility kernel is BSD-3-Clause licensed; the combined crate declares
+`MIT AND BSD-3-Clause`. Preserve `LICENSE`, `NOTICE`, and
+`LICENSES/NumPy-BSD-3-Clause.txt` when redistributing the corresponding source
+or compiled code.
 
 This layer contains newly authored shape/error code and embedded fuel, species,
 and fine dead fuel moisture tables generated from the explicit Python reference
@@ -49,3 +52,28 @@ recorded in the packaged fixtures; `tools/check_rust_tables.py --check` checks
 drift during repository development and CI. Building or using the crate never
 requires that Python tool. Later scientific ports retain applicable source and
 data notices and record their provenance.
+
+## Surface and crown calculations
+
+The scalar surface and crown pipelines and their public stages are available
+without Python. Inputs and outputs use the documented reference base units;
+typed unit selectors are available where the reference accepts units.
+
+```rust
+use behave_fire::{BehaveRun, FuelModels, surface::SurfaceInput, units::SpeedUnit};
+
+let model = BehaveRun::new(FuelModels::default());
+let mut input = SurfaceInput::new(124);
+input.wind_speed = 5.0;
+input.wind_speed_units = SpeedUnit::MilesPerHour;
+let result = model.do_surface_run(&input)?;
+assert!(result.spread_rate.is_finite());
+# Ok::<(), behave_fire::BehaveError>(())
+```
+
+The `surface::single` and `crown::single` modules preserve the reference's
+float32 intermediate arithmetic. Mask-aware companion APIs reproduce the
+documented NumPy masked-array stage behavior. Float32 NumPy exponential dispatch
+can differ by a few ULPs from scalar libc; select the matching `MathProfile` when
+matching a particular NumPy build. No Python runtime is used by either profile.
+The Python bindings remain incomplete at this layer.
