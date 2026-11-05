@@ -31,6 +31,11 @@ a supported real dtype before calculation. General arbitrary-precision integer
 outputs and opaque custom Python-object arithmetic require the explicit Python
 backend. Rust raises `TypeError` instead of truncating values, silently changing
 the result dtype, or falling back during a calculation.
+Raw custom numeric subclasses are rejected before NumPy can erase their type,
+including direct scalars and scalar payloads in lists or tuples. Stateful native
+helpers apply the same check to their scalar arguments and stored state. Entry
+points that explicitly coerce real inputs retain their existing supported
+coercions. Ordinary built-in and NumPy numeric values remain supported.
 For example, Python's `calculate_fire_length(2**64, 0, 1)` produces an object
 array containing the exact integer; this raw-object route is unsupported by Rust.
 Complex intermediates generated from supported real inputs are a separate case:

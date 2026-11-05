@@ -80,6 +80,107 @@ The final integration check found that the generic weak-scalar guard rejected or
 
 The surface/crown pipeline threshold remains 1,024 cells; standalone helper dispatch uses 10,000 cells. These came from earlier local threshold experiments, not a new integrated threshold sweep. Generic `map_chunks` imposes no threshold and uses `effective_worker_count`. No threshold was tuned using these single-run final measurements.
 
+## Performance investigation: 2026-11-05
+
+The slowdown is reproducible. The largest measured problem is native result
+packaging, followed by avoidable per-cell setup. Python uses compiled NumPy
+array operations; replacing them with a scalar Rust loop does not by itself
+improve performance.
+
+The investigation used the same host, interpreter, NumPy, release extension,
+and benchmark inputs described above. The checkout was based on
+`d37d400cd2d90f307e64b3b47f0d2da235f9a199`, with an uncommitted Python input
+validation fix. No production optimization was applied. These fresh-process
+results confirm the earlier pattern; they do not replace the historical tables.
+
+| 10,000-cell route | Python (s) | Rust 1 (s) | Rust 4 (s) | Rust 0 (s) |
+| --- | ---: | ---: | ---: | ---: |
+| surface | 0.033918 | 0.110720 | 0.060278 | 0.043474 |
+| crown | 0.045716 | 0.131147 | 0.061859 | 0.046484 |
+| typed-crown | 0.051588 | 3.748687 | 1.201821 | 0.616116 |
+
+Serial typed Crown spent 3.725172 seconds inside detached native execution,
+0.002611 seconds validating/copying inputs at the native boundary, and
+0.020139 seconds in Python marshalling/output restoration. These intervals do
+not identify Python execution or boundary copying as the main bottleneck.
+
+### Isolated native measurements
+
+Disposable Rust consumers measured the existing standalone core and exact
+copies of production binding helpers. Timing builds used release optimization
+without allocation instrumentation. Separate builds counted allocation and
+reallocation calls through the system allocator. Entire computed records were
+passed through `black_box` before selecting checksum fields.
+
+| Isolated operation | Cells | Median runtime (s) | Allocation/reallocation calls per cell |
+| --- | ---: | ---: | ---: |
+| Surface core with prepared input/fuel | 100,000 | 0.144506 | 0 |
+| Crown core with prepared input/registry | 100,000 | 0.622957 | 9 |
+| Typed Crown core with prepared inputs/registry | 10,000 | 0.114412 | 9 |
+| Typed Crown output encoder alone | 10,000 | 2.852865 | 679 |
+| Surface binding record setup alone | 100,000 | 0.473416 | 7 |
+| Crown binding record/registry setup alone | 100,000 | 0.443193 | 5 |
+
+Core/encoder timings are medians of three repetitions; setup timings are medians
+of five. Allocation counts used 1,000 core/encoder cells and 10,000 setup cells.
+Core inputs and registry are reused. The typed core case uses a representative
+masked heat value in every cell, rather than the public benchmark's every-seventh
+mask. The encoder reuses one computed typed result, runs the exact production
+`masked::outputs` helper, adds classification, and destroys the result map each
+iteration. Setup probes use representative model-10 argument maps, without all
+public-call transport metadata. Core runs omit output-column storage and Python
+transport. These are attribution experiments, not end-to-end speed claims;
+their runtimes cannot be subtracted to infer exact production time shares.
+
+### Causes supported by the measurements and source
+
+1. **Typed output serialization creates excessive allocations.**
+   [`masked::output` and `masked::outputs`](../rust/crates/behave-py/src/masked.rs)
+   construct string-keyed maps for every field of every cell. Twenty-one fields
+   each produce one payload and thirteen metadata columns; classification brings
+   the total to 295 columns. The measured encoder makes 679 allocation or
+   reallocation calls and requests 71,954 bytes per cell. At 10,000 cells that is
+   6.79 million calls and approximately 719.5 MB of cumulative requested
+   allocation, including temporary maps and strings. This is not peak memory.
+   Final native columns occupy 23.6 MB; 21.84 MB (92.54%) is metadata. Encoding
+   alone is much more expensive than the isolated typed equations.
+2. **Common float64 calls rebuild inputs inside the cell loop.**
+   [`structures::input` and `structures::fuel`](../rust/crates/behave-py/src/structures.rs)
+   repeatedly read named maps and rebuild records. Surface constructs three
+   default mode strings and three replacements per cell. Its absent optional
+   `user_waf` also formats an error string that is immediately discarded by
+   [`Arguments::optional`](../rust/crates/behave-py/src/arrays.rs).
+   [`Crown setup`](../rust/crates/behave-py/src/crown.rs) constructs an input and
+   a one-record fuel registry per cell. Measured setup costs are substantial
+   even before equations run.
+3. **Crown contains duplicated equation stages.**
+   [`calculate_crown_surface_fire`](../rust/crates/behave-fire/src/crown.rs)
+   computes particles, fuelbed intermediates, and reaction intensity, then calls
+   `surface::run`, which requests the same stages again. The
+   [Python implementation](../src/behave_fire/components/crown.py) reuses its
+   intermediates through `run_surface_fire`. The source duplication is confirmed;
+   its retained runtime cost after compiler optimization was not isolated.
+4. **Typed scalar machinery carries additional work.**
+   `MaskedValue` measures 216 bytes on this target, including inline capacity
+   for wide integers. Typed arithmetic and input decoding repeatedly handle
+   precision, masks, integer aliases, and scalar kinds. This is another profiling
+   target, but no measured time share is assigned to it here.
+
+The first optimization should replace per-cell output maps with a schema
+prepared once per batch and direct writes into output columns. Next, bind input
+columns and constant controls once, reuse fuel records where possible, and reuse
+Crown intermediates. Compact constant metadata and specialize common typed
+layouts only while preserving existing dtype, mask, integer, error, broadcasting,
+and ownership behavior. SIMD/math-kernel investigation comes after these costs
+are measured again. None of these proposed changes has yet established an
+end-to-end speedup.
+
+Investigation evidence is preserved locally under
+`.superpowers/perf-investigation/`: `wrapper-10k.json`,
+`core-timing-final.jsonl`, `core-allocations-final.jsonl`,
+`f64-setup-*-timing.jsonl`, and `f64-setup-*-allocations.jsonl`, plus the disposable
+`corebench/` and `f64-setup/` consumers. These ignored artifacts are not packaged.
+
 ## Reproduction and evidence
 
 Run `tools/benchmark_backends.py --output results.json` from an environment containing a release native build. Run `--sizes 10000 --operations typed-crown` separately. Model construction and input generation are excluded; native boundary calls and metadata are recorded per invocation. Crown uses 11 native calls, including unit conversions.

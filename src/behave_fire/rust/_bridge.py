@@ -113,6 +113,7 @@ def _call(operation, arguments):
     """
     from ._ownership import _owned_inputs
 
+    _validate_raw_arithmetic(operation, arguments)
     direction_profile = 0
     if operation == 'surface.calculate_direction_of_max_spread':
         normalized, single = _normalize_direction(arguments)
@@ -659,7 +660,7 @@ def _real_coercion(operation, parameter):
     if module == 'mortality':
         return None if parameter.startswith('coefficients.') else np.float64
     if module == 'crown':
-        if name in ('run_crown_fire', 'calculate_crown_surface_fire') and (not parameter.startswith(('surface_results.', 'model.'))):
+        if name in ('coerce_crown_fire_inputs', 'run_crown_fire', 'calculate_crown_surface_fire') and (not parameter.startswith(('surface_results.', 'model.'))):
             return np.float64
         return None
     normalized = {'build_particle_arrays': ('m1h', 'm10h', 'm100h', 'mlh', 'mlw'), 'calculate_direction_of_max_spread': ('aspect',), 'calculate_fire_area': ('forward_ros', 'backing_ros', 'lwr'), 'calculate_fire_perimeter': ('forward_ros', 'backing_ros', 'lwr'), 'calculate_fire_width': ('forward_ros', 'backing_ros', 'lwr'), 'calculate_fireline_intensity': ('spread_rate', 'heat_per_unit_area'), 'calculate_forward_spread_rate': ('no_wind_no_slope_spread_rate', 'rate_vector'), 'calculate_heat_per_unit_area': ('reaction_intensity', 'residence_time'), 'calculate_midflame_wind_speed': ('waf', 'twenty_foot_wind_speed'), 'calculate_reaction_intensity_output': ('reaction_intensity',), 'calculate_slope_phi': ('slope',), 'calculate_surface_rate_vector': ('wind_direction', 'aspect'), 'calculate_surface_wind_adjustment_factor': ('canopy_cover', 'canopy_height', 'crown_ratio', 'depth', 'user_waf'), 'calculate_twenty_foot_wind_speed': ('wind_speed',), 'calculate_wind_adjustment_factor': ('canopy_cover', 'canopy_height', 'crown_ratio', 'depth'), 'run_surface_fire': ('wind_speed', 'wind_direction', 'slope', 'aspect', 'canopy_cover', 'canopy_height', 'crown_ratio', 'user_waf', 'ib.depth')}
@@ -773,6 +774,18 @@ def _state(instance, domain, method, arguments):
     """
     arguments = {key: value for key, value in arguments.items() if key != 'self'}
     state = dict(vars(instance))
+    coerced = set()
+    if domain == 'fire_size':
+        coerced.add('elapsed_time')
+        if method == 'calculate_fire_basic_dimensions':
+            coerced.add('forward_spread_rate')
+            if arguments['wind_speed_units'] != 5:
+                coerced.add('effective_wind_speed')
+    elif domain == 'slope_tool':
+        coerced.update({'calculate_horizontal_distance': ('calculated_map_distance', 'max_slope_steepness'),
+                        'calculate_slope_from_map_measurements': ('map_distance',)}.get(method, ()))
+    _validate_raw_arithmetic(domain + '.' + method, {key: value for key, value in arguments.items() if key not in coerced})
+    _validate_raw_arithmetic(domain + '.' + method, state)
     if domain == 'fire_size':
         state['spread_rates_are_numpy_'] = isinstance(state.get('forward_spread_rate_'), (np.ndarray, np.generic))
         state['effective_wind_is_numpy_'] = isinstance(state.get('effective_wind_speed_'), (np.ndarray, np.generic))
@@ -817,6 +830,42 @@ def _unit_code(kind, units):
         return 1 if units == 1 else 2 if units == 2 else 0
     indices = list(range(_UNIT_COUNTS[kind])) if kind == 'SurfaceAreaToVolume' else np.arange(_UNIT_COUNTS[kind])
     return indices[units]
+
+
+def _validate_raw_arithmetic(operation, arguments, prefix=''):
+    """Reject numeric subclasses before array coercion can erase their operators.
+
+    :param operation: Fully qualified native calculation route.
+    :param arguments: Original named inputs, including nested scientific fields.
+    :param prefix: Dotted path of an enclosing input dictionary.
+    :return: None; unsupported custom arithmetic raises TypeError before native calls.
+    """
+    controls = {'S', 'charge_type', 'index', 'is_crown', 'is_surface_fire',
+                'is_passive_crown', 'is_active_crown', 'max_steps',
+                'wind_orientation_mode', 'wind_height_mode', 'waf_method'}
+    for name, value in arguments.items():
+        parameter = prefix + name
+        if isinstance(value, dict):
+            _validate_raw_arithmetic(operation, value, parameter + '.')
+        elif not (name.endswith('units') or name in controls
+                  or _real_coercion(operation, parameter) is not None):
+            _validate_raw_scalar(value)
+
+
+def _validate_raw_scalar(value):
+    """Check raw scalar payloads before NumPy can discard their Python subclass.
+
+    :param value: Scalar or sequence used in non-coercing native arithmetic.
+    :return: None; custom numeric subclasses raise TypeError.
+    """
+    if isinstance(value, (tuple, list)):
+        for item in value:
+            _validate_raw_scalar(item)
+    elif isinstance(value, np.generic):
+        if type(value) is not np.dtype(value.dtype).type:
+            raise TypeError('Unsupported opaque custom numeric arithmetic requires the explicit Python backend.')
+    elif isinstance(value, (int, float)) and type(value) not in (bool, int, float):
+        raise TypeError('Unsupported opaque custom numeric arithmetic requires the explicit Python backend.')
 
 
 def _validate_threads(threads):
