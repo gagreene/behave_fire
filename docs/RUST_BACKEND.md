@@ -92,7 +92,43 @@ The acceptance oracle for Rust is the explicit Python implementation given the s
 
 Separately compare the widened route with original float16 behavior as a diagnostic, not an acceptance gate. Widening can change overflow/underflow, finite versus infinite results, NaNs, exceptions, and classification thresholds as well as dtype. For example, the existing eccentricity helper returns `inf` for a float16 array containing 300, while its float32 route returns approximately `0.9999944`. Record such differences in `docs/BACKEND_DIFFERENCES.md`; do not loosen acceptance tolerances or claim exact original-float16 classifications. Finite-value diagnostics may report a `5e-3, 5e-4` comparison, but failures against original float16 do not invalidate correct normalized behavior. Users requiring original float16 semantics must select Python.
 
+The frozen non-finite-to-int32 diagnostics retain their original x86 conversion
+results. NumPy can convert NaN and positive infinity differently on another host.
+Only four exact original input records qualify for portability handling:
+`coerce_crown_fire_inputs/nan`,
+`coerce_crown_fire_inputs/positive-infinity`,
+`calculate_lightning_ignition_probability/positive-infinity`, and
+`calculate_fine_dead_fuel_moisture/nan`. Their entry points and encoded input
+hashes must match, and the current host must demonstrate a different int32 cast.
+Native execution then must match live explicit Python on those same original
+inputs, retaining the existing float tolerances and exact integer, dtype, shape,
+mask, exception, and warning requirements. A separate replay with the original
+finite `INT_MIN` cast must still match the unchanged frozen diagnostic. Other
+cases continue to use their original frozen acceptance checks.
+
+The exporter deliberately canonicalizes those four cast-dependent outputs by
+replaying the original finite `INT_MIN` conversion. Default generation and
+`--check` therefore use the same reviewed snapshots across hosts. These snapshots
+are canonical invalid-cast diagnostics, rather than raw current-host outputs.
+`tools/probe_platform_oracle.py` records the raw original-input Python and optional
+native results; `tools/compare_backends.py` reports frozen and live outputs
+separately when portability handling activates. Neither path rewrites scientific
+fixtures or relaxes numeric tolerances.
+
 Characterize float16/32/64, signed/unsigned integers, booleans, and object inputs for each public helper. Preserve successful numeric coercion and existing exception types against the selected oracle. Additional floating dtypes require an explicit documented contract before claiming support. Match NumPy's clipping, remainder, promotion, tie-breaking, and branch semantics deliberately; do not globally relax tolerances to conceal defects.
+
+The supported native arithmetic boundary is bool, fixed-width signed/unsigned
+integers, and float32/float64 after normalization. Preserve characterized
+numeric-object coercion, output boxing, and exception behavior; do not reject an
+input solely because its dtype is object. Preserve large-Python-integer inputs
+when the reference explicitly coerces them to a supported real dtype before
+arithmetic. General arbitrary-precision integer outputs and opaque custom
+Python-object arithmetic require explicit Python; native calls reject unsupported
+inputs with `TypeError` before detached execution. This includes the object result
+of `calculate_fire_length(2**64, 0, 1)`. Do not silently approximate such results
+or fall back during a calculation. Preserve exact fixed-width wrapping and weak
+integer prefixes on supported paths, and complex intermediates generated from
+supported real inputs. See [BACKEND_DIFFERENCES.md](BACKEND_DIFFERENCES.md).
 
 Characterize scalar, length-one, 1D/2D/3D, empty, mixed-fuel, and non-contiguous input behavior by entry point. Preserve documented shape restrictions, including containment's report-spread-rate-defined shape. Exception classes match the reference; exact message text is not an API guarantee. Malformed boundary shapes/types must raise `ValueError` or `TypeError`, never a Rust panic or PyO3 `PanicException`. Add malformed-input/fuzz cases.
 

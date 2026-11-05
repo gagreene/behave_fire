@@ -40,6 +40,14 @@ def _exporter():
     return module
 
 
+def test_explicit_namespaces_have_source_modules():
+    from behave_fire.python import BehaveRun as PythonBehaveRun
+
+    assert importlib.util.find_spec("behave_fire.python") is not None
+    assert importlib.util.find_spec("behave_fire.rust") is not None
+    assert PythonBehaveRun is BehaveRun
+
+
 def test_export_check_detects_changed_and_missing_fixtures(tmp_path, capsys):
     exporter = _exporter()
     assert exporter.main(["--output-dir", str(tmp_path)]) == 0
@@ -131,6 +139,24 @@ def test_export_portable_values_preserve_nonfinite_dtype_shape_and_mask():
                                   {"float": "-inf"}, -0.0]
     assert encoded["mask"] == [False, True, False, False]
     assert np.signbit(encoded["values"][3])
+
+
+def test_export_provenance_tracks_reference_implementation_only(tmp_path, monkeypatch):
+    exporter = _exporter()
+    source = tmp_path / "src" / "behave_fire"
+    (source / "components").mkdir(parents=True)
+    (source / "rust").mkdir()
+    (source / "behave.py").write_text("# explicit Python facade\n", encoding="utf-8")
+    (source / "components" / "surface.py").write_text("# reference equations\n", encoding="utf-8")
+    (source / "__init__.py").write_text("# automatic backend exports\n", encoding="utf-8")
+    (source / "auto.py").write_text("# dispatch\n", encoding="utf-8")
+    (source / "rust" / "surface.py").write_text("# native adapter\n", encoding="utf-8")
+    monkeypatch.setattr(exporter, "ROOT", tmp_path)
+    monkeypatch.setattr(exporter, "SOURCE", source)
+    hashes = exporter._envelope({})["provenance"]["source_sha256"]
+    assert set(hashes) == {
+        "src/behave_fire/behave.py", "src/behave_fire/components/surface.py",
+    }
 
 
 def test_export_registry_receivers_replay_custom_clear_and_species_insert():

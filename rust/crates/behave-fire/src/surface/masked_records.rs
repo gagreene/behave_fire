@@ -148,6 +148,15 @@ impl MaskedFuelbedIntermediates {
 
 /// Sum one leading particle axis, filling masked values with zero and masking an all-masked reduction.
 fn sum(values: [MaskedValue; 5], scalar_cell: bool) -> MaskedValue {
+    if values.iter().any(|x| x.object_result) {
+        return super::objects::sum(values, scalar_cell);
+    }
+    if let Some(error) = values.iter().find_map(|x| x.error) {
+        return super::integers::failure(values[0], error);
+    }
+    if values.iter().any(|x| super::integers::is_integer(*x)) {
+        return super::integers::sum(values, scalar_cell);
+    }
     let ma = values.iter().any(|x| x.is_masked_array);
     let mask = ma && values.iter().all(|x| x.mask);
     let precision = if values.iter().any(|x| x.precision == Precision::F64) {
@@ -188,7 +197,7 @@ fn particle(value: MaskedValue, scalar_cell: bool) -> MaskedValue {
 }
 /// Broadcast a per-cell scalar back over the leading particle axis.
 fn broad(value: MaskedValue) -> MaskedValue {
-    value.with_scalar_array(false)
+    value.with_scalar_array(false).with_numpy_scalar(false)
 }
 /// Compute the private size-bin helper, which deliberately accumulates fractions in ordinary f64 arrays.
 fn size_sorted(
@@ -254,8 +263,8 @@ fn eta_m(moisture: MaskedValue, moe: MaskedValue) -> Result<MaskedValue, MaskedE
         c(0.0),
         c(1.0)
             .sub(c(2.59).mul(rm))
-            .add(c(5.11).mul(rm.pow(c(2.0))))
-            .sub(c(3.52).mul(rm.pow(c(3.0)))),
+            .add(c(5.11).mul(rm.pow(MaskedValue::python_int(2))))
+            .sub(c(3.52).mul(rm.pow(MaskedValue::python_int(3)))),
     ))
 }
 /// Calculate mineral damping with masked comparison/where normalization.
@@ -294,11 +303,12 @@ pub fn try_calculate_reaction_intensity(
         .mul(ib.w_heat_live)
         .mul(eta_m(ib.w_moist_live, ib.moe_live)?)
         .mul(eta_s(ib.w_silica_live));
-    Ok(MaskedValue::select_with_condition(
-        valid,
-        dead.add(live),
-        c(0.0),
-    ))
+    let result = MaskedValue::select_with_condition(valid, dead.add(live), c(0.0));
+    if let Some(error) = result.error {
+        Err(error)
+    } else {
+        Ok(result)
+    }
 }
 
 /// Calculate all weighted fuelbed fields from independently masked particle arrays.
@@ -484,7 +494,7 @@ pub fn try_calculate_fuelbed_intermediates(
             .div(c(192.0).add(c(0.2595).mul(safe_sigma))),
         c(0.0),
     );
-    Ok(MaskedFuelbedIntermediates {
+    let result = MaskedFuelbedIntermediates {
         sigma,
         bulk_density,
         packing_ratio,
@@ -505,7 +515,12 @@ pub fn try_calculate_fuelbed_intermediates(
         frac_live,
         depth,
         is_defined: p.is_defined,
-    })
+    };
+    if let Some(error) = result.named_values().iter().find_map(|(_, x)| x.error) {
+        Err(error)
+    } else {
+        Ok(result)
+    }
 }
 
 /// Rank metadata for the normalized numerical surface input arguments.
@@ -565,6 +580,12 @@ pub fn try_run_surface_fire_with_intermediates_and_shape(
     input: &super::super::SurfaceInput,
     shape: &SurfaceInputShape,
 ) -> Result<super::super::SurfaceResult, MaskedError> {
+    if let Some(error) = ri
+        .error
+        .or_else(|| ib.named_values().iter().find_map(|(_, x)| x.error))
+    {
+        return Err(error);
+    }
     let plain = MaskedValue::plain;
     let sigma = ib.sigma;
     let safe_sigma =
@@ -573,6 +594,9 @@ pub fn try_run_surface_fire_with_intermediates_and_shape(
     let wb = c(0.02526).mul(safe_sigma.pow(c(0.54)));
     let we = c(0.715).mul(c(-0.000359).mul(safe_sigma).exp());
     let r0 = super::calculate_no_wind_no_slope_spread_rate(ri, ib.propagating_flux, ib.heat_sink);
+    if let Some(error) = r0.error {
+        return Err(error);
+    }
     let ws = super::super::calculate_twenty_foot_wind_speed(
         input.wind_speed,
         input.wind_speed_units,
@@ -608,6 +632,9 @@ pub fn try_run_surface_fire_with_intermediates_and_shape(
         ib.relative_packing_ratio,
         we,
     );
+    if let Some(error) = wp.error {
+        return Err(error);
+    }
     validate_condition_and(&[ib.packing_ratio])?;
     let sp = super::calculate_slope_phi(
         plain(input.slope).with_scalar_array(shape.slope),
@@ -615,6 +642,9 @@ pub fn try_run_surface_fire_with_intermediates_and_shape(
         ib.packing_ratio,
         ri,
     );
+    if let Some(error) = sp.error {
+        return Err(error);
+    }
     let vector = super::calculate_surface_rate_vector(
         r0,
         wp,
@@ -623,6 +653,9 @@ pub fn try_run_surface_fire_with_intermediates_and_shape(
         &input.wind_orientation_mode,
         plain(input.aspect).with_scalar_array(shape.aspect),
     );
+    if let Some(error) = vector.named_values().iter().find_map(|(_, x)| x.error) {
+        return Err(error);
+    }
     let spread_rate =
         super::super::calculate_forward_spread_rate(r0.value, vector.rate_vector.value);
     validate_condition_and(&[wb, wc, ib.relative_packing_ratio])?;

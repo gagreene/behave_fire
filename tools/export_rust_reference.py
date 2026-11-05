@@ -21,11 +21,14 @@ import warnings
 import numpy as np
 
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = next(parent for parent in Path(__file__).resolve().parents if (parent / "pytest.ini").is_file())
 SOURCE = ROOT / "src" / "behave_fire"
 REFERENCE_SHA = "7933789f00470c6bbfbe942dc22bdd7f74e192f9"
 if str(ROOT / "src") not in sys.path:
     sys.path.insert(0, str(ROOT / "src"))
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from rust_reference_platform import canonical_case
 
 from behave_fire.behave import BehaveRun
 from behave_fire.components import behave_units, crown, surface
@@ -236,8 +239,11 @@ def _envelope(payload):
     :param payload: Document fields.
     :return: Document with versioned provenance.
     """
+    # Backend selection and native adapters are not part of the frozen explicit
+    # Python scientific reference. Hash its facade and component sources only.
+    paths = [SOURCE / "behave.py", *sorted((SOURCE / "components").glob("*.py"))]
     hashes = {path.relative_to(ROOT).as_posix(): hashlib.sha256(path.read_bytes().replace(b"\r\n", b"\n")).hexdigest()
-              for path in sorted(SOURCE.rglob("*.py"))}
+              for path in paths}
     return {"schema_version": 1, "provenance": {"python_reference_sha": REFERENCE_SHA,
             "source_sha256": hashes, "oracle": "explicit Python"}, **payload}
 
@@ -461,6 +467,7 @@ def build_documents():
                         replacement = replacement.astype(dtype) if "float16" in profile else replacement
                         values[targets[0]] = replacement
                 record = _case(function, values, f"{name}/{profile}")
+                record = canonical_case(record, encode_value, contracts_match)
                 record["policy"] = "diagnostic" if dtype == "float16" else "acceptance"
                 domain_cases.append(record)
                 if dtype == "float16":

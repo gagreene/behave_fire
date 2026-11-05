@@ -175,3 +175,12 @@ impl BehaveRun {
         }
     }
 }
+
+/// Derive a fractional crown ratio from canopy heights in the same length unit.
+///
+/// The reference uses a denominator of one for nonpositive heights and preserves
+/// NaN propagation while clipping the fraction to zero through one.
+pub fn canopy_crown_ratio(height: f64, base: f64) -> f64 {
+    let safe_height = if height > 0.0 { height } else { 1.0 };
+    crate::math::np_clip((height - base) / safe_height, 0.0, 1.0)
+}

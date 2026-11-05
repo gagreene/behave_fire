@@ -54,4 +54,12 @@ where = ["src"]
 [tool.setuptools.package-dir]
 "" = "src"
 
+# Development extension settings; the packaging backend switches atomically in
+# the wheel layer after native and pure artifact validation is implemented.
+[tool.maturin]
+manifest-path = "rust/crates/behave-py/Cargo.toml"
+python-source = "src"
+module-name = "behave_fire._rust"
+bindings = "pyo3"
+
 

@@ -128,6 +128,18 @@ impl FuelModels {
             .unwrap_or(&self.empty)
     }
 
+    /// Restore an exact owned snapshot without registration-time normalization.
+    ///
+    /// Missing standard records stay missing; flags and base-unit values are
+    /// retained as supplied. Grid lookup still applies its documented clamping
+    /// and empty-record rules independently of this raw metadata snapshot.
+    pub fn from_records(records: BTreeMap<i32, FuelModel>) -> Self {
+        Self {
+            records,
+            empty: FuelModel::default(),
+        }
+    }
+
     /// Return the actual record for any registered integer, without clamping.
     pub fn get(&self, number: i32) -> Option<&FuelModel> {
         self.records.get(&number)
