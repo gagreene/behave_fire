@@ -19,6 +19,15 @@ pub enum BehaveError {
         /// Requested dimensions, preserved for diagnostics.
         dimensions: Vec<usize>,
     },
+    /// A requested row-major tile is reversed or extends beyond its raster.
+    InvalidRange {
+        /// Inclusive logical starting index.
+        start: usize,
+        /// Exclusive logical ending index.
+        end: usize,
+        /// Available raster cell count.
+        len: usize,
+    },
 }
 
 impl fmt::Display for BehaveError {
@@ -37,6 +46,9 @@ impl fmt::Display for BehaveError {
                     formatter,
                     "shape {dimensions:?} exceeds the platform cell-count limit"
                 )
+            }
+            Self::InvalidRange { start, end, len } => {
+                write!(formatter, "tile {start}..{end} exceeds raster length {len}")
             }
         }
     }

@@ -1,6 +1,9 @@
 //! Standalone core attribution, not end-to-end Python performance evidence.
 //! Allocation instrumentation is confined to this unpublished diagnostic tool.
 
+mod compact;
+mod raster_probe;
+
 use behave_fire::crown::{self, SurfaceFireInputs};
 use behave_fire::engine::{
     CrownCell, CrownPlan, CrownTweaks, PreparedFuel, PreparedFuels, SurfaceCell, SurfaceOptions,
@@ -66,6 +69,7 @@ struct Arguments {
     repetitions: usize,
     seed: usize,
     override_rate: Option<f64>,
+    scope: String,
 }
 
 struct Case<'a> {
@@ -87,6 +91,7 @@ fn arguments() -> Result<Arguments, String> {
         repetitions: 3,
         seed: 20261105,
         override_rate: None,
+        scope: "scalar".into(),
     };
     let mut args = std::env::args().skip(1);
     while let Some(name) = args.next() {
@@ -98,6 +103,7 @@ fn arguments() -> Result<Arguments, String> {
             "--layout" => result.layout = value,
             "--dataset" => result.dataset = value,
             "--mode" => result.mode = value,
+            "--scope" => result.scope = value,
             "--cells" => result.cells = value.parse().map_err(|_| "invalid cells")?,
             "--repetitions" => {
                 result.repetitions = value.parse().map_err(|_| "invalid repetitions")?
@@ -115,6 +121,7 @@ fn arguments() -> Result<Arguments, String> {
     ) || !matches!(result.layout.as_str(), "a" | "b")
         || !matches!(result.dataset.as_str(), "uniform" | "heterogeneous")
         || !matches!(result.mode.as_str(), "timing" | "allocations")
+        || !matches!(result.scope.as_str(), "scalar" | "raster" | "compact")
         || result.cells == 0
         || result.repetitions == 0
     {
@@ -127,6 +134,9 @@ fn arguments() -> Result<Arguments, String> {
     }
     if result.operation == "typed-crown" && result.override_rate.is_some() {
         return Err("The checked Python-layout probe has no fused native tweak argument".into());
+    }
+    if result.scope == "compact" && result.operation != "typed-crown" {
+        return Err("compact scope supports only the two experimental typed layouts".into());
     }
     Ok(result)
 }
@@ -274,6 +284,12 @@ fn main() -> Result<(), String> {
     let args = arguments()?;
     let fuels = PreparedFuels::from_registry(&FuelModels::default());
     let cases = build_cases(&args, &fuels)?;
+    if args.scope == "compact" {
+        return compact::run(&args, &cases, &fuels);
+    }
+    if args.scope == "raster" {
+        return raster_probe::run(&args, &cases, &fuels);
+    }
     black_box(evaluate(&args, &cases[0], &fuels));
     let operation = if args.operation == "typed-crown" && args.layout == "b" {
         "typed-crown-b"

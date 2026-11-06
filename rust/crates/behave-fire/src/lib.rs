@@ -20,6 +20,7 @@ pub mod fuel_models;
 pub mod ignite;
 pub mod math;
 pub mod mortality;
+pub mod raster;
 pub mod safety;
 pub mod slope;
 pub mod species;

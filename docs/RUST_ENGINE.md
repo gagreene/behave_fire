@@ -218,3 +218,143 @@ They retain warmed observations, NumPy build fingerprints, per-worker memory,
 and the independent validation records. Initial core probe JSON and compiler
 output are retained alongside them. These local artifacts are not packaged;
 the tables and method above are the tracked reviewer record.
+
+## Borrowed raster API
+
+`raster::{SurfaceRaster, CrownRaster}` borrows structure-of-arrays inputs through
+`SurfaceColumns` and `CrownColumns`. Each `PerCell` field is either a uniform
+scalar or a slice with exactly `GridShape::len()` elements. Constructing a raster
+validates every supplied input length before calculations or worker launch;
+calling a pipeline validates override and stage columns before allocating its
+outputs. Shapes are logical row-major dimensions, including scalar `[]` and
+empty shapes such as `[0, 3]`. Classification is an owned `Vec<i32>`.
+
+`SurfaceTweakColumns` and `CrownTweakColumns` supply uniform or per-cell overrides
+at the same stages as their scalar counterparts. `FuelbedColumns` lets callers
+edit and resume fuelbed intermediates without rebuilding particles. These are
+native Rust interfaces; existing Python stage helpers remain the Python
+injection interface. Reusing a plan with changed overrides keeps no old results.
+
+Native `validity: Some(PerCell::Cells(...))` explicitly skips false cells, keeps
+their positions, returns zero numerical payloads and a false output validity.
+Undefined-fuel scientific masking remains separate, including its length/width
+ratio of one. Python masked arrays never imply this native skip policy: their
+underlying data can participate in later calculations.
+
+`run_tile(range, ...)` returns a one-dimensional tile in original logical order.
+Input and override slices still describe the full raster; callers retain its
+original dimensions and the range offset. A caller reading external windows
+can instead construct one raster per window, using that window's own shape and
+slices. The library performs no file I/O. See
+`rust/crates/behave-fire/examples/raster_tweaks.rs` for a complete example.
+
+The initial implementation reuses the existing bounded worker executor and
+owned output vectors. It builds only the current scalar cell on the stack,
+never a full-grid vector of cell records. Output allocations depend on fields
+and workers. Disjoint worker output slices and tile scheduling remain later
+performance work; this layer makes no out-of-core scheduler claim.
+
+## Task 3 feasibility checkpoint
+
+**Decision: pause before production binding and specialization work.** The
+large-raster core headroom screen is unmet after the one permitted disposable
+prototype for each typed route. Owner-approved public-call targets remain
+unchanged. This is a feasibility result, not final performance certification
+or a speed claim for the current Python Rust wrapper.
+
+The release probe's `--scope raster` includes complete output-column storage,
+using the new native raster API for f64 and the allocation-free checked typed
+core for mixed layouts. `--scope compact` runs a disposable typed experiment
+under `tools/perf_probe/src/compact.rs`; it is not a supported core API, a
+production specialization, or a fallback for other dtype combinations. It
+reuses the FM10 science stages and implements compact postprocessing only for
+the two defined layouts, preserving f32 input quantization, the layout-B f32
+heat predicate, integer intensity inputs, masked left-operand restoration,
+mask-dropping selection and all 21 outputs. Every stored result and integer
+classification is compared outside timing with the checked scalar reference.
+Metadata, masks and raw masked values are also checked over the complete
+weather/fuel/mask period. The probe rejects missing or duplicate output fields.
+
+Each route/dataset/size uses three paired fresh-process blocks in seeded shuffled
+order, with one first and one warmed call per worker. Python is the public
+explicit backend on CPython 3.12.8, NumPy 2.1.3, Windows x86-64. Native timing
+includes complete numerical output storage but excludes Python transport;
+NumPy public-call timing includes that transport. Setup, validation and allocation
+instrumentation are outside timed regions. Existing Python-oracle differential
+suites remain separate from the probe's scalar replay checks. The measurements
+cover 10,000 and 100,000 cells as a reduced development screen; they do not
+certify million-cell, four-worker or cross-platform targets.
+Seconds below are medians across three fresh processes. Native typed rows use
+the compact experiment; the checked typed path remains slower. Ratios compare
+the public Python call with native core plus complete output storage only.
+
+| Cells | Dataset | Route | Python first / warm | Native first / warm | Ratio first / warm |
+| ---: | --- | --- | ---: | ---: | ---: |
+| 10,000 | uniform | Surface | 0.034897 / 0.035757 | 0.014171 / 0.013960 | 2.46x / 2.56x |
+| 10,000 | uniform | Crown | 0.046033 / 0.046140 | 0.024075 / 0.024437 | 1.91x / 1.89x |
+| 10,000 | uniform | Typed A | 0.049553 / 0.048343 | 0.025890 / 0.026176 | 1.91x / 1.85x |
+| 10,000 | uniform | Typed B | 0.050608 / 0.050803 | 0.027652 / 0.026299 | 1.83x / 1.93x |
+| 10,000 | heterogeneous | Surface | 0.033892 / 0.033579 | 0.015647 / 0.014862 | 2.17x / 2.26x |
+| 10,000 | heterogeneous | Crown | 0.048483 / 0.048894 | 0.023749 / 0.025003 | 2.04x / 1.96x |
+| 10,000 | heterogeneous | Typed A | 0.048877 / 0.048334 | 0.025614 / 0.026064 | 1.91x / 1.85x |
+| 10,000 | heterogeneous | Typed B | 0.050168 / 0.048107 | 0.025227 / 0.025419 | 1.99x / 1.89x |
+| 100,000 | uniform | Surface | 0.359708 / 0.377137 | 0.159002 / 0.154541 | 2.26x / 2.44x |
+| 100,000 | uniform | Crown | 0.481924 / 0.474781 | 0.248961 / 0.252465 | 1.94x / 1.88x |
+| 100,000 | uniform | Typed A | 0.485923 / 0.493117 | 0.262803 / 0.262991 | 1.85x / 1.88x |
+| 100,000 | uniform | Typed B | 0.518501 / 0.507598 | 0.277326 / 0.291026 | 1.87x / 1.74x |
+| 100,000 | heterogeneous | Surface | 0.358690 / 0.359472 | 0.146491 / 0.145789 | 2.45x / 2.47x |
+| 100,000 | heterogeneous | Crown | 0.502872 / 0.502467 | 0.293021 / 0.253576 | 1.72x / 1.98x |
+| 100,000 | heterogeneous | Typed A | 0.485383 / 0.499888 | 0.258745 / 0.263036 | 1.88x / 1.90x |
+| 100,000 | heterogeneous | Typed B | 0.483849 / 0.503197 | 0.264876 / 0.259771 | 1.83x / 1.94x |
+
+At 10,000 cells, the native stored-output ratios clear the provisional screens
+of 1.5625x for Surface/Crown and 1.25x for typed Crown. At 100,000 cells none
+consistently clears 2.5x on both datasets and call categories. Crown and the
+compact typed prototype are still below the 2x public target in several cases,
+even before Python-boundary costs. This is sufficient for a no-go at the reduced
+checkpoint. Million-cell and four-worker acceptance are unverified.
+
+The ordinary checked typed path, with full-column storage but no compact
+arithmetic, takes about 0.06–0.08 seconds at 10,000 cells and 0.6–0.8 seconds at
+100,000 cells. The single compact candidate substantially improves that core
+cost while preserving the checked outputs, but does not establish the required
+large-raster headroom. No additional candidate was tried for either typed
+layout. Further f64 prototype work was not spent after the typed checkpoint
+already required an owner decision.
+
+Equations-only attribution below excludes full output storage. These are three
+iterations in one native process per case, separate from the paired public-call
+screen, so differences between these and the stored-output table must not be
+interpreted as additive, precisely isolated costs.
+
+| Route, 100,000 cells | Uniform equations only | Heterogeneous equations only |
+| --- | ---: | ---: |
+| Surface | 0.150952 s | 0.123615 s |
+| Crown | 0.240064 s | 0.224170 s |
+| Checked typed A | 0.586304 s | 0.592001 s |
+| Checked typed B | 0.576295 s | 0.596573 s |
+
+A separate instrumented build reports zero allocation requests/bytes per scalar
+core cell on all four routes. Whole stored-output calls make 17 requests for
+Surface, 25 for Crown, 45 for checked typed layouts and 43 for the compact
+experiment, unchanged between 1,000 and 10,000 cells. Requested output bytes
+still scale with cell count: flat request counts do not mean constant memory.
+These figures exclude input preparation and Python output encoding.
+
+The final reduced screen contains 120 observations and zero worker/validation
+errors. Its probe SHA-256 is
+`9c391dbe25d5ea242e91941a2d1186d99f7cca8b5576de7d2f2f8dd64ba44531`;
+the core/probe source fingerprint is
+`831abbcb84983bfdbc52a8cf6583c123ff55052fcfde939f5b92d4be046594a4`.
+Each Python observation retains the exact NumPy version/build and source/binary
+provenance. Raw `s3-feasibility-screen.json`, `s3-equations-only.jsonl`, and
+`s3-allocations.jsonl` remain in the ignored execution workspace. The source and
+probe fingerprints are recorded independently; they do not imply the old
+Python extension already uses the new raster/prototype transport.
+
+The next decision is whether to authorize a bounded block-kernel feasibility
+investigation before binding work, continue the planned binding work while
+explicitly deferring this unmet screen, or revise the targets. The recommended
+option is the bounded kernel investigation with the targets unchanged. No
+production binding/API-3, generalized typed writer, parallel-tile optimization,
+wheel publication or performance-stack merge is included in this checkpoint.

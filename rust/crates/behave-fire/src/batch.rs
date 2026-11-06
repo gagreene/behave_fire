@@ -47,11 +47,14 @@ macro_rules! columns {
         pub struct $name {
             shape: GridShape,
             statistics: BatchStatistics,
+            /// Optional explicit native validity; false cells have zero payloads.
+            /// This is not inferred from Python masked-array inputs.
+            pub validity: Option<Vec<bool>>,
             $(#[doc=concat!("Owned `",stringify!($field),"` column in component base units.")] pub $field:Vec<$kind>,)+
         }
         impl $name {
             /// Construct empty columns with checked output shape metadata.
-            pub fn new(shape: GridShape) -> Self { Self {shape, statistics: BatchStatistics::default(), $($field:Vec::new(),)+} }
+            pub fn new(shape: GridShape) -> Self { Self {shape, statistics: BatchStatistics::default(), validity:None, $($field:Vec::new(),)+} }
             /// Borrow per-call concatenation measurements.
             pub fn statistics(&self) -> &BatchStatistics { &self.statistics }
             /// Borrow the logical output shape.
