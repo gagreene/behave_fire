@@ -1,5 +1,6 @@
 """Full-suite wheel binaries must match the host and never overwrite local builds."""
 
+import builtins
 import importlib.util
 from pathlib import Path
 import zipfile
@@ -33,6 +34,49 @@ def test_ambiguous_or_unsafe_extension_payload_is_rejected(tmp_path, members):
     with pytest.raises(ValueError, match="exactly one"):
         with runner._stage_extension(wheel, package):
             pytest.fail("invalid extension was staged")
+    assert not list(package.iterdir())
+
+
+def test_companion_library_staging_and_cleanup_preserve_loader_layout(tmp_path):
+    runner = _runner()
+    wheel = _wheel(tmp_path, "cp311-abi3-musllinux_1_2_x86_64",
+                   ("behave_fire/_rust.abi3.so", "behave_fire.libs/libgcc_s-hash.so.1"))
+    package = tmp_path / "package"
+    package.mkdir()
+    libraries = package.parent / "behave_fire.libs"
+    with runner._stage_extension(wheel, package):
+        assert (libraries / "libgcc_s-hash.so.1").read_bytes() == b"binary fixture"
+    assert not libraries.exists()
+    assert not list(package.iterdir())
+
+
+def test_companion_library_staging_refuses_existing_directory(tmp_path):
+    runner = _runner()
+    wheel = _wheel(tmp_path, "cp311-abi3-musllinux_1_2_x86_64",
+                   ("behave_fire/_rust.abi3.so", "behave_fire.libs/libgcc_s-hash.so.1"))
+    package = tmp_path / "package"
+    package.mkdir()
+    libraries = package.parent / "behave_fire.libs"
+    libraries.mkdir()
+    existing = libraries / "local.so"
+    existing.write_bytes(b"local library")
+    with pytest.raises(FileExistsError):
+        with runner._stage_extension(wheel, package):
+            pytest.fail("local libraries were replaced")
+    assert existing.read_bytes() == b"local library"
+    assert not list(package.iterdir())
+
+
+@pytest.mark.parametrize("member", ["behave_fire.libs/../escape.so", "behave_fire.libs/..\\escape.so"])
+def test_companion_library_staging_rejects_path_escape(tmp_path, member):
+    runner = _runner()
+    wheel = _wheel(tmp_path, "cp311-abi3-musllinux_1_2_x86_64", ("behave_fire/_rust.abi3.so", member))
+    package = tmp_path / "package"
+    package.mkdir()
+    with pytest.raises(ValueError, match="unsafe"):
+        with runner._stage_extension(wheel, package):
+            pytest.fail("unsafe library was staged")
+    assert not (tmp_path / "escape.so").exists()
     assert not list(package.iterdir())
 
 
@@ -81,3 +125,17 @@ def test_native_selection_rejects_missing_or_ambiguous_binaries(tmp_path):
     _wheel(tmp_path, "cp311-abi3-win_arm64")
     with pytest.raises(ValueError, match="exactly one"):
         runner._select_native_wheel(tmp_path.glob("*.whl"), supported)
+
+
+def test_native_selection_works_without_seeded_pip(tmp_path, monkeypatch):
+    runner = _runner()
+    wheel = _wheel(tmp_path, "cp311-abi3-win_arm64")
+    original = builtins.__import__
+
+    def without_pip(name, *args, **kwargs):
+        if name == "pip" or name.startswith("pip."):
+            raise ModuleNotFoundError("No module named 'pip'", name="pip")
+        return original(name, *args, **kwargs)
+
+    monkeypatch.setattr(builtins, "__import__", without_pip)
+    assert runner._select_native_wheel([wheel], {"cp311-abi3-win_arm64"}) == wheel

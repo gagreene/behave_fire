@@ -3,6 +3,8 @@
 import argparse
 from contextlib import contextmanager
 import hashlib
+import importlib
+import importlib.util
 import json
 import os
 from pathlib import Path, PurePosixPath
@@ -13,6 +15,16 @@ import sys
 import tempfile
 import venv
 import zipfile
+
+
+def _packaging_module(name):
+    """Load declared packaging tools or the bare interpreter's bundled pip copy.
+
+    :param name: Required packaging submodule.
+    :return: Loaded module without installing or changing host dependencies.
+    """
+    prefix = "packaging" if importlib.util.find_spec("packaging") is not None else "pip._vendor.packaging"
+    return importlib.import_module(prefix + "." + name)
 
 
 def _run(command, root, log, environment):
@@ -42,7 +54,7 @@ def _select_native_wheel(wheels, supported):
     :param supported: Stringified tags accepted by the host interpreter.
     :return: Native wheel path; raises ValueError for missing or ambiguous choices.
     """
-    from pip._vendor.packaging.utils import parse_wheel_filename
+    parse_wheel_filename = _packaging_module("utils").parse_wheel_filename
     matches = []
     for wheel in wheels:
         name, _, _, tags = parse_wheel_filename(wheel.name)
@@ -55,11 +67,11 @@ def _select_native_wheel(wheels, supported):
 
 @contextmanager
 def _stage_extension(wheel, package):
-    """Expose the shipped binary to source tests without replacing a local build.
+    """Expose the shipped binary and bundled libraries without replacing a build.
 
     :param wheel: Selected built project wheel.
     :param package: Source package directory in a clean checkout.
-    :return: Context yielding the temporary binary path and removing it on exit.
+    :return: Context yielding the binary path and removing all staged files on exit.
     """
     existing = [path for path in package.glob("_rust*") if path.suffix in (".pyd", ".so")]
     if existing:
@@ -70,16 +82,30 @@ def _stage_extension(wheel, package):
         if len(names) != 1:
             raise ValueError("wheel must contain exactly one project native extension")
         extension = package / PurePosixPath(names[0]).name
-        payload = archive.read(names[0])
-    created = False
+        payloads = [(extension, archive.read(names[0]))]
+        libraries = package.parent / "behave_fire.libs"
+        for item in archive.infolist():
+            if item.filename.startswith("behave_fire.libs/") and not item.is_dir():
+                name = item.filename.removeprefix("behave_fire.libs/")
+                if not re.fullmatch(r"[^/\\:]+", name) or name in (".", ".."):
+                    raise ValueError(f"unsafe companion library path: {item.filename}")
+                payloads.append((libraries / name, archive.read(item)))
+    created = []
+    library_directory_created = False
     try:
-        with extension.open("xb") as output:
-            created = True
-            output.write(payload)
+        if len(payloads) > 1:
+            libraries.mkdir()
+            library_directory_created = True
+        for destination, payload in payloads:
+            with destination.open("xb") as output:
+                created.append(destination)
+                output.write(payload)
         yield extension
     finally:
-        if created:
-            extension.unlink()
+        for destination in reversed(created):
+            destination.unlink()
+        if library_directory_created:
+            libraries.rmdir()
 
 
 def main():
@@ -87,7 +113,7 @@ def main():
 
     :return: None; creates isolated dependencies, reports evidence and runs pytest.
     """
-    from pip._vendor.packaging.tags import sys_tags
+    sys_tags = _packaging_module("tags").sys_tags
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--wheels", type=Path, required=True)
     parser.add_argument("--report-dir", type=Path, required=True)
@@ -118,6 +144,10 @@ def main():
             _run([python, "-B", "-c", provenance, extension], root, reports / "environment.json", environment)
             record = json.loads((reports / "environment.json").read_text(encoding="utf-8"))
             record.update(wheel=wheel.name, wheel_sha256=hashlib.sha256(wheel.read_bytes()).hexdigest())
+            record["companion_libraries"] = {
+                path.name: hashlib.sha256(path.read_bytes()).hexdigest()
+                for path in sorted((root / "src/behave_fire.libs").glob("*")) if path.is_file()
+            }
             (reports / "environment.json").write_text(json.dumps(record, indent=2), encoding="utf-8")
             _run([python, "-B", "tools/probe_platform_oracle.py", "--native"], root,
                  reports / "numpy-platform-oracle.json", environment)
