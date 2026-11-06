@@ -42,9 +42,18 @@ first-call fields such as `total_seconds`, `numpy`, and `output_bytes`.
 
 Default runs use an unprofiled three-block development screen and one warmed
 call. Add `--preset acceptance` for seven blocks and five warmed calls; select
-`--sizes 10000 100000 1000000` and `--worker-threads 1 4` for the raster gates.
+`--sizes 1 10000 100000 1000000` and `--worker-threads 1 4` for full acceptance,
+including fresh one-cell candidates for the scalar regression gate.
 Automatic-worker diagnostics run separately. Full acceptance is a multi-hour
 campaign; estimate its duration from a pilot and retain partial observations.
+
+Supply `--baseline preoptimization-scalar.json` to load a separately retained
+pre-optimization report containing Rust one-cell observations for every route
+and dataset, using one worker and the same Python/NumPy build, platform and seed.
+That baseline needs at least three fresh-process observations and five warmed
+calls per worker. Its old timings do not replace fresh one-cell candidate
+measurements in the acceptance campaign. Record its source and native-binary
+SHA-256 hashes independently when that build is captured.
 
 Uniform inputs reproduce the historical model-10 case. Heterogeneous inputs
 cycle models 1, 4, 10, 101, 124, 145, 201, and 0, with deterministic weather and
@@ -68,8 +77,21 @@ transfer attribution exists only in diagnostic runs. Unprofiled attribution is
 reported as unmeasured, not incorrectly classified as Python execution time.
 Profiled runs and development screens cannot certify the performance targets.
 
-`tools/check_performance.py --results results.json --requirements
-tools/performance_requirements.json` fails on missing cases, failed validation,
+Run the checker with the independently recorded pre-optimization hashes
+(replace the two uppercase placeholders with those recorded SHA-256 values):
+
+```text
+python tools/check_performance.py --results results.json --requirements tools/performance_requirements.json --baseline-source-hash PREOPT_SOURCE_SHA256 --baseline-extension-hash PREOPT_EXTENSION_SHA256
+```
+
+Programmatic callers can instead declare these expected hashes in
+`requirements["baseline_identity"]`, with `source_hash` and `extension_hash` keys.
+The expected baseline identity is separate from the candidate identity and must
+come from the trusted build record, rather than being inferred from the report
+being checked. Missing/empty identities and any baseline row with different
+source/binary hashes fail the scalar gate, including mixtures of builds.
+
+The checker fails on missing cases, failed validation,
 inconsistent provenance/NumPy builds, inadequate samples, missed intervals,
 allocation/memory failures, or scalar regression. The checked-in requirements
 record the owner-approved targets. Changing a target needs an explicit decision.

@@ -156,12 +156,17 @@ def _scalar_errors(report, requirements):
     """Apply the allowed one-cell regression budget to the old native baseline.
 
     :param report: Candidate and pre-optimization native worker observations.
-    :param requirements: Dataset, operation, and warmed-call rules.
+    :param requirements: Dataset, operation, warmed-call rules, and independently declared baseline identity.
     :return: Missing baseline or scalar regression failures.
     """
     errors = []
     if not requirements.get("require_scalar_baseline", True):
         return errors
+    identity = requirements.get("baseline_identity")
+    if (not isinstance(identity, dict)
+            or any(not isinstance(identity.get(key), str) or not identity[key].strip()
+                   for key in ("source_hash", "extension_hash"))):
+        return ["Scalar baseline requires a declared nonempty pre-optimization source/binary identity"]
     for dataset in requirements["datasets"]:
         for operation in requirements["operations"]:
             samples = []
@@ -172,6 +177,10 @@ def _scalar_errors(report, requirements):
                                 == (dataset, operation, 1, "rust", 1)])
             if any(len(rows) < 3 for rows in samples):
                 errors.append(f"{dataset}/{operation}: missing one-cell baseline or candidate")
+                continue
+            if any(any(row.get(key) != identity[key] for key in ("source_hash", "extension_hash"))
+                   for row in samples[0]):
+                errors.append(f"{dataset}/{operation}: scalar baseline source/binary identity mismatch")
                 continue
             if any(len({row.get("block") for row in rows}) != len(rows) for rows in samples):
                 errors.append(f"{dataset}/{operation}: duplicate scalar process blocks")
@@ -219,7 +228,7 @@ def check_report(report, requirements):
     """Assess complete evidence without running science or changing a target.
 
     :param report: Parsed timing, correctness, allocation, and baseline evidence.
-    :param requirements: Accepted measurement and per-route target contract.
+    :param requirements: Accepted measurement/target contract and independently declared baseline identity.
     :return: JSON-compatible pass/fail, case statistics, and failure explanations.
     """
     errors = []
@@ -267,10 +276,15 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--results", type=Path, required=True)
     parser.add_argument("--requirements", type=Path, default=Path(__file__).with_name("performance_requirements.json"))
+    parser.add_argument("--baseline-source-hash", help="Independently recorded pre-optimization source SHA-256")
+    parser.add_argument("--baseline-extension-hash", help="Independently recorded pre-optimization native-binary SHA-256")
     args = parser.parse_args()
     try:
-        result = check_report(json.loads(args.results.read_text(encoding="utf-8")),
-                              json.loads(args.requirements.read_text(encoding="utf-8")))
+        requirements = json.loads(args.requirements.read_text(encoding="utf-8"))
+        if args.baseline_source_hash is not None or args.baseline_extension_hash is not None:
+            requirements["baseline_identity"] = {"source_hash": args.baseline_source_hash,
+                                                 "extension_hash": args.baseline_extension_hash}
+        result = check_report(json.loads(args.results.read_text(encoding="utf-8")), requirements)
     except (OSError, ValueError, TypeError, KeyError) as error:
         result = {"passed": False, "errors": [f"Invalid performance evidence: {error}"], "cases": []}
     print(json.dumps(result, indent=2, allow_nan=False))

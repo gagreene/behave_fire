@@ -42,6 +42,7 @@ def _evidence():
         "targets": {"small_common": 1.25, "small_typed": 1.0, "large_serial": 2.0, "large_four": 4.0},
         "require_allocations": True,
         "require_scalar_baseline": True,
+        "baseline_identity": {"source_hash": "pre-optimization-source", "extension_hash": "pre-optimization-native"},
     }
     report = {"schema_version": 1, "preset": "acceptance", "profile": False, "physical_cores": 4,
               "records": [], "validations": [], "allocations": [], "baseline": []}
@@ -59,7 +60,9 @@ def _evidence():
                         row = _row(dataset, operation, cells, block, "rust", threads, seconds)
                         report["records"].append(row)
                         if cells == 1:
-                            report["baseline"].append(copy.deepcopy(row))
+                            baseline = copy.deepcopy(row)
+                            baseline.update(requirements["baseline_identity"])
+                            report["baseline"].append(baseline)
                 for threads in workers:
                     report["validations"].append({
                         "dataset": dataset, "operation": operation, "cells": cells, "threads": threads,
@@ -130,6 +133,27 @@ def test_campaign_does_not_time_validation_only_or_failed_cases(monkeypatch, fai
     assert len(commands) == 1 and "--validate-only" in commands[0]
     assert report["records"] == []
     assert bool(report["errors"]) is failed
+
+
+@pytest.mark.parametrize("identity", [None, "matching", "wrong"])
+def test_checker_cli_requires_declared_preoptimization_identity(tmp_path, identity):
+    report, requirements = _evidence()
+    requirements.pop("baseline_identity")
+    report_path = tmp_path / "report.json"
+    requirements_path = tmp_path / "requirements.json"
+    report_path.write_text(json.dumps(report), encoding="utf-8")
+    requirements_path.write_text(json.dumps(requirements), encoding="utf-8")
+    command = [sys.executable, "-B", str(TOOLS / "check_performance.py"), "--results", str(report_path),
+               "--requirements", str(requirements_path)]
+    if identity is not None:
+        command += ["--baseline-source-hash", "pre-optimization-source" if identity == "matching" else "other-source",
+                    "--baseline-extension-hash", "pre-optimization-native"]
+    completed = subprocess.run(command, capture_output=True, text=True, timeout=30)
+    assert completed.returncode == (0 if identity == "matching" else 1), completed.stderr
+    result = json.loads(completed.stdout)
+    assert result["passed"] is (identity == "matching")
+    if identity != "matching":
+        assert any("baseline" in error.lower() and "identity" in error.lower() for error in result["errors"])
 
 
 def test_each_dataset_must_pass():
@@ -265,6 +289,42 @@ def test_requirements_pin_owner_approved_thresholds():
     assert document["confidence"] == 0.95
     assert document["datasets"] == ["uniform", "heterogeneous"]
     assert document["operations"] == list(OPERATIONS)
+
+
+@pytest.mark.parametrize("problem", ["missing_declaration", "empty_declaration", "blank_declaration", "wrong_declaration",
+                                     "missing_source", "missing_binary", "blank_source", "blank_binary",
+                                     "mixed_source", "mixed_binary", "wrong_source", "wrong_binary"])
+def test_scalar_baseline_rejects_missing_mixed_or_unrelated_builds(problem):
+    checker = _tool("check_performance")
+    report, requirements = _evidence()
+    if problem == "missing_declaration":
+        requirements.pop("baseline_identity")
+    elif problem == "empty_declaration":
+        requirements["baseline_identity"] = {}
+    elif problem == "blank_declaration":
+        requirements["baseline_identity"]["source_hash"] = " "
+    elif problem == "wrong_declaration":
+        requirements["baseline_identity"]["source_hash"] = "unrelated-source"
+    else:
+        key = "source_hash" if problem.endswith("source") else "extension_hash"
+        rows = report["baseline"][:1] if problem.startswith("mixed") else report["baseline"]
+        for row in rows:
+            if problem.startswith("missing"):
+                row.pop(key)
+            else:
+                row[key] = " " if problem.startswith("blank") else "unrelated-build"
+    result = checker.check_report(report, requirements)
+    assert not result["passed"]
+    assert any("baseline" in error.lower() and "identity" in error.lower() for error in result["errors"])
+
+
+def test_scalar_baseline_uses_independent_preoptimization_identity():
+    checker = _tool("check_performance")
+    report, requirements = _evidence()
+    candidate = next(row for row in report["records"] if row["backend"] == "rust")
+    assert report["baseline"][0]["source_hash"] != candidate["source_hash"]
+    assert report["baseline"][0]["extension_hash"] != candidate["extension_hash"]
+    assert checker.check_report(report, requirements)["passed"]
 
 
 def test_typed_small_parity_target_is_not_common_speed_target():
