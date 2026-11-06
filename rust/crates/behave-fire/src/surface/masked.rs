@@ -59,7 +59,7 @@ mod tests {
             value(-1.0),
             value(65534.0),
             MaskedValue::plain(1.0),
-            "RelativeToNorth",
+            crate::engine::WindOrientation::North,
             MaskedValue::plain(95.0),
         );
         if crate::svml::available() {
@@ -1302,7 +1302,7 @@ pub fn calculate_surface_rate_vector(
     wind_phi: MaskedValue,
     slope_phi: MaskedValue,
     direction: MaskedValue,
-    orientation: &str,
+    orientation: crate::engine::WindOrientation,
     aspect: MaskedValue,
 ) -> MaskedRateVector {
     let direction = direction.as_array_f64();
@@ -1315,7 +1315,7 @@ pub fn calculate_surface_rate_vector(
             rate_vector: value,
         };
     }
-    let north = super::wind::contains_ascii(orientation, "north");
+    let north = orientation == crate::engine::WindOrientation::North;
     let degrees = if north {
         direction.value - aspect.value
     } else {
@@ -1349,7 +1349,7 @@ pub fn calculate_direction_of_max_spread(
     x: MaskedValue,
     y: MaskedValue,
     rate: MaskedValue,
-    orientation: &str,
+    orientation: crate::engine::WindOrientation,
     aspect: MaskedValue,
 ) -> MaskedValue {
     let aspect = aspect.as_array_f64();
@@ -1372,7 +1372,7 @@ pub fn calculate_direction_of_max_spread(
         result.add(c(360.)),
         result,
     );
-    if super::wind::contains_ascii(orientation, "north") {
+    if orientation == crate::engine::WindOrientation::North {
         result = result.add(aspect).add(c(180.));
         if result.error.is_some() || result.object_result {
             return result;
@@ -1394,7 +1394,8 @@ pub fn calculate_direction_of_max_spread(
 pub fn run_surface_fire(
     ri: MaskedValue,
     ib: &super::FuelbedIntermediates,
-    input: &super::SurfaceInput,
+    input: &crate::engine::SurfaceCell,
+    options: &crate::engine::SurfaceOptions,
 ) -> super::SurfaceResult {
     let plain = MaskedValue::plain;
     let wc = super::calculate_surface_wind_coefficients(ib.sigma);
@@ -1402,15 +1403,15 @@ pub fn run_surface_fire(
         calculate_no_wind_no_slope_spread_rate(ri, plain(ib.propagating_flux), plain(ib.heat_sink));
     let ws = super::calculate_twenty_foot_wind_speed(
         input.wind_speed,
-        input.wind_speed_units,
-        &input.wind_height_mode,
+        crate::units::SpeedUnit::FeetPerMinute,
+        options.wind_height,
     );
     let waf = super::calculate_surface_wind_adjustment_factor(
         input.canopy_cover,
         input.canopy_height,
         input.crown_ratio,
         ib.depth,
-        &input.waf_method,
+        options.waf_method,
         input.user_waf,
     );
     let midflame = super::calculate_midflame_wind_speed(waf, ws);
@@ -1424,7 +1425,7 @@ pub fn run_surface_fire(
     );
     let sp = calculate_slope_phi(
         plain(input.slope),
-        input.slope_units,
+        crate::units::SlopeUnit::Degrees,
         plain(ib.packing_ratio),
         ri,
     );
@@ -1433,7 +1434,7 @@ pub fn run_surface_fire(
         plain(wp),
         sp,
         plain(input.wind_direction),
-        &input.wind_orientation_mode,
+        options.wind_orientation,
         plain(input.aspect),
     );
     let spread_rate = super::calculate_forward_spread_rate(r0.value, vector.rate_vector.value);
@@ -1463,7 +1464,7 @@ pub fn run_surface_fire(
         vector.x_component,
         vector.y_component,
         vector.rate_vector,
-        &input.wind_orientation_mode,
+        options.wind_orientation,
         plain(input.aspect),
     )
     .value;

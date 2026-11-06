@@ -1,8 +1,10 @@
+#[path = "support/engine_fixture.rs"]
+mod fixture;
 use behave_fire::{
-    crown::{self, CrownInput, SurfaceFireInputs},
+    crown::{self, SurfaceFireInputs},
+    engine::{CrownCell, PreparedFuel},
     fuel_models::FuelModels,
     surface::masked::{MaskedValue, MathProfile, Precision},
-    units::{SlopeUnit, SpeedUnit},
 };
 use serde_json::Value;
 use std::sync::OnceLock;
@@ -114,36 +116,8 @@ fn fixture() -> &'static Value {
     static DATA: OnceLock<Value> = OnceLock::new();
     DATA.get_or_init(|| serde_json::from_str(include_str!("data/crown_record.json")).unwrap())
 }
-fn input(values: &Value, n: usize) -> CrownInput {
-    let mut result = CrownInput::default();
-    let grid = &values["fuel_model_grid"];
-    result.fuel_model_grid = if grid.is_number() {
-        number(grid) as i32
-    } else {
-        number(&grid["values"][n]) as i32
-    };
-    macro_rules! fields{($($field:ident),+)=>{$(result.$field=scalar(&values[stringify!($field)],n);)+}}
-    fields!(
-        m1h,
-        m10h,
-        m100h,
-        mlh,
-        mlw,
-        wind_speed,
-        wind_direction,
-        slope,
-        aspect,
-        canopy_base_height,
-        canopy_height,
-        canopy_bulk_density,
-        moisture_foliar
-    );
-    result.wind_speed_units =
-        SpeedUnit::try_from(values["wind_speed_units"].as_i64().unwrap() as i32).unwrap();
-    result.slope_units =
-        SlopeUnit::try_from(values["slope_units"].as_i64().unwrap() as i32).unwrap();
-    result.wind_orientation_mode = values["wind_orientation_mode"].as_str().unwrap().into();
-    result
+fn input(values: &Value, n: usize) -> CrownCell {
+    fixture::crown_cell(values, n)
 }
 fn number(value: &Value) -> f64 {
     if let Some(tag) = value.get("float") {
@@ -159,13 +133,7 @@ fn number(value: &Value) -> f64 {
         x => panic!("{x}"),
     }
 }
-fn scalar(value: &Value, n: usize) -> f64 {
-    if let Some(values) = value["values"].as_array() {
-        number(&values[n % values.len()])
-    } else {
-        number(value)
-    }
-}
+
 fn replay(prefix: &str) {
     let mut classes = std::collections::BTreeSet::new();
     let mut count = 0;
@@ -197,9 +165,13 @@ fn replay(prefix: &str) {
             surface.surface_ros = argument(&case["surface"]["spread_rate"], n);
             surface.surface_fli = argument(&case["surface"]["fireline_intensity"], n);
             surface.surface_hpua = argument(&case["surface"]["heat_per_unit_area"], n);
-            let result =
-                crown::run_with_surface_inputs(&surface, &input(&case["settings"], n), &fuels)
-                    .unwrap();
+            let result = crown::run_with_surface_inputs(
+                &surface,
+                &input(&case["settings"], n),
+                &PreparedFuel::from_model(fuels.for_grid(10)),
+                &fixture::surface_options(&case["settings"]),
+            )
+            .unwrap();
             classes.insert(result.fire_type);
             assert_eq!(
                 result.fire_type,

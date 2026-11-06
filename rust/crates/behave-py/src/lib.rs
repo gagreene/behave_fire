@@ -1,6 +1,7 @@
 //! Explicit owned NumPy bindings for the standalone Rust implementation.
 mod arrays;
 mod capabilities;
+mod controls;
 mod crown;
 mod data;
 mod dispatch;

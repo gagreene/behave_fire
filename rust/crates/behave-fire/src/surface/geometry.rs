@@ -84,12 +84,12 @@ pub fn calculate_flanking_spread_rate_bool(
     }
 }
 
-/// Calculate maximum spread direction in degrees; mode strings containing north include aspect and 180°.
+/// Calculate maximum spread direction in degrees; north orientation includes aspect and 180°.
 pub fn calculate_direction_of_max_spread(
     x_component: f64,
     y_component: f64,
     rate_vector: f64,
-    wind_orientation_mode: &str,
+    wind_orientation_mode: crate::engine::WindOrientation,
     aspect: f64,
 ) -> f64 {
     let mut dir = if rate_vector > 1e-7 {
@@ -103,7 +103,7 @@ pub fn calculate_direction_of_max_spread(
     if dir < -1e-20 {
         dir += 360.0;
     }
-    if super::wind::contains_ascii(wind_orientation_mode, "north") {
+    if wind_orientation_mode == crate::engine::WindOrientation::North {
         dir = np_remainder(dir + aspect + 180.0, 360.0);
     }
     dir
@@ -191,7 +191,7 @@ pub(super) mod single {
         x_component: f32,
         y_component: f32,
         rate_vector: f32,
-        wind_orientation_mode: &str,
+        wind_orientation_mode: crate::engine::WindOrientation,
         aspect: f64,
     ) -> f64 {
         // NumPy computes the single-precision factor from single-precision pi.
@@ -207,7 +207,7 @@ pub(super) mod single {
         if dir < -1e-20 {
             dir += 360.0;
         }
-        if super::super::wind::contains_ascii(wind_orientation_mode, "north") {
+        if wind_orientation_mode == crate::engine::WindOrientation::North {
             crate::math::np_remainder(dir as f64 + aspect + 180.0, 360.0)
         } else {
             dir as f64

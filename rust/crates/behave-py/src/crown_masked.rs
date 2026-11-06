@@ -101,7 +101,8 @@ pub fn evaluate(operation: &str, a: &Arguments, i: usize) -> Result<Option<Cell>
             let r = behave_fire::crown::run_with_surface_inputs(
                 &surface,
                 &crate::crown::input(a, i)?,
-                &crate::crown::fuels(a, i)?,
+                &crate::crown::fuel(a, i)?,
+                &crate::controls::crown(a),
             )
             .map_err(|e| e.to_string())?;
             let mut out = crate::masked::outputs(r.named_values())?;

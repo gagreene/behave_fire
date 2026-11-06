@@ -1,3 +1,5 @@
+#[path = "support/engine_fixture.rs"]
+mod fixture;
 use behave_fire::surface::masked::{
     self, IntegerKind, IntegerValue, MaskedValue, MathProfile, Precision,
 };
@@ -117,7 +119,7 @@ fn invoke(name: &str, i: &Value, opts: &Value, n: usize) -> Vec<(&'static str, M
             a("x_component"),
             a("y_component"),
             a("rate_vector"),
-            opts["wind_orientation_mode"].as_str().unwrap(),
+            fixture::orientation(opts["wind_orientation_mode"].as_str().unwrap()),
             a("aspect"),
         ),
         "calculate_wind_phi" => masked::calculate_wind_phi(
@@ -148,7 +150,7 @@ fn invoke(name: &str, i: &Value, opts: &Value, n: usize) -> Vec<(&'static str, M
                 a("wind_phi"),
                 a("slope_phi"),
                 a("wind_direction"),
-                opts["wind_orientation_mode"].as_str().unwrap(),
+                fixture::orientation(opts["wind_orientation_mode"].as_str().unwrap()),
                 a("aspect"),
             );
             return vec![

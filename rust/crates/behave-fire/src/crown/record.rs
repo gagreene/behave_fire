@@ -1,6 +1,7 @@
 //! Full Crown runner retaining independently typed supplied surface fields.
-use super::{CrownInput, SurfaceFireInputs};
-use crate::{fuel_models::FuelModels, surface::masked::MaskedValue, BehaveError};
+use super::SurfaceFireInputs;
+use crate::engine::{CrownCell, PreparedFuel, SurfaceOptions, SurfaceTweaks};
+use crate::{surface::masked::MaskedValue, BehaveError};
 
 macro_rules! result {
     ($($field:ident),+) => {
@@ -47,11 +48,11 @@ result!(
 /// Run Crown from three supplied surface fields without requiring unused SurfaceResult entries.
 pub fn run_with_surface_inputs(
     surface: &SurfaceFireInputs<MaskedValue>,
-    input: &CrownInput,
-    fuels: &FuelModels,
+    input: &CrownCell,
+    fuel: &PreparedFuel,
+    options: &SurfaceOptions,
 ) -> Result<MaskedCrownResult, BehaveError> {
-    let normalized = super::coerce_crown_fire_inputs(input);
-    let crown = super::calculate_crown_surface_fire(input, fuels)?;
+    let crown = super::calculate_crown_surface_fire(input, fuel, options, SurfaceTweaks::default());
     // Python normalizes Crown spatial inputs with np.atleast_1d(..., dtype=float).
     // Supplied surface dictionary values remain independently typed until each stage handles them.
     let plain = MaskedValue::plain;
@@ -59,16 +60,16 @@ pub fn run_with_surface_inputs(
     let heat = super::masked::calculate_crown_heat_and_intensity(
         surface.surface_hpua,
         crown_rate,
-        plain(normalized.cbh),
-        plain(normalized.ch),
-        plain(normalized.cbd),
+        plain(input.canopy_base_height),
+        plain(input.canopy_height),
+        plain(input.canopy_bulk_density),
     );
     let critical_intensity = plain(super::calculate_critical_surface_fireline_intensity(
-        normalized.cbh,
-        normalized.mf_pct,
+        input.canopy_base_height,
+        input.moisture_foliar,
     ));
     let critical_rate = plain(super::calculate_critical_crown_fire_spread_rate(
-        normalized.cbd,
+        input.canopy_bulk_density,
     ));
     let ratios = super::masked::calculate_crown_fire_ratios(
         surface.surface_fli,
@@ -88,7 +89,7 @@ pub fn run_with_surface_inputs(
         crown.ri_crown,
         &crown.ib_crown,
         critical_rate.value,
-        normalized.ch,
+        input.canopy_height,
     ));
     let fraction = super::masked::calculate_crown_fraction_burned(
         surface.surface_ros,

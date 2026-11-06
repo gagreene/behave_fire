@@ -256,6 +256,7 @@ pub fn evaluate(operation: &str, a: &Arguments, i: usize) -> Result<Option<Cell>
                 a.masked("ri", i)?,
                 &intermediates(a, i)?,
                 &crate::structures::input(a, i)?,
+                &crate::controls::surface(a)?,
                 &input_shape(a, i),
             )
             .map_err(crate::arrays::masked_error)?,

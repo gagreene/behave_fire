@@ -5,6 +5,52 @@ stages and raster columns. Python-facing calculations, shape/dtype/mask behavior
 and scientific tolerances remain the reference contract. The Rust core remains
 self-contained and has no normal/build dependencies.
 
+## Typed scalar stages
+
+`engine::SurfaceCell` and `engine::CrownCell` contain numerical values in
+fractions, feet, ft/min, and degrees (foliar moisture remains percent).
+`SurfaceOptions` uses `WindOrientation`, `WindHeight`, and `WafMethod` enums.
+The native core no longer interprets Python mode strings or constructs string
+controls, synthetic full Surface inputs for Crown, or per-cell fuel registries.
+Python's permissive mode matching is confined to the binding adapter.
+
+`PreparedFuels::from_registry` takes an immutable numerical snapshot with dense
+0–260 lookup. Later edits to the original registry do not change that snapshot.
+`PreparedFuel` can also be copied and edited explicitly for an experimental
+scalar call. Names and other registry metadata are not copied into cell loops.
+Dynamic herbaceous transfer remains moisture-dependent; preparation does not
+cache it incorrectly by fuel ID.
+
+`SurfacePlan::run_cell` evaluates a complete cell. `prepare_fuelbed` returns
+publicly editable `FuelbedIntermediates`; `run_from_fuelbed` resumes from that
+value without rebuilding it. `SurfaceTweaks` can replace reaction intensity,
+no-wind/no-slope rate, midflame wind, wind/slope amplification, or forward rate.
+Overrides apply before dependent outputs. Reaction intensity is BTU/ft²/min,
+including the named output. A forward-rate override recomputes shape, intensity,
+and flame length. Undefined-fuel output masking remains the final step.
+
+`CrownPlan::run_cell` accepts three independent `SurfaceFireInputs<f64>` values
+and a borrowed prepared model-10 fuel. `CrownTweaks` provides internal Surface
+overrides, critical intensity/rate overrides, and a fraction-burned override.
+The model-10 particles, fuelbed, and reaction are calculated once and reused.
+The supplied slope is retained, matching Python's frozen behavior even though
+the inspected C++ Rothermel path resets it.
+
+The former unreleased `SurfaceInput`/`CrownInput` interfaces and their adapters
+are replaced. In-repository consumers, tests, and examples migrate together.
+Python entry points and output dictionaries retain their existing signatures
+and scientific contract. Native raster columns and direct typed output are
+subsequent layers; removing scalar core allocations alone does not remove the
+large typed-result encoder cost.
+
+The scalar core allocation probe now measures zero allocation/reallocation
+requests per Surface/Crown cell after preparation, including rate overrides
+and the checked heterogeneous typed-Crown sample. Encoder allocation remains
+explicitly unmeasured in that core-only probe. The scalar core and its three
+doctests pass 561 tests on stable Rust and Rust 1.78; the new frozen-engine and
+override regressions cover custom/undefined FM10, slope passthrough, dynamic
+curing, snapshot isolation, non-finite values, and zero signs.
+
 ## Accepted targets
 
 Compare each dataset and route independently on a declared host with at least

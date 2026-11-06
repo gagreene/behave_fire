@@ -1,6 +1,9 @@
 // Fixtures intentionally exercise public default construction and field mutation.
 #![allow(clippy::field_reassign_with_default)]
 
+#[path = "support/engine_fixture.rs"]
+mod fixture;
+use behave_fire::engine::{PreparedFuel, SurfaceCell, SurfacePlan, SurfaceTweaks};
 use behave_fire::surface;
 
 #[test]
@@ -32,7 +35,14 @@ fn raw_fuel_rows_preserve_undefined_properties_and_dynamic_transfer() {
     fuel.moisture_of_extinction_dead = 0.23;
     fuel.is_defined = false;
     fuel.is_dynamic = true;
-    let p = build_particle_arrays_from_fuel(&fuel, -0.1, 0.07, 0.08, 0.60, 0.90);
+    let p = build_particle_arrays_from_prepared(
+        &PreparedFuel::from_model(&fuel),
+        -0.1,
+        0.07,
+        0.08,
+        0.60,
+        0.90,
+    );
     assert!(!p.is_defined);
     assert_eq!(p.load_dead[..3], [0.125, 0.0625, 0.03125]);
     check(p.load_dead[3], 0.1334, "raw partial herb transfer", 1e-12);
@@ -46,11 +56,25 @@ fn raw_fuel_rows_preserve_undefined_properties_and_dynamic_transfer() {
     assert_eq!(p.hoc_live, 7900.0);
     assert_eq!(p.depth, -0.5);
     assert_eq!(p.moe_dead, 0.23);
-    let full = build_particle_arrays_from_fuel(&fuel, 0.06, 0.07, 0.08, 0.20, 0.90);
+    let full = build_particle_arrays_from_prepared(
+        &PreparedFuel::from_model(&fuel),
+        0.06,
+        0.07,
+        0.08,
+        0.20,
+        0.90,
+    );
     assert_eq!(full.load_dead[3], 0.2);
     assert_eq!(full.load_live[0], 0.0);
     fuel.is_dynamic = false;
-    let static_row = build_particle_arrays_from_fuel(&fuel, 0.06, 0.07, 0.08, 0.20, 0.90);
+    let static_row = build_particle_arrays_from_prepared(
+        &PreparedFuel::from_model(&fuel),
+        0.06,
+        0.07,
+        0.08,
+        0.20,
+        0.90,
+    );
     assert_eq!(static_row.load_dead[3], 0.0);
     assert_eq!(static_row.load_live[0], 0.2);
 }
@@ -62,7 +86,14 @@ fn raw_default_rows_match_grid_particle_path() {
         for mlh in [0.20, 0.30, 0.60, 1.20, 1.200001] {
             assert_eq!(
                 build_particle_arrays(&fuels, model, 0.06, 0.07, 0.08, mlh, 0.90),
-                build_particle_arrays_from_fuel(fuels.for_grid(model), 0.06, 0.07, 0.08, mlh, 0.90),
+                build_particle_arrays_from_prepared(
+                    &PreparedFuel::from_model(fuels.for_grid(model)),
+                    0.06,
+                    0.07,
+                    0.08,
+                    mlh,
+                    0.90
+                ),
                 "model {model}, moisture {mlh}"
             );
         }
@@ -117,7 +148,11 @@ fn composed_pipeline_all_grid_models_and_custom_science_match_python() {
         x.m100h = number_value(&c["moisture"][2]);
         x.mlh = number_value(&c["moisture"][3]);
         x.mlw = number_value(&c["moisture"][4]);
-        let result = run(&x, &fuels).unwrap();
+        let result = SurfacePlan::new(fixture::surface_options(&c["settings"])).run_cell(
+            &x,
+            &PreparedFuel::from_model(fuels.for_grid(x.fuel_model_grid)),
+            SurfaceTweaks::default(),
+        );
         let ctx = format!("model {} {:?}", x.fuel_model_grid, c["moisture"]);
         assert_eq!(c["output"].as_object().unwrap().len(), 14);
         for (k, v) in result.named_values() {
@@ -440,7 +475,11 @@ fn float32_thresholds_and_nonfinite_stages_match_numpy() {
                         a("x_component") as f32,
                         a("y_component") as f32,
                         a("rate_vector") as f32,
-                        string(i, "wind_orientation_mode", "RelativeToUpslope"),
+                        fixture::orientation(string(
+                            i,
+                            "wind_orientation_mode",
+                            "RelativeToUpslope",
+                        )),
                         a("aspect"),
                     ))
                 }
@@ -478,7 +517,11 @@ fn float32_thresholds_and_nonfinite_stages_match_numpy() {
                         a("wind_phi") as f32,
                         a("slope_phi") as f32,
                         a("wind_direction"),
-                        string(i, "wind_orientation_mode", "RelativeToUpslope"),
+                        fixture::orientation(string(
+                            i,
+                            "wind_orientation_mode",
+                            "RelativeToUpslope",
+                        )),
                         a("aspect"),
                     )
                     .named_values()
@@ -618,31 +661,8 @@ fn particles(i: &Value, n: usize) -> Particles {
     x.is_defined = boolval(i, "is_defined", n);
     x
 }
-fn input(i: &Value, n: usize) -> SurfaceInput {
-    let mut x = SurfaceInput::default();
-    for (k, v) in i.as_object().unwrap() {
-        match k.as_str() {
-            "wind_speed" => x.wind_speed = value(v, n),
-            "wind_direction" => x.wind_direction = value(v, n),
-            "slope" => x.slope = value(v, n),
-            "aspect" => x.aspect = value(v, n),
-            "canopy_cover" => x.canopy_cover = value(v, n),
-            "canopy_height" => x.canopy_height = value(v, n),
-            "crown_ratio" => x.crown_ratio = value(v, n),
-            "user_waf" if !v.is_null() => x.user_waf = Some(value(v, n)),
-            "wind_orientation_mode" => x.wind_orientation_mode = v.as_str().unwrap().into(),
-            "wind_height_mode" => x.wind_height_mode = v.as_str().unwrap().into(),
-            "waf_method" => x.waf_method = v.as_str().unwrap().into(),
-            "wind_speed_units" => {
-                x.wind_speed_units = SpeedUnit::try_from(v.as_i64().unwrap() as i32).unwrap()
-            }
-            "slope_units" => {
-                x.slope_units = SlopeUnit::try_from(v.as_i64().unwrap() as i32).unwrap()
-            }
-            _ => {}
-        }
-    }
-    x
+fn input(i: &Value, n: usize) -> SurfaceCell {
+    fixture::surface_cell(i, n)
 }
 
 #[test]
@@ -807,7 +827,7 @@ fn every_public_stage_matches_explicit_python_oracle() {
                         a("x_component") as f32,
                         a("y_component") as f32,
                         a("rate_vector") as f32,
-                        s("wind_orientation_mode", "RelativeToUpslope"),
+                        fixture::orientation(s("wind_orientation_mode", "RelativeToUpslope")),
                         i.get("aspect").map_or(0., |v| value(v, cell)),
                     ))
                 }
@@ -819,7 +839,7 @@ fn every_public_stage_matches_explicit_python_oracle() {
                     a("x_component"),
                     a("y_component"),
                     a("rate_vector"),
-                    s("wind_orientation_mode", "RelativeToUpslope"),
+                    fixture::orientation(s("wind_orientation_mode", "RelativeToUpslope")),
                     i.get("aspect").map_or(0., |v| value(v, cell)),
                 )),
                 "calculate_eccentricity" => {
@@ -909,7 +929,7 @@ fn every_public_stage_matches_explicit_python_oracle() {
                         a("canopy_height"),
                         a("crown_ratio"),
                         a("depth"),
-                        s("waf_method", "UseCrownRatio"),
+                        fixture::waf(s("waf_method", "UseCrownRatio")),
                         i.get("user_waf")
                             .filter(|v| !v.is_null())
                             .map(|v| value(v, cell)),
@@ -918,7 +938,7 @@ fn every_public_stage_matches_explicit_python_oracle() {
                 "calculate_twenty_foot_wind_speed" => Some(calculate_twenty_foot_wind_speed(
                     a("wind_speed"),
                     SpeedUnit::try_from(i["wind_speed_units"].as_i64().unwrap() as i32).unwrap(),
-                    s("wind_height_mode", "TwentyFoot"),
+                    fixture::height(s("wind_height_mode", "TwentyFoot")),
                 )),
                 "calculate_wind_adjustment_factor" => Some(calculate_wind_adjustment_factor(
                     a("canopy_cover"),
@@ -970,7 +990,7 @@ fn every_public_stage_matches_explicit_python_oracle() {
                             a("wind_phi") as f32,
                             a("slope_phi") as f32,
                             a("wind_direction"),
-                            s("wind_orientation_mode", "RelativeToUpslope"),
+                            fixture::orientation(s("wind_orientation_mode", "RelativeToUpslope")),
                             i.get("aspect").map_or(0., |v| value(v, cell)),
                         )
                         .named_values()
@@ -981,24 +1001,32 @@ fn every_public_stage_matches_explicit_python_oracle() {
                         a("wind_phi"),
                         a("slope_phi"),
                         a("wind_direction"),
-                        s("wind_orientation_mode", "RelativeToUpslope"),
+                        fixture::orientation(s("wind_orientation_mode", "RelativeToUpslope")),
                         i.get("aspect").map_or(0., |v| value(v, cell)),
                     )
                     .named_values()
                     .to_vec(),
                     "run_surface_fire" => {
                         if i["ri"]["dtype"] == "float32" {
-                            run_surface_fire_single_reaction(
-                                a("ri") as f32,
+                            fixture::surface_with_reaction(
+                                a("ri"),
                                 &ib(&i["ib"], cell),
                                 &input(i, cell),
+                                fixture::surface_options(i),
+                                true,
                             )
                             .named_values()
                             .to_vec()
                         } else {
-                            run_surface_fire(a("ri"), &ib(&i["ib"], cell), &input(i, cell))
-                                .named_values()
-                                .to_vec()
+                            fixture::surface_with_reaction(
+                                a("ri"),
+                                &ib(&i["ib"], cell),
+                                &input(i, cell),
+                                fixture::surface_options(i),
+                                false,
+                            )
+                            .named_values()
+                            .to_vec()
                         }
                     }
                     "build_particle_arrays" => {

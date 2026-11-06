@@ -1,6 +1,6 @@
 //! Downstream smoke program compiled against the extracted standalone archive.
 use behave_fire::{
-    fuel_models::CustomFuelModel, map_chunks, surface::SurfaceInput, BehaveError, BehaveRun,
+    fuel_models::CustomFuelModel, map_chunks, engine::{SurfaceCell, SurfaceOptions, SurfacePlan, SurfaceTweaks}, BehaveError, BehaveRun,
     FuelModels, ParallelError, SpeciesMasterTable,
 };
 
@@ -9,7 +9,7 @@ fn run_cells(model: &BehaveRun, threads: usize) -> Result<Vec<f64>, ParallelErro
     let chunks = map_chunks(fuels.len(), threads, |range| {
         range
             .map(|index| {
-                let surface = model.do_surface_run(&SurfaceInput::new(fuels[index]))?;
+                let surface = model.do_surface_run(&SurfacePlan::new(SurfaceOptions::default()), &SurfaceCell::new(fuels[index]), SurfaceTweaks::default());
                 let scorch = BehaveRun::calculate_scorch_height(surface.fireline_intensity, 5.0, 77.0);
                 Ok(model
                     .calculate_crown_scorch_mortality(scorch, 80.0, 0.5, 12.0, 1)

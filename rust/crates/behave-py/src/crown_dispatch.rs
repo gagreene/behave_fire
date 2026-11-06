@@ -252,13 +252,14 @@ pub fn evaluate(
                 ))
             }
         }
-        "crown.calculate_crown_surface_fire" => crate::crown::surface_output(
-            crown::calculate_crown_surface_fire(
+        "crown.calculate_crown_surface_fire" => {
+            crate::crown::surface_output(crown::calculate_crown_surface_fire(
                 &crate::crown::input(a, i)?,
-                &crate::crown::fuels(a, i)?,
-            )
-            .map_err(|e| e.to_string())?,
-        ),
+                &crate::crown::fuel(a, i)?,
+                &crate::controls::crown(a),
+                behave_fire::engine::SurfaceTweaks::default(),
+            ))
+        }
         "crown.calculate_crowning_surface_fire_spread_rate" => {
             scalar(if a.optional("_mixed", i).is_some() {
                 crown::calculate_crowning_surface_fire_spread_rate_single_critical_rate(
@@ -278,8 +279,12 @@ pub fn evaluate(
         }
         "crown.run_crown_fire" => {
             let x = crate::crown::input(a, i)?;
-            let r = crown::run_crown_fire(&x.surface_results, &x, &crate::crown::fuels(a, i)?)
-                .map_err(|e| e.to_string())?;
+            let r = behave_fire::engine::CrownPlan::new(crate::controls::crown(a)).run_cell(
+                &x,
+                &crate::crown::surface_values(a, i),
+                &crate::crown::fuel(a, i)?,
+                behave_fire::engine::CrownTweaks::default(),
+            );
             let mut out = named(r.named_values());
             out.insert("fire_type".into(), r.fire_type as f64);
             out

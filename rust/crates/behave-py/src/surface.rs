@@ -30,7 +30,7 @@ pub fn evaluate(
                     a.n("x_component", i)? as f32,
                     a.n("y_component", i)? as f32,
                     a.n("rate_vector", i)? as f32,
-                    a.s("wind_orientation_mode")?,
+                    crate::controls::orientation(a.s("wind_orientation_mode")?),
                     a.n("aspect", i)?,
                 )))
             } else {
@@ -38,7 +38,7 @@ pub fn evaluate(
                     a.n("x_component", i)?,
                     a.n("y_component", i)?,
                     a.n("rate_vector", i)?,
-                    a.s("wind_orientation_mode")?,
+                    crate::controls::orientation(a.s("wind_orientation_mode")?),
                     a.n("aspect", i)?,
                 )))
             }
@@ -245,7 +245,7 @@ pub fn evaluate(
                         a.n("wind_phi", i)? as f32,
                         a.n("slope_phi", i)? as f32,
                         a.n("wind_direction", i)?,
-                        a.s("wind_orientation_mode")?,
+                        crate::controls::orientation(a.s("wind_orientation_mode")?),
                         a.n("aspect", i)?,
                     )
                     .named_values()
@@ -259,7 +259,7 @@ pub fn evaluate(
                         a.n("wind_phi", i)?,
                         a.n("slope_phi", i)?,
                         a.n("wind_direction", i)?,
-                        a.s("wind_orientation_mode")?,
+                        crate::controls::orientation(a.s("wind_orientation_mode")?),
                         a.n("aspect", i)?,
                     )
                     .named_values()
@@ -274,7 +274,7 @@ pub fn evaluate(
                 a.n("canopy_height", i)?,
                 a.n("crown_ratio", i)?,
                 a.n("depth", i)?,
-                a.s("waf_method")?,
+                crate::controls::waf(a.s("waf_method")?),
                 a.optional("user_waf", i),
             )))
         }
@@ -300,7 +300,7 @@ pub fn evaluate(
                 a.n("wind_speed", i)?,
                 SpeedUnit::try_from(a.n("wind_speed_units", i)? as i32)
                     .map_err(|e| e.to_string())?,
-                a.s("wind_height_mode")?,
+                crate::controls::height(a.s("wind_height_mode")?),
             )))
         }
         "surface.calculate_wind_adjustment_factor" => {
@@ -333,7 +333,7 @@ pub fn evaluate(
             }
         }
         "surface.build_particle_arrays" => {
-            crate::structures::particles_output(surface::build_particle_arrays_from_fuel(
+            crate::structures::particles_output(surface::build_particle_arrays_from_prepared(
                 &crate::structures::fuel(a, i)?,
                 a.n("m1h", i)?,
                 a.n("m10h", i)?,
@@ -352,22 +352,9 @@ pub fn evaluate(
         } else {
             surface::calculate_reaction_intensity(&crate::structures::ib(a, i)?)
         }),
-        "surface.run_surface_fire" => named(
-            if single {
-                surface::run_surface_fire_single_reaction(
-                    a.n("ri", i)? as f32,
-                    &crate::structures::ib(a, i)?,
-                    &crate::structures::input(a, i)?,
-                )
-            } else {
-                surface::run_surface_fire(
-                    a.n("ri", i)?,
-                    &crate::structures::ib(a, i)?,
-                    &crate::structures::input(a, i)?,
-                )
-            }
-            .named_values(),
-        ),
+        "surface.run_surface_fire" => {
+            named(crate::structures::run_surface(a, i, single)?.named_values())
+        }
         _ => return Ok(None),
     }))
 }

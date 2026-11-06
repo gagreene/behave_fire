@@ -1,25 +1,9 @@
-//! Wind and slope stages with string-mode semantics matching Python.
+//! Wind and slope stages with enum-valued direction, height, and adjustment controls.
 use super::{RateVector, WindCoefficients};
 use crate::{
     math::np_min,
     units::{SlopeUnit, SpeedUnit},
 };
-
-/// Match documented ASCII mode substrings without allocating per cell.
-pub(super) fn contains_ascii(value: &str, needle: &str) -> bool {
-    value
-        .as_bytes()
-        .windows(needle.len())
-        .any(|w| w.eq_ignore_ascii_case(needle.as_bytes()))
-}
-/// Match UserInput after removing underscores, like the Python reference.
-fn is_user_input(value: &str) -> bool {
-    value
-        .bytes()
-        .filter(|b| *b != b'_')
-        .map(|b| b.to_ascii_lowercase())
-        .eq(b"userinput".iter().copied())
-}
 
 macro_rules! retaining_wind {
     ($t:ty, $speed:ty) => {
@@ -112,10 +96,10 @@ pub fn calculate_surface_rate_vector(
     wind_phi: f64,
     slope_phi: f64,
     wind_direction: f64,
-    wind_orientation_mode: &str,
+    wind_orientation_mode: crate::engine::WindOrientation,
     aspect: f64,
 ) -> RateVector {
-    let corrected = if contains_ascii(wind_orientation_mode, "north") {
+    let corrected = if wind_orientation_mode == crate::engine::WindOrientation::North {
         wind_direction - aspect
     } else {
         wind_direction
@@ -138,10 +122,10 @@ pub fn calculate_surface_wind_adjustment_factor(
     canopy_height: f64,
     crown_ratio: f64,
     depth: f64,
-    waf_method: &str,
+    waf_method: crate::engine::WafMethod,
     user_waf: Option<f64>,
 ) -> f64 {
-    if is_user_input(waf_method) {
+    if waf_method == crate::engine::WafMethod::UserInput {
         if let Some(value) = user_waf {
             return value;
         }
@@ -162,10 +146,10 @@ pub fn calculate_surface_wind_coefficients(sigma: f64) -> WindCoefficients {
 pub fn calculate_twenty_foot_wind_speed(
     wind_speed: f64,
     wind_speed_units: SpeedUnit,
-    wind_height_mode: &str,
+    wind_height_mode: crate::engine::WindHeight,
 ) -> f64 {
     let value = wind_speed_units.to_base(wind_speed);
-    if contains_ascii(wind_height_mode, "10") || contains_ascii(wind_height_mode, "ten") {
+    if wind_height_mode == crate::engine::WindHeight::TenMetre {
         value / 1.15
     } else {
         value
@@ -229,10 +213,10 @@ pub(super) mod single {
         wind_phi: f32,
         slope_phi: f32,
         wind_direction: f64,
-        orientation: &str,
+        orientation: crate::engine::WindOrientation,
         aspect: f64,
     ) -> super::RateVector {
-        let direction = if super::contains_ascii(orientation, "north") {
+        let direction = if orientation == crate::engine::WindOrientation::North {
             wind_direction - aspect
         } else {
             wind_direction
