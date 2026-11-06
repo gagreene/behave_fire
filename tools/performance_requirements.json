@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "datasets": ["uniform", "heterogeneous"],
+  "operations": ["surface", "crown", "typed-crown", "typed-crown-b"],
+  "sizes": [10000, 100000, 1000000],
+  "minimum_pairs": 7,
+  "warm_calls": 5,
+  "bootstrap_resamples": 5000,
+  "confidence": 0.95,
+  "seed": 20261105,
+  "targets": {
+    "small_common": 1.25,
+    "small_typed": 1.0,
+    "large_serial": 2.0,
+    "large_four": 4.0
+  },
+  "require_allocations": true,
+  "require_scalar_baseline": true
+}
