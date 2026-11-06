@@ -35,6 +35,23 @@ def test_native_build_matrix_covers_every_tested_platform():
     assert setup["architecture"] == "${{ matrix.architecture }}"
 
 
+def test_new_platforms_require_full_native_suites_and_keep_isolated_installs():
+    workflow = yaml.load((ROOT / ".github/workflows/wheel-validation.yml").read_text(), Loader=yaml.BaseLoader)
+    for name in ("test-alpine-platform", "test-windows-arm64-platform"):
+        job = workflow["jobs"][name]
+        checkout = next(step for step in job["steps"] if step.get("uses") == "actions/checkout@v4")
+        assert "sparse-checkout" not in checkout.get("with", {}), "full suites require source and fixtures"
+        commands = [step["run"] for step in job["steps"] if "run" in step]
+        assert any("test_native_wheel_suite.py" in command for command in commands)
+        assert any("test_wheel_install.py" in command for command in commands)
+        full = next(step for step in job["steps"] if "test_native_wheel_suite.py" in step.get("run", ""))
+        assert full["if"] == "matrix.python == '3.12'"
+        assert full.get("continue-on-error", "false") == "false"
+        uploads = [step for step in job["steps"] if step.get("uses") == "actions/upload-artifact@v4"]
+        evidence = next(step for step in uploads if "full-suite" in step["with"]["path"])
+        assert evidence["if"] == "always()"
+
+
 def test_previous_fallback_hosts_require_native_choice():
     workflow = yaml.load((ROOT / ".github/workflows/wheel-validation.yml").read_text(), Loader=yaml.BaseLoader)
     for job in ("test-alpine-platform", "test-windows-arm64-platform"):

@@ -8,6 +8,8 @@ import unittest
 import zipfile
 
 ROOT = Path(__file__).parents[1]
+# These synthetic archives deliberately do not depend on the package's real version.
+FIXTURE_VERSION = "1.0.0b2"
 NATIVE_TAGS = (
     "cp311-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64",
     "cp311-abi3-manylinux_2_17_aarch64.manylinux2014_aarch64",
@@ -22,15 +24,15 @@ NATIVE_TAGS = (
 def _distributions(directory):
     paths = {tag: _wheel(directory, tag, "original attribution") for tag in (*NATIVE_TAGS, "py3-none-any")}
     # Source contents are checked by check_sdist.py; this boundary checks inventory.
-    paths["sdist"] = directory / "behave_fire-1.0.0b2.tar.gz"
+    paths["sdist"] = directory / f"behave_fire-{FIXTURE_VERSION}.tar.gz"
     paths["sdist"].write_bytes(b"source inventory fixture")
     return paths
 
 
 def _wheel(directory, tag, notice):
-    path = directory / ("behave_fire-1.0.0b2-" + tag + ".whl")
-    prefix = "behave_fire-1.0.0b2.dist-info/"
-    metadata = "Metadata-Version: 2.4\nName: behave-fire\nVersion: 1.0.0b2\nLicense-Expression: MIT AND BSD-3-Clause\n\nDescription\n"
+    path = directory / (f"behave_fire-{FIXTURE_VERSION}-" + tag + ".whl")
+    prefix = f"behave_fire-{FIXTURE_VERSION}.dist-info/"
+    metadata = f"Metadata-Version: 2.4\nName: behave-fire\nVersion: {FIXTURE_VERSION}\nLicense-Expression: MIT AND BSD-3-Clause\n\nDescription\n"
     with zipfile.ZipFile(path, "w") as archive:
         archive.writestr(prefix + "METADATA", metadata)
         for name, content in (("LICENSE", "MIT"), ("NOTICE", notice), ("LICENSES/NumPy-BSD-3-Clause.txt", "BSD-3-Clause"), ("LICENSES/Intel-SVML-BSD-3-Clause.txt", "Intel BSD-3-Clause")):
@@ -63,7 +65,6 @@ class MetadataTests(unittest.TestCase):
             _distributions(directory)
             result = subprocess.run([sys.executable, str(ROOT / "tools/check_wheel_metadata.py"), str(directory)], capture_output=True, text=True)
             self.assertEqual(result.returncode, 0, result.stderr)
-
 
     def test_missing_native_platform_blocks_aggregation(self):
         for tag in NATIVE_TAGS:
