@@ -1,3 +1,6 @@
+#[path = "support/engine_fixture.rs"]
+mod fixture;
+use behave_fire::engine::{SurfaceCell, SurfaceOptions, WindOrientation};
 use behave_fire::{
     surface::masked::{self, MaskedValue, MathProfile, Precision},
     units::SlopeUnit,
@@ -52,10 +55,7 @@ fn mixed_rank_particle_reduction_uses_lazy_default_fill() {
 
 #[test]
 fn masked_dictionary_fields_particles_reductions_and_runs_match_python() {
-    use behave_fire::surface::{
-        masked::{MaskedFuelbedIntermediates, MaskedParticles},
-        SurfaceInput,
-    };
+    use behave_fire::surface::masked::{MaskedFuelbedIntermediates, MaskedParticles};
     let cases: Value =
         serde_json::from_str(include_str!("data/port_surface_masked_dict.json")).unwrap();
     for (index, c) in cases.as_array().unwrap().iter().enumerate() {
@@ -109,10 +109,13 @@ fn masked_dictionary_fields_particles_reductions_and_runs_match_python() {
                     Err(_) => None,
                 }
             } else {
-                let mut input = SurfaceInput::new(c["model"].as_i64().unwrap() as i32);
-                input.wind_speed = 5.;
+                let mut input = SurfaceCell::new(c["model"].as_i64().unwrap() as i32);
+                input.wind_speed = behave_fire::units::SpeedUnit::MilesPerHour.to_base(5.0);
                 input.wind_direction = 45.;
-                input.wind_orientation_mode = "RelativeToNorth".into();
+                let controls = SurfaceOptions {
+                    wind_orientation: WindOrientation::North,
+                    ..SurfaceOptions::default()
+                };
                 input.slope = 30.;
                 input.aspect = 95.;
                 input.canopy_cover = 0.5;
@@ -120,7 +123,7 @@ fn masked_dictionary_fields_particles_reductions_and_runs_match_python() {
                 input.crown_ratio = 0.5;
                 let ri = MaskedValue::new(500., false, false, ib.sigma.precision)
                     .with_scalar_array(scalar_cell);
-                match masked::try_run_surface_fire_with_intermediates(ri, &ib, &input) {
+                match masked::try_run_surface_fire_with_intermediates(ri, &ib, &input, &controls) {
                     Ok(x) => Some(
                         x.named_values()
                             .into_iter()
@@ -172,11 +175,7 @@ fn masked_dictionary_fields_particles_reductions_and_runs_match_python() {
 
 #[test]
 fn composed_surface_runs_preserve_reaction_mask_intermediates() {
-    use behave_fire::{
-        fuel_models::FuelModels,
-        surface::{self, SurfaceInput},
-        units::SpeedUnit,
-    };
+    use behave_fire::{fuel_models::FuelModels, surface};
     let cases: Value =
         serde_json::from_str(include_str!("data/port_surface_masked_run.json")).unwrap();
     let fuels = FuelModels::default();
@@ -184,19 +183,20 @@ fn composed_surface_runs_preserve_reaction_mask_intermediates() {
         let model = c["fuel"].as_i64().unwrap() as i32;
         let p = surface::build_particle_arrays(&fuels, model, 0.06, 0.07, 0.08, 0.60, 0.90);
         let ib = surface::calculate_fuelbed_intermediates(&p);
-        let mut input = SurfaceInput::new(model);
+        let mut input = SurfaceCell::new(model);
         let opts = &c["options"];
-        input.wind_speed = 5.;
-        input.wind_speed_units = SpeedUnit::MilesPerHour;
+        input.wind_speed = behave_fire::units::SpeedUnit::MilesPerHour.to_base(5.0);
         input.wind_direction = 45.;
-        input.wind_orientation_mode = opts["wind_orientation_mode"].as_str().unwrap().into();
+        let controls = SurfaceOptions {
+            wind_orientation: fixture::orientation(opts["wind_orientation_mode"].as_str().unwrap()),
+            ..SurfaceOptions::default()
+        };
         input.slope = 30.;
-        input.slope_units = SlopeUnit::Degrees;
         input.aspect = 95.;
         input.canopy_cover = 0.5;
         input.canopy_height = 30.;
         input.crown_ratio = 0.5;
-        let result = masked::run_surface_fire(argument(&c["ri"], 0), &ib, &input);
+        let result = masked::run_surface_fire(argument(&c["ri"], 0), &ib, &input, &controls);
         for (key, value) in result.named_values() {
             check(
                 MaskedValue::plain(value),
@@ -467,7 +467,7 @@ fn replay(fixture: &Value, expected_count: usize) {
                         a("x_component"),
                         a("y_component"),
                         a("rate_vector"),
-                        orientation,
+                        fixture::orientation(orientation),
                         a("aspect"),
                     ))
                 }
@@ -486,7 +486,7 @@ fn replay(fixture: &Value, expected_count: usize) {
                     a("wind_phi"),
                     a("slope_phi"),
                     a("wind_direction"),
-                    orientation,
+                    fixture::orientation(orientation),
                     a("aspect"),
                 );
                 for (key, value) in v.named_values() {

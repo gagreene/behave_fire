@@ -1,6 +1,11 @@
 //! Owned registry state shared by the standalone model's calculation methods.
 
-use crate::FuelModels;
+use crate::{
+    engine::{
+        CrownCell, CrownPlan, CrownTweaks, PreparedFuels, SurfaceCell, SurfacePlan, SurfaceTweaks,
+    },
+    FuelModels,
+};
 
 /// A model owns the fuel snapshot used by its calculations.
 ///
@@ -8,6 +13,7 @@ use crate::FuelModels;
 #[derive(Clone, Debug)]
 pub struct BehaveRun {
     fuel_models: FuelModels,
+    prepared_fuels: PreparedFuels,
     mortality_coefficients: crate::mortality::MortalityLookup,
 }
 
@@ -141,20 +147,29 @@ impl BehaveRun {
         )
     }
 
-    /// Run crown calculations using the supplied surface result and owned fuels.
+    /// Run Crown using independently supplied Surface values and the model's fuel snapshot.
     pub fn do_crown_run(
         &self,
-        input: &crate::crown::CrownInput,
-    ) -> Result<crate::crown::CrownResult, crate::BehaveError> {
-        crate::crown::run(input, &self.fuel_models)
+        plan: &CrownPlan,
+        input: &CrownCell,
+        supplied: &crate::crown::SurfaceFireInputs<f64>,
+        tweaks: CrownTweaks,
+    ) -> crate::crown::CrownResult {
+        plan.run_cell(input, supplied, self.prepared_fuels.for_grid(10), tweaks)
     }
 
     /// Run the surface pipeline using this model's fuel snapshot.
     pub fn do_surface_run(
         &self,
-        input: &crate::surface::SurfaceInput,
-    ) -> Result<crate::surface::SurfaceResult, crate::BehaveError> {
-        crate::surface::run(input, &self.fuel_models)
+        plan: &SurfacePlan,
+        input: &SurfaceCell,
+        tweaks: SurfaceTweaks,
+    ) -> crate::surface::SurfaceResult {
+        plan.run_cell(
+            input,
+            self.prepared_fuels.for_grid(input.fuel_model_grid),
+            tweaks,
+        )
     }
 
     /// Borrow the immutable registry snapshot used by this model.
@@ -169,8 +184,10 @@ impl BehaveRun {
 
     /// Take ownership of a registry snapshot.
     pub fn new(fuel_models: FuelModels) -> Self {
+        let prepared_fuels = PreparedFuels::from_registry(&fuel_models);
         Self {
             fuel_models,
+            prepared_fuels,
             mortality_coefficients: crate::mortality::build_mortality_lookup(None),
         }
     }

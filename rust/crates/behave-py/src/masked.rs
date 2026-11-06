@@ -81,7 +81,7 @@ pub fn evaluate(operation: &str, a: &Arguments, i: usize) -> Result<Option<Cell>
                 a.masked("x_component", i)?,
                 a.masked("y_component", i)?,
                 a.masked("rate_vector", i)?,
-                a.s("wind_orientation_mode")?,
+                crate::controls::orientation(a.s("wind_orientation_mode")?),
                 a.masked("aspect", i)?,
             ),
             "",
@@ -193,7 +193,7 @@ pub fn evaluate(operation: &str, a: &Arguments, i: usize) -> Result<Option<Cell>
                 a.masked("wind_phi", i)?,
                 a.masked("slope_phi", i)?,
                 a.masked("wind_direction", i)?,
-                a.s("wind_orientation_mode")?,
+                crate::controls::orientation(a.s("wind_orientation_mode")?),
                 a.masked("aspect", i)?,
             );
             outputs([
@@ -224,6 +224,7 @@ pub fn evaluate(operation: &str, a: &Arguments, i: usize) -> Result<Option<Cell>
             a.masked("ri", i)?,
             &crate::structures::ib(a, i)?,
             &crate::structures::input(a, i)?,
+            &crate::controls::surface(a)?,
         )),
         _ => return Ok(None),
     }))

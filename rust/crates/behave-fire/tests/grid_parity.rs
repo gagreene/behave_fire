@@ -33,29 +33,38 @@ fn short_requests_are_bounded() {
 #[test]
 fn surface_batches_match_scalar_cells_bit_for_bit() {
     use behave_fire::batch::SurfaceBatch;
-    use behave_fire::surface::{self, SurfaceInput};
-    use behave_fire::{FuelModels, GridShape, PerCell};
-    let fuels = FuelModels::default();
+    use behave_fire::engine::{
+        PreparedFuels, SurfaceCell, SurfaceOptions, SurfacePlan, SurfaceTweaks,
+    };
+    use behave_fire::units::SpeedUnit;
+    use behave_fire::{BehaveError, FuelModels, GridShape};
+    let fuels = PreparedFuels::from_registry(&FuelModels::default());
+    let plan = SurfacePlan::new(SurfaceOptions::default());
     let inputs: Vec<_> = [1, 10, 101, 0, 261]
         .into_iter()
         .map(|model| {
-            let mut input = SurfaceInput::new(model);
-            input.wind_speed = 7.0;
+            let mut input = SurfaceCell::new(model);
+            input.wind_speed = SpeedUnit::MilesPerHour.to_base(7.0);
             input.slope = 15.0;
             input
         })
         .collect();
     for threads in [0, 1, 2, 4] {
-        let batch = SurfaceBatch::run(
-            GridShape::new(vec![5]).unwrap(),
-            PerCell::Cells(&inputs),
-            &fuels,
-            threads,
-        )
+        let batch = SurfaceBatch::run_with(GridShape::new(vec![5]).unwrap(), threads, |i| {
+            Ok::<_, BehaveError>(plan.run_cell(
+                &inputs[i],
+                fuels.for_grid(inputs[i].fuel_model_grid),
+                SurfaceTweaks::default(),
+            ))
+        })
         .unwrap();
         for (name, values) in batch.into_named_vectors() {
             for (i, value) in values.iter().enumerate() {
-                let scalar = surface::run(&inputs[i], &fuels).unwrap();
+                let scalar = plan.run_cell(
+                    &inputs[i],
+                    fuels.for_grid(inputs[i].fuel_model_grid),
+                    SurfaceTweaks::default(),
+                );
                 let expected = scalar
                     .named_values()
                     .into_iter()
@@ -70,27 +79,44 @@ fn surface_batches_match_scalar_cells_bit_for_bit() {
 #[test]
 fn crown_batches_match_scalar_and_columns_transfer_without_copying() {
     use behave_fire::batch::{CrownBatch, SurfaceBatch};
-    use behave_fire::{
-        crown::{self, CrownInput},
-        surface::{self, SurfaceInput},
+    use behave_fire::crown::get_surface_fire_inputs;
+    use behave_fire::engine::{
+        CrownCell, CrownPlan, CrownTweaks, PreparedFuels, SurfaceCell, SurfaceOptions, SurfacePlan,
+        SurfaceTweaks,
     };
-    use behave_fire::{FuelModels, GridShape, PerCell};
-    let fuels = FuelModels::default();
-    let surface = surface::run(&SurfaceInput::new(10), &fuels).unwrap();
-    let mut input = CrownInput::new(surface);
-    input.canopy_height = 30.0;
-    input.canopy_base_height = 4.0;
-    input.canopy_bulk_density = 0.01;
-    input.wind_speed = 15.0;
+    use behave_fire::units::SpeedUnit;
+    use behave_fire::{BehaveError, FuelModels, GridShape};
+    let fuels = PreparedFuels::from_registry(&FuelModels::default());
+    let surface_plan = SurfacePlan::new(SurfaceOptions::default());
+    let supplied = get_surface_fire_inputs(&surface_plan.run_cell(
+        &SurfaceCell::new(10),
+        fuels.for_grid(10),
+        SurfaceTweaks::default(),
+    ));
+    let plan = CrownPlan::new(SurfaceOptions::default());
+    let input = CrownCell {
+        canopy_height: 30.0,
+        canopy_base_height: 4.0,
+        canopy_bulk_density: 0.01,
+        wind_speed: SpeedUnit::MilesPerHour.to_base(15.0),
+        ..CrownCell::default()
+    };
     for threads in [0, 1, 2, 4] {
-        let batch = CrownBatch::run(
-            GridShape::new(vec![2, 3]).unwrap(),
-            PerCell::Scalar(input.clone()),
-            &fuels,
-            threads,
-        )
+        let batch = CrownBatch::run_with(GridShape::new(vec![2, 3]).unwrap(), threads, |_| {
+            Ok::<_, BehaveError>(plan.run_cell(
+                &input,
+                &supplied,
+                fuels.for_grid(10),
+                CrownTweaks::default(),
+            ))
+        })
         .unwrap();
-        let expected = crown::run(&input, &fuels).unwrap();
+        let expected = plan.run_cell(
+            &input,
+            &supplied,
+            fuels.for_grid(10),
+            CrownTweaks::default(),
+        );
         assert!(batch
             .fire_type
             .iter()
@@ -111,12 +137,13 @@ fn crown_batches_match_scalar_and_columns_transfer_without_copying() {
                 .all(|value| value.to_bits() == expected.to_bits()));
         }
     }
-    let batch = SurfaceBatch::run(
-        GridShape::new(vec![3]).unwrap(),
-        PerCell::Scalar(SurfaceInput::new(1)),
-        &fuels,
-        1,
-    )
+    let batch = SurfaceBatch::run_with(GridShape::new(vec![3]).unwrap(), 1, |_| {
+        Ok::<_, BehaveError>(surface_plan.run_cell(
+            &SurfaceCell::new(1),
+            fuels.for_grid(1),
+            SurfaceTweaks::default(),
+        ))
+    })
     .unwrap();
     let pointer = batch.spread_rate.as_ptr();
     let columns = batch.into_named_vectors();
@@ -129,24 +156,16 @@ fn crown_batches_match_scalar_and_columns_transfer_without_copying() {
             .as_ptr(),
         pointer
     );
-    let empty = SurfaceBatch::run(
-        GridShape::new(vec![0]).unwrap(),
-        PerCell::Cells(&[]),
-        &fuels,
-        4,
-    )
+    let empty = SurfaceBatch::run_with(GridShape::new(vec![0]).unwrap(), 4, |_| {
+        panic!("Empty batches must not evaluate a cell");
+        #[allow(unreachable_code)]
+        Ok::<_, BehaveError>(behave_fire::surface::SurfaceResult::default())
+    })
     .unwrap();
     assert!(empty
         .into_named_vectors()
         .iter()
         .all(|(_, values)| values.is_empty()));
-    assert!(SurfaceBatch::run(
-        GridShape::new(vec![2]).unwrap(),
-        PerCell::Cells(&[]),
-        &fuels,
-        4
-    )
-    .is_err());
 }
 
 #[test]
@@ -174,19 +193,15 @@ fn allocation_failures_are_returned_before_work_starts() {
 }
 #[test]
 fn standalone_batch_validation_retains_structured_core_errors() {
-    use behave_fire::{batch::SurfaceBatch, BehaveError, FuelModels, GridShape, PerCell};
-    let result = SurfaceBatch::run(
-        GridShape::new(vec![2]).unwrap(),
-        PerCell::Cells(&[]),
-        &FuelModels::default(),
-        4,
-    );
+    use behave_fire::{engine::SurfaceCell, BehaveError, GridShape, PerCell};
+    let result =
+        PerCell::<SurfaceCell>::Cells(&[]).validate(&GridShape::new(vec![2]).unwrap(), "inputs");
     assert!(matches!(
         result,
-        Err(ParallelError::Work(BehaveError::LengthMismatch {
+        Err(BehaveError::LengthMismatch {
             expected: 2,
             actual: 0,
             ..
-        }))
+        })
     ));
 }

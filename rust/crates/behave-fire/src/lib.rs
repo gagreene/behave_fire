@@ -13,6 +13,7 @@ mod svml;
 pub mod batch;
 pub mod contain;
 pub mod crown;
+pub mod engine;
 pub mod fine_dead_fuel_moisture;
 pub mod fire_size;
 pub mod fuel_models;

@@ -1,3 +1,6 @@
+#[path = "support/engine_fixture.rs"]
+mod fixture;
+use behave_fire::engine::{SurfaceCell, SurfaceOptions, WindOrientation};
 use behave_fire::surface::masked::{
     self, IntegerKind, IntegerValue, MaskedValue, MathProfile, Precision,
 };
@@ -169,7 +172,7 @@ fn invoke(name: &str, i: &Value, options: &Value, n: usize) -> Vec<(&'static str
             a("x_component"),
             a("y_component"),
             a("rate_vector"),
-            options["wind_orientation_mode"].as_str().unwrap(),
+            fixture::orientation(options["wind_orientation_mode"].as_str().unwrap()),
             a("aspect"),
         ),
         "calculate_surface_rate_vector" => {
@@ -178,7 +181,7 @@ fn invoke(name: &str, i: &Value, options: &Value, n: usize) -> Vec<(&'static str
                 a("wind_phi"),
                 a("slope_phi"),
                 a("wind_direction"),
-                options["wind_orientation_mode"].as_str().unwrap(),
+                fixture::orientation(options["wind_orientation_mode"].as_str().unwrap()),
                 a("aspect"),
             )
             .named_values()
@@ -289,7 +292,7 @@ fn intermediates(i: &Value, n: usize) -> masked::MaskedFuelbedIntermediates {
 
 #[test]
 fn integer_particle_reductions_and_wind_prefixes_match_python() {
-    use behave_fire::surface::{masked::MaskedParticles, SurfaceInput};
+    use behave_fire::surface::masked::MaskedParticles;
     let cases: Value = serde_json::from_str(include_str!("data/integer_dictionary.json")).unwrap();
     for (index, c) in cases.as_array().unwrap().iter().enumerate() {
         let name = c["name"].as_str().unwrap();
@@ -316,20 +319,27 @@ fn integer_particle_reductions_and_wind_prefixes_match_python() {
             masked::try_calculate_fuelbed_intermediates(&p).map(|x| x.named_values().to_vec())
         } else {
             let ib = intermediates(&i["ib"], 0);
-            let mut input = SurfaceInput::new(124);
-            input.wind_speed = 5.;
+            let mut input = SurfaceCell::new(124);
+            input.wind_speed = behave_fire::units::SpeedUnit::MilesPerHour.to_base(5.0);
             input.wind_direction = 45.;
-            input.wind_orientation_mode = "RelativeToNorth".into();
+            let controls = SurfaceOptions {
+                wind_orientation: WindOrientation::North,
+                ..SurfaceOptions::default()
+            };
             input.slope = 30.;
             input.aspect = 95.;
-            masked::try_run_surface_fire_with_intermediates(argument(&i["ri"], 0), &ib, &input).map(
-                |x| {
-                    x.named_values()
-                        .into_iter()
-                        .map(|(k, v)| (k, MaskedValue::plain(v)))
-                        .collect()
-                },
+            masked::try_run_surface_fire_with_intermediates(
+                argument(&i["ri"], 0),
+                &ib,
+                &input,
+                &controls,
             )
+            .map(|x| {
+                x.named_values()
+                    .into_iter()
+                    .map(|(k, v)| (k, MaskedValue::plain(v)))
+                    .collect()
+            })
         };
         if let Some(expected) = c["exception"].as_str() {
             assert_eq!(

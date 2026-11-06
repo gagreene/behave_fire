@@ -1,9 +1,6 @@
 //! Fixed five-particle construction with dynamic herb transfer.
 use super::Particles;
-use crate::{
-    fuel_models::{FuelModel, FuelModels},
-    math::np_max,
-};
+use crate::{engine::PreparedFuel, fuel_models::FuelModels, math::np_max};
 
 /// Build the Python particle arrays for one grid cell; all moisture inputs are fractions.
 pub fn build_particle_arrays(
@@ -15,7 +12,14 @@ pub fn build_particle_arrays(
     mlh: f64,
     mlw: f64,
 ) -> Particles {
-    build_particle_arrays_from_fuel(fuels.for_grid(fuel_model_grid), m1h, m10h, m100h, mlh, mlw)
+    build_particle_arrays_from_prepared(
+        &PreparedFuel::from_model(fuels.for_grid(fuel_model_grid)),
+        m1h,
+        m10h,
+        m100h,
+        mlh,
+        mlw,
+    )
 }
 
 /// Build particles from a raw lookup row without filtering its defined flag or scientific properties.
@@ -23,8 +27,8 @@ pub fn build_particle_arrays(
 /// Moisture inputs are fractions. Dynamic transfer and moisture clamping match
 /// the grid entry point. A false defined flag is preserved for the final surface
 /// output mask, while nonzero raw lookup properties still participate in stages.
-pub fn build_particle_arrays_from_fuel(
-    fuel: &FuelModel,
+pub fn build_particle_arrays_from_prepared(
+    fuel: &PreparedFuel,
     m1h: f64,
     m10h: f64,
     m100h: f64,

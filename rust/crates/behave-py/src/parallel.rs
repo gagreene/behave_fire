@@ -17,8 +17,13 @@ pub fn surface(a: &Arguments, i: usize) -> Result<behave_fire::surface::SurfaceR
     input.m100h = a.n("m100h", i)?;
     input.mlh = a.n("mlh", i)?;
     input.mlw = a.n("mlw", i)?;
-    behave_fire::surface::run_with_fuel(&input, &crate::structures::fuel(a, i)?)
-        .map_err(|error| error.to_string())
+    Ok(
+        behave_fire::engine::SurfacePlan::new(crate::controls::surface(a)?).run_cell(
+            &input,
+            &crate::structures::fuel(a, i)?,
+            behave_fire::engine::SurfaceTweaks::default(),
+        ),
+    )
 }
 
 pub fn evaluate(
@@ -49,11 +54,14 @@ pub fn evaluate(
         && !arguments.has_crown_python_payloads()
     {
         CrownBatch::run_with(shape, threads, |index| {
-            behave_fire::crown::run(
-                &crate::crown::input(arguments, index)?,
-                &crate::crown::fuels(arguments, index)?,
+            Ok::<_, String>(
+                behave_fire::engine::CrownPlan::new(crate::controls::crown(arguments)).run_cell(
+                    &crate::crown::input(arguments, index)?,
+                    &crate::crown::surface_values(arguments, index),
+                    &crate::crown::fuel(arguments, index)?,
+                    behave_fire::engine::CrownTweaks::default(),
+                ),
             )
-            .map_err(|error| error.to_string())
         })
         .map(|batch| {
             let stats = *batch.statistics();

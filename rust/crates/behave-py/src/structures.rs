@@ -2,7 +2,10 @@
 use crate::arrays::Arguments;
 use crate::dispatch::Cell;
 use behave_fire::units::*;
-use behave_fire::{surface::*, FuelModel};
+use behave_fire::{
+    engine::{PreparedFuel, SurfaceCell},
+    surface::*,
+};
 pub fn p(a: &Arguments, i: usize) -> Result<Particles, String> {
     let mut r = Particles::default();
     r.load_dead = [
@@ -78,29 +81,27 @@ pub fn ib(a: &Arguments, i: usize) -> Result<FuelbedIntermediates, String> {
     r.is_defined = a.optional("ib.is_defined", i).unwrap_or(0.0) != 0.0;
     Ok(r)
 }
-pub fn input(a: &Arguments, i: usize) -> Result<SurfaceInput, String> {
-    let mut r = SurfaceInput::default();
-    r.wind_speed = a.n("wind_speed", i)?;
-    r.wind_speed_units =
-        SpeedUnit::try_from(a.n("wind_speed_units", i)? as i32).map_err(|e| e.to_string())?;
-    r.wind_direction = a.n("wind_direction", i)?;
-    r.wind_orientation_mode = a.s("wind_orientation_mode")?.to_owned();
-    r.slope = a.n("slope", i)?;
-    r.slope_units =
-        SlopeUnit::try_from(a.n("slope_units", i)? as i32).map_err(|e| e.to_string())?;
-    r.aspect = a.n("aspect", i)?;
-    r.canopy_cover = a.n("canopy_cover", i)?;
-    r.canopy_height = a.n("canopy_height", i)?;
-    r.crown_ratio = a.n("crown_ratio", i)?;
-    r.wind_height_mode = a.s("wind_height_mode")?.to_owned();
-    r.waf_method = a.s("waf_method")?.to_owned();
-    r.user_waf = a.optional("user_waf", i);
-    Ok(r)
+pub fn input(a: &Arguments, i: usize) -> Result<SurfaceCell, String> {
+    Ok(SurfaceCell {
+        wind_speed: SpeedUnit::try_from(a.n("wind_speed_units", i)? as i32)
+            .map_err(|e| e.to_string())?
+            .to_base(a.n("wind_speed", i)?),
+        wind_direction: a.n("wind_direction", i)?,
+        slope: SlopeUnit::try_from(a.n("slope_units", i)? as i32)
+            .map_err(|e| e.to_string())?
+            .to_base(a.n("slope", i)?),
+        aspect: a.n("aspect", i)?,
+        canopy_cover: a.n("canopy_cover", i)?,
+        canopy_height: a.n("canopy_height", i)?,
+        crown_ratio: a.n("crown_ratio", i)?,
+        user_waf: a.optional("user_waf", i),
+        ..SurfaceCell::default()
+    })
 }
-// Start from core defaults so unmentioned registry metadata stays intact.
+// Physical fuel fields are copied without carrying registry names into cell loops.
 #[allow(clippy::field_reassign_with_default)]
-pub fn fuel(a: &Arguments, i: usize) -> Result<FuelModel, String> {
-    let mut r = FuelModel::default();
+pub fn fuel(a: &Arguments, i: usize) -> Result<PreparedFuel, String> {
+    let mut r = PreparedFuel::default();
     r.fuel_bed_depth = a.n("model.fuel_bed_depth", i)?;
     r.moisture_of_extinction_dead = a.n("model.moisture_of_extinction_dead", i)?;
     r.heat_of_combustion_dead = a.n("model.heat_of_combustion_dead", i)?;
@@ -116,6 +117,31 @@ pub fn fuel(a: &Arguments, i: usize) -> Result<FuelModel, String> {
     r.is_dynamic = a.n("model.is_dynamic", i)? != 0.0;
     r.is_defined = a.n("model.is_defined", i)? != 0.0;
     Ok(r)
+}
+/// Resume supplied reaction/fuelbed state, retaining the source's f32 slope-cap rounding.
+pub fn run_surface(a: &Arguments, i: usize, single: bool) -> Result<SurfaceResult, String> {
+    let cell = input(a, i)?;
+    let fuelbed = ib(a, i)?;
+    let options = crate::controls::surface(a)?;
+    let reaction = a.n("ri", i)?;
+    let mut tweaks = behave_fire::engine::SurfaceTweaks {
+        reaction_intensity: Some(reaction),
+        ..behave_fire::engine::SurfaceTweaks::default()
+    };
+    if single {
+        let reaction = reaction as f32;
+        tweaks.reaction_intensity = Some(reaction as f64);
+        tweaks.slope_phi = Some(behave_fire::math::np_min(
+            calculate_slope_phi(
+                cell.slope,
+                SlopeUnit::Degrees,
+                fuelbed.packing_ratio,
+                f64::INFINITY,
+            ),
+            (0.9_f32 * reaction) as f64,
+        ));
+    }
+    Ok(behave_fire::engine::SurfacePlan::new(options).run_from_fuelbed(&cell, &fuelbed, tweaks))
 }
 pub fn particles_output(p: Particles) -> Cell {
     let mut result: Cell = p

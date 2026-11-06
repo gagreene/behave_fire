@@ -1,12 +1,18 @@
 // Fixtures intentionally exercise public default construction and field mutation.
 #![allow(clippy::field_reassign_with_default)]
 
+#[path = "support/engine_fixture.rs"]
+mod fixture;
 use behave_fire::crown;
+use behave_fire::engine::{
+    CrownCell, CrownPlan, CrownTweaks, PreparedFuel, SurfaceCell, SurfaceOptions, SurfacePlan,
+    SurfaceTweaks,
+};
 use behave_fire::{
     crown::*,
     fuel_models::FuelModels,
     surface::{FuelbedIntermediates, SurfaceResult},
-    units::{SlopeUnit, SpeedUnit},
+    units::SpeedUnit,
 };
 use serde_json::Value;
 
@@ -40,7 +46,12 @@ fn python_slope_passthrough_and_changed_or_undefined_model_ten_match() {
             fuels.get_mut(10).unwrap().is_defined = v.as_bool().unwrap();
         }
         let x = input(&c["inputs"], 0);
-        let result = run(&x, &fuels).unwrap();
+        let result = CrownPlan::new(fixture::surface_options(&c["inputs"])).run_cell(
+            &x,
+            &fixture::surface_values(&c["inputs"]["surface_results"], 0),
+            &PreparedFuel::from_model(fuels.for_grid(10)),
+            CrownTweaks::default(),
+        );
         rates.push(result.crown_fire_spread_rate);
         assert_eq!(result.fire_type, number(&c["output"]["fire_type"]) as i32);
         for (k, v) in result.named_values() {
@@ -100,38 +111,8 @@ fn optional(i: &Value, k: &str, n: usize, default: f64) -> f64 {
         default
     }
 }
-fn input(i: &Value, n: usize) -> CrownInput {
-    let mut x = CrownInput::default();
-    let model = optional(i, "fuel_model_grid", n, 10.0);
-    x.fuel_model_grid = if model.is_finite() {
-        model as i32
-    } else {
-        i32::MIN
-    };
-    x.m1h = optional(i, "m1h", n, x.m1h);
-    x.m10h = optional(i, "m10h", n, x.m10h);
-    x.m100h = optional(i, "m100h", n, x.m100h);
-    x.mlh = optional(i, "mlh", n, x.mlh);
-    x.mlw = optional(i, "mlw", n, x.mlw);
-    x.wind_speed = optional(i, "wind_speed", n, 0.0);
-    x.wind_direction = optional(i, "wind_direction", n, 0.0);
-    x.wind_speed_units =
-        SpeedUnit::try_from(i["wind_speed_units"].as_i64().unwrap_or(5) as i32).unwrap();
-    x.wind_orientation_mode = i["wind_orientation_mode"]
-        .as_str()
-        .unwrap_or("RelativeToUpslope")
-        .into();
-    x.slope = optional(i, "slope", n, optional(i, "slope_deg", n, 0.0));
-    x.slope_units = SlopeUnit::try_from(i["slope_units"].as_i64().unwrap_or(0) as i32).unwrap();
-    x.aspect = optional(i, "aspect", n, 0.0);
-    x.canopy_base_height = optional(i, "canopy_base_height", n, 0.0);
-    x.canopy_height = optional(i, "canopy_height", n, 0.0);
-    x.canopy_bulk_density = optional(i, "canopy_bulk_density", n, 0.0);
-    x.moisture_foliar = optional(i, "moisture_foliar", n, 100.0);
-    if i.get("surface_results").is_some() {
-        x.surface_results = surface(&i["surface_results"], n)
-    }
-    x
+fn input(i: &Value, n: usize) -> CrownCell {
+    fixture::crown_cell(i, n)
 }
 fn surface(i: &Value, n: usize) -> SurfaceResult {
     let mut x = SurfaceResult::default();
@@ -186,7 +167,6 @@ fn cells(v: &Value) -> usize {
 fn composed_default_custom_fuels_and_canopy_units_match_python_facade() {
     use behave_fire::{
         fuel_models::{CustomFuelModel, FuelModel},
-        surface::{self, SurfaceInput},
         units::{DensityUnit, LengthUnit},
     };
     let fixture: Value =
@@ -225,6 +205,7 @@ fn composed_default_custom_fuels_and_canopy_units_match_python_facade() {
         let i = &c["inputs"];
         let canopy = &c["canopy"];
         let mut x = input(i, 0);
+        let grid = optional(i, "fuel_model_grid", 0, 10.0) as i32;
         x.canopy_base_height =
             LengthUnit::try_from(canopy["canopy_base_height_units"].as_i64().unwrap() as i32)
                 .unwrap()
@@ -238,26 +219,32 @@ fn composed_default_custom_fuels_and_canopy_units_match_python_facade() {
                 .unwrap()
                 .to_base(number(&canopy["canopy_bulk_density"]));
         x.moisture_foliar = number(&canopy["moisture_foliar"]);
-        let mut s = SurfaceInput::new(x.fuel_model_grid);
+        let mut s = SurfaceCell::new(grid);
         s.m1h = x.m1h;
         s.m10h = x.m10h;
         s.m100h = x.m100h;
         s.mlh = x.mlh;
         s.mlw = x.mlw;
         s.wind_speed = x.wind_speed;
-        s.wind_speed_units = x.wind_speed_units;
         s.wind_direction = x.wind_direction;
-        s.wind_orientation_mode = x.wind_orientation_mode.clone();
         s.slope = x.slope;
-        s.slope_units = x.slope_units;
         s.aspect = x.aspect;
         s.canopy_height = x.canopy_height;
-        x.surface_results = surface::run(&s, &fuels).unwrap();
-        let ctx = format!("model {} slope {}", x.fuel_model_grid, x.slope);
-        for (k, v) in x.surface_results.named_values() {
+        let surface_result = SurfacePlan::new(fixture::surface_options(i)).run_cell(
+            &s,
+            &PreparedFuel::from_model(fuels.for_grid(grid)),
+            SurfaceTweaks::default(),
+        );
+        let ctx = format!("model {} slope {}", grid, x.slope);
+        for (k, v) in surface_result.named_values() {
             check(v, &c["surface"][k], 0, &format!("{ctx}/surface/{k}"))
         }
-        let result = run(&x, &fuels).unwrap();
+        let result = CrownPlan::new(fixture::surface_options(i)).run_cell(
+            &x,
+            &get_surface_fire_inputs(&surface_result),
+            &PreparedFuel::from_model(fuels.for_grid(10)),
+            CrownTweaks::default(),
+        );
         classes.insert(result.fire_type);
         assert_eq!(
             result.fire_type,
@@ -271,10 +258,6 @@ fn composed_default_custom_fuels_and_canopy_units_match_python_facade() {
         for (k, v) in result.named_values() {
             check(v, &c["output"][k], 0, &format!("{ctx}/{k}"))
         }
-        assert_eq!(
-            run_crown_fire(&x.surface_results, &x, &fuels).unwrap(),
-            result
-        );
     }
     assert_eq!(classes, std::collections::BTreeSet::from([0, 1, 2, 3]));
 }
@@ -282,28 +265,43 @@ fn composed_default_custom_fuels_and_canopy_units_match_python_facade() {
 #[test]
 fn supplied_surface_and_live_model_ten_table_are_used() {
     let mut fuels = FuelModels::default();
-    let mut s = SurfaceResult::default();
-    s.spread_rate = 4.0;
-    s.heat_per_unit_area = 900.;
-    s.fireline_intensity = 60.;
-    let mut x = CrownInput::new(s);
-    x.canopy_base_height = 6.;
-    x.canopy_height = 30.;
-    x.canopy_bulk_density = 0.02;
-    x.wind_speed = 5.;
-    let original = run(&x, &fuels).unwrap();
+    let mut supplied = SurfaceFireInputs::<f64>::new();
+    supplied.surface_ros = 4.0;
+    supplied.surface_hpua = 900.0;
+    supplied.surface_fli = 60.0;
+    let mut input = CrownCell::default();
+    input.canopy_base_height = 6.0;
+    input.canopy_height = 30.0;
+    input.canopy_bulk_density = 0.02;
+    input.wind_speed = SpeedUnit::MilesPerHour.to_base(5.0);
+    let plan = CrownPlan::new(SurfaceOptions::default());
+    let original = plan.run_cell(
+        &input,
+        &supplied,
+        &PreparedFuel::from_model(fuels.for_grid(10)),
+        CrownTweaks::default(),
+    );
     fuels.get_mut(10).unwrap().dead_1h *= 2.0;
-    let changed = run(&x, &fuels).unwrap();
+    let changed = plan.run_cell(
+        &input,
+        &supplied,
+        &PreparedFuel::from_model(fuels.for_grid(10)),
+        CrownTweaks::default(),
+    );
     assert_ne!(
         original.crown_fire_spread_rate,
         changed.crown_fire_spread_rate
     );
-    let mut other = s;
-    other.fireline_intensity = 0.0;
-    let overridden = run_crown_fire(&other, &x, &fuels).unwrap();
+    supplied.surface_fli = 0.0;
+    let overridden = plan.run_cell(
+        &input,
+        &supplied,
+        &PreparedFuel::from_model(fuels.for_grid(10)),
+        CrownTweaks::default(),
+    );
     assert_eq!(overridden.crown_fire_transition_ratio, 0.0);
-    assert_eq!(overridden.final_spread_rate, other.spread_rate);
-    assert_eq!(x.moisture_foliar, 100.0);
+    assert_eq!(overridden.final_spread_rate, supplied.surface_ros);
+    assert_eq!(input.moisture_foliar, 100.0);
 }
 fn check(actual: f64, expected: &Value, n: usize, ctx: &str) {
     let target = value(expected, n);
@@ -358,6 +356,10 @@ fn every_source_stage_matches_independent_python_oracle() {
             .rsplit('.')
             .next()
             .unwrap();
+        // Python coercion metadata belongs to binding tests, not the numerical core API.
+        if name == "coerce_crown_fire_inputs" {
+            continue;
+        }
         for n in 0..cells(out) {
             count += 1;
             let a = |k| f(i, k, n);
@@ -524,21 +526,6 @@ fn every_source_stage_matches_independent_python_oracle() {
                     }
                     None
                 }
-                "coerce_crown_fire_inputs" => {
-                    let r = coerce_crown_fire_inputs(&input(i, n));
-                    assert_eq!(r.fm_grid, f(out, "fm_grid", n) as i32);
-                    vals = vec![
-                        ("slope_deg", r.slope_deg),
-                        ("aspect", r.aspect),
-                        ("wind_dir", r.wind_dir),
-                        ("cbh", r.cbh),
-                        ("ch", r.ch),
-                        ("cbd", r.cbd),
-                        ("mf_pct", r.mf_pct),
-                        ("wind_speed", r.wind_speed),
-                    ];
-                    None
-                }
                 "get_surface_fire_inputs" => {
                     vals =
                         get_surface_fire_inputs(&surface(&i["surface_results"], n)).named_values();
@@ -546,13 +533,23 @@ fn every_source_stage_matches_independent_python_oracle() {
                 }
                 "run_crown_fire" => {
                     let x = input(i, n);
-                    let r = run(&x, &fuels).unwrap();
+                    let r = CrownPlan::new(fixture::surface_options(i)).run_cell(
+                        &x,
+                        &fixture::surface_values(&i["surface_results"], n),
+                        &PreparedFuel::from_model(fuels.for_grid(10)),
+                        CrownTweaks::default(),
+                    );
                     assert_eq!(r.fire_type, f(out, "fire_type", n) as i32, "{id}");
                     vals = r.named_values().to_vec();
                     None
                 }
                 "calculate_crown_surface_fire" => {
-                    let r = calculate_crown_surface_fire(&input(i, n), &fuels).unwrap();
+                    let r = calculate_crown_surface_fire(
+                        &input(i, n),
+                        &PreparedFuel::from_model(fuels.for_grid(10)),
+                        &fixture::surface_options(i),
+                        SurfaceTweaks::default(),
+                    );
                     for (k, v) in r.crown_surface.named_values() {
                         check(
                             v,
@@ -603,5 +600,5 @@ fn every_source_stage_matches_independent_python_oracle() {
             }
         }
     }
-    println!("Checked {count} scalar cells across all 14 Python Crown entry points");
+    println!("Checked {count} scalar cells across the native Crown science stages");
 }

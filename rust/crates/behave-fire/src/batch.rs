@@ -1,7 +1,7 @@
 //! Bounded native pipelines with owned column results and checked shapes.
-use crate::crown::{CrownInput, CrownResult};
-use crate::surface::{SurfaceInput, SurfaceResult};
-use crate::{map_chunks, BehaveError, FuelModels, GridShape, ParallelError, PerCell};
+use crate::crown::CrownResult;
+use crate::surface::SurfaceResult;
+use crate::{map_chunks, GridShape, ParallelError};
 fn flatten_error<E>(error: ParallelError<ParallelError<E>>) -> ParallelError<E> {
     match error {
         ParallelError::Work(error) => error,
@@ -40,7 +40,7 @@ pub struct BatchStatistics {
 /// per-call threshold, not a promise of optimal scaling on every host.
 pub const PIPELINE_PARALLEL_MIN_CELLS: usize = 1_024;
 macro_rules! columns {
-    ($name:ident, $scalar:ty, $input:ty, $run:path, {$($field:ident:$kind:ty),+}) => {
+    ($name:ident, $scalar:ty, {$($field:ident:$kind:ty),+}) => {
         /// Owned named columns in logical row-major order.
         #[derive(Clone, Debug)]
         #[non_exhaustive]
@@ -59,11 +59,6 @@ macro_rules! columns {
             /// Move f64 buffers; convert integer columns for generic numeric adapters.
             pub fn into_named_vectors(self) -> Vec<(&'static str,Vec<f64>)> {
                 vec![$((stringify!($field),self.$field.into_column())),+]
-            }
-            /// Run checked scalar-or-slice inputs through the standalone pipeline.
-            pub fn run(shape: GridShape, inputs: PerCell<'_, $input>, fuels: &FuelModels, threads: usize) -> Result<Self,ParallelError<BehaveError>> {
-                inputs.validate(&shape,"inputs").map_err(ParallelError::Work)?;
-                Self::run_with(shape,threads,|index| $run(inputs.get(index).expect("validated input"),fuels))
             }
             /// Evaluate cells directly into columns; closures borrow only native data.
             pub fn run_with<E: Send,F>(shape: GridShape, threads: usize, operation:F) -> Result<Self,ParallelError<E>>
@@ -86,13 +81,13 @@ macro_rules! columns {
         }
     }
 }
-columns!(SurfaceBatch, SurfaceResult, SurfaceInput, crate::surface::run, {
+columns!(SurfaceBatch, SurfaceResult, {
 spread_rate:f64, backing_spread_rate:f64, flanking_spread_rate:f64, flame_length:f64,
 fireline_intensity:f64, heat_per_unit_area:f64, effective_wind_speed:f64,
 fire_length_to_width_ratio:f64, eccentricity:f64, direction_of_max_spread:f64,
 residence_time:f64, reaction_intensity:f64, midflame_wind_speed:f64,
 no_wind_no_slope_spread_rate:f64});
-columns!(CrownBatch, CrownResult, CrownInput, crate::crown::run, {
+columns!(CrownBatch, CrownResult, {
 crown_fire_spread_rate:f64, crown_flame_length:f64, crown_fire_line_intensity:f64,
 crown_fire_heat_per_unit_area:f64, canopy_heat_per_unit_area:f64,
 crown_critical_surface_fire_line_intensity:f64, crown_critical_fire_spread_rate:f64,

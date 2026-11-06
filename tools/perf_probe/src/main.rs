@@ -1,11 +1,14 @@
 //! Standalone core attribution, not end-to-end Python performance evidence.
 //! Allocation instrumentation is confined to this unpublished diagnostic tool.
 
-use behave_fire::crown::{self, CrownInput, SurfaceFireInputs};
+use behave_fire::crown::{self, SurfaceFireInputs};
+use behave_fire::engine::{
+    CrownCell, CrownPlan, CrownTweaks, PreparedFuel, PreparedFuels, SurfaceCell, SurfaceOptions,
+    SurfacePlan, SurfaceTweaks,
+};
 use behave_fire::surface::masked::{IntegerKind, IntegerValue, MaskedValue, Precision};
-use behave_fire::surface::{self, SurfaceInput};
-use behave_fire::units::SpeedUnit;
-use behave_fire::{FuelModel, FuelModels};
+
+use behave_fire::FuelModels;
 use std::hint::black_box;
 #[cfg(not(feature = "count-alloc"))]
 use std::time::Instant;
@@ -62,13 +65,15 @@ struct Arguments {
     cells: usize,
     repetitions: usize,
     seed: usize,
+    override_rate: Option<f64>,
 }
 
 struct Case<'a> {
-    surface: SurfaceInput,
-    crown: CrownInput,
+    surface: SurfaceCell,
+    crown: CrownCell,
+    supplied: SurfaceFireInputs<f64>,
     typed: SurfaceFireInputs<MaskedValue>,
-    fuel: &'a FuelModel,
+    fuel: &'a PreparedFuel,
 }
 
 /// Parse explicit attribution controls without a CLI runtime dependency.
@@ -81,6 +86,7 @@ fn arguments() -> Result<Arguments, String> {
         cells: 10_000,
         repetitions: 3,
         seed: 20261105,
+        override_rate: None,
     };
     let mut args = std::env::args().skip(1);
     while let Some(name) = args.next() {
@@ -97,6 +103,9 @@ fn arguments() -> Result<Arguments, String> {
                 result.repetitions = value.parse().map_err(|_| "invalid repetitions")?
             }
             "--seed" => result.seed = value.parse().map_err(|_| "invalid seed")?,
+            "--override-rate" => {
+                result.override_rate = Some(value.parse().map_err(|_| "invalid override rate")?)
+            }
             _ => return Err(format!("unknown option {name}")),
         }
     }
@@ -116,11 +125,14 @@ fn arguments() -> Result<Arguments, String> {
             "allocation mode requires count-alloc; timing requires an uninstrumented build".into(),
         );
     }
+    if result.operation == "typed-crown" && result.override_rate.is_some() {
+        return Err("The checked Python-layout probe has no fused native tweak argument".into());
+    }
     Ok(result)
 }
 
 /// Prepare a bounded repeating input period, preserving each typed mask period.
-fn build_cases<'a>(args: &Arguments, fuels: &'a FuelModels) -> Result<Vec<Case<'a>>, String> {
+fn build_cases<'a>(args: &Arguments, fuels: &'a PreparedFuels) -> Result<Vec<Case<'a>>, String> {
     let base = if args.dataset == "uniform" { 1 } else { 136 };
     let mask_period = if args.operation != "typed-crown" {
         1
@@ -132,8 +144,7 @@ fn build_cases<'a>(args: &Arguments, fuels: &'a FuelModels) -> Result<Vec<Case<'
     let period = (base * mask_period).min(args.cells);
     let mut cases = Vec::with_capacity(period);
     for index in 0..period {
-        let mut input = SurfaceInput::new(10);
-        input.wind_speed_units = SpeedUnit::FeetPerMinute;
+        let mut input = SurfaceCell::new(10);
         input.wind_speed = 8.0;
         input.wind_direction = 35.0;
         input.slope = 12.0;
@@ -150,22 +161,26 @@ fn build_cases<'a>(args: &Arguments, fuels: &'a FuelModels) -> Result<Vec<Case<'
             input.slope = 35.0 * phase;
         }
         let fuel = fuels.for_grid(input.fuel_model_grid);
-        let result = surface::run_with_fuel(&input, fuel).map_err(|error| error.to_string())?;
-        let mut crown = CrownInput::new(result);
-        crown.fuel_model_grid = input.fuel_model_grid;
-        crown.m1h = input.m1h;
-        crown.m10h = input.m10h;
-        crown.m100h = input.m100h;
-        crown.mlh = input.mlh;
-        crown.mlw = input.mlw;
-        crown.wind_speed = input.wind_speed;
-        crown.wind_speed_units = SpeedUnit::FeetPerMinute;
-        crown.wind_direction = input.wind_direction;
-        crown.slope = input.slope;
-        crown.canopy_base_height = 4.0;
-        crown.canopy_height = 30.0;
-        crown.canopy_bulk_density = 0.01;
-        crown.moisture_foliar = 100.0;
+        let result = SurfacePlan::new(SurfaceOptions::default()).run_cell(
+            &input,
+            fuel,
+            SurfaceTweaks::default(),
+        );
+        let mut crown = CrownCell {
+            m1h: input.m1h,
+            m10h: input.m10h,
+            m100h: input.m100h,
+            mlh: input.mlh,
+            mlw: input.mlw,
+            wind_speed: input.wind_speed,
+            wind_direction: input.wind_direction,
+            slope: input.slope,
+            aspect: input.aspect,
+            canopy_base_height: 4.0,
+            canopy_height: 30.0,
+            canopy_bulk_density: 0.01,
+            moisture_foliar: 100.0,
+        };
         if args.dataset == "heterogeneous" {
             crown.canopy_base_height = 1.0 + 5.0 * phase;
             crown.canopy_height = 15.0 + 25.0 * phase;
@@ -203,6 +218,7 @@ fn build_cases<'a>(args: &Arguments, fuels: &'a FuelModels) -> Result<Vec<Case<'
         cases.push(Case {
             surface: input,
             crown,
+            supplied: crown::get_surface_fire_inputs(&result),
             typed,
             fuel,
         });
@@ -211,24 +227,40 @@ fn build_cases<'a>(args: &Arguments, fuels: &'a FuelModels) -> Result<Vec<Case<'
 }
 
 /// Retain the complete result at a black-box boundary before selecting a checksum.
-fn evaluate(args: &Arguments, case: &Case<'_>, fuels: &FuelModels) -> f64 {
+fn evaluate(args: &Arguments, case: &Case<'_>, fuels: &PreparedFuels) -> f64 {
+    let surface_tweaks = SurfaceTweaks {
+        spread_rate: args.override_rate,
+        ..SurfaceTweaks::default()
+    };
+    let crown_tweaks = CrownTweaks {
+        fm10: surface_tweaks,
+        ..CrownTweaks::default()
+    };
     match args.operation.as_str() {
         "surface" => {
-            black_box(
-                surface::run_with_fuel(black_box(&case.surface), black_box(case.fuel)).unwrap(),
-            )
+            black_box(SurfacePlan::new(SurfaceOptions::default()).run_cell(
+                black_box(&case.surface),
+                black_box(case.fuel),
+                surface_tweaks,
+            ))
             .spread_rate
         }
         "crown" => {
-            black_box(crown::run(black_box(&case.crown), black_box(fuels)).unwrap())
-                .final_spread_rate
+            black_box(CrownPlan::new(SurfaceOptions::default()).run_cell(
+                black_box(&case.crown),
+                black_box(&case.supplied),
+                black_box(fuels.for_grid(10)),
+                crown_tweaks,
+            ))
+            .final_spread_rate
         }
         _ => {
             black_box(
                 crown::run_with_surface_inputs(
                     black_box(&case.typed),
                     black_box(&case.crown),
-                    black_box(fuels),
+                    black_box(fuels.for_grid(10)),
+                    &SurfaceOptions::default(),
                 )
                 .unwrap(),
             )
@@ -237,11 +269,10 @@ fn evaluate(args: &Arguments, case: &Case<'_>, fuels: &FuelModels) -> f64 {
         }
     }
 }
-
 /// Emit core attribution with explicit limits on the measured scope.
 fn main() -> Result<(), String> {
     let args = arguments()?;
-    let fuels = FuelModels::default();
+    let fuels = PreparedFuels::from_registry(&FuelModels::default());
     let cases = build_cases(&args, &fuels)?;
     black_box(evaluate(&args, &cases[0], &fuels));
     let operation = if args.operation == "typed-crown" && args.layout == "b" {

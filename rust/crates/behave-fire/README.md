@@ -63,13 +63,16 @@ without Python. Inputs and outputs use the documented reference base units;
 typed unit selectors are available where the reference accepts units.
 
 ```rust
-use behave_fire::{BehaveRun, FuelModels, surface::SurfaceInput, units::SpeedUnit};
+use behave_fire::{
+    engine::{PreparedFuels, SurfaceCell, SurfaceOptions, SurfacePlan, SurfaceTweaks},
+    FuelModels, units::SpeedUnit,
+};
 
-let model = BehaveRun::new(FuelModels::default());
-let mut input = SurfaceInput::new(124);
-input.wind_speed = 5.0;
-input.wind_speed_units = SpeedUnit::MilesPerHour;
-let result = model.do_surface_run(&input)?;
+let fuels = PreparedFuels::from_registry(&FuelModels::default());
+let plan = SurfacePlan::new(SurfaceOptions::default());
+let mut input = SurfaceCell::new(124);
+input.wind_speed = SpeedUnit::MilesPerHour.to_base(5.0);
+let result = plan.run_cell(&input, fuels.for_grid(124), SurfaceTweaks::default());
 assert!(result.spread_rate.is_finite());
 # Ok::<(), behave_fire::BehaveError>(())
 ```
@@ -79,7 +82,8 @@ float32 intermediate arithmetic. Mask-aware companion APIs reproduce the
 documented NumPy masked-array stage behavior. Float32 NumPy exponential dispatch
 can differ by a few ULPs from scalar libc; select the matching `MathProfile` when
 matching a particular NumPy build. No Python runtime is used by either profile.
-The Python bindings remain incomplete at this layer.
+The separate Python binding crate uses the same numerical core and handles
+Python-specific array and representation semantics at its boundary.
 
 ## Effects and utility calculations
 

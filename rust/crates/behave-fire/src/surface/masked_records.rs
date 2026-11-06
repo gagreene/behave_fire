@@ -563,12 +563,14 @@ impl SurfaceInputShape {
 pub fn try_run_surface_fire_with_intermediates(
     ri: MaskedValue,
     ib: &MaskedFuelbedIntermediates,
-    input: &super::super::SurfaceInput,
+    input: &crate::engine::SurfaceCell,
+    options: &crate::engine::SurfaceOptions,
 ) -> Result<super::super::SurfaceResult, MaskedError> {
     try_run_surface_fire_with_intermediates_and_shape(
         ri,
         ib,
         input,
+        options,
         &SurfaceInputShape::uniform(ri.is_scalar_array && ib.sigma.is_scalar_array),
     )
 }
@@ -577,7 +579,8 @@ pub fn try_run_surface_fire_with_intermediates(
 pub fn try_run_surface_fire_with_intermediates_and_shape(
     ri: MaskedValue,
     ib: &MaskedFuelbedIntermediates,
-    input: &super::super::SurfaceInput,
+    input: &crate::engine::SurfaceCell,
+    options: &crate::engine::SurfaceOptions,
     shape: &SurfaceInputShape,
 ) -> Result<super::super::SurfaceResult, MaskedError> {
     if let Some(error) = ri
@@ -599,25 +602,20 @@ pub fn try_run_surface_fire_with_intermediates_and_shape(
     }
     let ws = super::super::calculate_twenty_foot_wind_speed(
         input.wind_speed,
-        input.wind_speed_units,
-        &input.wind_height_mode,
+        crate::units::SpeedUnit::FeetPerMinute,
+        options.wind_height,
     );
     let waf = super::super::calculate_surface_wind_adjustment_factor(
         input.canopy_cover,
         input.canopy_height,
         input.crown_ratio,
         ib.depth.value,
-        &input.waf_method,
+        options.waf_method,
         input.user_waf,
     );
     let midflame = super::super::calculate_midflame_wind_speed(waf, ws);
-    let user_mode = input
-        .waf_method
-        .bytes()
-        .filter(|b| *b != b'_')
-        .map(|b| b.to_ascii_lowercase())
-        .eq(b"userinput".iter().copied())
-        && input.user_waf.is_some();
+    let user_mode =
+        options.waf_method == crate::engine::WafMethod::UserInput && input.user_waf.is_some();
     let waf_scalar = if user_mode {
         shape.user_waf
     } else {
@@ -638,7 +636,7 @@ pub fn try_run_surface_fire_with_intermediates_and_shape(
     validate_condition_and(&[ib.packing_ratio])?;
     let sp = super::calculate_slope_phi(
         plain(input.slope).with_scalar_array(shape.slope),
-        input.slope_units,
+        crate::units::SlopeUnit::Degrees,
         ib.packing_ratio,
         ri,
     );
@@ -650,7 +648,7 @@ pub fn try_run_surface_fire_with_intermediates_and_shape(
         wp,
         sp,
         plain(input.wind_direction).with_scalar_array(shape.wind_direction),
-        &input.wind_orientation_mode,
+        options.wind_orientation,
         plain(input.aspect).with_scalar_array(shape.aspect),
     );
     if let Some(error) = vector.named_values().iter().find_map(|(_, x)| x.error) {
@@ -695,7 +693,7 @@ pub fn try_run_surface_fire_with_intermediates_and_shape(
         vector.x_component,
         vector.y_component,
         vector.rate_vector,
-        &input.wind_orientation_mode,
+        options.wind_orientation,
         plain(input.aspect).with_scalar_array(shape.aspect),
     )
     .value;

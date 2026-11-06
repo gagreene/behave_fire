@@ -1,5 +1,9 @@
 //! Run surface fire and mortality using only the standalone Rust crate.
-use behave_fire::{fuel_models::CustomFuelModel, surface::SurfaceInput, BehaveRun, FuelModels};
+use behave_fire::{
+    engine::{SurfaceCell, SurfaceOptions, SurfacePlan, SurfaceTweaks},
+    fuel_models::CustomFuelModel,
+    BehaveRun, FuelModels,
+};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut fuels = FuelModels::default();
@@ -17,8 +21,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Later caller edits do not alter the model's calculation snapshot.
     assert!(fuels.clear_custom_fuel_model(14));
     for number in [1, 14] {
-        let input = SurfaceInput::new(number);
-        let surface = model.do_surface_run(&input)?;
+        let input = SurfaceCell::new(number);
+        let surface = model.do_surface_run(
+            &SurfacePlan::new(SurfaceOptions::default()),
+            &input,
+            SurfaceTweaks::default(),
+        );
         assert!(surface.spread_rate.is_finite() && surface.spread_rate > 0.0);
         let scorch = BehaveRun::calculate_scorch_height(surface.fireline_intensity, 5.0, 77.0);
         let mortality = model.calculate_crown_scorch_mortality(scorch, 80.0, 0.5, 12.0, 1);

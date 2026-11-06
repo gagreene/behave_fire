@@ -1,11 +1,9 @@
 //! Crown helpers preserving shared NumPy MaskedArray arithmetic semantics.
 use super::{CrownHeat, CrownRatios, FinalCrownBehavior, FireClassification, PassiveCrownBehavior};
-use crate::{
-    surface::{
-        masked::{self, MaskedError, MaskedFuelbedIntermediates, MaskedValue, SurfaceInputShape},
-        FuelbedIntermediates, SurfaceInput,
-    },
-    units::SpeedUnit,
+use crate::engine::{SurfaceCell, SurfaceOptions, WafMethod};
+use crate::surface::{
+    masked::{self, MaskedError, MaskedFuelbedIntermediates, MaskedValue, SurfaceInputShape},
+    FuelbedIntermediates,
 };
 
 /// Construct a weak Python scalar for a translated source constant.
@@ -268,16 +266,20 @@ pub fn try_calculate_crowning_surface_fire_spread_rate_with_intermediates(
     );
     let wind =
         MaskedValue::select(a.greater(c(0.)), a.pow(c(1. / 1.4308256324729873)), c(0.)).div(c(0.4));
-    let mut input = SurfaceInput::new(10);
+    let mut input = SurfaceCell::new(10);
     input.wind_speed = wind.value;
-    input.wind_speed_units = SpeedUnit::FeetPerMinute;
     input.canopy_height = height.value;
-    input.waf_method = "UserInput".into();
+    let controls = SurfaceOptions {
+        waf_method: WafMethod::UserInput,
+        ..SurfaceOptions::default()
+    };
     input.user_waf = Some(0.4);
     let mut shape = SurfaceInputShape::uniform(scalar_grid);
     shape.wind_speed = wind.is_scalar_array;
     shape.canopy_height = height.is_scalar_array;
-    let result = masked::try_run_surface_fire_with_intermediates_and_shape(ri, ib, &input, &shape)?;
+    let result = masked::try_run_surface_fire_with_intermediates_and_shape(
+        ri, ib, &input, &controls, &shape,
+    )?;
     let scalar = scalar_grid
         && ri.is_scalar_array
         && critical.is_scalar_array
