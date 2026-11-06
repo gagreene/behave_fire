@@ -45,7 +45,7 @@ This file lists the defined fuel models available in the `behave_fire` repositor
 | 107 | GR7 | High load, dry climate grass (D) |
 | 108 | GR8 | High load, very coarse, humid climate grass (D) |
 | 109 | GR9 | Very high load, humid climate grass (D) |
-| 110 | V-Hb | Short Gass, < 0.5 m (Dynamic) |
+| 110 | V-Hb | Short Grass, < 0.5 m (Dynamic) |
 | 111 | V-Ha | Tall Grass, > 0.5 m (Dynamic) |
 
 ## Grass-Shrub

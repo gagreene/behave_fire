@@ -17,6 +17,13 @@
 - Indent wrapped `:param` and `:return:` descriptions by eight spaces, and describe side effects in `:return:` when a function writes files instead of returning a value.
 - Apply these rules to first-party production code. Do not reformat vendored or generated code solely to enforce this preference.
 
+## Rust and native backend
+
+- The Cargo workspace is in `rust/` (core crate `behave-fire`, unpublished PyO3 bindings `behave-py`); there is no `Cargo.toml` at the repository root, so pass `--manifest-path rust/Cargo.toml`. Build, test, and lint commands are in `docs/CONTRIBUTION_PROCEDURES.md`.
+- The Python implementation under `src/behave_fire/components/` is the behavioral reference. Rust must match it within the documented tolerances; do not change expected values to make a change pass, and treat regenerating fixtures (`tools/export_rust_reference.py`) as an explicit, reviewed action. A suspected Python defect needs an explicit fix decision; Rust results must not silently differ from Python.
+- Keep the `behave-fire` core free of normal and build dependencies and of any Python, NumPy, or C++ requirement. Record intentional Rust/Python differences in `docs/BACKEND_DIFFERENCES.md`.
+- Never publish to PyPI or crates.io, create release tags, or enable publishing switches without the user's direct permission. See `docs/RELEASING.md` and `docs/CRATES_IO.md`.
+
 ## Version control permissions
 
 - Never create, amend, or otherwise modify a Git commit without the user's direct permission.

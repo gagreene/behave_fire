@@ -6,7 +6,14 @@ Port the current Python calculation library to a self-sufficient Rust crate, pro
 
 Behavior reference: `behave_fire` commit `7933789f00470c6bbfbe942dc22bdd7f74e192f9`. Architecture reference: sibling `../cffdrs` at `ec7d01909b7ef00ddc359cf4ff02f15b9786a380`. Read-only reference files include its `rust/Cargo.toml`, both crate manifests, `src/cffdrs/cffbps/auto.py`, Rust facade, `tools/smoke_test_wheel.py`, and `.github/workflows/{ci,release,release-crate}.yml`.
 
-This tracked contract defines the implemented Rust backend and its dependent PR stack. Native execution is available through the explicit and automatic interfaces when the compiled extension is installed; the pure wheel retains Python execution. Release and registry operations require separate authorization.
+This tracked contract defines the implemented Rust backend. Native execution is available through the explicit and automatic interfaces when the compiled extension is installed; the pure wheel retains Python execution. Release and registry operations require separate authorization.
+
+## Implementation status
+
+- **Complete:** every public Python calculation and stateful helper has a Rust core equivalent and an explicit native binding route, and the extension advertises a complete backend. The automatic and explicit selectors, serialization, ownership, and packaging contracts below are implemented and tested.
+- **Delivered:** the work landed on `pre_release` as an eight-layer dependent PR stack (contracts, core, surface and crown, other domains, bindings, dispatch, wheels, crate packaging), followed by the performance measurement harness, typed scalar stages, and raster columns described in [RUST_ENGINE.md](RUST_ENGINE.md).
+- **Not yet true:** the Rust backend is not faster than Python for typical workloads, and the Python binding does not yet use the raster engine. See [RUST_BACKEND_BENCHMARKS.md](RUST_BACKEND_BENCHMARKS.md).
+- **Not published:** neither the Python package nor the Rust crate has been uploaded to PyPI or crates.io.
 
 ## Chosen architecture
 
@@ -69,7 +76,7 @@ Preserve working pickle and deepcopy behavior for built-in model/registry classe
 
 ## Coverage and compatibility
 
-Completion means a Rust equivalent for every public calculation and stateful helper in the current components, plus the constructor and all 11 public facade methods: surface, crown, scorch height, crown-scorch mortality, three spotting methods, and four fire-geometry methods. Inventory these explicitly before porting; the current 194 pytest checks and 135-check legacy harness are not complete coverage of the library.
+Completion means a Rust equivalent for every public calculation and stateful helper in the current components, plus the constructor and all 11 public facade methods: surface, crown, scorch height, crown-scorch mortality, three spotting methods, and four fire-geometry methods. The explicit API inventory (`tests/data/rust_api_inventory.json`) lists each public name and its native route; the original pytest suite and legacy harness alone were not complete coverage of the library.
 
 | Python component | Core module and responsibility |
 | --- | --- |
@@ -188,7 +195,7 @@ Maturin's git sdist mode uses the tracked file set. Ensure required generated ta
 
 The release workflow builds/tests, checks MSRV, builds an sdist plus native and pure wheels, installs each artifact in an isolated environment outside the checkout across its tested matrix, runs native/Python parity or pure-fallback smoke checks as appropriate, and runs `twine check`. Native and pure artifacts share metadata; verify wheel selection with dependencies preinstalled from binary wheels and `pip install --no-deps --no-index --find-links ...`, separately from complete dependency-install tests. Only verified artifacts reach TestPyPI on manual release dispatch or PyPI on an approved `v*` tag. Use PyPI Trusted Publishing, protected environments, and explicit owner setup. Publishing and tags require separate authorization; provide a build-only manual mode.
 
-Conda packaging is removed in Layer 1 as specified by the revised plan, including its obsolete manifest exclusion and release-note update. Early CI begins in Layer 2 and runs for PRs targeting any stack branch. Treat these as coordinated plan/design decisions, not independent changes to make during this document revision.
+Conda packaging has been removed from the repository; Python delivery is through wheels and the source distribution. CI runs for PRs targeting any branch, including the intermediate branches of a dependent stack.
 
 ## Independent crates.io delivery
 
@@ -206,8 +213,6 @@ Follow cffdrs's first-publication bootstrap and later OIDC trusted-publishing wo
 
 ## Delivery and sources
 
-Implement in reviewable stages: contract fixtures, standalone Rust foundation/data, domain ports, array bindings and explicit namespaces, automatic wrapper, Python packaging/CI, then crates.io packaging/release checks. A release may not claim completion while advertised native operations are missing or silently delegated to Python.
-
-Deliver these stages as the eight-layer dependent PR stack defined in the implementation plan. The bottom PR targets `pre_release`; upper PRs initially target their preceding branches. The selected landing policy is one bottom PR at a time using merge commits, followed by stack synchronization. Merge commits are a project preference, not a claim that gh-stack cannot squash. The installed tool supports atomic multi-PR merges and squash/rebase methods. After explicit merge authorization, use `gh pr merge <bottom-pr-number> --repo gagreene/behave_fire --merge --match-head-commit <tested-head-sha>` for an unambiguous single-PR operation, then `gh stack sync` without `--prune` and verify resulting bases. Do not use an unqualified `gh stack merge` or `--yes` as a one-layer shortcut. Verify that every layer ultimately lands on `pre_release`, refresh SHA-specific tests after rebases, and leave permanent branches and local outputs intact. Stack creation/commit/push/PR authorization is recorded in the plan; merges and publication remain separately authorized.
+A release may not claim completion while advertised native operations are missing or silently delegated to Python. The original stages (contract fixtures, standalone Rust foundation and data, domain ports, array bindings with explicit namespaces, the automatic wrapper, Python packaging and CI, and crates.io packaging) were delivered as a dependent PR stack. Procedures for any future stack, including how to land it, are in [CONTRIBUTION_PROCEDURES.md](CONTRIBUTION_PROCEDURES.md).
 
 The selected layout and sdist settings follow the [Maturin project layout](https://www.maturin.rs/project_layout.html), [configuration documentation](https://www.maturin.rs/config.html), and [git-mode file selection](https://docs.rs/crate/maturin/1.7.4/source/maturin.schema.json). ABI choices follow [PyO3 build and distribution guidance](https://pyo3.rs/main/building-and-distribution.html). Standalone packaging follows [Cargo workspace rules](https://doc.rust-lang.org/cargo/reference/workspaces.html), [dependency rules](https://doc.rust-lang.org/cargo/reference/specifying-dependencies.html), and [publishing size guidance](https://doc.rust-lang.org/cargo/reference/publishing.html). Registry authentication must be checked against [crates.io Trusted Publishing](https://crates.io/docs/trusted-publishing) before release.
