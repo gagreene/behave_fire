@@ -4,7 +4,7 @@ use crate::operation::Operation;
 use crate::prepared::PreparedArguments;
 use std::ops::Range;
 
-type BatchEvaluation = (ColumnBundle, f64, usize);
+pub(crate) type BatchEvaluation = (ColumnBundle, f64, usize);
 
 pub fn surface(
     a: &PreparedArguments<'_>,
@@ -113,26 +113,38 @@ pub fn chunk(
     range: Range<usize>,
     single: bool,
 ) -> Result<ColumnBundle, String> {
-    let mut seeds = Vec::new();
-    let mut capture = RowWriter::record(&mut seeds);
-    crate::dispatch::evaluate(operation, arguments, range.start, single, &mut capture)?;
-    capture.finish()?;
-    let mut output = ColumnBundle::new(
-        seeds,
-        range.len(),
+    chunk_with(
+        range,
+        operation.main_model(),
         default_single(operation, arguments, single),
         arguments.metadata_varies(operation == Operation::CrownRunCrownFire),
-    )?;
-    output.write_first(operation.main_model())?;
-    for index in range.start + 1..range.end {
-        let mut row = RowWriter::row(&mut output, index - range.start, operation.main_model());
-        crate::dispatch::evaluate(operation, arguments, index, single, &mut row)?;
-        row.finish()?;
+        |index, output| crate::dispatch::evaluate(operation, arguments, index, single, output),
+    )
+}
+
+pub(crate) fn chunk_with(
+    range: Range<usize>,
+    main_model: bool,
+    single: bool,
+    variable_metadata: bool,
+    evaluate: impl Fn(usize, &mut RowWriter<'_>) -> Result<(), String>,
+) -> Result<ColumnBundle, String> {
+    let mut seeds = Vec::new();
+    let mut capture = RowWriter::record(&mut seeds);
+    evaluate(range.start, &mut capture)?;
+    capture.finish()?;
+    let mut output = ColumnBundle::new(seeds, range.len(), single, variable_metadata)?;
+    if !range.is_empty() {
+        output.write_first(main_model)?;
+        for index in range.start + 1..range.end {
+            let mut row = RowWriter::row(&mut output, index - range.start, main_model);
+            evaluate(index, &mut row)?;
+            row.finish()?;
+        }
     }
     output.check_lengths()?;
     Ok(output)
 }
-
 pub fn merge(chunks: Vec<ColumnBundle>, count: usize) -> Result<ColumnBundle, String> {
     let mut chunks = chunks.into_iter();
     let mut output = chunks

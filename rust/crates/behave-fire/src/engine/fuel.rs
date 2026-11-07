@@ -105,9 +105,24 @@ impl PreparedFuel {
             &[self.savr_live_herb, self.savr_live_woody, 0.0, 0.0, 0.0],
         )
     }
+    /// Prepare a numeric row after direct construction or edits, without registry names.
+    pub fn prepared(mut self) -> Self {
+        self.savr_cache = None;
+        self.static_cache = None;
+        self.savr_cache = Some((self.savr_key(), self.savr_terms()));
+        if !self.is_dynamic {
+            let particles = crate::surface::build_particle_arrays_from_prepared(
+                &self, 0.01, 0.01, 0.01, 0.01, 0.01,
+            );
+            let fuelbed = crate::surface::PreparedFuelbed::new(&particles, &self.savr_terms());
+            let reaction = crate::surface::ReactionCoefficients::new(&fuelbed.template);
+            self.static_cache = Some((self.physics_key(), StaticPhysics { fuelbed, reaction }));
+        }
+        self
+    }
     /// Copy physical properties without normalizing undefined rows or cloning names.
     pub fn from_model(model: &FuelModel) -> Self {
-        let mut result = Self {
+        let result = Self {
             fuel_bed_depth: model.fuel_bed_depth,
             moisture_of_extinction_dead: model.moisture_of_extinction_dead,
             heat_of_combustion_dead: model.heat_of_combustion_dead,
@@ -125,16 +140,7 @@ impl PreparedFuel {
             savr_cache: None,
             static_cache: None,
         };
-        result.savr_cache = Some((result.savr_key(), result.savr_terms()));
-        if !result.is_dynamic {
-            let particles = crate::surface::build_particle_arrays_from_prepared(
-                &result, 0.01, 0.01, 0.01, 0.01, 0.01,
-            );
-            let fuelbed = crate::surface::PreparedFuelbed::new(&particles, &result.savr_terms());
-            let reaction = crate::surface::ReactionCoefficients::new(&fuelbed.template);
-            result.static_cache = Some((result.physics_key(), StaticPhysics { fuelbed, reaction }));
-        }
-        result
+        result.prepared()
     }
 }
 
@@ -155,9 +161,27 @@ impl PreparedFuels {
         }
     }
 
-    /// Borrow a physical record, clamping the identifier to the valid 0–260 grid.
+    /// Prepare numeric lookup rows without constructing named registry objects.
+    pub fn from_rows(rows: Vec<PreparedFuel>) -> Result<Self, crate::BehaveError> {
+        if rows.is_empty() {
+            return Err(crate::BehaveError::LengthMismatch {
+                field: "fuel registry".into(),
+                expected: 1,
+                actual: 0,
+            });
+        }
+        Ok(Self {
+            rows: rows
+                .into_iter()
+                .map(PreparedFuel::prepared)
+                .collect::<Vec<_>>()
+                .into_boxed_slice(),
+        })
+    }
+
+    /// Borrow a physical record, clamping the identifier to the available numeric rows.
     pub fn for_grid(&self, id: i32) -> &PreparedFuel {
-        &self.rows[id.clamp(0, 260) as usize]
+        &self.rows[(id.max(0) as usize).min(self.rows.len() - 1)]
     }
 }
 
@@ -234,5 +258,22 @@ mod zero_sign_tests {
         let plan = crate::engine::SurfacePlan::default();
         let bed = plan.prepare_fuelbed(&crate::engine::SurfaceCell::new(0), &fuel);
         assert_eq!(bed.depth.to_bits(), (-0.0_f64).to_bits());
+    }
+}
+
+#[cfg(test)]
+mod numeric_rows_tests {
+    use super::*;
+    #[test]
+    fn numeric_registry_rows_prepare_without_registry_names_and_refresh_edits() {
+        let registry = FuelModels::default();
+        let mut row = PreparedFuel::from_model(registry.for_grid(10));
+        row.fuel_bed_depth *= 1.3;
+        let row = row.prepared();
+        assert!(row.physics().is_some());
+        let fuels = PreparedFuels::from_rows(vec![PreparedFuel::default(), row]).unwrap();
+        assert_eq!(fuels.for_grid(-5).fuel_bed_depth, 0.0);
+        assert_eq!(fuels.for_grid(500).fuel_bed_depth, row.fuel_bed_depth);
+        assert!(PreparedFuels::from_rows(Vec::new()).is_err());
     }
 }

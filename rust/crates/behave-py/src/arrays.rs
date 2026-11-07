@@ -26,7 +26,7 @@ pub fn masked_error(error: behave_fire::surface::masked::MaskedError) -> String 
 }
 
 #[pyfunction]
-#[pyo3(signature=(operation, arrays, strings, shape, single, integers=None, threads=None, profile=false, _owned_callback=None))]
+#[pyo3(signature=(operation, arrays, strings, shape, single, integers=None, threads=None, profile=false, _owned_callback=None, registry=None))]
 // Keep the existing keyword-based Python boundary explicit for PyO3.
 #[allow(clippy::too_many_arguments)]
 pub fn batch<'py>(
@@ -40,6 +40,7 @@ pub fn batch<'py>(
     threads: Option<&Bound<'py, PyAny>>,
     profile: bool,
     _owned_callback: Option<&Bound<'py, PyAny>>,
+    registry: Option<&Bound<'py, PyDict>>,
 ) -> PyResult<Bound<'py, PyDict>> {
     let started = std::time::Instant::now();
     let requested = if let Some(value) = threads {
@@ -163,11 +164,45 @@ pub fn batch<'py>(
             owned_integers.insert(name, (kind, bits));
         }
     }
-    let arguments = Arguments {
+    let mut arguments = Arguments {
         values,
         strings,
         integers: owned_integers,
     };
+    let registry = registry
+        .map(|registry| {
+            let mut values = BTreeMap::new();
+            let mut rows = None;
+            for (key, value) in registry.iter() {
+                let name: String = key.extract()?;
+                let array: PyReadonlyArrayDyn<'_, f64> = value.extract()?;
+                if array.ndim() != 1 {
+                    return Err(PyValueError::new_err(
+                        "fuel registry columns must be one-dimensional",
+                    ));
+                }
+                let view = array.as_array();
+                if rows.is_some_and(|rows| rows != view.len()) {
+                    return Err(PyValueError::new_err("fuel registry column lengths differ"));
+                }
+                rows = Some(view.len());
+                let mut column = Vec::new();
+                column
+                    .try_reserve_exact(view.len())
+                    .map_err(|error| pyo3::exceptions::PyMemoryError::new_err(error.to_string()))?;
+                column.extend(view.iter().copied());
+                values.insert(name, column);
+            }
+            Ok((
+                Arguments {
+                    values,
+                    strings: BTreeMap::new(),
+                    integers: BTreeMap::new(),
+                },
+                rows.unwrap_or(0),
+            ))
+        })
+        .transpose()?;
     let copied = started.elapsed().as_secs_f64();
     if let Some(callback) = _owned_callback {
         callback.call0()?;
@@ -177,14 +212,57 @@ pub fn batch<'py>(
     let detached_started = std::time::Instant::now();
     let result = py
         .detach(|| {
+            crate::prepared::conversions::apply(&mut arguments)?;
             let grid_shape =
                 behave_fire::GridShape::new(shape.clone()).map_err(|error| error.to_string())?;
             if count == 0 {
-                let prototype_arguments = arguments.empty_prototype();
+                let mut prototype_arguments = arguments.empty_prototype();
+                if let Some((registry, rows)) = &registry {
+                    let index = if operation == Operation::CrownRunCrownFire {
+                        10
+                    } else {
+                        prototype_arguments
+                            .values
+                            .get("fuel_model_grid")
+                            .and_then(|grid| grid.first())
+                            .copied()
+                            .unwrap_or(0.0)
+                            .max(0.0) as usize
+                    };
+                    if *rows == 0 {
+                        return Err("empty fuel registry".to_owned());
+                    }
+                    for (name, values) in &registry.values {
+                        prototype_arguments
+                            .values
+                            .insert(name.clone(), vec![values[index.min(rows - 1)]]);
+                    }
+                }
                 let prototype = PreparedArguments::new(&prototype_arguments, &grid_shape)?;
                 return crate::parallel::empty(operation, &prototype, single);
             }
             let prepared = PreparedArguments::new(&arguments, &grid_shape)?;
+            if let Some((registry, rows)) = &registry {
+                let fuels = crate::prepared::pipeline::prepare_fuels(registry, *rows)?;
+                return match operation {
+                    Operation::ModelRunSurface => crate::prepared::pipeline::surface_pipeline(
+                        &crate::prepared::surface::PreparedSurface::new(&prepared, grid_shape)?,
+                        &fuels,
+                        requested,
+                    ),
+                    Operation::CrownRunCrownFire => crate::prepared::pipeline::crown_pipeline(
+                        &crate::prepared::crown::PreparedCrown::new(&prepared, grid_shape)?,
+                        &fuels,
+                        requested,
+                    ),
+                    _ => Err("numeric registry is only supported for model pipelines".to_owned()),
+                }
+                .map(|(columns, seconds, bytes)| {
+                    concatenate_seconds = seconds;
+                    appended_bytes = bytes;
+                    columns
+                });
+            }
             if let Some(result) = crate::parallel::evaluate(operation, &prepared, count, requested)
             {
                 return result.map(|(columns, seconds, bytes)| {

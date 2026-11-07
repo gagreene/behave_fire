@@ -1,5 +1,6 @@
 //! Crown fire stages in reference base units: ft, ft/min, lb/ftÂ³, BTU/ftÂ², BTU/ft/s.
-use crate::math::{np_max, np_min};
+use crate::math::np_max;
+pub mod arithmetic;
 pub mod masked;
 mod record;
 use crate::{
@@ -8,7 +9,7 @@ use crate::{
     },
     surface::{self, FuelbedIntermediates, Particles, SurfaceResult},
 };
-pub use record::{run_with_surface_inputs, MaskedCrownResult};
+pub use record::{run_with_surface_inputs, try_run_compact_surface_inputs, MaskedCrownResult};
 
 macro_rules! record {
     ($name:ident { $($field:ident),+ $(,)? }) => {
@@ -119,7 +120,7 @@ macro_rules! numeric_stages {
             } else {
                 0.0
             };
-            np_min(np_max(v, 0.0), 1.0)
+            v.clamp(0.0, 1.0)
         }
         /// Calculate canopy loading, heat, active crown intensity, and flame length.
         pub fn calculate_crown_heat_and_intensity(
@@ -252,7 +253,7 @@ pub mod single {
     use super::{
         CrownHeat, CrownRatios, FinalCrownBehavior, FireClassification, PassiveCrownBehavior,
     };
-    use crate::math::single::{np_max, np_min};
+    use crate::math::single::np_max;
     numeric_stages!(f32);
 }
 
