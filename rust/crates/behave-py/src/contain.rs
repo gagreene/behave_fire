@@ -1,24 +1,24 @@
 //! Native contain marshalling and scalar entry-point dispatch.
-use crate::arrays::Arguments;
 use crate::dispatch::{named, widen, Cell};
+use crate::prepared::{Field, PreparedArguments};
 use behave_fire::contain;
 #[allow(deprecated)]
 pub fn evaluate(
     operation: &str,
-    a: &Arguments,
+    a: &PreparedArguments<'_>,
     i: usize,
     _single: bool,
 ) -> Result<Option<Cell>, String> {
     Ok(Some(match operation {
         "contain.run_contain_sim_array" => named(
             contain::run_contain_sim_array(
-                a.n("report_spread_rate", i)?,
-                a.n("lw_ratio", i)?,
-                a.n("report_size", i)?,
-                a.n("production_rate", i)?,
-                a.n("attack_time", i)?,
-                a.n("max_steps", i)? as i64,
-                a.n("dist_step", i)?,
+                a.n(Field::ReportSpreadRate, i)?,
+                a.n(Field::LwRatio, i)?,
+                a.n(Field::ReportSize, i)?,
+                a.n(Field::ProductionRate, i)?,
+                a.n(Field::AttackTime, i)?,
+                a.n(Field::MaxSteps, i)? as i64,
+                a.n(Field::DistStep, i)?,
             )
             .named_values()
             .into_iter()

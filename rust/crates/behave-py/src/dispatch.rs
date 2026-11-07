@@ -1,5 +1,5 @@
 //! Scalar dispatch; all numerical work belongs to the standalone core.
-use crate::arrays::Arguments;
+use crate::prepared::PreparedArguments;
 use behave_fire::crown;
 use std::collections::BTreeMap;
 pub type Cell = BTreeMap<String, f64>;
@@ -21,7 +21,12 @@ pub(crate) fn classification(r: crown::FireClassification) -> Cell {
     ])
 }
 #[allow(deprecated)]
-pub fn evaluate(operation: &str, a: &Arguments, i: usize, single: bool) -> Result<Cell, String> {
+pub fn evaluate(
+    operation: &str,
+    a: &PreparedArguments<'_>,
+    i: usize,
+    single: bool,
+) -> Result<Cell, String> {
     if a.has_masks() || a.has_single() || a.has_integers() || a.has_python_payloads() {
         if let Some(result) = crate::crown_masked::evaluate(operation, a, i)? {
             return Ok(result);
