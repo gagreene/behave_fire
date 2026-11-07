@@ -1,17 +1,20 @@
 //! Crown stage dtype and masks remain native per-input metadata.
+use crate::column_output::RowWriter;
+use crate::operation::Operation;
 use crate::{
-    dispatch::Cell,
     masked::output,
     prepared::{Field, PreparedArguments},
 };
 use behave_fire::crown::masked::*;
 pub fn evaluate(
-    operation: &str,
+    operation: Operation,
     a: &PreparedArguments<'_>,
     i: usize,
-) -> Result<Option<Cell>, String> {
-    Ok(Some(match operation {
-        "crown.assign_final_crown_fire_behavior" => crate::masked::outputs(
+    out: &mut RowWriter<'_>,
+) -> Result<Option<()>, String> {
+    match operation {
+        Operation::CrownAssignFinalCrownFireBehavior => crate::masked::outputs(
+            out,
             assign_final_crown_fire_behavior(
                 a.n(Field::IsSurfaceFire, i)? != 0.0,
                 a.n(Field::IsPassiveCrown, i)? != 0.0,
@@ -29,18 +32,21 @@ pub fn evaluate(
             )
             .named_values(),
         )?,
-        "crown.calculate_critical_crown_fire_spread_rate" => output(
+        Operation::CrownCalculateCriticalCrownFireSpreadRate => output(
+            out,
             calculate_critical_crown_fire_spread_rate(a.masked(Field::CanopyBulkDensity, i)?),
             "",
         )?,
-        "crown.calculate_critical_surface_fireline_intensity" => output(
+        Operation::CrownCalculateCriticalSurfaceFirelineIntensity => output(
+            out,
             calculate_critical_surface_fireline_intensity(
                 a.masked(Field::CanopyBaseHeight, i)?,
                 a.masked(Field::MoistureFoliar, i)?,
             ),
             "",
         )?,
-        "crown.calculate_crown_fire_ratios" => crate::masked::outputs(
+        Operation::CrownCalculateCrownFireRatios => crate::masked::outputs(
+            out,
             calculate_crown_fire_ratios(
                 a.masked(Field::SurfaceFli, i)?,
                 a.masked(Field::CrownRos, i)?,
@@ -49,7 +55,8 @@ pub fn evaluate(
             )
             .named_values(),
         )?,
-        "crown.calculate_crown_fraction_burned" => output(
+        Operation::CrownCalculateCrownFractionBurned => output(
+            out,
             calculate_crown_fraction_burned(
                 a.masked(Field::SurfaceRos, i)?,
                 a.masked(Field::SurfaceCriticalRos, i)?,
@@ -57,7 +64,8 @@ pub fn evaluate(
             ),
             "",
         )?,
-        "crown.calculate_crown_heat_and_intensity" => crate::masked::outputs(
+        Operation::CrownCalculateCrownHeatAndIntensity => crate::masked::outputs(
+            out,
             calculate_crown_heat_and_intensity(
                 a.masked(Field::SurfaceHpua, i)?,
                 a.masked(Field::CrownRos, i)?,
@@ -67,7 +75,8 @@ pub fn evaluate(
             )
             .named_values(),
         )?,
-        "crown.calculate_passive_crown_fire_behavior" => crate::masked::outputs(
+        Operation::CrownCalculatePassiveCrownFireBehavior => crate::masked::outputs(
+            out,
             calculate_passive_crown_fire_behavior(
                 a.masked(Field::SurfaceRos, i)?,
                 a.masked(Field::SurfaceHpua, i)?,
@@ -77,20 +86,23 @@ pub fn evaluate(
             )
             .named_values(),
         )?,
-        "crown.calculate_surface_fire_critical_spread_rate" => output(
+        Operation::CrownCalculateSurfaceFireCriticalSpreadRate => output(
+            out,
             calculate_surface_fire_critical_spread_rate(
                 a.masked(Field::CriticalSurfaceFli, i)?,
                 a.masked(Field::SurfaceHpua, i)?,
             ),
             "",
         )?,
-        "crown.classify_crown_fire_type" => {
-            crate::dispatch::classification(classify_crown_fire_type(
+        Operation::CrownClassifyCrownFireType => crate::dispatch::classification(
+            out,
+            classify_crown_fire_type(
                 a.masked(Field::TransitionRatio, i)?,
                 a.masked(Field::ActiveRatio, i)?,
-            ))
-        }
-        "crown.calculate_crowning_surface_fire_spread_rate" => output(
+            ),
+        ),
+        Operation::CrownCalculateCrowningSurfaceFireSpreadRate => output(
+            out,
             try_calculate_crowning_surface_fire_spread_rate_with_intermediates(
                 a.masked(Field::RiCrown, i)?,
                 &crate::masked_records::intermediates(a, i)?,
@@ -101,7 +113,7 @@ pub fn evaluate(
             .map_err(crate::arrays::masked_error)?,
             "",
         )?,
-        "crown.run_crown_fire" => {
+        Operation::CrownRunCrownFire => {
             let mut surface = behave_fire::crown::SurfaceFireInputs::new();
             surface.surface_ros = a.masked(Field::SurfaceResultsSpreadRate, i)?;
             surface.surface_fli = a.masked(Field::SurfaceResultsFirelineIntensity, i)?;
@@ -115,10 +127,10 @@ pub fn evaluate(
                 behave_fire::crown::run_with_surface_inputs(&surface, &input, &fuel, &controls)
             }
             .map_err(|e| e.to_string())?;
-            let mut out = crate::masked::outputs(r.named_values())?;
-            out.insert("fire_type".into(), r.fire_type as f64);
-            out
+            crate::masked::outputs(out, r.named_values())?;
+            out.i32("fire_type", r.fire_type);
         }
         _ => return Ok(None),
-    }))
+    }
+    Ok(Some(()))
 }

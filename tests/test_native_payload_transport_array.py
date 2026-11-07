@@ -34,7 +34,7 @@ def _assert_payload(actual, expected):
 def test_complex_reconstruction_does_not_perform_complex_arithmetic(real, imaginary, single):
     from behave_fire.rust._bridge import _restore_payload
 
-    metadata = {'__single.': np.array([single]), '__complex.': np.array([1.]), '__imag.': np.array([imaginary])}
+    metadata = {'': {'single': single, 'complex': True, 'imag': np.array([imaginary])}}
     result = _restore_payload(np.array([real]), metadata, '')
     assert result.dtype == (np.complex64 if single else np.complex128)
     np.testing.assert_array_equal(result.real, np.array([real], dtype=result.real.dtype))

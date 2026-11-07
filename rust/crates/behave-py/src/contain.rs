@@ -1,16 +1,20 @@
 //! Native contain marshalling and scalar entry-point dispatch.
-use crate::dispatch::{named, widen, Cell};
+use crate::column_output::RowWriter;
+use crate::dispatch::{named, widen};
+use crate::operation::Operation;
 use crate::prepared::{Field, PreparedArguments};
 use behave_fire::contain;
 #[allow(deprecated)]
 pub fn evaluate(
-    operation: &str,
+    operation: Operation,
     a: &PreparedArguments<'_>,
     i: usize,
     _single: bool,
-) -> Result<Option<Cell>, String> {
-    Ok(Some(match operation {
-        "contain.run_contain_sim_array" => named(
+    out: &mut RowWriter<'_>,
+) -> Result<Option<()>, String> {
+    match operation {
+        Operation::ContainRunContainSimArray => named(
+            out,
             contain::run_contain_sim_array(
                 a.n(Field::ReportSpreadRate, i)?,
                 a.n(Field::LwRatio, i)?,
@@ -25,5 +29,6 @@ pub fn evaluate(
             .map(|(k, v)| (k, widen(v))),
         ),
         _ => return Ok(None),
-    }))
+    }
+    Ok(Some(()))
 }

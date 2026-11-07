@@ -315,7 +315,8 @@ fn replay(name: &str) {
                         a("crown_fli"),
                         a("crown_fl"),
                     )
-                    .named_values();
+                    .named_values()
+                    .to_vec();
                     None
                 }
                 "calculate_critical_crown_fire_spread_rate" => Some(
@@ -365,7 +366,8 @@ fn replay(name: &str) {
                         a("critical_surface_fli"),
                         a("critical_crown_ros"),
                     )
-                    .named_values();
+                    .named_values()
+                    .to_vec();
                     None
                 }
                 "calculate_crown_heat_and_intensity" => {
@@ -376,7 +378,8 @@ fn replay(name: &str) {
                         a("canopy_height"),
                         a("canopy_bulk_density"),
                     )
-                    .named_values();
+                    .named_values()
+                    .to_vec();
                     None
                 }
                 "calculate_passive_crown_fire_behavior" => {
@@ -387,7 +390,8 @@ fn replay(name: &str) {
                         a("canopy_hpua"),
                         a("cfb"),
                     )
-                    .named_values();
+                    .named_values()
+                    .to_vec();
                     None
                 }
                 _ => panic!("{name}"),

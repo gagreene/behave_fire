@@ -4,7 +4,7 @@ Importing this module never discovers or imports the native extension.
 The versioned operation inventory is verified against the tracked API fixture.
 """
 
-BINDING_API_VERSION = 2
+BINDING_API_VERSION = 3
 REQUIRED_CAPABILITIES = frozenset((
     "behave_fire.rust.behave_units.area_from_base",
     "behave_fire.rust.behave_units.area_to_base",
