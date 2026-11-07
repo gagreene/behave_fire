@@ -134,3 +134,18 @@ Lightning ignition remains available as a deprecated compatibility calculation.
 
 Run `cargo run --example standalone` from this crate directory for a complete
 default/custom-fuel surface and mortality example with registry snapshots.
+
+## Prepared physics and Crown stages
+
+`PreparedFuels` snapshots the registry into immutable heap-backed numerical rows.
+SAVR terms are prepared for every row; static fuels also retain fuelbed and
+reaction coefficients. Moisture-dependent quantities are still calculated per
+cell. Changes to a standalone `PreparedFuel` invalidate cached terms through
+bitwise physical-field checks, including signed zero. Dynamic fuels and edited
+fuelbeds retain the appropriate uncached calculations.
+
+`CrownPlan::prepare_surface` returns the complete public Surface intermediates.
+`CrownPlan::prepare_spread` returns `CrownSpreadResult`, the particle, fuelbed,
+reaction, spread, and length-to-width stages consumed by the complete Crown
+pipeline. Both retain supplied terrain and overrides; the crowning backsolve
+uses its independent flat/default controls.

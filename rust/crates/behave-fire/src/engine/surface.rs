@@ -90,7 +90,7 @@ impl SurfacePlan {
         let particles = surface::build_particle_arrays_from_prepared(
             fuel, cell.m1h, cell.m10h, cell.m100h, cell.mlh, cell.mlw,
         );
-        surface::calculate_fuelbed_intermediates(&particles)
+        fuel.prepare_fuelbed(&particles)
     }
 
     /// Evaluate a cell with explicit stage overrides and no per-cell ownership.
@@ -100,7 +100,18 @@ impl SurfacePlan {
         fuel: &PreparedFuel,
         tweaks: SurfaceTweaks,
     ) -> SurfaceResult {
-        self.run_from_fuelbed(cell, &self.prepare_fuelbed(cell, fuel), tweaks)
+        let fuelbed = self.prepare_fuelbed(cell, fuel);
+        let reaction = tweaks
+            .reaction_intensity
+            .unwrap_or_else(|| fuel.reaction_intensity(&fuelbed));
+        run_selected_stages::<0>(
+            reaction,
+            0.9 * reaction,
+            &fuelbed,
+            cell,
+            &self.options,
+            tweaks,
+        )
     }
 
     /// Resume from supplied fuelbed state without rebuilding or replacing it.
@@ -110,10 +121,20 @@ impl SurfacePlan {
         fuelbed: &FuelbedIntermediates,
         tweaks: SurfaceTweaks,
     ) -> SurfaceResult {
+        self.run_selected_from_fuelbed::<0>(cell, fuelbed, tweaks)
+    }
+
+    /// Evaluate only the stages consumed by the native caller.
+    pub(crate) fn run_selected_from_fuelbed<const FINISH: u8>(
+        &self,
+        cell: &SurfaceCell,
+        fuelbed: &FuelbedIntermediates,
+        tweaks: SurfaceTweaks,
+    ) -> SurfaceResult {
         let reaction = tweaks
             .reaction_intensity
             .unwrap_or_else(|| surface::calculate_reaction_intensity(fuelbed));
-        run_stages(
+        run_selected_stages::<FINISH>(
             reaction,
             0.9 * reaction,
             fuelbed,
@@ -124,8 +145,8 @@ impl SurfacePlan {
     }
 }
 
-/// Compose shared spread stages with an already-rounded reaction slope limit.
-pub(crate) fn run_stages(
+/// Share spread equations while omitting unused Crown finishing stages.
+fn run_selected_stages<const FINISH: u8>(
     reaction: f64,
     slope_limit: f64,
     ib: &FuelbedIntermediates,
@@ -185,6 +206,12 @@ pub(crate) fn run_stages(
     let spread_rate = tweaks
         .spread_rate
         .unwrap_or_else(|| surface::calculate_forward_spread_rate(r0, vector.rate_vector));
+    if FINISH == 1 {
+        return SurfaceResult {
+            spread_rate: if ib.is_defined { spread_rate } else { 0.0 },
+            ..SurfaceResult::default()
+        };
+    }
     let effective_wind_speed = surface::calculate_effective_wind_speed(
         spread_rate,
         r0,
@@ -193,6 +220,17 @@ pub(crate) fn run_stages(
         ib.relative_packing_ratio,
         wc.wind_e,
     );
+    if FINISH == 2 {
+        return SurfaceResult {
+            spread_rate: if ib.is_defined { spread_rate } else { 0.0 },
+            effective_wind_speed: if ib.is_defined {
+                effective_wind_speed
+            } else {
+                0.0
+            },
+            ..SurfaceResult::default()
+        };
+    }
     let lwr = surface::calculate_fire_length_to_width_ratio(effective_wind_speed);
     let eccentricity = surface::calculate_eccentricity(lwr);
     let backing = surface::calculate_backing_spread_rate(spread_rate, eccentricity);
@@ -228,5 +266,54 @@ pub(crate) fn run_stages(
         reaction_intensity: surface::calculate_reaction_intensity_output(reaction),
         midflame_wind_speed: midflame,
         no_wind_no_slope_spread_rate: r0,
+    }
+}
+
+#[cfg(test)]
+mod spread_tests {
+    use super::*;
+    use crate::{
+        engine::{PreparedFuel, WindOrientation},
+        FuelModels,
+    };
+    #[test]
+    fn crown_spread_stages_preserve_first_run_backsolve_and_overrides() {
+        let models = FuelModels::default();
+        for id in [0, 10, 101, 124, 145, 201] {
+            let fuel = PreparedFuel::from_model(models.for_grid(id));
+            let plan = SurfacePlan::new(SurfaceOptions {
+                wind_orientation: WindOrientation::North,
+                ..SurfaceOptions::default()
+            });
+            let cell = SurfaceCell {
+                slope: 27.0,
+                aspect: 113.0,
+                wind_direction: 271.0,
+                wind_speed: 551.0,
+                ..SurfaceCell::new(id)
+            };
+            let bed = plan.prepare_fuelbed(&cell, &fuel);
+            for tweaks in [
+                SurfaceTweaks::default(),
+                SurfaceTweaks {
+                    reaction_intensity: Some(913.0),
+                    no_wind_no_slope_spread_rate: Some(3.1),
+                    midflame_wind_speed: Some(61.0),
+                    wind_phi: Some(2.7),
+                    slope_phi: Some(0.9),
+                    spread_rate: Some(13.7),
+                },
+            ] {
+                let full = plan.run_from_fuelbed(&cell, &bed, tweaks);
+                let rate = plan.run_selected_from_fuelbed::<1>(&cell, &bed, tweaks);
+                let wind = plan.run_selected_from_fuelbed::<2>(&cell, &bed, tweaks);
+                assert_eq!(rate.spread_rate.to_bits(), full.spread_rate.to_bits());
+                assert_eq!(wind.spread_rate.to_bits(), full.spread_rate.to_bits());
+                assert_eq!(
+                    wind.effective_wind_speed.to_bits(),
+                    full.effective_wind_speed.to_bits()
+                );
+            }
+        }
     }
 }

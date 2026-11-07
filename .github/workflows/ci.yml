@@ -27,6 +27,11 @@ jobs:
           components: rustfmt, clippy
       - run: cargo fmt --manifest-path rust/Cargo.toml --all -- --check
       - run: cargo clippy --manifest-path rust/Cargo.toml --workspace --all-targets --locked -- -D warnings
+      - name: Test isolated allocation counter scopes
+        shell: bash
+        run: |
+          rustc --edition=2021 --test rust/crates/behave-py/src/allocation_probe.rs -o allocation-probe-tests.exe
+          ./allocation-probe-tests.exe --test-threads=1
       - run: cargo test --manifest-path rust/Cargo.toml -p behave-fire --locked --no-fail-fast
       - run: cargo doc --manifest-path rust/Cargo.toml --workspace --no-deps --locked
         env:
@@ -46,6 +51,11 @@ jobs:
         with:
           toolchain: ${{ steps.msrv.outputs.version }}
       - run: cargo check --manifest-path rust/Cargo.toml --workspace --all-targets --locked
+      - name: Test isolated allocation counter scopes
+        shell: bash
+        run: |
+          rustc --edition=2021 --test rust/crates/behave-py/src/allocation_probe.rs -o allocation-probe-tests.exe
+          ./allocation-probe-tests.exe --test-threads=1
       - run: cargo test --manifest-path rust/Cargo.toml -p behave-fire --locked --no-fail-fast
 
   python-only:

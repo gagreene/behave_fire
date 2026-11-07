@@ -98,12 +98,14 @@ pub fn evaluate(operation: &str, a: &Arguments, i: usize) -> Result<Option<Cell>
             surface.surface_ros = a.masked("surface_results.spread_rate", i)?;
             surface.surface_fli = a.masked("surface_results.fireline_intensity", i)?;
             surface.surface_hpua = a.masked("surface_results.heat_per_unit_area", i)?;
-            let r = behave_fire::crown::run_with_surface_inputs(
-                &surface,
-                &crate::crown::input(a, i)?,
-                &crate::crown::fuel(a, i)?,
-                &crate::controls::crown(a),
-            )
+            let input = crate::crown::input(a, i)?;
+            let fuel = crate::crown::fuel(a, i)?;
+            let controls = crate::controls::crown(a);
+            let r = {
+                #[cfg(feature = "allocation-probe")]
+                let _scope = crate::allocation_probe::Scope::enter(crate::allocation_probe::KERNEL);
+                behave_fire::crown::run_with_surface_inputs(&surface, &input, &fuel, &controls)
+            }
             .map_err(|e| e.to_string())?;
             let mut out = crate::masked::outputs(r.named_values())?;
             out.insert("fire_type".into(), r.fire_type as f64);

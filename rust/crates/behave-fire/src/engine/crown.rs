@@ -81,6 +81,16 @@ impl CrownPlan {
         crown::calculate_crown_surface_fire(cell, fm10, &self.options, tweaks)
     }
 
+    /// Prepare only model-10 particle, fuelbed, reaction, and Crown spread stages.
+    pub fn prepare_spread(
+        &self,
+        cell: &CrownCell,
+        fm10: &PreparedFuel,
+        tweaks: SurfaceTweaks,
+    ) -> crown::CrownSpreadResult {
+        crown::calculate_crown_spread(cell, fm10, &self.options, tweaks)
+    }
+
     /// Evaluate Crown from independent supplied Surface fields and typed overrides.
     pub fn run_cell(
         &self,
@@ -89,7 +99,7 @@ impl CrownPlan {
         fm10: &PreparedFuel,
         tweaks: CrownTweaks,
     ) -> CrownResult {
-        let c = self.prepare_surface(cell, fm10, tweaks.fm10);
+        let c = self.prepare_spread(cell, fm10, tweaks.fm10);
         let h = crown::calculate_crown_heat_and_intensity(
             supplied.surface_hpua,
             c.crown_fire_spread_rate,

@@ -50,30 +50,46 @@ retaining_reaction!(f64);
 
 /// Calculate reaction intensity in BTU/ft²/min using all weighted fuelbed fields.
 pub fn calculate_reaction_intensity(ib: &FuelbedIntermediates) -> f64 {
-    let valid = ib.sigma > 1e-7 && ib.relative_packing_ratio > 0.0;
-    let sigma = if valid { ib.sigma } else { 1.0 };
-    let rpr = if valid {
-        ib.relative_packing_ratio
-    } else {
-        1.0
-    };
-    let aa = 133.0 / sigma.powf(0.7913);
-    let gamma_max = sigma.powf(1.5) / (495.0 + 0.0594 * sigma.powf(1.5));
-    let gamma = gamma_max * rpr.powf(aa) * (aa * (1.0 - rpr)).exp();
-    let dead = gamma
-        * ib.wfl_dead
-        * ib.w_heat_dead
-        * eta_m(ib.w_moist_dead, ib.moe_dead)
-        * eta_s(ib.w_silica_dead);
-    let live = gamma
-        * ib.wfl_live
-        * ib.w_heat_live
-        * eta_m(ib.w_moist_live, ib.moe_live)
-        * eta_s(ib.w_silica_live);
-    if valid {
-        dead + live
-    } else {
-        0.0
+    ReactionCoefficients::new(ib).run(ib)
+}
+
+/// Moisture-independent reaction coefficients, retaining left-to-right products.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub(crate) struct ReactionCoefficients {
+    valid: bool,
+    dead: f64,
+    live: f64,
+    silica_dead: f64,
+    silica_live: f64,
+}
+impl ReactionCoefficients {
+    pub(crate) fn new(ib: &FuelbedIntermediates) -> Self {
+        let valid = ib.sigma > 1e-7 && ib.relative_packing_ratio > 0.0;
+        let sigma = if valid { ib.sigma } else { 1.0 };
+        let rpr = if valid {
+            ib.relative_packing_ratio
+        } else {
+            1.0
+        };
+        let aa = 133.0 / sigma.powf(0.7913);
+        let gamma_max = sigma.powf(1.5) / (495.0 + 0.0594 * sigma.powf(1.5));
+        let gamma = gamma_max * rpr.powf(aa) * (aa * (1.0 - rpr)).exp();
+        Self {
+            valid,
+            dead: gamma * ib.wfl_dead * ib.w_heat_dead,
+            live: gamma * ib.wfl_live * ib.w_heat_live,
+            silica_dead: eta_s(ib.w_silica_dead),
+            silica_live: eta_s(ib.w_silica_live),
+        }
+    }
+    pub(crate) fn run(&self, ib: &FuelbedIntermediates) -> f64 {
+        let dead = self.dead * eta_m(ib.w_moist_dead, ib.moe_dead) * self.silica_dead;
+        let live = self.live * eta_m(ib.w_moist_live, ib.moe_live) * self.silica_live;
+        if self.valid {
+            dead + live
+        } else {
+            0.0
+        }
     }
 }
 /// Return reaction intensity, normalized to f64 as in Python.

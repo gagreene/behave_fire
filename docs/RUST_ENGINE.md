@@ -12,12 +12,12 @@ self-contained and has no normal/build dependencies.
 | Measurement harness, acceptance checker, native probe | Implemented (`tools/benchmark_backends.py`, `tools/check_performance.py`, `tools/perf_probe/`) |
 | Typed scalar stages and fused overrides (`engine`) | Implemented in the Rust core |
 | Raster columns, per-cell overrides, tiles (`raster`) | Implemented in the Rust core; usable from Rust only |
-| Feasibility checkpoint | Completed; large-raster core headroom unmet. The next step awaits an owner decision (see "Task 3 feasibility checkpoint" below) |
+| Feasibility checkpoint | Recovery confirmation passed; all required first/warm confidence bounds clear the core thresholds (see the recovery confirmation below) |
 | Prepared Python bindings, typed output transport, binding API 3 | Not implemented |
-| Kernel optimization, parallel tile scheduling | Not started |
+| Kernel optimization, parallel tile scheduling | Prepared physical coefficients and minimal Crown stages implemented; parallel scheduling work remains |
 | Performance targets (table below) | **Not met**; no speed claim is made for the Python Rust backend |
 
-Python public calls still use the original binding transport (binding API 2), so Python users do not yet benefit from the engine and raster work. The Python-facing calculation contract, including shapes, dtypes, masks, and tolerances, is unchanged.
+Python public calls still use the original binding transport (binding API 2). Native raster/tweak entry points remain Rust-only, and end-to-end speed targets are not yet certified. The Python-facing calculation contract, including shapes, dtypes, masks, and tolerances, is unchanged.
 
 ## Typed scalar stages
 
@@ -270,7 +270,30 @@ never a full-grid vector of cell records. Output allocations depend on fields
 and workers. Disjoint worker output slices and tile scheduling remain later
 performance work; this layer makes no out-of-core scheduler claim.
 
-## Task 3 feasibility checkpoint
+## Recovery core confirmation (2026-11-06)
+
+**Decision: GO for the planned binding work.** Seven fresh paired processes per case, each with five warmed calls, passed all 32 first/warm lower-95% thresholds. Exploratory samples were excluded. All stored numeric values, typed masks, classification values, and constant schemas matched independently built unchanged reference outputs outside timing.
+
+The measurements use Windows x86-64, CPython 3.12.8, NumPy 2.1.3, Rust 1.99, ordinary release settings, and the same Xeon E5-2640 v3 host as the profile sweep. Ratios divide Python public-call time by native complete-column time. They exclude the Python/native boundary and do not certify end-to-end wrapper performance.
+
+| Route at 100,000 cells | First-call median speedup range | Warm median speedup range | Lowest first/warm 95% bound |
+| --- | ---: | ---: | ---: |
+| surface | 3.70–3.82x | 3.52–4.06x | 3.43x |
+| crown | 3.13–3.34x | 3.16–3.24x | 2.83x |
+| typed-crown | 3.02–3.20x | 3.04–3.29x | 2.71x |
+| typed-crown-b | 3.04–3.12x | 3.04–3.18x | 2.78x |
+
+Both required datasets passed at 10,000 and 100,000 cells. The core thresholds remain 1.5625x for small Surface/Crown, 1.25x for small typed Crown, and 2.5x for every large route. Public-call targets remain unchanged; million-cell and four-worker acceptance still require the later binding and scheduling work.
+
+Retained changes prepare SAVR exponentials and size bins, separate minimal Crown spread stages from complete Surface output, and cache static fuelbed/reaction coefficients. Bitwise raw-field keys invalidate caches after edits, dynamic fuels retain moisture-dependent preparation, and explicitly supplied fuelbeds bypass registry caches. Full public Crown intermediates remain complete.
+
+The [confirmation record](performance/2026-11-06-core-confirmation.json) contains all 224 fresh-worker observations, confidence results, source hashes, compiler identity, and the frozen probe hash. Full independent output snapshots remain in the local ignored execution workspace. `tools/perf_probe/` exports complete columns outside timing when `BEHAVE_PROBE_OUTPUT` names a destination directory.
+
+Allocation evidence now uses `tools/measure_native_allocations.py` and `tools/assemble_allocation_evidence.py`. The counting feature is absent from normal builds and wheels. Raw kernel counts were zero in 48 verified samples across all four routes; the encoder is explicitly unmeasured until the direct writer is implemented. The acceptance checker rejects missing scopes, nonzero counts, incomplete worker samples, and mismatched build provenance.
+
+## Historical Task 3 feasibility checkpoint
+
+The following earlier decision is superseded by the recovery GO confirmation above.
 
 **Decision: pause before production binding and specialization work.** The
 large-raster core headroom screen is unmet after the one permitted disposable
@@ -368,7 +391,7 @@ provenance. Raw `s3-feasibility-screen.json`, `s3-equations-only.jsonl`, and
 probe fingerprints are recorded independently; they do not imply the old
 Python extension already uses the new raster/prototype transport.
 
-The next decision is whether to authorize a bounded block-kernel feasibility
+The historical next decision was whether to authorize a bounded block-kernel feasibility
 investigation before binding work, continue the planned binding work while
 explicitly deferring this unmet screen, or revise the targets. The recommended
 option is the bounded kernel investigation with the targets unchanged. No

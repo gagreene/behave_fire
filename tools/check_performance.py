@@ -7,6 +7,8 @@ from pathlib import Path
 import random
 import statistics
 
+from assemble_allocation_evidence import assemble
+
 
 def _allocation_errors(report, requirements, identity):
     """Check native kernel and encoder allocation evidence.
@@ -29,6 +31,14 @@ def _allocation_errors(report, requirements, identity):
             row = matches[0]
             if (row.get("source_hash"), row.get("extension_hash")) != identity:
                 errors.append(f"{dataset}/{operation}: allocation provenance mismatch")
+            try:
+                certified = assemble(row.get("evidence", {}), requirements)["allocations"]
+                expected = next(item for item in certified if
+                                (item["dataset"], item["operation"]) == (dataset, operation))
+                if row != expected:
+                    errors.append(f"{dataset}/{operation}: allocation row differs from raw evidence")
+            except (ValueError, StopIteration):
+                errors.append(f"{dataset}/{operation}: invalid or missing scoped allocation evidence")
             for key in ("kernel_per_cell", "encoder_per_cell"):
                 if type(row.get(key)) not in (int, float) or row[key] != 0:
                     errors.append(f"{dataset}/{operation}: {key} must be measured as zero")

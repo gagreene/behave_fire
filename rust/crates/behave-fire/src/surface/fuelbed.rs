@@ -188,6 +188,14 @@ pub(super) mod single {
 
 /// Calculate all twenty Python fuelbed dictionary fields for one cell, in base units.
 pub fn calculate_fuelbed_intermediates(p: &Particles) -> FuelbedIntermediates {
+    calculate_fuelbed_with_terms(p, &super::SavrTerms::new(&p.savr_dead, &p.savr_live))
+}
+
+/// Evaluate moisture-dependent fuelbed terms with validated prepared SAVR invariants.
+pub(crate) fn calculate_fuelbed_with_terms(
+    p: &Particles,
+    terms: &super::SavrTerms,
+) -> FuelbedIntermediates {
     let sa_d: [f64; 5] = std::array::from_fn(|n| p.load_dead[n] * p.savr_dead[n] / 32.0);
     let sa_l: [f64; 5] = std::array::from_fn(|n| p.load_live[n] * p.savr_live[n] / 32.0);
     let tsa_d: f64 = sa_d.iter().sum();
@@ -204,20 +212,8 @@ pub fn calculate_fuelbed_intermediates(p: &Particles) -> FuelbedIntermediates {
     let safe_l = if tsa_l > 1e-7 { tsa_l } else { 1.0 };
     let fp_d: [f64; 5] = std::array::from_fn(|n| sa_d[n] / safe_d);
     let fp_l: [f64; 5] = std::array::from_fn(|n| sa_l[n] / safe_l);
-    let exp_d: [f64; 5] = std::array::from_fn(|n| {
-        if p.savr_dead[n] > 1e-7 {
-            (-138.0 / p.savr_dead[n]).exp()
-        } else {
-            0.0
-        }
-    });
-    let exp_l500: [f64; 5] = std::array::from_fn(|n| {
-        if p.savr_live[n] > 1e-7 {
-            (-500.0 / p.savr_live[n]).exp()
-        } else {
-            0.0
-        }
-    });
+    let exp_d = terms.exp_dead;
+    let exp_l500 = terms.exp_live500;
     let fine_d: f64 = (0..5).map(|n| p.load_dead[n] * exp_d[n]).sum();
     let fine_dm: f64 = (0..5)
         .map(|n| p.load_dead[n] * exp_d[n] * p.moisture_dead[n])
@@ -250,8 +246,8 @@ pub fn calculate_fuelbed_intermediates(p: &Particles) -> FuelbedIntermediates {
     let sigma = frac_dead * w_savr_dead + frac_live * w_savr_live;
     let wn_d = std::array::from_fn(|n| p.load_dead[n] * (1.0 - 0.0555));
     let wn_l = std::array::from_fn(|n| p.load_live[n] * (1.0 - 0.0555));
-    let wfl_dead = size_sorted_wfl(&p.savr_dead, &fp_d, &wn_d);
-    let wfl_live = size_sorted_wfl(&p.savr_live, &fp_l, &wn_l);
+    let wfl_dead = super::size_sorted_prepared(&terms.bins_dead, &fp_d, &wn_d);
+    let wfl_live = super::size_sorted_prepared(&terms.bins_live, &fp_l, &wn_l);
     let total_load = p.load_dead.iter().sum::<f64>() + p.load_live.iter().sum::<f64>();
     let depth = p.depth;
     let safe_depth = if depth > 1e-7 { depth } else { 1.0 };
@@ -289,11 +285,7 @@ pub fn calculate_fuelbed_intermediates(p: &Particles) -> FuelbedIntermediates {
         .sum();
     let hs_l: f64 = (0..5)
         .map(|n| {
-            let exp = if p.savr_live[n] > 1e-7 {
-                (-138.0 / p.savr_live[n]).exp()
-            } else {
-                0.0
-            };
+            let exp = terms.exp_live138[n];
             frac_live * fp_l[n] * (250.0 + 1116.0 * p.moisture_live[n]) * exp
         })
         .sum();
@@ -325,5 +317,86 @@ pub fn calculate_fuelbed_intermediates(p: &Particles) -> FuelbedIntermediates {
         frac_live,
         depth,
         is_defined: p.is_defined,
+    }
+}
+
+/// Static fuelbed coefficients; moisture-dependent fields are rebuilt for every cell.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub(crate) struct PreparedFuelbed {
+    pub template: FuelbedIntermediates,
+    fp_dead: [f64; 5],
+    fp_live: [f64; 5],
+    fine_dead: [f64; 5],
+    fine_dead_total: f64,
+    fine_live: f64,
+    heat_dead: [f64; 5],
+    heat_live: [f64; 5],
+    exp_dead: [f64; 5],
+    exp_live: [f64; 5],
+}
+impl PreparedFuelbed {
+    /// Prepare physical terms only after dynamic-transfer eligibility is checked.
+    pub(crate) fn new(p: &Particles, terms: &super::SavrTerms) -> Self {
+        let template = calculate_fuelbed_with_terms(p, terms);
+        let sa_dead: [f64; 5] = std::array::from_fn(|i| p.load_dead[i] * p.savr_dead[i] / 32.0);
+        let sa_live: [f64; 5] = std::array::from_fn(|i| p.load_live[i] * p.savr_live[i] / 32.0);
+        let total_dead: f64 = sa_dead.iter().sum();
+        let total_live: f64 = sa_live.iter().sum();
+        let fp_dead = sa_dead.map(|v| v / if total_dead > 1e-7 { total_dead } else { 1.0 });
+        let fp_live = sa_live.map(|v| v / if total_live > 1e-7 { total_live } else { 1.0 });
+        let fine_dead = std::array::from_fn(|i| p.load_dead[i] * terms.exp_dead[i]);
+        Self {
+            template,
+            fp_dead,
+            fp_live,
+            fine_dead,
+            fine_dead_total: fine_dead.iter().sum(),
+            fine_live: (0..5).map(|i| p.load_live[i] * terms.exp_live500[i]).sum(),
+            heat_dead: fp_dead.map(|f| template.frac_dead * f),
+            heat_live: fp_live.map(|f| template.frac_live * f),
+            exp_dead: terms.exp_dead,
+            exp_live: terms.exp_live138,
+        }
+    }
+
+    /// Restore exactly the moisture-dependent reductions in their reference order.
+    pub(crate) fn run(&self, p: &Particles) -> FuelbedIntermediates {
+        let mut result = self.template;
+        let fine_dm: f64 = (0..5).map(|i| self.fine_dead[i] * p.moisture_dead[i]).sum();
+        let safe_fd = if self.fine_dead_total > 1e-7 {
+            self.fine_dead_total
+        } else {
+            1.0
+        };
+        let fine_moisture = if self.fine_dead_total > 1e-7 {
+            fine_dm / safe_fd
+        } else {
+            0.0
+        };
+        let safe_fl = if self.fine_live > 1e-7 {
+            self.fine_live
+        } else {
+            1.0
+        };
+        let fdol = if self.fine_live > 1e-7 {
+            self.fine_dead_total / safe_fl
+        } else {
+            0.0
+        };
+        let safe_md = if p.moe_dead > 1e-7 { p.moe_dead } else { 1.0 };
+        result.moe_live = np_max(
+            2.9 * fdol * (1.0 - fine_moisture / safe_md) - 0.226,
+            p.moe_dead,
+        );
+        result.w_moist_dead = (0..5).map(|i| self.fp_dead[i] * p.moisture_dead[i]).sum();
+        result.w_moist_live = (0..5).map(|i| self.fp_live[i] * p.moisture_live[i]).sum();
+        let hs_dead: f64 = (0..5)
+            .map(|i| self.heat_dead[i] * (250.0 + 1116.0 * p.moisture_dead[i]) * self.exp_dead[i])
+            .sum();
+        let hs_live: f64 = (0..5)
+            .map(|i| self.heat_live[i] * (250.0 + 1116.0 * p.moisture_live[i]) * self.exp_live[i])
+            .sum();
+        result.heat_sink = (hs_dead + hs_live) * result.bulk_density;
+        result
     }
 }

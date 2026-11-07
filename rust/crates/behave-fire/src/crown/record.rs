@@ -52,7 +52,7 @@ pub fn run_with_surface_inputs(
     fuel: &PreparedFuel,
     options: &SurfaceOptions,
 ) -> Result<MaskedCrownResult, BehaveError> {
-    let crown = super::calculate_crown_surface_fire(input, fuel, options, SurfaceTweaks::default());
+    let crown = super::calculate_crown_spread(input, fuel, options, SurfaceTweaks::default());
     // Python normalizes Crown spatial inputs with np.atleast_1d(..., dtype=float).
     // Supplied surface dictionary values remain independently typed until each stage handles them.
     let plain = MaskedValue::plain;

@@ -17,13 +17,11 @@ pub fn surface(a: &Arguments, i: usize) -> Result<behave_fire::surface::SurfaceR
     input.m100h = a.n("m100h", i)?;
     input.mlh = a.n("mlh", i)?;
     input.mlw = a.n("mlw", i)?;
-    Ok(
-        behave_fire::engine::SurfacePlan::new(crate::controls::surface(a)?).run_cell(
-            &input,
-            &crate::structures::fuel(a, i)?,
-            behave_fire::engine::SurfaceTweaks::default(),
-        ),
-    )
+    let plan = behave_fire::engine::SurfacePlan::new(crate::controls::surface(a)?);
+    let fuel = crate::structures::fuel(a, i)?;
+    #[cfg(feature = "allocation-probe")]
+    let _scope = crate::allocation_probe::Scope::enter(crate::allocation_probe::KERNEL);
+    Ok(plan.run_cell(&input, &fuel, behave_fire::engine::SurfaceTweaks::default()))
 }
 
 pub fn evaluate(
@@ -54,14 +52,18 @@ pub fn evaluate(
         && !arguments.has_crown_python_payloads()
     {
         CrownBatch::run_with(shape, threads, |index| {
-            Ok::<_, String>(
-                behave_fire::engine::CrownPlan::new(crate::controls::crown(arguments)).run_cell(
-                    &crate::crown::input(arguments, index)?,
-                    &crate::crown::surface_values(arguments, index),
-                    &crate::crown::fuel(arguments, index)?,
-                    behave_fire::engine::CrownTweaks::default(),
-                ),
-            )
+            let plan = behave_fire::engine::CrownPlan::new(crate::controls::crown(arguments));
+            let input = crate::crown::input(arguments, index)?;
+            let surface = crate::crown::surface_values(arguments, index);
+            let fuel = crate::crown::fuel(arguments, index)?;
+            #[cfg(feature = "allocation-probe")]
+            let _scope = crate::allocation_probe::Scope::enter(crate::allocation_probe::KERNEL);
+            Ok::<_, String>(plan.run_cell(
+                &input,
+                &surface,
+                &fuel,
+                behave_fire::engine::CrownTweaks::default(),
+            ))
         })
         .map(|batch| {
             let stats = *batch.statistics();

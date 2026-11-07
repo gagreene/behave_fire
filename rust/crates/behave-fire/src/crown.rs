@@ -363,6 +363,48 @@ pub fn calculate_crown_surface_fire(
     options: &SurfaceOptions,
     tweaks: SurfaceTweaks,
 ) -> CrownSurfaceResult {
+    calculate_crown_surface_selected::<0>(input, fuel, options, tweaks)
+}
+
+/// Minimal model-10 stages consumed by complete Crown calculations.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct CrownSpreadResult {
+    /// Prepared particles available for explicit stage inspection.
+    pub p_crown: Particles,
+    /// Complete fuelbed state used by spread and backsolve.
+    pub ib_crown: FuelbedIntermediates,
+    /// Reaction intensity in BTU/ft²/min.
+    pub ri_crown: f64,
+    /// Crown spread in ft/min.
+    pub crown_fire_spread_rate: f64,
+    /// Crown length-to-width ratio.
+    pub crown_length_to_width_ratio: f64,
+}
+
+/// Compute Crown's consumed model-10 fields without unrelated Surface finishing.
+pub fn calculate_crown_spread(
+    input: &CrownCell,
+    fuel: &PreparedFuel,
+    options: &SurfaceOptions,
+    tweaks: SurfaceTweaks,
+) -> CrownSpreadResult {
+    let result = calculate_crown_surface_selected::<2>(input, fuel, options, tweaks);
+    CrownSpreadResult {
+        p_crown: result.p_crown,
+        ib_crown: result.ib_crown,
+        ri_crown: result.ri_crown,
+        crown_fire_spread_rate: result.crown_fire_spread_rate,
+        crown_length_to_width_ratio: result.crown_length_to_width_ratio,
+    }
+}
+
+/// Share preparation and spread drivers while retaining full public-helper output.
+fn calculate_crown_surface_selected<const FINISH: u8>(
+    input: &CrownCell,
+    fuel: &PreparedFuel,
+    options: &SurfaceOptions,
+    tweaks: SurfaceTweaks,
+) -> CrownSurfaceResult {
     let x = SurfaceCell {
         fuel_model_grid: 10,
         m1h: input.m1h,
@@ -380,15 +422,15 @@ pub fn calculate_crown_surface_fire(
     };
     let p_crown =
         surface::build_particle_arrays_from_prepared(fuel, x.m1h, x.m10h, x.m100h, x.mlh, x.mlw);
-    let ib_crown = surface::calculate_fuelbed_intermediates(&p_crown);
+    let ib_crown = fuel.prepare_fuelbed(&p_crown);
     let ri_crown = tweaks
         .reaction_intensity
-        .unwrap_or_else(|| surface::calculate_reaction_intensity(&ib_crown));
+        .unwrap_or_else(|| fuel.reaction_intensity(&ib_crown));
     let controls = SurfaceOptions {
         waf_method: WafMethod::UserInput,
         ..*options
     };
-    let crown_surface = SurfacePlan::new(controls).run_from_fuelbed(
+    let crown_surface = SurfacePlan::new(controls).run_selected_from_fuelbed::<FINISH>(
         &x,
         &ib_crown,
         SurfaceTweaks {
@@ -464,7 +506,7 @@ fn crowning_surface_rate(
         ..SurfaceOptions::default()
     };
     SurfacePlan::new(options)
-        .run_from_fuelbed(
+        .run_selected_from_fuelbed::<1>(
             &x,
             ib_crown,
             SurfaceTweaks {
