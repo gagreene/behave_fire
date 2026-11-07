@@ -146,3 +146,29 @@ where
         }
     })
 }
+
+/// Actual scientific versus final-write work, excluding setup allocations.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum RunPhase {
+    /// Scientific evaluation of one explicitly valid cell.
+    Kernel,
+    /// Writing one row into the final typed result columns.
+    Encoder,
+}
+/// Optional static observation of real execution scopes without a runtime dependency.
+///
+/// The default implementation inlines to the scientific/write operation itself.
+/// Profiling and allocation tools can provide a scoped guard without copying math.
+pub trait RunObserver: Sync {
+    /// Execute one real scope, retaining normal return/error/unwind behavior.
+    fn observe<T>(&self, phase: RunPhase, work: impl FnOnce() -> T) -> T;
+}
+/// Ordinary execution with no counters, timers, or shared state.
+#[derive(Clone, Copy, Debug, Default)]
+pub struct NoopObserver;
+impl RunObserver for NoopObserver {
+    #[inline(always)]
+    fn observe<T>(&self, _phase: RunPhase, work: impl FnOnce() -> T) -> T {
+        work()
+    }
+}

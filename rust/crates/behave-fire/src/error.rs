@@ -5,6 +5,13 @@ use std::fmt;
 #[derive(Clone, Debug, Eq, PartialEq)]
 #[non_exhaustive]
 pub enum BehaveError {
+    /// A cell field was absent or used through an incorrect typed accessor.
+    InvalidFieldAccess {
+        /// Public field name.
+        field: String,
+        /// Structural access error, distinct from a known NaN.
+        reason: &'static str,
+    },
     /// A result field does not belong to the requested model.
     InvalidOutputField {
         /// Public field name.
@@ -43,6 +50,9 @@ impl fmt::Display for BehaveError {
     /// Describe invalid input without changing its structured diagnostic fields.
     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
+            Self::InvalidFieldAccess { field, reason } => {
+                write!(formatter, "cannot access {field}: {reason}")
+            }
             Self::InvalidOutputField { field, model } => {
                 write!(formatter, "{field} is not an output of {model}")
             }

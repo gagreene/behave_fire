@@ -47,6 +47,11 @@ impl<'a> SurfaceRaster<'a> {
         let cell = self.inputs.cell(index);
         Some(plan.run_cell(&cell, fuels.for_grid(cell.fuel_model_grid), tweaks))
     }
+    /// Borrow one validated spatial cell; invalid or out-of-range indices return None.
+    pub fn input_cell(&self, index: usize) -> Option<crate::engine::SurfaceCell> {
+        (index < self.shape.len() && self.inputs.valid(index)).then(|| self.inputs.cell(index))
+    }
+
     /// Borrow the checked logical dimensions.
     pub fn shape(&self) -> &GridShape {
         &self.shape

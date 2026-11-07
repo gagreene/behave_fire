@@ -1,7 +1,7 @@
 //! Existing model batch owners filled directly through borrowed final slices.
 use crate::crown::CrownResult;
 use crate::engine::{Field, OutputRequest};
-use crate::output::{fill_chunks, ColumnValues};
+use crate::output::{fill_chunks, ColumnValues, NoopObserver, RunObserver, RunPhase};
 use crate::surface::SurfaceResult;
 use crate::{BehaveError, GridShape, ParallelError};
 
@@ -120,6 +120,11 @@ macro_rules! columns {
             /// Evaluate cells while storing only the requested fields.
             pub fn run_with_request<E:Send,F>(shape:GridShape,request:&OutputRequest,threads:usize,operation:F)->Result<Self,ParallelError<E>>
             where F:Fn(usize)->Result<$scalar,E>+Sync {
+                Self::run_with_request_observed(shape,request,threads,operation,&NoopObserver)
+            }
+            /// Observe actual final writes; configured model callbacks observe their own kernel.
+            pub fn run_with_request_observed<E:Send,F,O:RunObserver>(shape:GridShape,request:&OutputRequest,threads:usize,operation:F,observer:&O)->Result<Self,ParallelError<E>>
+            where F:Fn(usize)->Result<$scalar,E>+Sync {
                 let count=shape.len();
                 let requested=if count<PIPELINE_PARALLEL_MIN_CELLS {1}else{threads};
                 let mut output=Self::allocate(shape,request).map_err(allocation_error)?;
@@ -135,9 +140,11 @@ macro_rules! columns {
                 fill_chunks(count,requested,&mut physical,&mut codes,&mut [],|range,shard| {
                     for (local,index) in range.enumerate() {
                         let cell=operation(index)?;
-                        let mut ordinal=0;
-                        $({if let Some(slot)=slots[ordinal] {store_column!($kind,shard,slot,local,cell.$field);} ordinal+=1;})+
-                        let _=ordinal;
+                        observer.observe(RunPhase::Encoder,|| {
+                            let mut ordinal=0;
+                            $({if let Some(slot)=slots[ordinal] {store_column!($kind,shard,slot,local,cell.$field);} ordinal+=1;})+
+                            let _=ordinal;
+                        });
                     }
                     Ok(())
                 })?;

@@ -21,7 +21,7 @@ macro_rules! data_columns {
             pub(super) fn new(args:&Arguments,cases:&[Case<'_>])->Self {
                 Self {$($field:(0..args.cells).map(|i|cases[i%cases.len()].$member.$field).collect(),)+}
             }
-            fn columns(&self)->$columns<'_> {
+            pub(super) fn columns(&self)->$columns<'_> {
                 $columns {$($field:PerCell::Cells(&self.$field),)+..$columns::default()}
             }
         }
@@ -91,7 +91,7 @@ fn check_columns(
     reference: &[Vec<(&'static str, f64)>],
     cells: usize,
 ) -> Result<(), String> {
-    let actual=comparison_columns(actual);
+    let actual = comparison_columns(actual);
     if reference.is_empty() || actual.len() != reference[0].len() {
         return Err("incomplete raster output inventory".into());
     }
@@ -442,11 +442,24 @@ pub(super) fn dump_typed(
 }
 
 // Numerical fixture comparison only; production export retains typed columns.
-fn comparison_columns(columns:Vec<(&'static str,behave_fire::output::ColumnValues)>)->Vec<(&'static str,Vec<f64>)> {
+fn comparison_columns(
+    columns: Vec<(&'static str, behave_fire::output::ColumnValues)>,
+) -> Vec<(&'static str, Vec<f64>)> {
     use behave_fire::output::ColumnValues;
-    columns.into_iter().map(|(name,values)|(name,match values {
-        ColumnValues::Float64(values)=>values,
-        ColumnValues::Int32(values)=>values.into_iter().map(f64::from).collect(),
-        ColumnValues::Bool(values)=>values.into_iter().map(|value|f64::from(u8::from(value))).collect(),
-    })).collect()
+    columns
+        .into_iter()
+        .map(|(name, values)| {
+            (
+                name,
+                match values {
+                    ColumnValues::Float64(values) => values,
+                    ColumnValues::Int32(values) => values.into_iter().map(f64::from).collect(),
+                    ColumnValues::Bool(values) => values
+                        .into_iter()
+                        .map(|value| f64::from(u8::from(value)))
+                        .collect(),
+                },
+            )
+        })
+        .collect()
 }

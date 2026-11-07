@@ -364,7 +364,7 @@ pub fn calculate_crown_surface_fire(
     options: &SurfaceOptions,
     tweaks: SurfaceTweaks,
 ) -> CrownSurfaceResult {
-    calculate_crown_surface_selected::<0>(input, fuel, options, tweaks)
+    calculate_crown_surface_selected::<0, false>(input, fuel, options, tweaks)
 }
 
 /// Minimal model-10 stages consumed by complete Crown calculations.
@@ -389,7 +389,25 @@ pub fn calculate_crown_spread(
     options: &SurfaceOptions,
     tweaks: SurfaceTweaks,
 ) -> CrownSpreadResult {
-    let result = calculate_crown_surface_selected::<2>(input, fuel, options, tweaks);
+    crown_spread_with_policy::<false>(input, fuel, options, tweaks)
+}
+
+/// Compute model-10 spread under the f64 missing-data contract.
+pub(crate) fn calculate_crown_spread_available(
+    input: &CrownCell,
+    fuel: &PreparedFuel,
+    options: &SurfaceOptions,
+    tweaks: SurfaceTweaks,
+) -> CrownSpreadResult {
+    crown_spread_with_policy::<true>(input, fuel, options, tweaks)
+}
+fn crown_spread_with_policy<const STRICT: bool>(
+    input: &CrownCell,
+    fuel: &PreparedFuel,
+    options: &SurfaceOptions,
+    tweaks: SurfaceTweaks,
+) -> CrownSpreadResult {
+    let result = calculate_crown_surface_selected::<2, STRICT>(input, fuel, options, tweaks);
     CrownSpreadResult {
         p_crown: result.p_crown,
         ib_crown: result.ib_crown,
@@ -398,9 +416,8 @@ pub fn calculate_crown_spread(
         crown_length_to_width_ratio: result.crown_length_to_width_ratio,
     }
 }
-
 /// Share preparation and spread drivers while retaining full public-helper output.
-fn calculate_crown_surface_selected<const FINISH: u8>(
+fn calculate_crown_surface_selected<const FINISH: u8, const STRICT: bool>(
     input: &CrownCell,
     fuel: &PreparedFuel,
     options: &SurfaceOptions,
@@ -431,21 +448,29 @@ fn calculate_crown_surface_selected<const FINISH: u8>(
         waf_method: WafMethod::UserInput,
         ..*options
     };
-    let crown_surface = SurfacePlan::new(controls).run_selected_from_fuelbed::<FINISH>(
-        &x,
-        &ib_crown,
-        SurfaceTweaks {
-            reaction_intensity: Some(ri_crown),
-            ..tweaks
-        },
-    );
+    let configured = SurfaceTweaks {
+        reaction_intensity: Some(ri_crown),
+        ..tweaks
+    };
+    let plan = SurfacePlan::new(controls);
+    let crown_surface = if STRICT {
+        plan.run_available_from_fuelbed::<FINISH>(&x, &ib_crown, configured)
+    } else {
+        plan.run_selected_from_fuelbed::<FINISH>(&x, &ib_crown, configured)
+    };
     let ews = crown_surface.effective_wind_speed;
     CrownSurfaceResult {
         p_crown,
         ib_crown,
         ri_crown,
         crown_fire_spread_rate: 3.34 * crown_surface.spread_rate,
-        crown_length_to_width_ratio: if ews > 1e-7 { 1.0 + 0.125 * ews } else { 1.0 },
+        crown_length_to_width_ratio: if STRICT && ews.is_nan() {
+            f64::NAN
+        } else if ews > 1e-7 {
+            1.0 + 0.125 * ews
+        } else {
+            1.0
+        },
         crown_surface,
     }
 }

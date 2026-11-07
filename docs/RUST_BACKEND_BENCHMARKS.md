@@ -1,5 +1,9 @@
 # Rust backend execution measurements
 
+## Float64 core checkpoint: 2026-11-07
+
+The configured float64 core passes complete-output correctness checks, but its first headroom screen misses 3 of 32 confidence bounds. Work stops before the Python API4 switch. This is core-only evidence; the public backend still uses API3. See the [checkpoint, timings, and owner choices](performance/2026-11-07-f64-core-checkpoint.md) and [frozen raw screen](performance/2026-11-07-f64-core-screen.json). No confirmation or repeat sampling was run.
+
 ## Recovery pipeline checkpoint: 2026-11-07
 
 **Task 4 stops at the serial-performance checkpoint.** Model calls now fuse normalization, numeric fuel preparation, shared native raster execution, and typed output into one native compute call. Ordinary Surface and Crown show faster median times. Both mixed Crown layouts remain slower than Python and miss the accepted targets. Task 5 parallel output work and final acceptance have not started.

@@ -422,3 +422,74 @@ mod restricted_group_tests {
         );
     }
 }
+
+#[cfg(all(test, feature = "allocation-probe"))]
+mod configured_scope_tests {
+    use behave_fire::engine::{
+        run_model_observed, CrownPlan, ModelBatch, ModelRun, OutputRequest, PreparedFuels,
+    };
+    use behave_fire::output::{RunObserver, RunPhase};
+    use behave_fire::raster::{CrownColumns, CrownRaster, CrownTweakColumns};
+    use behave_fire::{FuelModels, GridShape, PerCell};
+    struct Probe;
+    impl RunObserver for Probe {
+        fn observe<T>(&self, phase: RunPhase, work: impl FnOnce() -> T) -> T {
+            let phase = match phase {
+                RunPhase::Kernel => super::allocation_probe::KERNEL,
+                RunPhase::Encoder => super::allocation_probe::ENCODER,
+            };
+            let _scope = super::allocation_probe::Scope::enter(phase);
+            work()
+        }
+    }
+    #[test]
+    fn actual_model_kernel_and_encoder_have_zero_absolute_requests() {
+        let cells = 10000;
+        let fuels = PreparedFuels::from_registry(&FuelModels::default());
+        let heat = (0..cells)
+            .map(|i| if i % 7 == 0 { f64::NAN } else { 1000. })
+            .collect::<Vec<_>>();
+        let validity = (0..cells).map(|i| i % 17 != 0).collect::<Vec<_>>();
+        let eligible = validity.iter().filter(|&&v| v).count();
+        let raster = CrownRaster::new(
+            GridShape::new(vec![cells]).unwrap(),
+            CrownColumns {
+                surface_ros: PerCell::Scalar(2.),
+                surface_fli: PerCell::Scalar(200.),
+                surface_hpua: PerCell::Cells(&heat),
+                canopy_base_height: PerCell::Scalar(4.),
+                canopy_height: PerCell::Scalar(30.),
+                canopy_bulk_density: PerCell::Scalar(0.01),
+                validity: Some(PerCell::Cells(&validity)),
+                ..CrownColumns::default()
+            },
+        )
+        .unwrap();
+        let run = ModelRun::Crown {
+            raster,
+            plan: CrownPlan::default(),
+            fuels: &fuels,
+            tweaks: CrownTweakColumns::default(),
+        };
+        let request = OutputRequest::crown();
+        super::allocation_probe::start();
+        let output = run_model_observed(&run, &request, 4, &Probe).unwrap();
+        let counts = super::allocation_probe::stop();
+        for phase in [
+            super::allocation_probe::KERNEL,
+            super::allocation_probe::ENCODER,
+        ] {
+            assert_eq!(counts[phase].0, 0, "absolute request count in scope{phase}");
+            assert_eq!(counts[phase].1, 0);
+        }
+        assert_eq!(counts[super::allocation_probe::KERNEL].2, eligible);
+        assert_eq!(counts[super::allocation_probe::ENCODER].2, cells);
+        assert_eq!(counts[super::allocation_probe::KERNEL].3, 4);
+        if let ModelBatch::Crown(output) = output {
+            assert_eq!(output.fire_type[0], -1);
+            assert_eq!(output.final_spread_rate.len(), cells);
+        } else {
+            panic!("wrong result")
+        }
+    }
+}

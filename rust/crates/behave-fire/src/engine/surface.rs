@@ -104,7 +104,7 @@ impl SurfacePlan {
         let reaction = tweaks
             .reaction_intensity
             .unwrap_or_else(|| fuel.reaction_intensity(&fuelbed));
-        run_selected_stages::<0>(
+        run_selected_stages::<0, false>(
             reaction,
             0.9 * reaction,
             &fuelbed,
@@ -134,7 +134,46 @@ impl SurfacePlan {
         let reaction = tweaks
             .reaction_intensity
             .unwrap_or_else(|| surface::calculate_reaction_intensity(fuelbed));
-        run_selected_stages::<FINISH>(
+        run_selected_stages::<FINISH, false>(
+            reaction,
+            0.9 * reaction,
+            fuelbed,
+            cell,
+            &self.options,
+            tweaks,
+        )
+    }
+    /// Evaluate the availability-aware model contract with cached physical fuel data.
+    pub(crate) fn run_available_cell(
+        &self,
+        cell: &SurfaceCell,
+        fuel: &PreparedFuel,
+        tweaks: SurfaceTweaks,
+    ) -> SurfaceResult {
+        let fuelbed = self.prepare_fuelbed(cell, fuel);
+        let reaction = tweaks
+            .reaction_intensity
+            .unwrap_or_else(|| fuel.reaction_intensity(&fuelbed));
+        run_selected_stages::<0, true>(
+            reaction,
+            0.9 * reaction,
+            &fuelbed,
+            cell,
+            &self.options,
+            tweaks,
+        )
+    }
+    /// Resume an availability-aware run from supplied fuelbed state.
+    pub(crate) fn run_available_from_fuelbed<const FINISH: u8>(
+        &self,
+        cell: &SurfaceCell,
+        fuelbed: &FuelbedIntermediates,
+        tweaks: SurfaceTweaks,
+    ) -> SurfaceResult {
+        let reaction = tweaks
+            .reaction_intensity
+            .unwrap_or_else(|| surface::calculate_reaction_intensity(fuelbed));
+        run_selected_stages::<FINISH, true>(
             reaction,
             0.9 * reaction,
             fuelbed,
@@ -146,7 +185,7 @@ impl SurfacePlan {
 }
 
 /// Share spread equations while omitting unused Crown finishing stages.
-fn run_selected_stages<const FINISH: u8>(
+fn run_selected_stages<const FINISH: u8, const STRICT: bool>(
     reaction: f64,
     slope_limit: f64,
     ib: &FuelbedIntermediates,
@@ -154,27 +193,40 @@ fn run_selected_stages<const FINISH: u8>(
     options: &SurfaceOptions,
     tweaks: SurfaceTweaks,
 ) -> SurfaceResult {
-    let wc = surface::calculate_surface_wind_coefficients(ib.sigma);
-    let r0 = tweaks.no_wind_no_slope_spread_rate.unwrap_or_else(|| {
+    let mut wc = surface::calculate_surface_wind_coefficients(ib.sigma);
+    if STRICT && ib.sigma.is_nan() {
+        wc.safe_sigma = f64::NAN;
+        wc.wind_b = f64::NAN;
+        wc.wind_c = f64::NAN;
+        wc.wind_e = f64::NAN;
+    }
+    let mut r0 = tweaks.no_wind_no_slope_spread_rate.unwrap_or_else(|| {
         surface::calculate_no_wind_no_slope_spread_rate(reaction, ib.propagating_flux, ib.heat_sink)
     });
+    if STRICT && tweaks.no_wind_no_slope_spread_rate.is_none() && ib.heat_sink.is_nan() {
+        r0 = f64::NAN;
+    }
     let wind20 = surface::calculate_twenty_foot_wind_speed(
         cell.wind_speed,
         SpeedUnit::FeetPerMinute,
         options.wind_height,
     );
-    let waf = surface::calculate_surface_wind_adjustment_factor(
-        cell.canopy_cover,
-        cell.canopy_height,
-        cell.crown_ratio,
-        ib.depth,
-        options.waf_method,
-        cell.user_waf,
-    );
+    let waf = if STRICT {
+        super::missing::waf(cell, ib.depth, options)
+    } else {
+        surface::calculate_surface_wind_adjustment_factor(
+            cell.canopy_cover,
+            cell.canopy_height,
+            cell.crown_ratio,
+            ib.depth,
+            options.waf_method,
+            cell.user_waf,
+        )
+    };
     let midflame = tweaks
         .midflame_wind_speed
         .unwrap_or_else(|| surface::calculate_midflame_wind_speed(waf, wind20));
-    let wind_phi = tweaks.wind_phi.unwrap_or_else(|| {
+    let mut wind_phi = tweaks.wind_phi.unwrap_or_else(|| {
         surface::calculate_wind_phi(
             ib.sigma,
             midflame,
@@ -184,7 +236,21 @@ fn run_selected_stages<const FINISH: u8>(
             wc.wind_e,
         )
     });
-    let slope_phi = tweaks.slope_phi.unwrap_or_else(|| {
+    if STRICT && tweaks.wind_phi.is_none() {
+        match super::missing::all_above(&[(ib.sigma, 1e-7), (midflame, 1e-7)]) {
+            None => wind_phi = f64::NAN,
+            Some(true)
+                if wc.wind_b.is_nan()
+                    || wc.wind_c.is_nan()
+                    || wc.wind_e.is_nan()
+                    || ib.relative_packing_ratio.is_nan() =>
+            {
+                wind_phi = f64::NAN
+            }
+            _ => {}
+        }
+    }
+    let mut slope_phi = tweaks.slope_phi.unwrap_or_else(|| {
         crate::math::np_min(
             surface::calculate_slope_phi(
                 cell.slope,
@@ -195,6 +261,16 @@ fn run_selected_stages<const FINISH: u8>(
             slope_limit,
         )
     });
+    if STRICT
+        && tweaks.slope_phi.is_none()
+        && super::missing::all_above(&[
+            (cell.slope.to_radians().tan(), 1e-7),
+            (ib.packing_ratio, 1e-7),
+        ])
+        .is_none()
+    {
+        slope_phi = f64::NAN;
+    }
     let vector = surface::calculate_surface_rate_vector(
         r0,
         wind_phi,
@@ -212,7 +288,7 @@ fn run_selected_stages<const FINISH: u8>(
             ..SurfaceResult::default()
         };
     }
-    let effective_wind_speed = surface::calculate_effective_wind_speed(
+    let mut effective_wind_speed = surface::calculate_effective_wind_speed(
         spread_rate,
         r0,
         wc.wind_b,
@@ -220,6 +296,25 @@ fn run_selected_stages<const FINISH: u8>(
         ib.relative_packing_ratio,
         wc.wind_e,
     );
+    if STRICT {
+        let phi = if r0.is_nan() {
+            f64::NAN
+        } else if r0 > 1e-7 {
+            spread_rate / r0 - 1.0
+        } else {
+            0.0
+        };
+        if super::missing::all_above(&[
+            (phi, 0.0),
+            (wc.wind_b, 1e-7),
+            (wc.wind_c, 1e-7),
+            (ib.relative_packing_ratio, 1e-7),
+        ])
+        .is_none()
+        {
+            effective_wind_speed = f64::NAN;
+        }
+    }
     if FINISH == 2 {
         return SurfaceResult {
             spread_rate: if ib.is_defined { spread_rate } else { 0.0 },
@@ -231,20 +326,44 @@ fn run_selected_stages<const FINISH: u8>(
             ..SurfaceResult::default()
         };
     }
-    let lwr = surface::calculate_fire_length_to_width_ratio(effective_wind_speed);
-    let eccentricity = surface::calculate_eccentricity(lwr);
-    let backing = surface::calculate_backing_spread_rate(spread_rate, eccentricity);
-    let flanking = surface::calculate_flanking_spread_rate(spread_rate, backing, lwr);
-    let residence = surface::calculate_residence_time(ib.sigma);
+    let lwr = if STRICT && effective_wind_speed.is_nan() {
+        f64::NAN
+    } else {
+        surface::calculate_fire_length_to_width_ratio(effective_wind_speed)
+    };
+    let eccentricity = if STRICT && lwr.is_nan() {
+        f64::NAN
+    } else {
+        surface::calculate_eccentricity(lwr)
+    };
+    let backing = if STRICT && eccentricity.is_nan() {
+        f64::NAN
+    } else {
+        surface::calculate_backing_spread_rate(spread_rate, eccentricity)
+    };
+    let flanking = if STRICT && lwr.is_nan() {
+        f64::NAN
+    } else {
+        surface::calculate_flanking_spread_rate(spread_rate, backing, lwr)
+    };
+    let residence = if STRICT && ib.sigma.is_nan() {
+        f64::NAN
+    } else {
+        surface::calculate_residence_time(ib.sigma)
+    };
     let heat = surface::calculate_heat_per_unit_area(reaction, residence);
     let intensity = surface::calculate_fireline_intensity(spread_rate, heat);
-    let direction = surface::calculate_direction_of_max_spread(
-        vector.x_component,
-        vector.y_component,
-        vector.rate_vector,
-        options.wind_orientation,
-        cell.aspect,
-    );
+    let direction = if STRICT && vector.rate_vector.is_nan() {
+        f64::NAN
+    } else {
+        surface::calculate_direction_of_max_spread(
+            vector.x_component,
+            vector.y_component,
+            vector.rate_vector,
+            options.wind_orientation,
+            cell.aspect,
+        )
+    };
     if !ib.is_defined {
         return SurfaceResult {
             fire_length_to_width_ratio: 1.0,
@@ -255,7 +374,11 @@ fn run_selected_stages<const FINISH: u8>(
         spread_rate,
         backing_spread_rate: backing,
         flanking_spread_rate: flanking,
-        flame_length: surface::calculate_flame_length(intensity),
+        flame_length: if STRICT && intensity.is_nan() {
+            f64::NAN
+        } else {
+            surface::calculate_flame_length(intensity)
+        },
         fireline_intensity: intensity,
         heat_per_unit_area: heat,
         effective_wind_speed,

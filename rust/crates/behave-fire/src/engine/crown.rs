@@ -99,54 +99,134 @@ impl CrownPlan {
         fm10: &PreparedFuel,
         tweaks: CrownTweaks,
     ) -> CrownResult {
-        let c = self.prepare_spread(cell, fm10, tweaks.fm10);
-        let h = crown::calculate_crown_heat_and_intensity(
-            supplied.surface_hpua,
-            c.crown_fire_spread_rate,
+        run_crown::<false>(self, cell, supplied, fm10, tweaks)
+    }
+
+    /// Evaluate the float64 model contract with dependency-aware unavailable values.
+    pub(crate) fn run_available_cell(
+        &self,
+        cell: &CrownCell,
+        supplied: &SurfaceFireInputs<f64>,
+        fm10: &PreparedFuel,
+        tweaks: CrownTweaks,
+    ) -> CrownResult {
+        run_crown::<true>(self, cell, supplied, fm10, tweaks)
+    }
+}
+
+/// Shared f64 orchestration; availability policy is fixed at compile time during migration.
+fn run_crown<const STRICT: bool>(
+    plan: &CrownPlan,
+    cell: &CrownCell,
+    supplied: &SurfaceFireInputs<f64>,
+    fm10: &PreparedFuel,
+    tweaks: CrownTweaks,
+) -> CrownResult {
+    let c = if STRICT {
+        crown::calculate_crown_spread_available(cell, fm10, plan.options(), tweaks.fm10)
+    } else {
+        plan.prepare_spread(cell, fm10, tweaks.fm10)
+    };
+    let mut h = crown::calculate_crown_heat_and_intensity(
+        supplied.surface_hpua,
+        c.crown_fire_spread_rate,
+        cell.canopy_base_height,
+        cell.canopy_height,
+        cell.canopy_bulk_density,
+    );
+    if STRICT && h.crown_fire_line_intensity.is_nan() {
+        h.crown_flame_length = f64::NAN;
+    }
+    let critical_intensity = tweaks.critical_surface_intensity.unwrap_or_else(|| {
+        crown::calculate_critical_surface_fireline_intensity(
             cell.canopy_base_height,
-            cell.canopy_height,
-            cell.canopy_bulk_density,
-        );
-        let critical_intensity = tweaks.critical_surface_intensity.unwrap_or_else(|| {
-            crown::calculate_critical_surface_fireline_intensity(
-                cell.canopy_base_height,
-                cell.moisture_foliar,
-            )
-        });
-        let critical_rate = tweaks.critical_crown_rate.unwrap_or_else(|| {
+            cell.moisture_foliar,
+        )
+    });
+    let critical_rate = tweaks.critical_crown_rate.unwrap_or_else(|| {
+        if STRICT && cell.canopy_bulk_density.is_nan() {
+            f64::NAN
+        } else {
             crown::calculate_critical_crown_fire_spread_rate(cell.canopy_bulk_density)
-        });
-        let ratios = crown::calculate_crown_fire_ratios(
-            supplied.surface_fli,
-            c.crown_fire_spread_rate,
-            critical_intensity,
-            critical_rate,
-        );
-        let class = crown::classify_crown_fire_type(
+        }
+    });
+    let mut ratios = crown::calculate_crown_fire_ratios(
+        supplied.surface_fli,
+        c.crown_fire_spread_rate,
+        critical_intensity,
+        critical_rate,
+    );
+    if STRICT {
+        if critical_intensity.is_nan() {
+            ratios.crown_fire_transition_ratio = f64::NAN;
+        }
+        if critical_rate.is_nan() {
+            ratios.crown_fire_active_ratio = f64::NAN;
+        }
+    }
+    let class = if STRICT
+        && (ratios.crown_fire_transition_ratio.is_nan() || ratios.crown_fire_active_ratio.is_nan())
+    {
+        crown::FireClassification {
+            fire_type: -1,
+            is_surface_fire: false,
+            is_passive_crown: false,
+            is_active_crown: false,
+        }
+    } else {
+        crown::classify_crown_fire_type(
             ratios.crown_fire_transition_ratio,
             ratios.crown_fire_active_ratio,
-        );
-        let surface_critical = crown::calculate_surface_fire_critical_spread_rate(
+        )
+    };
+    let surface_critical = if STRICT && supplied.surface_hpua.is_nan() {
+        f64::NAN
+    } else {
+        crown::calculate_surface_fire_critical_spread_rate(
             critical_intensity,
             supplied.surface_hpua,
-        );
-        let crowning = crown::calculate_crowning_surface_fire_spread_rate(
+        )
+    };
+    let crowning = if STRICT
+        && (critical_rate.is_nan()
+            || c.ri_crown.is_nan()
+            || c.ib_crown.heat_sink.is_nan()
+            || c.ib_crown.propagating_flux.is_nan())
+    {
+        f64::NAN
+    } else {
+        crown::calculate_crowning_surface_fire_spread_rate(
             c.ri_crown,
             &c.ib_crown,
             critical_rate,
             cell.canopy_height,
-        );
-        let fraction = tweaks.crown_fraction_burned.unwrap_or_else(|| {
-            crown::calculate_crown_fraction_burned(supplied.surface_ros, surface_critical, crowning)
-        });
-        let passive = crown::calculate_passive_crown_fire_behavior(
-            supplied.surface_ros,
-            supplied.surface_hpua,
-            c.crown_fire_spread_rate,
-            h.canopy_heat_per_unit_area,
-            fraction,
-        );
-        let final_behavior = crown::assign_final_crown_fire_behavior(
+        )
+    };
+    let fraction = tweaks.crown_fraction_burned.unwrap_or_else(|| {
+        if STRICT && (crowning - surface_critical).is_nan() {
+            return f64::NAN;
+        }
+        crown::calculate_crown_fraction_burned(supplied.surface_ros, surface_critical, crowning)
+    });
+    let mut passive = crown::calculate_passive_crown_fire_behavior(
+        supplied.surface_ros,
+        supplied.surface_hpua,
+        c.crown_fire_spread_rate,
+        h.canopy_heat_per_unit_area,
+        fraction,
+    );
+    if STRICT && passive.passive_crown_fire_line_intensity.is_nan() {
+        passive.passive_crown_fire_flame_length = f64::NAN;
+    }
+    let mut final_behavior = if STRICT && class.fire_type < 0 {
+        crown::FinalCrownBehavior {
+            final_spread_rate: f64::NAN,
+            final_heat_per_unit_area: f64::NAN,
+            final_fireline_intensity: f64::NAN,
+            final_flame_length: f64::NAN,
+        }
+    } else {
+        crown::assign_final_crown_fire_behavior(
             class.is_surface_fire,
             class.is_passive_crown,
             supplied.surface_ros,
@@ -160,30 +240,33 @@ impl CrownPlan {
             h.crown_fire_heat_per_unit_area,
             h.crown_fire_line_intensity,
             h.crown_flame_length,
-        );
-        CrownResult {
-            crown_fire_spread_rate: c.crown_fire_spread_rate,
-            crown_flame_length: h.crown_flame_length,
-            crown_fire_line_intensity: h.crown_fire_line_intensity,
-            crown_fire_heat_per_unit_area: h.crown_fire_heat_per_unit_area,
-            canopy_heat_per_unit_area: h.canopy_heat_per_unit_area,
-            crown_critical_surface_fire_line_intensity: critical_intensity,
-            crown_critical_fire_spread_rate: critical_rate,
-            crown_fire_transition_ratio: ratios.crown_fire_transition_ratio,
-            crown_fire_active_ratio: ratios.crown_fire_active_ratio,
-            crown_length_to_width_ratio: c.crown_length_to_width_ratio,
-            fire_type: class.fire_type,
-            surface_fire_critical_spread_rate: surface_critical,
-            crowning_surface_fire_spread_rate: crowning,
-            crown_fraction_burned: fraction,
-            passive_crown_fire_spread_rate: passive.passive_crown_fire_spread_rate,
-            passive_crown_fire_heat_per_unit_area: passive.passive_crown_fire_heat_per_unit_area,
-            passive_crown_fire_line_intensity: passive.passive_crown_fire_line_intensity,
-            passive_crown_fire_flame_length: passive.passive_crown_fire_flame_length,
-            final_spread_rate: final_behavior.final_spread_rate,
-            final_heat_per_unit_area: final_behavior.final_heat_per_unit_area,
-            final_fireline_intensity: final_behavior.final_fireline_intensity,
-            final_flame_length: final_behavior.final_flame_length,
-        }
+        )
+    };
+    if STRICT && final_behavior.final_fireline_intensity.is_nan() {
+        final_behavior.final_flame_length = f64::NAN;
+    }
+    CrownResult {
+        crown_fire_spread_rate: c.crown_fire_spread_rate,
+        crown_flame_length: h.crown_flame_length,
+        crown_fire_line_intensity: h.crown_fire_line_intensity,
+        crown_fire_heat_per_unit_area: h.crown_fire_heat_per_unit_area,
+        canopy_heat_per_unit_area: h.canopy_heat_per_unit_area,
+        crown_critical_surface_fire_line_intensity: critical_intensity,
+        crown_critical_fire_spread_rate: critical_rate,
+        crown_fire_transition_ratio: ratios.crown_fire_transition_ratio,
+        crown_fire_active_ratio: ratios.crown_fire_active_ratio,
+        crown_length_to_width_ratio: c.crown_length_to_width_ratio,
+        fire_type: class.fire_type,
+        surface_fire_critical_spread_rate: surface_critical,
+        crowning_surface_fire_spread_rate: crowning,
+        crown_fraction_burned: fraction,
+        passive_crown_fire_spread_rate: passive.passive_crown_fire_spread_rate,
+        passive_crown_fire_heat_per_unit_area: passive.passive_crown_fire_heat_per_unit_area,
+        passive_crown_fire_line_intensity: passive.passive_crown_fire_line_intensity,
+        passive_crown_fire_flame_length: passive.passive_crown_fire_flame_length,
+        final_spread_rate: final_behavior.final_spread_rate,
+        final_heat_per_unit_area: final_behavior.final_heat_per_unit_area,
+        final_fireline_intensity: final_behavior.final_fireline_intensity,
+        final_flame_length: final_behavior.final_flame_length,
     }
 }
