@@ -30,6 +30,18 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
 
+def _array_bytes(value):
+    """Count array payload bytes through the native result's nested schema.
+
+    :param value: An array, nested schema mapping, or scalar schema value.
+    :return: Array storage bytes, excluding Python objects and scalar descriptors.
+    """
+    if isinstance(value, dict):
+        return sum(_array_bytes(item) for item in value.values())
+    if isinstance(value, (tuple, list)):
+        return sum(_array_bytes(item) for item in value)
+    return int(getattr(value, "nbytes", 0))
+
 def _campaign(arguments):
     """Run separate validation and shuffled timing blocks, retaining partial failures.
 
@@ -220,9 +232,9 @@ def _profile_batch(original, samples):
         sample = {key.removeprefix("__timing."): float(value.item())
                   for key, value in result.items() if key.startswith("__timing.")}
         sample["native_boundary_total_seconds"] = time.perf_counter() - started
-        sample["native_output_bytes"] = sum(value.nbytes for key, value in result.items()
+        sample["native_output_bytes"] = sum(_array_bytes(value) for key, value in result.items()
                                             if not key.startswith("__timing."))
-        sample["native_metadata_bytes"] = sum(value.nbytes for key, value in result.items()
+        sample["native_metadata_bytes"] = sum(_array_bytes(value) for key, value in result.items()
                                               if key.startswith("__") and not key.startswith("__timing."))
         sample["operation"] = args[0]
         samples.append(sample)

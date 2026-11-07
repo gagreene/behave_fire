@@ -11,13 +11,21 @@ self-contained and has no normal/build dependencies.
 | --- | --- |
 | Measurement harness, acceptance checker, native probe | Implemented (`tools/benchmark_backends.py`, `tools/check_performance.py`, `tools/perf_probe/`) |
 | Typed scalar stages and fused overrides (`engine`) | Implemented in the Rust core |
-| Raster columns, per-cell overrides, tiles (`raster`) | Implemented in the Rust core; usable from Rust only |
+| Raster columns, per-cell overrides, tiles (`raster`) | Implemented in the core and reused by model bindings; explicit tiles and tweak columns remain Rust APIs |
 | Feasibility checkpoint | Recovery confirmation passed; all required first/warm confidence bounds clear the core thresholds (see the recovery confirmation below) |
-| Prepared Python bindings, typed output transport, binding API 3 | Prepared inputs and general API-3 typed output implemented; complete model fusion remains pending |
+| Prepared Python bindings, typed output transport, binding API 3 | Prepared inputs, API-3 typed output, and one-call model fusion implemented |
 | Kernel optimization, parallel tile scheduling | Prepared physical coefficients and minimal Crown stages implemented; parallel scheduling work remains |
-| Performance targets (table below) | **Not met**; no speed claim is made for the Python Rust backend |
+| Performance targets (table below) | **Not met**; Task 4 serial screen fails for typed Crown; final acceptance is pending |
 
-Python public calls use binding API 3 with typed columns and compact metadata. Model calls still cross several native boundaries. Native raster/tweak entry points remain Rust-only, and end-to-end speed targets are not yet certified. The Python-facing calculation contract, including shapes, dtypes, masks, and tolerances, is unchanged.
+Python public calls use binding API 3 with typed columns and compact metadata. Common Surface and Crown model calls now cross one native compute boundary. Their original coercion and unit-selector validation order remains in Python; unit arithmetic runs on owned native buffers. The numeric fuel lookup is snapshotted once, prepared once, and shared by validated native raster views. Explicit tile and tweak APIs remain Rust-only.
+
+The [2026-11-07 public serial checkpoint](RUST_BACKEND_BENCHMARKS.md#recovery-pipeline-checkpoint-2026-11-07) still fails for typed Crown. Ordinary routes have faster measured medians, but complete end-to-end targets are not certified. Parallel output allocation and the final campaign remain pending an owner decision.
+
+Crown equations share a `CrownNumber` arithmetic contract. Ordinary mixed real values use compact precision, integer, mask, fill, rank, and math-profile metadata. Initial promotion and scalar edge cases reuse checked native arithmetic; weak/object or exceptional representations retain the checked native path. No Python calculations are called from Rust. The compact route is selected from payload traits, without matching benchmark dtype tuples or input values.
+
+`PreparedFuel::prepared` refreshes immutable physical coefficients after numeric edits; `PreparedFuels::from_rows` accepts numeric registry rows without names. `SurfaceRaster::evaluate_cell`, `CrownRaster::evaluate_cell`, and `CrownRaster::input_cell` let bindings and Rust callers reuse validated columns with their own output storage. Out-of-range cells return `None`; invalid pixels retain the raster's default-output behavior.
+
+The Python-facing shape, dtype, mask, and tolerance contract remains unchanged. Regression coverage also preserves negative zero at the Crown fraction's inclusive clip boundary.
 
 ## Typed scalar stages
 
@@ -29,7 +37,7 @@ controls, synthetic full Surface inputs for Crown, or per-cell fuel registries.
 Python's permissive mode matching is confined to the binding adapter.
 
 `PreparedFuels::from_registry` takes an immutable numerical snapshot with dense
-0–260 lookup. Later edits to the original registry do not change that snapshot.
+0â€“260 lookup. Later edits to the original registry do not change that snapshot.
 `PreparedFuel` can also be copied and edited explicitly for an experimental
 scalar call. Names and other registry metadata are not copied into cell loops.
 Dynamic herbaceous transfer remains moisture-dependent; preparation does not
@@ -39,7 +47,7 @@ cache it incorrectly by fuel ID.
 publicly editable `FuelbedIntermediates`; `run_from_fuelbed` resumes from that
 value without rebuilding it. `SurfaceTweaks` can replace reaction intensity,
 no-wind/no-slope rate, midflame wind, wind/slope amplification, or forward rate.
-Overrides apply before dependent outputs. Reaction intensity is BTU/ft²/min,
+Overrides apply before dependent outputs. Reaction intensity is BTU/ftÂ²/min,
 including the named output. A forward-rate override recomputes shape, intensity,
 and flame length. Undefined-fuel output masking remains the final step.
 
@@ -73,9 +81,9 @@ four available physical cores. A passing mean across routes does not qualify.
 
 | Cells | Route | One worker | Four workers |
 | ---: | --- | ---: | ---: |
-| 10,000 | Surface and Crown f64 | 1.25× Python | Diagnostic |
-| 10,000 | Typed Crown A and B | At least Python parity (1.0×) | Diagnostic |
-| 100,000 and 1,000,000 | All four routes | 2.0× Python | 4.0× Python |
+| 10,000 | Surface and Crown f64 | 1.25Ã— Python | Diagnostic |
+| 10,000 | Typed Crown A and B | At least Python parity (1.0Ã—) | Diagnostic |
+| 100,000 and 1,000,000 | All four routes | 2.0Ã— Python | 4.0Ã— Python |
 
 Ratios divide Python median public-call time by Rust median public-call time.
 Both first-call and warmed results must pass, including the lower endpoint of a
@@ -179,7 +187,7 @@ checkpoint below.
 
 After the typed scalar and raster engine exists, check core headroom before
 production binding work. The provisional core screen is 1.25 times the public
-target (2.5× core speed for a 2× public-call target). Measure actual typed layouts;
+target (2.5Ã— core speed for a 2Ã— public-call target). Measure actual typed layouts;
 do not substitute float64 results. At most one disposable prototype per failing
 route is allowed before returning evidence for a go/no-go decision. Later kernel
 tuning allows three isolated experiments per failing route before another
@@ -215,7 +223,7 @@ First-call medians in seconds:
 
 Both mixed layouts reproduce the slowdown. Four-worker common raster execution
 at 100,000 cells remains around Python speed on this host, below the accepted
-4× target. No old typed-million run was attempted. The allocation probe measures
+4Ã— target. No old typed-million run was attempted. The allocation probe measures
 nine core allocations and 115 requested allocation bytes per Crown cell in
 common and typed routes, excluding the separately investigated output encoder.
 
@@ -278,10 +286,10 @@ The measurements use Windows x86-64, CPython 3.12.8, NumPy 2.1.3, Rust 1.99, ord
 
 | Route at 100,000 cells | First-call median speedup range | Warm median speedup range | Lowest first/warm 95% bound |
 | --- | ---: | ---: | ---: |
-| surface | 3.70–3.82x | 3.52–4.06x | 3.43x |
-| crown | 3.13–3.34x | 3.16–3.24x | 2.83x |
-| typed-crown | 3.02–3.20x | 3.04–3.29x | 2.71x |
-| typed-crown-b | 3.04–3.12x | 3.04–3.18x | 2.78x |
+| surface | 3.70â€“3.82x | 3.52â€“4.06x | 3.43x |
+| crown | 3.13â€“3.34x | 3.16â€“3.24x | 2.83x |
+| typed-crown | 3.02â€“3.20x | 3.04â€“3.29x | 2.71x |
+| typed-crown-b | 3.04â€“3.12x | 3.04â€“3.18x | 2.78x |
 
 Both required datasets passed at 10,000 and 100,000 cells. The core thresholds remain 1.5625x for small Surface/Crown, 1.25x for small typed Crown, and 2.5x for every large route. Public-call targets remain unchanged; million-cell and four-worker acceptance still require the later binding and scheduling work.
 
@@ -354,7 +362,7 @@ even before Python-boundary costs. This is sufficient for a no-go at the reduced
 checkpoint. Million-cell and four-worker acceptance are unverified.
 
 The ordinary checked typed path, with full-column storage but no compact
-arithmetic, takes about 0.06–0.08 seconds at 10,000 cells and 0.6–0.8 seconds at
+arithmetic, takes about 0.06â€“0.08 seconds at 10,000 cells and 0.6â€“0.8 seconds at
 100,000 cells. The single compact candidate substantially improves that core
 cost while preserving the checked outputs, but does not establish the required
 large-raster headroom. No additional candidate was tried for either typed
@@ -425,8 +433,8 @@ selectors, and allocation counts.
 
 Reduced development screens used three fresh pairs and one warmed call, not the
 seven-pair acceptance procedure. At 10,000 cells, common Surface calls took about
-27–29 ms and Crown 34–35 ms, versus Python's 35–36 ms and 50–55 ms respectively.
-Typed Crown still took 4.4–5.4 seconds; these measurements do not establish the
+27â€“29 ms and Crown 34â€“35 ms, versus Python's 35â€“36 ms and 50â€“55 ms respectively.
+Typed Crown still took 4.4â€“5.4 seconds; these measurements do not establish the
 final public-call targets. The remaining output transport and pipeline fusion
 work are required.
 ## General output writer (recovery layer 3)
@@ -450,7 +458,7 @@ actual four-worker checks. The [raw allocation evidence](performance/2026-11-06-
 passes `tools/assemble_allocation_evidence.py` and the acceptance checker's
 provenance validation. A rehashed nonzero encoder sample is rejected.
 
-The reduced three-pair, one-warm-call screen puts typed Crown at 82–93 ms for
-10,000 cells, down from 4.4–5.4 seconds before the writer. Python remains about
-51–56 ms in those cases. Complete model fusion and general compact arithmetic
+The reduced three-pair, one-warm-call screen puts typed Crown at 82â€“93 ms for
+10,000 cells, down from 4.4â€“5.4 seconds before the writer. Python remains about
+51â€“56 ms in those cases. Complete model fusion and general compact arithmetic
 are still required; these figures do not certify final public-call targets.

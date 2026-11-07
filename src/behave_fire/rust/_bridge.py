@@ -138,6 +138,7 @@ def _call_owned(operation, arguments, direction_profile):
     :param direction_profile: Atan2 selector captured before copying original operands.
     :return: Fresh arrays in the reference result structure.
     """
+    native_registry = None
     arrays = {}
     integers = {}
     mask_metadata = {}
@@ -145,6 +146,7 @@ def _call_owned(operation, arguments, direction_profile):
     precision = []
     arguments = dict(arguments)
     original_arguments = dict(arguments)
+    pipeline = arguments.pop('_pipeline', None)
     name = operation.rsplit('.', 1)[1]
     direction_float32 = False
     if operation == 'surface.calculate_direction_of_max_spread':
@@ -180,7 +182,14 @@ def _call_owned(operation, arguments, direction_profile):
         if supplied and name == 'calculate_surface_wind_adjustment_factor':
             return _call('units.Fraction.to_base', {'value': arguments['user_waf'], 'units': 0})
         if supplied:
-            for key in ('canopy_cover', 'canopy_height', 'crown_ratio'):
+            ignored = ('canopy_cover', 'canopy_height', 'crown_ratio')
+            if pipeline:
+                if pipeline.get('derive'):
+                    arguments.pop('canopy_base_height', None)
+                pipeline = dict(pipeline, derive=False, conversions={
+                    field: descriptor for field, descriptor in pipeline['conversions'].items()
+                    if field not in ignored})
+            for key in ignored:
                 arguments[key] = 0.0
         else:
             arguments['user_waf'] = None
@@ -201,9 +210,14 @@ def _call_owned(operation, arguments, direction_profile):
     if operation in ('surface.build_particle_arrays', 'model.run_surface'):
         lookup = arguments.pop('lut')
         grid = np.atleast_1d(np.asarray(arguments.pop('fuel_model_grid'), dtype=np.int32))
-        index = np.clip(grid, 0, lookup['depth'].shape[0] - 1)
-        for key in _LOOKUP_FIELDS:
-            arguments['model.' + _FUEL_KEYS.get(key, key)] = np.asanyarray(lookup[key])[index]
+        if operation == 'model.run_surface' and grid.size:
+            native_registry = _prepare_registry(lookup)
+        if native_registry is None:
+            index = np.clip(grid, 0, lookup['depth'].shape[0] - 1)
+            for key in _LOOKUP_FIELDS:
+                arguments['model.' + _FUEL_KEYS.get(key, key)] = np.asanyarray(lookup[key])[index]
+        else:
+            arguments['fuel_model_grid'] = grid
         for key in ('m1h', 'm10h', 'm100h', 'mlh', 'mlw'):
             arguments[key] = np.atleast_1d(np.asarray(_normalize(arguments[key]), dtype=float))
             if arguments[key].shape != grid.shape:
@@ -214,8 +228,11 @@ def _call_owned(operation, arguments, direction_profile):
         if 'slope_deg' in arguments:
             arguments['slope'] = arguments.pop('slope_deg')
             arguments['slope_units'] = 0
-        for key in _LOOKUP_FIELDS:
-            arguments['model.' + _FUEL_KEYS.get(key, key)] = np.asanyarray(lookup[key])[10]
+        if operation == 'crown.run_crown_fire' and all(shape) and len(lookup['depth']) > 10:
+            native_registry = _prepare_registry(lookup)
+        if native_registry is None:
+            for key in _LOOKUP_FIELDS:
+                arguments['model.' + _FUEL_KEYS.get(key, key)] = np.asanyarray(lookup[key])[10]
         for key in ('m1h', 'm10h', 'm100h', 'mlh', 'mlw'):
             arguments[key] = np.atleast_1d(np.asarray(_normalize(arguments[key]), dtype=float))
             if arguments[key].shape != shape:
@@ -350,12 +367,20 @@ def _call_owned(operation, arguments, direction_profile):
     else:
         shape = np.broadcast_shapes(*(value.shape for value in arrays.values()))
     input_shapes = {key: value.shape for key, value in arrays.items()}
+    if pipeline:
+        for field, (kind, codes) in pipeline['conversions'].items():
+            if field in arrays:
+                arrays['_convert.' + field] = codes
+                strings['_convert.' + field] = kind
+        if pipeline.get('derive'):
+            strings['_derive_crown_ratio'] = 'true'
     arrays.update(mask_metadata)
     arrays['_simd_exp'] = np.asarray(_math_profile(), dtype=float)
     arrays['_svml_atan2'] = np.asarray(direction_profile if direction_float32 and all(shape) else 0, dtype=float)
     arrays = {key: _broadcast_buffer(value, shape) for key, value in arrays.items()}
     integers = {key: (kind, _broadcast_buffer(bits, shape)) for key, (kind, bits) in integers.items()}
-    result = _native.batch(operation, arrays, strings, shape, single, integers, threads=_THREADS.get())
+    native_options = {} if native_registry is None else {"registry": native_registry}
+    result = _native.batch(operation, arrays, strings, shape, single, integers, threads=_THREADS.get(), **native_options)
     metadata = result.pop("__schema")
     result = {key: value for key, value in result.items() if not key.startswith("__timing.")}
     if not result and 0 in shape:
@@ -644,6 +669,19 @@ def _partition_fields(operation, arguments, fields):
         result[field] = _call(operation, scoped)[field]
     return result
 
+
+def _prepare_registry(lookup):
+    """Keep regular numeric fuel rows independent of raster size.
+
+    :param lookup: Already snapshotted fuel lookup columns.
+    :return: Native numeric registry, or None for irregular legacy lookup shapes.
+    """
+    columns = {key: np.asanyarray(lookup[key]) for key in _LOOKUP_FIELDS}
+    count = columns['depth'].size
+    if not count or any(value.ndim != 1 or value.size != count for value in columns.values()):
+        return None
+    return {'model.' + _FUEL_KEYS.get(key, key): np.asarray(value, dtype=float)
+            for key, value in columns.items()}
 
 def _real_coercion(operation, parameter):
     """Describe explicit reference coercion before numerical arithmetic.

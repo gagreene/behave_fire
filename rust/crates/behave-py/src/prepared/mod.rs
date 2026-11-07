@@ -8,3 +8,9 @@ pub(crate) mod controls;
 pub(crate) mod units;
 
 mod unit_selectors;
+
+pub(crate) mod crown;
+pub(crate) mod pipeline;
+pub(crate) mod surface;
+
+pub(crate) mod conversions;
