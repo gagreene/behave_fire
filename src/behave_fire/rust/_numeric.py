@@ -71,6 +71,9 @@ def normalize_selector(kind, value):
     """
     from ._bridge import _unit_code
 
+    # Unit indexing can discard a mask, so validate missingness on the original input.
+    if np.ma.isMaskedArray(value) and np.ma.getmaskarray(value).any():
+        raise ValueError("A typed selector cannot be missing.")
     return normalize_control(_unit_code(kind, value), np.int32)
 
 

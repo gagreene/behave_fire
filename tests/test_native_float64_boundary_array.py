@@ -34,6 +34,15 @@ def test_normalization_rejects_opaque_and_complex_values_before_float_cast():
         with pytest.raises(TypeError):normalize_physical(value)
 
 
+@pytest.mark.parametrize('kind', ['Fraction', 'Pressure'])
+@pytest.mark.parametrize('value', [np.ma.array(0, mask=True), np.ma.array([1], mask=[True])])
+def test_selectors_reject_missing_positions_before_index_conversion(kind, value):
+    from behave_fire.rust._numeric import normalize_selector
+
+    with pytest.raises(ValueError, match='missing'):
+        normalize_selector(kind, value)
+
+
 def test_shape_groups_compute_independent_shapes_including_empty_groups():
     from behave_fire.rust._numeric import plan_shapes
 

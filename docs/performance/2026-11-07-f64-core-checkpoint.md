@@ -14,7 +14,7 @@ The new configured `run_model` calculates physical quantities as float64, propag
 - Source SHA256: `61884757aa89e00d5df82dffdf6efe9bd6b4a88034c8ae962cfea0c4ca7703ce`.
 - Probe binary SHA256: `b0f7b64deb4d61de96d7c7bc55294f10b7afc377960cb2f35df50132279d59be`.
 - Native extension SHA256 (public Python reference provenance): `33a822f001f876823f90a9a57c1a65845592b0b83a15785e3c135e02b6c7fa41`.
-- Raw report SHA256: `3a33b3e26e4afa2776ddcfbe799300285e27bc767822a1088cfe15768bf231ff`.
+- Raw report SHA256 (UTF-8, canonical LF line endings): `a4ea1e9a2e506bfa558a9a7ba148fa9e35632a9fbffcef6719370e36c07092a3`.
 - All per-process timings, compiler/environment fields, identities, and field checksums are in [the frozen raw screen](2026-11-07-f64-core-screen.json). Raw worker logs and typed exports remain in the ignored plan workspace at the repo-relative paths recorded there.
 
 ## Failed endpoints
@@ -36,7 +36,7 @@ All 10k endpoints pass the cheap core screen. All 16 warmed endpoints have media
 | heterogeneous typed-crown / python | 1.1898 / 0.6776 / 0.6673 | 0.8028 / 0.6245 / 0.9715 |
 | heterogeneous typed-crown / core-rust | 0.2194 / 0.2450 / 0.3281 | 0.2290 / 0.2367 / 0.2751 |
 
-The medians are promising, but observed variance and the remaining kernel cost leave insufficient measured headroom at the agreed confidence level. These observations do not establish the cause of variance or prove that boundary costs will fit within the public target. No extra sampling or numerical tuning was performed to turn a miss into a pass.
+The medians are promising, but observed variance and the remaining kernel cost leave insufficient measured headroom at the agreed confidence level. These observations do not establish the cause of variance or prove that boundary costs will fit within the public target. No extra sampling or numerical tuning was performed to turn a miss into a pass. This screen measures the frozen pre-review source identity. Subsequent review fixes reject missing selectors before index conversion and preserve missing fuelbed/reaction prerequisites, including cached Surface/Crown preparation; those fixes are untimed and do not waive the stop.
 
 ## Verification and next decision
 

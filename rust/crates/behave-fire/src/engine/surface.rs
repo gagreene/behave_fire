@@ -150,10 +150,13 @@ impl SurfacePlan {
         fuel: &PreparedFuel,
         tweaks: SurfaceTweaks,
     ) -> SurfaceResult {
-        let fuelbed = self.prepare_fuelbed(cell, fuel);
+        let particles = surface::build_particle_arrays_from_prepared(
+            fuel, cell.m1h, cell.m10h, cell.m100h, cell.mlh, cell.mlw,
+        );
+        let fuelbed = fuel.prepare_fuelbed_available(&particles);
         let reaction = tweaks
             .reaction_intensity
-            .unwrap_or_else(|| fuel.reaction_intensity(&fuelbed));
+            .unwrap_or_else(|| fuel.reaction_intensity_available(&fuelbed));
         run_selected_stages::<0, true>(
             reaction,
             0.9 * reaction,
@@ -172,7 +175,7 @@ impl SurfacePlan {
     ) -> SurfaceResult {
         let reaction = tweaks
             .reaction_intensity
-            .unwrap_or_else(|| surface::calculate_reaction_intensity(fuelbed));
+            .unwrap_or_else(|| surface::calculate_reaction_intensity_available(fuelbed));
         run_selected_stages::<FINISH, true>(
             reaction,
             0.9 * reaction,

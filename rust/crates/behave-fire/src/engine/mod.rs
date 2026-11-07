@@ -2,7 +2,7 @@
 mod crown;
 mod field;
 mod fuel;
-mod missing;
+pub(crate) mod missing;
 mod options;
 mod run;
 mod stage;

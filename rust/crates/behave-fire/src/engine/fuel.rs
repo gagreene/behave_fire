@@ -80,10 +80,33 @@ impl PreparedFuel {
             None => crate::surface::calculate_fuelbed_with_terms(particles, &self.savr_terms()),
         }
     }
+    /// Prepare a fuelbed without losing missing selected physical prerequisites.
+    pub(crate) fn prepare_fuelbed_available(
+        &self,
+        particles: &crate::surface::Particles,
+    ) -> crate::surface::FuelbedIntermediates {
+        match self.physics() {
+            Some(physics) => physics.fuelbed.run_available(particles, &self.savr_terms()),
+            None => crate::surface::calculate_fuelbed_available_with_terms(
+                particles,
+                &self.savr_terms(),
+            ),
+        }
+    }
     pub(crate) fn reaction_intensity(&self, bed: &crate::surface::FuelbedIntermediates) -> f64 {
         match self.physics() {
             Some(physics) => physics.reaction.run(bed),
             None => crate::surface::calculate_reaction_intensity(bed),
+        }
+    }
+    /// Apply strict availability through cached or ordinary reaction coefficients.
+    pub(crate) fn reaction_intensity_available(
+        &self,
+        bed: &crate::surface::FuelbedIntermediates,
+    ) -> f64 {
+        match self.physics() {
+            Some(physics) => physics.reaction.run_available(bed),
+            None => crate::surface::calculate_reaction_intensity_available(bed),
         }
     }
     fn savr_key(&self) -> [f64; 3] {

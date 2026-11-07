@@ -440,10 +440,18 @@ fn calculate_crown_surface_selected<const FINISH: u8, const STRICT: bool>(
     };
     let p_crown =
         surface::build_particle_arrays_from_prepared(fuel, x.m1h, x.m10h, x.m100h, x.mlh, x.mlw);
-    let ib_crown = fuel.prepare_fuelbed(&p_crown);
-    let ri_crown = tweaks
-        .reaction_intensity
-        .unwrap_or_else(|| fuel.reaction_intensity(&ib_crown));
+    let ib_crown = if STRICT {
+        fuel.prepare_fuelbed_available(&p_crown)
+    } else {
+        fuel.prepare_fuelbed(&p_crown)
+    };
+    let ri_crown = tweaks.reaction_intensity.unwrap_or_else(|| {
+        if STRICT {
+            fuel.reaction_intensity_available(&ib_crown)
+        } else {
+            fuel.reaction_intensity(&ib_crown)
+        }
+    });
     let controls = SurfaceOptions {
         waf_method: WafMethod::UserInput,
         ..*options
