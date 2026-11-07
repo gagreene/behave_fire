@@ -1,8 +1,12 @@
 # Rust backend execution measurements
 
+## Wind-cache confirmation checkpoint: 2026-11-07
+
+The cache candidate passed all 32 bounds in a fresh core screen, then passed 31 of 32 in the required seven-new-pair confirmation. Every Crown/A/B bound passes. Uniform Surface at 100k misses its first-call lower confidence bound (2.241x versus 2.5x required; median 3.814x). Work stops before API4. The [checkpoint and concrete Surface follow-up](performance/2026-11-07-wind-cache-core-checkpoint.md), [fresh screen](performance/2026-11-07-wind-cache-core-screen.json), and [confirmation](performance/2026-11-07-wind-cache-core-confirmation.json) preserve the complete evidence. No public backend speed certification is implied.
+
 ## Bounded Crown investigation: 2026-11-07
 
-An isolated immutable wind-term cache reduced warmed Crown core time by about 24% (1.31-1.32x relative to the existing Rust core) in fixed diagnostic pairs. Forward Surface and backsolve repeat physical wind powers; CPU pinning did not remove variance. See the [investigation and limitations](performance/2026-11-07-crown-profile.md) and [raw diagnostic evidence](performance/2026-11-07-crown-profile.json). This is not public backend certification or a replacement for the failed screen below. The single integrated candidate must pass a fresh unchanged core gate before API4 migration.
+An isolated immutable wind-term cache reduced warmed Crown core time by about 24% (1.31-1.32x relative to the existing Rust core) in fixed diagnostic pairs. Forward Surface and backsolve repeat physical wind powers; CPU pinning did not remove variance. See the [investigation and limitations](performance/2026-11-07-crown-profile.md) and [raw diagnostic evidence](performance/2026-11-07-crown-profile.json). The integrated candidate's fresh confirmation result is recorded above; these diagnostic ratios remain separate from acceptance.
 
 ## Float64 core checkpoint: 2026-11-07
 
