@@ -14,7 +14,7 @@ def test_binding_api_one_is_rejected_by_every_native_entry_route():
     source = '''
         import importlib, importlib.machinery, sys, types, warnings
         import behave_fire as bf
-        from behave_fire._backend_contract import REQUIRED_CAPABILITIES
+        from behave_fire._backend_contract import BINDING_API_VERSION, REQUIRED_CAPABILITIES
         native = types.ModuleType('behave_fire._rust')
         native.__spec__ = importlib.machinery.ModuleSpec('behave_fire._rust', loader=None)
         native.__binding_api_version__ = 1
@@ -26,7 +26,7 @@ def test_binding_api_one_is_rejected_by_every_native_entry_route():
             warnings.simplefilter('always')
             assert bf.BehaveRun(bf.FuelModels()).backend_in_use == 'python'
         assert len(caught) == 1
-        assert 'expected 2' in str(caught[0].message)
+        assert f'expected {BINDING_API_VERSION}' in str(caught[0].message)
         for call in (lambda: bf.get_backend('rust'), lambda: importlib.import_module('behave_fire.rust')):
             try:
                 call()

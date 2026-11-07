@@ -359,6 +359,49 @@ impl<'a> PreparedArguments<'a> {
         }
         Ok(None)
     }
+    /// Identify layouts whose output payload tags may vary, without inspecting scientific values.
+    pub(crate) fn metadata_varies(&self, crown: bool) -> bool {
+        Field::ALL.into_iter().any(|field| {
+            if crown
+                && !matches!(
+                    field,
+                    Field::SurfaceResultsSpreadRate
+                        | Field::SurfaceResultsFirelineIntensity
+                        | Field::SurfaceResultsHeatPerUnitArea
+                )
+            {
+                return false;
+            }
+            let name = field.name();
+            let tail = name.rsplit('.').next().unwrap_or(name);
+            if tail.ends_with("units")
+                || tail.starts_with('_')
+                || matches!(
+                    tail,
+                    "max_steps"
+                        | "charge_type"
+                        | "fuel_model_grid"
+                        | "equation_number_grid"
+                        | "is_crown"
+                        | "is_surface_fire"
+                        | "is_passive_crown"
+                        | "is_active_crown"
+                )
+            {
+                return false;
+            }
+            self.descriptor(field).is_some_and(|descriptor| {
+                [Meta::Object, Meta::Weak, Meta::WeakInteger, Meta::WeakBool]
+                    .iter()
+                    .any(|meta| descriptor.metadata[*meta as usize].is_some())
+                    || [Meta::ObjectKind, Meta::IntegerType, Meta::ObjectNumpy]
+                        .iter()
+                        .any(|meta| {
+                            descriptor.metadata[*meta as usize].is_some_and(|v| v.len() > 1)
+                        })
+            })
+        })
+    }
     pub(crate) fn has_masks(&self) -> bool {
         self.masks
     }
@@ -708,5 +751,32 @@ mod tool_selector_tests {
         assert_eq!(p.humidity_units(0).unwrap().code(), 1);
         assert_eq!(p.pressure_units(0).unwrap().code(), 1);
         assert!(p.speed_units(0).is_err());
+    }
+}
+
+#[cfg(all(test, feature = "allocation-probe"))]
+mod output_layout_tests {
+    use super::*;
+    #[test]
+    fn crown_layout_depends_on_supplied_payload_traits_not_spatial_controls() {
+        let mut a = Arguments {
+            values: BTreeMap::from([
+                ("surface_results.spread_rate".into(), vec![1.0, 2.0]),
+                ("_single.surface_results.spread_rate".into(), vec![1.0]),
+                ("_weak.aspect".into(), vec![1.0]),
+                ("aspect".into(), vec![0.0]),
+            ]),
+            strings: BTreeMap::new(),
+            integers: BTreeMap::new(),
+        };
+        let p = PreparedArguments::new(&a, &GridShape::new(vec![2]).unwrap()).unwrap();
+        assert!(!p.metadata_varies(true));
+        assert!(p.metadata_varies(false));
+        a.values.insert(
+            "_object_kind.surface_results.heat_per_unit_area".into(),
+            vec![10.0, 0.0],
+        );
+        let p = PreparedArguments::new(&a, &GridShape::new(vec![2]).unwrap()).unwrap();
+        assert!(p.metadata_varies(true));
     }
 }

@@ -1,5 +1,6 @@
 //! Structured dictionaries marshalled to typed core records.
-use crate::dispatch::Cell;
+use crate::column_output::RowWriter;
+use crate::dispatch::named;
 use crate::prepared::{Field, PreparedArguments};
 use behave_fire::units::*;
 use behave_fire::{
@@ -143,32 +144,19 @@ pub fn run_surface(
     }
     Ok(behave_fire::engine::SurfacePlan::new(options).run_from_fuelbed(&cell, &fuelbed, tweaks))
 }
-pub fn particles_output(p: Particles) -> Cell {
-    let mut result: Cell = p
-        .named_values()
-        .into_iter()
-        .map(|(k, v)| (k.to_owned(), v))
-        .collect();
-    result.insert("is_defined".into(), f64::from(u8::from(p.is_defined)));
+pub fn particles_output(out: &mut RowWriter<'_>, p: Particles) {
+    named(out, p.named_values());
+    out.f64("is_defined", f64::from(u8::from(p.is_defined)));
     for (name, values) in p.named_arrays() {
-        for (j, value) in values.into_iter().enumerate() {
-            result.insert(format!("{name}.{j}"), value);
+        for (index, value) in values.into_iter().enumerate() {
+            out.indexed_f64(name, index, value);
         }
     }
-    result
 }
-pub fn fuelbed_output(p: FuelbedIntermediates) -> Cell {
-    let mut result: Cell = p
-        .named_values()
-        .into_iter()
-        .map(|(k, v)| (k.to_owned(), v))
-        .collect();
-    result.insert("is_defined".into(), f64::from(u8::from(p.is_defined)));
-    result
+pub fn fuelbed_output(out: &mut RowWriter<'_>, p: FuelbedIntermediates) {
+    named(out, p.named_values());
+    out.f64("is_defined", f64::from(u8::from(p.is_defined)));
 }
-pub fn surface_output(r: SurfaceResult) -> Cell {
-    r.named_values()
-        .into_iter()
-        .map(|(k, v)| (k.to_owned(), v))
-        .collect()
+pub fn surface_output(out: &mut RowWriter<'_>, result: SurfaceResult) {
+    named(out, result.named_values());
 }

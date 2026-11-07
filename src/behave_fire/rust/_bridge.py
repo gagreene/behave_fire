@@ -356,20 +356,22 @@ def _call_owned(operation, arguments, direction_profile):
     arrays = {key: _broadcast_buffer(value, shape) for key, value in arrays.items()}
     integers = {key: (kind, _broadcast_buffer(bits, shape)) for key, (kind, bits) in integers.items()}
     result = _native.batch(operation, arrays, strings, shape, single, integers, threads=_THREADS.get())
+    metadata = result.pop("__schema")
+    result = {key: value for key, value in result.items() if not key.startswith("__timing.")}
     if not result and 0 in shape:
         result = {key: np.empty(shape) for key in _EMPTY_KEYS.get(name, ('',))}
     promoted = name in ('calculate_effective_wind_speed', 'run_surface_fire', 'calculate_fuelbed_intermediates', 'calculate_slope_phi', 'calculate_surface_rate_vector') or (name == 'calculate_direction_of_max_spread' and 'north' in strings['wind_orientation_mode'].lower())
     if single and (not promoted):
-        result = {key: value if key.startswith('__') or '__single.' + key in result else value.astype(np.float32) for key, value in result.items()}
+        result = {key: value if key in metadata or value.dtype.kind in 'biu' else value.astype(np.float32) for key, value in result.items()}
     if name == 'assign_final_crown_fire_behavior':
         for field, sources in (('final_spread_rate', ('surface_ros', 'passive_ros', 'crown_ros')), ('final_heat_per_unit_area', ('surface_hpua', 'passive_hpua', 'crown_hpua')), ('final_fireline_intensity', ('surface_fli', 'passive_fli', 'crown_fli'))):
             dtype = np.result_type(*[_normalize(arguments[key]) for key in sources])
-            if '__single.' + field not in result or dtype == object:
+            if field not in metadata or dtype == object:
                 result[field] = result[field].astype(dtype)
     if name == 'calculate_passive_crown_fire_behavior':
         for field, sources in (('passive_crown_fire_spread_rate', ('surface_ros', 'crown_ros', 'cfb')), ('passive_crown_fire_heat_per_unit_area', ('surface_hpua', 'canopy_hpua', 'cfb'))):
             dtype = np.result_type(*[_normalize(arguments[key]) for key in sources])
-            if '__single.' + field not in result or dtype == object:
+            if field not in metadata or dtype == object:
                 result[field] = result[field].astype(dtype)
     if 'is_defined' in result:
         dtype = np.asanyarray(original_arguments['p']['is_defined']).dtype if 'p' in original_arguments else bool
@@ -402,25 +404,23 @@ def _call_owned(operation, arguments, direction_profile):
             target = np.broadcast_shapes(*(input_shapes.get(key, np.shape(original_arguments[key])) for key in sources))
         if result[field].size == 0 and all((size > 0 for size in target)):
             result[field] = _recompute_field(operation, original_arguments, field, sources)
-            for key in list(result):
-                if key.startswith('__') and key.partition('.')[2] == field:
-                    del result[key]
+            metadata.pop(field, None)
         else:
             result[field] = _restore_shape(result[field], target)
-            for key in list(result):
-                if key.startswith('__') and key.partition('.')[2] == field and result[key].ndim:
-                    result[key] = _restore_shape(result[key], target)
-    metadata = {key: result.pop(key) for key in list(result) if key.startswith('__')}
+            if field in metadata:
+                metadata[field] = {key: _restore_shape(value, target) if isinstance(value, np.ndarray) and value.ndim else value
+                                   for key, value in metadata[field].items()}
     for key in result:
         result[key] = _restore_payload(result[key], metadata, key)
-        if '__masked.' + key in metadata and np.any(metadata['__masked.' + key]):
-            result[key] = np.ma.array(result[key], mask=metadata['__mask.' + key].astype(bool))
-            if '__fill_present.' + key in metadata and np.any(metadata['__fill_present.' + key]):
-                result[key].set_fill_value(metadata['__fill.' + key].ravel()[0])
+        schema = metadata.get(key, {})
+        if schema.get('masked', False):
+            result[key] = np.ma.array(result[key], mask=schema['mask'])
+            if schema.get('fill_present', False):
+                result[key].set_fill_value(schema['fill'])
     box_surface = object_input and name in _RETAIN and (name not in ('calculate_effective_wind_speed', 'calculate_reaction_intensity', 'calculate_fuelbed_intermediates'))
     box_crown = object_input and operation.startswith('crown.') and (name not in ('run_crown_fire', 'calculate_crown_surface_fire', 'calculate_crowning_surface_fire_spread_rate', 'classify_crown_fire_type'))
     if box_surface or box_crown:
-        result = {key: value if '__object.' + key in metadata else value.astype(object) for key, value in result.items()}
+        result = {key: value if key in metadata else value.astype(object) for key, value in result.items()}
     return result[''] if '' in result else result
 
 
@@ -698,56 +698,60 @@ def _recompute_field(operation, arguments, field, dependencies):
 
 
 def _restore_payload(value, metadata, key):
-    """Reconstruct owned typed outputs from native scalar metadata.
+    """Restore exact payload types from compact native field schemas.
 
-    :param value: Owned real-value storage returned by the native extension.
-    :param metadata: Native per-field dtype, exact bits, and object metadata.
+    :param value: Owned typed native value buffer.
+    :param metadata: Per-field constant schema and necessary variable sidecars.
     :param key: Result field name.
-    :return: An owned numeric or object array with exact native payload types.
+    :return: An owned numeric or object array preserving exact payload classes.
     """
-    if '__single.' + key not in metadata:
+    schema = metadata.get(key)
+    if schema is None:
         return value
     names = ('int8', 'int16', 'int32', 'int64', 'uint8', 'uint16', 'uint32', 'uint64', 'bool')
-    integer = metadata.get('__integer_dtype.' + key, np.asarray(-1.0))
-    type_numbers = metadata.get('__integer_type.' + key, np.asarray(-1.0))
     type_chars = '?bBhHiIlLqQ'
-    single = metadata['__single.' + key]
-    complex_kind = metadata.get('__complex.' + key, np.asarray(0.0))
-    object_kind = metadata.get('__object.' + key, np.asarray(0.0))
-    bits = None
-    if np.any(integer >= 0) and value.size:
-        bits = metadata['__integer_low.' + key].astype(np.uint64) | metadata['__integer_high.' + key].astype(np.uint64) << np.uint64(32)
-    if np.any(object_kind):
+    integer = schema.get('integer_kind', -1)
+    type_numbers = schema.get('integer_type', -1)
+    single = schema.get('single', False)
+    complex_kind = schema.get('complex', False)
+    bits = schema.get('bits')
+    if schema.get('object', False):
         result = np.empty(value.shape, dtype=object)
-        flags = np.broadcast_to(metadata.get('__object_numpy.' + key, np.asarray(0.0)), value.shape)
+        flags = np.broadcast_to(schema.get('object_numpy', False), value.shape)
         integers = np.broadcast_to(integer, value.shape)
         exact_types = np.broadcast_to(type_numbers, value.shape)
         singles = np.broadcast_to(single, value.shape)
         complexes = np.broadcast_to(complex_kind, value.shape)
-        imaginary = np.broadcast_to(metadata.get('__imag.' + key, np.asarray(0.0)), value.shape)
+        imaginary = np.broadcast_to(schema.get('imag', 0.0), value.shape)
         for index in np.ndindex(value.shape):
             if complexes[index]:
                 payload = np.asarray(complex(value[index], imaginary[index]), dtype=np.complex64 if singles[index] else np.complex128)[()]
             elif integers[index] >= 0:
+                if bits is None:
+                    raise ValueError('native object integer payload lacks exact bits')
                 dtype = type_chars[int(exact_types[index])] if exact_types[index] >= 0 else names[int(integers[index])]
                 payload = bits[index].astype(dtype)
             else:
                 payload = np.asarray(value[index], dtype=np.float32 if singles[index] else np.float64)[()]
             result[index] = payload if flags[index] else payload.item()
         return result
-    if np.any(complex_kind):
-        result = np.empty(value.shape, dtype=np.complex64 if np.all(single) else np.complex128)
+    if complex_kind:
+        result = np.empty(value.shape, dtype=np.complex64 if single else np.complex128)
         result.real = value
-        result.imag = metadata.get('__imag.' + key, 0.0)
+        result.imag = schema.get('imag', 0.0)
         return result
-    if np.any(integer >= 0):
-        code = int(integer.ravel()[0])
-        if not 0 <= code <= 8 or not np.all(integer == code):
+    if integer >= 0:
+        code = int(integer)
+        if not 0 <= code <= 8:
             raise ValueError('native output has inconsistent integer dtype metadata')
-        exact_type = int(type_numbers.ravel()[0]) if type_numbers.size else -1
-        dtype = type_chars[exact_type] if exact_type >= 0 else names[code]
-        return np.empty(value.shape, dtype=dtype) if bits is None else bits.astype(dtype)
-    return value.astype(np.float32 if np.all(single) else np.float64) if key != 'is_defined' else value
+        exact_type = int(type_numbers)
+        dtype = np.dtype(type_chars[exact_type] if exact_type >= 0 else names[code])
+        source = value if bits is None else bits
+        return source if source.dtype == dtype and source.dtype.num == dtype.num else source.astype(dtype)
+    if key == 'is_defined':
+        return value
+    dtype = np.dtype('float32' if single else 'float64')
+    return value if value.dtype == dtype else value.astype(dtype)
 
 
 def _restore_shape(value, shape):

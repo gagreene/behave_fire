@@ -371,7 +371,7 @@ fn every_source_stage_matches_independent_python_oracle() {
                     .values()
                     .any(|v| v["dtype"] == "float32");
             macro_rules! scalar {($fun:ident,$($k:literal),+)=>{{if single{Some(single::$fun($(a($k) as f32),+) as f64)}else{Some(crown::$fun($(a($k)),+))}}};}
-            macro_rules! record {($fun:ident,$($k:literal),+)=>{{if single{single::$fun($(a($k) as f32),+).named_values().into_iter().map(|(k,v)|(k,v as f64)).collect()}else{crown::$fun($(a($k)),+).named_values()}}};}
+            macro_rules! record {($fun:ident,$($k:literal),+)=>{{if single{single::$fun($(a($k) as f32),+).named_values().into_iter().map(|(k,v)|(k,v as f64)).collect()}else{crown::$fun($(a($k)),+).named_values().to_vec()}}};}
             let scalar = match name {
                 "calculate_critical_crown_fire_spread_rate" => scalar!(
                     calculate_critical_crown_fire_spread_rate,
@@ -505,12 +505,14 @@ fn every_source_stage_matches_independent_python_oracle() {
                             args[10],
                         )
                         .named_values()
+                        .to_vec()
                     } else {
                         assign_final_crown_fire_behavior(
                             b, p, args[0], args[1], args[2], args[3], args[4], args[5], args[6],
                             args[7], args[8], args[9], args[10],
                         )
                         .named_values()
+                        .to_vec()
                     };
                     None
                 }
@@ -527,8 +529,9 @@ fn every_source_stage_matches_independent_python_oracle() {
                     None
                 }
                 "get_surface_fire_inputs" => {
-                    vals =
-                        get_surface_fire_inputs(&surface(&i["surface_results"], n)).named_values();
+                    vals = get_surface_fire_inputs(&surface(&i["surface_results"], n))
+                        .named_values()
+                        .to_vec();
                     None
                 }
                 "run_crown_fire" => {

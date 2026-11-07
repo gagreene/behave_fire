@@ -1,16 +1,20 @@
 //! Native tools marshalling and scalar entry-point dispatch.
-use crate::dispatch::{named, scalar, widen, Cell};
+use crate::column_output::RowWriter;
+use crate::dispatch::{named, scalar, widen};
+use crate::operation::Operation;
 use crate::prepared::{Field, PreparedArguments};
 use behave_fire::{fine_dead_fuel_moisture, vapor_pressure_deficit};
 #[allow(deprecated)]
 pub fn evaluate(
-    operation: &str,
+    operation: Operation,
     a: &PreparedArguments<'_>,
     i: usize,
     _single: bool,
-) -> Result<Option<Cell>, String> {
-    Ok(Some(match operation {
-        "vapor_pressure_deficit_calculator.calculate_vpd" => named(
+    out: &mut RowWriter<'_>,
+) -> Result<Option<()>, String> {
+    match operation {
+        Operation::VaporPressureDeficitCalculatorCalculateVpd => named(
+            out,
             vapor_pressure_deficit::calculate_vpd(
                 a.n(Field::Temperature, i)?,
                 a.temperature_units(i)?,
@@ -22,8 +26,9 @@ pub fn evaluate(
             .into_iter()
             .map(|(k, v)| (k, widen(v))),
         ),
-        "fine_dead_fuel_moisture_tool.calculate_fine_dead_fuel_moisture" => scalar(widen(
-            fine_dead_fuel_moisture::calculate_fine_dead_fuel_moisture(
+        Operation::FineDeadFuelMoistureToolCalculateFineDeadFuelMoisture => scalar(
+            out,
+            widen(fine_dead_fuel_moisture::calculate_fine_dead_fuel_moisture(
                 a.n(Field::DryBulbI, i)? as i32,
                 a.n(Field::RhI, i)? as i32,
                 a.n(Field::SlopeI, i)? as i32,
@@ -32,8 +37,9 @@ pub fn evaluate(
                 a.n(Field::MonthI, i)? as i32,
                 a.n(Field::ElevI, i)? as i32,
                 a.n(Field::TimeI, i)? as i32,
-            ),
-        )),
+            )),
+        ),
         _ => return Ok(None),
-    }))
+    }
+    Ok(Some(()))
 }
