@@ -1,5 +1,5 @@
 //! Interpret Python's permissive string controls at the binding boundary.
-use crate::arrays::Arguments;
+use super::fields::PreparedArguments;
 use behave_fire::engine::{SurfaceOptions, WafMethod, WindHeight, WindOrientation};
 
 fn contains(value: &str, needle: &str) -> bool {
@@ -9,15 +9,8 @@ fn contains(value: &str, needle: &str) -> bool {
         .any(|part| part.eq_ignore_ascii_case(needle.as_bytes()))
 }
 
-pub fn crown(arguments: &Arguments) -> SurfaceOptions {
-    SurfaceOptions {
-        wind_orientation: orientation(
-            arguments
-                .s("wind_orientation_mode")
-                .unwrap_or("RelativeToUpslope"),
-        ),
-        ..SurfaceOptions::default()
-    }
+pub fn crown(arguments: &PreparedArguments<'_>) -> SurfaceOptions {
+    arguments.crown_options()
 }
 
 pub fn height(value: &str) -> WindHeight {
@@ -36,12 +29,8 @@ pub fn orientation(value: &str) -> WindOrientation {
     }
 }
 
-pub fn surface(arguments: &Arguments) -> Result<SurfaceOptions, String> {
-    Ok(SurfaceOptions {
-        wind_orientation: orientation(arguments.s("wind_orientation_mode")?),
-        wind_height: height(arguments.s("wind_height_mode")?),
-        waf_method: waf(arguments.s("waf_method")?),
-    })
+pub fn surface(arguments: &PreparedArguments<'_>) -> Result<SurfaceOptions, String> {
+    arguments.surface_options()
 }
 
 pub fn waf(value: &str) -> WafMethod {

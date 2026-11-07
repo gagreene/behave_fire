@@ -1,5 +1,5 @@
 //! Fused native model pipelines and ordered field-wise chunk concatenation.
-use crate::arrays::Arguments;
+use crate::prepared::{Field, PreparedArguments};
 use behave_fire::{
     batch::{CrownBatch, SurfaceBatch},
     GridShape,
@@ -10,14 +10,17 @@ use std::ops::Range;
 /// Named output columns, concatenation duration, and appended byte count.
 type BatchEvaluation = (BTreeMap<String, Vec<f64>>, f64, usize);
 
-pub fn surface(a: &Arguments, i: usize) -> Result<behave_fire::surface::SurfaceResult, String> {
+pub fn surface(
+    a: &PreparedArguments<'_>,
+    i: usize,
+) -> Result<behave_fire::surface::SurfaceResult, String> {
     let mut input = crate::structures::input(a, i)?;
-    input.m1h = a.n("m1h", i)?;
-    input.m10h = a.n("m10h", i)?;
-    input.m100h = a.n("m100h", i)?;
-    input.mlh = a.n("mlh", i)?;
-    input.mlw = a.n("mlw", i)?;
-    let plan = behave_fire::engine::SurfacePlan::new(crate::controls::surface(a)?);
+    input.m1h = a.n(Field::M1h, i)?;
+    input.m10h = a.n(Field::M10h, i)?;
+    input.m100h = a.n(Field::M100h, i)?;
+    input.mlh = a.n(Field::Mlh, i)?;
+    input.mlw = a.n(Field::Mlw, i)?;
+    let plan = behave_fire::engine::SurfacePlan::new(crate::prepared::controls::surface(a)?);
     let fuel = crate::structures::fuel(a, i)?;
     #[cfg(feature = "allocation-probe")]
     let _scope = crate::allocation_probe::Scope::enter(crate::allocation_probe::KERNEL);
@@ -26,7 +29,7 @@ pub fn surface(a: &Arguments, i: usize) -> Result<behave_fire::surface::SurfaceR
 
 pub fn evaluate(
     operation: &str,
-    arguments: &Arguments,
+    arguments: &PreparedArguments<'_>,
     shape: &[usize],
     threads: usize,
 ) -> Option<Result<BatchEvaluation, String>> {
@@ -34,6 +37,28 @@ pub fn evaluate(
         Ok(shape) => shape,
         Err(error) => return Some(Err(error.to_string())),
     };
+    if let Some(plan) = crate::prepared::units::PreparedUnits::new(operation, arguments) {
+        return Some(plan.and_then(|plan| {
+            let chunks = behave_fire::map_chunks(shape.len(), threads, |range| plan.run(range))
+                .map_err(error)?;
+            let appended = chunks
+                .iter()
+                .skip(1)
+                .map(|values| values.len() * std::mem::size_of::<f64>())
+                .sum();
+            let started = std::time::Instant::now();
+            let mut chunks = chunks.into_iter();
+            let mut values = chunks.next().unwrap_or_default();
+            values
+                .try_reserve_exact(shape.len() - values.len())
+                .map_err(|error| format!("MemoryError: {error}"))?;
+            for mut chunk in chunks {
+                values.append(&mut chunk);
+            }
+            let seconds = started.elapsed().as_secs_f64();
+            Ok((BTreeMap::from([(String::new(), values)]), seconds, appended))
+        }));
+    }
     let result = if operation == "model.run_surface" {
         SurfaceBatch::run_with(shape, threads, |index| surface(arguments, index)).map(|batch| {
             let stats = *batch.statistics();
@@ -52,7 +77,8 @@ pub fn evaluate(
         && !arguments.has_crown_python_payloads()
     {
         CrownBatch::run_with(shape, threads, |index| {
-            let plan = behave_fire::engine::CrownPlan::new(crate::controls::crown(arguments));
+            let plan =
+                behave_fire::engine::CrownPlan::new(crate::prepared::controls::crown(arguments));
             let input = crate::crown::input(arguments, index)?;
             let surface = crate::crown::surface_values(arguments, index);
             let fuel = crate::crown::fuel(arguments, index)?;
@@ -94,7 +120,7 @@ pub fn evaluate(
 
 pub fn chunk(
     operation: &str,
-    arguments: &Arguments,
+    arguments: &PreparedArguments<'_>,
     range: Range<usize>,
     single: bool,
 ) -> Result<BTreeMap<String, Vec<f64>>, String> {

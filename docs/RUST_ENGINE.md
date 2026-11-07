@@ -13,7 +13,7 @@ self-contained and has no normal/build dependencies.
 | Typed scalar stages and fused overrides (`engine`) | Implemented in the Rust core |
 | Raster columns, per-cell overrides, tiles (`raster`) | Implemented in the Rust core; usable from Rust only |
 | Feasibility checkpoint | Recovery confirmation passed; all required first/warm confidence bounds clear the core thresholds (see the recovery confirmation below) |
-| Prepared Python bindings, typed output transport, binding API 3 | Not implemented |
+| Prepared Python bindings, typed output transport, binding API 3 | Typed input descriptors and direct unit buffers implemented; general output transport and API 3 remain pending |
 | Kernel optimization, parallel tile scheduling | Prepared physical coefficients and minimal Crown stages implemented; parallel scheduling work remains |
 | Performance targets (table below) | **Not met**; no speed claim is made for the Python Rust backend |
 
@@ -397,3 +397,35 @@ explicitly deferring this unmet screen, or revise the targets. The recommended
 option is the bounded kernel investigation with the targets unchanged. No
 production binding/API-3, generalized typed writer, parallel-tile optimization,
 wheel publication or performance-stack merge is included in this checkpoint.
+## Prepared input boundary (recovery layer 2)
+
+Native evaluators now use compile-time field slots and borrowed views over owned
+Rust snapshots. Metadata prefixes, integer kinds, constant math profiles, string
+controls, and uniform numeric unit selectors are decoded before cell loops.
+Varying selectors and metadata remain indexed buffers. Missing optional values
+no longer construct discarded error strings. Unit converters fill numerical
+buffers directly and retain the existing plain-f64 normalization and public
+selector conventions, including negative table indices.
+
+A separate allocation build observed these one-worker request slopes between
+1,000 and 10,000 cells. They include all native allocations outside the measured
+science kernel, so they are not encoder-only certification:
+
+| Route | Before preparation | After preparation |
+| --- | ---: | ---: |
+| Surface | 8/cell | 0/cell |
+| Crown | 7/cell | 0/cell |
+| Typed Crown A/B | 842/cell | 679/cell |
+
+Forty-eight real observations passed complete Python output comparisons, including
+four-worker checks. The encoder scope remains unmeasured until the general writer
+is installed. The native-only `tools/field_probe` tests compile the actual binding
+preparation modules without linking Python and check metadata, error order, unit
+selectors, and allocation counts.
+
+Reduced development screens used three fresh pairs and one warmed call, not the
+seven-pair acceptance procedure. At 10,000 cells, common Surface calls took about
+27–29 ms and Crown 34–35 ms, versus Python's 35–36 ms and 50–55 ms respectively.
+Typed Crown still took 4.4–5.4 seconds; these measurements do not establish the
+final public-call targets. The remaining output transport and pipeline fusion
+work are required.
