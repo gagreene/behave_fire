@@ -5,6 +5,20 @@ stages and raster columns. Python-facing calculations, shape/dtype/mask behavior
 and scientific tolerances remain the reference contract. The Rust core remains
 self-contained and has no normal/build dependencies.
 
+## Current status
+
+| Area | State |
+| --- | --- |
+| Measurement harness, acceptance checker, native probe | Implemented (`tools/benchmark_backends.py`, `tools/check_performance.py`, `tools/perf_probe/`) |
+| Typed scalar stages and fused overrides (`engine`) | Implemented in the Rust core |
+| Raster columns, per-cell overrides, tiles (`raster`) | Implemented in the Rust core; usable from Rust only |
+| Feasibility checkpoint | Completed; large-raster core headroom unmet. The next step awaits an owner decision (see "Task 3 feasibility checkpoint" below) |
+| Prepared Python bindings, typed output transport, binding API 3 | Not implemented |
+| Kernel optimization, parallel tile scheduling | Not started |
+| Performance targets (table below) | **Not met**; no speed claim is made for the Python Rust backend |
+
+Python public calls still use the original binding transport (binding API 2), so Python users do not yet benefit from the engine and raster work. The Python-facing calculation contract, including shapes, dtypes, masks, and tolerances, is unchanged.
+
 ## Typed scalar stages
 
 `engine::SurfaceCell` and `engine::CrownCell` contain numerical values in
@@ -39,9 +53,10 @@ the inspected C++ Rothermel path resets it.
 The former unreleased `SurfaceInput`/`CrownInput` interfaces and their adapters
 are replaced. In-repository consumers, tests, and examples migrate together.
 Python entry points and output dictionaries retain their existing signatures
-and scientific contract. Native raster columns and direct typed output are
-subsequent layers; removing scalar core allocations alone does not remove the
-large typed-result encoder cost.
+and scientific contract. Native raster columns are implemented in the core
+(see "Borrowed raster API" below). Direct typed output in the Python binding is
+not: removing scalar core allocations alone does not remove the large
+typed-result encoder cost.
 
 The scalar core allocation probe now measures zero allocation/reallocation
 requests per Surface/Crown cell after preparation, including rate overrides
@@ -156,8 +171,9 @@ included in that period. Setup, Python transport, and output-column storage are
 excluded. Such results are attribution, not end-to-end speed claims. The probe
 reports `encoder_per_cell: null` until actual encoder instrumentation is added;
 an excluded or unmeasured encoder is never reported as allocating zero times.
-Task 3 extends the probe to native raster output storage before the feasibility
-checkpoint.
+The probe also measures native raster output storage (`--scope raster`) and a
+disposable compact typed experiment (`--scope compact`); see the feasibility
+checkpoint below.
 
 ## Execution checkpoints
 

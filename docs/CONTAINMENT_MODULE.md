@@ -4,6 +4,8 @@ Vectorized, simplified single-resource fire containment simulation. A fixed-step
 
 The function returns final scalar measures per cell, with no perimeter-point arrays or point-count API. Upstream's `ContainSim::firePoints()` correction therefore requires no equivalent change here.
 
+The Rust backend reproduces the same fixed-step model, status codes, and shape rules. Select it with `get_backend("rust").contain.run_contain_sim_array` (or `from behave_fire.rust import contain`); the examples below use the Python function, and `from behave_fire.python import contain` is its explicit alias. See [RUST_BACKEND.md](RUST_BACKEND.md) for backend selection.
+
 **Scope / limitations:**
 - Single resource, single attack point
 - No terrain adjustment

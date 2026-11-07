@@ -1,5 +1,5 @@
 """
-Behave Fire Behavior Model - Python Implementation
+Behave Fire Behavior Model - Python and Rust implementations
 
 This package provides vectorized (NumPy array) fire behavior modeling:
 - Surface fire calculations
@@ -8,9 +8,12 @@ This package provides vectorized (NumPy array) fire behavior modeling:
 - Spot fire prediction
 - Ignition potential assessment
 - Safety zone calculations
+- Containment and support tools
 
-Main entry point: automatic BehaveRun facade in auto.py.
-The explicit Python compatibility class remains in behave.py.
+Main entry point: the automatic BehaveRun facade in auto.py, which selects the
+Python reference implementation or the native Rust extension (backend="auto",
+"python", or "rust"). Explicit namespaces are behave_fire.python and
+behave_fire.rust. The explicit Python compatibility class remains in behave.py.
 """
 
 from .auto import BehaveBackendWarning, BehaveRun, available_backends, get_backend

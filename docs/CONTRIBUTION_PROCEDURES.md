@@ -58,6 +58,21 @@ rerun the full default suite and update the recorded SHA and results before that
 PR merges. Stack management does not grant permission to commit, push, merge,
 delete branches, or update either permanent branch directly.
 
+Landing a stack is a separate, explicitly authorized step for each layer. Merge
+commits are the project's preference; the installed `gh stack` supports merge,
+squash, and rebase methods, so this is a policy choice, not a tool limitation.
+To land one layer, use the single-PR command with a head guard, then synchronize:
+
+```shell
+gh pr merge <bottom-pr-number> --repo gagreene/behave_fire --merge --match-head-commit <tested-head-sha>
+gh stack sync
+```
+
+Never use an unqualified `gh stack merge` or `--yes` as a one-layer shortcut: they
+can merge several PRs atomically. Do not pass `--prune` to `gh stack sync` (it
+deletes branches). After each layer lands, verify that the next PR targets
+`pre_release` and that its commit range is unchanged, then rerun its tests.
+
 ### Release notes
 
 A next-release PR, including an upper stacked PR, that changes behavior adds its bullet under an `Unreleased`
@@ -99,18 +114,42 @@ When a serious defect is found in released code and cannot wait for the next rel
 ## Local tests before every PR merge
 
 Run the full default test suite locally against the **latest PR commit** before
-merging. Set up an environment with the package and its test dependencies, then run
-the suite from the repository root:
+merging. The project builds with Maturin, so `pip install -e .` needs a Rust
+toolchain. From the repository root, the Python-only route installs dependencies
+without building or installing the project:
 
 ```shell
-python -m pip install -e ".[test]"
-python -m pytest -vv
+uv sync --locked --no-install-project --extra test --extra dev
+uv run --no-sync python -m pytest -vv
 ```
 
-If the test extra is not defined in `pyproject.toml`, install `pytest` and the
-packages in `requirements.txt` instead. Document any skips, failures, or unavailable
-platform checks; a failed full suite does not satisfy the passing-test checkbox below.
-If pytest cannot use its cache folder, add `-p no:cacheprovider`.
+Changes that touch the native extension or its tests also run the native route,
+which builds the extension (Rust required) and fails, rather than skips, if it is
+missing or incompatible:
+
+```shell
+uv sync --locked --extra test --extra dev
+uv run --no-sync python -m pytest --require-rust -vv
+```
+
+When a PR changes anything under `rust/`, also run the Rust checks. There is no
+`Cargo.toml` at the repository root, so every command passes `--manifest-path`:
+
+```shell
+cargo fmt    --manifest-path rust/Cargo.toml --all -- --check
+cargo clippy --manifest-path rust/Cargo.toml --workspace --all-targets --locked -- -D warnings
+cargo test   --manifest-path rust/Cargo.toml -p behave-fire --locked --no-fail-fast
+cargo doc    --manifest-path rust/Cargo.toml --workspace --no-deps --locked
+cargo +<MSRV> check --manifest-path rust/Cargo.toml --workspace --all-targets --locked
+```
+
+`<MSRV>` is the `rust-version` declared in `rust/Cargo.toml` (currently 1.78). After
+any change under `rust/`, rebuild the extension before the native route (a plain
+`uv sync` does not notice Rust source changes; use `uv sync --reinstall-package behave-fire`).
+
+Document any skips, failures, or unavailable platform checks; a failed full suite
+does not satisfy the passing-test checkbox below. If pytest cannot use its cache
+folder, add `-p no:cacheprovider`.
 
 Rerun the suite after changes to the PR branch. Record the command, Python
 version, operating system, latest commit SHA, and pass/skip counts in the PR

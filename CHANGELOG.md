@@ -11,10 +11,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Drop Python 3.10 support; require Python 3.11 or newer. Standard CPython 3.11-3.14 are the certification targets. Free-threaded interpreters and PyPy are not supported.
 - Source/Git/editable/`--no-binary` project builds now use Maturin and require Rust. Binary native and universal pure-Python wheels share metadata and runtime APIs.
+- The package-root `BehaveRun` is now an automatic backend facade built by composition. Its class identity and default `repr` differ from the historical class, and an instance is not an `isinstance` of `behave_fire.behave.BehaveRun`. Use `behave_fire.python.BehaveRun` or `behave_fire.behave.BehaveRun` for legacy type checks and subclassing. Calculation signatures, output dictionaries, root `FuelModels`, species types, and unit enum identities are unchanged.
+- With the Rust backend, float16 inputs are widened to float32, so results can be float32 where the Python backend returns float16, and overflow, NaN, and threshold outcomes can differ. Select `backend="python"` for the historical float16 behavior. See `docs/BACKEND_DIFFERENCES.md`.
 
 ### Packaging
 
-- Add native ABI3 wheels, a universal pure-Python fallback wheel, isolated installed-artifact validation, and a tracked-input source-distribution check.
+- Add native `cp311-abi3` wheels for seven platforms (Linux x86-64 and aarch64 on manylinux 2_17, Alpine/musl x86-64 on musllinux 1_2, macOS x86-64 and arm64, Windows x86-64 and ARM64), a universal `py3-none-any` fallback wheel, isolated installed-artifact validation, and a tracked-input source-distribution check. The distribution inventory check requires exactly one native wheel per platform, one pure wheel, and one matching source archive. Free-threaded CPython and PyPy are not supported.
+- Add build-only CI runs, including manual dispatch, a standalone-crate archive check with a Rust-only consumer, and release workflows for the wheels and the crate. None of them publishes without separate owner authorization. See `docs/RELEASING.md` and `docs/CRATES_IO.md`.
 - Require NumPy >=2.3.3 for Python >=3.14 or native Windows ARM64; keep NumPy >=2.1.3 elsewhere.
 - Add optional `test` dependencies without raster libraries, and a uv lockfile for dependency-only source tests.
 - Preserve MIT and upstream BSD-3-Clause notices in both native and pure artifacts.
@@ -41,7 +44,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Native Rust backend. The Cargo workspace under `rust/` contains the standalone `behave-fire` core crate (version `0.1.0`, independent of the Python version, no runtime or build dependencies) and the unpublished `behave-py` PyO3 bindings built as `behave_fire._rust`. The core covers every public calculation: surface and crown fire with their stages, mortality, spotting, ignition, safety zones, fine dead fuel moisture, vapor pressure deficit, slope and ellipse helpers, and containment, plus typed unit conversions and embedded fuel and species tables.
+- Backend selection: `BehaveRun(fuel_models, *, backend="auto" | "python" | "rust", threads=1)`, `available_backends()`, `get_backend()`, and `BehaveBackendWarning`. Explicit namespaces are `behave_fire.python` and `behave_fire.rust`; historical component imports continue to use Python. `auto` selects Python silently when the extension is absent and with a once-per-process warning when it is present but unusable; forced Rust raises.
+- Native `threads` setting (`1` serial, `0` all available, positive count capped by work) using scoped threads with deterministic output order.
+- Typed native calculation stages (`engine`) with a reusable fuel snapshot, stage resumption from editable intermediates, and fused overrides (`SurfaceTweaks`, `CrownTweaks`). Borrowed raster columns (`raster`) with per-cell overrides, optional native validity, and caller-driven tiles. These are Rust interfaces; the Python binding does not yet route public calls through them.
+- Python/Rust parity, ownership, serialization, packaging, and workflow tests, and tools for backend comparison, platform probing, paired benchmarking, and performance acceptance (`tools/compare_backends.py`, `tools/benchmark_backends.py`, `tools/check_performance.py`).
+- Contracts and measurements: `docs/RUST_BACKEND.md`, `docs/BACKEND_DIFFERENCES.md`, `docs/RUST_ENGINE.md`, `docs/RUST_BACKEND_BENCHMARKS.md`, `docs/RELEASING.md`, and `docs/CRATES_IO.md`.
 - Pytest regression coverage for unit conversions, metric fuel records, static flags, and lightning compatibility, using portable fixtures without requiring a C++ checkout.
+
+### Known limitations
+
+- The Rust backend is not yet faster than Python for typical workloads. Measured single-host results show Python ahead for single-cell and 10,000-cell public calls, with parallel Rust ahead only on very large surface and crown rasters; mixed-dtype or masked Crown inputs are much slower on Rust. No speedup is promised. See `docs/RUST_BACKEND_BENCHMARKS.md` and `docs/RUST_ENGINE.md`.
+- Neither the Python package nor the Rust crate has been published to PyPI or crates.io.
 
 ## [1.0.0b2] - 2026-04-29
 

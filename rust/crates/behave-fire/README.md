@@ -85,6 +85,30 @@ matching a particular NumPy build. No Python runtime is used by either profile.
 The separate Python binding crate uses the same numerical core and handles
 Python-specific array and representation semantics at its boundary.
 
+## Raster calculations and stage injection
+
+`raster::SurfaceRaster` and `raster::CrownRaster` run a plan over a whole grid.
+Inputs are borrowed structure-of-arrays columns (`SurfaceColumns`,
+`CrownColumns`): each field is a uniform `PerCell::Scalar` or a slice with exactly
+one value per cell in row-major order. Lengths are validated once, before any
+calculation or worker starts, and results are owned typed columns
+(`SurfaceRasterOutput`, `CrownRasterOutput`). The library builds only the current
+cell on the stack and never a full-grid vector of cell records.
+
+Overrides are per-cell columns (`SurfaceTweakColumns`, `CrownTweakColumns`)
+applied at the stage that would produce the value, so downstream outputs use
+them; `run_from_fuelbeds` resumes from edited `FuelbedColumns`. An optional native
+`validity` column skips cells that are false and returns zero payloads for them.
+That is separate from NumPy masked-array semantics, which the Python binding
+reproduces independently. `run_tile` processes a caller-chosen range and returns a
+one-dimensional tile in original logical order. Raster file input and output
+belong to the caller.
+
+`cargo run --example raster_tweaks` runs a small raster with per-cell reaction
+intensity overrides, a validity mask, and a tile. The raster engine is a Rust
+interface: the Python extension does not yet route public calls through it, and
+this crate makes no claim that it is faster than the Python backend.
+
 ## Effects and utility calculations
 
 `BehaveRun` provides all eleven calculation routes of the Python facade. Rust
