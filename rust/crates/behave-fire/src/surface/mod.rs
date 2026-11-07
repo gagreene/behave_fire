@@ -4,12 +4,14 @@ mod geometry;
 /// NumPy-compatible masked-array scalar stages, including raw masked data and precision.
 pub mod masked;
 mod particles;
+mod prepared_wind;
 mod reaction;
 mod types;
 mod wind;
 pub use fuelbed::*;
 pub use geometry::*;
 pub use particles::*;
+pub(crate) use prepared_wind::PreparedWind;
 pub use reaction::*;
 pub use types::*;
 pub use wind::*;

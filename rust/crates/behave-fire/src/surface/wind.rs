@@ -7,6 +7,24 @@ use crate::{
 
 macro_rules! retaining_wind {
     ($t:ty, $speed:ty) => {
+        /// Share the exact product order with precomputed packing powers.
+        pub(super) fn wind_phi_product(
+            midflame: $t,
+            wind_b: $t,
+            wind_c: $t,
+            packing_power: $t,
+        ) -> $t {
+            midflame.powf(wind_b) * wind_c * packing_power
+        }
+        /// Share the effective-wind inverse without regrouping floating-point terms.
+        pub(super) fn effective_wind_power(
+            phi: $t,
+            wind_b: $t,
+            wind_c: $t,
+            packing_power: $t,
+        ) -> $t {
+            ((phi * packing_power) / wind_c).powf(1.0 / wind_b)
+        }
         /// Calculate effective wind speed in mph for ellipse shape.
         pub fn calculate_effective_wind_speed(
             spread_rate: $t,
@@ -35,7 +53,7 @@ macro_rules! retaining_wind {
             let wb = if wind_b > 1e-7 { wind_b } else { 1.0 };
             let fpm =
                 if phi > 0.0 && wind_b > 1e-7 && wind_c > 1e-7 && relative_packing_ratio > 1e-7 {
-                    ((phi * rpr.powf(wind_e)) / wc).powf(1.0 / wb)
+                    effective_wind_power(phi, wb, wc, rpr.powf(wind_e))
                 } else {
                     0.0
                 };
@@ -57,7 +75,7 @@ macro_rules! retaining_wind {
                 1.0
             };
             if sigma > 1e-7 && midflame_wind_speed > 1e-7 {
-                midflame_wind_speed.powf(wind_b) * wind_c * rpr.powf(-wind_e)
+                wind_phi_product(midflame_wind_speed, wind_b, wind_c, rpr.powf(-wind_e))
             } else {
                 0.0
             }

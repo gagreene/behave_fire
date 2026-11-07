@@ -1,5 +1,9 @@
 # Rust backend execution measurements
 
+## Bounded Crown investigation: 2026-11-07
+
+An isolated immutable wind-term cache reduced warmed Crown core time by about 24% (1.31-1.32x relative to the existing Rust core) in fixed diagnostic pairs. Forward Surface and backsolve repeat physical wind powers; CPU pinning did not remove variance. See the [investigation and limitations](performance/2026-11-07-crown-profile.md) and [raw diagnostic evidence](performance/2026-11-07-crown-profile.json). This is not public backend certification or a replacement for the failed screen below. The single integrated candidate must pass a fresh unchanged core gate before API4 migration.
+
 ## Float64 core checkpoint: 2026-11-07
 
 The configured float64 core passes complete-output correctness checks, but its first headroom screen misses 3 of 32 confidence bounds. Work stops before the Python API4 switch. This is core-only evidence; the public backend still uses API3. See the [checkpoint, timings, and owner choices](performance/2026-11-07-f64-core-checkpoint.md) and [frozen raw screen](performance/2026-11-07-f64-core-screen.json). No confirmation or repeat sampling was run.

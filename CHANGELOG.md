@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Rust core output storage
 
+- Reuse immutable wind coefficients and packing powers across Crown forward spread and backsolve for static physical fuel. Physical-fuel and actual fuelbed dependency checks prevent stale reuse; dynamic fuel retains per-cell evaluation. Floating-point product order and availability thresholds are unchanged. Python dispatch is still API3 while the new core candidate is validated.
 - Model batches write selected fields directly into final output buffers using safe disjoint worker slices. Integer classification columns retain int32 storage through export.
 - The unreleased Rust `into_named_vectors` adapter is replaced by typed `into_named_columns`; Rust callers must match the returned `ColumnValues` storage. Python model dispatch remains unchanged in this foundation layer.
 - Add a configured Rust `run_model` entry point with float64 physical calculations, selected final columns, prepared fuels or supplied fuelbeds, and persistent per-cell overrides. Missing inputs propagate by field dependency; explicitly invalid cells produce NaN physical outputs and classification -1. See the standalone `configured_tiles` example. This entry point does not yet change Python backend dispatch.

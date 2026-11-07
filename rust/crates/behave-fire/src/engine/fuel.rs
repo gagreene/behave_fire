@@ -40,6 +40,7 @@ pub struct PreparedFuel {
 struct StaticPhysics {
     fuelbed: crate::surface::PreparedFuelbed,
     reaction: crate::surface::ReactionCoefficients,
+    wind: crate::surface::PreparedWind,
 }
 
 impl PreparedFuel {
@@ -109,6 +110,10 @@ impl PreparedFuel {
             None => crate::surface::calculate_reaction_intensity_available(bed),
         }
     }
+    /// Return validated static wind physics without caching dynamic moisture transfers.
+    pub(crate) fn wind_terms(&self) -> Option<crate::surface::PreparedWind> {
+        self.physics().map(|p| p.wind)
+    }
     fn savr_key(&self) -> [f64; 3] {
         [self.savr_1h, self.savr_live_herb, self.savr_live_woody]
     }
@@ -139,7 +144,14 @@ impl PreparedFuel {
             );
             let fuelbed = crate::surface::PreparedFuelbed::new(&particles, &self.savr_terms());
             let reaction = crate::surface::ReactionCoefficients::new(&fuelbed.template);
-            self.static_cache = Some((self.physics_key(), StaticPhysics { fuelbed, reaction }));
+            self.static_cache = Some((
+                self.physics_key(),
+                StaticPhysics {
+                    wind: crate::surface::PreparedWind::new(&fuelbed.template),
+                    fuelbed,
+                    reaction,
+                },
+            ));
         }
         self
     }
@@ -164,6 +176,33 @@ impl PreparedFuel {
             static_cache: None,
         };
         result.prepared()
+    }
+}
+
+#[cfg(test)]
+mod wind_cache_tests {
+    use super::*;
+
+    #[test]
+    fn wind_terms_invalidate_after_fuel_edits_and_exclude_dynamic_transfers() {
+        let registry = FuelModels::default();
+        let mut row = PreparedFuel::from_model(registry.for_grid(10));
+        assert!(row.wind_terms().is_some());
+        row.savr_1h += 1.;
+        assert!(row.wind_terms().is_none());
+        row = row.prepared();
+        let refreshed = row.wind_terms().unwrap();
+        let cell = crate::engine::SurfaceCell::new(10);
+        let bed = crate::engine::SurfacePlan::default().prepare_fuelbed(&cell, &row);
+        assert!(refreshed.matches(&bed));
+        row.is_dynamic = true;
+        assert!(row.wind_terms().is_none());
+        assert!(row.prepared().wind_terms().is_none());
+        for id in [101, 124] {
+            assert!(PreparedFuel::from_model(registry.for_grid(id))
+                .wind_terms()
+                .is_none());
+        }
     }
 }
 

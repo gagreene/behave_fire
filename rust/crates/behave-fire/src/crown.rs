@@ -364,7 +364,7 @@ pub fn calculate_crown_surface_fire(
     options: &SurfaceOptions,
     tweaks: SurfaceTweaks,
 ) -> CrownSurfaceResult {
-    calculate_crown_surface_selected::<0, false>(input, fuel, options, tweaks)
+    calculate_crown_surface_selected::<0, false>(input, fuel, options, tweaks, None)
 }
 
 /// Minimal model-10 stages consumed by complete Crown calculations.
@@ -389,7 +389,7 @@ pub fn calculate_crown_spread(
     options: &SurfaceOptions,
     tweaks: SurfaceTweaks,
 ) -> CrownSpreadResult {
-    crown_spread_with_policy::<false>(input, fuel, options, tweaks)
+    crown_spread_with_policy::<false>(input, fuel, options, tweaks, None)
 }
 
 /// Compute model-10 spread under the f64 missing-data contract.
@@ -398,16 +398,18 @@ pub(crate) fn calculate_crown_spread_available(
     fuel: &PreparedFuel,
     options: &SurfaceOptions,
     tweaks: SurfaceTweaks,
+    wind: Option<&surface::PreparedWind>,
 ) -> CrownSpreadResult {
-    crown_spread_with_policy::<true>(input, fuel, options, tweaks)
+    crown_spread_with_policy::<true>(input, fuel, options, tweaks, wind)
 }
 fn crown_spread_with_policy<const STRICT: bool>(
     input: &CrownCell,
     fuel: &PreparedFuel,
     options: &SurfaceOptions,
     tweaks: SurfaceTweaks,
+    wind: Option<&surface::PreparedWind>,
 ) -> CrownSpreadResult {
-    let result = calculate_crown_surface_selected::<2, STRICT>(input, fuel, options, tweaks);
+    let result = calculate_crown_surface_selected::<2, STRICT>(input, fuel, options, tweaks, wind);
     CrownSpreadResult {
         p_crown: result.p_crown,
         ib_crown: result.ib_crown,
@@ -422,6 +424,7 @@ fn calculate_crown_surface_selected<const FINISH: u8, const STRICT: bool>(
     fuel: &PreparedFuel,
     options: &SurfaceOptions,
     tweaks: SurfaceTweaks,
+    wind: Option<&surface::PreparedWind>,
 ) -> CrownSurfaceResult {
     let x = SurfaceCell {
         fuel_model_grid: 10,
@@ -462,9 +465,9 @@ fn calculate_crown_surface_selected<const FINISH: u8, const STRICT: bool>(
     };
     let plan = SurfacePlan::new(controls);
     let crown_surface = if STRICT {
-        plan.run_available_from_fuelbed::<FINISH>(&x, &ib_crown, configured)
+        plan.run_with_wind::<FINISH, true>(&x, &ib_crown, configured, wind)
     } else {
-        plan.run_selected_from_fuelbed::<FINISH>(&x, &ib_crown, configured)
+        plan.run_with_wind::<FINISH, false>(&x, &ib_crown, configured, wind)
     };
     let ews = crown_surface.effective_wind_speed;
     CrownSurfaceResult {
@@ -490,7 +493,13 @@ pub fn calculate_crowning_surface_fire_spread_rate(
     critical_crown_ros: f64,
     canopy_height: f64,
 ) -> f64 {
-    crowning_surface_rate(ri_crown, ib_crown, critical_crown_ros / 3.34, canopy_height)
+    crowning_surface_rate(
+        ri_crown,
+        ib_crown,
+        critical_crown_ros / 3.34,
+        canopy_height,
+        None,
+    )
 }
 /// Retain the f32 critical-rate division before its promotion against f64 fuelbed intermediates.
 pub fn calculate_crowning_surface_fire_spread_rate_single_critical_rate(
@@ -504,7 +513,18 @@ pub fn calculate_crowning_surface_fire_spread_rate_single_critical_rate(
         ib_crown,
         (critical_crown_ros / 3.34) as f64,
         canopy_height,
+        None,
     )
+}
+/// Reuse the same physical wind context for the backsolved Surface calculation.
+pub(crate) fn crowning_with_wind(
+    ri: f64,
+    bed: &FuelbedIntermediates,
+    critical: f64,
+    height: f64,
+    wind: Option<&surface::PreparedWind>,
+) -> f64 {
+    crowning_surface_rate(ri, bed, critical / 3.34, height, wind)
 }
 /// Calculate the crowning surface rate from a precision-normalized model-10 target rate.
 fn crowning_surface_rate(
@@ -512,6 +532,7 @@ fn crowning_surface_rate(
     ib_crown: &FuelbedIntermediates,
     r10: f64,
     canopy_height: f64,
+    wind: Option<&surface::PreparedWind>,
 ) -> f64 {
     let ros0 = ri_crown * ib_crown.propagating_flux
         / if ib_crown.heat_sink > 1e-7 {
@@ -540,13 +561,14 @@ fn crowning_surface_rate(
         ..SurfaceOptions::default()
     };
     SurfacePlan::new(options)
-        .run_selected_from_fuelbed::<1>(
+        .run_with_wind::<1, false>(
             &x,
             ib_crown,
             SurfaceTweaks {
                 reaction_intensity: Some(ri_crown),
                 ..SurfaceTweaks::default()
             },
+            wind,
         )
         .spread_rate
 }

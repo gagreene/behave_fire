@@ -111,6 +111,7 @@ impl SurfacePlan {
             cell,
             &self.options,
             tweaks,
+            None,
         )
     }
 
@@ -141,6 +142,7 @@ impl SurfacePlan {
             cell,
             &self.options,
             tweaks,
+            None,
         )
     }
     /// Evaluate the availability-aware model contract with cached physical fuel data.
@@ -164,6 +166,32 @@ impl SurfacePlan {
             cell,
             &self.options,
             tweaks,
+            None,
+        )
+    }
+    /// Reuse an explicit wind context under the selected reaction and availability policy.
+    pub(crate) fn run_with_wind<const FINISH: u8, const STRICT: bool>(
+        &self,
+        cell: &SurfaceCell,
+        bed: &FuelbedIntermediates,
+        tweaks: SurfaceTweaks,
+        wind: Option<&surface::PreparedWind>,
+    ) -> SurfaceResult {
+        let reaction = tweaks.reaction_intensity.unwrap_or_else(|| {
+            if STRICT {
+                surface::calculate_reaction_intensity_available(bed)
+            } else {
+                surface::calculate_reaction_intensity(bed)
+            }
+        });
+        run_selected_stages::<FINISH, STRICT>(
+            reaction,
+            0.9 * reaction,
+            bed,
+            cell,
+            &self.options,
+            tweaks,
+            wind,
         )
     }
     /// Resume an availability-aware run from supplied fuelbed state.
@@ -183,6 +211,7 @@ impl SurfacePlan {
             cell,
             &self.options,
             tweaks,
+            None,
         )
     }
 }
@@ -195,8 +224,12 @@ fn run_selected_stages<const FINISH: u8, const STRICT: bool>(
     cell: &SurfaceCell,
     options: &SurfaceOptions,
     tweaks: SurfaceTweaks,
+    wind: Option<&surface::PreparedWind>,
 ) -> SurfaceResult {
-    let mut wc = surface::calculate_surface_wind_coefficients(ib.sigma);
+    let wind = wind.filter(|w| w.matches(ib));
+    let mut wc = wind
+        .map(|w| w.coefficients)
+        .unwrap_or_else(|| surface::calculate_surface_wind_coefficients(ib.sigma));
     if STRICT && ib.sigma.is_nan() {
         wc.safe_sigma = f64::NAN;
         wc.wind_b = f64::NAN;
@@ -230,6 +263,9 @@ fn run_selected_stages<const FINISH: u8, const STRICT: bool>(
         .midflame_wind_speed
         .unwrap_or_else(|| surface::calculate_midflame_wind_speed(waf, wind20));
     let mut wind_phi = tweaks.wind_phi.unwrap_or_else(|| {
+        if let Some(wind) = wind {
+            return wind.wind_phi(midflame);
+        }
         surface::calculate_wind_phi(
             ib.sigma,
             midflame,
@@ -291,14 +327,18 @@ fn run_selected_stages<const FINISH: u8, const STRICT: bool>(
             ..SurfaceResult::default()
         };
     }
-    let mut effective_wind_speed = surface::calculate_effective_wind_speed(
-        spread_rate,
-        r0,
-        wc.wind_b,
-        wc.wind_c,
-        ib.relative_packing_ratio,
-        wc.wind_e,
-    );
+    let mut effective_wind_speed =
+        wind.map(|w| w.effective(spread_rate, r0))
+            .unwrap_or_else(|| {
+                surface::calculate_effective_wind_speed(
+                    spread_rate,
+                    r0,
+                    wc.wind_b,
+                    wc.wind_c,
+                    ib.relative_packing_ratio,
+                    wc.wind_e,
+                )
+            });
     if STRICT {
         let phi = if r0.is_nan() {
             f64::NAN

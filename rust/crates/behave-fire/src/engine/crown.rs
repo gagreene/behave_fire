@@ -122,8 +122,15 @@ fn run_crown<const STRICT: bool>(
     fm10: &PreparedFuel,
     tweaks: CrownTweaks,
 ) -> CrownResult {
+    let wind = if STRICT { fm10.wind_terms() } else { None };
     let c = if STRICT {
-        crown::calculate_crown_spread_available(cell, fm10, plan.options(), tweaks.fm10)
+        crown::calculate_crown_spread_available(
+            cell,
+            fm10,
+            plan.options(),
+            tweaks.fm10,
+            wind.as_ref(),
+        )
     } else {
         plan.prepare_spread(cell, fm10, tweaks.fm10)
     };
@@ -195,11 +202,12 @@ fn run_crown<const STRICT: bool>(
     {
         f64::NAN
     } else {
-        crown::calculate_crowning_surface_fire_spread_rate(
+        crown::crowning_with_wind(
             c.ri_crown,
             &c.ib_crown,
             critical_rate,
             cell.canopy_height,
+            wind.as_ref(),
         )
     };
     let fraction = tweaks.crown_fraction_burned.unwrap_or_else(|| {
