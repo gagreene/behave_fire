@@ -166,7 +166,7 @@ impl SurfacePlan {
             cell,
             &self.options,
             tweaks,
-            None,
+            fuel.wind_terms().as_ref(),
         )
     }
     /// Reuse an explicit wind context under the selected reaction and availability policy.

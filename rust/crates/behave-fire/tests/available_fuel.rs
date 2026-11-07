@@ -55,7 +55,7 @@ fn missing_prepared_fuel_properties_propagate_in_surface_and_crown() {
             })
             .collect();
         let fuels = PreparedFuels::from_rows(rows).unwrap();
-        for id in [101, 124] {
+        for id in [10, 101, 124] {
             let raster = SurfaceRaster::new(
                 GridShape::new(vec![1]).unwrap(),
                 SurfaceColumns {

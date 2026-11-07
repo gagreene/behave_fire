@@ -171,6 +171,97 @@ fn unknown_canopy_condition_does_not_become_a_sheltered_default() {
 }
 
 #[test]
+fn static_surface_wind_context_matches_uncached_composition_with_options_and_overrides() {
+    let fuels = PreparedFuels::from_registry(&FuelModels::default());
+    for id in [1, 4, 10, 101, 124] {
+        for orientation in [WindOrientation::North, WindOrientation::Upslope] {
+            for height in [WindHeight::TwentyFoot, WindHeight::TenMetre] {
+                for injected in [false, true] {
+                    let plan = SurfacePlan::new(SurfaceOptions {
+                        wind_orientation: orientation,
+                        wind_height: height,
+                        waf_method: WafMethod::UserInput,
+                    });
+                    let cell = SurfaceCell {
+                        wind_speed: 551.,
+                        wind_direction: 271.,
+                        slope: 27.,
+                        aspect: 113.,
+                        user_waf: Some(0.4),
+                        ..SurfaceCell::new(id)
+                    };
+                    let tweaks = if injected {
+                        SurfaceTweaks {
+                            reaction_intensity: Some(913.),
+                            no_wind_no_slope_spread_rate: Some(3.1),
+                            midflame_wind_speed: Some(61.),
+                            wind_phi: Some(2.7),
+                            slope_phi: Some(0.9),
+                            spread_rate: Some(13.7),
+                        }
+                    } else {
+                        SurfaceTweaks::default()
+                    };
+                    let expected = plan.run_cell(&cell, fuels.for_grid(id), tweaks);
+                    let raster = SurfaceRaster::new(
+                        GridShape::new(vec![1031]).unwrap(),
+                        SurfaceColumns {
+                            fuel_model_grid: PerCell::Scalar(id),
+                            wind_speed: PerCell::Scalar(551.),
+                            wind_direction: PerCell::Scalar(271.),
+                            slope: PerCell::Scalar(27.),
+                            aspect: PerCell::Scalar(113.),
+                            user_waf: Some(PerCell::Scalar(0.4)),
+                            ..SurfaceColumns::default()
+                        },
+                    )
+                    .unwrap();
+                    let columns = SurfaceTweakColumns {
+                        reaction_intensity: tweaks.reaction_intensity.map(PerCell::Scalar),
+                        no_wind_no_slope_spread_rate: tweaks
+                            .no_wind_no_slope_spread_rate
+                            .map(PerCell::Scalar),
+                        midflame_wind_speed: tweaks.midflame_wind_speed.map(PerCell::Scalar),
+                        wind_phi: tweaks.wind_phi.map(PerCell::Scalar),
+                        slope_phi: tweaks.slope_phi.map(PerCell::Scalar),
+                        spread_rate: tweaks.spread_rate.map(PerCell::Scalar),
+                    };
+                    let run = ModelRun::Surface {
+                        raster,
+                        plan,
+                        source: SurfaceSource::Fuels(&fuels),
+                        tweaks: columns,
+                    };
+                    let ModelBatch::Surface(actual) =
+                        run_model(&run, &OutputRequest::surface(), 4).unwrap()
+                    else {
+                        unreachable!()
+                    };
+                    for (name, column) in actual.into_named_columns() {
+                        let behave_fire::output::ColumnValues::Float64(values) = column else {
+                            panic!("wrong Surface column type")
+                        };
+                        let wanted = expected
+                            .named_values()
+                            .into_iter()
+                            .find(|(key, _)| *key == name)
+                            .unwrap()
+                            .1;
+                        assert!(
+                            values
+                                .iter()
+                                .all(|value| value.to_bits() == wanted.to_bits()
+                                    || (value.is_nan() && wanted.is_nan())),
+                            "{id}/{name}"
+                        );
+                    }
+                }
+            }
+        }
+    }
+}
+
+#[test]
 fn missing_dead_moisture_keeps_independent_wind_and_residence() {
     let output = surface(SurfaceColumns {
         fuel_model_grid: PerCell::Scalar(124),
