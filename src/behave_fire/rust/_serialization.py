@@ -13,7 +13,7 @@ def _require_extension():
     except Exception as error:
         raise ImportError(f'Cannot restore a Rust behave-fire object; install a compatible native wheel or rebuild the extension. {error}') from error
     if getattr(extension, '__binding_api_version__', None) != BINDING_API_VERSION:
-        raise ImportError('Cannot restore a Rust behave-fire object: binding API version 2 is required. Rebuild or reinstall the native extension.')
+        raise ImportError('Cannot restore a Rust behave-fire object: binding API version 3 is required. Rebuild or reinstall the native extension.')
 
 class NativeState:
     """Preserve numerical snapshots without pointers, pools, or backend reselection."""

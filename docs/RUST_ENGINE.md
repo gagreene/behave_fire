@@ -13,11 +13,11 @@ self-contained and has no normal/build dependencies.
 | Typed scalar stages and fused overrides (`engine`) | Implemented in the Rust core |
 | Raster columns, per-cell overrides, tiles (`raster`) | Implemented in the Rust core; usable from Rust only |
 | Feasibility checkpoint | Recovery confirmation passed; all required first/warm confidence bounds clear the core thresholds (see the recovery confirmation below) |
-| Prepared Python bindings, typed output transport, binding API 3 | Typed input descriptors and direct unit buffers implemented; general output transport and API 3 remain pending |
+| Prepared Python bindings, typed output transport, binding API 3 | Prepared inputs and general API-3 typed output implemented; complete model fusion remains pending |
 | Kernel optimization, parallel tile scheduling | Prepared physical coefficients and minimal Crown stages implemented; parallel scheduling work remains |
 | Performance targets (table below) | **Not met**; no speed claim is made for the Python Rust backend |
 
-Python public calls still use the original binding transport (binding API 2). Native raster/tweak entry points remain Rust-only, and end-to-end speed targets are not yet certified. The Python-facing calculation contract, including shapes, dtypes, masks, and tolerances, is unchanged.
+Python public calls use binding API 3 with typed columns and compact metadata. Model calls still cross several native boundaries. Native raster/tweak entry points remain Rust-only, and end-to-end speed targets are not yet certified. The Python-facing calculation contract, including shapes, dtypes, masks, and tolerances, is unchanged.
 
 ## Typed scalar stages
 
@@ -429,3 +429,28 @@ seven-pair acceptance procedure. At 10,000 cells, common Surface calls took abou
 Typed Crown still took 4.4–5.4 seconds; these measurements do not establish the
 final public-call targets. The remaining output transport and pipeline fusion
 work are required.
+## General output writer (recovery layer 3)
+
+Binding API 3 replaces the per-cell `Cell` maps and expanded f64 metadata columns
+with typed output buffers, constant field schemas, and preallocated variable
+sidecars. All supported layouts use the same writer. Float32 results and integer
+classifications retain their native storage types; integer payloads do not round
+through f64. Object payload tags, raw masks, fills, complex components, and
+independent output shapes remain covered by the reference suite.
+
+A first-row capture establishes schema and retains that computed row for replay;
+the science is evaluated exactly once per cell. Operation identities and output
+field order are fixed before the remaining loop. Encoder instrumentation starts
+at the first actual output write, after input preparation and kernel execution.
+
+All 96 measured observations passed complete Python output comparisons and had
+zero allocation requests in both kernel and encoder loop scopes. They cover both
+datasets, all four routes, 1,000/10,000 cells, three fresh workers per size, and
+actual four-worker checks. The [raw allocation evidence](performance/2026-11-06-column-allocation-evidence.json)
+passes `tools/assemble_allocation_evidence.py` and the acceptance checker's
+provenance validation. A rehashed nonzero encoder sample is rejected.
+
+The reduced three-pair, one-warm-call screen puts typed Crown at 82–93 ms for
+10,000 cells, down from 4.4–5.4 seconds before the writer. Python remains about
+51–56 ms in those cases. Complete model fusion and general compact arithmetic
+are still required; these figures do not certify final public-call targets.

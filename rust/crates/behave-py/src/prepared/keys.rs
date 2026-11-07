@@ -6,6 +6,7 @@ macro_rules! fields {
         pub(crate) enum Field { $($variant),+ }
         impl Field {
             pub(crate) const COUNT: usize = [$(stringify!($variant)),+].len();
+            pub(crate) const ALL: [Field; Self::COUNT] = [$(Self::$variant),+];
             pub(crate) fn from_name(name: &str) -> Option<Self> {
                 match name { $($name => Some(Self::$variant),)+ _ => None }
             }
