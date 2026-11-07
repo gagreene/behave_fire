@@ -17,6 +17,7 @@ macro_rules! fields {
     };
 }
 fields! {
+    FuelModelGrid => "fuel_model_grid",
     GlobalBool => "_bool",
     GlobalMixed => "_mixed",
     GlobalParticleScalar => "_particle_scalar",

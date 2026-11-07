@@ -1,5 +1,77 @@
 # Rust backend execution measurements
 
+## Recovery pipeline checkpoint: 2026-11-07
+
+**Task 4 stops at the serial-performance checkpoint.** Model calls now fuse normalization, numeric fuel preparation, shared native raster execution, and typed output into one native compute call. Ordinary Surface and Crown show faster median times. Both mixed Crown layouts remain slower than Python and miss the accepted targets. Task 5 parallel output work and final acceptance have not started.
+
+The screen used Windows 10 x86-64, CPython 3.12.8, NumPy 2.1.3, 16 logical CPUs, three fresh paired processes per case, and one warmed call per process. It collected 240 timing records and passed 40 complete-output comparisons across both datasets, four routes, and 1/16/1,024/10,000/100,000 cells. Profiling was separate. This is exploratory evidence, not the required seven-pair/five-warm acceptance campaign.
+
+[Raw screen](performance/2026-11-07-pipeline-screen.json), [paired first/warm summaries](performance/2026-11-07-pipeline-summary.json), and [separate diagnostic profiles](performance/2026-11-07-pipeline-profiles.json) retain measurements and identities. Ratios are **Python time divided by Rust time**: above 1 means Rust is faster.
+
+### 10,000 cells: warmed serial medians
+
+| Dataset | Route | Python ms | Rust ms | Speed ratio | Exploratory lower 95% |
+| --- | --- | ---: | ---: | ---: | ---: |
+| uniform | surface | 35.92 | 15.57 | 2.31x | 2.25x |
+| uniform | crown | 54.80 | 27.36 | 2.00x | 1.92x |
+| uniform | typed-crown | 54.66 | 78.81 | 0.69x | 0.68x |
+| uniform | typed-crown-b | 52.10 | 67.76 | 0.77x | 0.76x |
+| heterogeneous | surface | 34.57 | 14.98 | 2.31x | 2.29x |
+| heterogeneous | crown | 48.76 | 23.41 | 2.08x | 2.04x |
+| heterogeneous | typed-crown | 49.67 | 74.24 | 0.67x | 0.65x |
+| heterogeneous | typed-crown-b | 53.02 | 69.65 | 0.76x | 0.69x |
+
+### 100,000 cells: warmed serial medians
+
+| Dataset | Route | Python ms | Rust ms | Speed ratio | Exploratory lower 95% |
+| --- | --- | ---: | ---: | ---: | ---: |
+| uniform | surface | 392.17 | 140.34 | 2.79x | 2.60x |
+| uniform | crown | 504.71 | 207.70 | 2.43x | 2.28x |
+| uniform | typed-crown | 517.20 | 749.96 | 0.69x | 0.56x |
+| uniform | typed-crown-b | 511.69 | 673.38 | 0.76x | 0.61x |
+| heterogeneous | surface | 373.33 | 161.22 | 2.32x | 2.32x |
+| heterogeneous | crown | 593.13 | 220.30 | 2.69x | 1.80x |
+| heterogeneous | typed-crown | 530.88 | 669.60 | 0.79x | 0.70x |
+| heterogeneous | typed-crown-b | 517.70 | 666.97 | 0.78x | 0.72x |
+
+The 10k targets are 1.25x for common routes and parity for typed routes; the large serial target is 2x for every route. Typed layouts fail clearly. The heterogeneous common Crown 100k lower bound also falls below 2x despite its faster median. Three pairs do not certify the common routes. Four-worker gains cannot substitute for the failed serial gate.
+
+### Small-call latency
+
+These uniform-data medians include call normalization, native work, output restoration, and lazy first-call setup. Imports, model construction, and input generation remain outside timing. Heterogeneous observations are retained in the linked summary.
+
+| Route | Cells | Python first / warm ms | Rust first / warm ms |
+| --- | ---: | ---: | ---: |
+| surface | 1 | 2.480 / 1.814 | 3.028 / 1.863 |
+| surface | 16 | 2.251 / 1.816 | 2.895 / 1.765 |
+| surface | 1,024 | 6.203 / 5.462 | 4.248 / 3.028 |
+| crown | 1 | 2.699 / 2.446 | 4.150 / 3.016 |
+| crown | 16 | 2.757 / 2.417 | 4.083 / 3.458 |
+| crown | 1,024 | 7.227 / 6.977 | 6.252 / 5.095 |
+| typed-crown | 1 | 3.391 / 3.075 | 4.944 / 3.795 |
+| typed-crown | 16 | 3.506 / 3.383 | 4.620 / 3.715 |
+| typed-crown | 1,024 | 8.211 / 7.951 | 10.992 / 10.060 |
+| typed-crown-b | 1 | 3.525 / 3.485 | 4.156 / 3.326 |
+| typed-crown-b | 16 | 3.383 / 3.137 | 4.914 / 4.019 |
+| typed-crown-b | 1,024 | 8.492 / 7.492 | 10.791 / 9.515 |
+
+### Native diagnostic intervals
+
+Each measured first and warmed model call used one native `batch` call. Optional caller-requested output-unit conversions remain separate. These cases do not exercise float32 direction calibration. The following single-run warmed profiles are diagnostic only; their instrumented durations were not pooled with timing observations.
+
+| Route, 100k uniform | Owned copy ms | Detached ms | NumPy transfer ms |
+| --- | ---: | ---: | ---: |
+| surface | 11.18 | 121.62 | 0.033 |
+| crown | 20.35 | 177.53 | 0.080 |
+| typed-crown | 18.03 | 658.86 | 0.105 |
+| typed-crown-b | 16.59 | 678.39 | 0.112 |
+
+The typed cost is dominated by the detached Rust interval, which includes arithmetic, prepared work, typed encoding, and worker/merge overhead. This profile does not yet separate arithmetic from encoding. The compact route is reachable for both typed layouts; neither weak/object fallback nor repeated model boundaries explain these observations. A further bounded investigation should separate those native costs before selecting another optimization. The plan requires an owner decision before that additional tuning.
+
+The timed source hash is `841d99b5f2d1a975bbc957f513592adf42ac0f715c4c51cf741ed26761cd05ef`; the release extension hash is `52a050f1755417022a4ba12b673c309843d9398e422dd1ad8cdb8fbb111cac71`. After the screen, review fixed ignored UserInput-WAF selector shapes, and the diagnostic harness was updated to count API-3 nested schema arrays. The diagnostic artifact records that later source identity with the same extension. The screen is retained as evidence for its recorded source, not claimed as final latest-head acceptance. No Linux or other-platform speed guarantee is established.
+
+## Historical measurements before recovery
+
 The later [core recovery confirmation](RUST_ENGINE.md#recovery-core-confirmation-2026-11-06) passes the native headroom gate. The historical Python-boundary measurements below still describe the transport being replaced; end-to-end speed is not yet certified.
 
 Measured on 2026-11-04 against the final ownership-fix release build based on `7d3fb2a0dbdc73d8433a6638607e1f71703f6793`, with binding API 2, the complete backend enabled, and exact integer-alias, object, empty, complex, and weak-scalar transport. The Windows calibration selects the platform-libm atan2 profile; Linux SVML timing is not measured here. These measurements supersede the earlier development tables.

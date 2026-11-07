@@ -1,5 +1,5 @@
 //! Full Crown runner retaining independently typed supplied surface fields.
-use super::SurfaceFireInputs;
+use super::{arithmetic::CrownNumber, SurfaceFireInputs};
 use crate::engine::{CrownCell, PreparedFuel, SurfaceOptions, SurfaceTweaks};
 use crate::{surface::masked::MaskedValue, BehaveError};
 
@@ -8,16 +8,20 @@ macro_rules! result {
         /// Complete Crown outputs with independent raw-data, dtype, mask, class, and rank metadata.
         #[derive(Clone,Copy,Debug,Default,PartialEq)]
         #[non_exhaustive]
-        pub struct MaskedCrownResult {
-            $(#[doc=concat!("Python `",stringify!($field),"` field in component base units.")] pub $field:MaskedValue,)+
+        pub struct MaskedCrownResult<T=MaskedValue> {
+            $(#[doc=concat!("Python `",stringify!($field),"` field in component base units.")] pub $field:T,)+
             /// Exact classification: 0=surface, 1=torching, 2=conditional crown, 3=crowning.
             pub fire_type:i32,
         }
-        impl MaskedCrownResult {
+        impl<T:Copy+Default> MaskedCrownResult<T> {
             /// Construct an empty result with ordinary f64 array defaults.
             pub fn new()->Self {Self::default()}
+            /// Transform every numerical output while retaining exact classification.
+            pub(crate) fn map<U:Copy+Default>(self, convert:impl Fn(T)->U)->MaskedCrownResult<U> {
+                MaskedCrownResult {$($field:convert(self.$field),)+fire_type:self.fire_type}
+            }
             /// Return all twenty-one numerical fields under their exact Python keys.
-            pub fn named_values(&self)->[(&'static str,MaskedValue);21] {[$((stringify!($field),self.$field)),+]}
+            pub fn named_values(&self)->[(&'static str,T);21] {[$((stringify!($field),self.$field)),+]}
         }
     }
 }
@@ -46,16 +50,16 @@ result!(
 );
 
 /// Run Crown from three supplied surface fields without requiring unused SurfaceResult entries.
-pub fn run_with_surface_inputs(
-    surface: &SurfaceFireInputs<MaskedValue>,
+pub fn run_with_surface_inputs<T: CrownNumber>(
+    surface: &SurfaceFireInputs<T>,
     input: &CrownCell,
     fuel: &PreparedFuel,
     options: &SurfaceOptions,
-) -> Result<MaskedCrownResult, BehaveError> {
+) -> Result<MaskedCrownResult<T>, BehaveError> {
     let crown = super::calculate_crown_spread(input, fuel, options, SurfaceTweaks::default());
     // Python normalizes Crown spatial inputs with np.atleast_1d(..., dtype=float).
     // Supplied surface dictionary values remain independently typed until each stage handles them.
-    let plain = MaskedValue::plain;
+    let plain = T::plain;
     let crown_rate = plain(crown.crown_fire_spread_rate);
     let heat = super::masked::calculate_crown_heat_and_intensity(
         surface.surface_hpua,
@@ -88,7 +92,7 @@ pub fn run_with_surface_inputs(
     let crowning = plain(super::calculate_crowning_surface_fire_spread_rate(
         crown.ri_crown,
         &crown.ib_crown,
-        critical_rate.value,
+        critical_rate.value(),
         input.canopy_height,
     ));
     let fraction = super::masked::calculate_crown_fraction_burned(
@@ -142,4 +146,36 @@ pub fn run_with_surface_inputs(
         final_fireline_intensity: final_behavior.final_fireline_intensity,
         final_flame_length: final_behavior.final_flame_length,
     })
+}
+
+/// Evaluate ordinary real layouts with compact metadata and the shared Crown equations.
+///
+/// `None` requests the checked native path for unsupported payload traits or an
+/// exceptional intermediate representation. No input values or dtype tuples
+/// identify the fast path; precision and promotion are retained at each operation.
+pub fn try_run_compact_surface_inputs(
+    surface: &SurfaceFireInputs<MaskedValue>,
+    input: &CrownCell,
+    fuel: &PreparedFuel,
+    options: &SurfaceOptions,
+) -> Option<Result<MaskedCrownResult, BehaveError>> {
+    use crate::surface::masked::CompactValue;
+    let mut supplied = SurfaceFireInputs::new();
+    supplied.surface_ros = CompactValue::from_checked(surface.surface_ros)?;
+    supplied.surface_fli = CompactValue::from_checked(surface.surface_fli)?;
+    supplied.surface_hpua = CompactValue::from_checked(surface.surface_hpua)?;
+    match run_with_surface_inputs(&supplied, input, fuel, options) {
+        Ok(result) => {
+            if result
+                .named_values()
+                .iter()
+                .any(|(_, value)| value.unsupported())
+            {
+                None
+            } else {
+                Some(Ok(result.map(CompactValue::checked)))
+            }
+        }
+        Err(error) => Some(Err(error)),
+    }
 }

@@ -1,4 +1,5 @@
 //! Crown helpers preserving shared NumPy MaskedArray arithmetic semantics.
+use super::arithmetic::CrownNumber;
 use super::{CrownHeat, CrownRatios, FinalCrownBehavior, FireClassification, PassiveCrownBehavior};
 use crate::engine::{SurfaceCell, SurfaceOptions, WafMethod};
 use crate::surface::{
@@ -12,25 +13,22 @@ fn c(value: f64) -> MaskedValue {
 }
 
 /// Evaluate the source flame expression before np.where erases its intermediate mask.
-fn flame(intensity: MaskedValue) -> MaskedValue {
-    MaskedValue::select(
-        intensity.greater(c(0.)),
-        c(0.2).mul(intensity.pow(c(2.0 / 3.0))),
-        c(0.),
+fn flame<T: CrownNumber>(intensity: T) -> T {
+    T::select(
+        intensity.greater(T::scalar(0.)),
+        T::scalar(0.2).mul(intensity.pow(T::scalar(2.0 / 3.0))),
+        T::scalar(0.),
     )
 }
 /// Classify raw ratio comparisons, including zero-dimensional masked comparison normalization.
-pub fn classify_crown_fire_type(
-    transition: MaskedValue,
-    active: MaskedValue,
-) -> FireClassification {
-    let fire_type = if transition.less(c(1.)) {
-        if active.less(c(1.)) {
+pub fn classify_crown_fire_type<T: CrownNumber>(transition: T, active: T) -> FireClassification {
+    let fire_type = if transition.less(T::scalar(1.)) {
+        if active.less(T::scalar(1.)) {
             0
         } else {
             2
         }
-    } else if active.less(c(1.)) {
+    } else if active.less(T::scalar(1.)) {
         1
     } else {
         3
@@ -45,114 +43,117 @@ pub fn classify_crown_fire_type(
 
 /// Select final Crown outputs with each branch's independent raw data and precision.
 #[allow(clippy::too_many_arguments)]
-pub fn assign_final_crown_fire_behavior(
+pub fn assign_final_crown_fire_behavior<T: CrownNumber>(
     surface: bool,
     passive: bool,
-    surface_rate: MaskedValue,
-    surface_heat: MaskedValue,
-    surface_intensity: MaskedValue,
-    passive_rate: MaskedValue,
-    passive_heat: MaskedValue,
-    passive_intensity: MaskedValue,
-    passive_flame: MaskedValue,
-    crown_rate: MaskedValue,
-    crown_heat: MaskedValue,
-    crown_intensity: MaskedValue,
-    crown_flame: MaskedValue,
-) -> FinalCrownBehavior<MaskedValue> {
+    surface_rate: T,
+    surface_heat: T,
+    surface_intensity: T,
+    passive_rate: T,
+    passive_heat: T,
+    passive_intensity: T,
+    passive_flame: T,
+    crown_rate: T,
+    crown_heat: T,
+    crown_intensity: T,
+    crown_flame: T,
+) -> FinalCrownBehavior<T> {
     FinalCrownBehavior {
-        final_spread_rate: MaskedValue::select(
+        final_spread_rate: T::select(
             surface,
             surface_rate,
-            MaskedValue::select(passive, passive_rate, crown_rate),
+            T::select(passive, passive_rate, crown_rate),
         ),
-        final_heat_per_unit_area: MaskedValue::select(
+        final_heat_per_unit_area: T::select(
             surface,
             surface_heat,
-            MaskedValue::select(passive, passive_heat, crown_heat),
+            T::select(passive, passive_heat, crown_heat),
         ),
-        final_fireline_intensity: MaskedValue::select(
+        final_fireline_intensity: T::select(
             surface,
             surface_intensity,
-            MaskedValue::select(passive, passive_intensity, crown_intensity),
+            T::select(passive, passive_intensity, crown_intensity),
         ),
-        final_flame_length: MaskedValue::select(
+        final_flame_length: T::select(
             surface,
             flame(surface_intensity),
-            MaskedValue::select(passive, passive_flame, crown_flame),
+            T::select(passive, passive_flame, crown_flame),
         ),
     }
 }
 
 /// Calculate masked critical crown spread.
-pub fn calculate_critical_crown_fire_spread_rate(density: MaskedValue) -> MaskedValue {
-    let cbd = density.mul(c(16.0185));
-    let safe = MaskedValue::select(cbd.greater(c(1e-7)), cbd, c(1.));
-    MaskedValue::select(cbd.greater(c(1e-7)), c(3.).div(safe).mul(c(3.28084)), c(0.))
+pub fn calculate_critical_crown_fire_spread_rate<T: CrownNumber>(density: T) -> T {
+    let cbd = density.mul(T::scalar(16.0185));
+    let safe = T::select(cbd.greater(T::scalar(1e-7)), cbd, T::scalar(1.));
+    T::select(
+        cbd.greater(T::scalar(1e-7)),
+        T::scalar(3.).div(safe).mul(T::scalar(3.28084)),
+        T::scalar(0.),
+    )
 }
 /// Calculate masked critical surface intensity.
-pub fn calculate_critical_surface_fireline_intensity(
-    height: MaskedValue,
-    moisture: MaskedValue,
-) -> MaskedValue {
-    let mf = moisture.maximum(c(30.));
-    let cbh = height.mul(c(0.3048)).maximum(c(0.1));
-    c(0.010)
+pub fn calculate_critical_surface_fireline_intensity<T: CrownNumber>(height: T, moisture: T) -> T {
+    let mf = moisture.maximum(T::scalar(30.));
+    let cbh = height.mul(T::scalar(0.3048)).maximum(T::scalar(0.1));
+    T::scalar(0.010)
         .mul(cbh)
-        .mul(c(460.).add(c(25.9).mul(mf)))
-        .pow(c(1.5))
-        .mul(c(0.2886719))
+        .mul(T::scalar(460.).add(T::scalar(25.9).mul(mf)))
+        .pow(T::scalar(1.5))
+        .mul(T::scalar(0.2886719))
 }
 /// Calculate masked transition and active ratios.
-pub fn calculate_crown_fire_ratios(
-    surface: MaskedValue,
-    crown: MaskedValue,
-    critical_surface: MaskedValue,
-    critical_crown: MaskedValue,
-) -> CrownRatios<MaskedValue> {
-    let safe_surface =
-        MaskedValue::select(critical_surface.greater(c(1e-7)), critical_surface, c(1.));
-    let safe_crown = MaskedValue::select(critical_crown.greater(c(1e-7)), critical_crown, c(1.));
+pub fn calculate_crown_fire_ratios<T: CrownNumber>(
+    surface: T,
+    crown: T,
+    critical_surface: T,
+    critical_crown: T,
+) -> CrownRatios<T> {
+    let safe_surface = T::select(
+        critical_surface.greater(T::scalar(1e-7)),
+        critical_surface,
+        T::scalar(1.),
+    );
+    let safe_crown = T::select(
+        critical_crown.greater(T::scalar(1e-7)),
+        critical_crown,
+        T::scalar(1.),
+    );
     CrownRatios {
-        crown_fire_transition_ratio: MaskedValue::select(
-            critical_surface.greater(c(1e-7)),
+        crown_fire_transition_ratio: T::select(
+            critical_surface.greater(T::scalar(1e-7)),
             surface.div(safe_surface),
-            c(0.),
+            T::scalar(0.),
         ),
-        crown_fire_active_ratio: MaskedValue::select(
-            critical_crown.greater(c(1e-7)),
+        crown_fire_active_ratio: T::select(
+            critical_crown.greater(T::scalar(1e-7)),
             crown.div(safe_crown),
-            c(0.),
+            T::scalar(0.),
         ),
     }
 }
 /// Calculate masked crown fraction.
-pub fn calculate_crown_fraction_burned(
-    surface: MaskedValue,
-    critical: MaskedValue,
-    crowning: MaskedValue,
-) -> MaskedValue {
+pub fn calculate_crown_fraction_burned<T: CrownNumber>(surface: T, critical: T, crowning: T) -> T {
     let denom = crowning.sub(critical);
-    MaskedValue::select(
-        denom.greater(c(1e-7)),
+    T::select(
+        denom.greater(T::scalar(1e-7)),
         surface.sub(critical).div(denom),
-        c(0.),
+        T::scalar(0.),
     )
-    .maximum(c(0.))
-    .minimum(c(1.))
+    .clip_unit()
 }
 /// Calculate masked canopy heat and intensity.
-pub fn calculate_crown_heat_and_intensity(
-    heat: MaskedValue,
-    rate: MaskedValue,
-    base: MaskedValue,
-    height: MaskedValue,
-    density: MaskedValue,
-) -> CrownHeat<MaskedValue> {
-    let load = density.mul(height.sub(base)).maximum(c(0.));
-    let canopy = load.mul(c(8000.));
+pub fn calculate_crown_heat_and_intensity<T: CrownNumber>(
+    heat: T,
+    rate: T,
+    base: T,
+    height: T,
+    density: T,
+) -> CrownHeat<T> {
+    let load = density.mul(height.sub(base)).maximum(T::scalar(0.));
+    let canopy = load.mul(T::scalar(8000.));
     let crown = heat.add(canopy);
-    let intensity = rate.div(c(60.)).mul(crown);
+    let intensity = rate.div(T::scalar(60.)).mul(crown);
     CrownHeat {
         crown_fuel_load: load,
         canopy_heat_per_unit_area: canopy,
@@ -162,16 +163,16 @@ pub fn calculate_crown_heat_and_intensity(
     }
 }
 /// Calculate masked passive behavior.
-pub fn calculate_passive_crown_fire_behavior(
-    rate: MaskedValue,
-    heat: MaskedValue,
-    crown: MaskedValue,
-    canopy: MaskedValue,
-    fraction: MaskedValue,
-) -> PassiveCrownBehavior<MaskedValue> {
+pub fn calculate_passive_crown_fire_behavior<T: CrownNumber>(
+    rate: T,
+    heat: T,
+    crown: T,
+    canopy: T,
+    fraction: T,
+) -> PassiveCrownBehavior<T> {
     let passive_rate = rate.add(fraction.mul(crown.sub(rate)));
     let passive_heat = heat.add(fraction.mul(canopy));
-    let intensity = passive_heat.mul(passive_rate).div(c(60.));
+    let intensity = passive_heat.mul(passive_rate).div(T::scalar(60.));
     PassiveCrownBehavior {
         passive_crown_fire_spread_rate: passive_rate,
         passive_crown_fire_heat_per_unit_area: passive_heat,
@@ -180,12 +181,13 @@ pub fn calculate_passive_crown_fire_behavior(
     }
 }
 /// Calculate masked critical surface rate.
-pub fn calculate_surface_fire_critical_spread_rate(
-    critical: MaskedValue,
-    heat: MaskedValue,
-) -> MaskedValue {
-    let safe = MaskedValue::select(heat.greater(c(1e-7)), heat, c(1.));
-    MaskedValue::select(heat.greater(c(1e-7)), c(60.).mul(critical).div(safe), c(0.))
+pub fn calculate_surface_fire_critical_spread_rate<T: CrownNumber>(critical: T, heat: T) -> T {
+    let safe = T::select(heat.greater(T::scalar(1e-7)), heat, T::scalar(1.));
+    T::select(
+        heat.greater(T::scalar(1e-7)),
+        T::scalar(60.).mul(critical).div(safe),
+        T::scalar(0.),
+    )
 }
 /// Calculate masked crowning surface rate.
 pub fn calculate_crowning_surface_fire_spread_rate(

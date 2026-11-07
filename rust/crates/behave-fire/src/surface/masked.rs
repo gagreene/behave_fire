@@ -16,8 +16,11 @@ pub use integers::{IntegerKind, IntegerValue};
 #[path = "complex.rs"]
 mod complex;
 pub use complex::ComplexValue;
+#[path = "compact.rs"]
+mod compact;
 #[path = "objects.rs"]
 mod objects;
+pub(crate) use compact::CompactValue;
 
 #[cfg(test)]
 mod tests {

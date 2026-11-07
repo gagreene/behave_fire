@@ -5,7 +5,7 @@ The registry is snapshotted at construction; calculations use standalone Rust sc
 The keyword-only ``threads`` request bounds per-call native workers and is serialized.
 """
 from __future__ import annotations
-from ._bridge import _call, _validate_threads
+from ._bridge import _call, _unit_code, _validate_threads
 from ._threads import _threaded_method, _threaded_static
 from ._serialization import NativeState as _NativeState
 import numpy as np
@@ -48,6 +48,22 @@ def _apply_out_units(results: dict, out_units: dict, converters: dict) -> dict:
             value = speed_to_base(value=value, units=stored_base)
         out[key] = converter_fn(value, requested)
     return out
+
+def _prepare_base(field, kind, value, units, conversions):
+    """Validate coercion and selector broadcasting while deferring native arithmetic.
+
+    :param field: Native field name receiving the converted values.
+    :param kind: Existing unit conversion family.
+    :param value: Caller input to coerce to a one-dimensional-or-higher float array.
+    :param units: Caller unit selector using the reference indexing convention.
+    :param conversions: Per-call native conversion descriptors to populate.
+    :return: Structural broadcast view of the owned input, before unit conversion.
+    """
+    value = np.atleast_1d(np.asarray(value, dtype=float))
+    codes = np.asarray(_unit_code(kind, units), dtype=float)
+    shape = np.broadcast_shapes(value.shape, codes.shape)
+    conversions[field] = (kind, codes)
+    return np.broadcast_to(value, shape)
 
 class BehaveRun(_NativeState):
     """Explicit Rust array-mode facade with independently owned fuel lookup snapshots."""
@@ -233,24 +249,30 @@ class BehaveRun(_NativeState):
 
         :return: dict of (*S) ndarrays in the requested output units.
         """
+        conversions = {}
         fuel_model_grid = np.atleast_1d(np.asarray(fuel_model_grid, dtype=np.int32))
-        m1h = fraction_to_base(np.atleast_1d(np.asarray(m1h, dtype=float)), moisture_units)
-        m10h = fraction_to_base(np.atleast_1d(np.asarray(m10h, dtype=float)), moisture_units)
-        m100h = fraction_to_base(np.atleast_1d(np.asarray(m100h, dtype=float)), moisture_units)
-        mlh = fraction_to_base(np.atleast_1d(np.asarray(mlh, dtype=float)), moisture_units)
-        mlw = fraction_to_base(np.atleast_1d(np.asarray(mlw, dtype=float)), moisture_units)
+        m1h = _prepare_base('m1h', 'Fraction', m1h, moisture_units, conversions)
+        m10h = _prepare_base('m10h', 'Fraction', m10h, moisture_units, conversions)
+        m100h = _prepare_base('m100h', 'Fraction', m100h, moisture_units, conversions)
+        mlh = _prepare_base('mlh', 'Fraction', mlh, moisture_units, conversions)
+        mlw = _prepare_base('mlw', 'Fraction', mlw, moisture_units, conversions)
         wind_direction = np.atleast_1d(np.asarray(wind_direction, dtype=float))
         aspect = np.atleast_1d(np.asarray(aspect, dtype=float))
-        canopy_cover = fraction_to_base(np.atleast_1d(np.asarray(canopy_cover, dtype=float)), canopy_cover_units)
-        canopy_height_ft = length_to_base(np.atleast_1d(np.asarray(canopy_height, dtype=float)), canopy_height_units)
-        canopy_base_height_ft = length_to_base(np.atleast_1d(np.asarray(canopy_base_height, dtype=float)), canopy_base_height_units)
-        if crown_ratio_units is None:
-            crown_ratio = _call('model.canopy_crown_ratio', {'height': canopy_height_ft, 'base': canopy_base_height_ft})
+        canopy_cover = _prepare_base('canopy_cover', 'Fraction', canopy_cover, canopy_cover_units, conversions)
+        canopy_height_ft = _prepare_base('canopy_height', 'Length', canopy_height, canopy_height_units, conversions)
+        canopy_base_height_ft = _prepare_base('canopy_base_height', 'Length', canopy_base_height, canopy_base_height_units, conversions)
+        derive_ratio = crown_ratio_units is None
+        if derive_ratio:
+            ratio_shape = np.broadcast_shapes(canopy_height_ft.shape, canopy_base_height_ft.shape)
+            crown_ratio = np.broadcast_to(np.asarray(1.0), ratio_shape)
         else:
-            crown_ratio = fraction_to_base(np.atleast_1d(np.asarray(crown_ratio, dtype=float)), crown_ratio_units)
-        wind_speed_fpm = speed_to_base(np.atleast_1d(np.asarray(wind_speed, dtype=float)), wind_speed_units)
-        slope_deg = slope_to_base(np.atleast_1d(np.asarray(slope, dtype=float)), slope_units)
-        results = _call('model.run_surface', dict(lut=self._lut, fuel_model_grid=fuel_model_grid, m1h=m1h, m10h=m10h, m100h=m100h, mlh=mlh, mlw=mlw, wind_speed=wind_speed_fpm, wind_speed_units=0, wind_direction=wind_direction, wind_orientation_mode=wind_orientation_mode, slope=slope_deg, slope_units=0, aspect=aspect, canopy_cover=canopy_cover, canopy_height=canopy_height_ft, crown_ratio=crown_ratio, wind_height_mode=wind_height_mode, waf_method=waf_method, user_waf=user_waf))
+            crown_ratio = _prepare_base('crown_ratio', 'Fraction', crown_ratio, crown_ratio_units, conversions)
+        wind_speed_fpm = _prepare_base('wind_speed', 'Speed', wind_speed, wind_speed_units, conversions)
+        slope_deg = _prepare_base('slope', 'Slope', slope, slope_units, conversions)
+        arguments = dict(lut=self._lut, fuel_model_grid=fuel_model_grid, m1h=m1h, m10h=m10h, m100h=m100h, mlh=mlh, mlw=mlw, wind_speed=wind_speed_fpm, wind_speed_units=0, wind_direction=wind_direction, wind_orientation_mode=wind_orientation_mode, slope=slope_deg, slope_units=0, aspect=aspect, canopy_cover=canopy_cover, canopy_height=canopy_height_ft, crown_ratio=crown_ratio, wind_height_mode=wind_height_mode, waf_method=waf_method, user_waf=user_waf, _pipeline={'conversions': conversions, 'derive': derive_ratio})
+        if derive_ratio:
+            arguments['canopy_base_height'] = canopy_base_height_ft
+        results = _call('model.run_surface', arguments)
         return _apply_out_units(results, out_units or {}, _SURFACE_KEY_CONVERTERS)
 
     @_threaded_method
@@ -444,17 +466,18 @@ class BehaveRun(_NativeState):
 
         :return: dict in the requested output units.
         """
-        wind_speed_fpm = speed_to_base(np.atleast_1d(np.asarray(wind_speed, dtype=float)), wind_speed_units)
-        slope_deg = slope_to_base(np.atleast_1d(np.asarray(slope, dtype=float)), slope_units)
-        m1h = fraction_to_base(np.atleast_1d(np.asarray(m1h, dtype=float)), moisture_units)
-        m10h = fraction_to_base(np.atleast_1d(np.asarray(m10h, dtype=float)), moisture_units)
-        m100h = fraction_to_base(np.atleast_1d(np.asarray(m100h, dtype=float)), moisture_units)
-        mlh = fraction_to_base(np.atleast_1d(np.asarray(mlh, dtype=float)), moisture_units)
-        mlw = fraction_to_base(np.atleast_1d(np.asarray(mlw, dtype=float)), moisture_units)
-        cbh_ft = length_to_base(np.atleast_1d(np.asarray(canopy_base_height, dtype=float)), canopy_base_height_units)
-        ch_ft = length_to_base(np.atleast_1d(np.asarray(canopy_height, dtype=float)), canopy_height_units)
-        cbd_pcf = density_to_base(np.atleast_1d(np.asarray(canopy_bulk_density, dtype=float)), canopy_bulk_density_units)
-        results = run_crown_fire(surface_results=surface_results, lut=self._lut, fuel_model_grid=fuel_model_grid, m1h=m1h, m10h=m10h, m100h=m100h, mlh=mlh, mlw=mlw, wind_speed=wind_speed_fpm, wind_speed_units=0, wind_direction=wind_direction, wind_orientation_mode=wind_orientation_mode, slope=slope_deg, slope_units=0, aspect=aspect, canopy_base_height=cbh_ft, canopy_height=ch_ft, canopy_bulk_density=cbd_pcf, moisture_foliar=moisture_foliar)
+        conversions = {}
+        wind_speed_fpm = _prepare_base('wind_speed', 'Speed', wind_speed, wind_speed_units, conversions)
+        slope_deg = _prepare_base('slope', 'Slope', slope, slope_units, conversions)
+        m1h = _prepare_base('m1h', 'Fraction', m1h, moisture_units, conversions)
+        m10h = _prepare_base('m10h', 'Fraction', m10h, moisture_units, conversions)
+        m100h = _prepare_base('m100h', 'Fraction', m100h, moisture_units, conversions)
+        mlh = _prepare_base('mlh', 'Fraction', mlh, moisture_units, conversions)
+        mlw = _prepare_base('mlw', 'Fraction', mlw, moisture_units, conversions)
+        cbh_ft = _prepare_base('canopy_base_height', 'Length', canopy_base_height, canopy_base_height_units, conversions)
+        ch_ft = _prepare_base('canopy_height', 'Length', canopy_height, canopy_height_units, conversions)
+        cbd_pcf = _prepare_base('canopy_bulk_density', 'Density', canopy_bulk_density, canopy_bulk_density_units, conversions)
+        results = _call('crown.run_crown_fire', dict(surface_results=surface_results, lut=self._lut, fuel_model_grid=fuel_model_grid, m1h=m1h, m10h=m10h, m100h=m100h, mlh=mlh, mlw=mlw, wind_speed=wind_speed_fpm, wind_speed_units=0, wind_direction=wind_direction, wind_orientation_mode=wind_orientation_mode, slope=slope_deg, slope_units=0, aspect=aspect, canopy_base_height=cbh_ft, canopy_height=ch_ft, canopy_bulk_density=cbd_pcf, moisture_foliar=moisture_foliar, _pipeline={'conversions': conversions}))
         return _apply_out_units(results, out_units or {}, _CROWN_KEY_CONVERTERS)
 
     @_threaded_static

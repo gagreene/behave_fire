@@ -2,7 +2,7 @@
 use super::{
     tile_shape, validity, FuelbedColumns, SurfaceColumns, SurfaceRasterOutput, SurfaceTweakColumns,
 };
-use crate::engine::{PreparedFuels, SurfacePlan};
+use crate::engine::{PreparedFuels, SurfacePlan, SurfaceTweaks};
 use crate::surface::SurfaceResult;
 use crate::{BehaveError, GridShape, ParallelError};
 use std::ops::Range;
@@ -27,6 +27,26 @@ impl<'a> SurfaceRaster<'a> {
         Ok(Self { shape, inputs })
     }
 
+    /// Evaluate one checked cell into caller-managed output storage.
+    ///
+    /// Returns `None` outside the raster. Invalid pixels return the same default
+    /// result as `run`; validity remains available in the caller's input columns.
+    pub fn evaluate_cell(
+        &self,
+        index: usize,
+        plan: &SurfacePlan,
+        fuels: &PreparedFuels,
+        tweaks: SurfaceTweaks,
+    ) -> Option<SurfaceResult> {
+        if index >= self.shape.len() {
+            return None;
+        }
+        if !self.inputs.valid(index) {
+            return Some(SurfaceResult::default());
+        }
+        let cell = self.inputs.cell(index);
+        Some(plan.run_cell(&cell, fuels.for_grid(cell.fuel_model_grid), tweaks))
+    }
     /// Borrow the checked logical dimensions.
     pub fn shape(&self) -> &GridShape {
         &self.shape
@@ -109,15 +129,14 @@ impl<'a> SurfaceRaster<'a> {
             if !self.inputs.valid(index) {
                 return Ok::<_, BehaveError>(SurfaceResult::default());
             }
-            let cell = self.inputs.cell(index);
             let overrides = tweaks.cell(index);
             Ok(match source {
                 SurfaceSource::Fuelbeds(columns) => {
-                    plan.run_from_fuelbed(&cell, &columns.cell(index), overrides)
+                    plan.run_from_fuelbed(&self.inputs.cell(index), &columns.cell(index), overrides)
                 }
-                SurfaceSource::Fuels(fuels) => {
-                    plan.run_cell(&cell, fuels.for_grid(cell.fuel_model_grid), overrides)
-                }
+                SurfaceSource::Fuels(fuels) => self
+                    .evaluate_cell(index, plan, fuels, overrides)
+                    .expect("validated raster index"),
             })
         })?;
         output.validity = validity(self.inputs.validity, range)?;
