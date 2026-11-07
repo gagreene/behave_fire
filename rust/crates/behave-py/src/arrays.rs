@@ -1,4 +1,5 @@
 //! Owned array boundary. No Python references survive into detached execution.
+use crate::prepared::{Arguments, PreparedArguments};
 
 use numpy::ndarray::{ArrayD, IxDyn};
 use numpy::{IntoPyArray, PyReadonlyArrayDyn, PyUntypedArrayMethods};
@@ -20,205 +21,6 @@ fn flatten_base_array<'py>(value: &Bound<'py, PyAny>) -> PyResult<Bound<'py, PyA
 
 pub fn masked_error(error: behave_fire::surface::masked::MaskedError) -> String {
     format!("{}: {error:?}", error.python_exception())
-}
-
-#[derive(Clone)]
-pub struct Arguments {
-    values: BTreeMap<String, Vec<f64>>,
-    strings: BTreeMap<String, String>,
-    integers: BTreeMap<String, (String, Vec<u64>)>,
-}
-
-impl Arguments {
-    fn empty_prototype(&self) -> Self {
-        let mut result = self.clone();
-        for (name, values) in &mut result.values {
-            if values.is_empty() {
-                values.push(if name.starts_with("_mask.") { 0.0 } else { 1.0 });
-            }
-        }
-        for (_, bits) in result.integers.values_mut() {
-            if bits.is_empty() {
-                bits.push(1);
-            }
-        }
-        result
-    }
-    pub fn integer(&self, name: &str, index: usize) -> Option<(&str, u64)> {
-        let (kind, bits) = self.integers.get(name)?;
-        bits.get(if bits.len() == 1 { 0 } else { index })
-            .map(|value| (kind.as_str(), *value))
-    }
-    pub fn has_crown_python_payloads(&self) -> bool {
-        self.values.keys().any(|key| {
-            key.starts_with("_object.")
-                || (key.starts_with("_weak.")
-                    && !matches!(
-                        key.as_str(),
-                        "_weak.wind_speed_units"
-                            | "_weak.slope_units"
-                            | "_weak.aspect"
-                            | "_weak.moisture_foliar"
-                    ))
-        })
-    }
-    pub fn has_python_payloads(&self) -> bool {
-        self.values
-            .keys()
-            .any(|key| key.starts_with("_object.") || key.starts_with("_weak."))
-    }
-    pub fn has_masks(&self) -> bool {
-        self.values.keys().any(|key| key.starts_with("_masked."))
-    }
-    pub fn has_single(&self) -> bool {
-        self.values.keys().any(|key| key.starts_with("_single."))
-    }
-    pub fn has_integers(&self) -> bool {
-        self.integers.keys().any(|key| {
-            let field = key.rsplit('.').next().unwrap_or(key);
-            !field.ends_with("units")
-                && !field.starts_with('_')
-                && !matches!(
-                    field,
-                    "max_steps"
-                        | "charge_type"
-                        | "fuel_model_grid"
-                        | "equation_number_grid"
-                        | "is_crown"
-                        | "is_surface_fire"
-                        | "is_passive_crown"
-                        | "is_active_crown"
-                        | "is_defined"
-                        | "is_dynamic"
-                )
-        })
-    }
-    pub fn masked(
-        &self,
-        name: &str,
-        index: usize,
-    ) -> Result<behave_fire::surface::masked::MaskedValue, String> {
-        use behave_fire::surface::masked::{
-            IntegerKind, IntegerValue, MaskedValue, MathProfile, Precision,
-        };
-        let profile = match (
-            self.optional("_simd_exp", index).unwrap_or(0.0) != 0.0,
-            self.optional("_svml_atan2", index).unwrap_or(0.0) != 0.0,
-        ) {
-            (true, true) => MathProfile::NumpySimdSvmlAtan2,
-            (false, true) => MathProfile::LibmSvmlAtan2,
-            (true, false) => MathProfile::NumpySimd,
-            (false, false) => MathProfile::Libm,
-        };
-        let mut integer = self
-            .integer(name, index)
-            .map(|(kind, bits)| {
-                IntegerKind::from_name(kind)
-                    .map(|kind| IntegerValue::from_bits(kind, bits))
-                    .ok_or_else(|| format!("TypeError: unsupported integer dtype {kind}"))
-            })
-            .transpose()?;
-        if let Some(code) = self.optional(&format!("_object_kind.{name}"), index) {
-            integer = if (0.0..=8.0).contains(&code) {
-                let kinds = [
-                    IntegerKind::I8,
-                    IntegerKind::I16,
-                    IntegerKind::I32,
-                    IntegerKind::I64,
-                    IntegerKind::U8,
-                    IntegerKind::U16,
-                    IntegerKind::U32,
-                    IntegerKind::U64,
-                    IntegerKind::Bool,
-                ];
-                Some(IntegerValue::from_bits(
-                    kinds[code as usize],
-                    self.integer(name, index).map_or(0, |(_, bits)| bits),
-                ))
-            } else {
-                None
-            };
-        }
-        if self
-            .optional(&format!("_weak_bool.{name}"), index)
-            .is_some()
-        {
-            return Ok(
-                MaskedValue::python_bool(integer.is_some_and(|v| v.raw_bits != 0))
-                    .with_math_profile(profile),
-            );
-        }
-        if self
-            .optional(&format!("_weak_integer.{name}"), index)
-            .is_some()
-        {
-            if let Some(integer) = integer {
-                return Ok(if integer.kind.is_signed() {
-                    MaskedValue::python_int(integer.as_i128() as i64)
-                } else {
-                    MaskedValue::python_uint(integer.raw_bits)
-                }
-                .with_math_profile(profile));
-            }
-        }
-        if self.optional(&format!("_weak.{name}"), index).is_some() {
-            return Ok(MaskedValue::scalar(self.n(name, index)?).with_math_profile(profile));
-        }
-        let value = MaskedValue::new(
-            self.n(name, index)?,
-            self.optional(&format!("_mask.{name}"), index)
-                .unwrap_or(0.0)
-                != 0.0,
-            self.optional(&format!("_masked.{name}"), index).is_some(),
-            if self.optional(&format!("_single.{name}"), index).is_some()
-                || self.optional(&format!("_object_kind.{name}"), index) == Some(10.0)
-            {
-                Precision::F32
-            } else {
-                Precision::F64
-            },
-        )
-        .with_scalar_array(self.optional(&format!("_scalar.{name}"), index).is_some())
-        .with_fill_value(self.optional(&format!("_fill.{name}"), index))
-        .with_math_profile(profile)
-        .with_numpy_scalar(
-            self.optional(&format!("_numpy_scalar.{name}"), index)
-                .is_some(),
-        );
-        let mut value = integer.map_or(value, |integer| value.with_integer(integer));
-        if self.optional(&format!("_object.{name}"), index).is_some() {
-            value = value.with_object_payload(
-                self.optional(&format!("_object_numpy.{name}"), index)
-                    .unwrap_or(0.0)
-                    != 0.0,
-            );
-        }
-        value = value.with_numpy_integer_type(
-            self.optional(&format!("_integer_type.{name}"), index)
-                .filter(|number| (0.0..=10.0).contains(number))
-                .map(|number| number as u8),
-        );
-        Ok(value.with_empty_array(self.optional(&format!("_empty.{name}"), index).is_some()))
-    }
-    pub fn n(&self, name: &str, index: usize) -> Result<f64, String> {
-        let values = self
-            .values
-            .get(name)
-            .ok_or_else(|| format!("missing argument {name}"))?;
-        values
-            .get(if values.len() == 1 { 0 } else { index })
-            .copied()
-            .ok_or_else(|| format!("invalid length for {name}"))
-    }
-    pub fn optional(&self, name: &str, index: usize) -> Option<f64> {
-        self.n(name, index).ok()
-    }
-    pub fn s(&self, name: &str) -> Result<&str, String> {
-        self.strings
-            .get(name)
-            .map(String::as_str)
-            .ok_or_else(|| format!("missing mode {name}"))
-    }
 }
 
 #[pyfunction]
@@ -376,9 +178,12 @@ pub fn batch<'py>(
     let detached_started = std::time::Instant::now();
     let result = py
         .detach(|| {
+            let grid_shape =
+                behave_fire::GridShape::new(shape.clone()).map_err(|error| error.to_string())?;
             let mut output: BTreeMap<String, Vec<f64>> = BTreeMap::new();
             if count == 0 {
-                let prototype = arguments.empty_prototype();
+                let prototype_arguments = arguments.empty_prototype();
+                let prototype = PreparedArguments::new(&prototype_arguments, &grid_shape)?;
                 let fields = if operation == "model.run_surface" {
                     crate::structures::surface_output(crate::parallel::surface(&prototype, 0)?)
                 } else {
@@ -397,8 +202,9 @@ pub fn batch<'py>(
                 }
                 return Ok::<_, String>(output);
             }
+            let prepared = PreparedArguments::new(&arguments, &grid_shape)?;
             if let Some(result) =
-                crate::parallel::evaluate(&operation, &arguments, &shape, requested)
+                crate::parallel::evaluate(&operation, &prepared, &shape, requested)
             {
                 return result.map(|(columns, seconds, bytes)| {
                     concatenate_seconds = seconds;
@@ -407,7 +213,7 @@ pub fn batch<'py>(
                 });
             }
             let chunks = behave_fire::map_chunks(count, requested, |range| {
-                crate::parallel::chunk(&operation, &arguments, range, single)
+                crate::parallel::chunk(&operation, &prepared, range, single)
             })
             .map_err(crate::parallel::error)?;
             appended_bytes = chunks
