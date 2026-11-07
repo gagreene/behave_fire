@@ -2,7 +2,25 @@
 
 Python package versions come from `rust/crates/behave-py/Cargo.toml`. Cargo `1.0.0-beta.2` maps to Python `1.0.0b2` and Python tag `v1.0.0b2`. The standalone core version (`rust/crates/behave-fire/Cargo.toml`, currently `0.1.0`) is independent. Never bump the core solely to match Python.
 
-Build-only validation is safe on an unmerged branch. PR CI calls `.github/workflows/wheel-validation.yml` through a local reusable-workflow reference, so the branch's own scripts and workflow run before merge. A new manual workflow is not dispatchable until present on the default branch; use the authorized PR checks for first validation. Manual `release.yml` dispatch defaults to `build-only`. No package upload is authorized by implementing or testing these files.
+Build-only validation is safe on an unmerged branch. PR CI calls `.github/workflows/wheel-validation.yml` through a local reusable-workflow reference, so the branch's own scripts and workflow run before merge. The registered CI workflow also accepts manual dispatch on a selected ref; it builds and tests artifacts without publishing. Manual `release.yml` dispatch defaults to `build-only`. No package upload is authorized by implementing or testing these files.
+
+## Build wheels on GitHub
+
+Push the implementation branch and open its PR to run CI, or dispatch the registered CI workflow on a ref that contains `workflow_dispatch`:
+
+```sh
+gh workflow run CI --ref pre_release
+gh run list --workflow CI --branch pre_release --event workflow_dispatch --limit 5
+gh run watch RUN_ID --exit-status
+gh run download RUN_ID --name distributions --dir dist
+python tools/check_wheel_metadata.py dist
+```
+
+Replace `RUN_ID` with the run reported by GitHub. Use a feature branch instead of `pre_release` when validating changes before merge. CI also runs on pushes to `pre_release` and `master`; its workflow can be rerun through GitHub Actions for an existing commit. The manual command runs the full CI pipeline, including all seven native wheel targets, pure wheel, sdist, isolated installation tests and Rust/package checks. It has read-only repository permissions and no publication job.
+
+Use the `distributions` artifact from a successful run; individual `distributions-*` artifacts are intermediate build outputs. The combined artifact contains seven `cp311-abi3` native wheels, one universal `py3-none-any` wheel and one source archive. Test evidence is uploaded separately per platform/interpreter. All installation tests run outside the source checkout on CPython 3.11–3.14, with both the exact NumPy floor and a current allowed version. On every platform the complete artifact set selects Rust; a separate pure-only install selects Python silently.
+
+The GitHub UI's Run workflow button depends on the workflow being available on the default branch. These build commands use the existing registered CI workflow; they do not require changing the default branch, promoting unreleased code into `master`, creating a release tag or enabling either publisher. The first validation of a newly added workflow remains its PR CI run.
 
 ## Local dependency-only source tests
 
@@ -26,11 +44,10 @@ uv build --sdist --out-dir dist
 uv build --wheel --out-dir dist
 uv run --no-sync python tools/build_pure_wheel.py --out-dir dist
 uv run --no-sync python tools/check_sdist.py dist/behave_fire-1.0.0b2.tar.gz
-uv run --no-sync python tools/check_wheel_metadata.py dist
 uv run --no-sync python -m twine check dist/*
 ```
 
-The metadata parity command requires a universal pure wheel and at least one native wheel in `dist`; a pure-only directory cannot establish native/pure parity.
+These local commands build the current host's native wheel, the universal pure wheel and the source distribution. They do not build or certify the complete platform set. Run `tools/check_wheel_metadata.py` on the assembled CI artifact: it requires exactly one native wheel per tested platform family, one universal pure wheel and one matching source distribution. It rejects missing/duplicate families, incorrect interpreter/ABI/platform tags, mismatched project versions, metadata or license payloads. Equivalent manylinux alias tags count as one wheel.
 
 Maturin builds the native wheels using `rust/crates/behave-py/Cargo.toml`, PyO3 `abi3-py311`, and `src/behave_fire`. Source/git/editable/`--no-binary` project builds require Rust and a native linker. The pure builder uses a temporary setuptools project and never changes root metadata or invokes Rust. The pure wheel contains the same Python sources, project metadata, license expression, and notices, without a native extension or Rust sources.
 
@@ -49,10 +66,14 @@ Every row runs CPython 3.11, 3.12, 3.13, and 3.14. All rows remain **unverified 
 | macOS x86-64 | native abi3 | same | native plus pure checks |
 | macOS arm64 | native abi3 | same | native plus pure checks |
 | Windows x86-64 | native abi3 | same | native plus pure checks |
-| Alpine/musl x86-64 | pure `py3-none-any` | same | measured musl identity, native container Python |
-| Windows ARM64 | pure `py3-none-any` | 2.3.3 (all four Pythons) | `platform_machine == 'ARM64'`, `win_arm64` pip tags |
+| Alpine/musl x86-64 | native musllinux 1_2 abi3 | same | native plus pure checks, measured musl identity, container Python |
+| Windows ARM64 | native win_arm64 abi3 | 2.3.3 (all four Pythons) | native plus pure checks, `platform_machine == 'ARM64'`, `win_arm64` pip tags |
 
 Each row tests the exact applicable floor and a current resolver-selected binary release separately, logs interpreter/platform/package provenance and dependency versions, and uploads pip installation reports. Floor metadata uses mutually exclusive markers, including Python 3.14 on Windows ARM64. Alpine jobs pin Docker Hub manifest digests resolved during implementation and force `linux/amd64`; JavaScript actions run on the Ubuntu host. An unavailable runner or missing binary dependency leaves its row unverified. Failing rows block artifact aggregation and publishing. Never remove a row, tolerate its failure, or substitute a source dependency build. Omitting a requested target requires an explicit release-scope revision.
+
+Alpine/musl and Windows ARM64 additionally run the full default `pytest --require-rust -W error` suite on Python 3.12, matching the Python version used by the existing native source-suite jobs. `tools/test_native_wheel_suite.py` selects the compatible built wheel, installs it with binary-only test dependencies and the applicable NumPy floor in a temporary environment, and temporarily stages that wheel's exact native binary and bundled companion libraries into the matching source checkout. This preserves relative loader paths, including musl's bundled libgcc. The suite receives its complete fixtures and tools without rebuilding a different extension. All staged files are removed afterward; an existing local build or library directory is never overwritten. The separate isolated install tests remain required on all four Python versions.
+
+The corresponding evidence artifact includes a `full-suite` directory with the full pytest log, JUnit XML, wheel/binary hashes, interpreter/NumPy identity, cast fingerprints and direction-oracle data. `environment.json` records both `svml_candidate_available` and `calibrated_atan2_profile` (zero for scalar libm, one for guarded SVML). SVML is also compiled into Linux x86-64 musl wheels, but entry requires all runtime CPU/OS feature checks. Compilation alone does not establish execution: the Alpine Python 3.12 evidence from [run 42164115015](https://github.com/gagreene/behave_fire/actions/runs/42164115015) reports availability true and selected profile one with NumPy 2.1.3 and 2.5.4, confirming actual SVML use. Unsupported CPUs cannot execute that assembly; calibration selects the matching scalar path or rejects an unknown kernel.
 
 Runner labels and setup-python ARM64 support were checked against [GitHub's runner reference](https://docs.github.com/en/actions/reference/runners/github-hosted-runners) and [actions/setup-python](https://github.com/actions/setup-python). Recheck platform availability when certifying a release.
 

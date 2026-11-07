@@ -29,24 +29,27 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - {os: ubuntu-24.04, target: x86_64, artifact: linux-x86_64}
-          - {os: ubuntu-24.04-arm, target: aarch64, artifact: linux-aarch64}
-          - {os: macos-15-intel, target: x86_64, artifact: macos-x86_64}
-          - {os: macos-15, target: aarch64, artifact: macos-arm64}
-          - {os: windows-2025, target: x86_64, artifact: windows-x86_64}
+          - {os: ubuntu-24.04, target: x86_64, artifact: linux-x86_64, architecture: x64, compatibility: "2_17"}
+          - {os: ubuntu-24.04-arm, target: aarch64, artifact: linux-aarch64, architecture: arm64, compatibility: "2_17"}
+          - {os: ubuntu-24.04, target: x86_64-unknown-linux-musl, artifact: linux-musl-x86_64, architecture: x64, compatibility: musllinux_1_2}
+          - {os: macos-15-intel, target: x86_64, artifact: macos-x86_64, architecture: x64, compatibility: "off"}
+          - {os: macos-15, target: aarch64, artifact: macos-arm64, architecture: arm64, compatibility: "off"}
+          - {os: windows-2025, target: x86_64, artifact: windows-x86_64, architecture: x64, compatibility: "off"}
+          - {os: windows-11-arm, target: aarch64-pc-windows-msvc, artifact: windows-arm64, architecture: arm64, compatibility: "off"}
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v6
         with:
           python-version: "3.11"
+          architecture: ${{ matrix.architecture }}
       - uses: PyO3/maturin-action@v1
         with:
           maturin-version: "1.10.0"
           command: build
           target: ${{ matrix.target }}
           args: --release --locked --out dist --interpreter ${{ runner.os == 'Linux' && 'python3.11' || 'python' }}
-          manylinux: "2_17"
+          manylinux: ${{ matrix.compatibility }}
       - uses: actions/upload-artifact@v4
         with:
           name: distributions-${{ matrix.artifact }}
@@ -128,7 +131,7 @@ jobs:
           name: evidence-${{ matrix.platform.artifact }}-${{ matrix.python }}
           path: ${{ runner.temp }}/evidence
 
-  test-alpine-fallback:
+  test-alpine-platform:
     needs: [build-native-wheels, build-pure-wheel]
     runs-on: ubuntu-24.04
     strategy:
@@ -141,8 +144,6 @@ jobs:
           - {python: "3.14", image: "python:3.14-alpine@sha256:eb2c62658b8d51bff0acc408504b76521d02030de56a8a3c1e830083e89b89d2"}
     steps:
       - uses: actions/checkout@v4
-        with:
-          sparse-checkout: tools
       - uses: actions/download-artifact@v4
         with:
           pattern: distributions-*
@@ -152,14 +153,25 @@ jobs:
         shell: bash
         run: |
           cp tools/{test_wheel_install,smoke_test_wheel}.py "$RUNNER_TEMP/alpine/"
-          docker run --rm --platform linux/amd64 -v "$RUNNER_TEMP/alpine:/artifacts" -w /tmp '${{ matrix.image }}' python /artifacts/test_wheel_install.py --wheels /artifacts/wheels --expect-choice python --identity musl-x86_64 --report-dir /artifacts/evidence
+          docker run --rm --platform linux/amd64 -v "$RUNNER_TEMP/alpine:/artifacts" -w /tmp '${{ matrix.image }}' python /artifacts/test_wheel_install.py --wheels /artifacts/wheels --expect-choice rust --identity musl-x86_64 --report-dir /artifacts/evidence
+      - name: Run the full native suite against the musllinux wheel
+        if: matrix.python == '3.12'
+        shell: bash
+        run: |
+          docker run --rm --platform linux/amd64 -v "$GITHUB_WORKSPACE:/source" -v "$RUNNER_TEMP/alpine:/artifacts" -w /source '${{ matrix.image }}' sh -ec '
+            apk add --no-cache git
+            export GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=safe.directory GIT_CONFIG_VALUE_0=/source
+            python tools/test_native_wheel_suite.py --wheels /artifacts/wheels --report-dir /artifacts/full-suite
+          '
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: evidence-alpine-${{ matrix.python }}
-          path: ${{ runner.temp }}/alpine/evidence
+          path: |
+            ${{ runner.temp }}/alpine/evidence
+            ${{ runner.temp }}/alpine/full-suite
 
-  test-windows-arm64-fallback:
+  test-windows-arm64-platform:
     needs: [build-native-wheels, build-pure-wheel]
     runs-on: windows-11-arm
     strategy:
@@ -168,8 +180,6 @@ jobs:
         python: ["3.11", "3.12", "3.13", "3.14"]
     steps:
       - uses: actions/checkout@v4
-        with:
-          sparse-checkout: tools
       - uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python }}
@@ -184,15 +194,21 @@ jobs:
         run: |
           Copy-Item tools/test_wheel_install.py,tools/smoke_test_wheel.py $env:RUNNER_TEMP
           Set-Location $env:RUNNER_TEMP
-          python test_wheel_install.py --wheels artifacts --expect-choice python --identity windows-arm64 --report-dir evidence
+          python test_wheel_install.py --wheels artifacts --expect-choice rust --identity windows-arm64 --report-dir evidence
+      - name: Run the full native suite against the Windows ARM64 wheel
+        if: matrix.python == '3.12'
+        shell: pwsh
+        run: python tools/test_native_wheel_suite.py --wheels "$env:RUNNER_TEMP/artifacts" --report-dir "$env:RUNNER_TEMP/full-suite"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: evidence-windows-arm64-${{ matrix.python }}
-          path: ${{ runner.temp }}/evidence
+          path: |
+            ${{ runner.temp }}/evidence
+            ${{ runner.temp }}/full-suite
 
   check-distributions:
-    needs: [build-sdist, test-native-platforms, test-alpine-fallback, test-windows-arm64-fallback]
+    needs: [build-sdist, test-native-platforms, test-alpine-platform, test-windows-arm64-platform]
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4

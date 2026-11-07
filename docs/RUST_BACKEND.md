@@ -157,7 +157,7 @@ strided float32 atan2 behavior.
 
 ## Wheel process
 
-Adapt cffdrs's Maturin/PyO3 process and five target platforms: Linux x86-64 and aarch64 using manylinux 2_17, macOS x86-64 and arm64, and Windows x86-64. Validate runner availability and dependency floors during implementation. No PyPy, free-threaded CPython, GPU, or WebAssembly support is proposed.
+Use cffdrs's Maturin/PyO3 process for all seven tested native platforms: Linux x86-64 and aarch64 using manylinux 2_17, Alpine x86-64 using musllinux 1_2, macOS x86-64 and arm64, and Windows x86-64 and ARM64. Each platform must pass real installation checks before certification. No PyPy, free-threaded CPython, GPU, or WebAssembly support is proposed.
 
 The selected Python floor is >=3.11, with `abi3-py311` / `cp311-abi3`, matching cffdrs. Python 3.10 support is dropped. The target certification matrix is CPython 3.11, 3.12, 3.13, and 3.14, explicitly tested by Linux Python-only CI from Task 2 onward; support is certified only after relevant artifact/dependency checks pass. Retain NumPy >=2.1.3 generally and use >=2.3.3 for Python >=3.14 or Windows ARM64, validating platform markers on the actual runner. The universal fallback wheel does not extend certification to PyPy, free-threaded builds, untested platforms, or future interpreters.
 
@@ -171,7 +171,7 @@ Use dynamic Python metadata from the binding crate, following cffdrs. Preserve t
 
 Publish the pure wheel alongside platform wheels. Installing that behave-fire artifact itself never requires compiling behave-fire or installing Rust; NumPy's binary availability determines whether dependency installation also avoids compilation. On a covered platform pip must prefer the compatible native wheel; where only the pure wheel is compatible, auto selects Python. Compiler-free installation of the whole environment is promised only where `pip install --only-binary=:all:` succeeds for the project and required dependencies. Optional extras have separate matrix claims. Editable, git, sdist, and `--no-binary` project builds still require Rust. State both project and dependency requirements clearly in contribution/release documentation.
 
-The pure wheel has two explicit additional targets beyond the five native-wheel platforms:
+Alpine and Windows ARM64 now have native wheels alongside the original five targets. They also retain independent pure-wheel installation checks:
 
 | Fallback target | Execution environment | Python matrix | NumPy floor to verify |
 | --- | --- | --- | --- |
@@ -180,7 +180,7 @@ The pure wheel has two explicit additional targets beyond the five native-wheel 
 
 The PyPI metadata audit found matching musllinux x86-64 wheels for NumPy 2.1.3 on 3.11–3.13, and matching musllinux x86-64 plus win_arm64 wheels for NumPy 2.3.3 on every 3.11–3.14 row. These are [published wheel files](https://pypi.org/project/numpy/2.3.3/#files), not completed runtime certification. [GitHub documents the Windows ARM runner](https://docs.github.com/en/actions/how-tos/write-workflows/choose-where-workflows-run); verify availability and native interpreter architecture when implementing CI.
 
-Run artifact checkout/download actions on the Ubuntu host, then use container Python for Alpine smoke checks with only staged artifacts/scripts mounted outside the checkout. Pin tested container digests. On Windows ARM64, verify ARM64 interpreter/pip tags rather than accidentally exercising x64 emulation. On each target, test exact conditional floors and current allowed binary dependencies, and give pip the complete project-wheel artifact set to prove it selects `py3-none-any`. Require Python-only availability, silent auto selection, correct forced-Rust failure, and matching calculations. Preserve pure-wheel checks on native-covered platforms as additional regression coverage.
+Run artifact checkout/download actions on the Ubuntu host, then use container Python for Alpine smoke checks with only staged artifacts/scripts mounted outside the checkout. Pin tested container digests. On Windows ARM64, verify ARM64 interpreter/pip tags rather than accidentally exercising x64 emulation. On every target, test exact conditional floors and current allowed binary dependencies. With the complete artifact set, require native-wheel selection, silent automatic Rust selection and matching calculations. In separate environments offering only `py3-none-any`, require Python-only availability, silent automatic Python selection and correct forced-Rust failure. Both routes are required on all seven platforms.
 
 Keep an explicit result for every requested matrix row. Missing dependency wheels or runners produce a named unverified/unsupported outcome, never silent removal, source-build substitution, or `continue-on-error`. They block certification for that row and require explicit scope revision before a release omits a requested target.
 
