@@ -87,10 +87,11 @@ pub(super) fn check_value(actual: f64, expected: f64) -> bool {
 }
 
 fn check_columns(
-    actual: Vec<(&'static str, Vec<f64>)>,
+    actual: Vec<(&'static str, behave_fire::output::ColumnValues)>,
     reference: &[Vec<(&'static str, f64)>],
     cells: usize,
 ) -> Result<(), String> {
+    let actual=comparison_columns(actual);
     if reference.is_empty() || actual.len() != reference[0].len() {
         return Err("incomplete raster output inventory".into());
     }
@@ -197,7 +198,7 @@ fn surface(args: &Arguments, cases: &[Case<'_>], fuels: &PreparedFuels) -> Resul
                 .run(&plan, fuels, &overrides, 1)
                 .map_err(|e| e.to_string())
         },
-        |output| check_columns(output.into_named_vectors(), &reference, args.cells),
+        |output| check_columns(output.into_named_columns(), &reference, args.cells),
     )
 }
 
@@ -258,7 +259,7 @@ fn crown(args: &Arguments, cases: &[Case<'_>], fuels: &PreparedFuels) -> Result<
                 .run(&plan, fuels, &overrides, 1)
                 .map_err(|e| e.to_string())
         },
-        |output| check_columns(output.into_named_vectors(), &reference, args.cells),
+        |output| check_columns(output.into_named_columns(), &reference, args.cells),
     )
 }
 
@@ -438,4 +439,14 @@ pub(super) fn dump_typed(
         file.flush().map_err(|e| e.to_string())?;
     }
     Ok(())
+}
+
+// Numerical fixture comparison only; production export retains typed columns.
+fn comparison_columns(columns:Vec<(&'static str,behave_fire::output::ColumnValues)>)->Vec<(&'static str,Vec<f64>)> {
+    use behave_fire::output::ColumnValues;
+    columns.into_iter().map(|(name,values)|(name,match values {
+        ColumnValues::Float64(values)=>values,
+        ColumnValues::Int32(values)=>values.into_iter().map(f64::from).collect(),
+        ColumnValues::Bool(values)=>values.into_iter().map(|value|f64::from(u8::from(value))).collect(),
+    })).collect()
 }

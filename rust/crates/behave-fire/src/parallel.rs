@@ -10,6 +10,8 @@ use std::panic::{catch_unwind, AssertUnwindSafe};
 pub enum ParallelError<E> {
     /// A native calculation returned an error.
     Work(E),
+    /// Output buffer shape or other structural input was invalid.
+    InvalidInput(crate::BehaveError),
     /// A scoped native worker panicked.
     WorkerPanic,
     /// The operating system refused a worker.
@@ -22,6 +24,7 @@ impl<E: fmt::Display> fmt::Display for ParallelError<E> {
     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::Work(error) => error.fmt(formatter),
+            Self::InvalidInput(error) => error.fmt(formatter),
             Self::WorkerPanic => formatter.write_str("native worker panicked"),
             Self::WorkerSpawn(message) => {
                 write!(formatter, "cannot start native worker: {message}")
@@ -37,6 +40,7 @@ impl<E: std::error::Error + 'static> std::error::Error for ParallelError<E> {
     fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
         match self {
             Self::Work(error) => Some(error),
+            Self::InvalidInput(error) => Some(error),
             _ => None,
         }
     }

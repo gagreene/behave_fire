@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Rust core output storage
+
+- Model batches write selected fields directly into final output buffers using safe disjoint worker slices. Integer classification columns retain int32 storage through export.
+- The unreleased Rust `into_named_vectors` adapter is replaced by typed `into_named_columns`; Rust callers must match the returned `ColumnValues` storage. Python model dispatch remains unchanged in this foundation layer.
 
 ### Breaking changes
 

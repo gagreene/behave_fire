@@ -44,7 +44,7 @@ fn crown_validity_empty_shapes_and_bad_columns_keep_their_contracts() {
         .unwrap();
     assert_eq!(output.validity.as_deref(), Some(validity.as_slice()));
     assert_eq!(output.fire_type[0], 0);
-    for (_, column) in output.into_named_vectors() {
+    for (_, column) in comparison_columns(output.into_named_columns()) {
         assert_eq!(column[0].to_bits(), 0.0_f64.to_bits());
     }
     let empty = CrownRaster::new(GridShape::new(vec![0, 3]).unwrap(), CrownColumns::default())
@@ -82,10 +82,9 @@ fn raster_parallel_workers_preserve_every_column_and_validity() {
     let serial = raster.run(&plan, &fuels, &tweaks, 1).unwrap();
     let parallel = raster.run(&plan, &fuels, &tweaks, 4).unwrap();
     assert_eq!(serial.validity, parallel.validity);
-    for ((left_name, left), (right_name, right)) in serial
-        .into_named_vectors()
+    for ((left_name, left), (right_name, right)) in comparison_columns(serial.into_named_columns())
         .into_iter()
-        .zip(parallel.into_named_vectors())
+        .zip(comparison_columns(parallel.into_named_columns()))
     {
         assert_eq!(left_name, right_name);
         assert_eq!(
@@ -320,4 +319,27 @@ fn irregular_tiles_retain_order_and_reject_invalid_ranges() {
             Err(ParallelError::Work(BehaveError::InvalidRange { .. }))
         ));
     }
+}
+
+// Numerical fixture comparison only; production export retains typed columns.
+fn comparison_columns(
+    columns: Vec<(&'static str, behave_fire::output::ColumnValues)>,
+) -> Vec<(&'static str, Vec<f64>)> {
+    use behave_fire::output::ColumnValues;
+    columns
+        .into_iter()
+        .map(|(name, values)| {
+            (
+                name,
+                match values {
+                    ColumnValues::Float64(values) => values,
+                    ColumnValues::Int32(values) => values.into_iter().map(f64::from).collect(),
+                    ColumnValues::Bool(values) => values
+                        .into_iter()
+                        .map(|value| f64::from(u8::from(value)))
+                        .collect(),
+                },
+            )
+        })
+        .collect()
 }
