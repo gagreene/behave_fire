@@ -1,5 +1,9 @@
 # Rust backend execution measurements
 
+## Surface/Crown core headroom: confirmed GO, 2026-11-07
+
+The Surface-enabled wind cache passes all 32 confidence bounds in both a fresh three-pair screen and the required seven-new-pair confirmation. At 100k, confirmed first/warm lower bounds range from 3.526x to 4.971x against the unchanged 2.5x core requirement. This clears the core prerequisite for the planned API4 model migration; public backend speed remains unverified. See the [complete checkpoint](performance/2026-11-07-surface-cache-core-checkpoint.md), [screen](performance/2026-11-07-surface-cache-core-screen.json), and [confirmation](performance/2026-11-07-surface-cache-core-confirmation.json). Earlier failed checkpoints below are retained as history.
+
 ## Wind-cache confirmation checkpoint: 2026-11-07
 
 The cache candidate passed all 32 bounds in a fresh core screen, then passed 31 of 32 in the required seven-new-pair confirmation. Every Crown/A/B bound passes. Uniform Surface at 100k misses its first-call lower confidence bound (2.241x versus 2.5x required; median 3.814x). Work stops before API4. The [checkpoint and concrete Surface follow-up](performance/2026-11-07-wind-cache-core-checkpoint.md), [fresh screen](performance/2026-11-07-wind-cache-core-screen.json), and [confirmation](performance/2026-11-07-wind-cache-core-confirmation.json) preserve the complete evidence. No public backend speed certification is implied.
