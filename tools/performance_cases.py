@@ -50,12 +50,12 @@ def build_inputs(cells, dataset, seed=20261105):
     """Build normalized, shape-matching raster inputs without constructing a model.
 
     :param cells: Nonnegative logical cell count.
-    :param dataset: Historical uniform model 10 or heterogeneous fuel/weather case.
+    :param dataset: Uniform, heterogeneous, or continuously varying diagnostic case.
     :param seed: Stable phase offset for spatial variation.
     :return: Surface-run arguments in component base units.
     """
     import numpy as np
-    if dataset not in ("uniform", "heterogeneous") or type(cells) is not int or cells < 0:
+    if dataset not in ("uniform", "heterogeneous", "continuous") or type(cells) is not int or cells < 0:
         raise ValueError("Expected a nonnegative cell count and a known dataset")
     inputs = dict(fuel_model_grid=np.full(cells, 10, dtype=np.int32),
                   m1h=np.full(cells, .06), m10h=np.full(cells, .07),
@@ -63,9 +63,12 @@ def build_inputs(cells, dataset, seed=20261105):
                   mlw=np.full(cells, .9), wind_speed=np.full(cells, 8.0),
                   wind_speed_units=0, wind_direction=np.full(cells, 35.0),
                   wind_orientation_mode="RelativeToUpslope", slope=np.full(cells, 12.0))
-    if dataset == "heterogeneous":
+    if dataset in ("heterogeneous", "continuous"):
         index = np.arange(cells)
         phase = ((index + seed) % 17) / 16
+        if dataset == "continuous":
+            # Irrational rotation avoids the repeating 17-cell acceptance cycle.
+            phase = np.mod((index + seed) * ((5.0 ** 0.5 - 1.0) / 2.0), 1.0)
         inputs["fuel_model_grid"] = np.array([1, 4, 10, 101, 124, 145, 201, 0], dtype=np.int32)[index % 8]
         for field, low, width in (("m1h", .03, .07), ("m10h", .04, .08), ("m100h", .05, .09),
                                   ("mlh", .35, .9), ("mlw", .6, .8), ("wind_speed", 2., 160.),

@@ -94,6 +94,7 @@ fn check_columns(
     if reference.is_empty() || actual.len() != reference[0].len() {
         return Err("incomplete raster output inventory".into());
     }
+    dump_plain(&actual)?;
     let mut seen = vec![false; reference[0].len()];
     for (name, column) in actual {
         if column.len() != cells {
@@ -330,6 +331,12 @@ fn typed(args: &Arguments, cases: &[Case<'_>], fuels: &PreparedFuels) -> Result<
         Ok(output)
     };
     measure(args, run, |output| {
+        dump_typed(
+            &output.values,
+            &output.masks,
+            &output.classes,
+            &reference[0],
+        )?;
         for index in 0..args.cells {
             let expected = &reference[index % reference.len()];
             if output.classes[index] != expected.fire_type {
@@ -369,4 +376,66 @@ mod tests {
             super::check_columns(vec![("a", vec![1.0]), ("a", vec![1.0])], &reference, 1).is_err()
         );
     }
+}
+
+/// Export every stored result outside timing for comparison to unchanged science.
+pub(super) fn dump_plain(columns: &[(&str, Vec<f64>)]) -> Result<(), String> {
+    use std::io::Write;
+    if let Some(path) = std::env::var_os("BEHAVE_PROBE_OUTPUT") {
+        let path = std::path::PathBuf::from(path);
+        std::fs::create_dir_all(&path).map_err(|e| e.to_string())?;
+        for (name, values) in columns {
+            let mut file = std::io::BufWriter::new(
+                std::fs::File::create(path.join(format!("{name}.f64")))
+                    .map_err(|e| e.to_string())?,
+            );
+            for value in values {
+                file.write_all(&value.to_le_bytes())
+                    .map_err(|e| e.to_string())?;
+            }
+            file.flush().map_err(|e| e.to_string())?;
+        }
+    }
+    Ok(())
+}
+
+/// Export typed raw data, masks, class values, and complete constant metadata.
+pub(super) fn dump_typed(
+    values: &[Vec<f64>],
+    masks: &[Vec<bool>],
+    classes: &[i32],
+    reference: &MaskedCrownResult,
+) -> Result<(), String> {
+    use std::io::Write;
+    if let Some(path) = std::env::var_os("BEHAVE_PROBE_OUTPUT") {
+        let path = std::path::PathBuf::from(path);
+        let columns: Vec<_> = reference
+            .named_values()
+            .into_iter()
+            .enumerate()
+            .map(|(i, (name, _))| (name, values[i].clone()))
+            .collect();
+        dump_plain(&columns)?;
+        for (i, (name, value)) in reference.named_values().into_iter().enumerate() {
+            std::fs::write(
+                path.join(format!("{name}.mask")),
+                masks[i].iter().map(|m| u8::from(*m)).collect::<Vec<_>>(),
+            )
+            .map_err(|e| e.to_string())?;
+            std::fs::write(
+                path.join(format!("{name}.schema")),
+                format!("{:?}", schema(value)),
+            )
+            .map_err(|e| e.to_string())?;
+        }
+        let mut file = std::io::BufWriter::new(
+            std::fs::File::create(path.join("fire_type.i32")).map_err(|e| e.to_string())?,
+        );
+        for value in classes {
+            file.write_all(&value.to_le_bytes())
+                .map_err(|e| e.to_string())?;
+        }
+        file.flush().map_err(|e| e.to_string())?;
+    }
+    Ok(())
 }

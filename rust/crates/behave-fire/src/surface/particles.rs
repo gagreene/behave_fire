@@ -94,3 +94,65 @@ pub fn size_sorted_wfl(savr_arr: &[f64; 5], frac_arr: &[f64; 5], wn_arr: &[f64; 
     }
     wfl
 }
+
+/// Moisture-independent SAVR terms, with exact size-bin boundaries.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub(crate) struct SavrTerms {
+    pub exp_dead: [f64; 5],
+    pub exp_live500: [f64; 5],
+    pub exp_live138: [f64; 5],
+    pub bins_dead: [usize; 5],
+    pub bins_live: [usize; 5],
+}
+impl SavrTerms {
+    pub(crate) fn new(dead: &[f64; 5], live: &[f64; 5]) -> Self {
+        fn exponential(savr: f64, numerator: f64) -> f64 {
+            if savr > 1e-7 {
+                (numerator / savr).exp()
+            } else {
+                0.0
+            }
+        }
+        fn bin(savr: f64) -> usize {
+            if savr >= 1200.0 {
+                0
+            } else if savr >= 192.0 {
+                1
+            } else if savr >= 96.0 {
+                2
+            } else if savr >= 48.0 {
+                3
+            } else if savr >= 16.0 {
+                4
+            } else {
+                5
+            }
+        }
+        Self {
+            exp_dead: dead.map(|v| exponential(v, -138.0)),
+            exp_live500: live.map(|v| exponential(v, -500.0)),
+            exp_live138: live.map(|v| exponential(v, -138.0)),
+            bins_dead: dead.map(bin),
+            bins_live: live.map(bin),
+        }
+    }
+}
+
+/// Apply precomputed size bins without changing reduction or invalid-bin arithmetic.
+pub(crate) fn size_sorted_prepared(bins: &[usize; 5], fractions: &[f64; 5], net: &[f64; 5]) -> f64 {
+    let mut summed = [0.0; 5];
+    for i in 0..5 {
+        if bins[i] < 5 {
+            summed[bins[i]] += fractions[i];
+        }
+    }
+    let mut result = 0.0;
+    for i in 0..5 {
+        let mut assigned = 0.0;
+        if bins[i] < 5 {
+            assigned += summed[bins[i]];
+        }
+        result += assigned * net[i];
+    }
+    result
+}
