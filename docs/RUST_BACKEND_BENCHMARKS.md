@@ -1,5 +1,11 @@
 # Rust backend execution measurements
 
+## API4 public serial screen: 55/56 bounds, 2026-11-07
+
+Public Surface/Crown calls now use the float64 raster engine. The complete three-pair screen passed 55 of 56 first/warmed bounds across two datasets, seven layouts, and 10k/100k cells. At 100k, every bound passes 2x; median speedups range from 2.558x to 3.631x. The only miss is heterogeneous Surface at 10k, warmed: median-ratio estimate 2.234x, lower 95% bound 0.954x against 1.25x required. The slow process is retained, and its cause is not established.
+
+The approved single core/encoder diagnostic profile is complete. No confirmation or further optimization was attempted. Task 3 remains incomplete pending an owner decision; staged grids and subsequent migration remain unstarted. See the [complete checkpoint and proposed bounded follow-up](performance/2026-11-07-api4-public-serial-checkpoint.md), [immutable screen](performance/2026-11-07-api4-public-serial-screen.json), and [diagnostic-only profile](performance/2026-11-07-api4-public-serial-profile.json). Earlier entries below are historical evidence.
+
 ## Surface/Crown core headroom: confirmed GO, 2026-11-07
 
 The Surface-enabled wind cache passes all 32 confidence bounds in both a fresh three-pair screen and the required seven-new-pair confirmation. At 100k, confirmed first/warm lower bounds range from 3.526x to 4.971x against the unchanged 2.5x core requirement. This clears the core prerequisite for the planned API4 model migration; public backend speed remains unverified. See the [complete checkpoint](performance/2026-11-07-surface-cache-core-checkpoint.md), [screen](performance/2026-11-07-surface-cache-core-screen.json), and [confirmation](performance/2026-11-07-surface-cache-core-confirmation.json). Earlier failed checkpoints below are retained as history.

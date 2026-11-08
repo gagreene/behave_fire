@@ -14,7 +14,7 @@ arithmetic. General object input does not trigger automatic fallback.
 
 A NumPy-based Python port of the US Forest Service [Behave<sup>7</sup>](https://www.firelab.org/project/behave) fire behavior modeling system, supporting scalar and array calculations. The package has two calculation backends: the original Python/NumPy implementation (the behavioral reference) and a native Rust implementation selected automatically when its compiled extension is installed. The same Rust core is also a standalone crate, `behave-fire`, for Rust applications.
 
-Upstream alignment is ongoing; full C++ parity has not been established. Fuel data and heat constants follow `firelab/behave` at `f3b2943`, with an intentional correction of metric-model moisture percentages to fractions. Containment is a simplified growth model, and lightning ignition remains available only as a deprecated compatibility API. The Rust backend is not yet faster than Python for typical workloads; see [Performance](#performance).
+Upstream alignment is ongoing; full C++ parity has not been established. Fuel data and heat constants follow `firelab/behave` at `f3b2943`, with an intentional correction of metric-model moisture percentages to fractions. Containment is a simplified growth model, and lightning ignition remains available only as a deprecated compatibility API. Rust performance is being validated against the public Python API; see [Performance](#performance).
 
 ---
 
@@ -300,13 +300,11 @@ The raster engine and tweak columns are Rust interfaces. Python users keep their
 
 ## Performance
 
-The Rust backend is correct against the Python reference but is **not yet faster for typical workloads**. Measurements on one Windows x86-64 host (CPython 3.12.8, NumPy 2.1.3) in [docs/RUST_BACKEND_BENCHMARKS.md](docs/RUST_BACKEND_BENCHMARKS.md) show:
+The current API4 [public serial screen](docs/performance/2026-11-07-api4-public-serial-checkpoint.md) measured median Rust speedups of **2.56–3.63x at 100,000 cells** across Surface, Crown, and five dtype/mask layouts. Every 100k first/warmed confidence bound passed the unchanged 2x requirement. Measurements used original-input Python timing on one Windows x86-64 host with CPython 3.12.8 and NumPy 2.1.3.
 
-- Python is faster for single-cell and 10,000-cell public calls, and for serial Rust at one million cells. NumPy's compiled array operations outperform a per-cell Rust loop plus Python-boundary conversion.
-- Parallel Rust (`threads=4` or `threads=0`) is faster than Python only on large (about one million cell) surface and crown rasters in those runs.
-- Mixed-dtype or masked Crown inputs (the typed route) are substantially slower on Rust, mainly from output encoding at the Python boundary.
+The overall checkpoint remains **55/56 bounds passed**. Heterogeneous Surface at 10k cells had a 2.23x median-ratio estimate, but its warmed lower 95% bound was 0.954x against a 1.25x target. The slow process remains in the evidence. Work pauses at the approved checkpoint; the required seven-new-pair confirmation has not run.
 
-A restructuring is underway: typed scalar stages and raster columns are implemented in the Rust core, and a feasibility screen of the native core found the proposed large-raster speed targets not yet met (see [docs/RUST_ENGINE.md](docs/RUST_ENGINE.md)). Select `backend="python"` when speed on small and medium inputs matters. No speedup is promised, and measurements from one host do not apply to other platforms or workloads.
+Four-thread, million-cell, memory, and final platform certification remain pending. These screen results do not guarantee speed on other hosts or workloads. Earlier measurements of the previous dtype/mask implementation remain in [the benchmark history](docs/RUST_BACKEND_BENCHMARKS.md); they do not describe the current API4 model route. Select Python when original dtype/mask behavior is required.
 
 ---
 
