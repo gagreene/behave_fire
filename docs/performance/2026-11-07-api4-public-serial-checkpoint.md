@@ -80,6 +80,12 @@ The proposed next authorization is one bounded follow-up on model-call ownership
 
 ## Evidence
 
+Subsequent CI integration fixes guard Rust-only test imports on pure-Python
+hosts and move the model allocation observer into a separate adapter module.
+The standalone counter remains dependency-free. These changes do not alter
+scientific equations or normalization; they have not been performance timed.
+The screen and profile above remain frozen at the recorded `df8fb40` candidate.
+
 - [Complete immutable screen](2026-11-07-api4-public-serial-screen.json)
 - [Single diagnostic profile](2026-11-07-api4-public-serial-profile.json)
 - Per-process stdout/stderr, installation reports, test logs, and the ledger remain in the ignored local execution workspace.

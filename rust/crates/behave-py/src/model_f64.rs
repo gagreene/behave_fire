@@ -510,7 +510,7 @@ pub fn model_batch<'py>(
             } else {
                 #[cfg(feature = "allocation-probe")]
                 {
-                    run_model_observed(&run, &request, threads, &crate::allocation_probe::Observer)
+                    run_model_observed(&run, &request, threads, &crate::model_observer::Observer)
                 }
                 #[cfg(not(feature = "allocation-probe"))]
                 {

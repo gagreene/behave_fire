@@ -2,7 +2,7 @@
 import numpy as np
 import pytest
 
-from behave_fire import _rust as native
+native = pytest.importorskip('behave_fire._rust', exc_type=ImportError)
 from behave_fire.components.fuel_models import FuelModels
 from behave_fire.components.fuel_models_array import build_fuel_lookup_arrays
 

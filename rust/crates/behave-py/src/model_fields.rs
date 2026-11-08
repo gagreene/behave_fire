@@ -1,12 +1,9 @@
 //! Dependency-restricted primitive groups; unbound inputs are errors, never filler values.
-#[cfg(feature = "allocation-probe")]
-use crate::allocation_probe::Observer;
+use crate::model_observer::Observer;
 use behave_fire::batch::{CrownBatch, SurfaceBatch};
 use behave_fire::engine::{
     CrownPlan, Field, ModelBatch, OutputRequest, PreparedFuels, SurfaceOptions,
 };
-#[cfg(not(feature = "allocation-probe"))]
-use behave_fire::output::NoopObserver as Observer;
 use behave_fire::output::{RunObserver, RunPhase};
 use behave_fire::{GridShape, PerCell};
 use pyo3::exceptions::PyValueError;

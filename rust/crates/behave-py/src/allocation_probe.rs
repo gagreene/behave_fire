@@ -7,19 +7,6 @@ const OUTSIDE: usize = 0;
 pub const KERNEL: usize = 1;
 pub const ENCODER: usize = 2;
 
-/// Observe the same kernel/write scopes in configured model bindings and tests.
-#[derive(Default)]
-pub struct Observer;
-impl behave_fire::output::RunObserver for Observer {
-    fn observe<T>(&self, phase: behave_fire::output::RunPhase, work: impl FnOnce() -> T) -> T {
-        let scope = match phase {
-            behave_fire::output::RunPhase::Kernel => KERNEL,
-            behave_fire::output::RunPhase::Encoder => ENCODER,
-        };
-        let _guard = Scope::enter(scope);
-        work()
-    }
-}
 static GENERATION: AtomicUsize = AtomicUsize::new(0);
 static WORKERS: [AtomicUsize; 3] = [
     AtomicUsize::new(0),

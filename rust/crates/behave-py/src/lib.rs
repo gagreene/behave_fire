@@ -13,6 +13,7 @@ mod math_profiles;
 mod model_f64;
 mod model_fields;
 mod model_groups;
+mod model_observer;
 mod operation;
 mod prepared;
 mod state;

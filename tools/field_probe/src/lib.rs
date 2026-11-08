@@ -5,6 +5,9 @@ mod allocation_probe;
 #[allow(dead_code)]
 #[path = "../../../rust/crates/behave-py/src/prepared/fields.rs"]
 mod fields;
+#[allow(dead_code)]
+#[path = "../../../rust/crates/behave-py/src/model_observer.rs"]
+mod model_observer;
 
 #[allow(dead_code)]
 #[path = "../../../rust/crates/behave-py/src/prepared/keys.rs"]
@@ -425,7 +428,7 @@ mod restricted_group_tests {
 
 #[cfg(all(test, feature = "allocation-probe"))]
 mod configured_scope_tests {
-    use super::allocation_probe::Observer as Probe;
+    use super::model_observer::Observer as Probe;
     use behave_fire::engine::{
         run_model_observed, CrownPlan, ModelBatch, ModelRun, OutputRequest, PreparedFuels,
     };
