@@ -1,5 +1,11 @@
 # Rust backend execution measurements
 
+## API4 public serial checkpoint: confirmed GO, 2026-11-08
+
+The single approved plain-normalization candidate passed all 56 confidence bounds in a fresh three-pair screen and the required seven-NEW-pair confirmation, with frozen source/binary/harness/environment. At 100k, confirmed median speedups range from 2.930x to 4.085x and lower bounds from 2.455x to 3.810x, all above 2x required. Heterogeneous Surface at 10k, previously the only miss, now has a warmed median-ratio estimate of 2.646x and lower bound of 2.229x against 1.25x required.
+
+This clears the public serial prerequisite for staged-grid work. It does not certify four-thread, million-cell, memory, or final release-platform targets. See the [confirmed checkpoint](performance/2026-11-08-plain-normalization-public-checkpoint.md), [fresh screen](performance/2026-11-08-plain-normalization-public-screen.json), and [independent confirmation](performance/2026-11-08-plain-normalization-public-confirmation.json). The [bounded diagnostic](performance/2026-11-08-plain-normalization-diagnostic.md) selected one general boundary candidate; it did not establish the cause of the old slow process. All earlier failures below remain intact.
+
 ## API4 public serial screen: 55/56 bounds, 2026-11-07
 
 Public Surface/Crown calls now use the float64 raster engine. The complete three-pair screen passed 55 of 56 first/warmed bounds across two datasets, seven layouts, and 10k/100k cells. At 100k, every bound passes 2x; median speedups range from 2.558x to 3.631x. The only miss is heterogeneous Surface at 10k, warmed: median-ratio estimate 2.234x, lower 95% bound 0.954x against 1.25x required. The slow process is retained, and its cause is not established.

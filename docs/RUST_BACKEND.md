@@ -21,11 +21,10 @@ coercion or scientific calculation, with a separate warning. Masked real inputs
 stay on Rust. Requested policy, preferred available backend, and last completed
 call backend are separate properties. See [BACKEND_DIFFERENCES.md](BACKEND_DIFFERENCES.md).
 
-Core feasibility has passed. The [public serial screen](performance/2026-11-07-api4-public-serial-checkpoint.md)
-passed 55 of 56 bounds; heterogeneous Surface at 10k cells missed its warmed
-confidence target. The required confirmation has not run. Staged grid APIs,
-remaining helper migration, and final artifact validation await the approved
-checkpoint decision.
+Core feasibility and the [public serial checkpoint](performance/2026-11-08-plain-normalization-public-checkpoint.md)
+have passed. The fresh screen and seven-new-pair confirmation both pass all 56
+bounds. Staged grid APIs and remaining helper migration can proceed; final
+large/four-thread, memory, allocation, and artifact acceptance still remain.
 
 ## Goal and reference
 

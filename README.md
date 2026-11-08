@@ -300,11 +300,11 @@ The raster engine and tweak columns are Rust interfaces. Python users keep their
 
 ## Performance
 
-The current API4 [public serial screen](docs/performance/2026-11-07-api4-public-serial-checkpoint.md) measured median Rust speedups of **2.56–3.63x at 100,000 cells** across Surface, Crown, and five dtype/mask layouts. Every 100k first/warmed confidence bound passed the unchanged 2x requirement. Measurements used original-input Python timing on one Windows x86-64 host with CPython 3.12.8 and NumPy 2.1.3.
+The current API4 [public serial checkpoint](docs/performance/2026-11-08-plain-normalization-public-checkpoint.md) passed **all 56 bounds** in both a fresh screen and the required seven-new-pair confirmation. Confirmed median Rust speedups were **2.93–4.09x at 100,000 cells** across Surface, Crown, and five dtype/mask layouts. Every 100k lower 95% bound exceeded the unchanged 2x requirement. Measurements used original-input Python timing on one Windows x86-64 host with CPython 3.12.8 and NumPy 2.1.3.
 
-The overall checkpoint remains **55/56 bounds passed**. Heterogeneous Surface at 10k cells had a 2.23x median-ratio estimate, but its warmed lower 95% bound was 0.954x against a 1.25x target. The slow process remains in the evidence. Work pauses at the approved checkpoint; the required seven-new-pair confirmation has not run.
+The previously failing heterogeneous Surface 10k warmed endpoint now passes: its confirmed median-ratio estimate is 2.65x and lower 95% bound is 2.23x against 1.25x required. Earlier failed samples remain preserved; they were not discarded or pooled into the new campaign.
 
-Four-thread, million-cell, memory, and final platform certification remain pending. These screen results do not guarantee speed on other hosts or workloads. Earlier measurements of the previous dtype/mask implementation remain in [the benchmark history](docs/RUST_BACKEND_BENCHMARKS.md); they do not describe the current API4 model route. Select Python when original dtype/mask behavior is required.
+Four-thread, million-cell, memory, and final release-platform certification remain pending. These serial results do not guarantee speed on other hosts or workloads. Earlier measurements remain in [the benchmark history](docs/RUST_BACKEND_BENCHMARKS.md). Select Python when original dtype/mask behavior is required.
 
 ---
 
