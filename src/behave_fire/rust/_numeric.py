@@ -2,6 +2,7 @@
 from dataclasses import dataclass
 
 import numpy as np
+from .._ownership import _OWNER
 
 
 def _validate_value(value):
@@ -74,9 +75,18 @@ def normalize_physical(value):
     """Own supplied physical values as float64, filling masked positions with NaN.
 
     :param value: Real numeric scalar, sequence, ndarray, or masked array.
-    :return: Independent contiguous float64 ndarray with the original logical shape.
+    :return: Contiguous float64 storage independent of caller buffers; an existing
+            registered snapshot may be reused within the same public call.
     """
     _validate_value(value)
+    if type(value) is np.ndarray or type(value) in (bool, int, float) or isinstance(value, np.generic):
+        owner = _OWNER.get()
+        if (owner is not None and owner.owns_storage(value) and value.dtype == np.float64
+                and value.flags.c_contiguous and value.flags.aligned):
+            return value
+        # Plain real storage has no mask to inspect or materialize. Keep the
+        # masked/subclass path below for operands whose metadata matters.
+        return np.array(value, dtype=np.float64, copy=True, order="C", subok=False)
     # Cast before filling: integer storage cannot represent NaN.
     converted = np.ma.asarray(value, dtype=np.float64)
     return np.array(converted.filled(np.nan), dtype=np.float64, copy=True, order="C", subok=False)

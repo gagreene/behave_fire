@@ -29,6 +29,17 @@ class _InputOwner:
                 return source
         return value
 
+    def owns_storage(self, value):
+        """Identify plain owned allocations already registered for this public call.
+
+        :param value: Physical operand whose storage may be reused during normalization.
+        :return: True only for a registered exact ndarray that owns its allocation.
+        """
+        if type(value) is not np.ndarray or not value.flags.owndata:
+            return False
+        entry = self.memo.get(id(value))
+        return entry is not None and entry[0] is value and entry[1] is value
+
     def remember(self, value):
         """Register fresh results so later stages can reuse them and their views.
 
