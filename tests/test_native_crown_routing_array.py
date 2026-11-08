@@ -1,6 +1,9 @@
 """Crown fused routing preserves normalized controls and typed supplied inputs."""
 import numpy as np
 import pytest
+from parity_support import ROOT
+from float64_model_reference import model_reference
+from performance_cases import assert_outputs
 
 pytestmark = pytest.mark.rust
 _native = pytest.importorskip("behave_fire.rust", exc_type=ImportError)
@@ -46,28 +49,22 @@ def test_crown_normalized_controls_preserve_routing_and_reference(
         surface["spread_rate"] = np.full(3, 2, dtype=np.uint16)
     inputs.update(canopy_base_height=4., canopy_height=30., canopy_bulk_density=.01)
     metadata = []
-    original = _bridge._native.batch
+    original = _bridge._native.model_batch
 
     def profile(*args, **kwargs):
-        kwargs["profile"] = True
         result = original(*args, **kwargs)
-        if args[0] == "crown.run_crown_fire":
-            metadata.append(bool(result["__schema"]))
+        assert all(not name.startswith('__') for name in result)
+        metadata.append(args[0])
         return result
 
-    monkeypatch.setattr(_bridge._native, "batch", profile)
+    monkeypatch.setattr(_bridge._native, "model_batch", profile)
+    if surface_kind == 'object':
+        with pytest.raises(TypeError):
+            BehaveRun(FuelModels()).do_crown_run(surface_results=surface, **inputs)
+        assert metadata == []
+        return
     with np.errstate(all="ignore"):
-        expected = reference.do_crown_run(surface_results=surface, **inputs)
+        expected = model_reference(reference.do_crown_run, dict(surface_results=surface, **inputs))
         actual = BehaveRun(FuelModels()).do_crown_run(surface_results=surface, **inputs)
-    assert metadata and all(present == (surface_kind != "f64") for present in metadata)
-    assert actual.keys() == expected.keys()
-    for key in expected:
-        assert actual[key].dtype == expected[key].dtype, key
-        assert actual[key].shape == expected[key].shape, key
-        assert np.ma.isMaskedArray(actual[key]) == np.ma.isMaskedArray(expected[key]), key
-        np.testing.assert_array_equal(np.ma.getmaskarray(actual[key]), np.ma.getmaskarray(expected[key]))
-        a = np.asarray(np.ma.getdata(actual[key]), dtype=float)
-        e = np.asarray(np.ma.getdata(expected[key]), dtype=float)
-        np.testing.assert_allclose(a, e, rtol=1e-9, atol=1e-12, err_msg=key)
-        np.testing.assert_array_equal(np.isposinf(a), np.isposinf(e))
-        np.testing.assert_array_equal(np.isneginf(a), np.isneginf(e))
+    assert metadata == ['crown']
+    assert_outputs(actual, expected)

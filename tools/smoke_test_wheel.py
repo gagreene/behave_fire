@@ -103,7 +103,11 @@ def main():
     with warnings.catch_warnings(record=True) as caught:
         warnings.simplefilter("always")
         automatic = bf.BehaveRun(bf.FuelModels())
-    assert not caught, [str(item.message) for item in caught]
+    if arguments.expect == "python":
+        assert len(caught) == 1 and caught[0].category is bf.BehaveBackendWarning
+        assert "Python" in str(caught[0].message)
+    else:
+        assert not caught, [str(item.message) for item in caught]
     assert automatic.backend_in_use == arguments.expect
     spec = importlib.util.find_spec("behave_fire._rust")
     if arguments.expect == "rust":

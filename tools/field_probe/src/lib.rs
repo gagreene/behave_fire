@@ -425,23 +425,12 @@ mod restricted_group_tests {
 
 #[cfg(all(test, feature = "allocation-probe"))]
 mod configured_scope_tests {
+    use super::allocation_probe::Observer as Probe;
     use behave_fire::engine::{
         run_model_observed, CrownPlan, ModelBatch, ModelRun, OutputRequest, PreparedFuels,
     };
-    use behave_fire::output::{RunObserver, RunPhase};
     use behave_fire::raster::{CrownColumns, CrownRaster, CrownTweakColumns};
     use behave_fire::{FuelModels, GridShape, PerCell};
-    struct Probe;
-    impl RunObserver for Probe {
-        fn observe<T>(&self, phase: RunPhase, work: impl FnOnce() -> T) -> T {
-            let phase = match phase {
-                RunPhase::Kernel => super::allocation_probe::KERNEL,
-                RunPhase::Encoder => super::allocation_probe::ENCODER,
-            };
-            let _scope = super::allocation_probe::Scope::enter(phase);
-            work()
-        }
-    }
     #[test]
     fn actual_model_kernel_and_encoder_have_zero_absolute_requests() {
         let cells = 10000;

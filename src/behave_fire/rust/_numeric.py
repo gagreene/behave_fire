@@ -50,6 +50,26 @@ def normalize_control(value, dtype):
     return np.array(data, dtype=target, copy=True, order="C", subok=False)
 
 
+def normalize_identifier(value):
+    """Retain valid integral float identifiers without narrowing integer inputs through float64.
+
+    :param value: Original real identifier scalar or array.
+    :return: Owned int32 IDs; missing, fractional, and out-of-range values raise.
+    """
+    _validate_value(value)
+    if np.ma.isMaskedArray(value) and np.ma.getmaskarray(value).any():
+        raise ValueError('A typed identifier cannot be missing.')
+    data = np.asarray(np.ma.getdata(value))
+    if data.dtype.kind == 'f':
+        if not np.all(np.isfinite(data)) or np.any(data != np.trunc(data)):
+            raise ValueError('Identifiers must be finite integral values.')
+        limits = np.iinfo(np.int32)
+        if data.size and (data.min() < limits.min or data.max() > limits.max):
+            raise OverflowError('Identifier is outside the int32 range.')
+        return np.array(data, dtype=np.int32, copy=True, order='C')
+    return normalize_control(value, np.int32)
+
+
 def normalize_physical(value):
     """Own supplied physical values as float64, filling masked positions with NaN.
 

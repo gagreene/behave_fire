@@ -17,7 +17,7 @@ def test_column_wire_keeps_float32_and_mask_schema_compact():
         "_mask.elapsed_min": np.array([False, False], dtype=float),
         "_fill.elapsed_min": np.array([-17.0]),
     }, {}, (2,), True)
-    assert _rust.__binding_api_version__ == 3
+    assert _rust.__binding_api_version__ == 4
     assert set(result) == {"", "__schema"}
     assert result[""].dtype == np.float32
     schema = result["__schema"][""]

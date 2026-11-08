@@ -18,12 +18,30 @@ macro_rules! operations {
         #[derive(Clone, Copy, Debug, PartialEq, Eq)]
         pub(crate) enum Operation { $($variant),+ }
         impl Operation {
+            pub(crate) const ALL: &'static [Self] = &[$(Self::$variant),+];
             pub(crate) fn parse(name: &str) -> Option<Self> { match name { $($name => Some(Self::$variant),)+ _ => None } }
             pub(crate) const fn name(self) -> &'static str { match self { $(Self::$variant => $name),+ } }
             pub(crate) const fn family(self) -> Family { match self { $(Self::$variant => Family::$family),+ } }
             pub(crate) const fn main_model(self) -> bool { matches!(self, Self::ModelRunSurface | Self::CrownRunCrownFire) }
         }
     };
+}
+impl Operation {
+    pub(crate) fn numeric_contract(self) -> &'static str {
+        if self.main_model() {
+            return "f64-model";
+        }
+        match self.family() {
+            Family::Contain
+            | Family::Ignite
+            | Family::Mortality
+            | Family::Safety
+            | Family::Spot
+            | Family::Units
+            | Family::VaporPressureDeficitCalculator => "f64-stateless",
+            _ => "unmigrated",
+        }
+    }
 }
 operations! {
     ContainRunContainSimArray: Contain => "contain.run_contain_sim_array",

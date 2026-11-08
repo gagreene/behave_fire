@@ -78,25 +78,35 @@ fn any_below(values: &[(f64, f64)]) -> Option<bool> {
 }
 /// Share the ordinary WAF formula while checking its selected dependencies.
 pub(crate) fn waf(cell: &super::SurfaceCell, depth: f64, options: &super::SurfaceOptions) -> f64 {
-    if options.waf_method == super::WafMethod::UserInput {
-        if let Some(value) = cell.user_waf {
+    wind_adjustment_factor(
+        cell.canopy_cover,
+        cell.canopy_height,
+        cell.crown_ratio,
+        depth,
+        options.waf_method,
+        cell.user_waf,
+    )
+}
+
+/// Evaluate only actual WAF inputs under three-valued canopy selection.
+pub fn wind_adjustment_factor(
+    cover: f64,
+    height: f64,
+    ratio: f64,
+    depth: f64,
+    method: super::WafMethod,
+    user: Option<f64>,
+) -> f64 {
+    if method == super::WafMethod::UserInput {
+        if let Some(value) = user {
             return value;
         }
     }
-    let fraction = cell.crown_ratio * cell.canopy_cover / 3.0;
-    match any_below(&[
-        (cell.canopy_cover, 1e-7),
-        (fraction, 0.05),
-        (cell.canopy_height, 6.0),
-    ]) {
+    let fraction = ratio * cover / 3.0;
+    match any_below(&[(cover, 1e-7), (fraction, 0.05), (height, 6.0)]) {
         None => f64::NAN,
         Some(true) if depth.is_nan() => f64::NAN,
-        Some(false) if cell.canopy_height.is_infinite() => f64::NAN,
-        _ => crate::surface::calculate_wind_adjustment_factor(
-            cell.canopy_cover,
-            cell.canopy_height,
-            cell.crown_ratio,
-            depth,
-        ),
+        Some(false) if height.is_infinite() => f64::NAN,
+        _ => crate::surface::calculate_wind_adjustment_factor(cover, height, ratio, depth),
     }
 }

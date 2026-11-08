@@ -49,6 +49,13 @@ def test_all_eleven_instance_methods_enter_native_and_keep_signatures(_usable_na
         return original(operation, *args, **kwargs)
 
     monkeypatch.setattr(native, "batch", record)
+    model_original = native.model_batch
+
+    def record_model(kind, *args, **kwargs):
+        calls.append(('model.run_surface' if kind == 'surface' else 'crown.run_crown_fire', kwargs.get('threads', 1)))
+        return model_original(kind, *args, **kwargs)
+
+    monkeypatch.setattr(native, 'model_batch', record_model)
     surface_inputs = dict(fuel_model_grid=np.array([1, 2, 10]), m1h=np.full(3, .06), m10h=np.full(3, .07),
                           m100h=np.full(3, .08), mlh=np.full(3, .6), mlw=np.full(3, .9), wind_speed=np.full(3, 8.), wind_speed_units=0,
                           wind_direction=np.full(3, 35.), wind_orientation_mode="RelativeToUpslope", slope=np.full(3, 12.))
@@ -114,7 +121,8 @@ def test_native_namespace_registry_routes_and_standalone_containment(_usable_nat
 
     rust = get_backend("rust")
     assert rust is _usable_native
-    assert get_backend() is rust
+    automatic = get_backend()
+    assert automatic.preferred_backend == automatic.backend_in_use == 'rust'
     assert available_backends() == ["python", "rust"]
     names = ("behave_units", "contain", "crown", "fine_dead_fuel_moisture_tool", "fire_size", "fuel_models", "fuel_models_array", "ignite", "mortality", "safety", "slope_tool", "species_master_table", "spot", "surface", "vapor_pressure_deficit_calculator")
     for name in names:

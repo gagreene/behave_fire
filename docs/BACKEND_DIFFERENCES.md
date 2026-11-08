@@ -1,5 +1,30 @@
 # Backend compatibility contract
 
+## Current float64 model contract
+
+Surface/Crown model routes widen real physical inputs to float64 once, replace
+masked values with NaN, and return plain float64 arrays. Classifications remain
+int32; -1 means unavailable. Valid IDs and selectors retain exact integer storage.
+Float32 results may differ from Python because calculations now use float64.
+Independent field shapes, conditional dependencies, units, and ownership remain
+part of the contract. Missing fields do not invalidate unrelated outputs.
+
+Auto selects usable Rust for real inputs, including masked arrays. If native
+execution is unavailable, auto selects Python and warns once per process. A
+separate once-per-process warning accompanies complex physical inputs routed to
+a proven compatible Python operation before coercion. Explicit Rust rejects
+complex/object input. General objects and Rust scientific errors do not trigger
+fallback. Consequently, auto can return Python masked arrays or Rust plain NaN
+arrays depending on availability and the actual call. `backend_in_use` reports
+the last completed operation; `preferred_backend` reports availability preference.
+
+The binding's `__numeric_contracts__` lists all 89 native operations as
+`f64-model`, `f64-stateless`, or `unmigrated`. Unit conversions, spotting, ignition,
+safety, mortality calculations, VPD, and containment share real physical
+normalization. Remaining Surface/Crown component helpers and state tools retain
+their earlier numeric contracts until their separate migration. The older dtype
+and object details below describe those remaining helpers, not migrated routes.
+
 The Python backend at commit `7933789f00470c6bbfbe942dc22bdd7f74e192f9` is the behavioral reference for the Rust backend. Native execution is available when the compiled extension is installed. The full API, ownership, selection, and artifact contracts are in [RUST_BACKEND.md](RUST_BACKEND.md).
 
 ## Intentional numerical differences
@@ -66,6 +91,6 @@ explicit Python backend when exact reference scalar classes matter, or
 `.item()` to request a Python scalar. This does not relax vector shapes,
 masked-array classes, boxed payload kinds, or input scalar-kind handling.
 
-The root automatic BehaveRun uses composition and therefore changes exact class identity. The historical `behave_fire.behave.BehaveRun` and explicit Python alias retain legacy identity/subclassing. Backend selection is fixed per instance. A missing extension falls back silently for auto; an unusable extension causes a once-per-process BehaveBackendWarning and Python fallback. Forced Rust raises. Calculation failures never cause fallback.
+The root automatic BehaveRun uses composition and therefore changes exact class identity. The historical `behave_fire.behave.BehaveRun` and explicit Python alias retain legacy identity/subclassing. Backend selection is fixed per instance. A missing or unusable extension causes a once-per-process BehaveBackendWarning and Python fallback for auto. Forced Rust raises. Calculation failures never cause fallback.
 
 The Python runtime floor is 3.11. Rust is required for source builds; native and pure-Python wheels themselves require no project compilation. Complete compiler-free installation also depends on binary dependency availability. See the artifact matrix in the implementation contract.

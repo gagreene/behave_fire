@@ -10,9 +10,10 @@ mod state;
 mod surface;
 mod tweaks;
 
-pub use crown::{CrownCell, CrownPlan};
+pub use crown::{CrownCell, CrownPlan, CrownSpatial};
 pub use field::{Field, FieldKind, OutputRequest};
 pub use fuel::{PreparedFuel, PreparedFuels};
+pub use missing::wind_adjustment_factor as available_wind_adjustment_factor;
 pub use options::{SurfaceOptions, WafMethod, WindHeight, WindOrientation};
 pub use run::{run_model, run_model_observed, ModelBatch, ModelRun, SurfaceSource};
 pub use stage::{Pipeline, Stage};

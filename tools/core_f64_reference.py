@@ -12,38 +12,15 @@ sys.path.insert(0, str(ROOT / 'src'))
 
 
 def _missing_rules(outputs, supplied):
-    """Correct old NumPy threshold defaults using the reviewed new contract.
+    """Apply the shared reviewed NaN rules to independent Python equations.
 
     :param outputs: Ordinary Python result arrays on widened, NaN-filled inputs.
     :param supplied: Actual normalized Surface fields consumed by Crown.
     :return: Corrected complete output mapping without calling Rust.
     """
-    heat_missing = np.isnan(supplied['heat_per_unit_area'])
-    rate_missing = np.isnan(supplied['spread_rate'])
-    code = outputs['fire_type']
-    if np.any(heat_missing):
-        for field in ('crown_fire_heat_per_unit_area', 'crown_fire_line_intensity', 'crown_flame_length',
-                      'surface_fire_critical_spread_rate', 'crown_fraction_burned',
-                      'passive_crown_fire_spread_rate', 'passive_crown_fire_heat_per_unit_area',
-                      'passive_crown_fire_line_intensity', 'passive_crown_fire_flame_length',
-                      'final_heat_per_unit_area'):
-            outputs[field][heat_missing] = np.nan
-        outputs['final_spread_rate'][heat_missing & (code == 1)] = np.nan
-        for field in ('final_fireline_intensity', 'final_flame_length'):
-            outputs[field][heat_missing & np.isin(code, [1, 3])] = np.nan
-    if np.any(rate_missing):
-        unknown_fraction = rate_missing & (
-            outputs['crowning_surface_fire_spread_rate'] - outputs['surface_fire_critical_spread_rate'] > 1e-7)
-        outputs['crown_fraction_burned'][unknown_fraction] = np.nan
-        outputs['passive_crown_fire_heat_per_unit_area'][unknown_fraction] = np.nan
-        for field in ('passive_crown_fire_spread_rate', 'passive_crown_fire_line_intensity',
-                      'passive_crown_fire_flame_length'):
-            outputs[field][rate_missing] = np.nan
-        outputs['final_spread_rate'][rate_missing & np.isin(code, [0, 1, 2])] = np.nan
-        for field in ('final_fireline_intensity', 'final_flame_length'):
-            outputs[field][rate_missing & (code == 1)] = np.nan
-        outputs['final_heat_per_unit_area'][unknown_fraction & (code == 1)] = np.nan
-    return outputs
+    from float64_model_reference import apply_crown_rules
+
+    return apply_crown_rules(outputs, supplied)
 
 
 def expected_outputs(operation, cells, dataset, seed):

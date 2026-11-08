@@ -54,6 +54,29 @@ impl Default for CrownCell {
     }
 }
 
+/// The actual moisture and spatial inputs consumed by fixed-WAF model-10 spread.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct CrownSpatial {
+    /// One-hour dead moisture fraction.
+    pub m1h: f64,
+    /// Ten-hour dead moisture fraction.
+    pub m10h: f64,
+    /// Hundred-hour dead moisture fraction.
+    pub m100h: f64,
+    /// Live herbaceous moisture fraction.
+    pub mlh: f64,
+    /// Live woody moisture fraction.
+    pub mlw: f64,
+    /// Configured-height wind speed in ft/min.
+    pub wind_speed: f64,
+    /// Wind direction in degrees.
+    pub wind_direction: f64,
+    /// Slope in degrees.
+    pub slope: f64,
+    /// Aspect in degrees clockwise from north.
+    pub aspect: f64,
+}
+
 /// Immutable Crown configuration, with model-10 fuel supplied explicitly per call.
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub struct CrownPlan {
@@ -89,6 +112,15 @@ impl CrownPlan {
         tweaks: SurfaceTweaks,
     ) -> crown::CrownSpreadResult {
         crown::calculate_crown_spread(cell, fm10, &self.options, tweaks)
+    }
+
+    /// Evaluate fixed-WAF Crown spread without reading unrelated canopy or Surface inputs.
+    pub fn prepare_spread_spatial(
+        &self,
+        input: &CrownSpatial,
+        fm10: &PreparedFuel,
+    ) -> crown::CrownSpreadResult {
+        crown::calculate_crown_spread_spatial(input, fm10, &self.options)
     }
 
     /// Evaluate Crown from independent supplied Surface fields and typed overrides.

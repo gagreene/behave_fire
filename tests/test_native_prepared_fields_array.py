@@ -42,7 +42,8 @@ def test_prepared_conversions_match_reference_for_all_unit_classes(class_name, d
     actual_function = getattr(getattr(native, class_name + "Units"), method)
     values = _values(layout)
     with np.errstate(all="ignore"):
-        expected = expected_function(values, code)
+        widened = np.asarray(np.ma.asarray(values, dtype=np.float64).filled(np.nan))
+        expected = expected_function(widened, code)
         actual = actual_function(values, code)
     expected, actual = np.asanyarray(expected), np.asanyarray(actual)
     assert actual.shape == expected.shape

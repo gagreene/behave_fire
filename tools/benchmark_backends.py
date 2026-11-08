@@ -146,14 +146,17 @@ def _memory():
     return None, peak if sys.platform == "darwin" else peak * 1024
 
 
-def _model_call(arguments, backend):
+def _model_call(arguments, backend, *, normalize_reference=False):
     """Prepare a model and identical inputs outside the timed interval.
 
     :param arguments: Worker route, dataset, size, seed, and worker count.
     :param backend: Explicit Python or Rust implementation.
+    :param normalize_reference: Correctness-only widening; never enabled by timed workers.
     :return: Callable retaining its explicit model and prepared inputs.
     """
     import numpy as np
+    if normalize_reference and backend != 'python':
+        raise ValueError('Only the independent Python correctness oracle can normalize reference inputs')
     from behave_fire.python import BehaveRun as PythonRun, FuelModels
     inputs = build_inputs(arguments.cells, arguments.dataset, arguments.seed)
     if backend == "rust":
@@ -167,6 +170,9 @@ def _model_call(arguments, backend):
 
             :return: Complete Surface output dictionary.
             """
+            if normalize_reference:
+                from float64_model_reference import model_reference
+                return model_reference(model.do_surface_run, inputs)
             return model.do_surface_run(**inputs)
     else:
         surface = supplied_surface(inputs, arguments.operation, PythonRun(FuelModels()),
@@ -182,6 +188,9 @@ def _model_call(arguments, backend):
 
             :return: Complete Crown output dictionary.
             """
+            if normalize_reference:
+                from float64_model_reference import model_reference
+                return model_reference(model.do_crown_run, dict(surface_results=surface, **inputs, **canopy))
             return model.do_crown_run(surface_results=surface, **inputs, **canopy)
     return call
 
@@ -307,10 +316,40 @@ def _validation_worker(arguments):
     :param arguments: Operation, dtype layout, dataset, seed, and worker request.
     :return: Validation status and matching input/source provenance.
     """
-    expected = _model_call(arguments, "python")()
-    actual = _model_call(arguments, "rust")()
+    expected = _model_call(arguments, 'python', normalize_reference=True)()
+    from behave_fire import _rust
+    calls = []
+    originals = {name: getattr(_rust, name) for name in ('batch', 'model_batch', 'model_groups', 'atan2_profile_candidates')}
+
+    def instrument(name, original):
+        """Record an untimed real native boundary without changing its operands.
+
+        :param name: Native boundary identity.
+        :param original: Unmodified native callable.
+        :return: Transparent diagnostic wrapper.
+        """
+        def invoke(*args, **kwargs):
+            """Record and execute exactly one native operation.
+
+            :param args: Original positional arguments.
+            :param kwargs: Original keyword arguments.
+            :return: Unmodified native result.
+            """
+            calls.append(name)
+            return original(*args, **kwargs)
+        return invoke
+
+    try:
+        for name, function in originals.items():
+            setattr(_rust, name, instrument(name, function))
+        actual = _model_call(arguments, "rust")()
+    finally:
+        for name, function in originals.items():
+            setattr(_rust, name, function)
     result = dict(kind="validation", dataset=arguments.dataset, operation=arguments.operation,
-                  cells=arguments.cells, threads=arguments.threads, output_fields=len(expected), passed=False)
+                  cells=arguments.cells, threads=arguments.threads, output_fields=len(expected), passed=False,
+                  correctness_contract='f64-nan-v1', independent_python=True,
+                  python_timing_original_inputs=True, fields=sorted(expected), native_boundary_calls=calls)
     try:
         assert_outputs(actual, expected)
         result["passed"] = True
@@ -335,6 +374,7 @@ def _worker(arguments):
     samples = []
     if arguments.backend == "rust" and arguments.profile:
         _bridge._native.batch = _profile_batch(_bridge._native.batch, samples)
+        _bridge._native.model_batch = _profile_batch(_bridge._native.model_batch, samples)
     created = time.perf_counter()
     call = _model_call(arguments, arguments.backend)
     construction_seconds = time.perf_counter() - created
@@ -376,6 +416,8 @@ def _worker(arguments):
                   dataset=arguments.dataset, cells=arguments.cells, operation=arguments.operation,
                   first_seconds=durations[0], total_seconds=durations[0], warm_seconds=durations[1:],
                   profile=arguments.profile, import_seconds=import_seconds,
+                  python_timing_original_inputs=arguments.backend == 'python',
+                  actual_backend=arguments.backend,
                   construction_and_inputs_seconds=construction_seconds,
                   python_marshalling_and_output_seconds=(durations[0] - native_total) if arguments.profile else None,
                   native_stages=sums, native_calls=first_samples, warm_native_calls=calls[1:],

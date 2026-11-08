@@ -1,5 +1,17 @@
 # behave_fire
 
+Native Surface/Crown models now calculate physical values in float64. Float16,
+float32, and integer physical inputs widen once; masked real values become NaN,
+and physical results are plain float64 arrays. Classifications remain int32,
+with -1 for unavailable classifications. Python retains its original dtype and
+masked-array behavior. These differences also apply when `backend="auto"`
+selects Rust; see [Backend differences](docs/BACKEND_DIFFERENCES.md).
+
+Auto uses Rust when available. Otherwise it selects Python and warns once per
+process. A separate warning accompanies supported complex-input calls routed
+to Python before native calculation. Explicit Rust rejects complex/object
+arithmetic. General object input does not trigger automatic fallback.
+
 A NumPy-based Python port of the US Forest Service [Behave<sup>7</sup>](https://www.firelab.org/project/behave) fire behavior modeling system, supporting scalar and array calculations. The package has two calculation backends: the original Python/NumPy implementation (the behavioral reference) and a native Rust implementation selected automatically when its compiled extension is installed. The same Rust core is also a standalone crate, `behave-fire`, for Rust applications.
 
 Upstream alignment is ongoing; full C++ parity has not been established. Fuel data and heat constants follow `firelab/behave` at `f3b2943`, with an intentional correction of metric-model moisture percentages to fractions. Containment is a simplified growth model, and lightning ignition remains available only as a deprecated compatibility API. The Rust backend is not yet faster than Python for typical workloads; see [Performance](#performance).
@@ -141,7 +153,7 @@ uv run --no-sync python -m pytest --require-rust
 
 ### Python-only use of a checkout
 
-The Python implementation needs no build step. Put `src/` on the Python path (or run scripts from the repository root; the examples set their own path). With no extension present, `backend="auto"` selects Python silently:
+The Python implementation needs no build step. Put `src/` on the Python path (or run scripts from the repository root; the examples set their own path). With no extension present, `backend="auto"` selects Python and emits a once-per-process `BehaveBackendWarning`:
 
 ```sh
 uv sync --locked --no-install-project --extra test --extra dev   # dependencies only; never installs the project
@@ -241,7 +253,7 @@ contain = get_backend("rust").contain.run_contain_sim_array
 
 `available_backends()` reports Python and, when compatible and complete, Rust. `get_backend("python")` and `get_backend("rust")` expose their model, registries, and component modules. Standalone imports include `from behave_fire.python import contain` and `from behave_fire.rust import contain`. Historical imports such as `behave_fire.components.surface` continue to use Python. Nested component import paths under the new namespaces are not required; access their module attributes.
 
-`backend="auto"` prefers a compatible, complete Rust extension. An absent extension (the universal wheel, or an unbuilt checkout) selects Python silently. A present extension with a loader error, incompatible API, or an incomplete advertised operation inventory selects Python and emits `BehaveBackendWarning`, a `RuntimeWarning` subclass, once per process, with its cause. An availability query can cache the extension status but does not consume that warning. Forced Rust raises a chained `ImportError` for any unavailable or incomplete extension. Explicit native imports permit compatible incomplete development extensions; an unsupported operation raises `NotImplementedError`. Calculation and facade errors propagate and never trigger a fallback.
+`backend="auto"` prefers a compatible, complete Rust extension. An absent extension (the universal wheel, or an unbuilt checkout), loader error, incompatible API, or incomplete advertised operation inventory selects Python and emits `BehaveBackendWarning`, a `RuntimeWarning` subclass, once per process, with its cause. An availability query can cache the extension status but does not consume that warning. Forced Rust raises a chained `ImportError` for any unavailable or incomplete extension. Explicit native imports permit compatible incomplete development extensions; an unsupported operation raises `NotImplementedError`. Calculation and facade errors propagate and never trigger a fallback.
 
 Configure strict fallback handling before the first warned automatic selection:
 

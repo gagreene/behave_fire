@@ -33,6 +33,64 @@ def _assert_floating(actual, expected, single=False):
                                atol=1e-7 if single else 1e-12, equal_nan=True)
 
 
+def _assert_native_error(operation, arguments, category):
+    """Require the declared rejection while retaining ordinary comparator errors."""
+    try:
+        operation(**arguments)
+    except category:
+        return
+    raise AssertionError(f'Native contract requires {category.__name__} before calculation')
+
+
+def _float64_case(case, operation, arguments):
+    """Keep historical Python evidence separate from the new native model contract."""
+    import builtins
+    from float64_model_reference import model_reference
+    from performance_cases import assert_outputs
+    from behave_fire import python as python_backend
+    from behave_fire.python import BehaveRun, FuelModels
+
+    name = case['entry_point'].rsplit('.', 1)[1]
+    if '.BehaveRun.' in case['entry_point']:
+        reference = getattr(BehaveRun(FuelModels()), name)
+    else:
+        reference = python_backend
+        for part in case['entry_point'].removeprefix('behave_fire.components.').split('.'):
+            reference = getattr(reference, part)
+    with warnings.catch_warnings(), np.errstate(all='ignore'):
+        warnings.simplefilter('ignore')
+        if 'exception' in case:
+            error = case['exception']
+            category = error['type'] if isinstance(error, dict) else error
+            with pytest.raises(getattr(builtins, category)):
+                reference(**arguments)
+        else:
+            assert_result(reference(**arguments), acceptance_output(case, encode_value, contracts_match))
+        physical = {key: value for key, value in arguments.items()
+                    if key not in ('lut', 'out_units') and not key.endswith('units') and not isinstance(value, str)}
+
+        def unsupported(value):
+            if isinstance(value, dict):
+                return any(unsupported(item) for item in value.values())
+            return value is not None and np.asanyarray(value).dtype.kind in 'Oc'
+
+        if any(unsupported(value) for value in physical.values()):
+            _assert_native_error(operation, arguments, TypeError)
+            return
+        for key, value in arguments.items():
+            if key.endswith('_grid'):
+                ids = np.asanyarray(value)
+                if np.ma.getmaskarray(ids).any() or not np.isfinite(ids).all() or np.any(ids != np.trunc(ids)):
+                    _assert_native_error(operation, arguments, ValueError)
+                    return
+        try:
+            expected = model_reference(reference, arguments)
+        except (TypeError, ValueError, IndexError) as error:
+            _assert_native_error(operation, arguments, type(error))
+            return
+        assert_outputs(operation(**arguments), expected)
+
+
 def _numeric_family(value):
     families = ((bool, np.bool_), (int, np.integer), (float, np.floating),
                 (complex, np.complexfloating))
@@ -173,6 +231,12 @@ def run_case(case):
         for part in route.removeprefix("behave_fire.rust.").split("."):
             operation = getattr(operation, part)
     arguments = decode(case["inputs"])
+    entry = case['entry_point']
+    stateless = any(f'.{family}.' in entry for family in ('behave_units', 'contain', 'ignite', 'safety', 'spot', 'vapor_pressure_deficit_calculator'))
+    stateless = stateless or ('.mortality.calculate_' in entry)
+    if stateless or '.BehaveRun.' in entry or entry.rsplit('.', 1)[1] in ('run_crown_fire', 'coerce_crown_fire_inputs'):
+        _float64_case(case, operation, arguments)
+        return
     if case['entry_point']=='behave_fire.components.surface.calculate_direction_of_max_spread':
         x,y=arguments['x_component'],arguments['y_component']
         loop=np.arctan2.resolve_dtypes((np.asanyarray(y).dtype,np.asanyarray(x).dtype,None))[2]
