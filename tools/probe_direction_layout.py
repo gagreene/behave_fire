@@ -106,22 +106,21 @@ def _record(name, x, y, atan2f):
     """
     from behave_fire.components import surface as reference
     from behave_fire.rust import surface as native
-    from behave_fire.rust._bridge import _normalize_direction
-
-    arguments, _ = _normalize_direction(dict(x_component=x, y_component=y))
-    nx, ny = arguments['x_component'], arguments['y_component']
+    # Retain an independent float32 NumPy/libm trace for historical attribution.
+    # The native correctness reference uses the actual inputs widened to float64.
+    nx, ny = np.asarray(x, dtype=np.float32), np.asarray(y, dtype=np.float32)
     with np.errstate(all='ignore'):
         actual = np.asarray(np.arctan2(ny, nx))
         bx, by = np.broadcast_arrays(np.asarray(nx, dtype=np.float32), np.asarray(ny, dtype=np.float32))
         contiguous = np.arctan2(np.array(by, order='C', copy=True), np.array(bx, order='C', copy=True))
         scalar = np.array([atan2f(float(vy), float(vx)) for vx, vy in zip(bx.flat, by.flat)], dtype=np.float32).reshape(bx.shape)
-        expected_direction = reference.calculate_direction_of_max_spread(nx, ny, np.ones(bx.shape), 'RelativeToNorth', 95.)
+        expected_direction = reference.calculate_direction_of_max_spread(np.asarray(x, dtype=np.float64), np.asarray(y, dtype=np.float64), np.ones(bx.shape), 'RelativeToNorth', 95.)
         native_direction = native.calculate_direction_of_max_spread(x, y, np.ones(bx.shape), 'RelativeToNorth', 95.)
     mask = ~(np.isnan(actual) | np.isnan(scalar) | np.isnan(contiguous))
     actual_bits, scalar_bits, vector_bits = [np.asarray(value).view(np.uint32) for value in (actual, scalar, contiguous)]
     difference = mask & ((actual_bits != scalar_bits) | (actual_bits != vector_bits))
     positions = np.flatnonzero(difference)[:12]
-    result = {'name': name, 'x': _describe(x), 'y': _describe(y), 'normalized_x': _describe(nx),
+    result = {'name': name, 'native_physical_dtype': 'float64', 'x': _describe(x), 'y': _describe(y), 'normalized_x': _describe(nx),
               'normalized_y': _describe(ny), 'out': _describe(actual),
               'numpy_equals_libm': bool(np.array_equal(actual_bits[mask], scalar_bits[mask])),
               'numpy_equals_contiguous': bool(np.array_equal(actual_bits[mask], vector_bits[mask])),

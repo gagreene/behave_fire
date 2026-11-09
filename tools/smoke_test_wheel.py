@@ -67,6 +67,16 @@ def _direction_reversed(selected, reference):
     _compare(actual, expected)
 
 
+def _native_report():
+    """Describe installed native identity using supported extension metadata.
+
+    :return: Binding API version and the current physical storage contract.
+    """
+    from behave_fire import _rust
+
+    return {"binding_api_version": _rust.__binding_api_version__, "native_physical_dtype": "float64"}
+
+
 def _surface(model, grid):
     """Calculate a fixed non-contiguous GS4 surface scenario.
 
@@ -172,10 +182,7 @@ def main():
               "numpy": np.__version__, "version": bf.__version__, "backend": automatic.backend_in_use,
               "package": str(package)}
     if arguments.expect == "rust":
-        from behave_fire import _rust
-        from behave_fire.rust import _bridge
-        report["calibrated_atan2_profile"] = _bridge._atan2_math_profile()
-        report["svml_candidate_available"] = _rust.atan2_profile_candidates()[3] is not None
+        report.update(_native_report())
     print(json.dumps(report, indent=2))
 
 
