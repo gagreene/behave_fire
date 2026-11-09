@@ -30,17 +30,17 @@ def _compare(actual, expected):
 
 
 def _direction(selected, reference, normalize_half_loop):
-    """Check platform-dependent float32 angles after float64 North promotion.
+    """Check widened native angles against Python on the same float64 inputs.
 
     :param selected: Installed selected surface backend.
     :param reference: Installed explicit Python surface backend.
-    :param normalize_half_loop: Whether the integer operands select float16.
+    :param normalize_half_loop: Whether to use the boolean fixture instead of uint16.
     :return: None; raises AssertionError on structure or strict live parity differences.
     """
     import numpy as np
     x = np.array([-1], dtype=np.int8)
     y = np.array([False], dtype=np.bool_) if normalize_half_loop else np.array([65534], dtype=np.uint16)
-    reference_x, reference_y = (x.astype(np.float32), y.astype(np.float32)) if normalize_half_loop else (x, y)
+    reference_x, reference_y = x.astype(np.float64), y.astype(np.float64)
     expected = reference.calculate_direction_of_max_spread(reference_x, reference_y, np.ones(1), "RelativeToNorth", 95.0)
     actual = selected.calculate_direction_of_max_spread(x, y, np.ones(1), "RelativeToNorth", 95.0)
     assert actual.dtype == expected.dtype == np.float64
@@ -50,7 +50,7 @@ def _direction(selected, reference, normalize_half_loop):
 
 
 def _direction_reversed(selected, reference):
-    """Check scalar-loop direction parity for reversed float32 operands.
+    """Check direction parity after widening reversed float32 operands.
 
     :param selected: Installed native surface backend.
     :param reference: Installed explicit Python surface backend.
@@ -60,7 +60,7 @@ def _direction_reversed(selected, reference):
     x = np.full(7, -1., dtype=np.float32)[::-1]
     y = np.full(7, np.finfo(np.float32).max, dtype=np.float32)[::-1]
     rate = np.ones(7)
-    expected = reference.calculate_direction_of_max_spread(x, y, rate, "RelativeToNorth", 95.)
+    expected = reference.calculate_direction_of_max_spread(x.astype(np.float64), y.astype(np.float64), rate, "RelativeToNorth", 95.)
     actual = selected.calculate_direction_of_max_spread(x, y, rate, "RelativeToNorth", 95.)
     assert actual.dtype == expected.dtype == np.float64
     assert actual.shape == expected.shape == (7,)

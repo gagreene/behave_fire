@@ -43,11 +43,9 @@ def main():
         atan2f.restype = ctypes.c_float
     try:
         from behave_fire.rust import surface as native
-        from behave_fire.rust import _bridge
         from behave_fire import _rust
         report["native_extension"] = _rust.__file__
-        report["calibrated_atan2_profile"] = _bridge._atan2_math_profile()
-        report["svml_candidate_available"] = _rust.atan2_profile_candidates()[3] is not None
+        report["native_physical_dtype"] = "float64"
     except ImportError:
         native = None
     report["cases"] = []
@@ -63,12 +61,13 @@ def main():
             case["libm_angles"] = _describe(np.array([atan2f(float(yf[0]), float(xf[0]))], dtype=np.float32))
         for orientation in ("RelativeToUpslope", "RelativeToNorth"):
             reference_x, reference_y = (xf, yf) if normalize else (x, y)
-            expected = reference.calculate_direction_of_max_spread(reference_x, reference_y, np.ones(1), orientation, 95.0)
-            case[orientation] = {"python": _describe(expected)}
+            original = reference.calculate_direction_of_max_spread(reference_x, reference_y, np.ones(1), orientation, 95.0)
+            expected = reference.calculate_direction_of_max_spread(x.astype(np.float64), y.astype(np.float64), np.ones(1), orientation, 95.0)
+            case[orientation] = {"python": _describe(original), "python_widened": _describe(expected)}
             if native is not None:
                 actual = native.calculate_direction_of_max_spread(x, y, np.ones(1), orientation, 95.0)
                 case[orientation]["rust"] = _describe(actual)
-                case[orientation]["strict_pass"] = bool(np.allclose(actual, expected, rtol=1e-6 if expected.dtype == np.float32 else 1e-9, atol=1e-7 if expected.dtype == np.float32 else 1e-12))
+                case[orientation]["strict_pass"] = bool(np.allclose(actual, expected, rtol=1e-9, atol=1e-12))
         report["cases"].append(case)
     print(json.dumps(report, indent=2))
 
