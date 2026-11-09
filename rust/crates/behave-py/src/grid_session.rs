@@ -1,8 +1,6 @@
 //! Python-owned staged sessions; no Python references survive detached calculation.
 use crate::model_f64 as model;
-use behave_fire::engine::{
-    Field, FieldKind, GridSession, ModelRun, OutputRequest, Stage, SurfaceSource,
-};
+use behave_fire::engine::{Field, FieldKind, GridSession, OutputRequest, Stage, SurfaceSource};
 use behave_fire::output::ColumnValues;
 use behave_fire::raster::FuelbedColumns;
 use behave_fire::PerCell;
@@ -59,7 +57,15 @@ fn array<'py, T: Element + Copy>(
     } else {
         values.to_vec()
     };
-    Ok(ArrayD::from_shape_vec(IxDyn(shape), values)
+    // rust-numpy's ndarray conversion has a 32-axis ceiling. Transfer a flat
+    // owned array above that ceiling; the public wrapper restores logical axes.
+    let flat_shape = [count];
+    let numpy_shape = if shape.len() > 32 {
+        &flat_shape[..]
+    } else {
+        shape
+    };
+    Ok(ArrayD::from_shape_vec(IxDyn(numpy_shape), values)
         .map_err(error)?
         .into_pyarray(py)
         .into_any())
@@ -93,11 +99,9 @@ impl NativeGridSession {
         let controls = model::controls(controls, &grid)?;
         let fuels = model::fuels(registry)?;
         let options = model::options(settings)?;
-        let mut run =
-            model::configured_run(kind, grid.clone(), &values, &controls, &fuels, options)?;
         let mut bed = BTreeMap::new();
         let mut defined = None;
-        if let Some(source) = fuelbed {
+        let source = if let Some(source) = fuelbed {
             if kind != "surface" {
                 return Err(PyValueError::new_err(
                     "only Surface accepts supplied fuelbeds",
@@ -105,6 +109,33 @@ impl NativeGridSession {
             }
             for (key, value) in source.iter() {
                 let name: String = key.extract()?;
+                if !matches!(
+                    name.as_str(),
+                    "sigma"
+                        | "bulk_density"
+                        | "packing_ratio"
+                        | "relative_packing_ratio"
+                        | "heat_sink"
+                        | "propagating_flux"
+                        | "w_heat_dead"
+                        | "w_heat_live"
+                        | "w_silica_dead"
+                        | "w_silica_live"
+                        | "w_moist_dead"
+                        | "w_moist_live"
+                        | "wfl_dead"
+                        | "wfl_live"
+                        | "moe_dead"
+                        | "moe_live"
+                        | "frac_dead"
+                        | "frac_live"
+                        | "depth"
+                        | "is_defined"
+                ) {
+                    return Err(PyValueError::new_err(format!(
+                        "unknown supplied fuelbed column {name}"
+                    )));
+                }
                 if name == "is_defined" {
                     defined = Some(model::array::<bool>(&value, &name)?);
                 } else {
@@ -141,10 +172,19 @@ impl NativeGridSession {
                     PerCell::Cells(v)
                 },
             };
-            if let ModelRun::Surface { source, .. } = &mut run {
-                *source = SurfaceSource::Fuelbeds(columns);
-            }
-        }
+            Some(SurfaceSource::Fuelbeds(columns))
+        } else {
+            None
+        };
+        let run = model::configured_run(
+            kind,
+            grid.clone(),
+            &values,
+            &controls,
+            &fuels,
+            options,
+            source.as_ref(),
+        )?;
         let inner = GridSession::new(
             &run,
             OutputRequest::new(&fields(outputs)?),
