@@ -1,0 +1,2887 @@
+{
+  "protocol": "Three fresh timed processes per size; first plus three warm calls. Separate allocation-only process per size. Serial workers. Scalar-only state tools at one cell; vector geometry also measured.",
+  "observations": [
+    {
+      "rows": [
+        {
+          "family": "surface.geometry",
+          "cells": 1,
+          "first_seconds": 0.0008853,
+          "warm_seconds": [
+            0.0001442,
+            0.000115,
+            0.0001052
+          ],
+          "output_bytes": 8,
+          "allocations": null,
+          "before_rss": 47222784,
+          "after_rss": 47484928,
+          "lifetime_peak_before": 47759360,
+          "lifetime_peak_after": 47759360
+        },
+        {
+          "family": "surface.direction",
+          "cells": 1,
+          "first_seconds": 0.0002873,
+          "warm_seconds": [
+            0.0002001,
+            0.0001852,
+            0.0001835
+          ],
+          "output_bytes": 8,
+          "allocations": null,
+          "before_rss": 47484928,
+          "after_rss": 47501312,
+          "lifetime_peak_before": 47759360,
+          "lifetime_peak_after": 47759360
+        },
+        {
+          "family": "crown.component",
+          "cells": 1,
+          "first_seconds": 0.0004099,
+          "warm_seconds": [
+            0.0003263,
+            0.0003123,
+            0.0003059
+          ],
+          "output_bytes": 40,
+          "allocations": null,
+          "before_rss": 47501312,
+          "after_rss": 47513600,
+          "lifetime_peak_before": 47759360,
+          "lifetime_peak_after": 47759360
+        },
+        {
+          "family": "units",
+          "cells": 1,
+          "first_seconds": 0.0002784,
+          "warm_seconds": [
+            0.0001881,
+            0.0001711,
+            0.0003412
+          ],
+          "output_bytes": 8,
+          "allocations": null,
+          "before_rss": 47513600,
+          "after_rss": 47534080,
+          "lifetime_peak_before": 47759360,
+          "lifetime_peak_after": 47759360
+        },
+        {
+          "family": "mortality",
+          "cells": 1,
+          "first_seconds": 0.0008975,
+          "warm_seconds": [
+            0.0006744,
+            0.0005777,
+            0.0003958
+          ],
+          "output_bytes": 24,
+          "allocations": null,
+          "before_rss": 47534080,
+          "after_rss": 47583232,
+          "lifetime_peak_before": 47759360,
+          "lifetime_peak_after": 47759360
+        },
+        {
+          "family": "vpd",
+          "cells": 1,
+          "first_seconds": 0.0004417,
+          "warm_seconds": [
+            0.0003482,
+            0.0003399,
+            0.0003329
+          ],
+          "output_bytes": 24,
+          "allocations": null,
+          "before_rss": 47583232,
+          "after_rss": 47595520,
+          "lifetime_peak_before": 47759360,
+          "lifetime_peak_after": 47759360
+        },
+        {
+          "family": "fdfm",
+          "cells": 1,
+          "first_seconds": 0.0005112,
+          "warm_seconds": [
+            0.0004625,
+            0.0004446,
+            0.000447
+          ],
+          "output_bytes": 8,
+          "allocations": null,
+          "before_rss": 47595520,
+          "after_rss": 47603712,
+          "lifetime_peak_before": 47759360,
+          "lifetime_peak_after": 47759360
+        },
+        {
+          "family": "containment",
+          "cells": 1,
+          "first_seconds": 0.0003887,
+          "warm_seconds": [
+            0.0003246,
+            0.0003069,
+            0.0003059
+          ],
+          "output_bytes": 28,
+          "allocations": null,
+          "before_rss": 47603712,
+          "after_rss": 47607808,
+          "lifetime_peak_before": 47759360,
+          "lifetime_peak_after": 47759360
+        },
+        {
+          "family": "ignite",
+          "cells": 1,
+          "first_seconds": 0.0002224,
+          "warm_seconds": [
+            0.0001707,
+            0.0001627,
+            0.0002986
+          ],
+          "output_bytes": 8,
+          "allocations": null,
+          "before_rss": 47607808,
+          "after_rss": 47616000,
+          "lifetime_peak_before": 47759360,
+          "lifetime_peak_after": 47759360
+        },
+        {
+          "family": "safety",
+          "cells": 1,
+          "first_seconds": 0.0003079,
+          "warm_seconds": [
+            0.0002517,
+            0.0002507,
+            0.0003097
+          ],
+          "output_bytes": 24,
+          "allocations": null,
+          "before_rss": 47669248,
+          "after_rss": 47669248,
+          "lifetime_peak_before": 47759360,
+          "lifetime_peak_after": 47759360
+        },
+        {
+          "family": "spot",
+          "cells": 1,
+          "first_seconds": 0.0002057,
+          "warm_seconds": [
+            0.0001536,
+            0.0001425,
+            0.0001367
+          ],
+          "output_bytes": 8,
+          "allocations": null,
+          "before_rss": 47935488,
+          "after_rss": 47939584,
+          "lifetime_peak_before": 47939584,
+          "lifetime_peak_after": 47943680
+        },
+        {
+          "family": "fire_size.scalar",
+          "cells": 1,
+          "first_seconds": 0.0002388,
+          "warm_seconds": [
+            0.0001593,
+            0.0001482,
+            0.0001572
+          ],
+          "output_bytes": 8,
+          "allocations": null,
+          "before_rss": 47939584,
+          "after_rss": 47939584,
+          "lifetime_peak_before": 47943680,
+          "lifetime_peak_after": 47943680
+        },
+        {
+          "family": "slope.scalar",
+          "cells": 1,
+          "first_seconds": 0.000451,
+          "warm_seconds": [
+            0.000355,
+            0.0003338,
+            0.0003525
+          ],
+          "output_bytes": 0,
+          "allocations": null,
+          "before_rss": 47939584,
+          "after_rss": 47968256,
+          "lifetime_peak_before": 47943680,
+          "lifetime_peak_after": 47972352
+        }
+      ],
+      "python": "3.12.8",
+      "numpy": "2.1.3",
+      "platform": "Windows-10-10.0.19044-SP0",
+      "extension_sha256": "630f2f66a7e6ebbf544aedafbaf1582eaf7e2d555893af91b094407d99d76ab8",
+      "sample": 0,
+      "profile": false
+    },
+    {
+      "rows": [
+        {
+          "family": "surface.geometry",
+          "cells": 1,
+          "first_seconds": 0.000674,
+          "warm_seconds": [
+            0.0001604,
+            0.0001201,
+            0.0001167
+          ],
+          "output_bytes": 8,
+          "allocations": null,
+          "before_rss": 45993984,
+          "after_rss": 46268416,
+          "lifetime_peak_before": 45998080,
+          "lifetime_peak_after": 46272512
+        },
+        {
+          "family": "surface.direction",
+          "cells": 1,
+          "first_seconds": 0.0002962,
+          "warm_seconds": [
+            0.0002249,
+            0.0002221,
+            0.0002062
+          ],
+          "output_bytes": 8,
+          "allocations": null,
+          "before_rss": 46268416,
+          "after_rss": 46297088,
+          "lifetime_peak_before": 46272512,
+          "lifetime_peak_after": 46301184
+        },
+        {
+          "family": "crown.component",
+          "cells": 1,
+          "first_seconds": 0.0009344,
+          "warm_seconds": [
+            0.0006466,
+            0.0005883,
+            0.0005809
+          ],
+          "output_bytes": 40,
+          "allocations": null,
+          "before_rss": 46309376,
+          "after_rss": 46346240,
+          "lifetime_peak_before": 46313472,
+          "lifetime_peak_after": 46350336
+        },
+        {
+          "family": "units",
+          "cells": 1,
+          "first_seconds": 0.0005947,
+          "warm_seconds": [
+            0.0004366,
+            0.0002656,
+            0.0002488
+          ],
+          "output_bytes": 8,
+          "allocations": null,
+          "before_rss": 46354432,
+          "after_rss": 46379008,
+          "lifetime_peak_before": 46358528,
+          "lifetime_peak_after": 46383104
+        },
+        {
+          "family": "mortality",
+          "cells": 1,
+          "first_seconds": 0.0006842,
+          "warm_seconds": [
+            0.0004164,
+            0.0004914,
+            0.0003955
+          ],
+          "output_bytes": 24,
+          "allocations": null,
+          "before_rss": 46391296,
+          "after_rss": 46452736,
+          "lifetime_peak_before": 46395392,
+          "lifetime_peak_after": 46456832
+        },
+        {
+          "family": "vpd",
+          "cells": 1,
+          "first_seconds": 0.0006609,
+          "warm_seconds": [
+            0.000366,
+            0.0003336,
+            0.0003293
+          ],
+          "output_bytes": 24,
+          "allocations": null,
+          "before_rss": 46452736,
+          "after_rss": 46469120,
+          "lifetime_peak_before": 46456832,
+          "lifetime_peak_after": 46473216
+        },
+        {
+          "family": "fdfm",
+          "cells": 1,
+          "first_seconds": 0.0004353,
+          "warm_seconds": [
+            0.0003949,
+            0.0003689,
+            0.0003654
+          ],
+          "output_bytes": 8,
+          "allocations": null,
+          "before_rss": 46469120,
+          "after_rss": 46485504,
+          "lifetime_peak_before": 46473216,
+          "lifetime_peak_after": 46489600
+        },
+        {
+          "family": "containment",
+          "cells": 1,
+          "first_seconds": 0.0003325,
+          "warm_seconds": [
+            0.0003491,
+            0.000333,
+            0.0003003
+          ],
+          "output_bytes": 28,
+          "allocations": null,
+          "before_rss": 46489600,
+          "after_rss": 46505984,
+          "lifetime_peak_before": 46493696,
+          "lifetime_peak_after": 46510080
+        },
+        {
+          "family": "ignite",
+          "cells": 1,
+          "first_seconds": 0.0001964,
+          "warm_seconds": [
+            0.0001494,
+            0.0001385,
+            0.0002072
+          ],
+          "output_bytes": 8,
+          "allocations": null,
+          "before_rss": 46505984,
+          "after_rss": 46530560,
+          "lifetime_peak_before": 46510080,
+          "lifetime_peak_after": 46534656
+        },
+        {
+          "family": "safety",
+          "cells": 1,
+          "first_seconds": 0.0002841,
+          "warm_seconds": [
+            0.0002937,
+            0.0002449,
+            0.0002359
+          ],
+          "output_bytes": 24,
+          "allocations": null,
+          "before_rss": 46530560,
+          "after_rss": 46809088,
+          "lifetime_peak_before": 46534656,
+          "lifetime_peak_after": 46813184
+        },
+        {
+          "family": "spot",
+          "cells": 1,
+          "first_seconds": 0.0002337,
+          "warm_seconds": [
+            0.0001658,
+            0.0001682,
+            0.000324
+          ],
+          "output_bytes": 8,
+          "allocations": null,
+          "before_rss": 46809088,
+          "after_rss": 46817280,
+          "lifetime_peak_before": 46813184,
+          "lifetime_peak_after": 46821376
+        },
+        {
+          "family": "fire_size.scalar",
+          "cells": 1,
+          "first_seconds": 0.0004293,
+          "warm_seconds": [
+            0.0003424,
+            0.0002957,
+            0.0001729
+          ],
+          "output_bytes": 8,
+          "allocations": null,
+          "before_rss": 46817280,
+          "after_rss": 46821376,
+          "lifetime_peak_before": 46821376,
+          "lifetime_peak_after": 46825472
+        },
+        {
+          "family": "slope.scalar",
+          "cells": 1,
+          "first_seconds": 0.0004492,
+          "warm_seconds": [
+            0.0003598,
+            0.0003396,
+            0.0003369
+          ],
+          "output_bytes": 0,
+          "allocations": null,
+          "before_rss": 46821376,
+          "after_rss": 46862336,
+          "lifetime_peak_before": 46825472,
+          "lifetime_peak_after": 46866432
+        }
+      ],
+      "python": "3.12.8",
+      "numpy": "2.1.3",
+      "platform": "Windows-10-10.0.19044-SP0",
+      "extension_sha256": "630f2f66a7e6ebbf544aedafbaf1582eaf7e2d555893af91b094407d99d76ab8",
+      "sample": 1,
+      "profile": false
+    },
+    {
+      "rows": [
+        {
+          "family": "surface.geometry",
+          "cells": 1,
+          "first_seconds": 0.0006347,
+          "warm_seconds": [
+            0.0001434,
+            0.0001558,
+            0.0001596
+          ],
+          "output_bytes": 8,
+          "allocations": null,
+          "before_rss": 45805568,
+          "after_rss": 46080000,
+          "lifetime_peak_before": 45809664,
+          "lifetime_peak_after": 46084096
+        },
+        {
+          "family": "surface.direction",
+          "cells": 1,
+          "first_seconds": 0.0002756,
+          "warm_seconds": [
+            0.0001987,
+            0.0001838,
+            0.0001792
+          ],
+          "output_bytes": 8,
+          "allocations": null,
+          "before_rss": 46080000,
+          "after_rss": 46112768,
+          "lifetime_peak_before": 46084096,
+          "lifetime_peak_after": 46116864
+        },
+        {
+          "family": "crown.component",
+          "cells": 1,
+          "first_seconds": 0.0003903,
+          "warm_seconds": [
+            0.0003631,
+            0.0003699,
+            0.0003678
+          ],
+          "output_bytes": 40,
+          "allocations": null,
+          "before_rss": 46120960,
+          "after_rss": 46157824,
+          "lifetime_peak_before": 46125056,
+          "lifetime_peak_after": 46161920
+        },
+        {
+          "family": "units",
+          "cells": 1,
+          "first_seconds": 0.0002744,
+          "warm_seconds": [
+            0.0001929,
+            0.0001882,
+            0.0001972
+          ],
+          "output_bytes": 8,
+          "allocations": null,
+          "before_rss": 46166016,
+          "after_rss": 46190592,
+          "lifetime_peak_before": 46170112,
+          "lifetime_peak_after": 46194688
+        },
+        {
+          "family": "mortality",
+          "cells": 1,
+          "first_seconds": 0.0006576,
+          "warm_seconds": [
+            0.0003942,
+            0.0004842,
+            0.0003515
+          ],
+          "output_bytes": 24,
+          "allocations": null,
+          "before_rss": 46206976,
+          "after_rss": 46264320,
+          "lifetime_peak_before": 46211072,
+          "lifetime_peak_after": 46268416
+        },
+        {
+          "family": "vpd",
+          "cells": 1,
+          "first_seconds": 0.0003785,
+          "warm_seconds": [
+            0.0003143,
+            0.0003019,
+            0.0002946
+          ],
+          "output_bytes": 24,
+          "allocations": null,
+          "before_rss": 46264320,
+          "after_rss": 46280704,
+          "lifetime_peak_before": 46268416,
+          "lifetime_peak_after": 46284800
+        },
+        {
+          "family": "fdfm",
+          "cells": 1,
+          "first_seconds": 0.0004415,
+          "warm_seconds": [
+            0.0003804,
+            0.0003735,
+            0.0003629
+          ],
+          "output_bytes": 8,
+          "allocations": null,
+          "before_rss": 46280704,
+          "after_rss": 46305280,
+          "lifetime_peak_before": 46284800,
+          "lifetime_peak_after": 46309376
+        },
+        {
+          "family": "containment",
+          "cells": 1,
+          "first_seconds": 0.0003216,
+          "warm_seconds": [
+            0.0002736,
+            0.0002615,
+            0.000272
+          ],
+          "output_bytes": 28,
+          "allocations": null,
+          "before_rss": 46305280,
+          "after_rss": 46317568,
+          "lifetime_peak_before": 46309376,
+          "lifetime_peak_after": 46321664
+        },
+        {
+          "family": "ignite",
+          "cells": 1,
+          "first_seconds": 0.0001915,
+          "warm_seconds": [
+            0.0001786,
+            0.0001877,
+            0.0001668
+          ],
+          "output_bytes": 8,
+          "allocations": null,
+          "before_rss": 46321664,
+          "after_rss": 46342144,
+          "lifetime_peak_before": 46325760,
+          "lifetime_peak_after": 46346240
+        },
+        {
+          "family": "safety",
+          "cells": 1,
+          "first_seconds": 0.0002999,
+          "warm_seconds": [
+            0.0003842,
+            0.0002362,
+            0.0002129
+          ],
+          "output_bytes": 24,
+          "allocations": null,
+          "before_rss": 46342144,
+          "after_rss": 46354432,
+          "lifetime_peak_before": 46346240,
+          "lifetime_peak_after": 46358528
+        },
+        {
+          "family": "spot",
+          "cells": 1,
+          "first_seconds": 0.0002423,
+          "warm_seconds": [
+            0.0001622,
+            0.0001443,
+            0.0001378
+          ],
+          "output_bytes": 8,
+          "allocations": null,
+          "before_rss": 46354432,
+          "after_rss": 46362624,
+          "lifetime_peak_before": 46358528,
+          "lifetime_peak_after": 46366720
+        },
+        {
+          "family": "fire_size.scalar",
+          "cells": 1,
+          "first_seconds": 0.0002476,
+          "warm_seconds": [
+            0.0001674,
+            0.0001549,
+            0.0001512
+          ],
+          "output_bytes": 8,
+          "allocations": null,
+          "before_rss": 46362624,
+          "after_rss": 46366720,
+          "lifetime_peak_before": 46366720,
+          "lifetime_peak_after": 46370816
+        },
+        {
+          "family": "slope.scalar",
+          "cells": 1,
+          "first_seconds": 0.0004429,
+          "warm_seconds": [
+            0.000343,
+            0.000622,
+            0.0004418
+          ],
+          "output_bytes": 0,
+          "allocations": null,
+          "before_rss": 46366720,
+          "after_rss": 46411776,
+          "lifetime_peak_before": 46370816,
+          "lifetime_peak_after": 46415872
+        }
+      ],
+      "python": "3.12.8",
+      "numpy": "2.1.3",
+      "platform": "Windows-10-10.0.19044-SP0",
+      "extension_sha256": "630f2f66a7e6ebbf544aedafbaf1582eaf7e2d555893af91b094407d99d76ab8",
+      "sample": 2,
+      "profile": false
+    },
+    {
+      "rows": [
+        {
+          "family": "surface.geometry",
+          "cells": 1,
+          "first_seconds": null,
+          "warm_seconds": [],
+          "output_bytes": 8,
+          "allocations": [
+            [
+              25,
+              1517,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              1,
+              1
+            ],
+            [
+              0,
+              0,
+              1,
+              1
+            ]
+          ],
+          "before_rss": 47325184,
+          "after_rss": 47620096,
+          "lifetime_peak_before": 48005120,
+          "lifetime_peak_after": 48005120
+        },
+        {
+          "family": "surface.direction",
+          "cells": 1,
+          "first_seconds": null,
+          "warm_seconds": [],
+          "output_bytes": 8,
+          "allocations": [
+            [
+              22,
+              1979,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              1,
+              1
+            ],
+            [
+              0,
+              0,
+              1,
+              1
+            ]
+          ],
+          "before_rss": 47620096,
+          "after_rss": 47648768,
+          "lifetime_peak_before": 48005120,
+          "lifetime_peak_after": 48005120
+        },
+        {
+          "family": "crown.component",
+          "cells": 1,
+          "first_seconds": null,
+          "warm_seconds": [],
+          "output_bytes": 40,
+          "allocations": [
+            [
+              93,
+              6159,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              3,
+              1
+            ],
+            [
+              0,
+              0,
+              5,
+              1
+            ]
+          ],
+          "before_rss": 47648768,
+          "after_rss": 47677440,
+          "lifetime_peak_before": 48005120,
+          "lifetime_peak_after": 48005120
+        },
+        {
+          "family": "units",
+          "cells": 1,
+          "first_seconds": null,
+          "warm_seconds": [],
+          "output_bytes": 8,
+          "allocations": [
+            [
+              16,
+              1639,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              1,
+              1
+            ],
+            [
+              0,
+              0,
+              1,
+              1
+            ]
+          ],
+          "before_rss": 47677440,
+          "after_rss": 47693824,
+          "lifetime_peak_before": 48005120,
+          "lifetime_peak_after": 48005120
+        },
+        {
+          "family": "mortality",
+          "cells": 1,
+          "first_seconds": null,
+          "warm_seconds": [],
+          "output_bytes": 24,
+          "allocations": [
+            [
+              40,
+              2679,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              1,
+              1
+            ],
+            [
+              0,
+              0,
+              3,
+              1
+            ]
+          ],
+          "before_rss": 47693824,
+          "after_rss": 47738880,
+          "lifetime_peak_before": 48005120,
+          "lifetime_peak_after": 48005120
+        },
+        {
+          "family": "vpd",
+          "cells": 1,
+          "first_seconds": null,
+          "warm_seconds": [],
+          "output_bytes": 24,
+          "allocations": [
+            [
+              38,
+              2772,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              1,
+              1
+            ],
+            [
+              0,
+              0,
+              3,
+              1
+            ]
+          ],
+          "before_rss": 47738880,
+          "after_rss": 47747072,
+          "lifetime_peak_before": 48005120,
+          "lifetime_peak_after": 48005120
+        },
+        {
+          "family": "fdfm",
+          "cells": 1,
+          "first_seconds": null,
+          "warm_seconds": [],
+          "output_bytes": 8,
+          "allocations": [
+            [
+              42,
+              2450,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              1,
+              1
+            ],
+            [
+              0,
+              0,
+              1,
+              1
+            ]
+          ],
+          "before_rss": 47747072,
+          "after_rss": 47759360,
+          "lifetime_peak_before": 48005120,
+          "lifetime_peak_after": 48005120
+        },
+        {
+          "family": "containment",
+          "cells": 1,
+          "first_seconds": null,
+          "warm_seconds": [],
+          "output_bytes": 28,
+          "allocations": [
+            [
+              48,
+              3484,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              1,
+              1
+            ],
+            [
+              0,
+              0,
+              4,
+              1
+            ]
+          ],
+          "before_rss": 47759360,
+          "after_rss": 47783936,
+          "lifetime_peak_before": 48005120,
+          "lifetime_peak_after": 48005120
+        },
+        {
+          "family": "ignite",
+          "cells": 1,
+          "first_seconds": null,
+          "warm_seconds": [],
+          "output_bytes": 8,
+          "allocations": [
+            [
+              19,
+              1404,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              1,
+              1
+            ],
+            [
+              0,
+              0,
+              1,
+              1
+            ]
+          ],
+          "before_rss": 47783936,
+          "after_rss": 47788032,
+          "lifetime_peak_before": 48005120,
+          "lifetime_peak_after": 48005120
+        },
+        {
+          "family": "safety",
+          "cells": 1,
+          "first_seconds": null,
+          "warm_seconds": [],
+          "output_bytes": 24,
+          "allocations": [
+            [
+              34,
+              2246,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              1,
+              1
+            ],
+            [
+              0,
+              0,
+              3,
+              1
+            ]
+          ],
+          "before_rss": 47788032,
+          "after_rss": 47788032,
+          "lifetime_peak_before": 48005120,
+          "lifetime_peak_after": 48005120
+        },
+        {
+          "family": "spot",
+          "cells": 1,
+          "first_seconds": null,
+          "warm_seconds": [],
+          "output_bytes": 8,
+          "allocations": [
+            [
+              19,
+              1394,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              1,
+              1
+            ],
+            [
+              0,
+              0,
+              1,
+              1
+            ]
+          ],
+          "before_rss": 47788032,
+          "after_rss": 47792128,
+          "lifetime_peak_before": 48005120,
+          "lifetime_peak_after": 48005120
+        },
+        {
+          "family": "fire_size.scalar",
+          "cells": 1,
+          "first_seconds": null,
+          "warm_seconds": [],
+          "output_bytes": 8,
+          "allocations": [
+            [
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0
+            ]
+          ],
+          "before_rss": 47796224,
+          "after_rss": 47796224,
+          "lifetime_peak_before": 48005120,
+          "lifetime_peak_after": 48005120
+        },
+        {
+          "family": "slope.scalar",
+          "cells": 1,
+          "first_seconds": null,
+          "warm_seconds": [],
+          "output_bytes": 0,
+          "allocations": [
+            [
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0
+            ]
+          ],
+          "before_rss": 47796224,
+          "after_rss": 47824896,
+          "lifetime_peak_before": 48005120,
+          "lifetime_peak_after": 48005120
+        }
+      ],
+      "python": "3.12.8",
+      "numpy": "2.1.3",
+      "platform": "Windows-10-10.0.19044-SP0",
+      "extension_sha256": "da98cca9006fa48c94d54f6a7bc657e894a3be2cd439edf0dfd46af9819d313b",
+      "profile": true
+    },
+    {
+      "rows": [
+        {
+          "family": "surface.geometry",
+          "cells": 10000,
+          "first_seconds": 0.001417,
+          "warm_seconds": [
+            0.0005647,
+            0.0004561,
+            0.0004441
+          ],
+          "output_bytes": 80000,
+          "allocations": null,
+          "before_rss": 45735936,
+          "after_rss": 46190592,
+          "lifetime_peak_before": 45740032,
+          "lifetime_peak_after": 46194688
+        },
+        {
+          "family": "surface.direction",
+          "cells": 10000,
+          "first_seconds": 0.0015748,
+          "warm_seconds": [
+            0.0012831,
+            0.001867,
+            0.001809
+          ],
+          "output_bytes": 80000,
+          "allocations": null,
+          "before_rss": 46190592,
+          "after_rss": 46784512,
+          "lifetime_peak_before": 46194688,
+          "lifetime_peak_after": 46788608
+        },
+        {
+          "family": "crown.component",
+          "cells": 10000,
+          "first_seconds": 0.0018571,
+          "warm_seconds": [
+            0.0016164,
+            0.0012126,
+            0.0011233
+          ],
+          "output_bytes": 160024,
+          "allocations": null,
+          "before_rss": 46792704,
+          "after_rss": 46825472,
+          "lifetime_peak_before": 46796800,
+          "lifetime_peak_after": 46829568
+        },
+        {
+          "family": "units",
+          "cells": 10000,
+          "first_seconds": 0.000414,
+          "warm_seconds": [
+            0.0002918,
+            0.0002345,
+            0.0002265
+          ],
+          "output_bytes": 80000,
+          "allocations": null,
+          "before_rss": 46837760,
+          "after_rss": 46931968,
+          "lifetime_peak_before": 46841856,
+          "lifetime_peak_after": 46936064
+        },
+        {
+          "family": "mortality",
+          "cells": 10000,
+          "first_seconds": 0.0017331,
+          "warm_seconds": [
+            0.0020561,
+            0.0019614,
+            0.0021322
+          ],
+          "output_bytes": 240000,
+          "allocations": null,
+          "before_rss": 46944256,
+          "after_rss": 46583808,
+          "lifetime_peak_before": 46948352,
+          "lifetime_peak_after": 47464448
+        },
+        {
+          "family": "vpd",
+          "cells": 10000,
+          "first_seconds": 0.0015546,
+          "warm_seconds": [
+            0.0011532,
+            0.0010378,
+            0.0010012
+          ],
+          "output_bytes": 240000,
+          "allocations": null,
+          "before_rss": 46583808,
+          "after_rss": 47153152,
+          "lifetime_peak_before": 47464448,
+          "lifetime_peak_after": 47464448
+        },
+        {
+          "family": "fdfm",
+          "cells": 10000,
+          "first_seconds": 0.0010185,
+          "warm_seconds": [
+            0.0009344,
+            0.0009194,
+            0.0008763
+          ],
+          "output_bytes": 80000,
+          "allocations": null,
+          "before_rss": 47153152,
+          "after_rss": 46559232,
+          "lifetime_peak_before": 47464448,
+          "lifetime_peak_after": 47464448
+        },
+        {
+          "family": "containment",
+          "cells": 10000,
+          "first_seconds": 0.0031457,
+          "warm_seconds": [
+            0.0032858,
+            0.0029908,
+            0.0029215
+          ],
+          "output_bytes": 280000,
+          "allocations": null,
+          "before_rss": 46567424,
+          "after_rss": 47140864,
+          "lifetime_peak_before": 47464448,
+          "lifetime_peak_after": 47464448
+        },
+        {
+          "family": "ignite",
+          "cells": 10000,
+          "first_seconds": 0.0017769,
+          "warm_seconds": [
+            0.0017768,
+            0.0013875,
+            0.0013556
+          ],
+          "output_bytes": 80000,
+          "allocations": null,
+          "before_rss": 47140864,
+          "after_rss": 46653440,
+          "lifetime_peak_before": 47464448,
+          "lifetime_peak_after": 47464448
+        },
+        {
+          "family": "safety",
+          "cells": 10000,
+          "first_seconds": 0.0007931,
+          "warm_seconds": [
+            0.0006538,
+            0.0004041,
+            0.0004199
+          ],
+          "output_bytes": 240000,
+          "allocations": null,
+          "before_rss": 46768128,
+          "after_rss": 47300608,
+          "lifetime_peak_before": 47464448,
+          "lifetime_peak_after": 47464448
+        },
+        {
+          "family": "spot",
+          "cells": 10000,
+          "first_seconds": 0.0029683,
+          "warm_seconds": [
+            0.0028776,
+            0.0033696,
+            0.0028979
+          ],
+          "output_bytes": 80000,
+          "allocations": null,
+          "before_rss": 47300608,
+          "after_rss": 47308800,
+          "lifetime_peak_before": 47464448,
+          "lifetime_peak_after": 47464448
+        }
+      ],
+      "python": "3.12.8",
+      "numpy": "2.1.3",
+      "platform": "Windows-10-10.0.19044-SP0",
+      "extension_sha256": "630f2f66a7e6ebbf544aedafbaf1582eaf7e2d555893af91b094407d99d76ab8",
+      "sample": 0,
+      "profile": false
+    },
+    {
+      "rows": [
+        {
+          "family": "surface.geometry",
+          "cells": 10000,
+          "first_seconds": 0.0012849,
+          "warm_seconds": [
+            0.0005686,
+            0.0005167,
+            0.000474
+          ],
+          "output_bytes": 80000,
+          "allocations": null,
+          "before_rss": 45744128,
+          "after_rss": 46358528,
+          "lifetime_peak_before": 45748224,
+          "lifetime_peak_after": 46362624
+        },
+        {
+          "family": "surface.direction",
+          "cells": 10000,
+          "first_seconds": 0.0017307,
+          "warm_seconds": [
+            0.0017799,
+            0.0016252,
+            0.0016521
+          ],
+          "output_bytes": 80000,
+          "allocations": null,
+          "before_rss": 46358528,
+          "after_rss": 46092288,
+          "lifetime_peak_before": 46362624,
+          "lifetime_peak_after": 46903296
+        },
+        {
+          "family": "crown.component",
+          "cells": 10000,
+          "first_seconds": 0.0014918,
+          "warm_seconds": [
+            0.0012186,
+            0.0011755,
+            0.0011256
+          ],
+          "output_bytes": 160024,
+          "allocations": null,
+          "before_rss": 46096384,
+          "after_rss": 46604288,
+          "lifetime_peak_before": 46903296,
+          "lifetime_peak_after": 46903296
+        },
+        {
+          "family": "units",
+          "cells": 10000,
+          "first_seconds": 0.0004087,
+          "warm_seconds": [
+            0.0002424,
+            0.0002286,
+            0.0002219
+          ],
+          "output_bytes": 80000,
+          "allocations": null,
+          "before_rss": 46616576,
+          "after_rss": 46714880,
+          "lifetime_peak_before": 46903296,
+          "lifetime_peak_after": 46903296
+        },
+        {
+          "family": "mortality",
+          "cells": 10000,
+          "first_seconds": 0.0020333,
+          "warm_seconds": [
+            0.0031923,
+            0.0029972,
+            0.0026525
+          ],
+          "output_bytes": 240000,
+          "allocations": null,
+          "before_rss": 46727168,
+          "after_rss": 46518272,
+          "lifetime_peak_before": 46903296,
+          "lifetime_peak_after": 47644672
+        },
+        {
+          "family": "vpd",
+          "cells": 10000,
+          "first_seconds": 0.0015791,
+          "warm_seconds": [
+            0.001117,
+            0.0010408,
+            0.0010156
+          ],
+          "output_bytes": 240000,
+          "allocations": null,
+          "before_rss": 46518272,
+          "after_rss": 47017984,
+          "lifetime_peak_before": 47644672,
+          "lifetime_peak_after": 47644672
+        },
+        {
+          "family": "fdfm",
+          "cells": 10000,
+          "first_seconds": 0.0010099,
+          "warm_seconds": [
+            0.0008572,
+            0.0016723,
+            0.0017513
+          ],
+          "output_bytes": 80000,
+          "allocations": null,
+          "before_rss": 47017984,
+          "after_rss": 47075328,
+          "lifetime_peak_before": 47644672,
+          "lifetime_peak_after": 47644672
+        },
+        {
+          "family": "containment",
+          "cells": 10000,
+          "first_seconds": 0.0037403,
+          "warm_seconds": [
+            0.0040981,
+            0.0037867,
+            0.0037959
+          ],
+          "output_bytes": 280000,
+          "allocations": null,
+          "before_rss": 47079424,
+          "after_rss": 47247360,
+          "lifetime_peak_before": 47644672,
+          "lifetime_peak_after": 47644672
+        },
+        {
+          "family": "ignite",
+          "cells": 10000,
+          "first_seconds": 0.0024666,
+          "warm_seconds": [
+            0.0021895,
+            0.0021994,
+            0.0015343
+          ],
+          "output_bytes": 80000,
+          "allocations": null,
+          "before_rss": 47251456,
+          "after_rss": 46878720,
+          "lifetime_peak_before": 47644672,
+          "lifetime_peak_after": 47644672
+        },
+        {
+          "family": "safety",
+          "cells": 10000,
+          "first_seconds": 0.0005339,
+          "warm_seconds": [
+            0.0005529,
+            0.0005493,
+            0.0004395
+          ],
+          "output_bytes": 240000,
+          "allocations": null,
+          "before_rss": 46882816,
+          "after_rss": 47214592,
+          "lifetime_peak_before": 47644672,
+          "lifetime_peak_after": 47644672
+        },
+        {
+          "family": "spot",
+          "cells": 10000,
+          "first_seconds": 0.0028501,
+          "warm_seconds": [
+            0.0028366,
+            0.0030026,
+            0.0028242
+          ],
+          "output_bytes": 80000,
+          "allocations": null,
+          "before_rss": 47214592,
+          "after_rss": 47222784,
+          "lifetime_peak_before": 47644672,
+          "lifetime_peak_after": 47644672
+        }
+      ],
+      "python": "3.12.8",
+      "numpy": "2.1.3",
+      "platform": "Windows-10-10.0.19044-SP0",
+      "extension_sha256": "630f2f66a7e6ebbf544aedafbaf1582eaf7e2d555893af91b094407d99d76ab8",
+      "sample": 1,
+      "profile": false
+    },
+    {
+      "rows": [
+        {
+          "family": "surface.geometry",
+          "cells": 10000,
+          "first_seconds": 0.0019474,
+          "warm_seconds": [
+            0.0009236,
+            0.0007603,
+            0.0009417
+          ],
+          "output_bytes": 80000,
+          "allocations": null,
+          "before_rss": 45735936,
+          "after_rss": 46436352,
+          "lifetime_peak_before": 45740032,
+          "lifetime_peak_after": 46440448
+        },
+        {
+          "family": "surface.direction",
+          "cells": 10000,
+          "first_seconds": 0.001634,
+          "warm_seconds": [
+            0.0016334,
+            0.0016753,
+            0.0017121
+          ],
+          "output_bytes": 80000,
+          "allocations": null,
+          "before_rss": 46436352,
+          "after_rss": 46137344,
+          "lifetime_peak_before": 46440448,
+          "lifetime_peak_after": 46981120
+        },
+        {
+          "family": "crown.component",
+          "cells": 10000,
+          "first_seconds": 0.0014921,
+          "warm_seconds": [
+            0.0011116,
+            0.0012988,
+            0.0011568
+          ],
+          "output_bytes": 160024,
+          "allocations": null,
+          "before_rss": 46141440,
+          "after_rss": 46968832,
+          "lifetime_peak_before": 46981120,
+          "lifetime_peak_after": 46981120
+        },
+        {
+          "family": "units",
+          "cells": 10000,
+          "first_seconds": 0.0004711,
+          "warm_seconds": [
+            0.0003533,
+            0.0003408,
+            0.0003595
+          ],
+          "output_bytes": 80000,
+          "allocations": null,
+          "before_rss": 46981120,
+          "after_rss": 47079424,
+          "lifetime_peak_before": 46985216,
+          "lifetime_peak_after": 47083520
+        },
+        {
+          "family": "mortality",
+          "cells": 10000,
+          "first_seconds": 0.0018903,
+          "warm_seconds": [
+            0.0019802,
+            0.0034809,
+            0.0045011
+          ],
+          "output_bytes": 240000,
+          "allocations": null,
+          "before_rss": 47091712,
+          "after_rss": 46809088,
+          "lifetime_peak_before": 47095808,
+          "lifetime_peak_after": 47714304
+        },
+        {
+          "family": "vpd",
+          "cells": 10000,
+          "first_seconds": 0.0013179,
+          "warm_seconds": [
+            0.0010404,
+            0.0015308,
+            0.0012518
+          ],
+          "output_bytes": 240000,
+          "allocations": null,
+          "before_rss": 46809088,
+          "after_rss": 47222784,
+          "lifetime_peak_before": 47714304,
+          "lifetime_peak_after": 47714304
+        },
+        {
+          "family": "fdfm",
+          "cells": 10000,
+          "first_seconds": 0.0011862,
+          "warm_seconds": [
+            0.0009843,
+            0.0009136,
+            0.0009124
+          ],
+          "output_bytes": 80000,
+          "allocations": null,
+          "before_rss": 47222784,
+          "after_rss": 46714880,
+          "lifetime_peak_before": 47714304,
+          "lifetime_peak_after": 47714304
+        },
+        {
+          "family": "containment",
+          "cells": 10000,
+          "first_seconds": 0.0036813,
+          "warm_seconds": [
+            0.0038038,
+            0.0039693,
+            0.0041212
+          ],
+          "output_bytes": 280000,
+          "allocations": null,
+          "before_rss": 46718976,
+          "after_rss": 47333376,
+          "lifetime_peak_before": 47714304,
+          "lifetime_peak_after": 47714304
+        },
+        {
+          "family": "ignite",
+          "cells": 10000,
+          "first_seconds": 0.0023684,
+          "warm_seconds": [
+            0.0024696,
+            0.0021471,
+            0.0020122
+          ],
+          "output_bytes": 80000,
+          "allocations": null,
+          "before_rss": 47337472,
+          "after_rss": 46845952,
+          "lifetime_peak_before": 47714304,
+          "lifetime_peak_after": 47714304
+        },
+        {
+          "family": "safety",
+          "cells": 10000,
+          "first_seconds": 0.0009768,
+          "warm_seconds": [
+            0.0007951,
+            0.0005384,
+            0.0004215
+          ],
+          "output_bytes": 240000,
+          "allocations": null,
+          "before_rss": 46850048,
+          "after_rss": 47333376,
+          "lifetime_peak_before": 47714304,
+          "lifetime_peak_after": 47714304
+        },
+        {
+          "family": "spot",
+          "cells": 10000,
+          "first_seconds": 0.0028929,
+          "warm_seconds": [
+            0.0028102,
+            0.002968,
+            0.0036041
+          ],
+          "output_bytes": 80000,
+          "allocations": null,
+          "before_rss": 47333376,
+          "after_rss": 47341568,
+          "lifetime_peak_before": 47714304,
+          "lifetime_peak_after": 47714304
+        }
+      ],
+      "python": "3.12.8",
+      "numpy": "2.1.3",
+      "platform": "Windows-10-10.0.19044-SP0",
+      "extension_sha256": "630f2f66a7e6ebbf544aedafbaf1582eaf7e2d555893af91b094407d99d76ab8",
+      "sample": 2,
+      "profile": false
+    },
+    {
+      "rows": [
+        {
+          "family": "surface.geometry",
+          "cells": 10000,
+          "first_seconds": null,
+          "warm_seconds": [],
+          "output_bytes": 80000,
+          "allocations": [
+            [
+              25,
+              161501,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              10000,
+              1
+            ],
+            [
+              0,
+              0,
+              10000,
+              1
+            ]
+          ],
+          "before_rss": 45948928,
+          "after_rss": 46428160,
+          "lifetime_peak_before": 45953024,
+          "lifetime_peak_after": 46432256
+        },
+        {
+          "family": "surface.direction",
+          "cells": 10000,
+          "first_seconds": null,
+          "warm_seconds": [],
+          "output_bytes": 80000,
+          "allocations": [
+            [
+              22,
+              321947,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              10000,
+              1
+            ],
+            [
+              0,
+              0,
+              10000,
+              1
+            ]
+          ],
+          "before_rss": 46432256,
+          "after_rss": 47030272,
+          "lifetime_peak_before": 46436352,
+          "lifetime_peak_after": 47034368
+        },
+        {
+          "family": "crown.component",
+          "cells": 10000,
+          "first_seconds": null,
+          "warm_seconds": [],
+          "output_bytes": 160024,
+          "allocations": [
+            [
+              93,
+              246135,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              10002,
+              1
+            ],
+            [
+              0,
+              0,
+              20003,
+              1
+            ]
+          ],
+          "before_rss": 47046656,
+          "after_rss": 47087616,
+          "lifetime_peak_before": 47050752,
+          "lifetime_peak_after": 47091712
+        },
+        {
+          "family": "units",
+          "cells": 10000,
+          "first_seconds": null,
+          "warm_seconds": [],
+          "output_bytes": 80000,
+          "allocations": [
+            [
+              16,
+              161623,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              10000,
+              1
+            ],
+            [
+              0,
+              0,
+              10000,
+              1
+            ]
+          ],
+          "before_rss": 47091712,
+          "after_rss": 47185920,
+          "lifetime_peak_before": 47095808,
+          "lifetime_peak_after": 47190016
+        },
+        {
+          "family": "mortality",
+          "cells": 10000,
+          "first_seconds": null,
+          "warm_seconds": [],
+          "output_bytes": 240000,
+          "allocations": [
+            [
+              40,
+              562623,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              10000,
+              1
+            ],
+            [
+              0,
+              0,
+              30000,
+              1
+            ]
+          ],
+          "before_rss": 47202304,
+          "after_rss": 46706688,
+          "lifetime_peak_before": 47206400,
+          "lifetime_peak_after": 47591424
+        },
+        {
+          "family": "vpd",
+          "cells": 10000,
+          "first_seconds": null,
+          "warm_seconds": [],
+          "output_bytes": 240000,
+          "allocations": [
+            [
+              38,
+              322740,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              10000,
+              1
+            ],
+            [
+              0,
+              0,
+              30000,
+              1
+            ]
+          ],
+          "before_rss": 46706688,
+          "after_rss": 47120384,
+          "lifetime_peak_before": 47591424,
+          "lifetime_peak_after": 47591424
+        },
+        {
+          "family": "fdfm",
+          "cells": 10000,
+          "first_seconds": null,
+          "warm_seconds": [],
+          "output_bytes": 80000,
+          "allocations": [
+            [
+              42,
+              162434,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              10000,
+              1
+            ],
+            [
+              0,
+              0,
+              10000,
+              1
+            ]
+          ],
+          "before_rss": 47124480,
+          "after_rss": 47222784,
+          "lifetime_peak_before": 47591424,
+          "lifetime_peak_after": 47591424
+        },
+        {
+          "family": "containment",
+          "cells": 10000,
+          "first_seconds": null,
+          "warm_seconds": [],
+          "output_bytes": 280000,
+          "allocations": [
+            [
+              48,
+              443440,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              10000,
+              1
+            ],
+            [
+              0,
+              0,
+              40000,
+              1
+            ]
+          ],
+          "before_rss": 47222784,
+          "after_rss": 47497216,
+          "lifetime_peak_before": 47591424,
+          "lifetime_peak_after": 47591424
+        },
+        {
+          "family": "ignite",
+          "cells": 10000,
+          "first_seconds": null,
+          "warm_seconds": [],
+          "output_bytes": 80000,
+          "allocations": [
+            [
+              19,
+              161388,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              10000,
+              1
+            ],
+            [
+              0,
+              0,
+              10000,
+              1
+            ]
+          ],
+          "before_rss": 47497216,
+          "after_rss": 47513600,
+          "lifetime_peak_before": 47591424,
+          "lifetime_peak_after": 47591424
+        },
+        {
+          "family": "safety",
+          "cells": 10000,
+          "first_seconds": null,
+          "warm_seconds": [],
+          "output_bytes": 240000,
+          "allocations": [
+            [
+              34,
+              322214,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              10000,
+              1
+            ],
+            [
+              0,
+              0,
+              30000,
+              1
+            ]
+          ],
+          "before_rss": 47521792,
+          "after_rss": 47558656,
+          "lifetime_peak_before": 47591424,
+          "lifetime_peak_after": 47591424
+        },
+        {
+          "family": "spot",
+          "cells": 10000,
+          "first_seconds": null,
+          "warm_seconds": [],
+          "output_bytes": 80000,
+          "allocations": [
+            [
+              19,
+              161378,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              10000,
+              1
+            ],
+            [
+              0,
+              0,
+              10000,
+              1
+            ]
+          ],
+          "before_rss": 47562752,
+          "after_rss": 47575040,
+          "lifetime_peak_before": 47591424,
+          "lifetime_peak_after": 47591424
+        }
+      ],
+      "python": "3.12.8",
+      "numpy": "2.1.3",
+      "platform": "Windows-10-10.0.19044-SP0",
+      "extension_sha256": "da98cca9006fa48c94d54f6a7bc657e894a3be2cd439edf0dfd46af9819d313b",
+      "profile": true
+    },
+    {
+      "rows": [
+        {
+          "family": "surface.geometry",
+          "cells": 100000,
+          "first_seconds": 0.0071254,
+          "warm_seconds": [
+            0.0054045,
+            0.0063414,
+            0.0058277
+          ],
+          "output_bytes": 800000,
+          "allocations": null,
+          "before_rss": 47263744,
+          "after_rss": 48279552,
+          "lifetime_peak_before": 47267840,
+          "lifetime_peak_after": 51163136
+        },
+        {
+          "family": "surface.direction",
+          "cells": 100000,
+          "first_seconds": 0.019687,
+          "warm_seconds": [
+            0.0180051,
+            0.015548,
+            0.01372
+          ],
+          "output_bytes": 800000,
+          "allocations": null,
+          "before_rss": 48279552,
+          "after_rss": 48730112,
+          "lifetime_peak_before": 51163136,
+          "lifetime_peak_after": 55922688
+        },
+        {
+          "family": "crown.component",
+          "cells": 100000,
+          "first_seconds": 0.0110255,
+          "warm_seconds": [
+            0.012149,
+            0.0113025,
+            0.0102134
+          ],
+          "output_bytes": 1600024,
+          "allocations": null,
+          "before_rss": 48734208,
+          "after_rss": 49184768,
+          "lifetime_peak_before": 55922688,
+          "lifetime_peak_after": 55922688
+        },
+        {
+          "family": "units",
+          "cells": 100000,
+          "first_seconds": 0.0050483,
+          "warm_seconds": [
+            0.0024536,
+            0.0020775,
+            0.0029027
+          ],
+          "output_bytes": 800000,
+          "allocations": null,
+          "before_rss": 49197056,
+          "after_rss": 49283072,
+          "lifetime_peak_before": 55922688,
+          "lifetime_peak_after": 55922688
+        },
+        {
+          "family": "mortality",
+          "cells": 100000,
+          "first_seconds": 0.0169904,
+          "warm_seconds": [
+            0.0176243,
+            0.016453,
+            0.0197965
+          ],
+          "output_bytes": 2400000,
+          "allocations": null,
+          "before_rss": 49295360,
+          "after_rss": 50192384,
+          "lifetime_peak_before": 55922688,
+          "lifetime_peak_after": 61448192
+        },
+        {
+          "family": "vpd",
+          "cells": 100000,
+          "first_seconds": 0.0115771,
+          "warm_seconds": [
+            0.0109572,
+            0.0113039,
+            0.011787
+          ],
+          "output_bytes": 2400000,
+          "allocations": null,
+          "before_rss": 50192384,
+          "after_rss": 50180096,
+          "lifetime_peak_before": 61448192,
+          "lifetime_peak_after": 61448192
+        },
+        {
+          "family": "fdfm",
+          "cells": 100000,
+          "first_seconds": 0.0073393,
+          "warm_seconds": [
+            0.007473,
+            0.0073406,
+            0.0070836
+          ],
+          "output_bytes": 800000,
+          "allocations": null,
+          "before_rss": 50180096,
+          "after_rss": 48607232,
+          "lifetime_peak_before": 61448192,
+          "lifetime_peak_after": 61448192
+        },
+        {
+          "family": "containment",
+          "cells": 100000,
+          "first_seconds": 0.0324744,
+          "warm_seconds": [
+            0.0360319,
+            0.0384428,
+            0.0351709
+          ],
+          "output_bytes": 2800000,
+          "allocations": null,
+          "before_rss": 48611328,
+          "after_rss": 50630656,
+          "lifetime_peak_before": 61448192,
+          "lifetime_peak_after": 61448192
+        },
+        {
+          "family": "ignite",
+          "cells": 100000,
+          "first_seconds": 0.0172424,
+          "warm_seconds": [
+            0.0191066,
+            0.017583,
+            0.0167762
+          ],
+          "output_bytes": 800000,
+          "allocations": null,
+          "before_rss": 50634752,
+          "after_rss": 48640000,
+          "lifetime_peak_before": 61448192,
+          "lifetime_peak_after": 61448192
+        },
+        {
+          "family": "safety",
+          "cells": 100000,
+          "first_seconds": 0.0063847,
+          "warm_seconds": [
+            0.0060507,
+            0.006179,
+            0.0059123
+          ],
+          "output_bytes": 2400000,
+          "allocations": null,
+          "before_rss": 48644096,
+          "after_rss": 51073024,
+          "lifetime_peak_before": 61448192,
+          "lifetime_peak_after": 61448192
+        },
+        {
+          "family": "spot",
+          "cells": 100000,
+          "first_seconds": 0.0304295,
+          "warm_seconds": [
+            0.0300767,
+            0.0301625,
+            0.03278
+          ],
+          "output_bytes": 800000,
+          "allocations": null,
+          "before_rss": 51073024,
+          "after_rss": 48676864,
+          "lifetime_peak_before": 61448192,
+          "lifetime_peak_after": 61448192
+        }
+      ],
+      "python": "3.12.8",
+      "numpy": "2.1.3",
+      "platform": "Windows-10-10.0.19044-SP0",
+      "extension_sha256": "630f2f66a7e6ebbf544aedafbaf1582eaf7e2d555893af91b094407d99d76ab8",
+      "sample": 0,
+      "profile": false
+    },
+    {
+      "rows": [
+        {
+          "family": "surface.geometry",
+          "cells": 100000,
+          "first_seconds": 0.0070815,
+          "warm_seconds": [
+            0.0088357,
+            0.0082526,
+            0.0087258
+          ],
+          "output_bytes": 800000,
+          "allocations": null,
+          "before_rss": 47284224,
+          "after_rss": 48627712,
+          "lifetime_peak_before": 47288320,
+          "lifetime_peak_after": 51101696
+        },
+        {
+          "family": "surface.direction",
+          "cells": 100000,
+          "first_seconds": 0.0162128,
+          "warm_seconds": [
+            0.014104,
+            0.0146673,
+            0.0163216
+          ],
+          "output_bytes": 800000,
+          "allocations": null,
+          "before_rss": 48627712,
+          "after_rss": 48676864,
+          "lifetime_peak_before": 51101696,
+          "lifetime_peak_after": 55873536
+        },
+        {
+          "family": "crown.component",
+          "cells": 100000,
+          "first_seconds": 0.0106717,
+          "warm_seconds": [
+            0.0105577,
+            0.0110335,
+            0.010805
+          ],
+          "output_bytes": 1600024,
+          "allocations": null,
+          "before_rss": 48685056,
+          "after_rss": 49934336,
+          "lifetime_peak_before": 55873536,
+          "lifetime_peak_after": 55873536
+        },
+        {
+          "family": "units",
+          "cells": 100000,
+          "first_seconds": 0.0023148,
+          "warm_seconds": [
+            0.0021192,
+            0.0025251,
+            0.0025744
+          ],
+          "output_bytes": 800000,
+          "allocations": null,
+          "before_rss": 49946624,
+          "after_rss": 48431104,
+          "lifetime_peak_before": 55873536,
+          "lifetime_peak_after": 55873536
+        },
+        {
+          "family": "mortality",
+          "cells": 100000,
+          "first_seconds": 0.0160883,
+          "warm_seconds": [
+            0.0165014,
+            0.0164038,
+            0.0163942
+          ],
+          "output_bytes": 2400000,
+          "allocations": null,
+          "before_rss": 48443392,
+          "after_rss": 50139136,
+          "lifetime_peak_before": 55873536,
+          "lifetime_peak_after": 61390848
+        },
+        {
+          "family": "vpd",
+          "cells": 100000,
+          "first_seconds": 0.0114809,
+          "warm_seconds": [
+            0.0119841,
+            0.0111774,
+            0.010867
+          ],
+          "output_bytes": 2400000,
+          "allocations": null,
+          "before_rss": 50139136,
+          "after_rss": 50126848,
+          "lifetime_peak_before": 61390848,
+          "lifetime_peak_after": 61390848
+        },
+        {
+          "family": "fdfm",
+          "cells": 100000,
+          "first_seconds": 0.0076702,
+          "warm_seconds": [
+            0.0088603,
+            0.0113689,
+            0.0115222
+          ],
+          "output_bytes": 800000,
+          "allocations": null,
+          "before_rss": 50126848,
+          "after_rss": 48549888,
+          "lifetime_peak_before": 61390848,
+          "lifetime_peak_after": 61390848
+        },
+        {
+          "family": "containment",
+          "cells": 100000,
+          "first_seconds": 0.0317412,
+          "warm_seconds": [
+            0.0330828,
+            0.0331304,
+            0.0313813
+          ],
+          "output_bytes": 2800000,
+          "allocations": null,
+          "before_rss": 48558080,
+          "after_rss": 50577408,
+          "lifetime_peak_before": 61390848,
+          "lifetime_peak_after": 61390848
+        },
+        {
+          "family": "ignite",
+          "cells": 100000,
+          "first_seconds": 0.0160683,
+          "warm_seconds": [
+            0.0158086,
+            0.015115,
+            0.0157212
+          ],
+          "output_bytes": 800000,
+          "allocations": null,
+          "before_rss": 50577408,
+          "after_rss": 48713728,
+          "lifetime_peak_before": 61390848,
+          "lifetime_peak_after": 61390848
+        },
+        {
+          "family": "safety",
+          "cells": 100000,
+          "first_seconds": 0.0056652,
+          "warm_seconds": [
+            0.0059706,
+            0.0061323,
+            0.0057488
+          ],
+          "output_bytes": 2400000,
+          "allocations": null,
+          "before_rss": 48717824,
+          "after_rss": 50618368,
+          "lifetime_peak_before": 61390848,
+          "lifetime_peak_after": 61390848
+        },
+        {
+          "family": "spot",
+          "cells": 100000,
+          "first_seconds": 0.0292773,
+          "warm_seconds": [
+            0.0292348,
+            0.0307231,
+            0.0356673
+          ],
+          "output_bytes": 800000,
+          "allocations": null,
+          "before_rss": 50618368,
+          "after_rss": 49020928,
+          "lifetime_peak_before": 61390848,
+          "lifetime_peak_after": 61390848
+        }
+      ],
+      "python": "3.12.8",
+      "numpy": "2.1.3",
+      "platform": "Windows-10-10.0.19044-SP0",
+      "extension_sha256": "630f2f66a7e6ebbf544aedafbaf1582eaf7e2d555893af91b094407d99d76ab8",
+      "sample": 1,
+      "profile": false
+    },
+    {
+      "rows": [
+        {
+          "family": "surface.geometry",
+          "cells": 100000,
+          "first_seconds": 0.0057625,
+          "warm_seconds": [
+            0.0050355,
+            0.0056258,
+            0.0055138
+          ],
+          "output_bytes": 800000,
+          "allocations": null,
+          "before_rss": 47378432,
+          "after_rss": 48459776,
+          "lifetime_peak_before": 47382528,
+          "lifetime_peak_after": 51281920
+        },
+        {
+          "family": "surface.direction",
+          "cells": 100000,
+          "first_seconds": 0.0174526,
+          "warm_seconds": [
+            0.0163839,
+            0.0136476,
+            0.0133269
+          ],
+          "output_bytes": 800000,
+          "allocations": null,
+          "before_rss": 48459776,
+          "after_rss": 49311744,
+          "lifetime_peak_before": 51281920,
+          "lifetime_peak_after": 56098816
+        },
+        {
+          "family": "crown.component",
+          "cells": 100000,
+          "first_seconds": 0.0125793,
+          "warm_seconds": [
+            0.0147595,
+            0.0185199,
+            0.0156436
+          ],
+          "output_bytes": 1600024,
+          "allocations": null,
+          "before_rss": 49315840,
+          "after_rss": 49356800,
+          "lifetime_peak_before": 56098816,
+          "lifetime_peak_after": 56098816
+        },
+        {
+          "family": "units",
+          "cells": 100000,
+          "first_seconds": 0.0035325,
+          "warm_seconds": [
+            0.0030289,
+            0.0027789,
+            0.0027837
+          ],
+          "output_bytes": 800000,
+          "allocations": null,
+          "before_rss": 49369088,
+          "after_rss": 49467392,
+          "lifetime_peak_before": 56098816,
+          "lifetime_peak_after": 56098816
+        },
+        {
+          "family": "mortality",
+          "cells": 100000,
+          "first_seconds": 0.0197845,
+          "warm_seconds": [
+            0.0202399,
+            0.0222039,
+            0.0319016
+          ],
+          "output_bytes": 2400000,
+          "allocations": null,
+          "before_rss": 49479680,
+          "after_rss": 50364416,
+          "lifetime_peak_before": 56098816,
+          "lifetime_peak_after": 61624320
+        },
+        {
+          "family": "vpd",
+          "cells": 100000,
+          "first_seconds": 0.0146422,
+          "warm_seconds": [
+            0.0140207,
+            0.0155078,
+            0.0143198
+          ],
+          "output_bytes": 2400000,
+          "allocations": null,
+          "before_rss": 50364416,
+          "after_rss": 50376704,
+          "lifetime_peak_before": 61624320,
+          "lifetime_peak_after": 61624320
+        },
+        {
+          "family": "fdfm",
+          "cells": 100000,
+          "first_seconds": 0.0187978,
+          "warm_seconds": [
+            0.0158,
+            0.0335528,
+            0.0124592
+          ],
+          "output_bytes": 800000,
+          "allocations": null,
+          "before_rss": 50376704,
+          "after_rss": 48787456,
+          "lifetime_peak_before": 61624320,
+          "lifetime_peak_after": 61624320
+        },
+        {
+          "family": "containment",
+          "cells": 100000,
+          "first_seconds": 0.0426126,
+          "warm_seconds": [
+            0.0433445,
+            0.0468133,
+            0.0546309
+          ],
+          "output_bytes": 2800000,
+          "allocations": null,
+          "before_rss": 48791552,
+          "after_rss": 50806784,
+          "lifetime_peak_before": 61624320,
+          "lifetime_peak_after": 61624320
+        },
+        {
+          "family": "ignite",
+          "cells": 100000,
+          "first_seconds": 0.0247224,
+          "warm_seconds": [
+            0.0259289,
+            0.0221126,
+            0.0220036
+          ],
+          "output_bytes": 800000,
+          "allocations": null,
+          "before_rss": 50810880,
+          "after_rss": 48828416,
+          "lifetime_peak_before": 61624320,
+          "lifetime_peak_after": 61624320
+        },
+        {
+          "family": "safety",
+          "cells": 100000,
+          "first_seconds": 0.0094619,
+          "warm_seconds": [
+            0.0083401,
+            0.0098104,
+            0.0122085
+          ],
+          "output_bytes": 2400000,
+          "allocations": null,
+          "before_rss": 49098752,
+          "after_rss": 50724864,
+          "lifetime_peak_before": 61624320,
+          "lifetime_peak_after": 61624320
+        },
+        {
+          "family": "spot",
+          "cells": 100000,
+          "first_seconds": 0.0394245,
+          "warm_seconds": [
+            0.0492181,
+            0.0422837,
+            0.0428166
+          ],
+          "output_bytes": 800000,
+          "allocations": null,
+          "before_rss": 50724864,
+          "after_rss": 49930240,
+          "lifetime_peak_before": 61624320,
+          "lifetime_peak_after": 61624320
+        }
+      ],
+      "python": "3.12.8",
+      "numpy": "2.1.3",
+      "platform": "Windows-10-10.0.19044-SP0",
+      "extension_sha256": "630f2f66a7e6ebbf544aedafbaf1582eaf7e2d555893af91b094407d99d76ab8",
+      "sample": 2,
+      "profile": false
+    },
+    {
+      "rows": [
+        {
+          "family": "surface.geometry",
+          "cells": 100000,
+          "first_seconds": null,
+          "warm_seconds": [],
+          "output_bytes": 800000,
+          "allocations": [
+            [
+              25,
+              1601501,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              100000,
+              1
+            ],
+            [
+              0,
+              0,
+              100000,
+              1
+            ]
+          ],
+          "before_rss": 47153152,
+          "after_rss": 48680960,
+          "lifetime_peak_before": 47157248,
+          "lifetime_peak_after": 50278400
+        },
+        {
+          "family": "surface.direction",
+          "cells": 100000,
+          "first_seconds": null,
+          "warm_seconds": [],
+          "output_bytes": 800000,
+          "allocations": [
+            [
+              22,
+              3201947,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              100000,
+              1
+            ],
+            [
+              0,
+              0,
+              100000,
+              1
+            ]
+          ],
+          "before_rss": 48685056,
+          "after_rss": 48066560,
+          "lifetime_peak_before": 50278400,
+          "lifetime_peak_after": 55930880
+        },
+        {
+          "family": "crown.component",
+          "cells": 100000,
+          "first_seconds": null,
+          "warm_seconds": [],
+          "output_bytes": 1600024,
+          "allocations": [
+            [
+              93,
+              2406135,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              100002,
+              1
+            ],
+            [
+              0,
+              0,
+              200003,
+              1
+            ]
+          ],
+          "before_rss": 48082944,
+          "after_rss": 48914432,
+          "lifetime_peak_before": 55930880,
+          "lifetime_peak_after": 55930880
+        },
+        {
+          "family": "units",
+          "cells": 100000,
+          "first_seconds": null,
+          "warm_seconds": [],
+          "output_bytes": 800000,
+          "allocations": [
+            [
+              16,
+              1601623,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              100000,
+              1
+            ],
+            [
+              0,
+              0,
+              100000,
+              1
+            ]
+          ],
+          "before_rss": 48918528,
+          "after_rss": 48222208,
+          "lifetime_peak_before": 55930880,
+          "lifetime_peak_after": 55930880
+        },
+        {
+          "family": "mortality",
+          "cells": 100000,
+          "first_seconds": null,
+          "warm_seconds": [],
+          "output_bytes": 2400000,
+          "allocations": [
+            [
+              40,
+              5602623,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              100000,
+              1
+            ],
+            [
+              0,
+              0,
+              300000,
+              1
+            ]
+          ],
+          "before_rss": 48238592,
+          "after_rss": 49909760,
+          "lifetime_peak_before": 55930880,
+          "lifetime_peak_after": 59576320
+        },
+        {
+          "family": "vpd",
+          "cells": 100000,
+          "first_seconds": null,
+          "warm_seconds": [],
+          "output_bytes": 2400000,
+          "allocations": [
+            [
+              38,
+              3202740,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              100000,
+              1
+            ],
+            [
+              0,
+              0,
+              300000,
+              1
+            ]
+          ],
+          "before_rss": 49909760,
+          "after_rss": 49917952,
+          "lifetime_peak_before": 59576320,
+          "lifetime_peak_after": 59576320
+        },
+        {
+          "family": "fdfm",
+          "cells": 100000,
+          "first_seconds": null,
+          "warm_seconds": [],
+          "output_bytes": 800000,
+          "allocations": [
+            [
+              42,
+              1602434,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              100000,
+              1
+            ],
+            [
+              0,
+              0,
+              100000,
+              1
+            ]
+          ],
+          "before_rss": 49922048,
+          "after_rss": 48345088,
+          "lifetime_peak_before": 59576320,
+          "lifetime_peak_after": 59576320
+        },
+        {
+          "family": "containment",
+          "cells": 100000,
+          "first_seconds": null,
+          "warm_seconds": [],
+          "output_bytes": 2800000,
+          "allocations": [
+            [
+              48,
+              4403440,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              100000,
+              1
+            ],
+            [
+              0,
+              0,
+              400000,
+              1
+            ]
+          ],
+          "before_rss": 48345088,
+          "after_rss": 51183616,
+          "lifetime_peak_before": 59576320,
+          "lifetime_peak_after": 59576320
+        },
+        {
+          "family": "ignite",
+          "cells": 100000,
+          "first_seconds": null,
+          "warm_seconds": [],
+          "output_bytes": 800000,
+          "allocations": [
+            [
+              19,
+              1601388,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              100000,
+              1
+            ],
+            [
+              0,
+              0,
+              100000,
+              1
+            ]
+          ],
+          "before_rss": 51183616,
+          "after_rss": 48377856,
+          "lifetime_peak_before": 59576320,
+          "lifetime_peak_after": 59576320
+        },
+        {
+          "family": "safety",
+          "cells": 100000,
+          "first_seconds": null,
+          "warm_seconds": [],
+          "output_bytes": 2400000,
+          "allocations": [
+            [
+              34,
+              3202214,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              100000,
+              1
+            ],
+            [
+              0,
+              0,
+              300000,
+              1
+            ]
+          ],
+          "before_rss": 48390144,
+          "after_rss": 51068928,
+          "lifetime_peak_before": 59576320,
+          "lifetime_peak_after": 59576320
+        },
+        {
+          "family": "spot",
+          "cells": 100000,
+          "first_seconds": null,
+          "warm_seconds": [],
+          "output_bytes": 800000,
+          "allocations": [
+            [
+              19,
+              1601378,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              100000,
+              1
+            ],
+            [
+              0,
+              0,
+              100000,
+              1
+            ]
+          ],
+          "before_rss": 51073024,
+          "after_rss": 48693248,
+          "lifetime_peak_before": 59576320,
+          "lifetime_peak_after": 59576320
+        }
+      ],
+      "python": "3.12.8",
+      "numpy": "2.1.3",
+      "platform": "Windows-10-10.0.19044-SP0",
+      "extension_sha256": "da98cca9006fa48c94d54f6a7bc657e894a3be2cd439edf0dfd46af9819d313b",
+      "profile": true
+    }
+  ]
+}

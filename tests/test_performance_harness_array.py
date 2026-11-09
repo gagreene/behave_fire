@@ -284,6 +284,23 @@ def test_pairing_and_seed_are_reproducible():
             ("python", 1), ("rust", 1), ("rust", 4)]
 
 
+def test_profile_component_boundary_never_requests_removed_timing_payloads():
+    import numpy as np
+
+    result = {'': np.array([1.])}
+    samples = []
+
+    def component(operation):
+        assert operation == 'surface.calculate_eccentricity'
+        return result
+
+    profile = _tool('benchmark_backends')._profile_batch(component, samples, timers=False)
+    assert profile('surface.calculate_eccentricity') is result
+    assert samples[0]['native_output_bytes'] == 8
+    assert samples[0]['native_metadata_bytes'] == 0
+    assert 'detached_seconds' not in samples[0]
+
+
 def test_profile_counts_nested_api3_arrays_without_counting_scalar_schema():
     import numpy as np
 

@@ -23,7 +23,7 @@ def _mutate_after_first_copy(monkeypatch, mutate):
 
         return batch
 
-    for name in ('batch', 'model_batch', 'model_groups'):
+    for name in ('component_batch', 'model_batch', 'model_groups'):
         monkeypatch.setattr(_bridge._native, name, instrument(getattr(_bridge._native, name)))
     return calls
 
@@ -41,7 +41,8 @@ def test_crown_partition_owns_later_masked_field(monkeypatch):
     inputs = dict(surface_fli=np.array([2.]), crown_ros=crown_ros,
                   critical_surface_fli=np.array([4.]), critical_crown_ros=np.array([8.]))
     from behave_fire.python import crown
-    expected = crown.calculate_crown_fire_ratios(**inputs)
+    from component_f64_reference import reference
+    expected = reference(crown.calculate_crown_fire_ratios, inputs)
 
     def mutate():
         crown_ros.data[:] = 40.
@@ -108,7 +109,11 @@ def test_facade_surface_owns_moisture_before_first_conversion(monkeypatch):
 def test_live_scalar_array_and_boxed_payload_types_match_reference(value):
     from behave_fire.python import surface
 
-    expected = surface.calculate_fire_length(value, 0, 1)
+    if np.asanyarray(value).dtype.kind == 'O':
+        with pytest.raises(TypeError):
+            native.surface.calculate_fire_length(value, 0, 1)
+        return
+    expected = surface.calculate_fire_length(np.asarray(value, dtype=np.float64), 0., 1.)
     actual = native.surface.calculate_fire_length(value, 0, 1)
     if np.ndim(expected) == 0:
         assert isinstance(actual, np.ndarray)

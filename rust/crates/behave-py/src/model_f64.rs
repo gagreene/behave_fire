@@ -1,5 +1,5 @@
 //! Direct normalized model boundary; no legacy numeric tags enter cell loops.
-use crate::prepared::units::Convert;
+use crate::component_units::Convert;
 use behave_fire::engine::{
     run_model_observed, CrownPlan, ModelBatch, ModelRun, OutputRequest, PreparedFuel,
     PreparedFuels, SurfaceOptions, SurfacePlan, SurfaceSource, WafMethod, WindHeight,
@@ -141,10 +141,26 @@ pub(crate) fn array<T: Element + Copy>(value: &Bound<'_, PyAny>, name: &str) -> 
             "{name} must have normalized native-endian storage"
         )));
     }
+    // rust-numpy's borrowed ndarray view supports at most 32 axes. Flatten
+    // normalized base arrays while attached; shape restoration uses the checked
+    // logical grid and never needs the original Python storage after detach.
+    let flattened = if value.getattr("ndim")?.extract::<usize>()? > 32 {
+        Some(value.call_method1("ravel", ("C",))?)
+    } else {
+        None
+    };
+    let value = flattened.as_ref().unwrap_or(value);
     let view = value
         .extract::<PyReadonlyArrayDyn<'_, T>>()
         .map_err(|_| PyTypeError::new_err(format!("wrong normalized dtype for {name}")))?;
-    Ok(view.as_array().iter().copied().collect())
+    let array = view.as_array();
+    // Normalized C-order columns can use a bulk owned copy. Strided private
+    // inputs retain logical C-order traversal rather than copying raw memory.
+    Ok(if let Some(values) = array.as_slice() {
+        values.to_vec()
+    } else {
+        array.iter().copied().collect()
+    })
 }
 
 fn required_array<T: Element + Copy>(values: &Bound<'_, PyDict>, name: &str) -> PyResult<Vec<T>> {
@@ -300,23 +316,47 @@ pub(crate) fn export<'py>(
         ModelBatch::Surface(v) => v.into_named_columns(),
         ModelBatch::Crown(v) => v.into_named_columns(),
     };
+    export_columns(py, columns, shape)
+}
+
+/// Move existing primitive column buffers directly into owned NumPy arrays.
+pub(crate) fn export_columns<'py, S: AsRef<str>>(
+    py: Python<'py>,
+    columns: impl IntoIterator<Item = (S, ColumnValues)>,
+    shape: &[usize],
+) -> PyResult<Bound<'py, PyDict>> {
     let result = PyDict::new(py);
     for (name, values) in columns {
+        if shape.len() > 32 {
+            // The conversion side has the same rust-numpy 32-axis limitation.
+            // Transfer the owning vector once, then restore logical axes with
+            // NumPy's checked reshape while attached to the interpreter.
+            let flat = match values {
+                ColumnValues::Float64(v) => v.into_pyarray(py).into_any(),
+                ColumnValues::Int32(v) => v.into_pyarray(py).into_any(),
+                ColumnValues::Bool(v) => v.into_pyarray(py).into_any(),
+            };
+            result.set_item(
+                name.as_ref(),
+                flat.call_method1("reshape", (shape.to_vec(),))?,
+            )?;
+            continue;
+        }
         match values {
             ColumnValues::Float64(v) => result.set_item(
-                name,
+                name.as_ref(),
                 ArrayD::from_shape_vec(IxDyn(shape), v)
                     .map_err(|e| PyValueError::new_err(e.to_string()))?
                     .into_pyarray(py),
             )?,
             ColumnValues::Int32(v) => result.set_item(
-                name,
+                name.as_ref(),
                 ArrayD::from_shape_vec(IxDyn(shape), v)
                     .map_err(|e| PyValueError::new_err(e.to_string()))?
                     .into_pyarray(py),
             )?,
             ColumnValues::Bool(v) => result.set_item(
-                name,
+                name.as_ref(),
                 ArrayD::from_shape_vec(IxDyn(shape), v)
                     .map_err(|e| PyValueError::new_err(e.to_string()))?
                     .into_pyarray(py),

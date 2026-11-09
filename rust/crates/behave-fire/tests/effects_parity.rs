@@ -1107,7 +1107,8 @@ fn oracle_44() {
 #[allow(deprecated, unused_variables, unused_mut)]
 fn oracle_45() {
     let actual = mortality::calculate_scorch_height(f64::NAN, 5.0, 80.0);
-    close(actual as f64, 0.0);
+    // A missing intensity is not the finite nonpositive-intensity branch.
+    close(actual as f64, f64::NAN);
 }
 
 // calculate_scorch_height/positive-infinity

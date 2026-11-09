@@ -41,9 +41,10 @@ initial `0.1.0` is a proposed package version, not publication authorization.
 
 ## License and provenance
 
-Project-owned code is MIT licensed. The NumPy-derived float32 exponential
-kernel and bundled Intel SVML atan2 assembly are BSD-3-Clause licensed; the
-combined crate declares `MIT AND BSD-3-Clause`. Preserve `LICENSE`, `NOTICE`,
+Project-owned code is MIT licensed. The float64 engine contains no unsafe code,
+float32 exponential profiles, or Intel SVML assembly. Historical third-party
+notices remain packaged; the crate retains `MIT AND BSD-3-Clause` while that
+provenance is retained. Preserve `LICENSE`, `NOTICE`,
 `LICENSES/NumPy-BSD-3-Clause.txt`, and `LICENSES/Intel-SVML-BSD-3-Clause.txt`
 when redistributing the corresponding source or compiled code.
 
@@ -77,13 +78,11 @@ assert!(result.spread_rate.is_finite());
 # Ok::<(), behave_fire::BehaveError>(())
 ```
 
-The `surface::single` and `crown::single` modules preserve the reference's
-float32 intermediate arithmetic. Mask-aware companion APIs reproduce the
-documented NumPy masked-array stage behavior. Float32 NumPy exponential dispatch
-can differ by a few ULPs from scalar libc; select the matching `MathProfile` when
-matching a particular NumPy build. No Python runtime is used by either profile.
-The separate Python binding crate uses the same numerical core and handles
-Python-specific array and representation semantics at its boundary.
+All physical arithmetic uses float64. Codes and flags retain integral and
+boolean types. Missing physical values use NaN with output-specific dependency
+rules. The separate Python binding widens real inputs and converts masked
+physical values to NaN; no dtype, mask-payload, or object arithmetic emulation
+runs in the core. Rust-only callers need no Python runtime.
 
 ## Raster calculations and stage injection
 
@@ -99,23 +98,23 @@ Overrides are per-cell columns (`SurfaceTweakColumns`, `CrownTweakColumns`)
 applied at the stage that would produce the value, so downstream outputs use
 them; `run_from_fuelbeds` resumes from edited `FuelbedColumns`. An optional native
 `validity` column skips cells that are false and returns zero payloads for them.
-That is separate from NumPy masked-array semantics, which the Python binding
-reproduces independently. `run_tile` processes a caller-chosen range and returns a
+That low-level validity policy is separate from the Python-facing NaN policy.
+`run_tile` processes a caller-chosen range and returns a
 one-dimensional tile in original logical order. Raster file input and output
 belong to the caller.
 
 `cargo run --example raster_tweaks` runs a small raster with per-cell reaction
 intensity overrides, a validity mask, and a tile. The raster engine is a Rust
-interface: the Python extension does not yet route public calls through it, and
-this crate makes no claim that it is faster than the Python backend.
+interface alongside the configured model batches and owned staged sessions used
+by the Python extension. Final end-to-end performance certification is pending.
 
 ## Effects and utility calculations
 
 `BehaveRun` provides all eleven calculation routes of the Python facade. Rust
 scalar methods use documented base units, with conversion functions in `units`
-for callers using other units. Stateful helpers preserve their checked geometry
-errors and numeric-kind metadata; `GeometryError` distinguishes domain,
-overflow, and division-by-zero errors.
+for callers using other units. Stateful helpers store float64 physical values
+and use IEEE NaN and infinity for numeric domain results. Structural shape,
+control, and allocation errors remain checked before scientific work.
 
 ```rust
 use behave_fire::{BehaveRun, FuelModels};

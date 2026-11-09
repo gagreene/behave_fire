@@ -95,7 +95,7 @@ def test_compare_reports_frozen_diagnostic_and_retains_live_gate(monkeypatch, tm
     module = getattr(rust, domain)
     function = name.split("/")[0]
     reference = getattr(import_module("behave_fire.components." + domain), function)
-    if domain not in ('crown', 'ignite'):
+    if domain not in ('crown', 'ignite', 'fine_dead_fuel_moisture_tool'):
         monkeypatch.setattr(module, function, reference)
     assert compare.main([]) == 0
     report = json.loads(capsys.readouterr().out)
@@ -188,7 +188,7 @@ def test_run_case_rejects_frozen_native_output_and_accepts_live_python(monkeypat
     monkeypatch.setattr(module, function, lambda **arguments: support.decode(frozen["output"]))
     with pytest.raises(AssertionError):
         support.run_case(frozen)
-    monkeypatch.setattr(module, function, original if domain in ('crown', 'ignite') else reference)
+    monkeypatch.setattr(module, function, original if domain in ('crown', 'ignite', 'fine_dead_fuel_moisture_tool') else reference)
     support.run_case(frozen)
 
 

@@ -78,8 +78,11 @@ class AutoNamespace(ModuleType):
         elif inspect.isfunction(value) and not name.startswith('_'):
             result = _wrap_function(self, name, value)
         elif inspect.isclass(value) and name in ('FireSize', 'SlopeTool') and self._preferred == 'rust':
-            # Stateful migration requires a complete tested state bridge in Task 5.
-            result = getattr(self._native_namespace(), name)
+            if name == 'FireSize':
+                from ._auto_state import fire_size_type
+                result = fire_size_type(self._status)
+            else:
+                result = getattr(self._native_namespace(), name)
         elif inspect.isclass(value) and self._operation_prefix == 'behave_units.' and self._preferred == 'rust':
             # Unit enum identities remain shared; unmigrated converter classes stay explicit.
             result = getattr(self._native_namespace(), name)

@@ -110,12 +110,12 @@ def test_native_automatic_restore_in_fresh_process_never_reselects(_native_model
             assert model._threads == model._delegate.threads == 3
             assert model._delegate._lut["depth"][1] == 1.
             assert model._delegate._fuel_models.fuel_models_[1]["fuel_bed_depth"] == 777.
-            original = _rust.batch
+            original = _rust.component_batch
             requests = []
             def record(*args, **kwargs):
                 requests.append(kwargs.get("threads", 1))
                 return original(*args, **kwargs)
-            _rust.batch = record
+            _rust.component_batch = record
             np.testing.assert_array_equal(model.calculate_fire_length(np.array([1.]), .5, 0, 3., 0), np.array([4.5]))
             assert requests and set(requests) == {3}
         assert auto._PROBE_RESULT is None

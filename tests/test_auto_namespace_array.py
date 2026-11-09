@@ -81,25 +81,24 @@ def test_namespace_routes_real_complex_real_with_original_signature(native_names
 
 
 @pytest.mark.rust
-def test_unmigrated_direction_selection_keeps_original_strided_layout(monkeypatch):
+def test_direction_selection_widens_owned_strided_inputs_once(monkeypatch):
     from behave_fire.rust import _bridge
 
     monkeypatch.setattr(auto, '_probe', lambda: ('usable', None))
-    monkeypatch.setattr(_bridge, '_atan2_math_profile', lambda: 1)
     selected = []
+    original = _bridge._native.component_batch
 
-    def detached(operation, arguments, direction_profile):
-        selected.append(direction_profile)
-        return np.zeros(3)
+    def detached(operation, physical, codes, flags, shape, **kwargs):
+        selected.append(physical['x_component'].copy())
+        assert physical['x_component'].dtype == np.float64
+        return original(operation, physical, codes, flags, shape, **kwargs)
 
-    monkeypatch.setattr(_bridge, '_call_owned', detached)
+    monkeypatch.setattr(_bridge._native, 'component_batch', detached)
     inputs = dict(x_component=np.array([1., 2., 3.], np.float32)[::-1],
                   y_component=np.array([3., 2., 1.], np.float32)[::-1],
                   rate_vector=np.ones(3, np.float32), wind_orientation_mode='RelativeToUpslope', aspect=0.)
-    normalized, single = _bridge._normalize_direction(inputs)
-    assert single and _bridge._direction_math_profile(normalized) == 0
     bf.get_backend('auto').surface.calculate_direction_of_max_spread(**inputs)
-    assert selected == [0]
+    np.testing.assert_array_equal(selected[0], inputs['x_component'].astype(np.float64))
 
 
 def test_unsupported_complex_argument_is_not_replayed_on_python(native_namespace):

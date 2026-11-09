@@ -668,6 +668,11 @@ impl GridSession {
                 0.
             });
         }
+        if let Some(value) =
+            super::fuelbed_fields::evaluate(field, |dependency| self.physical(dependency, index))
+        {
+            return value;
+        }
         let p = |field| self.physical(field, index);
         let number = field as usize;
         if (Field::ParticleLoadDead0 as usize..=Field::ParticleLoadDead4 as usize).contains(&number)
@@ -736,91 +741,6 @@ impl GridSession {
             });
         }
         Ok(match field {
-            Field::FuelbedDepth => p(Field::ParticleDepth)?,
-            Field::FuelbedMoeDead => p(Field::ParticleMoeDead)?,
-            Field::FuelbedBulkDensity => crate::surface::bulk_from_loads::<true>(
-                &self.five(Field::ParticleLoadDead0, index)?,
-                &self.five(Field::ParticleLoadLive0, index)?,
-                p(Field::ParticleDepth)?,
-            ),
-            Field::FuelbedPackingRatio => crate::surface::packing_from_loads::<true>(
-                &self.five(Field::ParticleLoadDead0, index)?,
-                &self.five(Field::ParticleLoadLive0, index)?,
-                p(Field::ParticleDepth)?,
-            ),
-            Field::FuelbedWHeatDead => crate::surface::weighted_constant(
-                &self.area_side(true, index)?.1,
-                p(Field::ParticleHocDead)?,
-            ),
-            Field::FuelbedWHeatLive => crate::surface::weighted_constant(
-                &self.area_side(false, index)?.1,
-                p(Field::ParticleHocLive)?,
-            ),
-            Field::FuelbedWSilicaDead => {
-                crate::surface::weighted_constant(&self.area_side(true, index)?.1, 0.01)
-            }
-            Field::FuelbedWSilicaLive => crate::surface::weighted_values(
-                &self.area_side(false, index)?.1,
-                &[0.01, 0.01, 0., 0., 0.],
-            ),
-            Field::FuelbedWMoistDead => crate::surface::weighted_values(
-                &self.area_side(true, index)?.1,
-                &self.five(Field::ParticleMoistureDead0, index)?,
-            ),
-            Field::FuelbedWMoistLive => crate::surface::weighted_values(
-                &self.area_side(false, index)?.1,
-                &self.five(Field::ParticleMoistureLive0, index)?,
-            ),
-            Field::FuelbedWflDead | Field::FuelbedWflLive => {
-                let dead = field == Field::FuelbedWflDead;
-                let (load, savr) = if dead {
-                    (Field::ParticleLoadDead0, Field::ParticleSavrDead0)
-                } else {
-                    (Field::ParticleLoadLive0, Field::ParticleSavrLive0)
-                };
-                let net = self.five(load, index)?.map(|v| v * (1. - 0.0555));
-                crate::surface::size_sorted_wfl(
-                    &self.five(savr, index)?,
-                    &self.area_side(dead, index)?.1,
-                    &net,
-                )
-            }
-            Field::FuelbedMoeLive => {
-                let sd = self.five(Field::ParticleSavrDead0, index)?;
-                let sl = self.five(Field::ParticleSavrLive0, index)?;
-                let terms = crate::surface::SavrTerms::new(&sd, &sl);
-                let ld = self.five(Field::ParticleLoadDead0, index)?;
-                let ll = self.five(Field::ParticleLoadLive0, index)?;
-                let md = self.five(Field::ParticleMoistureDead0, index)?;
-                let fine_d = (0..5).map(|n| ld[n] * terms.exp_dead[n]).sum();
-                let fine_dm = (0..5).map(|n| ld[n] * terms.exp_dead[n] * md[n]).sum();
-                let fine_l = (0..5).map(|n| ll[n] * terms.exp_live500[n]).sum();
-                crate::surface::live_extinction_from_fines::<true>(
-                    fine_d,
-                    fine_dm,
-                    fine_l,
-                    p(Field::FuelbedMoeDead)?,
-                )
-            }
-            Field::FuelbedHeatSink => {
-                let terms = crate::surface::SavrTerms::new(
-                    &self.five(Field::ParticleSavrDead0, index)?,
-                    &self.five(Field::ParticleSavrLive0, index)?,
-                );
-                let dead = crate::surface::heat_sink_side(
-                    p(Field::FuelbedFracDead)?,
-                    &self.area_side(true, index)?.1,
-                    &self.five(Field::ParticleMoistureDead0, index)?,
-                    &terms.exp_dead,
-                );
-                let live = crate::surface::heat_sink_side(
-                    p(Field::FuelbedFracLive)?,
-                    &self.area_side(false, index)?.1,
-                    &self.five(Field::ParticleMoistureLive0, index)?,
-                    &terms.exp_live138,
-                );
-                (dead + live) * p(Field::FuelbedBulkDensity)?
-            }
             Field::ReactionIntensity => {
                 crate::surface::reaction_from_inputs(&crate::surface::ReactionInputs {
                     sigma: p(Field::FuelbedSigma)?,
@@ -837,38 +757,10 @@ impl GridSession {
                     moe_live: p(Field::FuelbedMoeLive)?,
                 })
             }
-            Field::FuelbedFracDead => {
-                let (dead, _) = self.area_side(true, index)?;
-                let (live, _) = self.area_side(false, index)?;
-                crate::surface::dead_area_fraction::<true>(dead, live)
-            }
-            Field::FuelbedFracLive => 1. - p(Field::FuelbedFracDead)?,
-            Field::FuelbedSigma => {
-                let (_, wd) = self.area_side(true, index)?;
-                let (_, wl) = self.area_side(false, index)?;
-                crate::surface::mixture_sigma(
-                    p(Field::FuelbedFracDead)?,
-                    p(Field::FuelbedFracLive)?,
-                    &wd,
-                    &self.five(Field::ParticleSavrDead0, index)?,
-                    &wl,
-                    &self.five(Field::ParticleSavrLive0, index)?,
-                )
-            }
             Field::ParticleHocDead => self.source_fuel(index)?.heat_of_combustion_dead,
             Field::ParticleHocLive => self.source_fuel(index)?.heat_of_combustion_live,
             Field::ParticleDepth => self.source_fuel(index)?.fuel_bed_depth,
             Field::ParticleMoeDead => self.source_fuel(index)?.moisture_of_extinction_dead,
-            Field::FuelbedRelativePackingRatio => {
-                crate::surface::relative_packing_from_sigma::<true>(
-                    p(Field::FuelbedSigma)?,
-                    p(Field::FuelbedPackingRatio)?,
-                )
-            }
-            Field::FuelbedPropagatingFlux => crate::surface::propagating_flux_from_sigma::<true>(
-                p(Field::FuelbedSigma)?,
-                p(Field::FuelbedPackingRatio)?,
-            ),
             Field::CrownFuelLoad => crate::crown::calculate_canopy_fuel_load(
                 p(Field::CanopyBaseHeight)?,
                 p(Field::CanopyHeight)?,
@@ -882,25 +774,6 @@ impl GridSession {
             }
             _ => return self.surface_physical(field, index),
         })
-    }
-    fn five(&self, start: Field, index: usize) -> Result<[f64; 5], BehaveError> {
-        let mut result = [0.; 5];
-        for (n, value) in result.iter_mut().enumerate() {
-            *value = self.physical(Field::ALL[start as usize + n], index)?;
-        }
-        Ok(result)
-    }
-    fn area_side(&self, dead: bool, index: usize) -> Result<(f64, [f64; 5]), BehaveError> {
-        let (load, savr) = if dead {
-            (Field::ParticleLoadDead0, Field::ParticleSavrDead0)
-        } else {
-            (Field::ParticleLoadLive0, Field::ParticleSavrLive0)
-        };
-        let (weights, total) = crate::surface::particle_area_weights::<true>(
-            &self.five(load, index)?,
-            &self.five(savr, index)?,
-        );
-        Ok((total, weights))
     }
     fn dependencies(&self, field: Field) -> Vec<Field> {
         let mut result = match field {

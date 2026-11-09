@@ -6,7 +6,7 @@ descriptors, and the complete per-operation contract manifest are ready.
 import numpy as np
 
 from ._bridge import _native
-from ._numeric import normalize_control, normalize_identifier, normalize_physical, normalize_selector, plan_shapes
+from ._numeric import broadcast_shape, normalize_control, normalize_identifier, normalize_physical, normalize_selector, plan_shapes
 
 _SHARED = ('m1h', 'm10h', 'm100h', 'mlh', 'mlw', 'wind_speed', 'wind_direction', 'slope', 'aspect')
 _FIELDS = {
@@ -30,6 +30,8 @@ def _buffer(value, shape):
     """
     if value.size == 1:
         return value.reshape(1)
+    if value.shape == shape:
+        return np.ascontiguousarray(value).reshape(-1)
     return np.ascontiguousarray(np.broadcast_to(value, shape)).reshape(-1)
 
 
@@ -95,7 +97,7 @@ def _prepare(kind, arguments):
         if selector in arguments and field not in descriptors:
             descriptors[field] = (family, normalize_selector(family, arguments[selector]))
     for field, (_, codes) in descriptors.items():
-        inputs[field] = np.broadcast_to(inputs[field], np.broadcast_shapes(inputs[field].shape, codes.shape))
+        inputs[field] = np.broadcast_to(inputs[field], broadcast_shape(inputs[field].shape, codes.shape))
     # Fuel particle assignment follows the ID grid, not the weather union grid.
     for name in _MOISTURE:
         if inputs[name].shape != controls['fuel_model_grid'].shape:
@@ -151,7 +153,7 @@ def execute_common(kind, arguments, *, threads=1, owned_callback=None):
     inputs, controls, descriptors, settings, derive_ratio = _prepare(kind, arguments)
     shapes = [value.shape for value in (*inputs.values(), *controls.values())]
     shapes.extend(codes.shape for _, codes in descriptors.values())
-    shape = np.broadcast_shapes(*shapes)
+    shape = broadcast_shape(*shapes)
     inputs = {name: _buffer(value, shape) for name, value in inputs.items()}
     controls = {name: _buffer(value, shape) for name, value in controls.items()}
     descriptors = {name: (family, _buffer(codes, shape)) for name, (family, codes) in descriptors.items()}
@@ -176,7 +178,7 @@ def execute_model(kind, arguments, *, threads=1, owned_callback=None):
     shaped = dict(inputs, **controls)
     groups = plan_shapes(shaped, dependencies)
     shapes = {name: group.shape for group in groups for name in group.outputs}
-    union = np.broadcast_shapes(*(group.shape for group in groups))
+    union = broadcast_shape(*(group.shape for group in groups))
     registry = _registry(arguments['lut'])
     if all(union):
         active = set().union(*dependencies.values())

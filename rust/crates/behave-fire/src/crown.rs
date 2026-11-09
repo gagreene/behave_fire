@@ -1,15 +1,12 @@
 //! Crown fire stages in reference base units: ft, ft/min, lb/ftÂ³, BTU/ftÂ², BTU/ft/s.
 use crate::math::np_max;
-pub mod arithmetic;
-pub mod masked;
-mod record;
+
 use crate::{
     engine::{
         CrownCell, PreparedFuel, SurfaceCell, SurfaceOptions, SurfacePlan, SurfaceTweaks, WafMethod,
     },
     surface::{self, FuelbedIntermediates, Particles, SurfaceResult},
 };
-pub use record::{run_with_surface_inputs, try_run_compact_surface_inputs, MaskedCrownResult};
 
 macro_rules! record {
     ($name:ident { $($field:ident),+ $(,)? }) => {
@@ -80,6 +77,9 @@ macro_rules! numeric_stages {
         }
         /// Calculate Van Wagner critical active spread rate in ft/min.
         pub fn calculate_critical_crown_fire_spread_rate(canopy_bulk_density: $t) -> $t {
+            if canopy_bulk_density.is_nan() {
+                return <$t>::NAN;
+            }
             let cbd = canopy_bulk_density * 16.0185;
             if cbd > 1e-7 {
                 (3.0 / cbd) * 3.28084
@@ -104,12 +104,16 @@ macro_rules! numeric_stages {
             critical_crown_ros: $t,
         ) -> CrownRatios<$t> {
             CrownRatios {
-                crown_fire_transition_ratio: if critical_surface_fli > 1e-7 {
+                crown_fire_transition_ratio: if critical_surface_fli.is_nan() {
+                    <$t>::NAN
+                } else if critical_surface_fli > 1e-7 {
                     surface_fli / critical_surface_fli
                 } else {
                     0.0
                 },
-                crown_fire_active_ratio: if critical_crown_ros > 1e-7 {
+                crown_fire_active_ratio: if critical_crown_ros.is_nan() {
+                    <$t>::NAN
+                } else if critical_crown_ros > 1e-7 {
                     crown_ros / critical_crown_ros
                 } else {
                     0.0
@@ -123,6 +127,9 @@ macro_rules! numeric_stages {
             crowning_surface_ros: $t,
         ) -> $t {
             let d = crowning_surface_ros - surface_critical_ros;
+            if d.is_nan() {
+                return <$t>::NAN;
+            }
             let v = if d > 1e-7 {
                 (surface_ros - surface_critical_ros) / d
             } else {
@@ -186,6 +193,9 @@ macro_rules! numeric_stages {
             critical_surface_fli: $t,
             surface_hpua: $t,
         ) -> $t {
+            if surface_hpua.is_nan() {
+                return <$t>::NAN;
+            }
             if surface_hpua > 1e-7 {
                 (60.0 * critical_surface_fli) / surface_hpua
             } else {
@@ -197,6 +207,14 @@ macro_rules! numeric_stages {
             transition_ratio: $t,
             active_ratio: $t,
         ) -> FireClassification {
+            if transition_ratio.is_nan() || active_ratio.is_nan() {
+                return FireClassification {
+                    fire_type: -1,
+                    is_surface_fire: false,
+                    is_passive_crown: false,
+                    is_active_crown: false,
+                };
+            }
             let fire_type = if transition_ratio < 1.0 {
                 if active_ratio < 1.0 {
                     0
@@ -257,7 +275,9 @@ macro_rules! numeric_stages {
         }
         /// Evaluate the reference crown flame expression in native precision.
         fn flame(fli: $t) -> $t {
-            if fli > 0.0 {
+            if fli.is_nan() {
+                <$t>::NAN
+            } else if fli > 0.0 {
                 0.2 * fli.powf(2.0 / 3.0)
             } else {
                 0.0
@@ -347,89 +367,6 @@ pub mod available {
         let wind = fuel.wind_terms();
         crowning_without_geometry(reaction, &bed, critical, wind.as_ref())
     }
-}
-/// Native f32 arithmetic for helpers retaining Python single precision.
-pub mod single {
-    use super::{
-        CrownHeat, CrownRatios, FinalCrownBehavior, FireClassification, PassiveCrownBehavior,
-    };
-    use crate::math::single::np_max;
-    numeric_stages!(f32);
-}
-
-/// Retain f32 height conversion and coefficient multiplication before f64 foliar-moisture promotion.
-pub fn calculate_critical_surface_fireline_intensity_single_height(
-    canopy_base_height: f32,
-    moisture_foliar: f64,
-) -> f64 {
-    let height = crate::math::single::np_max(canopy_base_height * 0.3048, 0.1);
-    ((0.010_f32 * height) as f64 * (460.0 + 25.9 * np_max(moisture_foliar, 30.0))).powf(1.5)
-        * 0.2886719
-}
-
-/// Retain the f32 intensity multiplication before division by f64 surface heat.
-pub fn calculate_surface_fire_critical_spread_rate_single_intensity(
-    critical_surface_fli: f32,
-    surface_hpua: f64,
-) -> f64 {
-    if surface_hpua > 1e-7 {
-        ((60.0_f32 * critical_surface_fli) as f64) / surface_hpua
-    } else {
-        0.0
-    }
-}
-
-/// Retain a single-precision surface flame before final selection promotes against f64 crown branches.
-#[allow(clippy::too_many_arguments)]
-pub fn assign_final_crown_fire_behavior_single_surface(
-    is_surface_fire: bool,
-    is_passive_crown: bool,
-    surface_ros: f32,
-    surface_hpua: f32,
-    surface_fli: f32,
-    passive_ros: f64,
-    passive_hpua: f64,
-    passive_fli: f64,
-    passive_fl: f64,
-    crown_ros: f64,
-    crown_hpua: f64,
-    crown_fli: f64,
-    crown_fl: f64,
-) -> FinalCrownBehavior {
-    let mut result = assign_final_crown_fire_behavior(
-        is_surface_fire,
-        is_passive_crown,
-        surface_ros as f64,
-        surface_hpua as f64,
-        surface_fli as f64,
-        passive_ros,
-        passive_hpua,
-        passive_fli,
-        passive_fl,
-        crown_ros,
-        crown_hpua,
-        crown_fli,
-        crown_fl,
-    );
-    if is_surface_fire {
-        result.final_flame_length = single::assign_final_crown_fire_behavior(
-            true,
-            false,
-            surface_ros,
-            surface_hpua,
-            surface_fli,
-            0.,
-            0.,
-            0.,
-            0.,
-            0.,
-            0.,
-            0.,
-            0.,
-        )
-        .final_flame_length as f64;
-    }
-    result
 }
 
 /// Extract the three supplied base-unit surface fields used by crown calculations.
@@ -646,15 +583,7 @@ pub fn calculate_crowning_surface_fire_spread_rate(
 ) -> f64 {
     crowning_surface_rate(ri_crown, ib_crown, critical_crown_ros / 3.34, None)
 }
-/// Retain the f32 critical-rate division before its promotion against f64 fuelbed intermediates.
-pub fn calculate_crowning_surface_fire_spread_rate_single_critical_rate(
-    ri_crown: f64,
-    ib_crown: &FuelbedIntermediates,
-    critical_crown_ros: f32,
-    _canopy_height: f64,
-) -> f64 {
-    crowning_surface_rate(ri_crown, ib_crown, (critical_crown_ros / 3.34) as f64, None)
-}
+
 /// Reuse the same physical wind context for the backsolved Surface calculation.
 pub(crate) fn crowning_with_wind(
     ri: f64,

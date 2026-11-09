@@ -221,11 +221,12 @@ def _physical_cores():
         return None
 
 
-def _profile_batch(original, samples):
+def _profile_batch(original, samples, *, timers=True):
     """Instrument the current native batch entry point for diagnostics only.
 
     :param original: Unmodified native batch function.
     :param samples: Destination for per-boundary diagnostic samples.
+    :param timers: Whether this boundary supports optional internal timing fields.
     :return: Instrumented callable preserving ordinary batch results.
     """
     def profile(*args, **kwargs):
@@ -235,7 +236,8 @@ def _profile_batch(original, samples):
         :param kwargs: Native keyword arguments.
         :return: Ordinary result with optional diagnostic metadata.
         """
-        kwargs["profile"] = True
+        if timers:
+            kwargs["profile"] = True
         started = time.perf_counter()
         result = original(*args, **kwargs)
         sample = {key.removeprefix("__timing."): float(value.item())
@@ -319,7 +321,7 @@ def _validation_worker(arguments):
     expected = _model_call(arguments, 'python', normalize_reference=True)()
     from behave_fire import _rust
     calls = []
-    originals = {name: getattr(_rust, name) for name in ('batch', 'model_batch', 'model_groups', 'atan2_profile_candidates')}
+    originals = {name: getattr(_rust, name) for name in ('component_batch', 'model_batch', 'model_groups')}
 
     def instrument(name, original):
         """Record an untimed real native boundary without changing its operands.
@@ -373,7 +375,7 @@ def _worker(arguments):
     import_seconds = time.perf_counter() - import_started
     samples = []
     if arguments.backend == "rust" and arguments.profile:
-        _bridge._native.batch = _profile_batch(_bridge._native.batch, samples)
+        _bridge._native.component_batch = _profile_batch(_bridge._native.component_batch, samples, timers=False)
         _bridge._native.model_batch = _profile_batch(_bridge._native.model_batch, samples)
     created = time.perf_counter()
     call = _model_call(arguments, arguments.backend)

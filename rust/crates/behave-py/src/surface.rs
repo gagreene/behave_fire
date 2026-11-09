@@ -1,5 +1,5 @@
 //! Native surface marshalling and scalar entry-point dispatch.
-use crate::column_output::RowWriter;
+use crate::component_columns::RowWriter;
 use crate::dispatch::{named, scalar, widen};
 use crate::operation::Operation;
 use crate::prepared::{Field, PreparedArguments};
@@ -9,98 +9,43 @@ pub fn evaluate(
     operation: Operation,
     a: &PreparedArguments<'_>,
     i: usize,
-    single: bool,
-    out: &mut RowWriter<'_>,
+    out: &mut RowWriter<'_, '_>,
 ) -> Result<Option<()>, String> {
     match operation {
-        Operation::SurfaceCalculateBackingSpreadRate => {
-            if single {
-                scalar(
-                    out,
-                    widen(surface::single::calculate_backing_spread_rate(
-                        a.n(Field::SpreadRate, i)? as f32,
-                        a.n(Field::Eccentricity, i)? as f32,
-                    )),
-                )
-            } else {
-                scalar(
-                    out,
-                    widen(surface::calculate_backing_spread_rate(
-                        a.n(Field::SpreadRate, i)?,
-                        a.n(Field::Eccentricity, i)?,
-                    )),
-                )
-            }
-        }
-        Operation::SurfaceCalculateDirectionOfMaxSpread => {
-            if single {
-                scalar(
-                    out,
-                    widen(surface::single::calculate_direction_of_max_spread(
-                        a.n(Field::XComponent, i)? as f32,
-                        a.n(Field::YComponent, i)? as f32,
-                        a.n(Field::RateVector, i)? as f32,
-                        a.orientation()?,
-                        a.n(Field::Aspect, i)?,
-                    )),
-                )
-            } else {
-                scalar(
-                    out,
-                    widen(surface::calculate_direction_of_max_spread(
-                        a.n(Field::XComponent, i)?,
-                        a.n(Field::YComponent, i)?,
-                        a.n(Field::RateVector, i)?,
-                        a.orientation()?,
-                        a.n(Field::Aspect, i)?,
-                    )),
-                )
-            }
-        }
-        Operation::SurfaceCalculateEccentricity => {
-            if single {
-                scalar(
-                    out,
-                    widen(surface::single::calculate_eccentricity(
-                        a.n(Field::FireLengthToWidthRatio, i)? as f32,
-                    )),
-                )
-            } else {
-                scalar(
-                    out,
-                    widen(surface::calculate_eccentricity(
-                        a.n(Field::FireLengthToWidthRatio, i)?,
-                    )),
-                )
-            }
-        }
-        Operation::SurfaceCalculateEffectiveWindSpeed => {
-            if single {
-                scalar(
-                    out,
-                    widen(surface::single::calculate_effective_wind_speed(
-                        a.n(Field::SpreadRate, i)? as f32,
-                        a.n(Field::NoWindNoSlopeSpreadRate, i)? as f32,
-                        a.n(Field::WindB, i)? as f32,
-                        a.n(Field::WindC, i)? as f32,
-                        a.n(Field::RelativePackingRatio, i)? as f32,
-                        a.n(Field::WindE, i)? as f32,
-                    )),
-                )
-            } else {
-                scalar(
-                    out,
-                    widen(surface::calculate_effective_wind_speed(
-                        a.n(Field::SpreadRate, i)?,
-                        a.n(Field::NoWindNoSlopeSpreadRate, i)?,
-                        a.n(Field::WindB, i)?,
-                        a.n(Field::WindC, i)?,
-                        a.n(Field::RelativePackingRatio, i)?,
-                        a.n(Field::WindE, i)?,
-                    )),
-                )
-            }
-        }
+        Operation::SurfaceCalculateBackingSpreadRate => scalar(
+            out,
+            widen(surface::calculate_backing_spread_rate(
+                a.n(Field::SpreadRate, i)?,
+                a.n(Field::Eccentricity, i)?,
+            )),
+        ),
+        Operation::SurfaceCalculateDirectionOfMaxSpread => scalar(
+            out,
+            widen(surface::calculate_direction_of_max_spread(
+                a.n(Field::XComponent, i)?,
+                a.n(Field::YComponent, i)?,
+                a.n(Field::RateVector, i)?,
+                a.orientation()?,
+                a.optional(Field::Aspect, i).unwrap_or(f64::NAN),
+            )),
+        ),
+        Operation::SurfaceCalculateEccentricity => scalar(
+            out,
+            widen(surface::calculate_eccentricity(
+                a.n(Field::FireLengthToWidthRatio, i)?,
+            )),
+        ),
+        Operation::SurfaceCalculateEffectiveWindSpeed => scalar(
+            out,
+            widen(surface::calculate_effective_wind_speed(
+                a.n(Field::SpreadRate, i)?,
+                a.n(Field::NoWindNoSlopeSpreadRate, i)?,
+                a.n(Field::WindB, i)?,
+                a.n(Field::WindC, i)?,
+                a.n(Field::RelativePackingRatio, i)?,
+                a.n(Field::WindE, i)?,
+            )),
+        ),
         Operation::SurfaceCalculateFireArea => scalar(
             out,
             widen(surface::calculate_fire_area(
@@ -108,58 +53,23 @@ pub fn evaluate(
                 a.n(Field::BackingRos, i)?,
                 a.n(Field::Lwr, i)?,
                 a.n(Field::ElapsedMin, i)?,
-                a.n(Field::IsCrown, i)? != 0.0,
+                a.flag(Field::IsCrown, i)?,
             )),
         ),
-        Operation::SurfaceCalculateFireLength => {
-            if a.optional(Field::GlobalBool, i).is_some() {
-                scalar(
-                    out,
-                    surface::calculate_fire_length_bool(
-                        a.n(Field::ForwardRos, i)? != 0.0,
-                        a.n(Field::BackingRos, i)? != 0.0,
-                        a.n(Field::ElapsedMin, i)?,
-                    ),
-                )
-            } else {
-                if single {
-                    scalar(
-                        out,
-                        widen(surface::single::calculate_fire_length(
-                            a.n(Field::ForwardRos, i)? as f32,
-                            a.n(Field::BackingRos, i)? as f32,
-                            a.n(Field::ElapsedMin, i)? as f32,
-                        )),
-                    )
-                } else {
-                    scalar(
-                        out,
-                        widen(surface::calculate_fire_length(
-                            a.n(Field::ForwardRos, i)?,
-                            a.n(Field::BackingRos, i)?,
-                            a.n(Field::ElapsedMin, i)?,
-                        )),
-                    )
-                }
-            }
-        }
-        Operation::SurfaceCalculateFireLengthToWidthRatio => {
-            if single {
-                scalar(
-                    out,
-                    widen(surface::single::calculate_fire_length_to_width_ratio(
-                        a.n(Field::EffectiveWindSpeed, i)? as f32,
-                    )),
-                )
-            } else {
-                scalar(
-                    out,
-                    widen(surface::calculate_fire_length_to_width_ratio(
-                        a.n(Field::EffectiveWindSpeed, i)?,
-                    )),
-                )
-            }
-        }
+        Operation::SurfaceCalculateFireLength => scalar(
+            out,
+            widen(surface::calculate_fire_length(
+                a.n(Field::ForwardRos, i)?,
+                a.n(Field::BackingRos, i)?,
+                a.n(Field::ElapsedMin, i)?,
+            )),
+        ),
+        Operation::SurfaceCalculateFireLengthToWidthRatio => scalar(
+            out,
+            widen(surface::calculate_fire_length_to_width_ratio(
+                a.n(Field::EffectiveWindSpeed, i)?,
+            )),
+        ),
         Operation::SurfaceCalculateFirePerimeter => scalar(
             out,
             widen(surface::calculate_fire_perimeter(
@@ -167,7 +77,7 @@ pub fn evaluate(
                 a.n(Field::BackingRos, i)?,
                 a.n(Field::Lwr, i)?,
                 a.n(Field::ElapsedMin, i)?,
-                a.n(Field::IsCrown, i)? != 0.0,
+                a.flag(Field::IsCrown, i)?,
             )),
         ),
         Operation::SurfaceCalculateFireWidth => scalar(
@@ -186,55 +96,20 @@ pub fn evaluate(
                 a.n(Field::HeatPerUnitArea, i)?,
             )),
         ),
-        Operation::SurfaceCalculateFlameLength => {
-            if single {
-                scalar(
-                    out,
-                    widen(surface::single::calculate_flame_length(
-                        a.n(Field::FirelineIntensity, i)? as f32,
-                    )),
-                )
-            } else {
-                scalar(
-                    out,
-                    widen(surface::calculate_flame_length(
-                        a.n(Field::FirelineIntensity, i)?,
-                    )),
-                )
-            }
-        }
-        Operation::SurfaceCalculateFlankingSpreadRate => {
-            if a.optional(Field::GlobalBool, i).is_some() {
-                scalar(
-                    out,
-                    surface::calculate_flanking_spread_rate_bool(
-                        a.n(Field::SpreadRate, i)? != 0.0,
-                        a.n(Field::BackingSpreadRate, i)? != 0.0,
-                        a.n(Field::FireLengthToWidthRatio, i)?,
-                    ),
-                )
-            } else {
-                if single {
-                    scalar(
-                        out,
-                        widen(surface::single::calculate_flanking_spread_rate(
-                            a.n(Field::SpreadRate, i)? as f32,
-                            a.n(Field::BackingSpreadRate, i)? as f32,
-                            a.n(Field::FireLengthToWidthRatio, i)? as f32,
-                        )),
-                    )
-                } else {
-                    scalar(
-                        out,
-                        widen(surface::calculate_flanking_spread_rate(
-                            a.n(Field::SpreadRate, i)?,
-                            a.n(Field::BackingSpreadRate, i)?,
-                            a.n(Field::FireLengthToWidthRatio, i)?,
-                        )),
-                    )
-                }
-            }
-        }
+        Operation::SurfaceCalculateFlameLength => scalar(
+            out,
+            widen(surface::calculate_flame_length(
+                a.n(Field::FirelineIntensity, i)?,
+            )),
+        ),
+        Operation::SurfaceCalculateFlankingSpreadRate => scalar(
+            out,
+            widen(surface::calculate_flanking_spread_rate(
+                a.n(Field::SpreadRate, i)?,
+                a.n(Field::BackingSpreadRate, i)?,
+                a.n(Field::FireLengthToWidthRatio, i)?,
+            )),
+        ),
         Operation::SurfaceCalculateForwardSpreadRate => scalar(
             out,
             widen(surface::calculate_forward_spread_rate(
@@ -256,103 +131,51 @@ pub fn evaluate(
                 a.n(Field::TwentyFootWindSpeed, i)?,
             )),
         ),
-        Operation::SurfaceCalculateNoWindNoSlopeSpreadRate => {
-            if single {
-                scalar(
-                    out,
-                    widen(surface::single::calculate_no_wind_no_slope_spread_rate(
-                        a.n(Field::Ri, i)? as f32,
-                        a.n(Field::PropagatingFlux, i)? as f32,
-                        a.n(Field::HeatSink, i)? as f32,
-                    )),
-                )
-            } else {
-                scalar(
-                    out,
-                    widen(surface::calculate_no_wind_no_slope_spread_rate(
-                        a.n(Field::Ri, i)?,
-                        a.n(Field::PropagatingFlux, i)?,
-                        a.n(Field::HeatSink, i)?,
-                    )),
-                )
-            }
-        }
+        Operation::SurfaceCalculateNoWindNoSlopeSpreadRate => scalar(
+            out,
+            widen(surface::calculate_no_wind_no_slope_spread_rate(
+                a.n(Field::Ri, i)?,
+                a.n(Field::PropagatingFlux, i)?,
+                a.n(Field::HeatSink, i)?,
+            )),
+        ),
         Operation::SurfaceCalculateReactionIntensityOutput => scalar(
             out,
             widen(surface::calculate_reaction_intensity_output(
                 a.n(Field::ReactionIntensity, i)?,
             )),
         ),
-        Operation::SurfaceCalculateResidenceTime => {
-            if single {
-                scalar(
-                    out,
-                    widen(surface::single::calculate_residence_time(
-                        a.n(Field::Sigma, i)? as f32,
-                    )),
-                )
-            } else {
-                scalar(
-                    out,
-                    widen(surface::calculate_residence_time(a.n(Field::Sigma, i)?)),
-                )
-            }
-        }
-        Operation::SurfaceCalculateSlopePhi => {
-            if single {
-                scalar(
-                    out,
-                    widen(surface::single::calculate_slope_phi(
-                        a.n(Field::Slope, i)?,
-                        a.slope_units(i)?,
-                        a.n(Field::PackingRatio, i)? as f32,
-                        a.n(Field::ReactionIntensity, i)? as f32,
-                    )),
-                )
-            } else {
-                scalar(
-                    out,
-                    widen(surface::calculate_slope_phi(
-                        a.n(Field::Slope, i)?,
-                        a.slope_units(i)?,
-                        a.n(Field::PackingRatio, i)?,
-                        a.n(Field::ReactionIntensity, i)?,
-                    )),
-                )
-            }
-        }
-        Operation::SurfaceCalculateSurfaceRateVector => {
-            if single {
-                named(
-                    out,
-                    surface::single::calculate_surface_rate_vector(
-                        a.n(Field::NoWindNoSlopeSpreadRate, i)? as f32,
-                        a.n(Field::WindPhi, i)? as f32,
-                        a.n(Field::SlopePhi, i)? as f32,
-                        a.n(Field::WindDirection, i)?,
-                        a.orientation()?,
-                        a.n(Field::Aspect, i)?,
-                    )
-                    .named_values()
-                    .into_iter()
-                    .map(|(k, v)| (k, widen(v))),
-                )
-            } else {
-                named(
-                    out,
-                    surface::calculate_surface_rate_vector(
-                        a.n(Field::NoWindNoSlopeSpreadRate, i)?,
-                        a.n(Field::WindPhi, i)?,
-                        a.n(Field::SlopePhi, i)?,
-                        a.n(Field::WindDirection, i)?,
-                        a.orientation()?,
-                        a.n(Field::Aspect, i)?,
-                    )
-                    .named_values()
-                    .into_iter()
-                    .map(|(k, v)| (k, widen(v))),
-                )
-            }
+        Operation::SurfaceCalculateResidenceTime => scalar(
+            out,
+            widen(surface::calculate_residence_time(a.n(Field::Sigma, i)?)),
+        ),
+        Operation::SurfaceCalculateSlopePhi => scalar(
+            out,
+            widen(surface::calculate_slope_phi(
+                a.n(Field::Slope, i)?,
+                a.slope_units(i)?,
+                a.n(Field::PackingRatio, i)?,
+                a.n(Field::ReactionIntensity, i)?,
+            )),
+        ),
+        Operation::SurfaceCalculateSurfaceRateVector => named(
+            out,
+            surface::calculate_surface_rate_vector(
+                a.n(Field::NoWindNoSlopeSpreadRate, i)?,
+                a.n(Field::WindPhi, i)?,
+                a.n(Field::SlopePhi, i)?,
+                a.n(Field::WindDirection, i)?,
+                a.orientation()?,
+                a.optional(Field::Aspect, i).unwrap_or(f64::NAN),
+            )
+            .named_values()
+            .into_iter()
+            .map(|(k, v)| (k, widen(v))),
+        ),
+        Operation::SurfaceCalculateSurfaceWindAdjustmentFactor
+            if a.waf()? == behave_fire::engine::WafMethod::UserInput && a.has(Field::UserWaf) =>
+        {
+            scalar(out, a.n(Field::UserWaf, i)?)
         }
         Operation::SurfaceCalculateSurfaceWindAdjustmentFactor => scalar(
             out,
@@ -365,27 +188,13 @@ pub fn evaluate(
                 a.optional(Field::UserWaf, i),
             )),
         ),
-        Operation::SurfaceCalculateSurfaceWindCoefficients => {
-            if single {
-                named(
-                    out,
-                    surface::single::calculate_surface_wind_coefficients(
-                        a.n(Field::Sigma, i)? as f32
-                    )
-                    .named_values()
-                    .into_iter()
-                    .map(|(k, v)| (k, widen(v))),
-                )
-            } else {
-                named(
-                    out,
-                    surface::calculate_surface_wind_coefficients(a.n(Field::Sigma, i)?)
-                        .named_values()
-                        .into_iter()
-                        .map(|(k, v)| (k, widen(v))),
-                )
-            }
-        }
+        Operation::SurfaceCalculateSurfaceWindCoefficients => named(
+            out,
+            surface::calculate_surface_wind_coefficients(a.n(Field::Sigma, i)?)
+                .named_values()
+                .into_iter()
+                .map(|(k, v)| (k, widen(v))),
+        ),
         Operation::SurfaceCalculateTwentyFootWindSpeed => scalar(
             out,
             widen(surface::calculate_twenty_foot_wind_speed(
@@ -403,33 +212,17 @@ pub fn evaluate(
                 a.n(Field::Depth, i)?,
             )),
         ),
-        Operation::SurfaceCalculateWindPhi => {
-            if single {
-                scalar(
-                    out,
-                    widen(surface::single::calculate_wind_phi(
-                        a.n(Field::Sigma, i)? as f32,
-                        a.n(Field::MidflameWindSpeed, i)? as f32,
-                        a.n(Field::WindB, i)? as f32,
-                        a.n(Field::WindC, i)? as f32,
-                        a.n(Field::RelativePackingRatio, i)? as f32,
-                        a.n(Field::WindE, i)? as f32,
-                    )),
-                )
-            } else {
-                scalar(
-                    out,
-                    widen(surface::calculate_wind_phi(
-                        a.n(Field::Sigma, i)?,
-                        a.n(Field::MidflameWindSpeed, i)?,
-                        a.n(Field::WindB, i)?,
-                        a.n(Field::WindC, i)?,
-                        a.n(Field::RelativePackingRatio, i)?,
-                        a.n(Field::WindE, i)?,
-                    )),
-                )
-            }
-        }
+        Operation::SurfaceCalculateWindPhi => scalar(
+            out,
+            widen(surface::calculate_wind_phi(
+                a.n(Field::Sigma, i)?,
+                a.n(Field::MidflameWindSpeed, i)?,
+                a.n(Field::WindB, i)?,
+                a.n(Field::WindC, i)?,
+                a.n(Field::RelativePackingRatio, i)?,
+                a.n(Field::WindE, i)?,
+            )),
+        ),
         Operation::SurfaceBuildParticleArrays => crate::structures::particles_output(
             out,
             surface::build_particle_arrays_from_prepared(
@@ -441,26 +234,17 @@ pub fn evaluate(
                 a.n(Field::Mlw, i)?,
             ),
         ),
-        Operation::SurfaceCalculateFuelbedIntermediates => crate::structures::fuelbed_output(
-            out,
-            if single {
-                surface::single::calculate_fuelbed_intermediates(&crate::structures::p(a, i)?)
-            } else {
+        Operation::SurfaceCalculateFuelbedIntermediates => {
+            crate::structures::fuelbed_output(out, {
                 surface::calculate_fuelbed_intermediates(&crate::structures::p(a, i)?)
-            },
-        ),
-        Operation::SurfaceCalculateReactionIntensity => scalar(
-            out,
-            if single {
-                surface::single::calculate_reaction_intensity(&crate::structures::ib(a, i)?) as f64
-            } else {
-                surface::calculate_reaction_intensity(&crate::structures::ib(a, i)?)
-            },
-        ),
-        Operation::SurfaceRunSurfaceFire => named(
-            out,
-            crate::structures::run_surface(a, i, single)?.named_values(),
-        ),
+            })
+        }
+        Operation::SurfaceCalculateReactionIntensity => scalar(out, {
+            surface::calculate_reaction_intensity(&crate::structures::ib(a, i)?)
+        }),
+        Operation::SurfaceRunSurfaceFire => {
+            named(out, crate::structures::run_surface(a, i)?.named_values())
+        }
         _ => return Ok(None),
     }
     Ok(Some(()))

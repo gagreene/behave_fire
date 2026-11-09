@@ -1,8 +1,7 @@
 //! Structured dictionaries marshalled to typed core records.
-use crate::column_output::RowWriter;
+use crate::component_columns::RowWriter;
 use crate::dispatch::named;
 use crate::prepared::{Field, PreparedArguments};
-use behave_fire::units::*;
 use behave_fire::{
     engine::{PreparedFuel, SurfaceCell},
     surface::*,
@@ -55,7 +54,7 @@ pub fn p(a: &PreparedArguments<'_>, i: usize) -> Result<Particles, String> {
     r.hoc_live = a.optional(Field::PHocLive, i).unwrap_or(0.0);
     r.depth = a.optional(Field::PDepth, i).unwrap_or(0.0);
     r.moe_dead = a.optional(Field::PMoeDead, i).unwrap_or(0.0);
-    r.is_defined = a.optional(Field::PIsDefined, i).unwrap_or(0.0) != 0.0;
+    r.is_defined = a.flag(Field::PIsDefined, i)?;
     Ok(r)
 }
 pub fn ib(a: &PreparedArguments<'_>, i: usize) -> Result<FuelbedIntermediates, String> {
@@ -79,7 +78,11 @@ pub fn ib(a: &PreparedArguments<'_>, i: usize) -> Result<FuelbedIntermediates, S
     r.frac_dead = a.optional(Field::IbFracDead, i).unwrap_or(0.0);
     r.frac_live = a.optional(Field::IbFracLive, i).unwrap_or(0.0);
     r.depth = a.optional(Field::IbDepth, i).unwrap_or(0.0);
-    r.is_defined = a.optional(Field::IbIsDefined, i).unwrap_or(0.0) != 0.0;
+    r.is_defined = if a.has(Field::IbIsDefined) {
+        a.flag(Field::IbIsDefined, i)?
+    } else {
+        false
+    };
     Ok(r)
 }
 pub fn input(a: &PreparedArguments<'_>, i: usize) -> Result<SurfaceCell, String> {
@@ -87,10 +90,10 @@ pub fn input(a: &PreparedArguments<'_>, i: usize) -> Result<SurfaceCell, String>
         wind_speed: a.speed_units(i)?.to_base(a.n(Field::WindSpeed, i)?),
         wind_direction: a.n(Field::WindDirection, i)?,
         slope: a.slope_units(i)?.to_base(a.n(Field::Slope, i)?),
-        aspect: a.n(Field::Aspect, i)?,
-        canopy_cover: a.n(Field::CanopyCover, i)?,
-        canopy_height: a.n(Field::CanopyHeight, i)?,
-        crown_ratio: a.n(Field::CrownRatio, i)?,
+        aspect: a.optional(Field::Aspect, i).unwrap_or(f64::NAN),
+        canopy_cover: a.optional(Field::CanopyCover, i).unwrap_or(f64::NAN),
+        canopy_height: a.optional(Field::CanopyHeight, i).unwrap_or(f64::NAN),
+        crown_ratio: a.optional(Field::CrownRatio, i).unwrap_or(f64::NAN),
         user_waf: a.optional(Field::UserWaf, i),
         ..SurfaceCell::default()
     })
@@ -111,52 +114,36 @@ pub fn fuel(a: &PreparedArguments<'_>, i: usize) -> Result<PreparedFuel, String>
     r.savr_1h = a.n(Field::ModelSavr1h, i)?;
     r.savr_live_herb = a.n(Field::ModelSavrLiveHerb, i)?;
     r.savr_live_woody = a.n(Field::ModelSavrLiveWoody, i)?;
-    r.is_dynamic = a.n(Field::ModelIsDynamic, i)? != 0.0;
-    r.is_defined = a.n(Field::ModelIsDefined, i)? != 0.0;
+    r.is_dynamic = a.flag(Field::ModelIsDynamic, i)?;
+    r.is_defined = a.flag(Field::ModelIsDefined, i)?;
     Ok(r)
 }
-/// Resume supplied reaction/fuelbed state, retaining the source's f32 slope-cap rounding.
-pub fn run_surface(
-    a: &PreparedArguments<'_>,
-    i: usize,
-    single: bool,
-) -> Result<SurfaceResult, String> {
+/// Resume supplied reaction/fuelbed state, using the shared float64 stage equations.
+pub fn run_surface(a: &PreparedArguments<'_>, i: usize) -> Result<SurfaceResult, String> {
     let cell = input(a, i)?;
     let fuelbed = ib(a, i)?;
     let options = crate::prepared::controls::surface(a)?;
     let reaction = a.n(Field::Ri, i)?;
-    let mut tweaks = behave_fire::engine::SurfaceTweaks {
+    let tweaks = behave_fire::engine::SurfaceTweaks {
         reaction_intensity: Some(reaction),
         ..behave_fire::engine::SurfaceTweaks::default()
     };
-    if single {
-        let reaction = reaction as f32;
-        tweaks.reaction_intensity = Some(reaction as f64);
-        tweaks.slope_phi = Some(behave_fire::math::np_min(
-            calculate_slope_phi(
-                cell.slope,
-                SlopeUnit::Degrees,
-                fuelbed.packing_ratio,
-                f64::INFINITY,
-            ),
-            (0.9_f32 * reaction) as f64,
-        ));
-    }
+
     Ok(behave_fire::engine::SurfacePlan::new(options).run_from_fuelbed(&cell, &fuelbed, tweaks))
 }
-pub fn particles_output(out: &mut RowWriter<'_>, p: Particles) {
+pub fn particles_output(out: &mut RowWriter<'_, '_>, p: Particles) {
     named(out, p.named_values());
-    out.f64("is_defined", f64::from(u8::from(p.is_defined)));
+    out.boolean("is_defined", p.is_defined);
     for (name, values) in p.named_arrays() {
         for (index, value) in values.into_iter().enumerate() {
             out.indexed_f64(name, index, value);
         }
     }
 }
-pub fn fuelbed_output(out: &mut RowWriter<'_>, p: FuelbedIntermediates) {
+pub fn fuelbed_output(out: &mut RowWriter<'_, '_>, p: FuelbedIntermediates) {
     named(out, p.named_values());
-    out.f64("is_defined", f64::from(u8::from(p.is_defined)));
+    out.boolean("is_defined", p.is_defined);
 }
-pub fn surface_output(out: &mut RowWriter<'_>, result: SurfaceResult) {
+pub fn surface_output(out: &mut RowWriter<'_, '_>, result: SurfaceResult) {
     named(out, result.named_values());
 }

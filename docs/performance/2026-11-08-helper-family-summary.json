@@ -1,0 +1,4646 @@
+{
+  "kind": "descriptive helper diagnostics, not final model performance acceptance",
+  "before_commit": "182d47842c7267fb6f03b7bf12061fa267e604e2",
+  "protocol": "Three fresh timed processes per size; first plus three warm calls. Separate allocation-only process per size. Serial workers. Scalar-only state tools at one cell; vector geometry also measured.",
+  "rows": [
+    {
+      "family": "surface.geometry",
+      "cells": 1,
+      "before": {
+        "first_median_ms": 0.9607,
+        "warm_median_ms": 0.2019,
+        "output_bytes": [
+          4
+        ],
+        "current_rss_median_before": 45957120,
+        "current_rss_median_after": 46358528,
+        "lifetime_peak_max": 46391296,
+        "allocation": [
+          [
+            33,
+            4827,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ]
+        ]
+      },
+      "candidate1": {
+        "first_median_ms": 0.6877,
+        "warm_median_ms": 0.1522,
+        "output_bytes": [
+          8
+        ],
+        "current_rss_median_before": 45944832,
+        "current_rss_median_after": 46194688,
+        "lifetime_peak_max": 47730688,
+        "allocation": [
+          [
+            25,
+            1541,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            1,
+            1
+          ],
+          [
+            0,
+            0,
+            1,
+            1
+          ]
+        ]
+      },
+      "candidate2": {
+        "first_median_ms": 0.6754,
+        "warm_median_ms": 0.11309999999999999,
+        "output_bytes": [
+          8
+        ],
+        "current_rss_median_before": 45727744,
+        "current_rss_median_after": 46010368,
+        "lifetime_peak_max": 48001024,
+        "allocation": [
+          [
+            25,
+            1541,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            1,
+            1
+          ],
+          [
+            0,
+            0,
+            1,
+            1
+          ]
+        ]
+      },
+      "after": {
+        "first_median_ms": 0.674,
+        "warm_median_ms": 0.1434,
+        "output_bytes": [
+          8
+        ],
+        "current_rss_median_before": 45993984,
+        "current_rss_median_after": 46268416,
+        "lifetime_peak_max": 47759360,
+        "allocation": [
+          [
+            25,
+            1517,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            1,
+            1
+          ],
+          [
+            0,
+            0,
+            1,
+            1
+          ]
+        ]
+      },
+      "first_material_regression": false,
+      "warm_material_regression": false,
+      "warm_before_over_after": 1.407949790794979
+    },
+    {
+      "family": "surface.direction",
+      "cells": 1,
+      "before": {
+        "first_median_ms": 0.6826,
+        "warm_median_ms": 0.41609999999999997,
+        "output_bytes": [
+          4
+        ],
+        "current_rss_median_before": 46362624,
+        "current_rss_median_after": 46444544,
+        "lifetime_peak_max": 46473216,
+        "allocation": [
+          [
+            56,
+            8846,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ]
+        ]
+      },
+      "candidate1": {
+        "first_median_ms": 0.2849,
+        "warm_median_ms": 0.217,
+        "output_bytes": [
+          8
+        ],
+        "current_rss_median_before": 46198784,
+        "current_rss_median_after": 46235648,
+        "lifetime_peak_max": 47730688,
+        "allocation": [
+          [
+            22,
+            2051,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            1,
+            1
+          ],
+          [
+            0,
+            0,
+            1,
+            1
+          ]
+        ]
+      },
+      "candidate2": {
+        "first_median_ms": 0.2741,
+        "warm_median_ms": 0.1969,
+        "output_bytes": [
+          8
+        ],
+        "current_rss_median_before": 46010368,
+        "current_rss_median_after": 46047232,
+        "lifetime_peak_max": 48001024,
+        "allocation": [
+          [
+            22,
+            2051,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            1,
+            1
+          ],
+          [
+            0,
+            0,
+            1,
+            1
+          ]
+        ]
+      },
+      "after": {
+        "first_median_ms": 0.2873,
+        "warm_median_ms": 0.19870000000000002,
+        "output_bytes": [
+          8
+        ],
+        "current_rss_median_before": 46268416,
+        "current_rss_median_after": 46297088,
+        "lifetime_peak_max": 47759360,
+        "allocation": [
+          [
+            22,
+            1979,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            1,
+            1
+          ],
+          [
+            0,
+            0,
+            1,
+            1
+          ]
+        ]
+      },
+      "first_material_regression": false,
+      "warm_material_regression": false,
+      "warm_before_over_after": 2.0941117262204325
+    },
+    {
+      "family": "crown.component",
+      "cells": 1,
+      "before": {
+        "first_median_ms": 0.6154,
+        "warm_median_ms": 0.5511999999999999,
+        "output_bytes": [
+          40
+        ],
+        "current_rss_median_before": 46477312,
+        "current_rss_median_after": 46518272,
+        "lifetime_peak_max": 46759936,
+        "allocation": [
+          [
+            106,
+            15993,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ]
+        ]
+      },
+      "candidate1": {
+        "first_median_ms": 0.4727,
+        "warm_median_ms": 0.4214,
+        "output_bytes": [
+          40
+        ],
+        "current_rss_median_before": 46239744,
+        "current_rss_median_after": 46284800,
+        "lifetime_peak_max": 47730688,
+        "allocation": [
+          [
+            93,
+            6447,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            3,
+            1
+          ],
+          [
+            0,
+            0,
+            5,
+            1
+          ]
+        ]
+      },
+      "candidate2": {
+        "first_median_ms": 0.4057,
+        "warm_median_ms": 0.3241,
+        "output_bytes": [
+          40
+        ],
+        "current_rss_median_before": 46051328,
+        "current_rss_median_after": 46088192,
+        "lifetime_peak_max": 48001024,
+        "allocation": [
+          [
+            93,
+            6447,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            3,
+            1
+          ],
+          [
+            0,
+            0,
+            5,
+            1
+          ]
+        ]
+      },
+      "after": {
+        "first_median_ms": 0.4099,
+        "warm_median_ms": 0.3678,
+        "output_bytes": [
+          40
+        ],
+        "current_rss_median_before": 46309376,
+        "current_rss_median_after": 46346240,
+        "lifetime_peak_max": 47759360,
+        "allocation": [
+          [
+            93,
+            6159,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            3,
+            1
+          ],
+          [
+            0,
+            0,
+            5,
+            1
+          ]
+        ]
+      },
+      "first_material_regression": false,
+      "warm_material_regression": false,
+      "warm_before_over_after": 1.4986405655247415
+    },
+    {
+      "family": "units",
+      "cells": 1,
+      "before": {
+        "first_median_ms": 0.46030000000000004,
+        "warm_median_ms": 0.3015,
+        "output_bytes": [
+          8
+        ],
+        "current_rss_median_before": 46518272,
+        "current_rss_median_after": 46571520,
+        "lifetime_peak_max": 46817280,
+        "allocation": [
+          [
+            30,
+            5348,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ]
+        ]
+      },
+      "candidate1": {
+        "first_median_ms": 0.30229999999999996,
+        "warm_median_ms": 0.1743,
+        "output_bytes": [
+          8
+        ],
+        "current_rss_median_before": 46292992,
+        "current_rss_median_after": 46317568,
+        "lifetime_peak_max": 47730688,
+        "allocation": [
+          [
+            17,
+            1751,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            1,
+            1
+          ],
+          [
+            0,
+            0,
+            1,
+            1
+          ]
+        ]
+      },
+      "candidate2": {
+        "first_median_ms": 0.32989999999999997,
+        "warm_median_ms": 0.2047,
+        "output_bytes": [
+          8
+        ],
+        "current_rss_median_before": 46100480,
+        "current_rss_median_after": 46125056,
+        "lifetime_peak_max": 48001024,
+        "allocation": [
+          [
+            16,
+            1687,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            1,
+            1
+          ],
+          [
+            0,
+            0,
+            1,
+            1
+          ]
+        ]
+      },
+      "after": {
+        "first_median_ms": 0.2784,
+        "warm_median_ms": 0.1972,
+        "output_bytes": [
+          8
+        ],
+        "current_rss_median_before": 46354432,
+        "current_rss_median_after": 46379008,
+        "lifetime_peak_max": 47759360,
+        "allocation": [
+          [
+            16,
+            1639,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            1,
+            1
+          ],
+          [
+            0,
+            0,
+            1,
+            1
+          ]
+        ]
+      },
+      "first_material_regression": false,
+      "warm_material_regression": false,
+      "warm_before_over_after": 1.5289046653144016
+    },
+    {
+      "family": "mortality",
+      "cells": 1,
+      "before": {
+        "first_median_ms": 0.657,
+        "warm_median_ms": 0.5923,
+        "output_bytes": [
+          24
+        ],
+        "current_rss_median_before": 46583808,
+        "current_rss_median_after": 46637056,
+        "lifetime_peak_max": 46882816,
+        "allocation": [
+          [
+            63,
+            13274,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ]
+        ]
+      },
+      "candidate1": {
+        "first_median_ms": 0.5078,
+        "warm_median_ms": 0.45780000000000004,
+        "output_bytes": [
+          24
+        ],
+        "current_rss_median_before": 46333952,
+        "current_rss_median_after": 46395392,
+        "lifetime_peak_max": 47730688,
+        "allocation": [
+          [
+            40,
+            2847,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            1,
+            1
+          ],
+          [
+            0,
+            0,
+            3,
+            1
+          ]
+        ]
+      },
+      "candidate2": {
+        "first_median_ms": 0.49160000000000004,
+        "warm_median_ms": 0.5564,
+        "output_bytes": [
+          24
+        ],
+        "current_rss_median_before": 46141440,
+        "current_rss_median_after": 46194688,
+        "lifetime_peak_max": 48001024,
+        "allocation": [
+          [
+            40,
+            2847,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            1,
+            1
+          ],
+          [
+            0,
+            0,
+            3,
+            1
+          ]
+        ]
+      },
+      "after": {
+        "first_median_ms": 0.6842,
+        "warm_median_ms": 0.4164,
+        "output_bytes": [
+          24
+        ],
+        "current_rss_median_before": 46391296,
+        "current_rss_median_after": 46452736,
+        "lifetime_peak_max": 47759360,
+        "allocation": [
+          [
+            40,
+            2679,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            1,
+            1
+          ],
+          [
+            0,
+            0,
+            3,
+            1
+          ]
+        ]
+      },
+      "first_material_regression": false,
+      "warm_material_regression": false,
+      "warm_before_over_after": 1.4224303554274738
+    },
+    {
+      "family": "vpd",
+      "cells": 1,
+      "before": {
+        "first_median_ms": 0.7958999999999999,
+        "warm_median_ms": 0.7752,
+        "output_bytes": [
+          24
+        ],
+        "current_rss_median_before": 46637056,
+        "current_rss_median_after": 46661632,
+        "lifetime_peak_max": 46903296,
+        "allocation": [
+          [
+            71,
+            14230,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ]
+        ]
+      },
+      "candidate1": {
+        "first_median_ms": 0.408,
+        "warm_median_ms": 0.3409,
+        "output_bytes": [
+          24
+        ],
+        "current_rss_median_before": 46395392,
+        "current_rss_median_after": 46419968,
+        "lifetime_peak_max": 47730688,
+        "allocation": [
+          [
+            38,
+            2892,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            1,
+            1
+          ],
+          [
+            0,
+            0,
+            3,
+            1
+          ]
+        ]
+      },
+      "candidate2": {
+        "first_median_ms": 0.612,
+        "warm_median_ms": 0.4354,
+        "output_bytes": [
+          24
+        ],
+        "current_rss_median_before": 46194688,
+        "current_rss_median_after": 46206976,
+        "lifetime_peak_max": 48001024,
+        "allocation": [
+          [
+            38,
+            2892,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            1,
+            1
+          ],
+          [
+            0,
+            0,
+            3,
+            1
+          ]
+        ]
+      },
+      "after": {
+        "first_median_ms": 0.4417,
+        "warm_median_ms": 0.33290000000000003,
+        "output_bytes": [
+          24
+        ],
+        "current_rss_median_before": 46452736,
+        "current_rss_median_after": 46469120,
+        "lifetime_peak_max": 47759360,
+        "allocation": [
+          [
+            38,
+            2772,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            1,
+            1
+          ],
+          [
+            0,
+            0,
+            3,
+            1
+          ]
+        ]
+      },
+      "first_material_regression": false,
+      "warm_material_regression": false,
+      "warm_before_over_after": 2.328627215379994
+    },
+    {
+      "family": "fdfm",
+      "cells": 1,
+      "before": {
+        "first_median_ms": 0.8695,
+        "warm_median_ms": 0.9429,
+        "output_bytes": [
+          8
+        ],
+        "current_rss_median_before": 46661632,
+        "current_rss_median_after": 46686208,
+        "lifetime_peak_max": 46931968,
+        "allocation": [
+          [
+            163,
+            28796,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ]
+        ]
+      },
+      "candidate1": {
+        "first_median_ms": 0.5051,
+        "warm_median_ms": 0.4573,
+        "output_bytes": [
+          8
+        ],
+        "current_rss_median_before": 46419968,
+        "current_rss_median_after": 46440448,
+        "lifetime_peak_max": 47730688,
+        "allocation": [
+          [
+            42,
+            2642,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            1,
+            1
+          ],
+          [
+            0,
+            0,
+            1,
+            1
+          ]
+        ]
+      },
+      "candidate2": {
+        "first_median_ms": 0.5174,
+        "warm_median_ms": 0.46480000000000005,
+        "output_bytes": [
+          8
+        ],
+        "current_rss_median_before": 46206976,
+        "current_rss_median_after": 46223360,
+        "lifetime_peak_max": 48001024,
+        "allocation": [
+          [
+            42,
+            2642,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            1,
+            1
+          ],
+          [
+            0,
+            0,
+            1,
+            1
+          ]
+        ]
+      },
+      "after": {
+        "first_median_ms": 0.4415,
+        "warm_median_ms": 0.38039999999999996,
+        "output_bytes": [
+          8
+        ],
+        "current_rss_median_before": 46469120,
+        "current_rss_median_after": 46485504,
+        "lifetime_peak_max": 47759360,
+        "allocation": [
+          [
+            42,
+            2450,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            1,
+            1
+          ],
+          [
+            0,
+            0,
+            1,
+            1
+          ]
+        ]
+      },
+      "first_material_regression": false,
+      "warm_material_regression": false,
+      "warm_before_over_after": 2.4787066246056786
+    },
+    {
+      "family": "containment",
+      "cells": 1,
+      "before": {
+        "first_median_ms": 0.6389,
+        "warm_median_ms": 0.5239,
+        "output_bytes": [
+          28
+        ],
+        "current_rss_median_before": 46686208,
+        "current_rss_median_after": 46706688,
+        "lifetime_peak_max": 46948352,
+        "allocation": [
+          [
+            74,
+            15441,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ]
+        ]
+      },
+      "candidate1": {
+        "first_median_ms": 0.37560000000000004,
+        "warm_median_ms": 0.3192,
+        "output_bytes": [
+          28
+        ],
+        "current_rss_median_before": 46444544,
+        "current_rss_median_after": 46469120,
+        "lifetime_peak_max": 47730688,
+        "allocation": [
+          [
+            48,
+            3652,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            1,
+            1
+          ],
+          [
+            0,
+            0,
+            4,
+            1
+          ]
+        ]
+      },
+      "candidate2": {
+        "first_median_ms": 0.37379999999999997,
+        "warm_median_ms": 0.29050000000000004,
+        "output_bytes": [
+          28
+        ],
+        "current_rss_median_before": 46231552,
+        "current_rss_median_after": 46243840,
+        "lifetime_peak_max": 48001024,
+        "allocation": [
+          [
+            48,
+            3652,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            1,
+            1
+          ],
+          [
+            0,
+            0,
+            4,
+            1
+          ]
+        ]
+      },
+      "after": {
+        "first_median_ms": 0.3325,
+        "warm_median_ms": 0.3059,
+        "output_bytes": [
+          28
+        ],
+        "current_rss_median_before": 46489600,
+        "current_rss_median_after": 46505984,
+        "lifetime_peak_max": 47759360,
+        "allocation": [
+          [
+            48,
+            3484,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            1,
+            1
+          ],
+          [
+            0,
+            0,
+            4,
+            1
+          ]
+        ]
+      },
+      "first_material_regression": false,
+      "warm_material_regression": false,
+      "warm_before_over_after": 1.7126511932003923
+    },
+    {
+      "family": "ignite",
+      "cells": 1,
+      "before": {
+        "first_median_ms": 0.2981,
+        "warm_median_ms": 0.2561,
+        "output_bytes": [
+          8
+        ],
+        "current_rss_median_before": 46706688,
+        "current_rss_median_after": 46710784,
+        "lifetime_peak_max": 46952448,
+        "allocation": [
+          [
+            30,
+            5798,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ]
+        ]
+      },
+      "candidate1": {
+        "first_median_ms": 0.2372,
+        "warm_median_ms": 0.162,
+        "output_bytes": [
+          8
+        ],
+        "current_rss_median_before": 46473216,
+        "current_rss_median_after": 46489600,
+        "lifetime_peak_max": 47730688,
+        "allocation": [
+          [
+            19,
+            1476,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            1,
+            1
+          ],
+          [
+            0,
+            0,
+            1,
+            1
+          ]
+        ]
+      },
+      "candidate2": {
+        "first_median_ms": 0.2595,
+        "warm_median_ms": 0.18239999999999998,
+        "output_bytes": [
+          8
+        ],
+        "current_rss_median_before": 46247936,
+        "current_rss_median_after": 46268416,
+        "lifetime_peak_max": 48001024,
+        "allocation": [
+          [
+            19,
+            1476,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            1,
+            1
+          ],
+          [
+            0,
+            0,
+            1,
+            1
+          ]
+        ]
+      },
+      "after": {
+        "first_median_ms": 0.1964,
+        "warm_median_ms": 0.1707,
+        "output_bytes": [
+          8
+        ],
+        "current_rss_median_before": 46505984,
+        "current_rss_median_after": 46530560,
+        "lifetime_peak_max": 47759360,
+        "allocation": [
+          [
+            19,
+            1404,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            1,
+            1
+          ],
+          [
+            0,
+            0,
+            1,
+            1
+          ]
+        ]
+      },
+      "first_material_regression": false,
+      "warm_material_regression": false,
+      "warm_before_over_after": 1.5002929115407146
+    },
+    {
+      "family": "safety",
+      "cells": 1,
+      "before": {
+        "first_median_ms": 0.44949999999999996,
+        "warm_median_ms": 0.342,
+        "output_bytes": [
+          24
+        ],
+        "current_rss_median_before": 46718976,
+        "current_rss_median_after": 46727168,
+        "lifetime_peak_max": 46968832,
+        "allocation": [
+          [
+            47,
+            9294,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ]
+        ]
+      },
+      "candidate1": {
+        "first_median_ms": 0.27769999999999995,
+        "warm_median_ms": 0.25,
+        "output_bytes": [
+          24
+        ],
+        "current_rss_median_before": 46497792,
+        "current_rss_median_after": 46641152,
+        "lifetime_peak_max": 47730688,
+        "allocation": [
+          [
+            34,
+            2366,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            1,
+            1
+          ],
+          [
+            0,
+            0,
+            3,
+            1
+          ]
+        ]
+      },
+      "candidate2": {
+        "first_median_ms": 0.2727,
+        "warm_median_ms": 0.25020000000000003,
+        "output_bytes": [
+          24
+        ],
+        "current_rss_median_before": 46542848,
+        "current_rss_median_after": 46555136,
+        "lifetime_peak_max": 48001024,
+        "allocation": [
+          [
+            34,
+            2366,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            1,
+            1
+          ],
+          [
+            0,
+            0,
+            3,
+            1
+          ]
+        ]
+      },
+      "after": {
+        "first_median_ms": 0.2999,
+        "warm_median_ms": 0.25070000000000003,
+        "output_bytes": [
+          24
+        ],
+        "current_rss_median_before": 46530560,
+        "current_rss_median_after": 46809088,
+        "lifetime_peak_max": 47759360,
+        "allocation": [
+          [
+            34,
+            2246,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            1,
+            1
+          ],
+          [
+            0,
+            0,
+            3,
+            1
+          ]
+        ]
+      },
+      "first_material_regression": false,
+      "warm_material_regression": false,
+      "warm_before_over_after": 1.364180295173514
+    },
+    {
+      "family": "spot",
+      "cells": 1,
+      "before": {
+        "first_median_ms": 0.45899999999999996,
+        "warm_median_ms": 0.384,
+        "output_bytes": [
+          8
+        ],
+        "current_rss_median_before": 46968832,
+        "current_rss_median_after": 46985216,
+        "lifetime_peak_max": 47017984,
+        "allocation": [
+          [
+            30,
+            5773,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ]
+        ]
+      },
+      "candidate1": {
+        "first_median_ms": 0.2185,
+        "warm_median_ms": 0.1618,
+        "output_bytes": [
+          8
+        ],
+        "current_rss_median_before": 46641152,
+        "current_rss_median_after": 46649344,
+        "lifetime_peak_max": 47730688,
+        "allocation": [
+          [
+            19,
+            1466,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            1,
+            1
+          ],
+          [
+            0,
+            0,
+            1,
+            1
+          ]
+        ]
+      },
+      "candidate2": {
+        "first_median_ms": 0.206,
+        "warm_median_ms": 0.17809999999999998,
+        "output_bytes": [
+          8
+        ],
+        "current_rss_median_before": 46555136,
+        "current_rss_median_after": 46563328,
+        "lifetime_peak_max": 48001024,
+        "allocation": [
+          [
+            19,
+            1466,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            1,
+            1
+          ],
+          [
+            0,
+            0,
+            1,
+            1
+          ]
+        ]
+      },
+      "after": {
+        "first_median_ms": 0.2337,
+        "warm_median_ms": 0.1536,
+        "output_bytes": [
+          8
+        ],
+        "current_rss_median_before": 46809088,
+        "current_rss_median_after": 46817280,
+        "lifetime_peak_max": 47943680,
+        "allocation": [
+          [
+            19,
+            1394,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            1,
+            1
+          ],
+          [
+            0,
+            0,
+            1,
+            1
+          ]
+        ]
+      },
+      "first_material_regression": false,
+      "warm_material_regression": false,
+      "warm_before_over_after": 2.5000000000000004
+    },
+    {
+      "family": "fire_size.scalar",
+      "cells": 1,
+      "before": {
+        "first_median_ms": 0.1764,
+        "warm_median_ms": 0.11950000000000001,
+        "output_bytes": [
+          8
+        ],
+        "current_rss_median_before": 46985216,
+        "current_rss_median_after": 46985216,
+        "lifetime_peak_max": 47017984,
+        "allocation": [
+          [
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ]
+        ]
+      },
+      "candidate1": {
+        "first_median_ms": 0.35100000000000003,
+        "warm_median_ms": 0.23020000000000002,
+        "output_bytes": [
+          8
+        ],
+        "current_rss_median_before": 46649344,
+        "current_rss_median_after": 46653440,
+        "lifetime_peak_max": 47730688,
+        "allocation": [
+          [
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ]
+        ]
+      },
+      "candidate2": {
+        "first_median_ms": 0.2783,
+        "warm_median_ms": 0.1982,
+        "output_bytes": [
+          8
+        ],
+        "current_rss_median_before": 46563328,
+        "current_rss_median_after": 46567424,
+        "lifetime_peak_max": 48001024,
+        "allocation": [
+          [
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ]
+        ]
+      },
+      "after": {
+        "first_median_ms": 0.24760000000000001,
+        "warm_median_ms": 0.1593,
+        "output_bytes": [
+          8
+        ],
+        "current_rss_median_before": 46817280,
+        "current_rss_median_after": 46821376,
+        "lifetime_peak_max": 47943680,
+        "allocation": [
+          [
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ]
+        ]
+      },
+      "first_material_regression": false,
+      "warm_material_regression": false,
+      "warm_before_over_after": 0.7501569365976146
+    },
+    {
+      "family": "slope.scalar",
+      "cells": 1,
+      "before": {
+        "first_median_ms": 0.27599999999999997,
+        "warm_median_ms": 0.2288,
+        "output_bytes": [
+          0
+        ],
+        "current_rss_median_before": 46989312,
+        "current_rss_median_after": 46997504,
+        "lifetime_peak_max": 47030272,
+        "allocation": [
+          [
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ]
+        ]
+      },
+      "candidate1": {
+        "first_median_ms": 1.3246,
+        "warm_median_ms": 1.4072,
+        "output_bytes": [
+          0
+        ],
+        "current_rss_median_before": 46657536,
+        "current_rss_median_after": 46698496,
+        "lifetime_peak_max": 47730688,
+        "allocation": [
+          [
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ]
+        ]
+      },
+      "candidate2": {
+        "first_median_ms": 0.5157999999999999,
+        "warm_median_ms": 0.4542,
+        "output_bytes": [
+          0
+        ],
+        "current_rss_median_before": 46567424,
+        "current_rss_median_after": 46608384,
+        "lifetime_peak_max": 48001024,
+        "allocation": [
+          [
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ]
+        ]
+      },
+      "after": {
+        "first_median_ms": 0.44920000000000004,
+        "warm_median_ms": 0.3525,
+        "output_bytes": [
+          0
+        ],
+        "current_rss_median_before": 46821376,
+        "current_rss_median_after": 46862336,
+        "lifetime_peak_max": 47972352,
+        "allocation": [
+          [
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ]
+        ]
+      },
+      "first_material_regression": false,
+      "warm_material_regression": false,
+      "warm_before_over_after": 0.6490780141843973
+    },
+    {
+      "family": "surface.geometry",
+      "cells": 10000,
+      "before": {
+        "first_median_ms": 7.975599999999999,
+        "warm_median_ms": 8.2495,
+        "output_bytes": [
+          40000
+        ],
+        "current_rss_median_before": 45924352,
+        "current_rss_median_after": 46436352,
+        "lifetime_peak_max": 46624768,
+        "allocation": [
+          [
+            33,
+            124815,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ]
+        ]
+      },
+      "candidate1": {
+        "first_median_ms": 2.0217,
+        "warm_median_ms": 0.6273,
+        "output_bytes": [
+          80000
+        ],
+        "current_rss_median_before": 45936640,
+        "current_rss_median_after": 46452736,
+        "lifetime_peak_max": 46546944,
+        "allocation": [
+          [
+            25,
+            161501,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            10000,
+            1
+          ],
+          [
+            0,
+            0,
+            10000,
+            1
+          ]
+        ]
+      },
+      "candidate2": {
+        "first_median_ms": 1.2796,
+        "warm_median_ms": 0.6147,
+        "output_bytes": [
+          80000
+        ],
+        "current_rss_median_before": 45735936,
+        "current_rss_median_after": 46194688,
+        "lifetime_peak_max": 46292992,
+        "allocation": [
+          [
+            25,
+            161501,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            10000,
+            1
+          ],
+          [
+            0,
+            0,
+            10000,
+            1
+          ]
+        ]
+      },
+      "after": {
+        "first_median_ms": 1.417,
+        "warm_median_ms": 0.5647,
+        "output_bytes": [
+          80000
+        ],
+        "current_rss_median_before": 45735936,
+        "current_rss_median_after": 46358528,
+        "lifetime_peak_max": 46440448,
+        "allocation": [
+          [
+            25,
+            161501,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            10000,
+            1
+          ],
+          [
+            0,
+            0,
+            10000,
+            1
+          ]
+        ]
+      },
+      "first_material_regression": false,
+      "warm_material_regression": false,
+      "warm_before_over_after": 14.608641756684966
+    },
+    {
+      "family": "surface.direction",
+      "cells": 10000,
+      "before": {
+        "first_median_ms": 10.005500000000001,
+        "warm_median_ms": 11.5316,
+        "output_bytes": [
+          40000
+        ],
+        "current_rss_median_before": 46440448,
+        "current_rss_median_after": 46493696,
+        "lifetime_peak_max": 47460352,
+        "allocation": [
+          [
+            56,
+            548792,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ]
+        ]
+      },
+      "candidate1": {
+        "first_median_ms": 1.665,
+        "warm_median_ms": 1.2702,
+        "output_bytes": [
+          80000
+        ],
+        "current_rss_median_before": 46456832,
+        "current_rss_median_after": 46923776,
+        "lifetime_peak_max": 47063040,
+        "allocation": [
+          [
+            22,
+            321947,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            10000,
+            1
+          ],
+          [
+            0,
+            0,
+            10000,
+            1
+          ]
+        ]
+      },
+      "candidate2": {
+        "first_median_ms": 1.8149,
+        "warm_median_ms": 1.2971000000000001,
+        "output_bytes": [
+          80000
+        ],
+        "current_rss_median_before": 46194688,
+        "current_rss_median_after": 46718976,
+        "lifetime_peak_max": 46796800,
+        "allocation": [
+          [
+            22,
+            321947,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            10000,
+            1
+          ],
+          [
+            0,
+            0,
+            10000,
+            1
+          ]
+        ]
+      },
+      "after": {
+        "first_median_ms": 1.6340000000000001,
+        "warm_median_ms": 1.6753,
+        "output_bytes": [
+          80000
+        ],
+        "current_rss_median_before": 46358528,
+        "current_rss_median_after": 46137344,
+        "lifetime_peak_max": 46981120,
+        "allocation": [
+          [
+            22,
+            321947,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            10000,
+            1
+          ],
+          [
+            0,
+            0,
+            10000,
+            1
+          ]
+        ]
+      },
+      "first_material_regression": false,
+      "warm_material_regression": false,
+      "warm_before_over_after": 6.883304482779203
+    },
+    {
+      "family": "crown.component",
+      "cells": 10000,
+      "before": {
+        "first_median_ms": 20.0865,
+        "warm_median_ms": 18.604200000000002,
+        "output_bytes": [
+          160024
+        ],
+        "current_rss_median_before": 46493696,
+        "current_rss_median_after": 47411200,
+        "lifetime_peak_max": 48504832,
+        "allocation": [
+          [
+            106,
+            1595835,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ]
+        ]
+      },
+      "candidate1": {
+        "first_median_ms": 1.355,
+        "warm_median_ms": 1.2459,
+        "output_bytes": [
+          160024
+        ],
+        "current_rss_median_before": 46927872,
+        "current_rss_median_after": 47034368,
+        "lifetime_peak_max": 47120384,
+        "allocation": [
+          [
+            93,
+            246399,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            10002,
+            1
+          ],
+          [
+            0,
+            0,
+            20003,
+            1
+          ]
+        ]
+      },
+      "candidate2": {
+        "first_median_ms": 1.5364,
+        "warm_median_ms": 1.2616,
+        "output_bytes": [
+          160024
+        ],
+        "current_rss_median_before": 46718976,
+        "current_rss_median_after": 46804992,
+        "lifetime_peak_max": 46833664,
+        "allocation": [
+          [
+            93,
+            246399,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            10002,
+            1
+          ],
+          [
+            0,
+            0,
+            20003,
+            1
+          ]
+        ]
+      },
+      "after": {
+        "first_median_ms": 1.4921,
+        "warm_median_ms": 1.1755,
+        "output_bytes": [
+          160024
+        ],
+        "current_rss_median_before": 46141440,
+        "current_rss_median_after": 46825472,
+        "lifetime_peak_max": 46981120,
+        "allocation": [
+          [
+            93,
+            246135,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            10002,
+            1
+          ],
+          [
+            0,
+            0,
+            20003,
+            1
+          ]
+        ]
+      },
+      "first_material_regression": false,
+      "warm_material_regression": false,
+      "warm_before_over_after": 15.826626967247982
+    },
+    {
+      "family": "units",
+      "cells": 10000,
+      "before": {
+        "first_median_ms": 1.1738,
+        "warm_median_ms": 0.679,
+        "output_bytes": [
+          80000
+        ],
+        "current_rss_median_before": 47411200,
+        "current_rss_median_after": 47788032,
+        "lifetime_peak_max": 48504832,
+        "allocation": [
+          [
+            30,
+            165332,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ]
+        ]
+      },
+      "candidate1": {
+        "first_median_ms": 0.5062000000000001,
+        "warm_median_ms": 0.415,
+        "output_bytes": [
+          80000
+        ],
+        "current_rss_median_before": 47042560,
+        "current_rss_median_after": 47140864,
+        "lifetime_peak_max": 47222784,
+        "allocation": [
+          [
+            17,
+            161711,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            10000,
+            1
+          ],
+          [
+            0,
+            0,
+            10000,
+            1
+          ]
+        ]
+      },
+      "candidate2": {
+        "first_median_ms": 0.506,
+        "warm_median_ms": 0.3026,
+        "output_bytes": [
+          80000
+        ],
+        "current_rss_median_before": 46813184,
+        "current_rss_median_after": 46915584,
+        "lifetime_peak_max": 46944256,
+        "allocation": [
+          [
+            16,
+            161647,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            10000,
+            1
+          ],
+          [
+            0,
+            0,
+            10000,
+            1
+          ]
+        ]
+      },
+      "after": {
+        "first_median_ms": 0.414,
+        "warm_median_ms": 0.2424,
+        "output_bytes": [
+          80000
+        ],
+        "current_rss_median_before": 46837760,
+        "current_rss_median_after": 46931968,
+        "lifetime_peak_max": 47083520,
+        "allocation": [
+          [
+            16,
+            161623,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            10000,
+            1
+          ],
+          [
+            0,
+            0,
+            10000,
+            1
+          ]
+        ]
+      },
+      "first_material_regression": false,
+      "warm_material_regression": false,
+      "warm_before_over_after": 2.8011551155115515
+    },
+    {
+      "family": "mortality",
+      "cells": 10000,
+      "before": {
+        "first_median_ms": 4.9894,
+        "warm_median_ms": 4.5053,
+        "output_bytes": [
+          240000
+        ],
+        "current_rss_median_before": 47792128,
+        "current_rss_median_after": 47656960,
+        "lifetime_peak_max": 48930816,
+        "allocation": [
+          [
+            63,
+            733202,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ]
+        ]
+      },
+      "candidate1": {
+        "first_median_ms": 1.9905000000000002,
+        "warm_median_ms": 2.4442,
+        "output_bytes": [
+          240000
+        ],
+        "current_rss_median_before": 47149056,
+        "current_rss_median_after": 46850048,
+        "lifetime_peak_max": 47853568,
+        "allocation": [
+          [
+            40,
+            562695,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            10000,
+            1
+          ],
+          [
+            0,
+            0,
+            30000,
+            1
+          ]
+        ]
+      },
+      "candidate2": {
+        "first_median_ms": 2.0186,
+        "warm_median_ms": 2.3419,
+        "output_bytes": [
+          240000
+        ],
+        "current_rss_median_before": 46927872,
+        "current_rss_median_after": 46686208,
+        "lifetime_peak_max": 47759360,
+        "allocation": [
+          [
+            40,
+            562695,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            10000,
+            1
+          ],
+          [
+            0,
+            0,
+            30000,
+            1
+          ]
+        ]
+      },
+      "after": {
+        "first_median_ms": 1.8902999999999999,
+        "warm_median_ms": 2.6525,
+        "output_bytes": [
+          240000
+        ],
+        "current_rss_median_before": 46944256,
+        "current_rss_median_after": 46583808,
+        "lifetime_peak_max": 47714304,
+        "allocation": [
+          [
+            40,
+            562623,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            10000,
+            1
+          ],
+          [
+            0,
+            0,
+            30000,
+            1
+          ]
+        ]
+      },
+      "first_material_regression": false,
+      "warm_material_regression": false,
+      "warm_before_over_after": 1.6985108388312913
+    },
+    {
+      "family": "vpd",
+      "cells": 10000,
+      "before": {
+        "first_median_ms": 2.4164,
+        "warm_median_ms": 2.278,
+        "output_bytes": [
+          240000
+        ],
+        "current_rss_median_before": 47656960,
+        "current_rss_median_after": 48066560,
+        "lifetime_peak_max": 48930816,
+        "allocation": [
+          [
+            71,
+            334198,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ]
+        ]
+      },
+      "candidate1": {
+        "first_median_ms": 1.6366,
+        "warm_median_ms": 1.2861,
+        "output_bytes": [
+          240000
+        ],
+        "current_rss_median_before": 46850048,
+        "current_rss_median_after": 47067136,
+        "lifetime_peak_max": 47853568,
+        "allocation": [
+          [
+            38,
+            322836,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            10000,
+            1
+          ],
+          [
+            0,
+            0,
+            30000,
+            1
+          ]
+        ]
+      },
+      "candidate2": {
+        "first_median_ms": 1.5412,
+        "warm_median_ms": 1.1327,
+        "output_bytes": [
+          240000
+        ],
+        "current_rss_median_before": 46686208,
+        "current_rss_median_after": 47296512,
+        "lifetime_peak_max": 47759360,
+        "allocation": [
+          [
+            38,
+            322836,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            10000,
+            1
+          ],
+          [
+            0,
+            0,
+            30000,
+            1
+          ]
+        ]
+      },
+      "after": {
+        "first_median_ms": 1.5546,
+        "warm_median_ms": 1.0408,
+        "output_bytes": [
+          240000
+        ],
+        "current_rss_median_before": 46583808,
+        "current_rss_median_after": 47153152,
+        "lifetime_peak_max": 47714304,
+        "allocation": [
+          [
+            38,
+            322740,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            10000,
+            1
+          ],
+          [
+            0,
+            0,
+            30000,
+            1
+          ]
+        ]
+      },
+      "first_material_regression": false,
+      "warm_material_regression": false,
+      "warm_before_over_after": 2.1887009992313606
+    },
+    {
+      "family": "fdfm",
+      "cells": 10000,
+      "before": {
+        "first_median_ms": 2.9092,
+        "warm_median_ms": 1.9772,
+        "output_bytes": [
+          80000
+        ],
+        "current_rss_median_before": 48070656,
+        "current_rss_median_after": 47935488,
+        "lifetime_peak_max": 48930816,
+        "allocation": [
+          [
+            163,
+            268772,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ]
+        ]
+      },
+      "candidate1": {
+        "first_median_ms": 1.1549,
+        "warm_median_ms": 1.0038,
+        "output_bytes": [
+          80000
+        ],
+        "current_rss_median_before": 47071232,
+        "current_rss_median_after": 47095808,
+        "lifetime_peak_max": 47853568,
+        "allocation": [
+          [
+            42,
+            162602,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            10000,
+            1
+          ],
+          [
+            0,
+            0,
+            10000,
+            1
+          ]
+        ]
+      },
+      "candidate2": {
+        "first_median_ms": 1.1822,
+        "warm_median_ms": 1.0057,
+        "output_bytes": [
+          80000
+        ],
+        "current_rss_median_before": 47296512,
+        "current_rss_median_after": 46669824,
+        "lifetime_peak_max": 47759360,
+        "allocation": [
+          [
+            42,
+            162602,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            10000,
+            1
+          ],
+          [
+            0,
+            0,
+            10000,
+            1
+          ]
+        ]
+      },
+      "after": {
+        "first_median_ms": 1.0185000000000002,
+        "warm_median_ms": 0.9194,
+        "output_bytes": [
+          80000
+        ],
+        "current_rss_median_before": 47153152,
+        "current_rss_median_after": 46714880,
+        "lifetime_peak_max": 47714304,
+        "allocation": [
+          [
+            42,
+            162434,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            10000,
+            1
+          ],
+          [
+            0,
+            0,
+            10000,
+            1
+          ]
+        ]
+      },
+      "first_material_regression": false,
+      "warm_material_regression": false,
+      "warm_before_over_after": 2.150532956275832
+    },
+    {
+      "family": "containment",
+      "cells": 10000,
+      "before": {
+        "first_median_ms": 4.2354,
+        "warm_median_ms": 5.9316,
+        "output_bytes": [
+          280000
+        ],
+        "current_rss_median_before": 47935488,
+        "current_rss_median_after": 48275456,
+        "lifetime_peak_max": 48930816,
+        "allocation": [
+          [
+            74,
+            495393,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ]
+        ]
+      },
+      "candidate1": {
+        "first_median_ms": 3.1543,
+        "warm_median_ms": 3.1944999999999997,
+        "output_bytes": [
+          280000
+        ],
+        "current_rss_median_before": 47099904,
+        "current_rss_median_after": 47349760,
+        "lifetime_peak_max": 47853568,
+        "allocation": [
+          [
+            48,
+            443560,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            10000,
+            1
+          ],
+          [
+            0,
+            0,
+            40000,
+            1
+          ]
+        ]
+      },
+      "candidate2": {
+        "first_median_ms": 3.8692,
+        "warm_median_ms": 3.6020000000000003,
+        "output_bytes": [
+          280000
+        ],
+        "current_rss_median_before": 46678016,
+        "current_rss_median_after": 47210496,
+        "lifetime_peak_max": 47759360,
+        "allocation": [
+          [
+            48,
+            443560,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            10000,
+            1
+          ],
+          [
+            0,
+            0,
+            40000,
+            1
+          ]
+        ]
+      },
+      "after": {
+        "first_median_ms": 3.6813000000000002,
+        "warm_median_ms": 3.7959,
+        "output_bytes": [
+          280000
+        ],
+        "current_rss_median_before": 46718976,
+        "current_rss_median_after": 47247360,
+        "lifetime_peak_max": 47714304,
+        "allocation": [
+          [
+            48,
+            443440,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            10000,
+            1
+          ],
+          [
+            0,
+            0,
+            40000,
+            1
+          ]
+        ]
+      },
+      "first_material_regression": false,
+      "warm_material_regression": false,
+      "warm_before_over_after": 1.562633367580811
+    },
+    {
+      "family": "ignite",
+      "cells": 10000,
+      "before": {
+        "first_median_ms": 2.895,
+        "warm_median_ms": 2.5363,
+        "output_bytes": [
+          80000
+        ],
+        "current_rss_median_before": 48279552,
+        "current_rss_median_after": 47439872,
+        "lifetime_peak_max": 48930816,
+        "allocation": [
+          [
+            30,
+            165782,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ]
+        ]
+      },
+      "candidate1": {
+        "first_median_ms": 1.8651,
+        "warm_median_ms": 1.7943,
+        "output_bytes": [
+          80000
+        ],
+        "current_rss_median_before": 47362048,
+        "current_rss_median_after": 46903296,
+        "lifetime_peak_max": 47853568,
+        "allocation": [
+          [
+            19,
+            161436,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            10000,
+            1
+          ],
+          [
+            0,
+            0,
+            10000,
+            1
+          ]
+        ]
+      },
+      "candidate2": {
+        "first_median_ms": 1.9927000000000001,
+        "warm_median_ms": 1.7254,
+        "output_bytes": [
+          80000
+        ],
+        "current_rss_median_before": 47210496,
+        "current_rss_median_after": 46718976,
+        "lifetime_peak_max": 47759360,
+        "allocation": [
+          [
+            19,
+            161436,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            10000,
+            1
+          ],
+          [
+            0,
+            0,
+            10000,
+            1
+          ]
+        ]
+      },
+      "after": {
+        "first_median_ms": 2.3684000000000003,
+        "warm_median_ms": 2.0122,
+        "output_bytes": [
+          80000
+        ],
+        "current_rss_median_before": 47251456,
+        "current_rss_median_after": 46845952,
+        "lifetime_peak_max": 47714304,
+        "allocation": [
+          [
+            19,
+            161388,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            10000,
+            1
+          ],
+          [
+            0,
+            0,
+            10000,
+            1
+          ]
+        ]
+      },
+      "first_material_regression": false,
+      "warm_material_regression": false,
+      "warm_before_over_after": 1.2604611867607596
+    },
+    {
+      "family": "safety",
+      "cells": 10000,
+      "before": {
+        "first_median_ms": 1.5639,
+        "warm_median_ms": 1.8908,
+        "output_bytes": [
+          240000
+        ],
+        "current_rss_median_before": 47448064,
+        "current_rss_median_after": 47738880,
+        "lifetime_peak_max": 48930816,
+        "allocation": [
+          [
+            47,
+            329262,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ]
+        ]
+      },
+      "candidate1": {
+        "first_median_ms": 0.9076000000000001,
+        "warm_median_ms": 0.626,
+        "output_bytes": [
+          240000
+        ],
+        "current_rss_median_before": 46907392,
+        "current_rss_median_after": 47390720,
+        "lifetime_peak_max": 47853568,
+        "allocation": [
+          [
+            34,
+            322310,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            10000,
+            1
+          ],
+          [
+            0,
+            0,
+            30000,
+            1
+          ]
+        ]
+      },
+      "candidate2": {
+        "first_median_ms": 0.75,
+        "warm_median_ms": 0.6611,
+        "output_bytes": [
+          240000
+        ],
+        "current_rss_median_before": 46727168,
+        "current_rss_median_after": 47104000,
+        "lifetime_peak_max": 47759360,
+        "allocation": [
+          [
+            34,
+            322310,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            10000,
+            1
+          ],
+          [
+            0,
+            0,
+            30000,
+            1
+          ]
+        ]
+      },
+      "after": {
+        "first_median_ms": 0.7931,
+        "warm_median_ms": 0.5384,
+        "output_bytes": [
+          240000
+        ],
+        "current_rss_median_before": 46850048,
+        "current_rss_median_after": 47300608,
+        "lifetime_peak_max": 47714304,
+        "allocation": [
+          [
+            34,
+            322214,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            10000,
+            1
+          ],
+          [
+            0,
+            0,
+            30000,
+            1
+          ]
+        ]
+      },
+      "first_material_regression": false,
+      "warm_material_regression": false,
+      "warm_before_over_after": 3.511887072808321
+    },
+    {
+      "family": "spot",
+      "cells": 10000,
+      "before": {
+        "first_median_ms": 3.6005,
+        "warm_median_ms": 3.5568,
+        "output_bytes": [
+          80000
+        ],
+        "current_rss_median_before": 47738880,
+        "current_rss_median_after": 47755264,
+        "lifetime_peak_max": 48930816,
+        "allocation": [
+          [
+            30,
+            165757,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ]
+        ]
+      },
+      "candidate1": {
+        "first_median_ms": 3.2796000000000003,
+        "warm_median_ms": 3.2077,
+        "output_bytes": [
+          80000
+        ],
+        "current_rss_median_before": 47390720,
+        "current_rss_median_after": 47398912,
+        "lifetime_peak_max": 47853568,
+        "allocation": [
+          [
+            19,
+            161426,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            10000,
+            1
+          ],
+          [
+            0,
+            0,
+            10000,
+            1
+          ]
+        ]
+      },
+      "candidate2": {
+        "first_median_ms": 3.2380999999999998,
+        "warm_median_ms": 3.3605,
+        "output_bytes": [
+          80000
+        ],
+        "current_rss_median_before": 47104000,
+        "current_rss_median_after": 47218688,
+        "lifetime_peak_max": 47759360,
+        "allocation": [
+          [
+            19,
+            161426,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            10000,
+            1
+          ],
+          [
+            0,
+            0,
+            10000,
+            1
+          ]
+        ]
+      },
+      "after": {
+        "first_median_ms": 2.8929,
+        "warm_median_ms": 2.8979,
+        "output_bytes": [
+          80000
+        ],
+        "current_rss_median_before": 47300608,
+        "current_rss_median_after": 47308800,
+        "lifetime_peak_max": 47714304,
+        "allocation": [
+          [
+            19,
+            161378,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            10000,
+            1
+          ],
+          [
+            0,
+            0,
+            10000,
+            1
+          ]
+        ]
+      },
+      "first_material_regression": false,
+      "warm_material_regression": false,
+      "warm_before_over_after": 1.2273715449118328
+    },
+    {
+      "family": "surface.geometry",
+      "cells": 100000,
+      "before": {
+        "first_median_ms": 73.7963,
+        "warm_median_ms": 72.27409999999999,
+        "output_bytes": [
+          400000
+        ],
+        "current_rss_median_before": 47321088,
+        "current_rss_median_after": 48119808,
+        "lifetime_peak_max": 50667520,
+        "allocation": [
+          [
+            33,
+            1204815,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ]
+        ]
+      },
+      "candidate1": {
+        "first_median_ms": 6.4293,
+        "warm_median_ms": 6.2888,
+        "output_bytes": [
+          800000
+        ],
+        "current_rss_median_before": 47284224,
+        "current_rss_median_after": 48361472,
+        "lifetime_peak_max": 51306496,
+        "allocation": [
+          [
+            25,
+            1601501,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            100000,
+            1
+          ],
+          [
+            0,
+            0,
+            100000,
+            1
+          ]
+        ]
+      },
+      "candidate2": {
+        "first_median_ms": 6.7948,
+        "warm_median_ms": 6.1637,
+        "output_bytes": [
+          800000
+        ],
+        "current_rss_median_before": 47321088,
+        "current_rss_median_after": 48283648,
+        "lifetime_peak_max": 51249152,
+        "allocation": [
+          [
+            25,
+            1601501,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            100000,
+            1
+          ],
+          [
+            0,
+            0,
+            100000,
+            1
+          ]
+        ]
+      },
+      "after": {
+        "first_median_ms": 7.0815,
+        "warm_median_ms": 5.8277,
+        "output_bytes": [
+          800000
+        ],
+        "current_rss_median_before": 47284224,
+        "current_rss_median_after": 48459776,
+        "lifetime_peak_max": 51281920,
+        "allocation": [
+          [
+            25,
+            1601501,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            100000,
+            1
+          ],
+          [
+            0,
+            0,
+            100000,
+            1
+          ]
+        ]
+      },
+      "first_material_regression": false,
+      "warm_material_regression": false,
+      "warm_before_over_after": 12.40182233127992
+    },
+    {
+      "family": "surface.direction",
+      "cells": 100000,
+      "before": {
+        "first_median_ms": 101.7585,
+        "warm_median_ms": 106.0128,
+        "output_bytes": [
+          400000
+        ],
+        "current_rss_median_before": 48123904,
+        "current_rss_median_after": 48242688,
+        "lifetime_peak_max": 58122240,
+        "allocation": [
+          [
+            56,
+            5408792,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ]
+        ]
+      },
+      "candidate1": {
+        "first_median_ms": 15.1472,
+        "warm_median_ms": 16.1084,
+        "output_bytes": [
+          800000
+        ],
+        "current_rss_median_before": 48361472,
+        "current_rss_median_after": 48676864,
+        "lifetime_peak_max": 56070144,
+        "allocation": [
+          [
+            22,
+            3201947,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            100000,
+            1
+          ],
+          [
+            0,
+            0,
+            100000,
+            1
+          ]
+        ]
+      },
+      "candidate2": {
+        "first_median_ms": 15.8593,
+        "warm_median_ms": 17.352,
+        "output_bytes": [
+          800000
+        ],
+        "current_rss_median_before": 48283648,
+        "current_rss_median_after": 48738304,
+        "lifetime_peak_max": 55939072,
+        "allocation": [
+          [
+            22,
+            3201947,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            100000,
+            1
+          ],
+          [
+            0,
+            0,
+            100000,
+            1
+          ]
+        ]
+      },
+      "after": {
+        "first_median_ms": 17.4526,
+        "warm_median_ms": 14.6673,
+        "output_bytes": [
+          800000
+        ],
+        "current_rss_median_before": 48459776,
+        "current_rss_median_after": 48730112,
+        "lifetime_peak_max": 56098816,
+        "allocation": [
+          [
+            22,
+            3201947,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            100000,
+            1
+          ],
+          [
+            0,
+            0,
+            100000,
+            1
+          ]
+        ]
+      },
+      "first_material_regression": false,
+      "warm_material_regression": false,
+      "warm_before_over_after": 7.227833343560165
+    },
+    {
+      "family": "crown.component",
+      "cells": 100000,
+      "before": {
+        "first_median_ms": 166.3348,
+        "warm_median_ms": 169.6936,
+        "output_bytes": [
+          1600024
+        ],
+        "current_rss_median_before": 48242688,
+        "current_rss_median_after": 49524736,
+        "lifetime_peak_max": 66985984,
+        "allocation": [
+          [
+            106,
+            15815835,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ]
+        ]
+      },
+      "candidate1": {
+        "first_median_ms": 12.7963,
+        "warm_median_ms": 11.3467,
+        "output_bytes": [
+          1600024
+        ],
+        "current_rss_median_before": 48680960,
+        "current_rss_median_after": 49344512,
+        "lifetime_peak_max": 56070144,
+        "allocation": [
+          [
+            93,
+            2406399,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            100002,
+            1
+          ],
+          [
+            0,
+            0,
+            200003,
+            1
+          ]
+        ]
+      },
+      "candidate2": {
+        "first_median_ms": 11.2802,
+        "warm_median_ms": 12.2085,
+        "output_bytes": [
+          1600024
+        ],
+        "current_rss_median_before": 48742400,
+        "current_rss_median_after": 49192960,
+        "lifetime_peak_max": 55939072,
+        "allocation": [
+          [
+            93,
+            2406399,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            100002,
+            1
+          ],
+          [
+            0,
+            0,
+            200003,
+            1
+          ]
+        ]
+      },
+      "after": {
+        "first_median_ms": 11.025500000000001,
+        "warm_median_ms": 11.3025,
+        "output_bytes": [
+          1600024
+        ],
+        "current_rss_median_before": 48734208,
+        "current_rss_median_after": 49356800,
+        "lifetime_peak_max": 56098816,
+        "allocation": [
+          [
+            93,
+            2406135,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            100002,
+            1
+          ],
+          [
+            0,
+            0,
+            200003,
+            1
+          ]
+        ]
+      },
+      "first_material_regression": false,
+      "warm_material_regression": false,
+      "warm_before_over_after": 15.013811103738112
+    },
+    {
+      "family": "units",
+      "cells": 100000,
+      "before": {
+        "first_median_ms": 3.2426999999999997,
+        "warm_median_ms": 2.6962,
+        "output_bytes": [
+          800000
+        ],
+        "current_rss_median_before": 49524736,
+        "current_rss_median_after": 49565696,
+        "lifetime_peak_max": 66985984,
+        "allocation": [
+          [
+            30,
+            1605332,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ]
+        ]
+      },
+      "candidate1": {
+        "first_median_ms": 3.5422000000000002,
+        "warm_median_ms": 3.0099,
+        "output_bytes": [
+          800000
+        ],
+        "current_rss_median_before": 49352704,
+        "current_rss_median_after": 49238016,
+        "lifetime_peak_max": 56070144,
+        "allocation": [
+          [
+            17,
+            1601711,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            100000,
+            1
+          ],
+          [
+            0,
+            0,
+            100000,
+            1
+          ]
+        ]
+      },
+      "candidate2": {
+        "first_median_ms": 4.3107,
+        "warm_median_ms": 3.1496,
+        "output_bytes": [
+          800000
+        ],
+        "current_rss_median_before": 49197056,
+        "current_rss_median_after": 49205248,
+        "lifetime_peak_max": 55939072,
+        "allocation": [
+          [
+            16,
+            1601647,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            100000,
+            1
+          ],
+          [
+            0,
+            0,
+            100000,
+            1
+          ]
+        ]
+      },
+      "after": {
+        "first_median_ms": 3.5325,
+        "warm_median_ms": 2.5744000000000002,
+        "output_bytes": [
+          800000
+        ],
+        "current_rss_median_before": 49369088,
+        "current_rss_median_after": 49283072,
+        "lifetime_peak_max": 56098816,
+        "allocation": [
+          [
+            16,
+            1601623,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            100000,
+            1
+          ],
+          [
+            0,
+            0,
+            100000,
+            1
+          ]
+        ]
+      },
+      "first_material_regression": false,
+      "warm_material_regression": false,
+      "warm_before_over_after": 1.0473119950279677
+    },
+    {
+      "family": "mortality",
+      "cells": 100000,
+      "before": {
+        "first_median_ms": 30.8151,
+        "warm_median_ms": 29.6082,
+        "output_bytes": [
+          2400000
+        ],
+        "current_rss_median_before": 49569792,
+        "current_rss_median_after": 50438144,
+        "lifetime_peak_max": 66985984,
+        "allocation": [
+          [
+            63,
+            7213202,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ]
+        ]
+      },
+      "candidate1": {
+        "first_median_ms": 20.1469,
+        "warm_median_ms": 18.8102,
+        "output_bytes": [
+          2400000
+        ],
+        "current_rss_median_before": 49246208,
+        "current_rss_median_after": 50143232,
+        "lifetime_peak_max": 61599744,
+        "allocation": [
+          [
+            40,
+            5602695,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            100000,
+            1
+          ],
+          [
+            0,
+            0,
+            300000,
+            1
+          ]
+        ]
+      },
+      "candidate2": {
+        "first_median_ms": 19.902099999999997,
+        "warm_median_ms": 20.938399999999998,
+        "output_bytes": [
+          2400000
+        ],
+        "current_rss_median_before": 49217536,
+        "current_rss_median_after": 50196480,
+        "lifetime_peak_max": 61460480,
+        "allocation": [
+          [
+            40,
+            5602695,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            100000,
+            1
+          ],
+          [
+            0,
+            0,
+            300000,
+            1
+          ]
+        ]
+      },
+      "after": {
+        "first_median_ms": 16.990399999999998,
+        "warm_median_ms": 17.624299999999998,
+        "output_bytes": [
+          2400000
+        ],
+        "current_rss_median_before": 49295360,
+        "current_rss_median_after": 50192384,
+        "lifetime_peak_max": 61624320,
+        "allocation": [
+          [
+            40,
+            5602623,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            100000,
+            1
+          ],
+          [
+            0,
+            0,
+            300000,
+            1
+          ]
+        ]
+      },
+      "first_material_regression": false,
+      "warm_material_regression": false,
+      "warm_before_over_after": 1.6799645943384987
+    },
+    {
+      "family": "vpd",
+      "cells": 100000,
+      "before": {
+        "first_median_ms": 18.472700000000003,
+        "warm_median_ms": 18.6131,
+        "output_bytes": [
+          2400000
+        ],
+        "current_rss_median_before": 50544640,
+        "current_rss_median_after": 50573312,
+        "lifetime_peak_max": 66985984,
+        "allocation": [
+          [
+            71,
+            3214198,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ]
+        ]
+      },
+      "candidate1": {
+        "first_median_ms": 12.0061,
+        "warm_median_ms": 11.8978,
+        "output_bytes": [
+          2400000
+        ],
+        "current_rss_median_before": 50143232,
+        "current_rss_median_after": 50130944,
+        "lifetime_peak_max": 61599744,
+        "allocation": [
+          [
+            38,
+            3202836,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            100000,
+            1
+          ],
+          [
+            0,
+            0,
+            300000,
+            1
+          ]
+        ]
+      },
+      "candidate2": {
+        "first_median_ms": 11.831,
+        "warm_median_ms": 11.661299999999999,
+        "output_bytes": [
+          2400000
+        ],
+        "current_rss_median_before": 50196480,
+        "current_rss_median_after": 50180096,
+        "lifetime_peak_max": 61460480,
+        "allocation": [
+          [
+            38,
+            3202836,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            100000,
+            1
+          ],
+          [
+            0,
+            0,
+            300000,
+            1
+          ]
+        ]
+      },
+      "after": {
+        "first_median_ms": 11.5771,
+        "warm_median_ms": 11.787,
+        "output_bytes": [
+          2400000
+        ],
+        "current_rss_median_before": 50192384,
+        "current_rss_median_after": 50180096,
+        "lifetime_peak_max": 61624320,
+        "allocation": [
+          [
+            38,
+            3202740,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            100000,
+            1
+          ],
+          [
+            0,
+            0,
+            300000,
+            1
+          ]
+        ]
+      },
+      "first_material_regression": false,
+      "warm_material_regression": false,
+      "warm_before_over_after": 1.5791210655807244
+    },
+    {
+      "family": "fdfm",
+      "cells": 100000,
+      "before": {
+        "first_median_ms": 14.696900000000001,
+        "warm_median_ms": 14.3887,
+        "output_bytes": [
+          800000
+        ],
+        "current_rss_median_before": 50577408,
+        "current_rss_median_after": 49025024,
+        "lifetime_peak_max": 66985984,
+        "allocation": [
+          [
+            163,
+            2428772,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ]
+        ]
+      },
+      "candidate1": {
+        "first_median_ms": 8.2317,
+        "warm_median_ms": 8.656699999999999,
+        "output_bytes": [
+          800000
+        ],
+        "current_rss_median_before": 50139136,
+        "current_rss_median_after": 48570368,
+        "lifetime_peak_max": 61599744,
+        "allocation": [
+          [
+            42,
+            1602602,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            100000,
+            1
+          ],
+          [
+            0,
+            0,
+            100000,
+            1
+          ]
+        ]
+      },
+      "candidate2": {
+        "first_median_ms": 8.5614,
+        "warm_median_ms": 8.040500000000002,
+        "output_bytes": [
+          800000
+        ],
+        "current_rss_median_before": 50184192,
+        "current_rss_median_after": 48611328,
+        "lifetime_peak_max": 61460480,
+        "allocation": [
+          [
+            42,
+            1602602,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            100000,
+            1
+          ],
+          [
+            0,
+            0,
+            100000,
+            1
+          ]
+        ]
+      },
+      "after": {
+        "first_median_ms": 7.6702,
+        "warm_median_ms": 11.3689,
+        "output_bytes": [
+          800000
+        ],
+        "current_rss_median_before": 50180096,
+        "current_rss_median_after": 48607232,
+        "lifetime_peak_max": 61624320,
+        "allocation": [
+          [
+            42,
+            1602434,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            100000,
+            1
+          ],
+          [
+            0,
+            0,
+            100000,
+            1
+          ]
+        ]
+      },
+      "first_material_regression": false,
+      "warm_material_regression": false,
+      "warm_before_over_after": 1.265619365110081
+    },
+    {
+      "family": "containment",
+      "cells": 100000,
+      "before": {
+        "first_median_ms": 40.7896,
+        "warm_median_ms": 40.6452,
+        "output_bytes": [
+          2800000
+        ],
+        "current_rss_median_before": 49025024,
+        "current_rss_median_after": 50999296,
+        "lifetime_peak_max": 66985984,
+        "allocation": [
+          [
+            74,
+            4815393,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ]
+        ]
+      },
+      "candidate1": {
+        "first_median_ms": 35.0491,
+        "warm_median_ms": 33.5444,
+        "output_bytes": [
+          2800000
+        ],
+        "current_rss_median_before": 48570368,
+        "current_rss_median_after": 50597888,
+        "lifetime_peak_max": 61599744,
+        "allocation": [
+          [
+            48,
+            4403560,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            100000,
+            1
+          ],
+          [
+            0,
+            0,
+            400000,
+            1
+          ]
+        ]
+      },
+      "candidate2": {
+        "first_median_ms": 33.0911,
+        "warm_median_ms": 33.722,
+        "output_bytes": [
+          2800000
+        ],
+        "current_rss_median_before": 48615424,
+        "current_rss_median_after": 50630656,
+        "lifetime_peak_max": 61460480,
+        "allocation": [
+          [
+            48,
+            4403560,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            100000,
+            1
+          ],
+          [
+            0,
+            0,
+            400000,
+            1
+          ]
+        ]
+      },
+      "after": {
+        "first_median_ms": 32.4744,
+        "warm_median_ms": 36.0319,
+        "output_bytes": [
+          2800000
+        ],
+        "current_rss_median_before": 48611328,
+        "current_rss_median_after": 50630656,
+        "lifetime_peak_max": 61624320,
+        "allocation": [
+          [
+            48,
+            4403440,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            100000,
+            1
+          ],
+          [
+            0,
+            0,
+            400000,
+            1
+          ]
+        ]
+      },
+      "first_material_regression": false,
+      "warm_material_regression": false,
+      "warm_before_over_after": 1.1280337700759606
+    },
+    {
+      "family": "ignite",
+      "cells": 100000,
+      "before": {
+        "first_median_ms": 18.4458,
+        "warm_median_ms": 18.4397,
+        "output_bytes": [
+          800000
+        ],
+        "current_rss_median_before": 50999296,
+        "current_rss_median_after": 49029120,
+        "lifetime_peak_max": 66985984,
+        "allocation": [
+          [
+            30,
+            1605782,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ]
+        ]
+      },
+      "candidate1": {
+        "first_median_ms": 16.742900000000002,
+        "warm_median_ms": 16.5737,
+        "output_bytes": [
+          800000
+        ],
+        "current_rss_median_before": 50606080,
+        "current_rss_median_after": 48607232,
+        "lifetime_peak_max": 61599744,
+        "allocation": [
+          [
+            19,
+            1601436,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            100000,
+            1
+          ],
+          [
+            0,
+            0,
+            100000,
+            1
+          ]
+        ]
+      },
+      "candidate2": {
+        "first_median_ms": 19.147100000000002,
+        "warm_median_ms": 17.158,
+        "output_bytes": [
+          800000
+        ],
+        "current_rss_median_before": 50634752,
+        "current_rss_median_after": 48648192,
+        "lifetime_peak_max": 61460480,
+        "allocation": [
+          [
+            19,
+            1601436,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            100000,
+            1
+          ],
+          [
+            0,
+            0,
+            100000,
+            1
+          ]
+        ]
+      },
+      "after": {
+        "first_median_ms": 17.2424,
+        "warm_median_ms": 17.583000000000002,
+        "output_bytes": [
+          800000
+        ],
+        "current_rss_median_before": 50634752,
+        "current_rss_median_after": 48713728,
+        "lifetime_peak_max": 61624320,
+        "allocation": [
+          [
+            19,
+            1601388,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            100000,
+            1
+          ],
+          [
+            0,
+            0,
+            100000,
+            1
+          ]
+        ]
+      },
+      "first_material_regression": false,
+      "warm_material_regression": false,
+      "warm_before_over_after": 1.048723198544048
+    },
+    {
+      "family": "safety",
+      "cells": 100000,
+      "before": {
+        "first_median_ms": 13.51,
+        "warm_median_ms": 17.6433,
+        "output_bytes": [
+          2400000
+        ],
+        "current_rss_median_before": 49037312,
+        "current_rss_median_after": 50630656,
+        "lifetime_peak_max": 66985984,
+        "allocation": [
+          [
+            47,
+            3209262,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ]
+        ]
+      },
+      "candidate1": {
+        "first_median_ms": 6.1529,
+        "warm_median_ms": 6.1719,
+        "output_bytes": [
+          2400000
+        ],
+        "current_rss_median_before": 48754688,
+        "current_rss_median_after": 50712576,
+        "lifetime_peak_max": 61599744,
+        "allocation": [
+          [
+            34,
+            3202310,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            100000,
+            1
+          ],
+          [
+            0,
+            0,
+            300000,
+            1
+          ]
+        ]
+      },
+      "candidate2": {
+        "first_median_ms": 6.0387,
+        "warm_median_ms": 6.532,
+        "output_bytes": [
+          2400000
+        ],
+        "current_rss_median_before": 48832512,
+        "current_rss_median_after": 51077120,
+        "lifetime_peak_max": 61460480,
+        "allocation": [
+          [
+            34,
+            3202310,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            100000,
+            1
+          ],
+          [
+            0,
+            0,
+            300000,
+            1
+          ]
+        ]
+      },
+      "after": {
+        "first_median_ms": 6.3847000000000005,
+        "warm_median_ms": 6.1323,
+        "output_bytes": [
+          2400000
+        ],
+        "current_rss_median_before": 48717824,
+        "current_rss_median_after": 50724864,
+        "lifetime_peak_max": 61624320,
+        "allocation": [
+          [
+            34,
+            3202214,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            100000,
+            1
+          ],
+          [
+            0,
+            0,
+            300000,
+            1
+          ]
+        ]
+      },
+      "first_material_regression": false,
+      "warm_material_regression": false,
+      "warm_before_over_after": 2.877109730443716
+    },
+    {
+      "family": "spot",
+      "cells": 100000,
+      "before": {
+        "first_median_ms": 35.3835,
+        "warm_median_ms": 35.1885,
+        "output_bytes": [
+          800000
+        ],
+        "current_rss_median_before": 50630656,
+        "current_rss_median_after": 49037312,
+        "lifetime_peak_max": 66985984,
+        "allocation": [
+          [
+            30,
+            1605757,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ]
+        ]
+      },
+      "candidate1": {
+        "first_median_ms": 31.3967,
+        "warm_median_ms": 30.1931,
+        "output_bytes": [
+          800000
+        ],
+        "current_rss_median_before": 50712576,
+        "current_rss_median_after": 49586176,
+        "lifetime_peak_max": 61599744,
+        "allocation": [
+          [
+            19,
+            1601426,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            100000,
+            1
+          ],
+          [
+            0,
+            0,
+            100000,
+            1
+          ]
+        ]
+      },
+      "candidate2": {
+        "first_median_ms": 32.7347,
+        "warm_median_ms": 32.1621,
+        "output_bytes": [
+          800000
+        ],
+        "current_rss_median_before": 51077120,
+        "current_rss_median_after": 48861184,
+        "lifetime_peak_max": 61460480,
+        "allocation": [
+          [
+            19,
+            1601426,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            100000,
+            1
+          ],
+          [
+            0,
+            0,
+            100000,
+            1
+          ]
+        ]
+      },
+      "after": {
+        "first_median_ms": 30.4295,
+        "warm_median_ms": 32.779999999999994,
+        "output_bytes": [
+          800000
+        ],
+        "current_rss_median_before": 50724864,
+        "current_rss_median_after": 49020928,
+        "lifetime_peak_max": 61624320,
+        "allocation": [
+          [
+            19,
+            1601378,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            100000,
+            1
+          ],
+          [
+            0,
+            0,
+            100000,
+            1
+          ]
+        ]
+      },
+      "first_material_regression": false,
+      "warm_material_regression": false,
+      "warm_before_over_after": 1.0734746796827335
+    }
+  ],
+  "original_script_sha256": "55932875530b25783b05f2ac962fdbdb4aa6b7a33ac80c790b4b56bfa0cc3f48",
+  "source_sha256": {
+    "rust/crates/behave-fire/examples/configured_tiles.rs": "9cd9c17c90501136f5114bc79397539bae0d203f5369ac3e48196224b77bdd24",
+    "rust/crates/behave-fire/examples/raster_tweaks.rs": "02707db38a0002c3bbdb1e153810d6be2967916f49aba615c82ab958a73c57e4",
+    "rust/crates/behave-fire/examples/staged_raster.rs": "7984c1846023495e53e952f6dad5b7fc1a7f3d142ae452c921ee69d0e87d0f3d",
+    "rust/crates/behave-fire/examples/standalone.rs": "1c4ffb8004aff1ea49c2a86af35cc53cd0eee96efb551354e83a62fd98ee3631",
+    "rust/crates/behave-fire/src/batch.rs": "b114e723f4c65747e699726e28e604be3b2b9c162b349e71d48a419d7e6be24d",
+    "rust/crates/behave-fire/src/contain.rs": "1bf788af5b75270dd7b8feb752c7f365598e4b7288614774a39d09fe34352e17",
+    "rust/crates/behave-fire/src/crown.rs": "f498aeecfc694803401f044d83af413ce305fef68cbc2c4cfafac309c29e8ef0",
+    "rust/crates/behave-fire/src/engine/crown.rs": "a4aae45bf34eb99c1097c7c467867bb34796d4c5de152ffb545fd6e2205d73a8",
+    "rust/crates/behave-fire/src/engine/field.rs": "f38fc553b6c32da41dbab31fb336512756f08e1936d1180b73275c8ff92d7c96",
+    "rust/crates/behave-fire/src/engine/fuel.rs": "7942eb5219e8df1b9cf5e00856faa2545d3c494e7e4640ffe4a8ad958cdce038",
+    "rust/crates/behave-fire/src/engine/fuelbed_fields.rs": "8c032e8bedc550bdc54e3ccaca56be91607e40d882929db1ac602038518c948f",
+    "rust/crates/behave-fire/src/engine/missing.rs": "9351704590bb2b76b6f65d220a16de766fd03c3bb406524f4edee927583adf0c",
+    "rust/crates/behave-fire/src/engine/mod.rs": "3c3f57c35167375ea5471bc3804ce32c8c3780bdfdfa32ebc234693918f6d316",
+    "rust/crates/behave-fire/src/engine/options.rs": "a83f2a663988dce31df19029d7798fa0241715aa6971171b513419a57e97bd28",
+    "rust/crates/behave-fire/src/engine/run.rs": "e45f9918a6682892a22b174a6f31eb0cc11995d0abdad4c591e657e2969ffa10",
+    "rust/crates/behave-fire/src/engine/session.rs": "ee005fc7f830cf51059d67dc173ca85a2d73fdef6cd81347e19456dc311c530d",
+    "rust/crates/behave-fire/src/engine/session_crown.rs": "2fb551e4ce8ee364ca61238b17efc2563ff99463890d44cd140dc0aaa60c4612",
+    "rust/crates/behave-fire/src/engine/session_fused.rs": "55e183fbcf3ea5d2bda96d893d536e964dcc3b89ebb7515986bb5a7f8ff2be89",
+    "rust/crates/behave-fire/src/engine/session_surface.rs": "552389e5e302f4010fead5f0257f9df7ef1d578cfa4cd74f66c817b355deb2cd",
+    "rust/crates/behave-fire/src/engine/stage.rs": "6718471346616480057310802b3a189d311906d23b2c352f42bfdf3c6857a099",
+    "rust/crates/behave-fire/src/engine/state.rs": "577570d613211a0c90df05f3eb7da22ac59deda6fc2e840058e2df1e04f62b3f",
+    "rust/crates/behave-fire/src/engine/surface.rs": "6755c01eb9c2b06214772945f4160af2c55a60545fb05117f8eea3dc08792b60",
+    "rust/crates/behave-fire/src/engine/tweaks.rs": "de44d930e7de1c2feb60c4ae1a3cb54ef970683d000d5856a4fcbdb118c1bdbf",
+    "rust/crates/behave-fire/src/error.rs": "fc1acc257d4f043bdd7081b55aac846fa4adbfbb44e2efa06cec2a2e32596121",
+    "rust/crates/behave-fire/src/fine_dead_fuel_moisture.rs": "a01feb0824e9c6a0173e279377b326ead76abc00b26cd635937fe3f0d5601f7a",
+    "rust/crates/behave-fire/src/fire_size.rs": "3d532a6237b461d65bbdc9946e2aa2751f2d80011d3e3f8c944f97df538e1e70",
+    "rust/crates/behave-fire/src/fuel_models.rs": "225395dfb10129254a1146dd067670ac4611234b31091ee659d8a9c1ad3ce572",
+    "rust/crates/behave-fire/src/generated/fine_dead_fuel_moisture.rs": "c6e53aa8a6f8827660cc81439cf70ed061673c74268bf79c7f5602df609fa0be",
+    "rust/crates/behave-fire/src/generated/fuel_models.rs": "14b4c321889438aa746853644c2f2085abd61765b43308fea73e67fbad592653",
+    "rust/crates/behave-fire/src/generated/species.rs": "4ffcbbb23496b1b5448547ee316e20bd07aff7286a7fe1f6a5928e5d3a1239a9",
+    "rust/crates/behave-fire/src/grid.rs": "09b1213ca7909edb32b40081b1c24665ca31f796c2e892f9c4b136c83236c788",
+    "rust/crates/behave-fire/src/ignite.rs": "d385dcc3b50fed7bff8d446bb39fb830b692d35300b91413ef608275095d3887",
+    "rust/crates/behave-fire/src/lib.rs": "5acdc9320c6d5206744b4d012cf1e71538ded9411c7db692e74bf643ce154253",
+    "rust/crates/behave-fire/src/math.rs": "002763d0578c26f8297c78771783156c7aaa641a8f07d1cbd57d436c91da83e6",
+    "rust/crates/behave-fire/src/model.rs": "02def716da213880b8ece23346c798315151f4b7583f5fc386a624cfbabbdc87",
+    "rust/crates/behave-fire/src/mortality.rs": "9ec25a32dc07e27c3dd480357d8a386619ffa9ba84fad450b56ec2c00a80f33c",
+    "rust/crates/behave-fire/src/output.rs": "11284f155e182132c29e6a935b3c143aec7cd65a0aaa67bfd420c0fdc2777285",
+    "rust/crates/behave-fire/src/parallel.rs": "c57cba03e76c15fa95fce12114b6654d47548d09139962169ba085fba45e831b",
+    "rust/crates/behave-fire/src/raster/crown.rs": "540d5b2c5edc632424928dda0a4045989c9e5e3198c2897df69677452ecde406",
+    "rust/crates/behave-fire/src/raster/inputs.rs": "1dea148aa28cf29c387ea06c7714885488987a38bb7aea8e5f81c45c507602ce",
+    "rust/crates/behave-fire/src/raster/mod.rs": "e89db866d321dd22b1aff5f7b671a38b04762af16e7d87df22a80be15d8d5e59",
+    "rust/crates/behave-fire/src/raster/outputs.rs": "bac57dd5ee71e430881f360e389f620c5ea1c27af9b8f987da8414b729e9aba4",
+    "rust/crates/behave-fire/src/raster/stages.rs": "b8a29cf0cfe08d10487236b8e6dc3032a544d249bd85f61ff2e31630dba3f5e9",
+    "rust/crates/behave-fire/src/raster/surface.rs": "e95d25975894d2604782f519a89c4833e136f54ebdd805ae79a835bab6146789",
+    "rust/crates/behave-fire/src/safety.rs": "0402419487884aa26904c5ef93de204a6050a5316e58b05165f72bfb277a220f",
+    "rust/crates/behave-fire/src/slope.rs": "a6b66de6291da64b56acf051780d38bc9658a90611cf145c31dc4214c42e8b2f",
+    "rust/crates/behave-fire/src/species.rs": "f1df847553f141f5ea0bd6e77dca90139df2d4b8db40699310d54788b2cca1be",
+    "rust/crates/behave-fire/src/spot.rs": "6a042ec11538666dbbb22f817f2e8e8b5e239dfeaebb69a3024ae30dda0181ce",
+    "rust/crates/behave-fire/src/surface/fuelbed.rs": "bc10542b202d11314be51639e8059d537a3a0d00de5ddf0e9059b71457094c60",
+    "rust/crates/behave-fire/src/surface/geometry.rs": "41e030e2a8429b3612569295849aeb6500aea492ef8b1d7c4544d6bd87e1d5f3",
+    "rust/crates/behave-fire/src/surface/mod.rs": "7497db3e46ca2919dd8cd24fd6961ddf52a835c2033e0da8af3302ea34b4ca8b",
+    "rust/crates/behave-fire/src/surface/particles.rs": "a6710c1bdcaac78c0e7eec5648c414c4f53de2b060bb2f7be22d0395103565eb",
+    "rust/crates/behave-fire/src/surface/prepared_wind.rs": "a175fd62391a34bd3a471385910b854ee745a110c9bb394d33a69b4df82db764",
+    "rust/crates/behave-fire/src/surface/reaction.rs": "ec0d508b05261721a2cd9cd585edbe15e586b901888326a208f37ee3279b29cf",
+    "rust/crates/behave-fire/src/surface/types.rs": "49b9ecd1e9f2e0797d38b2c52807e6bb00c349e08ab246e260a3ed5fa91539af",
+    "rust/crates/behave-fire/src/surface/wind.rs": "0d9d6030e35e867e5d447140bc234c3fe6d672bd2b529b8590e531a012471515",
+    "rust/crates/behave-fire/src/units.rs": "7e2014f06c1eb7c248c3687d1a8ed885ba29f0d6cd1c6d8066a5f22d188b40e5",
+    "rust/crates/behave-fire/src/vapor_pressure_deficit.rs": "4abf29315657a39907a9f3ed33ce422140deff216369dd493480cfccc3551c87",
+    "rust/crates/behave-fire/tests/available_fuel.rs": "3935c785d42f7feef8629144a76c2c566e764ded5d61887655d40d94393aedfe",
+    "rust/crates/behave-fire/tests/binding_core_contracts.rs": "2c7102429419d9e883e100a6bcaf459e5406a29a83d05efcdd160b213414559f",
+    "rust/crates/behave-fire/tests/cell_pipeline.rs": "32da1c90c38a3da2d40bc875ed5f4043d16828b2621aad18244b23e764f426e3",
+    "rust/crates/behave-fire/tests/chunks.rs": "1f60431c2aea8959d64abaa87fc3e517e4d5c413bc8ab1a0e5fbc7d457577278",
+    "rust/crates/behave-fire/tests/containment_parity.rs": "b88060f3976a3d0020a8b459b4d2b808d65e5dd3fba631ca850528805cb80935",
+    "rust/crates/behave-fire/tests/crown_parity.rs": "578c9a78e232724393c0290b0ad021fede289d5e7f0d68bcefb4b73014e2987c",
+    "rust/crates/behave-fire/tests/crown_spatial.rs": "bb483564cc9dc8385ec7add3be3d96da951164a1a010e5809a2e399f43db5fde",
+    "rust/crates/behave-fire/tests/data_contract_parity.rs": "8bbaa9e018b84ed457311520ed71c09385f89cded799af193f5e5c71742063fa",
+    "rust/crates/behave-fire/tests/effects_parity.rs": "61a05d546a0885b8cb4645193bfde7cf57eb6a1859587508e811b86fc2f44f6c",
+    "rust/crates/behave-fire/tests/f64_helpers.rs": "2cf1c7e528bc21acec00e85e0cfa4ee43cd775ffa31c840b89df7fc01edcf411",
+    "rust/crates/behave-fire/tests/f64_state_domains.rs": "6b85f4f5fc34244f57e521f3a2d618ce2e67da2419055d58db092899256cec57",
+    "rust/crates/behave-fire/tests/float64_missing.rs": "e6840681dfd9198b70d56a466b8f97c5dd7839429280ea84301bc23a2bceb739",
+    "rust/crates/behave-fire/tests/grid_contract.rs": "195dd59ed492f8150d69dd4ed48f78a5caa647572adaa6b053456daedc1bda7e",
+    "rust/crates/behave-fire/tests/grid_parity.rs": "8b7631f357fda00a80e5a64ec1b36e1c7459172f19fb4db5b6c9a411aa36068a",
+    "rust/crates/behave-fire/tests/grid_session.rs": "3bdd3ca867665c1539c49be5aa31a26faf07e41354ed9ce4aab996ff58d5478e",
+    "rust/crates/behave-fire/tests/grid_session_controls.rs": "60b7d4184473726a37f8283e040d7549cb756657852a293aace26bbe931a2e0d",
+    "rust/crates/behave-fire/tests/grid_session_fuelbed.rs": "726c125eb24a69ccee4370abb0a3550a678fcd63fdfda16f809f0135213b6e33",
+    "rust/crates/behave-fire/tests/grid_session_fused.rs": "c57fb489a9f1d0284b022d6136f17701df149333698cf02029186343e183ec58",
+    "rust/crates/behave-fire/tests/grid_session_injection.rs": "2f9cebc64a85bd5e3970ea391834882ac93292d2bb8d490ab6604812a6b85292",
+    "rust/crates/behave-fire/tests/grid_session_liveness.rs": "349a054f218870005d759bb34206bdf4e1c4677ee134e64e7f4965661d8230ad",
+    "rust/crates/behave-fire/tests/grid_session_particles.rs": "a4948151ea522132e887d1c66ad87ed2363883d4daf6ea88b5e48e8400175e6c",
+    "rust/crates/behave-fire/tests/grid_session_workers.rs": "07e90d0fc6a0bd717cc331bcdb3088d00a18c93c0b91bd2e9d6b6e873fcc2698",
+    "rust/crates/behave-fire/tests/model_domains.rs": "7b96fbc319151a5bea95b56fdcd89022239eb8cabb3158edfa9c603d01c33235",
+    "rust/crates/behave-fire/tests/model_snapshot.rs": "e949276e987284771d776d7f0646f53553bc84ab39d3a9b1fc0770cd66daffaf",
+    "rust/crates/behave-fire/tests/native_engine.rs": "e4f6c0444b650e79c4868e439f759f690177b8ac3ccfd00e10fbc21ea4b4f1dd",
+    "rust/crates/behave-fire/tests/native_raster.rs": "1cef43aa8ae83e84a98022795dd24a38f9cdba7112b28bec778520c4dacc64dd",
+    "rust/crates/behave-fire/tests/native_tweaks.rs": "cc03d92262a349c2117f846f0526259c4ea735167467a45284ec6519779369dd",
+    "rust/crates/behave-fire/tests/numpy_semantics.rs": "51cfd8f4d93842de1f1c40584250f0faa5cc40ec6a706cb9b3be6e373f92d25d",
+    "rust/crates/behave-fire/tests/output_shards.rs": "fc18153c408a1ee1afad0ed99589ba16dfd9c463a95e9f90dc04a86496a474f5",
+    "rust/crates/behave-fire/tests/prepared_physics.rs": "2ffd757a3fbc4c4b87e5a7121a8365c0ba30d1f2dfc4d7f218030cd241ff3326",
+    "rust/crates/behave-fire/tests/raster_cell_access.rs": "21d7529aea722b425859e79d362a4c368f87442b6115c99af2736e78ef3f9730",
+    "rust/crates/behave-fire/tests/raster_tweaks.rs": "6989a4cf024c9d102faff340d9157fd1019005d94bde370bc4d07d644cdde0d9",
+    "rust/crates/behave-fire/tests/requested_outputs.rs": "938e77de3e62102293d0c7c7cc7c9397f7393ea738d97eb9b06e3423b3646e1a",
+    "rust/crates/behave-fire/tests/stage_state.rs": "766fe931c86d526c677809be4f279d8953a0bb4aabbc293e4f018df6a3b73013",
+    "rust/crates/behave-fire/tests/support/engine_fixture.rs": "facb0938165940af83ef3bbd9a4eeadf016a0633005fe32c871aa4aae3e24abb",
+    "rust/crates/behave-fire/tests/surface_parity.rs": "7d87b786df9eb558a234371c455c0a7d86e5f587982b65012d588efbe098c03c",
+    "rust/crates/behave-fire/tests/tools_parity.rs": "69d7faf13dd51655fe5ff6ae5f67837e1cc9969d3f91ed9b1bf883f253368957",
+    "rust/crates/behave-py/src/allocation_probe.rs": "21e9f8a2c6130aeeb6eb15808aa491716bd644935b39e3e73f1715e186a521c7",
+    "rust/crates/behave-py/src/capabilities.rs": "e2780beb1c1d539cc1ae081bb486f5e17220e78eb9fd87695539e2d4c9dbbebf",
+    "rust/crates/behave-py/src/component_columns.rs": "30699d9e4fbe57d0a66ca779d1dfc5cad037e0c650071797630d5cb809352e5f",
+    "rust/crates/behave-py/src/component_f64.rs": "32e1f83acd53d263b3eba5553b6cbaba9d6830461573492035bda1a7f6322fe1",
+    "rust/crates/behave-py/src/component_fuelbed.rs": "32a5f2fe21b915d9428ef220f0029a85d9878c15b1b52e8f0c4befbb13c8644e",
+    "rust/crates/behave-py/src/component_independent.rs": "b58bfa8499a4988564044fe64c8a48cc9beb7e3e97c30edc215c99adac32d846",
+    "rust/crates/behave-py/src/component_requirements.rs": "7888fefc3783defa065e545ed529bf2b1d9c9f4bfaac281f7d1cd1ac0f51984c",
+    "rust/crates/behave-py/src/component_schema.rs": "c729f0f2b4560a0d7f350546d9bcc5746077abff8342161fce0623edd6cedab4",
+    "rust/crates/behave-py/src/component_selected.rs": "40a6a45bfe6dee1ee87090032627ecb403cacd35f5b124395a3a912fffefac17",
+    "rust/crates/behave-py/src/component_units.rs": "fe74c7b1bac47745f4357979f8a5cbfd5b77fd8325a09b78ec3bf6b98cfbe6ca",
+    "rust/crates/behave-py/src/contain.rs": "ed15dba970029b401aef4969b18f0001e2e0ba5c6abb4d64cc9ad8f81a542fda",
+    "rust/crates/behave-py/src/crown.rs": "a72ad6364c4430e12490d120c0a4cc3bdc2b7c284d5ce313d7e56fcbb77b62ee",
+    "rust/crates/behave-py/src/crown_dispatch.rs": "056fd2fae2f265557ddee97fe0c538d01cbd659190aba39bdcb9a64de55180b6",
+    "rust/crates/behave-py/src/crown_fields.rs": "37761caf190aaf1a5b729cfb549f915599295472537c9a20784e77c3c3f0e0c6",
+    "rust/crates/behave-py/src/data.rs": "fbfb6900dc2a7fe09492818e1905643eb3488f62a271b39a6d7305fcaaed0da1",
+    "rust/crates/behave-py/src/dispatch.rs": "904ac66b5dfbe7d2d8eb55fce773239f1bd730205ffdc3257554b4391e5a749e",
+    "rust/crates/behave-py/src/effects.rs": "aff65d1e0f841381e387ffe63af23027d976ab3166c20f4c9ed553cd07ae04ab",
+    "rust/crates/behave-py/src/grid_session.rs": "8fb76d8db6840d8f5d376b270f4f86ed816def02b294711b0414fb6ca15a3bde",
+    "rust/crates/behave-py/src/lib.rs": "8edc0ce037e615ed7b81dd523be2aace92b130f0da993e97c12c77f69426286b",
+    "rust/crates/behave-py/src/model.rs": "36a51f8507fcd3d38962d571ed18dacf68a8cfa86f3d3e1e8d0ddc5921696b6a",
+    "rust/crates/behave-py/src/model_f64.rs": "3ea3b478bb2830bce9ccb662f59edae8b0d2092de032145274f1d131b269e514",
+    "rust/crates/behave-py/src/model_fields.rs": "325ae04581ced3c4171fed90f46505f2e395cfa05017fb1a80a5f218919273e0",
+    "rust/crates/behave-py/src/model_groups.rs": "af20023d7e92025406acd58a3fada7ca698af0d87532ecc8fe20f2eaaa83ca51",
+    "rust/crates/behave-py/src/model_observer.rs": "03041fcdfaf652f6d13474d4ec1256e0ec9d9ce8d107a3bc52e055046de0fab3",
+    "rust/crates/behave-py/src/numeric/contract.rs": "4e695d27f311845de0de94a660a5c3ce5f9e9ce3773eafdb598d4ebfffdf948e",
+    "rust/crates/behave-py/src/numeric/shape.rs": "9b561793ee5ba5be3e731320f102f257591d5f369faf572089da66fb550da72f",
+    "rust/crates/behave-py/src/numeric/snapshot.rs": "90f0378f7d7ec08a7b71d8c50b87d15cc353ad401427627cee40de6e37c769e4",
+    "rust/crates/behave-py/src/operation.rs": "1f5a7b6823731adc55b7d3c23b3485f326c1c7881b13413cbf37b2e311cdca29",
+    "rust/crates/behave-py/src/prepared/controls.rs": "d93485f7a041a449d242962b39243f1ace3b8d491bc762c5c39386bcf7c11f1f",
+    "rust/crates/behave-py/src/prepared/keys.rs": "cf29d810add88818ea228b9b55e7b4f2d0aab821ff88e98571937afc67be5712",
+    "rust/crates/behave-py/src/prepared/mod.rs": "c23319086fb807cb5db7e252793a9270853b0d74fad4dfa900e497807bab2b4c",
+    "rust/crates/behave-py/src/prepared/primitive.rs": "90b99390175aa2d3e9214b28ceaa7dde225b9a0a98b85531206c0d8ced6ea22f",
+    "rust/crates/behave-py/src/prepared/selectors.rs": "7f044dbdefff3f259434bcf9f27bcc42147d6b6ecd042ad8f190c8a7149bd5e8",
+    "rust/crates/behave-py/src/state.rs": "02847bcb6465af600593c13d809149996bf5c6a8ae90235e88c52a45c8fb4ec5",
+    "rust/crates/behave-py/src/structures.rs": "061d2775072c5f9bf65ca99aa9deddb4651d2a6e0bee5c8d5144c1e318b1fbd0",
+    "rust/crates/behave-py/src/surface.rs": "f1b406ce7d2383522621d709bc240c52b95cc1babaeda96a17dd4b28fc96699b",
+    "rust/crates/behave-py/src/surface_fields.rs": "3581184764f527c49e57ca6637282514c55dab59a23b528d8ecdd59bdc5a0b4a",
+    "rust/crates/behave-py/src/tools.rs": "3a77306de6c7f7dc0de3068632124a2023c0d64f1b7981b05d28733b4133a9ee",
+    "src/behave_fire/__init__.py": "4f6e242887cb57c933afe6eca00871eb65f737659b91aa11d2107103666309aa",
+    "src/behave_fire/_auto_namespace.py": "f2399c236bc8eebce04a9f9024a723f2ba93ee08e54a61bab30b03e2f0ee72a7",
+    "src/behave_fire/_auto_routing.py": "18e12bd74bd69a56f598c7d00822763d615db45214c4791b568ed3af01592aa5",
+    "src/behave_fire/_auto_state.py": "6913c8956b8730ea66bc27bc3a4aa7430deef418a0730ab5d82d429933102ab3",
+    "src/behave_fire/_backend_contract.py": "247285d02880de39538e49d55bf1deab5496d42607fa5dfe178634f4f5fa6c14",
+    "src/behave_fire/_ownership.py": "d599647c7340ba3233453ff90bd289c47f996a3934d093255bb5c40512c8e5be",
+    "src/behave_fire/_version.py": "ce55728dac12ae949c96f2b65f0444e6de31137d673d616aa8658fabb5c2bb7a",
+    "src/behave_fire/auto.py": "0dfc3cd3ff74a595c0fe6fc0154795f5c5c82f0f9d306b3af259ddf4c09dacfc",
+    "src/behave_fire/behave.py": "7e7fd6770d3308425deafd32068acf80f913e3cf92106b5d260820e79523f248",
+    "src/behave_fire/components/__init__.py": "9e7b6dc780845e161a1dce09ec144a1b10f71cd135255e5fa34fa4cbcf545aaf",
+    "src/behave_fire/components/behave_units.py": "bb55ac32293f3261acf912779deb40c02f5ec16ddf0ce5c17a9294d1b115fa01",
+    "src/behave_fire/components/contain.py": "0baa7d44af7ac87812b1d711a0cb453c03230d55ead2b08b4c5434c4e546c927",
+    "src/behave_fire/components/crown.py": "4198a725cf9ead838012c2f4940226340acdfd02137c3196d2896efead79ddc9",
+    "src/behave_fire/components/fine_dead_fuel_moisture_tool.py": "a631684a162b5ffe626529c159165e6ed8c6bcc56ca7f2fbf02267f5db5e99a1",
+    "src/behave_fire/components/fire_size.py": "0db485738b95cceb62bce9386fa38e3e8f1d79f363a29d92ca5b7f5f2eae9aef",
+    "src/behave_fire/components/fuel_models.py": "b3c56cb9cfef44c71bea1af81310c0b37681f379103c250536d06bc06197ca6a",
+    "src/behave_fire/components/fuel_models_array.py": "854f9e2e796e0cf45cc5a8c515aa25564e457a00d58667c8b973cb3031194401",
+    "src/behave_fire/components/ignite.py": "5ef7e39eb337326fa78de23f953e481b1d84ebbbb8f154de22afcc23a14882ef",
+    "src/behave_fire/components/mortality.py": "ee0efb22b73cd7c1dcc180cc88629a44534712e5466f8a49064304b0ff3ad7f1",
+    "src/behave_fire/components/safety.py": "f69aa9acb16855eb2e453e6da93adb0f522d832d9c225d8d6b93b28ba2f0357d",
+    "src/behave_fire/components/slope_tool.py": "b5437b24a7f7cc7183c59e50c34802b48e27cd8ff5ace0f43777f9ef2db5e46c",
+    "src/behave_fire/components/species_master_table.py": "b54414446631684ccfd9cfdc445f0da69532e6676fce7a565b228832edadfdf4",
+    "src/behave_fire/components/spot.py": "4950a2fb31f87bcaf9e56a02c0a203559908aeebeb27e08bb5e2b00421513fb9",
+    "src/behave_fire/components/surface.py": "155124230bc59b3cd8f8225939293e5834ade59e47681ec06bb1166a19bd06db",
+    "src/behave_fire/components/vapor_pressure_deficit_calculator.py": "1d070e341f7a9c7ec5f91b2868097d49e32cb413779a3fcec781e9fe4bc150b3",
+    "src/behave_fire/python/__init__.py": "a2c13a618ca82c6692a009b7f173929f536f0167735715266164ba05b8b2ec91",
+    "src/behave_fire/rust/__init__.py": "d6a389199e80219e9ac9b55633e2d77af6f74b3c1fce325e6f9827dee1b4c5c8",
+    "src/behave_fire/rust/_bridge.py": "5d58a7dcf8243f550acccaee491e094a6398de14dcaef58b62d715ea0335407f",
+    "src/behave_fire/rust/_component_api4.py": "5e4a0fb58389f3238629e61f8f778d53ff13295b2cc7445bf71bc1163210fb9a",
+    "src/behave_fire/rust/_contracts.py": "866d0947c36015423d6714ab13c3872f93bb9cdad3c2721f7847ce35c1a1a3dc",
+    "src/behave_fire/rust/_model_api4.py": "d337b5b8d3266d52bee63632824324db90c69f9354e0565176a34c199c34f4c2",
+    "src/behave_fire/rust/_numeric.py": "57f0f1d8f8816a7f25d1a0b858210a3ee979e3271afcd530cee10a4db6ef94c0",
+    "src/behave_fire/rust/_serialization.py": "edc88d7f2a10d919ce5740c718ee6113b5d5aa1a7cd19d474adc348afe19d4b7",
+    "src/behave_fire/rust/_threads.py": "6b2603aaba6ee9a62b5bd8e8bab87284f42b714af1b92b6aa66263584d3629d6",
+    "src/behave_fire/rust/behave_units.py": "c587ddca1ea7ecc098cab287123e4e8b17c1b8239e9d9d2fc6f42326d5bac15d",
+    "src/behave_fire/rust/contain.py": "4d46d96f5d51cce39778bae8219152dc8581555267ee40d3d9b56c2c238d2b16",
+    "src/behave_fire/rust/core.py": "f4443792bca264075a33b406c9ad026f60b66c327fe09fcda8a851ffa4a0f59d",
+    "src/behave_fire/rust/crown.py": "71dbc7bcd44cb9c51d882c56b787f06aaa78fdf7ea9a52e3d5b373482b9af497",
+    "src/behave_fire/rust/fine_dead_fuel_moisture_tool.py": "0ac509a93c07fc27619d1b8db77c7aa31c2da4cd944668d870733e3f2067a122",
+    "src/behave_fire/rust/fire_size.py": "3db4d0d5e0bb45ac655d7ec86b03bc329b4df24e97ee8a891d181b3514eea5e6",
+    "src/behave_fire/rust/fuel_models.py": "d46a724ec74113cb816ebb6f763a408333dea25f1ec97168fd3c11c7f5d028af",
+    "src/behave_fire/rust/fuel_models_array.py": "d5bcec441d7989dce7409e593ff71278729abf4d2dfabbe631e10e8c43b8066f",
+    "src/behave_fire/rust/grid.py": "55ce9d3dc43cfd36cb22cf750f7535a7d40488a2490a0ccf071e99a20d35e96a",
+    "src/behave_fire/rust/ignite.py": "10189ae7064a4258754d2b7d56afb15a583af694d020102c5e02aaa93cb41610",
+    "src/behave_fire/rust/mortality.py": "779b22a2f303b4b8813f4f62d10540a2d0c45d3c7317490b09d576f960a76780",
+    "src/behave_fire/rust/safety.py": "1a4fd9f0517ed9d77a0d371ad2beea5273815aad1fcdd9b0470a51553de90db4",
+    "src/behave_fire/rust/slope_tool.py": "7b47ef1962ab721e7528202d3e90c5adbce3fc1f30c898c353a4c923111cbb95",
+    "src/behave_fire/rust/species_master_table.py": "d809e47830c2be99c99214e0fb793be74c696b5777a238403cdd03e90d1d27a3",
+    "src/behave_fire/rust/spot.py": "500fdc23197d65557659c7362a89a9e6f605a19676ea07eccf0ee7341f04fe31",
+    "src/behave_fire/rust/surface.py": "1611b2eae94f314825708cd918d6875bb6de5c7044939d34fe327e24b18dab6f",
+    "src/behave_fire/rust/vapor_pressure_deficit_calculator.py": "6ee869e4178613ad6799f84a275af3ad2bca7c182ede685938af3e7c09446235"
+  },
+  "regular_extension_sha256": "630f2f66a7e6ebbf544aedafbaf1582eaf7e2d555893af91b094407d99d76ab8",
+  "raw_file_sha256": {
+    "before": "181da4bbb1f133a8ed34678b89c4f61343fde8a46f136e63a3d1e940d5bedb3f",
+    "candidate1": "3134b7c6d01bb8f8f351be3891eb1b9258b2ec3eb963976e45e6520bfcf41cbc",
+    "candidate2": "aa6566ff0d17fd59891c7328c83b9e4f89ac7e7e5e63ade31cb1de5fc653c1b4",
+    "after": "cf224610db70712bd80321bbb7209ec0d6e6c19d78ac176bc386584749f7a665"
+  }
+}

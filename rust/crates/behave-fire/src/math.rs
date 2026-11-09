@@ -46,8 +46,3 @@ macro_rules! numpy_math {
 }
 
 numpy_math!(f64);
-
-/// Single-precision variants for public helpers that retain float32 arithmetic.
-pub mod single {
-    numpy_math!(f32);
-}

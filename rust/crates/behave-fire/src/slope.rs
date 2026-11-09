@@ -1,5 +1,4 @@
 //! Stateful slope helper, preserving raw-distance conversion and table quirks.
-pub use crate::fire_size::GeometryError;
 use crate::units::{LengthUnit, SlopeUnit};
 use std::f64::consts::PI;
 
@@ -84,16 +83,13 @@ impl SlopeTool {
         distance_units: LengthUnit,
         max_slope_steepness: f64,
         slope_units: SlopeUnit,
-    ) -> Result<(), GeometryError> {
+    ) {
         self.max_slope_in_degrees_ = slope_units.to_base(max_slope_steepness);
         self.max_slope_in_percent_ = SlopeUnit::Percent.from_base(self.max_slope_in_degrees_);
         let _ground_distance_in_feet = distance_units.to_base(calculated_map_distance);
         // The explicit reference converts the RAW input from feet to inches here.
         let inches = LengthUnit::Inches.from_base(calculated_map_distance);
         let slope_angle = self.max_slope_in_degrees_ * PI / 180.0;
-        if slope_angle.is_infinite() {
-            return Err(GeometryError::Domain);
-        }
         for (index, distance) in self.horizontal_distances_.iter_mut().enumerate() {
             let direction = 15.0 * index as f64;
             let a = inches * (direction * PI / 180.0).cos();
@@ -102,7 +98,6 @@ impl SlopeTool {
             let d = (c * c + b * b).sqrt();
             *distance = LengthUnit::Inches.to_base(d);
         }
-        Ok(())
     }
     /// Calculate map slope from map scale, contours, and unit-aware distances.
     pub fn calculate_slope_from_map_measurements(

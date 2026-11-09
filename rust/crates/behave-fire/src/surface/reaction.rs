@@ -187,38 +187,3 @@ pub fn calculate_reaction_intensity_output(reaction_intensity: f64) -> f64 {
 pub fn calculate_heat_per_unit_area(reaction_intensity: f64, residence_time: f64) -> f64 {
     reaction_intensity * residence_time
 }
-
-pub(super) mod single {
-    use crate::math::single::np_min;
-    retaining_reaction!(f32);
-    /// Calculate reaction intensity retaining float32 arithmetic in every stage.
-    ///
-    /// The typed f64 record is a transport container; each value is narrowed before arithmetic.
-    pub fn calculate_reaction_intensity(ib: &super::FuelbedIntermediates) -> f32 {
-        let valid = (ib.sigma as f32) > 1e-7 && (ib.relative_packing_ratio as f32) > 0.0;
-        let sigma = if valid { ib.sigma as f32 } else { 1.0 };
-        let rpr = if valid {
-            ib.relative_packing_ratio as f32
-        } else {
-            1.0
-        };
-        let aa = 133.0 / sigma.powf(0.7913);
-        let gm = sigma.powf(1.5) / (495.0 + 0.0594 * sigma.powf(1.5));
-        let gamma = gm * rpr.powf(aa) * (aa * (1.0 - rpr)).exp();
-        let dead = gamma
-            * (ib.wfl_dead as f32)
-            * (ib.w_heat_dead as f32)
-            * eta_m(ib.w_moist_dead as f32, ib.moe_dead as f32)
-            * eta_s(ib.w_silica_dead as f32);
-        let live = gamma
-            * (ib.wfl_live as f32)
-            * (ib.w_heat_live as f32)
-            * eta_m(ib.w_moist_live as f32, ib.moe_live as f32)
-            * eta_s(ib.w_silica_live as f32);
-        if valid {
-            dead + live
-        } else {
-            0.0
-        }
-    }
-}

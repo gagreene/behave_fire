@@ -1,56 +1,63 @@
 //! Checked stateful tools: snapshots are copied before detached execution.
 use behave_fire::units::*;
-use behave_fire::{
-    fire_size::{FireSize, NumericKind},
-    slope::SlopeTool,
-};
+use behave_fire::{fire_size::FireSize, slope::SlopeTool};
 use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
 use pyo3::types::PyDict;
-fn numeric_kind(code: i32) -> NumericKind {
-    match code {
-        2 => NumericKind::NumpyFloat32,
-        1 => NumericKind::NumpyFloat64,
-        _ => NumericKind::PythonFloat,
+
+enum Scalar {
+    Physical(f64),
+    Code(i64),
+}
+impl From<f64> for Scalar {
+    fn from(value: f64) -> Self {
+        Self::Physical(value)
     }
 }
-fn kind_code(kind: NumericKind) -> i32 {
-    match kind {
-        NumericKind::NumpyFloat32 => 2,
-        NumericKind::NumpyFloat64 => 1,
-        NumericKind::PythonFloat => 0,
+impl From<i32> for Scalar {
+    fn from(value: i32) -> Self {
+        Self::Code(i64::from(value))
     }
+}
+impl From<usize> for Scalar {
+    fn from(value: usize) -> Self {
+        Self::Code(value as i64)
+    }
+}
+fn scalar(value: impl Into<Scalar>) -> Option<Scalar> {
+    Some(value.into())
+}
+fn export(py: Python<'_>, value: Option<Scalar>) -> PyResult<Option<Bound<'_, PyAny>>> {
+    value
+        .map(|value| match value {
+            Scalar::Physical(v) => v
+                .into_pyobject(py)
+                .map(|v| v.into_any())
+                .map_err(Into::into),
+            Scalar::Code(v) => v
+                .into_pyobject(py)
+                .map(|v| v.into_any())
+                .map_err(Into::into),
+        })
+        .transpose()
 }
 #[pyfunction]
+#[allow(clippy::type_complexity)]
 pub fn state_call<'py>(
     py: Python<'py>,
     domain: &str,
     method: &str,
     state: &Bound<'py, PyDict>,
     arguments: &Bound<'py, PyDict>,
-) -> PyResult<(Bound<'py, PyDict>, Option<f64>, Option<String>)> {
+) -> PyResult<(
+    Bound<'py, PyDict>,
+    Option<Bound<'py, PyAny>>,
+    Option<String>,
+)> {
     let result = PyDict::new(py);
     match domain {
         "fire_size" => {
             let mut value = FireSize::default();
-            if let Some(item) = state.get_item("effective_wind_numeric_kind_")? {
-                value.effective_wind_numeric_kind_ = numeric_kind(item.extract()?);
-            }
-            if let Some(item) = state.get_item("ratio_numeric_kind_")? {
-                value.ratio_numeric_kind_ = numeric_kind(item.extract()?);
-            }
-            if let Some(item) = state.get_item("eccentricity_numeric_kind_")? {
-                value.eccentricity_numeric_kind_ = numeric_kind(item.extract()?);
-            }
-            if let Some(item) = state.get_item("spread_rates_are_numpy_")? {
-                value.spread_rates_are_numpy_ = item.extract()?;
-            }
-            if let Some(item) = state.get_item("effective_wind_is_numpy_")? {
-                value.effective_wind_is_numpy_ = item.extract()?;
-            }
-            if let Some(item) = state.get_item("ratio_is_numpy_")? {
-                value.ratio_is_numpy_ = item.extract()?;
-            }
             if let Some(item) = state.get_item("effective_wind_speed_")? {
                 value.effective_wind_speed_ = item.extract()?;
             }
@@ -111,34 +118,21 @@ pub fn state_call<'py>(
                         .extract()?;
                     let spread_rate_units = SpeedUnit::try_from(spread_rate_units)
                         .map_err(|e| PyValueError::new_err(e.to_string()))?;
-                    let wind_kind = numeric_kind(
-                        arguments
-                            .get_item("_wind_kind")?
-                            .ok_or_else(|| PyValueError::new_err("missing numeric kind"))?
-                            .extract()?,
-                    );
                     py.detach(|| {
-                        match value.calculate_fire_basic_dimensions_with_wind_kind(
+                        value.calculate_fire_basic_dimensions(
                             is_crown,
                             effective_wind_speed,
                             wind_speed_units,
                             forward_spread_rate,
                             spread_rate_units,
-                            wind_kind,
-                        ) {
-                            Ok(_output) => (None, None),
-                            Err(error) => (None, Some(format!("{error:?}"))),
-                        }
+                        );
+                        (None, None)
                     })
                 }
-                "calculate_surface_fire_length_to_width_ratio" => {
-                    py.detach(
-                        || match value.calculate_surface_fire_length_to_width_ratio() {
-                            Ok(_output) => (None, None),
-                            Err(error) => (None, Some(format!("{error:?}"))),
-                        },
-                    )
-                }
+                "calculate_surface_fire_length_to_width_ratio" => py.detach(|| {
+                    value.calculate_surface_fire_length_to_width_ratio();
+                    (None, None)
+                }),
                 "calculate_crown_fire_length_to_width_ratio" => py.detach(|| {
                     value.calculate_crown_fire_length_to_width_ratio();
                     (None, None)
@@ -147,30 +141,24 @@ pub fn state_call<'py>(
                     value.calculate_fire_eccentricity();
                     (None, None)
                 }),
-                "calculate_elliptical_dimensions" => {
-                    py.detach(|| match value.calculate_elliptical_dimensions() {
-                        Ok(_output) => (None, None),
-                        Err(error) => (None, Some(format!("{error:?}"))),
-                    })
-                }
-                "calculate_backing_spread_rate" => {
-                    py.detach(|| match value.calculate_backing_spread_rate() {
-                        Ok(_output) => (None, None),
-                        Err(error) => (None, Some(format!("{error:?}"))),
-                    })
-                }
-                "calculate_flanking_spread_rate" => {
-                    py.detach(|| match value.calculate_flanking_spread_rate() {
-                        Ok(_output) => (None, None),
-                        Err(error) => (None, Some(format!("{error:?}"))),
-                    })
-                }
+                "calculate_elliptical_dimensions" => py.detach(|| {
+                    value.calculate_elliptical_dimensions();
+                    (None, None)
+                }),
+                "calculate_backing_spread_rate" => py.detach(|| {
+                    value.calculate_backing_spread_rate();
+                    (None, None)
+                }),
+                "calculate_flanking_spread_rate" => py.detach(|| {
+                    value.calculate_flanking_spread_rate();
+                    (None, None)
+                }),
                 "get_fire_length_to_width_ratio" => {
-                    py.detach(|| (Some(value.get_fire_length_to_width_ratio()), None))
+                    py.detach(|| (scalar(value.get_fire_length_to_width_ratio()), None))
                 }
-                "get_eccentricity" => py.detach(|| (Some(value.get_eccentricity()), None)),
+                "get_eccentricity" => py.detach(|| (scalar(value.get_eccentricity()), None)),
                 "get_heading_to_backing_ratio" => {
-                    py.detach(|| (Some(value.get_heading_to_backing_ratio()), None))
+                    py.detach(|| (scalar(value.get_heading_to_backing_ratio()), None))
                 }
                 "get_backing_spread_rate" => {
                     let spread_rate_units: i32 = arguments
@@ -179,7 +167,12 @@ pub fn state_call<'py>(
                         .extract()?;
                     let spread_rate_units = SpeedUnit::try_from(spread_rate_units)
                         .map_err(|e| PyValueError::new_err(e.to_string()))?;
-                    py.detach(|| (Some(value.get_backing_spread_rate(spread_rate_units)), None))
+                    py.detach(|| {
+                        (
+                            scalar(value.get_backing_spread_rate(spread_rate_units)),
+                            None,
+                        )
+                    })
                 }
                 "get_flanking_spread_rate" => {
                     let spread_rate_units: i32 = arguments
@@ -190,7 +183,7 @@ pub fn state_call<'py>(
                         .map_err(|e| PyValueError::new_err(e.to_string()))?;
                     py.detach(|| {
                         (
-                            Some(value.get_flanking_spread_rate(spread_rate_units)),
+                            scalar(value.get_flanking_spread_rate(spread_rate_units)),
                             None,
                         )
                     })
@@ -214,7 +207,7 @@ pub fn state_call<'py>(
                         .map_err(|e| PyValueError::new_err(e.to_string()))?;
                     py.detach(|| {
                         (
-                            Some(value.get_elliptical_a(length_units, elapsed_time, time_units)),
+                            scalar(value.get_elliptical_a(length_units, elapsed_time, time_units)),
                             None,
                         )
                     })
@@ -238,7 +231,7 @@ pub fn state_call<'py>(
                         .map_err(|e| PyValueError::new_err(e.to_string()))?;
                     py.detach(|| {
                         (
-                            Some(value.get_elliptical_b(length_units, elapsed_time, time_units)),
+                            scalar(value.get_elliptical_b(length_units, elapsed_time, time_units)),
                             None,
                         )
                     })
@@ -262,7 +255,7 @@ pub fn state_call<'py>(
                         .map_err(|e| PyValueError::new_err(e.to_string()))?;
                     py.detach(|| {
                         (
-                            Some(value.get_elliptical_c(length_units, elapsed_time, time_units)),
+                            scalar(value.get_elliptical_c(length_units, elapsed_time, time_units)),
                             None,
                         )
                     })
@@ -286,7 +279,7 @@ pub fn state_call<'py>(
                         .map_err(|e| PyValueError::new_err(e.to_string()))?;
                     py.detach(|| {
                         (
-                            Some(value.get_fire_length(length_units, elapsed_time, time_units)),
+                            scalar(value.get_fire_length(length_units, elapsed_time, time_units)),
                             None,
                         )
                     })
@@ -310,7 +303,11 @@ pub fn state_call<'py>(
                         .map_err(|e| PyValueError::new_err(e.to_string()))?;
                     py.detach(|| {
                         (
-                            Some(value.get_max_fire_width(length_units, elapsed_time, time_units)),
+                            scalar(value.get_max_fire_width(
+                                length_units,
+                                elapsed_time,
+                                time_units,
+                            )),
                             None,
                         )
                     })
@@ -337,15 +334,15 @@ pub fn state_call<'py>(
                     let time_units = TimeUnit::try_from(time_units)
                         .map_err(|e| PyValueError::new_err(e.to_string()))?;
                     py.detach(|| {
-                        match value.get_fire_perimeter(
-                            is_crown,
-                            length_units,
-                            elapsed_time,
-                            time_units,
-                        ) {
-                            Ok(output) => (Some(output), None),
-                            Err(error) => (None, Some(format!("{error:?}"))),
-                        }
+                        (
+                            scalar(value.get_fire_perimeter(
+                                is_crown,
+                                length_units,
+                                elapsed_time,
+                                time_units,
+                            )),
+                            None,
+                        )
                     })
                 }
                 "get_fire_area" => {
@@ -371,7 +368,7 @@ pub fn state_call<'py>(
                         .map_err(|e| PyValueError::new_err(e.to_string()))?;
                     py.detach(|| {
                         (
-                            Some(value.get_fire_area(
+                            scalar(value.get_fire_area(
                                 is_crown,
                                 area_units,
                                 elapsed_time,
@@ -387,18 +384,6 @@ pub fn state_call<'py>(
                     ))
                 }
             };
-            result.set_item(
-                "effective_wind_numeric_kind_",
-                kind_code(value.effective_wind_numeric_kind_),
-            )?;
-            result.set_item("ratio_numeric_kind_", kind_code(value.ratio_numeric_kind_))?;
-            result.set_item(
-                "eccentricity_numeric_kind_",
-                kind_code(value.eccentricity_numeric_kind_),
-            )?;
-            result.set_item("spread_rates_are_numpy_", value.spread_rates_are_numpy_)?;
-            result.set_item("effective_wind_is_numpy_", value.effective_wind_is_numpy_)?;
-            result.set_item("ratio_is_numpy_", value.ratio_is_numpy_)?;
             result.set_item("effective_wind_speed_", value.effective_wind_speed_)?;
             result.set_item("forward_spread_rate_", value.forward_spread_rate_)?;
             result.set_item("elapsed_time_", value.elapsed_time_)?;
@@ -413,7 +398,7 @@ pub fn state_call<'py>(
                 value.fire_length_to_width_ratio_,
             )?;
             result.set_item("heading_to_backing_ratio_", value.heading_to_backing_ratio_)?;
-            Ok((result, output, error))
+            Ok((result, export(py, output)?, error))
         }
         "slope_tool" => {
             let mut value = SlopeTool::default();
@@ -474,15 +459,13 @@ pub fn state_call<'py>(
                     let slope_units = SlopeUnit::try_from(slope_units)
                         .map_err(|e| PyValueError::new_err(e.to_string()))?;
                     py.detach(|| {
-                        match value.calculate_horizontal_distance(
+                        value.calculate_horizontal_distance(
                             calculated_map_distance,
                             distance_units,
                             max_slope_steepness,
                             slope_units,
-                        ) {
-                            Ok(_output) => (None, None),
-                            Err(error) => (None, Some(format!("{error:?}"))),
-                        }
+                        );
+                        (None, None)
                     })
                 }
                 "calculate_slope_from_map_measurements" => {
@@ -528,12 +511,9 @@ pub fn state_call<'py>(
                         (None, None)
                     })
                 }
-                "get_number_of_horizontal_distances" => py.detach(|| {
-                    (
-                        Some(value.get_number_of_horizontal_distances() as f64),
-                        None,
-                    )
-                }),
+                "get_number_of_horizontal_distances" => {
+                    py.detach(|| (scalar(value.get_number_of_horizontal_distances()), None))
+                }
                 "get_horizontal_distance_at_index" => {
                     let index: i64 = arguments
                         .get_item("index")?
@@ -547,7 +527,9 @@ pub fn state_call<'py>(
                         .map_err(|e| PyValueError::new_err(e.to_string()))?;
                     py.detach(|| {
                         (
-                            Some(value.get_horizontal_distance_at_index(index, map_distance_units)),
+                            scalar(
+                                value.get_horizontal_distance_at_index(index, map_distance_units),
+                            ),
                             None,
                         )
                     })
@@ -561,20 +543,20 @@ pub fn state_call<'py>(
                         .map_err(|e| PyValueError::new_err(e.to_string()))?;
                     py.detach(|| {
                         (
-                            Some(value.get_slope_from_map_measurements(slope_units)),
+                            scalar(value.get_slope_from_map_measurements(slope_units)),
                             None,
                         )
                     })
                 }
                 "get_slope_from_map_measurements_in_percent" => py.detach(|| {
                     (
-                        Some(value.get_slope_from_map_measurements_in_percent()),
+                        scalar(value.get_slope_from_map_measurements_in_percent()),
                         None,
                     )
                 }),
                 "get_slope_from_map_measurements_in_degrees" => py.detach(|| {
                     (
-                        Some(value.get_slope_from_map_measurements_in_degrees()),
+                        scalar(value.get_slope_from_map_measurements_in_degrees()),
                         None,
                     )
                 }),
@@ -587,7 +569,7 @@ pub fn state_call<'py>(
                         .map_err(|e| PyValueError::new_err(e.to_string()))?;
                     py.detach(|| {
                         (
-                            Some(value.get_slope_horizontal_distance_from_map_measurements(
+                            scalar(value.get_slope_horizontal_distance_from_map_measurements(
                                 distance_units,
                             )),
                             None,
@@ -603,7 +585,7 @@ pub fn state_call<'py>(
                         .map_err(|e| PyValueError::new_err(e.to_string()))?;
                     py.detach(|| {
                         (
-                            Some(
+                            scalar(
                                 value.get_slope_elevation_change_from_map_measurements(
                                     elevation_units,
                                 ),
@@ -612,12 +594,9 @@ pub fn state_call<'py>(
                         )
                     })
                 }
-                "get_number_of_representative_fractions" => py.detach(|| {
-                    (
-                        Some(value.get_number_of_representative_fractions() as f64),
-                        None,
-                    )
-                }),
+                "get_number_of_representative_fractions" => {
+                    py.detach(|| (scalar(value.get_number_of_representative_fractions()), None))
+                }
                 "get_representative_fraction_at_index" => {
                     let index: i64 = arguments
                         .get_item("index")?
@@ -625,7 +604,7 @@ pub fn state_call<'py>(
                         .extract()?;
                     py.detach(|| {
                         (
-                            Some(value.get_representative_fraction_at_index(index) as f64),
+                            scalar(value.get_representative_fraction_at_index(index)),
                             None,
                         )
                     })
@@ -635,14 +614,14 @@ pub fn state_call<'py>(
                         .get_item("index")?
                         .ok_or_else(|| PyValueError::new_err("missing index"))?
                         .extract()?;
-                    py.detach(|| (Some(value.get_inches_per_mile_at_index(index)), None))
+                    py.detach(|| (scalar(value.get_inches_per_mile_at_index(index)), None))
                 }
                 "get_miles_per_inch_at_index" => {
                     let index: i64 = arguments
                         .get_item("index")?
                         .ok_or_else(|| PyValueError::new_err("missing index"))?
                         .extract()?;
-                    py.detach(|| (Some(value.get_miles_per_inch_at_index(index)), None))
+                    py.detach(|| (scalar(value.get_miles_per_inch_at_index(index)), None))
                 }
                 "get_centimeters_per_kilometer_at_index" => {
                     let index: i64 = arguments
@@ -651,7 +630,7 @@ pub fn state_call<'py>(
                         .extract()?;
                     py.detach(|| {
                         (
-                            Some(value.get_centimeters_per_kilometer_at_index(index)),
+                            scalar(value.get_centimeters_per_kilometer_at_index(index)),
                             None,
                         )
                     })
@@ -663,7 +642,7 @@ pub fn state_call<'py>(
                         .extract()?;
                     py.detach(|| {
                         (
-                            Some(value.get_kilometers_per_centimeter_at_index(index)),
+                            scalar(value.get_kilometers_per_centimeter_at_index(index)),
                             None,
                         )
                     })
@@ -697,7 +676,7 @@ pub fn state_call<'py>(
                 "kilometers_per_centimeter_",
                 value.kilometers_per_centimeter_,
             )?;
-            Ok((result, output, error))
+            Ok((result, export(py, output)?, error))
         }
         _ => Err(PyValueError::new_err("unknown stateful domain")),
     }

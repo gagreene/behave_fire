@@ -27,9 +27,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   float64 arrays. Classifications stay int32, with -1 for unavailable values.
   Preserve output shapes and selected-branch dependencies. This intentionally
   differs from Python dtype/mask behavior, including under automatic selection.
-- Normalize already-float64 stateless families and expose an operation-level
-  numeric-contract manifest. Remaining component/state helpers are not yet
-  covered by the new contract. Binding API4 rejects API3 extensions/saved state.
+- Complete float64 normalization across all 89 numerical operations and scalar
+  state tools. Keep controls, status/classification codes, and flags typed.
+  Remove NumPy dtype, masked-payload, object/weak-scalar, fixed-width integer,
+  float32, and SVML emulation. The standalone core now forbids unsafe code.
+  API4 facade/tool serialization remains value-only.
+- Add direct preinitialized component buffers, real dependency groups for
+  independent outputs, and shared fuelbed field equations for components and
+  staged sessions. Empty groups never evaluate fake prototype cells.
+- Automatic FireSize state moves completely to a verified Python counterpart
+  before supported complex operations, emits a warning, and stays pinned there.
+  Other complex state methods fail clearly without native error replay.
 - Warn once when auto cannot use Rust, including on pure wheels. Proven complex
   input compatibility selects a complete Python operation before coercion, with
   an independent warning. General object data and native errors do not trigger

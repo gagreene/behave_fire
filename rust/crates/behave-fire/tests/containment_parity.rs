@@ -212,10 +212,11 @@ fn oracle_338() {
 #[allow(deprecated, unused_variables, unused_mut)]
 fn oracle_339() {
     let actual = contain::run_contain_sim_array(f64::NAN, 2.0, 1.0, 1000.0, 0.0, 10, 0.01);
-    close(actual.contained_time as f64, 0.0);
+    // API4's unavailable-condition rule replaces Python's false-comparison fallback.
+    close(actual.contained_time as f64, f64::NAN);
     close(actual.final_area as f64, f64::NAN);
     close(actual.final_perimeter as f64, f64::NAN);
-    close(actual.status as f64, 8.0);
+    assert_eq!(actual.status, -1);
 }
 
 // run_contain_sim_array/positive-infinity
@@ -223,10 +224,11 @@ fn oracle_339() {
 #[allow(deprecated, unused_variables, unused_mut)]
 fn oracle_340() {
     let actual = contain::run_contain_sim_array(f64::INFINITY, 2.0, 1.0, 1000.0, 0.0, 10, 0.01);
-    close(actual.contained_time as f64, 0.0);
+    // Infinity produces a real-domain NaN in the first geometric step.
+    close(actual.contained_time as f64, f64::NAN);
     close(actual.final_area as f64, f64::NAN);
     close(actual.final_perimeter as f64, f64::NAN);
-    close(actual.status as f64, 8.0);
+    assert_eq!(actual.status, -1);
 }
 
 // run_contain_sim_array/negative-infinity

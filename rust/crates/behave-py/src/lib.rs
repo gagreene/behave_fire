@@ -1,15 +1,19 @@
 //! Explicit owned NumPy bindings for the standalone Rust implementation.
 #[cfg(feature = "allocation-probe")]
 mod allocation_probe;
-mod arrays;
 mod capabilities;
-mod column_output;
+mod component_columns;
+mod component_f64;
+mod component_fuelbed;
+mod component_independent;
+mod component_requirements;
+mod component_schema;
+mod component_selected;
+mod component_units;
 mod crown;
 mod crown_fields;
 mod data;
 mod dispatch;
-mod masked;
-mod math_profiles;
 mod model_f64;
 mod model_fields;
 mod model_groups;
@@ -42,25 +46,28 @@ fn _rust(module: &Bound<'_, PyModule>) -> PyResult<()> {
         "__capabilities__",
         pyo3::types::PyTuple::new(module.py(), capabilities::OPERATIONS.iter().copied())?,
     )?;
-    module.add_function(wrap_pyfunction!(arrays::batch, module)?)?;
+    module.add_function(wrap_pyfunction!(component_f64::component_batch, module)?)?;
+    module.add_function(wrap_pyfunction!(
+        component_f64::component_dependencies,
+        module
+    )?)?;
+    module.add(
+        "__primitive_operations__",
+        pyo3::types::PyTuple::new(
+            module.py(),
+            component_f64::OPERATIONS.iter().map(|op| op.name()),
+        )?,
+    )?;
     module.add_function(wrap_pyfunction!(model_f64::model_batch, module)?)?;
     module.add_class::<grid_session::NativeGridSession>()?;
     module.add_function(wrap_pyfunction!(grid_session::grid_fields, module)?)?;
     module.add_function(wrap_pyfunction!(model_fields::model_fields, module)?)?;
     module.add_function(wrap_pyfunction!(model_groups::model_groups, module)?)?;
-    module.add_function(wrap_pyfunction!(
-        math_profiles::atan2_profile_candidates,
-        module
-    )?)?;
     module.add_function(wrap_pyfunction!(data::defaults, module)?)?;
     module.add_function(wrap_pyfunction!(data::missing_mortality, module)?)?;
     module.add_function(wrap_pyfunction!(state::state_call, module)?)?;
     Ok(())
 }
-
-mod masked_records;
-
-mod crown_masked;
 
 mod surface;
 
@@ -74,11 +81,7 @@ mod tools;
 
 mod contain;
 
-mod units;
-
 mod model;
-
-mod parallel;
 
 #[cfg(feature = "allocation-probe")]
 #[pyfunction]

@@ -78,13 +78,25 @@ def _float64_case(case, operation, arguments):
             _assert_native_error(operation, arguments, TypeError)
             return
         for key, value in arguments.items():
-            if key.endswith('_grid'):
+            if key in ('is_surface_fire', 'is_passive_crown', 'is_active_crown'):
+                flags = np.asanyarray(value)
+                if np.ma.getmaskarray(flags).any() or np.isnan(flags).any():
+                    _assert_native_error(operation, arguments, ValueError)
+                    return
+            elif key.endswith(('_grid', '_i')):
                 ids = np.asanyarray(value)
                 if np.ma.getmaskarray(ids).any() or not np.isfinite(ids).all() or np.any(ids != np.trunc(ids)):
                     _assert_native_error(operation, arguments, ValueError)
                     return
         try:
-            expected = model_reference(reference, arguments)
+            if '.BehaveRun.' in case['entry_point'] or name in ('run_crown_fire', 'coerce_crown_fire_inputs'):
+                expected = model_reference(reference, arguments)
+                if name == 'calculate_scorch_height':
+                    value = np.asarray(np.ma.asarray(arguments['fireline_intensity'], dtype=np.float64).filled(np.nan))
+                    expected = np.where(np.isnan(value), np.nan, expected)
+            else:
+                from component_f64_reference import reference as component_reference
+                expected = component_reference(reference, arguments)
         except (TypeError, ValueError, IndexError) as error:
             _assert_native_error(operation, arguments, type(error))
             return
@@ -232,7 +244,7 @@ def run_case(case):
             operation = getattr(operation, part)
     arguments = decode(case["inputs"])
     entry = case['entry_point']
-    stateless = any(f'.{family}.' in entry for family in ('behave_units', 'contain', 'ignite', 'safety', 'spot', 'vapor_pressure_deficit_calculator'))
+    stateless = any(f'.{family}.' in entry for family in ('behave_units', 'contain', 'ignite', 'safety', 'spot', 'vapor_pressure_deficit_calculator', 'surface', 'crown', 'fine_dead_fuel_moisture_tool'))
     stateless = stateless or ('.mortality.calculate_' in entry)
     if stateless or '.BehaveRun.' in entry or entry.rsplit('.', 1)[1] in ('run_crown_fire', 'coerce_crown_fire_inputs'):
         _float64_case(case, operation, arguments)
