@@ -71,6 +71,8 @@ def contract_errors(report, requirements, root=ROOT):
     for validation, row in rows:
         try:
             key = tuple(row[name] for name in ('dataset', 'operation', 'cells'))
+            if 'operations' in requirements and row['operation'] not in requirements['operations']:
+                raise ValueError('Diagnostic routes cannot substitute for final acceptance routes')
             fields = requested_outputs(row['operation'])
             if row.get('binding_api_version') != 4 or row.get('requested_outputs') != fields:
                 raise ValueError('Changed binding contract or requested output set')
@@ -150,7 +152,7 @@ def requested_outputs(operation):
     :param operation: Surface, Crown, or one of the two original mixed-input recipes.
     :return: Sorted unique output names, including Crown classification.
     """
-    if operation not in ('surface', 'crown', 'typed-crown', 'typed-crown-b'):
+    if operation not in ('surface', 'crown', 'typed-crown', 'typed-crown-b', 'masked-crown', 'masked-false-crown', 'typed-crown-c'):
         raise ValueError('Unknown final acceptance operation')
     return sorted(_SURFACE if operation == 'surface' else _CROWN)
 
