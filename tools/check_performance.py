@@ -29,6 +29,8 @@ def _allocation_errors(report, requirements, identity):
                 errors.append(f"{dataset}/{operation}: require one native allocation report")
                 continue
             row = matches[0]
+            if requirements.get('binding_api_version') == 4 and row.get('evidence', {}).get('manifest', {}).get('binding_api_version') != 4:
+                errors.append(f'{dataset}/{operation}: allocation manifest must identify binding API 4')
             if (row.get("source_hash"), row.get("extension_hash")) != identity:
                 errors.append(f"{dataset}/{operation}: allocation provenance mismatch")
             try:
@@ -234,14 +236,17 @@ def _target(operation, cells, threads, requirements):
     return requirements["targets"]["large_four" if threads == 4 else "large_serial"]
 
 
-def check_report(report, requirements):
+def check_report(report, requirements, *, artifact_root=None):
     """Assess complete evidence without running science or changing a target.
 
     :param report: Parsed timing, correctness, allocation, and baseline evidence.
     :param requirements: Accepted measurement/target contract and independently declared baseline identity.
+    :param artifact_root: Optional execution root for complete captured output arrays.
     :return: JSON-compatible pass/fail, case statistics, and failure explanations.
     """
-    errors = []
+    from performance_contract import ROOT, contract_errors
+
+    errors = contract_errors(report, requirements, ROOT if artifact_root is None else artifact_root)
     cases = []
     if report.get("errors"):
         errors.append("The campaign contains failed workers or correctness checks")
