@@ -2,16 +2,6 @@
 import numpy as np
 
 
-def _unknown_all_above(values):
-    """Return unknown conjunctions, allowing an independent known false condition."""
-    unknown, inactive = False, False
-    for value, limit in values:
-        value = np.asarray(value)
-        unknown = unknown | np.isnan(value)
-        inactive = inactive | (value <= limit)
-    return unknown & ~inactive
-
-
 def _surface_missing(outputs, intermediates):
     """Apply reviewed unknown-denominator/ellipse rules to existing Python output."""
     missing = np.isnan(intermediates['heat_sink']) | np.isnan(outputs['no_wind_no_slope_spread_rate'])
@@ -27,6 +17,16 @@ def _surface_missing(outputs, intermediates):
     for field in ('effective_wind_speed','fire_length_to_width_ratio','eccentricity','backing_spread_rate','flanking_spread_rate'):
         outputs[field] = np.where(unknown,np.nan,outputs[field])
     return outputs
+
+
+def _unknown_all_above(values):
+    """Return unknown conjunctions, allowing an independent known false condition."""
+    unknown, inactive = False, False
+    for value, limit in values:
+        value = np.asarray(value)
+        unknown = unknown | np.isnan(value)
+        inactive = inactive | (value <= limit)
+    return unknown & ~inactive
 
 
 def normalize(arguments):

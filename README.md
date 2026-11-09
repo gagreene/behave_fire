@@ -316,7 +316,7 @@ Getters return independent arrays. `run_remaining` preserves transient injection
 
 ## Performance
 
-The [final Windows acceptance](docs/performance/2026-11-09-float64-acceptance.md) passes **all 40 cases and 80 first/warmed confidence bounds**, plus scalar latency, peak-memory, complete-output, and allocation gates. At 100k/1M cells, warmed Rust speedups range from **3.27–5.65x with one worker** and **6.06–13.47x with four workers**. Ratios divide Python time by Rust time: higher means faster Rust.
+The [final Windows acceptance](docs/performance/2026-11-09-reviewed-float64-acceptance.md) passes **all 40 cases and 80 first/warmed confidence bounds**, plus scalar latency, peak-memory, complete-output, and allocation gates. At 100k/1M cells, warmed Rust speedups range from **3.18–5.52x with one worker** and **6.06–13.44x with four workers**. Ratios divide Python time by Rust time: higher means faster Rust.
 
 Measurements use original-input Python timing, seven fresh paired blocks, five warm calls, and separately checked complete outputs on an eight-core Windows x86-64 host with CPython 3.12.8 and NumPy 2.1.3. Native physical calculations use the documented float64/NaN contract. These results do not guarantee speed on other hosts or workloads; other-platform wheel correctness is separate. Raw records, complete-array bundles, controlled source provenance, and earlier failed campaigns remain available in [the benchmark history](docs/RUST_BACKEND_BENCHMARKS.md).
 

@@ -8,9 +8,9 @@ its original dtype, mask, and arithmetic behavior. Automatic selection can
 therefore return different types on native and Python-only installations.
 See [backend differences](BACKEND_DIFFERENCES.md) for the complete contract.
 
-The [final Windows acceptance](performance/2026-11-09-float64-acceptance.md)
+The [final Windows acceptance](performance/2026-11-09-reviewed-float64-acceptance.md)
 passes every required speed, confidence, scalar, memory, and allocation gate.
-Warmed 100k/1M speedups are 3.27-5.65x with one worker and 6.06-13.47x with four,
+Warmed 100k/1M speedups are 3.18-5.52x with one worker and 6.06-13.44x with four,
 on the declared Windows host using CPython 3.12.8 and NumPy 2.1.3. Other hosts
 and workloads require their own speed measurements.
 
@@ -132,7 +132,7 @@ A pure project wheel requires no compiler. A completely compiler-free install
 also depends on binary NumPy availability for that platform/interpreter.
 
 See [release verification](RELEASING.md), [standalone crate delivery](CRATES_IO.md),
-and [performance evidence](performance/2026-11-09-float64-acceptance.md). Builds
+and [performance evidence](performance/2026-11-09-reviewed-float64-acceptance.md). Builds
 and validation do not authorize PyPI/crates.io publishing, tags, or merges.
 Dependent PRs ultimately target `pre_release`; `master` receives released code
 through the documented promotion route.

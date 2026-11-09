@@ -20,10 +20,10 @@ the scientific equations; component fuelbed calculations also use the session's
 field evaluator. Codes and status arrays use int32, with -1 for unknown status;
 missing classifications clear their boolean flags.
 
-The [final Windows acceptance](performance/2026-11-09-float64-acceptance.md)
+The [final Windows acceptance](performance/2026-11-09-reviewed-float64-acceptance.md)
 passes all 40 cases and 80 first/warmed confidence bounds, scalar regression
 budgets, peak-memory comparisons, full-output validation, and zero-allocation
-loop gates. Warmed 100k/1M ratios are 3.27-5.65x serial and 6.06-13.47x with four
+loop gates. Warmed 100k/1M ratios are 3.18-5.52x serial and 6.06-13.44x with four
 workers on the declared Windows/NumPy2.1.3 host. These are Python/Rust ratios.
 Other-host speed claims require their own timing. Earlier records below remain
 historical evidence. Separate helper/staged diagnostics do not replace final

@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   dtype/mask behavior. These installation-dependent differences are intentional.
 - Certify the final Windows float64 model campaign: all 40 cases and 80
   first/warm confidence bounds pass. At 100k/1M cells, warmed speedups are
-  3.27-5.65x serial and 6.06-13.47x with four workers on the declared host.
+  3.18-5.52x serial and 6.06-13.44x with four workers on the declared host.
   Retain complete arrays, confidence/memory/scalar/allocation evidence, and
   independent additional-layout/containment/continuous diagnostics.
 

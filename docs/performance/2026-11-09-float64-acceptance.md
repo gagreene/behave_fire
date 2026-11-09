@@ -1,5 +1,7 @@
 # Final float64 Windows performance acceptance (2026-11-09)
 
+**Historical pre-review source:** the [reviewed-source campaign](2026-11-09-reviewed-float64-acceptance.md) supersedes this result for current code. The original measurements and arrays remain unchanged.
+
 **GO:** all 40 required cases and all 80 first/warmed confidence bounds pass.
 Scalar regression budgets, peak-memory comparisons, complete output checks, and
 ordinary scientific/encoder allocation gates also pass. No target or tolerance

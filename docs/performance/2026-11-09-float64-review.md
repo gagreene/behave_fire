@@ -33,6 +33,13 @@ for commit `fe43dce`. Corrections change the core binary, so final-source timing
 and allocation verification use fresh artifacts and observations. Previous source
 identities are never relabeled as measurements of the corrected implementation.
 
+The [reviewed-source acceptance](2026-11-09-reviewed-float64-acceptance.md)
+now passes all 40 cases and 80 first/warmed confidence bounds on the corrected
+scientific source at `9be8a50`. Its matched allocation builds, complete output
+arrays, continuous and additional-layout checks, and attribution profiles are
+retained separately from the historical campaign. The measured production and
+benchmark-source inventory remains unchanged in the evidence-only follow-up.
+
 The reviewer accepted the existing source/array hashes and narrow post-measurement
 metadata attestation. Historical dtype parity, unreleased API preservation,
 explicitly unsupported grid pickle/complex fallback, and non-Windows speed were
