@@ -17,6 +17,21 @@ import venv
 import zipfile
 
 
+def _environment_command():
+    """Capture actual wheel binary identity without retired numeric-profile APIs.
+
+    :return: Python code for the isolated wheel interpreter and staged binary path.
+    """
+    return (
+        "import hashlib,json,platform,sys; from pathlib import Path; import numpy; "
+        "from behave_fire import _rust; "
+        "assert Path(_rust.__file__).resolve()==Path(sys.argv[1]).resolve(); "
+        "print(json.dumps(dict(python=sys.version,numpy=numpy.__version__,machine=platform.machine(),"
+        "platform=platform.platform(),extension_sha256=hashlib.sha256(Path(_rust.__file__).read_bytes()).hexdigest(),"
+        "binding_api_version=_rust.__binding_api_version__,native_physical_dtype='float64')))"
+    )
+
+
 def _packaging_module(name):
     """Load declared packaging tools or the bare interpreter's bundled pip copy.
 
@@ -132,15 +147,7 @@ def main():
         _run([python, "-m", "pip", "install", "--only-binary=:all:", str(wheel) + "[test,dev]", "numpy==" + floor],
              root, reports / "install.log", environment)
         with _stage_extension(wheel, root / "src/behave_fire") as extension:
-            provenance = (
-                "import hashlib,json,platform,sys; from pathlib import Path; import numpy; "
-                "from behave_fire import _rust; from behave_fire.rust import _bridge; "
-                "assert Path(_rust.__file__).resolve()==Path(sys.argv[1]).resolve(); "
-                "print(json.dumps(dict(python=sys.version,numpy=numpy.__version__,machine=platform.machine(),"
-                "platform=platform.platform(),extension_sha256=hashlib.sha256(Path(_rust.__file__).read_bytes()).hexdigest(),"
-                "svml_candidate_available=_rust.atan2_profile_candidates()[3] is not None,"
-                "calibrated_atan2_profile=_bridge._atan2_math_profile())))"
-            )
+            provenance = _environment_command()
             _run([python, "-B", "-c", provenance, extension], root, reports / "environment.json", environment)
             record = json.loads((reports / "environment.json").read_text(encoding="utf-8"))
             record.update(wheel=wheel.name, wheel_sha256=hashlib.sha256(wheel.read_bytes()).hexdigest())
