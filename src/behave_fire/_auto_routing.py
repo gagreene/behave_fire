@@ -10,7 +10,7 @@ from ._ownership import _owned_inputs
 # Entries are parameter/layout proofs, never a catch-and-retry permission.
 # Further operations enter this table only with complete, nonzero-imaginary tests.
 _COMPLEX_CAPABILITIES = {
-    'surface.calculate_fire_area': {'elapsed_min': frozenset({'scalar', 'array', 'masked', 'boxed'})},
+    'surface.calculate_fire_area': {'elapsed_min': frozenset({'scalar', 'numpy-scalar', 'array', 'masked', 'boxed'})},
     'crown.calculate_crown_heat_and_intensity': {'surface_hpua': frozenset({'array', 'masked'})},
     'model.do_crown_run': {'surface_results.heat_per_unit_area': frozenset({'array', 'masked'})},
 }
@@ -78,11 +78,11 @@ def choose_backend(call, preferred):
 
     :param call: Owned original values captured for this complete operation.
     :param preferred: Already selected usable backend, python or rust.
-    :return: Preferred backend for real values, or Python for a proven complex call.
+    :return: Python unchanged when already selected; otherwise Rust or a proven complex fallback.
     """
     if preferred not in ('python', 'rust'):
         raise ValueError('preferred backend must be python or rust')
-    if not call.complex_sites:
+    if preferred == 'python' or not call.complex_sites:
         return preferred
     supported = _COMPLEX_CAPABILITIES.get(call.operation, {})
     for path, layout in call.complex_sites:

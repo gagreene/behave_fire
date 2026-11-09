@@ -25,6 +25,11 @@ def _wrap_function(namespace, name, function):
         :param kwargs: Original keyword arguments.
         :return: Complete result; exceptions propagate without replay or status fabrication.
         """
+        if namespace._preferred == 'python':
+            result = function(*args, **kwargs)
+            namespace._status['backend'] = 'python'
+            return result
+
         from .auto import _warn_complex
 
         call = capture_call(operation, function, args, kwargs)
