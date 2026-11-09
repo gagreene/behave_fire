@@ -6,6 +6,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+- Automatic selection prefers Rust and warns once when unavailable; verified
+  complex operations route to Python with a separate warning before computation.
+  Rust uses float64/NaN physical arrays, while Python retains its original
+  dtype/mask behavior. These installation-dependent differences are intentional.
+- Certify the final Windows float64 model campaign: all 40 cases and 80
+  first/warm confidence bounds pass. At 100k/1M cells, warmed speedups are
+  3.27-5.65x serial and 6.06-13.47x with four workers on the declared host.
+  Retain complete arrays, confidence/memory/scalar/allocation evidence, and
+  independent additional-layout/containment/continuous diagnostics.
+
 ### Staged Rust raster sessions
 
 - Add public Python `behave_fire.rust.SurfaceGrid` and `CrownGrid`, backed by the
