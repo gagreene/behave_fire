@@ -13,6 +13,13 @@ The compiler and complete source/build inventory are in the allocation manifest.
 Results certify this Windows host. Native wheel correctness on other platforms
 does not establish their performance.
 
+After measurement, running every standalone example found one obsolete assertion
+expecting zero for an invalid raster cell. Only that assertion changed to expect
+NaN. Neither library nor the benchmark/oracle changed. The
+[example-only attestation](2026-11-09-reviewed-float64-example-attestation.json)
+pins the exact one-line change and both file hashes. Original measured source
+identities, binaries, reports, and complete arrays remain unchanged.
+
 ## Protocol and result matrix
 
 Both uniform and heterogeneous datasets cover Surface, Crown, and original mixed

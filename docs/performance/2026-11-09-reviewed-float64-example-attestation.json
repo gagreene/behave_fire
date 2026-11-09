@@ -1,0 +1,16 @@
+{
+  "measured_source_commit": "9be8a50d9011438d4b61f219d60e156904659207",
+  "measured_source_hash": "a7a78d4c916b2cd213a72a327f31806216ef69a3dbb1e6cb76ae83e730114162",
+  "measured_extension_hash": "1976dbcc551dffab91755455f3d38747a71b6df6e2be883dd5dcd85511ba6bfd",
+  "changed_files": [
+    "rust/crates/behave-fire/examples/raster_tweaks.rs"
+  ],
+  "original_file_sha256": "c8f1204b3aefba0176d5a645ca4bd7486d05ae5398d455d5d5316e0c2898f4c3",
+  "current_file_sha256": "102b887ac54d7cb9983c60ef116f910e1169be77f8b21408b97d27284a59e0eb",
+  "old_assertion": "assert_eq!(result.spread_rate[5], 0.0);",
+  "new_assertion": "assert!(result.spread_rate[5].is_nan());",
+  "reason": "Standalone example expected obsolete zero-filled invalid cells; corrected contract returns NaN.",
+  "compiled_library_source_changes": [],
+  "benchmark_or_oracle_changes": [],
+  "effect": "The example assertion is not compiled into either library. Original timing/allocation hashes and arrays are retained unchanged."
+}

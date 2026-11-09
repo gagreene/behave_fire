@@ -10,7 +10,8 @@
     "docs/performance/2026-11-09-reviewed-float64-scheduling-pilot.json": "20270b85e61d793a78d965221f1fc4cc376a79ebc012011f8daa804f294f869b",
     "docs/performance/2026-11-09-reviewed-float64-continuous-correctness.json": "bc3c88c7fc9d1aa9f1ceafd93cee5529790de6cc360b82167dd6060189c18f74",
     "docs/performance/2026-11-09-reviewed-float64-auxiliary.json": "ee18ab2c582e278212aacfe0915aa1018464f8a6909b246398f4a7ba125ae84b",
-    "docs/performance/2026-11-09-reviewed-float64-profiles.json": "e6d85a170432937545dac08d165cf2ddc4e012160d224a13794de52b20072555"
+    "docs/performance/2026-11-09-reviewed-float64-profiles.json": "e6d85a170432937545dac08d165cf2ddc4e012160d224a13794de52b20072555",
+    "docs/performance/2026-11-09-reviewed-float64-example-attestation.json": "8529fb1daafa1b45e425b3930dd91424e9c6e089ebe16f8ad89ec9b4b6528b56"
   },
   "array_bundles": {
     "docs/performance/2026-11-09-reviewed-float64-acceptance-arrays.tar.xz": {
