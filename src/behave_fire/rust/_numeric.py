@@ -137,9 +137,15 @@ def normalize_selector(kind, value):
     """
     from ._bridge import _unit_code
 
+    if isinstance(value, IntEnum):
+        value = int(value)
+    _validate_value(value)
     # Unit indexing can discard a mask, so validate missingness on the original input.
     if np.ma.isMaskedArray(value) and np.ma.getmaskarray(value).any():
         raise ValueError("A typed selector cannot be missing.")
+    data = np.asarray(np.ma.getdata(value))
+    if data.dtype.kind == 'f' and not np.isfinite(data).all():
+        raise ValueError('A typed selector must be finite.')
     return normalize_control(_unit_code(kind, value), np.int32)
 
 

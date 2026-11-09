@@ -91,6 +91,9 @@ def _float64_case(case, operation, arguments):
         try:
             if '.BehaveRun.' in case['entry_point'] or name in ('run_crown_fire', 'coerce_crown_fire_inputs'):
                 expected = model_reference(reference, arguments)
+                if name.startswith('calculate_spotting_from_'):
+                    from component_f64_reference import reference as component_reference
+                    expected = component_reference(reference, arguments)
                 if name == 'calculate_scorch_height':
                     value = np.asarray(np.ma.asarray(arguments['fireline_intensity'], dtype=np.float64).filled(np.nan))
                     expected = np.where(np.isnan(value), np.nan, expected)

@@ -81,7 +81,7 @@ def _select(backend, stacklevel):
         if not _WARNING_EMITTED:
             reason = "unavailable" if status == "absent" else "unusable"
             warnings.warn(
-                f"Rust backend {reason} ({type(cause).__name__}: {cause}); using Python.",
+                f"Rust backend {reason} ({type(cause).__name__}: {cause}); using Python. {_INSTALL}",
                 BehaveBackendWarning,
                 stacklevel=stacklevel,
             )

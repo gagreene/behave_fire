@@ -33,7 +33,13 @@ pub fn calculate_safety_zone(
     let separation_distance = calculate_separation_distance(flame_height_ft);
     let core =
         area_per_person_sqft * number_of_personnel + area_per_equipment_sqft * number_of_equipment;
-    let core_radius = if core > 1e-7 { (core / PI).sqrt() } else { 0.0 };
+    let core_radius = if core.is_nan() {
+        f64::NAN
+    } else if core > 1e-7 {
+        (core / PI).sqrt()
+    } else {
+        0.0
+    };
     let radius = separation_distance + core_radius;
     SafetyZoneResult {
         separation_distance,

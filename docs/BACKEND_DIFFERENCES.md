@@ -82,6 +82,12 @@ possible. New grid sessions require Rust, have no Python fallback, and reject
 pickling explicitly. Existing facade/tool serialization remains API4 and stores
 values rather than native pointers.
 
+Explicit validity=false hides every derived output, including pinned overrides,
+as NaN, -1, or false. The original injected values remain stored and reappear if
+validity is enabled later. Classification flags can select final Crown behavior:
+Surface takes precedence over passive, then active. All-false flags mean unknown;
+flag injection does not rewrite an independently injected fire_type code.
+
 The package-root BehaveRun uses composition and can have a different class
 identity/repr from `behave_fire.behave.BehaveRun`. Use the explicit Python class
 for legacy subclassing or class-identity checks. All 89 numerical operation

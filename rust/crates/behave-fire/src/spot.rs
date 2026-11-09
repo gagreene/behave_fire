@@ -3,6 +3,9 @@ use crate::math::np_max;
 
 /// Finish the shared firebrand-height calculation in feet.
 fn distance(fb_ht: f64, wind_mph: f64, cover_height_ft: f64) -> f64 {
+    if fb_ht.is_nan() {
+        return f64::NAN;
+    }
     let safe_fb = if fb_ht > 1e-7 { fb_ht } else { 1.0 };
     let crit_cover = if fb_ht > 1e-7 {
         np_max(cover_height_ft, 2.2 * safe_fb.powf(0.337) - 4.0)
@@ -10,6 +13,9 @@ fn distance(fb_ht: f64, wind_mph: f64, cover_height_ft: f64) -> f64 {
         0.0
     };
     let safe_cc = if crit_cover > 1e-7 { crit_cover } else { 1.0 };
+    if crit_cover.is_nan() {
+        return f64::NAN;
+    }
     let drift = 0.000278 * wind_mph * safe_fb.powf(0.643);
     let miles = if crit_cover > 1e-7 {
         0.000718
@@ -29,6 +35,9 @@ pub fn calculate_spotting_from_burning_pile(
     wind_mph: f64,
     cover_height_ft: f64,
 ) -> f64 {
+    if crate::engine::missing::all_above(&[(wind_mph, 1e-7), (flame_height_ft, 1e-7)]).is_none() {
+        return f64::NAN;
+    }
     let height = if wind_mph > 1e-7 && flame_height_ft > 1e-7 {
         1.055 * (flame_height_ft * wind_mph).sqrt()
     } else {
@@ -43,6 +52,9 @@ pub fn calculate_spotting_from_surface_fire(
     wind_mph: f64,
     cover_height_ft: f64,
 ) -> f64 {
+    if crate::engine::missing::all_above(&[(wind_mph, 1e-7), (flame_length_ft, 1e-7)]).is_none() {
+        return f64::NAN;
+    }
     let active = wind_mph > 1e-7 && flame_length_ft > 1e-7;
     let safe_ws = if wind_mph > 1e-7 { wind_mph } else { 1.0 };
     let safe_fl = if flame_length_ft > 1e-7 {
@@ -53,6 +65,9 @@ pub fn calculate_spotting_from_surface_fire(
     let f = 322.0 * (0.474 * safe_ws).powf(-1.01);
     let byrams = (safe_fl / 0.45).powf(1.0 / 0.46);
     let val = f * byrams;
+    if active && val.is_nan() {
+        return f64::NAN;
+    }
     let height = if active && val > 1e-7 {
         1.055 * val.sqrt()
     } else {
@@ -69,6 +84,14 @@ pub fn calculate_spotting_from_torching_trees(
     wind_mph: f64,
     cover_height_ft: f64,
 ) -> f64 {
+    if wind_mph <= 1e-7 {
+        return 0.;
+    }
+    if crate::engine::missing::all_above(&[(dbh_in, 1e-7), (height_ft, 1e-7), (count, 0.)])
+        .is_none()
+    {
+        return f64::NAN;
+    }
     let height = if dbh_in > 1e-7 && height_ft > 1e-7 && count > 0.0 {
         0.5 * height_ft + 2.0 * dbh_in * count.sqrt()
     } else {

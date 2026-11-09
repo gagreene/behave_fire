@@ -90,7 +90,7 @@ impl SurfacePlan {
         let particles = surface::build_particle_arrays_from_prepared(
             fuel, cell.m1h, cell.m10h, cell.m100h, cell.mlh, cell.mlw,
         );
-        fuel.prepare_fuelbed(&particles)
+        fuel.prepare_fuelbed_available(&particles)
     }
 
     /// Evaluate a cell with explicit stage overrides and no per-cell ownership.
@@ -100,19 +100,7 @@ impl SurfacePlan {
         fuel: &PreparedFuel,
         tweaks: SurfaceTweaks,
     ) -> SurfaceResult {
-        let fuelbed = self.prepare_fuelbed(cell, fuel);
-        let reaction = tweaks
-            .reaction_intensity
-            .unwrap_or_else(|| fuel.reaction_intensity(&fuelbed));
-        run_selected_stages::<0, false>(
-            reaction,
-            0.9 * reaction,
-            &fuelbed,
-            cell,
-            &self.options,
-            tweaks,
-            None,
-        )
+        self.run_available_cell(cell, fuel, tweaks)
     }
 
     /// Resume from supplied fuelbed state without rebuilding or replacing it.
@@ -132,18 +120,7 @@ impl SurfacePlan {
         fuelbed: &FuelbedIntermediates,
         tweaks: SurfaceTweaks,
     ) -> SurfaceResult {
-        let reaction = tweaks
-            .reaction_intensity
-            .unwrap_or_else(|| surface::calculate_reaction_intensity(fuelbed));
-        run_selected_stages::<FINISH, false>(
-            reaction,
-            0.9 * reaction,
-            fuelbed,
-            cell,
-            &self.options,
-            tweaks,
-            None,
-        )
+        self.run_available_from_fuelbed::<FINISH>(cell, fuelbed, tweaks)
     }
     /// Evaluate the availability-aware model contract with cached physical fuel data.
     pub(crate) fn run_available_cell(

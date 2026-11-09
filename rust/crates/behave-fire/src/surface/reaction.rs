@@ -1,4 +1,4 @@
-//! Reaction and residence stages, including native float32 arithmetic.
+//! Float64 reaction and residence stages with dependency-aware missing values.
 use super::FuelbedIntermediates;
 use crate::math::np_min;
 
@@ -10,6 +10,9 @@ macro_rules! retaining_reaction {
             propagating_flux: $t,
             heat_sink: $t,
         ) -> $t {
+            if heat_sink.is_nan() {
+                return <$t>::NAN;
+            }
             let safe = if heat_sink > 1e-7 { heat_sink } else { 1.0 };
             if heat_sink > 1e-7 {
                 ri * propagating_flux / safe
@@ -19,6 +22,9 @@ macro_rules! retaining_reaction {
         }
         /// Calculate residence time in minutes from sigma in ft²/ft³.
         pub fn calculate_residence_time(sigma: $t) -> $t {
+            if sigma.is_nan() {
+                return <$t>::NAN;
+            }
             let safe = if sigma > 1e-7 { sigma } else { 1.0 };
             if sigma > 1e-7 {
                 384.0 / safe
@@ -50,7 +56,7 @@ retaining_reaction!(f64);
 
 /// Calculate reaction intensity in BTU/ft²/min using all weighted fuelbed fields.
 pub fn calculate_reaction_intensity(ib: &FuelbedIntermediates) -> f64 {
-    ReactionCoefficients::new(ib).run(ib)
+    ReactionCoefficients::new(ib).run_available(ib)
 }
 
 /// Calculate reaction using the availability policy of configured f64 models.
@@ -130,7 +136,7 @@ impl ReactionCoefficients {
         }
     }
     pub(crate) fn run(&self, ib: &FuelbedIntermediates) -> f64 {
-        self.run_selected::<false>(ib)
+        self.run_selected::<true>(ib)
     }
     /// Retain cached finite coefficients without treating unknown guards as false.
     pub(crate) fn run_available(&self, ib: &FuelbedIntermediates) -> f64 {

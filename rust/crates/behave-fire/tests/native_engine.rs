@@ -235,7 +235,38 @@ fn surface_all_grid_models_and_custom_science_match_pinned_python() {
             {
                 expected = f64::NAN;
             }
-            close(actual, expected, name);
+            if number(&case["intermediates"]["heat_sink"]).is_nan()
+                && matches!(
+                    name,
+                    "no_wind_no_slope_spread_rate"
+                        | "spread_rate"
+                        | "backing_spread_rate"
+                        | "flanking_spread_rate"
+                        | "fireline_intensity"
+                        | "flame_length"
+                        | "direction_of_max_spread"
+                )
+            {
+                expected = f64::NAN;
+            }
+            if number(&case["intermediates"]["heat_sink"]).is_nan()
+                && (number(&case["intermediates"]["relative_packing_ratio"]).is_nan()
+                    || number(&case["intermediates"]["relative_packing_ratio"]) > 1e-7)
+                && matches!(
+                    name,
+                    "effective_wind_speed" | "fire_length_to_width_ratio" | "eccentricity"
+                )
+            {
+                expected = f64::NAN;
+            }
+            close(
+                actual,
+                expected,
+                &format!(
+                    "model={:?}, settings={:?}, {name}",
+                    case["model"], case["settings"]
+                ),
+            );
         }
     }
 }

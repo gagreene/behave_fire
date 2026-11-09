@@ -401,7 +401,13 @@ pub fn calculate_crown_surface_fire(
     options: &SurfaceOptions,
     tweaks: SurfaceTweaks,
 ) -> CrownSurfaceResult {
-    calculate_crown_surface_selected::<0, false>(input, fuel, options, tweaks, None)
+    calculate_crown_surface_selected::<0, true>(
+        input,
+        fuel,
+        options,
+        tweaks,
+        fuel.wind_terms().as_ref(),
+    )
 }
 
 /// Minimal model-10 stages consumed by complete Crown calculations.
@@ -426,7 +432,7 @@ pub fn calculate_crown_spread(
     options: &SurfaceOptions,
     tweaks: SurfaceTweaks,
 ) -> CrownSpreadResult {
-    crown_spread_with_policy::<false>(input, fuel, options, tweaks, None)
+    crown_spread_with_policy::<true>(input, fuel, options, tweaks, fuel.wind_terms().as_ref())
 }
 
 /// Compute model-10 spread under the f64 missing-data contract.
@@ -552,11 +558,7 @@ fn calculate_fm10_surface<const FINISH: u8, const STRICT: bool>(
         ..tweaks
     };
     let plan = SurfacePlan::new(controls);
-    let crown_surface = if STRICT {
-        plan.run_with_wind::<FINISH, true>(x, &ib_crown, configured, wind)
-    } else {
-        plan.run_with_wind::<FINISH, false>(x, &ib_crown, configured, wind)
-    };
+    let crown_surface = plan.run_with_wind::<FINISH, true>(x, &ib_crown, configured, wind);
     let ews = crown_surface.effective_wind_speed;
     CrownSurfaceResult {
         p_crown,

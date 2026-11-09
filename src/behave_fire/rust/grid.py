@@ -235,7 +235,9 @@ class _Grid:
 
         :param name: Stable boolean field name.
         :param value: Boolean or integral scalar/array without missing values.
-        :return: None; owns replacements and invalidates descendants.
+        :return: None; owns replacements and invalidates descendants. Final Crown
+                selection prioritizes Surface, then passive, then active flags;
+                all-false classification flags leave final behavior unavailable.
         """
         self._native.set(name, self._column(name, value, 'flag'), False)
 

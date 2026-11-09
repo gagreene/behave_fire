@@ -34,8 +34,8 @@ impl<'a> SurfaceRaster<'a> {
 
     /// Evaluate one checked cell into caller-managed output storage.
     ///
-    /// Returns `None` outside the raster. Invalid pixels return the same default
-    /// result as `run`; validity remains available in the caller's input columns.
+    /// Returns `None` outside the raster. Invalid pixels return missing physical
+    /// values as `run`; validity remains available in the caller's input columns.
     pub fn evaluate_cell(
         &self,
         index: usize,
@@ -47,7 +47,7 @@ impl<'a> SurfaceRaster<'a> {
             return None;
         }
         if !self.inputs.valid(index) {
-            return Some(SurfaceResult::default());
+            return Some(crate::engine::missing::surface());
         }
         let cell = self.inputs.cell(index);
         Some(plan.run_cell(&cell, fuels.for_grid(cell.fuel_model_grid), tweaks))
@@ -137,7 +137,7 @@ impl<'a> SurfaceRaster<'a> {
         let mut output = SurfaceRasterOutput::run_with(shape, threads, |offset| {
             let index = start + offset;
             if !self.inputs.valid(index) {
-                return Ok::<_, BehaveError>(SurfaceResult::default());
+                return Ok::<_, BehaveError>(crate::engine::missing::surface());
             }
             let overrides = tweaks.cell(index);
             Ok(match source {

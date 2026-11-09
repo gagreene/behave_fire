@@ -12,7 +12,7 @@ pub(crate) fn calculate_fuelbed_with_terms(
     p: &Particles,
     terms: &super::SavrTerms,
 ) -> FuelbedIntermediates {
-    calculate_fuelbed_selected::<false>(p, terms)
+    calculate_fuelbed_selected::<true>(p, terms)
 }
 
 /// Share finite reductions while preserving unknown threshold conditions.

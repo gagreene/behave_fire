@@ -67,7 +67,7 @@ fn invalid_and_empty_raster_cells_do_not_read_scientific_inputs() {
     let skipped = surface
         .evaluate_cell(0, &plan, &fuels, SurfaceTweaks::default())
         .unwrap();
-    assert_eq!(skipped.spread_rate, full.spread_rate[0]);
+    assert!(skipped.spread_rate.is_nan() && full.spread_rate[0].is_nan());
     assert!(surface
         .evaluate_cell(usize::MAX, &plan, &fuels, SurfaceTweaks::default())
         .is_none());

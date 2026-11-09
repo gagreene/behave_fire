@@ -1724,7 +1724,7 @@ fn oracle_74() {
 #[allow(deprecated, unused_variables, unused_mut)]
 fn oracle_75() {
     let actual = spot::calculate_spotting_from_burning_pile(f64::NAN, 5.0, 10.0);
-    close(actual as f64, 0.0);
+    close(actual as f64, f64::NAN); // Unknown required flame condition stays unavailable.
 }
 
 // calculate_spotting_from_burning_pile/positive-infinity
@@ -1971,7 +1971,7 @@ fn oracle_103() {
 #[allow(deprecated, unused_variables, unused_mut)]
 fn oracle_104() {
     let actual = spot::calculate_spotting_from_surface_fire(f64::NAN, 5.0, 10.0);
-    close(actual as f64, 0.0);
+    close(actual as f64, f64::NAN); // Unknown required flame condition stays unavailable.
 }
 
 // calculate_spotting_from_surface_fire/positive-infinity
@@ -2218,7 +2218,7 @@ fn oracle_132() {
 #[allow(deprecated, unused_variables, unused_mut)]
 fn oracle_133() {
     let actual = spot::calculate_spotting_from_torching_trees(f64::NAN, 60.0, 3.0, 5.0, 10.0);
-    close(actual as f64, 0.0);
+    close(actual as f64, f64::NAN); // Unknown required diameter condition stays unavailable.
 }
 
 // calculate_spotting_from_torching_trees/positive-infinity

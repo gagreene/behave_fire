@@ -26,8 +26,8 @@ impl<'a> CrownRaster<'a> {
 
     /// Evaluate one checked cell into caller-managed output storage.
     ///
-    /// Returns `None` outside the raster. Invalid pixels return the same default
-    /// result as `run`; validity remains available in the caller's input columns.
+    /// Returns `None` outside the raster. Invalid pixels return NaN physical
+    /// values and code -1 as `run`; validity remains in the caller's columns.
     pub fn evaluate_cell(
         &self,
         index: usize,
@@ -39,7 +39,7 @@ impl<'a> CrownRaster<'a> {
             return None;
         }
         if !self.inputs.valid(index) {
-            return Some(CrownResult::default());
+            return Some(crate::engine::missing::crown());
         }
         Some(plan.run_cell(
             &self.inputs.cell(index),

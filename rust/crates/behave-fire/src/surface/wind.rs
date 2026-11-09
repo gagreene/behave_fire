@@ -39,11 +39,23 @@ macro_rules! retaining_wind {
             } else {
                 1.0
             };
-            let phi = if no_wind_no_slope_spread_rate > 1e-7 {
+            let phi = if no_wind_no_slope_spread_rate.is_nan() {
+                <$t>::NAN
+            } else if no_wind_no_slope_spread_rate > 1e-7 {
                 spread_rate / r0 - 1.0
             } else {
                 0.0
             };
+            match crate::engine::missing::all_above(&[
+                (phi, 0.),
+                (wind_b, 1e-7),
+                (wind_c, 1e-7),
+                (relative_packing_ratio, 1e-7),
+            ]) {
+                None => return <$speed>::NAN,
+                Some(false) => return 0.,
+                Some(true) => {}
+            }
             let rpr = if relative_packing_ratio > 1e-7 {
                 relative_packing_ratio
             } else {
@@ -69,6 +81,14 @@ macro_rules! retaining_wind {
             relative_packing_ratio: $t,
             wind_e: $t,
         ) -> $t {
+            match crate::engine::missing::all_above(&[(sigma, 1e-7), (midflame_wind_speed, 1e-7)]) {
+                None => return <$t>::NAN,
+                Some(false) => return 0.,
+                Some(true) => {}
+            }
+            if relative_packing_ratio.is_nan() {
+                return <$t>::NAN;
+            }
             let rpr = if relative_packing_ratio > 1e-7 {
                 relative_packing_ratio
             } else {
@@ -96,6 +116,9 @@ pub fn calculate_slope_phi(
     reaction_intensity: f64,
 ) -> f64 {
     let slope_tan = slope_units.to_base(slope).to_radians().tan();
+    if crate::engine::missing::all_above(&[(slope_tan, 1e-7), (packing_ratio, 1e-7)]).is_none() {
+        return f64::NAN;
+    }
     let pr = if packing_ratio > 1e-7 {
         packing_ratio
     } else {
@@ -152,6 +175,14 @@ pub fn calculate_surface_wind_adjustment_factor(
 }
 /// Calculate Albini/Rothermel wind coefficients from sigma in ft²/ft³.
 pub fn calculate_surface_wind_coefficients(sigma: f64) -> WindCoefficients {
+    if sigma.is_nan() {
+        return WindCoefficients {
+            safe_sigma: f64::NAN,
+            wind_c: f64::NAN,
+            wind_b: f64::NAN,
+            wind_e: f64::NAN,
+        };
+    }
     let safe_sigma = if sigma > 1e-7 { sigma } else { 1.0 };
     WindCoefficients {
         safe_sigma,
@@ -181,7 +212,17 @@ pub fn calculate_wind_adjustment_factor(
     depth: f64,
 ) -> f64 {
     let ccf = crown_ratio * canopy_cover / 3.0;
-    let no_canopy = canopy_cover < 1e-7 || ccf < 0.05 || canopy_height < 6.0;
+    let no_canopy = match crate::engine::missing::any_below(&[
+        (canopy_cover, 1e-7),
+        (ccf, 0.05),
+        (canopy_height, 6.),
+    ]) {
+        None => return f64::NAN,
+        Some(value) => value,
+    };
+    if (no_canopy && depth.is_nan()) || (!no_canopy && canopy_height.is_infinite()) {
+        return f64::NAN;
+    }
     let safe_depth = if depth > 1e-7 { depth } else { 1.0 };
     let open = if depth > 1e-7 {
         1.83 / ((20.0 + 0.36 * safe_depth) / (0.13 * safe_depth)).ln()

@@ -61,7 +61,7 @@ pub(crate) fn all_above(values: &[(f64, f64)]) -> Option<bool> {
     }
 }
 /// Resolve a disjunction; a known true branch makes other inputs unnecessary.
-fn any_below(values: &[(f64, f64)]) -> Option<bool> {
+pub(crate) fn any_below(values: &[(f64, f64)]) -> Option<bool> {
     let mut unknown = false;
     for &(value, limit) in values {
         if value.is_nan() {
