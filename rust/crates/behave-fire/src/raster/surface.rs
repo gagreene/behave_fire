@@ -21,6 +21,11 @@ pub struct SurfaceRaster<'a> {
 }
 
 impl<'a> SurfaceRaster<'a> {
+    /// Borrow the validated inputs when creating an independently owned session.
+    pub fn columns(&self) -> &SurfaceColumns<'a> {
+        &self.inputs
+    }
+
     /// Validate every provided column once, before allocation or worker execution.
     pub fn new(shape: GridShape, inputs: SurfaceColumns<'a>) -> Result<Self, BehaveError> {
         inputs.validate(&shape)?;

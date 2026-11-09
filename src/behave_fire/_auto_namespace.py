@@ -47,7 +47,10 @@ class AutoNamespace(ModuleType):
 
         :return: Sorted discoverable attribute names without native discovery or execution.
         """
-        return sorted(set(dir(self._python_namespace)) | {'backend_in_use', 'preferred_backend'})
+        names = set(dir(self._python_namespace)) | {'backend_in_use', 'preferred_backend'}
+        if not self._operation_prefix and self._preferred == 'rust':
+            names.update(('CrownGrid', 'SurfaceGrid'))
+        return sorted(names)
 
     def __getattr__(self, name):
         """Resolve a counterpart or explicitly unmigrated class lazily.
@@ -58,6 +61,10 @@ class AutoNamespace(ModuleType):
         if not self._operation_prefix and name == 'BehaveRun':
             from .auto import BehaveRun
             return BehaveRun
+        if not self._operation_prefix and name in ('CrownGrid', 'SurfaceGrid'):
+            if self._preferred != 'rust':
+                raise ImportError(f'{name} is Rust-only; install a compatible native wheel or build the extension.')
+            return getattr(self._native_namespace(), name)
         try:
             value = getattr(self._python_namespace, name)
         except AttributeError:

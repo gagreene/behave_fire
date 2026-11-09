@@ -59,6 +59,45 @@ pub(crate) fn calculate_reaction_intensity_available(ib: &FuelbedIntermediates) 
 }
 
 /// Moisture-independent reaction coefficients, retaining left-to-right products.
+#[derive(Clone, Copy, Debug)]
+pub(crate) struct ReactionInputs {
+    pub sigma: f64,
+    pub relative_packing_ratio: f64,
+    pub wfl_dead: f64,
+    pub wfl_live: f64,
+    pub w_heat_dead: f64,
+    pub w_heat_live: f64,
+    pub w_silica_dead: f64,
+    pub w_silica_live: f64,
+    pub w_moist_dead: f64,
+    pub w_moist_live: f64,
+    pub moe_dead: f64,
+    pub moe_live: f64,
+}
+impl From<&FuelbedIntermediates> for ReactionInputs {
+    fn from(v: &FuelbedIntermediates) -> Self {
+        Self {
+            sigma: v.sigma,
+            relative_packing_ratio: v.relative_packing_ratio,
+            wfl_dead: v.wfl_dead,
+            wfl_live: v.wfl_live,
+            w_heat_dead: v.w_heat_dead,
+            w_heat_live: v.w_heat_live,
+            w_silica_dead: v.w_silica_dead,
+            w_silica_live: v.w_silica_live,
+            w_moist_dead: v.w_moist_dead,
+            w_moist_live: v.w_moist_live,
+            moe_dead: v.moe_dead,
+            moe_live: v.moe_live,
+        }
+    }
+}
+/// Evaluate only the declared reaction dependencies, with no invented fuelbed fields.
+pub(crate) fn reaction_from_inputs(inputs: &ReactionInputs) -> f64 {
+    ReactionCoefficients::from_inputs(inputs).run_inputs::<true>(inputs)
+}
+
+/// Moisture-independent reaction coefficients, retaining left-to-right products.
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub(crate) struct ReactionCoefficients {
     valid: bool,
@@ -69,6 +108,9 @@ pub(crate) struct ReactionCoefficients {
 }
 impl ReactionCoefficients {
     pub(crate) fn new(ib: &FuelbedIntermediates) -> Self {
+        Self::from_inputs(&ib.into())
+    }
+    fn from_inputs(ib: &ReactionInputs) -> Self {
         let valid = ib.sigma > 1e-7 && ib.relative_packing_ratio > 0.0;
         let sigma = if valid { ib.sigma } else { 1.0 };
         let rpr = if valid {
@@ -95,6 +137,9 @@ impl ReactionCoefficients {
         self.run_selected::<true>(ib)
     }
     fn run_selected<const STRICT: bool>(&self, ib: &FuelbedIntermediates) -> f64 {
+        self.run_inputs::<STRICT>(&ib.into())
+    }
+    fn run_inputs<const STRICT: bool>(&self, ib: &ReactionInputs) -> f64 {
         if STRICT {
             match crate::engine::missing::all_above(&[
                 (ib.sigma, 1e-7),

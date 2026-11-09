@@ -54,15 +54,21 @@ pub fn build_particle_arrays_from_prepared(
         moe_dead: f.moisture_of_extinction_dead,
         is_defined: f.is_defined,
     };
-    if f.is_dynamic && mlh < 0.30 {
-        p.load_dead[3] = p.load_live[0];
-        p.load_live[0] = 0.0;
-    } else if f.is_dynamic && (0.30..=1.20).contains(&mlh) {
-        let transferred = p.load_live[0] * (1.333 - 1.11 * mlh);
-        p.load_dead[3] = transferred;
-        p.load_live[0] -= transferred;
-    }
+    (p.load_dead[3], p.load_live[0]) = transfer_herbaceous_load(f.live_herb, f.is_dynamic, mlh);
     p
+}
+
+/// Share dynamic herb transfer with field-level stages, without reading unrelated moisture.
+#[inline]
+pub(crate) fn transfer_herbaceous_load(loading: f64, dynamic: bool, moisture: f64) -> (f64, f64) {
+    if dynamic && moisture < 0.30 {
+        (loading, 0.)
+    } else if dynamic && (0.30..=1.20).contains(&moisture) {
+        let transferred = loading * (1.333 - 1.11 * moisture);
+        (transferred, loading - transferred)
+    } else {
+        (0., loading)
+    }
 }
 
 /// Size-class weighted net loading (lb/ft²), retaining the Albini bin boundaries exactly.

@@ -485,3 +485,54 @@ mod configured_scope_tests {
         }
     }
 }
+
+#[cfg(all(test, feature = "allocation-probe"))]
+mod staged_scope_tests {
+    use super::{allocation_probe as probe, model_observer::Observer};
+    use behave_fire::engine::{
+        CrownPlan, Field, GridSession, ModelRun, OutputRequest, PreparedFuels,
+    };
+    use behave_fire::raster::{CrownColumns, CrownRaster, CrownTweakColumns};
+    use behave_fire::{FuelModels, GridShape, PerCell};
+
+    #[test]
+    fn staged_scientific_and_encoder_scopes_allocate_nothing_and_use_actual_workers() {
+        let fuels = PreparedFuels::from_registry(&FuelModels::default());
+        for workers in [1, 4] {
+            let valid = (0..1031).map(|i| i % 17 != 0).collect::<Vec<_>>();
+            let run = ModelRun::Crown {
+                raster: CrownRaster::new(
+                    GridShape::new(vec![1031]).unwrap(),
+                    CrownColumns {
+                        canopy_base_height: PerCell::Scalar(3.),
+                        canopy_height: PerCell::Scalar(30.),
+                        canopy_bulk_density: PerCell::Scalar(0.02),
+                        surface_ros: PerCell::Scalar(5.),
+                        surface_fli: PerCell::Scalar(1000.),
+                        surface_hpua: PerCell::Scalar(1000.),
+                        wind_speed: PerCell::Scalar(88.),
+                        validity: Some(PerCell::Cells(&valid)),
+                        ..CrownColumns::default()
+                    },
+                )
+                .unwrap(),
+                plan: CrownPlan::default(),
+                fuels: &fuels,
+                tweaks: CrownTweakColumns::default(),
+            };
+            let mut s = GridSession::new(&run, OutputRequest::crown(), &[], workers).unwrap();
+            s.set_physical(Field::CrownFractionBurned, vec![0.5])
+                .unwrap();
+            probe::start();
+            s.run_remaining_observed(&Observer).unwrap();
+            let counts = probe::stop();
+            for phase in [probe::KERNEL, probe::ENCODER] {
+                assert_eq!((counts[phase].0, counts[phase].1), (0, 0), "{counts:?}");
+                assert!(counts[phase].2 > 1031);
+                assert!(counts[phase].3 >= workers);
+            }
+            assert!(s.get(Field::FinalSpreadRate).unwrap().physical().unwrap()[0].is_nan());
+            assert!(s.get(Field::FinalSpreadRate).unwrap().physical().unwrap()[1].is_finite());
+        }
+    }
+}

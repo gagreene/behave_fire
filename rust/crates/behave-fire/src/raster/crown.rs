@@ -13,6 +13,11 @@ pub struct CrownRaster<'a> {
 }
 
 impl<'a> CrownRaster<'a> {
+    /// Borrow the validated inputs when creating an independently owned session.
+    pub fn columns(&self) -> &CrownColumns<'a> {
+        &self.inputs
+    }
+
     /// Validate all column lengths before any native calculation or worker launch.
     pub fn new(shape: GridShape, inputs: CrownColumns<'a>) -> Result<Self, BehaveError> {
         inputs.validate(&shape)?;

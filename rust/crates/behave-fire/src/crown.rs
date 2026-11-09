@@ -681,12 +681,51 @@ fn crowning_surface_rate(
     r10: f64,
     wind: Option<&surface::PreparedWind>,
 ) -> f64 {
-    let ros0 = ri_crown * ib_crown.propagating_flux
-        / if ib_crown.heat_sink > 1e-7 {
-            ib_crown.heat_sink
-        } else {
-            1.0
-        };
+    let wind = wind.filter(|context| context.matches(ib_crown));
+    let coefficients = wind
+        .map(|v| v.coefficients)
+        .unwrap_or_else(|| surface::calculate_surface_wind_coefficients(ib_crown.sigma));
+    crowning_from_inputs(
+        &CrowningInputs {
+            reaction: ri_crown,
+            sigma: ib_crown.sigma,
+            packing: ib_crown.packing_ratio,
+            relative_packing: ib_crown.relative_packing_ratio,
+            flux: ib_crown.propagating_flux,
+            heat_sink: ib_crown.heat_sink,
+            defined: ib_crown.is_defined,
+            target: r10,
+            wind_b: coefficients.wind_b,
+            wind_c: coefficients.wind_c,
+            wind_e: coefficients.wind_e,
+        },
+        wind,
+    )
+}
+
+/// Only the actual declared physical inputs of the fixed-WAF backsolve.
+pub(crate) struct CrowningInputs {
+    pub reaction: f64,
+    pub sigma: f64,
+    pub packing: f64,
+    pub relative_packing: f64,
+    pub flux: f64,
+    pub heat_sink: f64,
+    pub defined: bool,
+    pub target: f64,
+    pub wind_b: f64,
+    pub wind_c: f64,
+    pub wind_e: f64,
+}
+
+/// Share backsolve equations with staged, potentially injected wind coefficients.
+pub(crate) fn crowning_from_inputs(
+    v: &CrowningInputs,
+    wind: Option<&surface::PreparedWind>,
+) -> f64 {
+    let ri_crown = v.reaction;
+    let r10 = v.target;
+    let ros0 = ri_crown * v.flux / if v.heat_sink > 1e-7 { v.heat_sink } else { 1.0 };
     // Keep the reference coefficient's decimal spelling for traceability.
     #[allow(clippy::excessive_precision)]
     let a = if ros0 > 1e-7 {
@@ -699,24 +738,35 @@ fn crowning_surface_rate(
     } else {
         0.0
     };
-    let mut x = SurfaceCell::new(10);
-    x.wind_speed = u_mid / 0.4;
-    x.user_waf = Some(0.4);
-    let options = SurfaceOptions {
-        waf_method: WafMethod::UserInput,
-        ..SurfaceOptions::default()
-    };
-    SurfacePlan::new(options)
-        .run_with_wind::<1, false>(
-            &x,
-            ib_crown,
-            SurfaceTweaks {
-                reaction_intensity: Some(ri_crown),
-                ..SurfaceTweaks::default()
-            },
-            wind,
-        )
-        .spread_rate
+    let r0 = surface::calculate_no_wind_no_slope_spread_rate(ri_crown, v.flux, v.heat_sink);
+    let mid = surface::calculate_midflame_wind_speed(0.4, u_mid / 0.4);
+    let phi = wind
+        .map(|context| context.wind_phi(mid))
+        .unwrap_or_else(|| {
+            surface::calculate_wind_phi(
+                v.sigma,
+                mid,
+                v.wind_b,
+                v.wind_c,
+                v.relative_packing,
+                v.wind_e,
+            )
+        });
+    let slope =
+        surface::calculate_slope_phi(0., crate::units::SlopeUnit::Degrees, v.packing, ri_crown);
+    let vector = surface::calculate_surface_rate_vector(
+        r0,
+        phi,
+        slope,
+        0.,
+        crate::engine::WindOrientation::Upslope,
+        0.,
+    );
+    if v.defined {
+        surface::calculate_forward_spread_rate(r0, vector.rate_vector)
+    } else {
+        0.
+    }
 }
 
 macro_rules! crown_result {

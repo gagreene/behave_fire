@@ -44,6 +44,8 @@ fn _rust(module: &Bound<'_, PyModule>) -> PyResult<()> {
     )?;
     module.add_function(wrap_pyfunction!(arrays::batch, module)?)?;
     module.add_function(wrap_pyfunction!(model_f64::model_batch, module)?)?;
+    module.add_class::<grid_session::NativeGridSession>()?;
+    module.add_function(wrap_pyfunction!(grid_session::grid_fields, module)?)?;
     module.add_function(wrap_pyfunction!(model_fields::model_fields, module)?)?;
     module.add_function(wrap_pyfunction!(model_groups::model_groups, module)?)?;
     module.add_function(wrap_pyfunction!(
@@ -65,6 +67,8 @@ mod surface;
 mod crown_dispatch;
 
 mod effects;
+
+mod grid_session;
 
 mod tools;
 

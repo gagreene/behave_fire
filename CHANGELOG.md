@@ -6,6 +6,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Staged Rust raster sessions
+
+- Add public Python `behave_fire.rust.SurfaceGrid` and `CrownGrid`, backed by the
+  standalone Rust `GridSession` and borrowed `FieldView`. Sessions own inputs,
+  options, fuels or supplied Surface fuelbeds, and persistent overrides.
+- Support explicit stages, typed physical/code/flag edits, persistent overrides,
+  requested/kept fields, and worker selection. `run_remaining` preserves injected
+  values (including NaN) and recovers freed dependencies. Explicit producer runs
+  replace their transient injections; `run_fused` restarts from inputs and
+  persistent overrides. Python getters return independent arrays.
+- These grid APIs require Rust and accept real numeric inputs. They have no
+  Python fallback or pickle support. Existing facades retain API4 serialization.
+  Both languages have a `staged_raster` example using base-unit injection.
+
 ### Float64 models and backend routing
 
 - Move public Rust Surface/Crown models to the standalone float64 raster engine.
