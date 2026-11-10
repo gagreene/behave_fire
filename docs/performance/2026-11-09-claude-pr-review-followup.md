@@ -68,7 +68,7 @@ Numbers below match each review's numbered items.
 | PR22 | 5 | Retired: no empty scientific prototype/capture remains. Initialized zero-cell outputs and skipped callbacks have direct tests. |
 | PR22 | 6 | Compact weak/scalar emulation tests are obsolete after the approved f64 contract. Short nonempty Rust registries deliberately clamp through `PreparedFuels::for_grid`, as documented and confirmed in the later PR23 review; imposing an 11-row minimum would change that accepted API. Empty registries are rejected. |
 | PR23 | 1 | Fixed: Python preference bypasses the Rust whitelist and argument snapshots. Actual absent/unusable model and namespace cases retain Python complex behavior. |
-| PR23 | 2 | Fixed: NumPy complex64/complex128 scalar elapsed times pass an independently derived ellipse-area check and retain imaginary output. |
+| PR23 | 2 | Fixed: ordinary NumPy complex64/complex128/long-double scalar elapsed times pass an independently derived ellipse-area check and retain imaginary output. Custom scalar subclasses remain opaque and unverified for Rust-preferred fallback. |
 | PR23 | 3 | Clarified: the complex warning is once per process, at the first complex operation, across operations. It is separate from extension-unavailable warning state. |
 | PR23 | 4 | Fixed: only auto with a usable native preference creates the neutral registry snapshot. Forced-Rust metadata copy-hook and pickle cases pass. |
 | PR24 | 1 | Fixed: staged fuel identifiers use `normalize_identifier`; classification injection remains strictly integral. |

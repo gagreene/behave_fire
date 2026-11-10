@@ -38,7 +38,8 @@ def _complex_sites(value, path):
                 return ((path, layout),)
         return ()
     if isinstance(value, np.complexfloating):
-        return ((path, 'numpy-scalar'),)
+        ordinary = any(type(value) is kind for kind in (np.complex64, np.complex128, np.clongdouble))
+        return ((path, 'numpy-scalar' if ordinary else 'opaque'),)
     if isinstance(value, complex):
         return ((path, 'scalar' if type(value) is complex else 'opaque'),)
     if type(value) is dict:

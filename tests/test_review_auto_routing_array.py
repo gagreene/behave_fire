@@ -54,7 +54,7 @@ def test_explicit_rust_without_auto_snapshot_retains_pickle_behavior():
     assert model.backend_in_use == 'rust'
 
 
-@pytest.mark.parametrize('value', [np.complex64(3.+.25j), np.complex128(3.+.25j)])
+@pytest.mark.parametrize('value', [np.complex64(3.+.25j), np.complex128(3.+.25j), np.clongdouble(3.+.25j)])
 def test_numpy_complex_elapsed_scalar_uses_proven_area_formula(monkeypatch, value):
     monkeypatch.setattr(auto, '_COMPLEX_WARNING_EMITTED', False)
     namespace = AutoNamespace('rust')

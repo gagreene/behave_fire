@@ -58,6 +58,18 @@ def test_opaque_array_subclass_does_not_gain_a_complex_fallback():
         choose_backend(call, 'rust')
 
 
+def test_opaque_numpy_complex_scalar_does_not_gain_a_fallback():
+    from behave_fire._auto_routing import capture_call, choose_backend
+
+    class OpaqueComplex(np.complex128):
+        pass
+
+    call = capture_call('surface.calculate_fire_area', surface.calculate_fire_area,
+                        (2., 1., 2., OpaqueComplex(3.+.25j)), {})
+    with pytest.raises(TypeError, match='complex|Complex'):
+        choose_backend(call, 'rust')
+
+
 def test_unknown_complex_operation_has_no_guessed_python_fallback():
     from behave_fire._auto_routing import capture_call, choose_backend
 
