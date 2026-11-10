@@ -1,4 +1,4 @@
-//! Crown fire stages in reference base units: ft, ft/min, lb/ftÂ³, BTU/ftÂ², BTU/ft/s.
+//! Crown fire stages in reference base units: ft, ft/min, lb/ft³, BTU/ft², BTU/ft/s.
 use crate::math::np_max;
 
 use crate::{
@@ -385,7 +385,7 @@ pub struct CrownSurfaceResult {
     pub p_crown: Particles,
     /// Model-10 fuelbed intermediates.
     pub ib_crown: FuelbedIntermediates,
-    /// Reaction intensity BTU/ftÂ²/min.
+    /// Reaction intensity BTU/ft²/min.
     pub ri_crown: f64,
     /// Model-10 surface results with WAF 0.4.
     pub crown_surface: SurfaceResult,
@@ -417,7 +417,7 @@ pub struct CrownSpreadResult {
     pub p_crown: Particles,
     /// Complete fuelbed state used by spread and backsolve.
     pub ib_crown: FuelbedIntermediates,
-    /// Reaction intensity in BTU/ftÂ²/min.
+    /// Reaction intensity in BTU/ft²/min.
     pub ri_crown: f64,
     /// Crown spread in ft/min.
     pub crown_fire_spread_rate: f64,

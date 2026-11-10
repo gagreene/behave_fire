@@ -127,6 +127,10 @@ mod tests {
     #[test]
     fn distinguishes_scopes_and_restores_after_nested_exit() {
         start();
+        // Unrelated runtime threads may allocate while global counting is active.
+        std::thread::spawn(|| black_box(vec![0_u8; 23]))
+            .join()
+            .unwrap();
         black_box(vec![0_u8; 11]);
         {
             let _kernel = Scope::enter(KERNEL);
@@ -138,7 +142,8 @@ mod tests {
             black_box(vec![0_u8; 19]);
         }
         let counts = stop();
-        assert_eq!(counts, [(1, 11, 0, 0), (2, 32, 1, 1), (1, 17, 1, 1)]);
+        assert!(counts[0].0 >= 2 && counts[0].1 >= 34);
+        assert_eq!(&counts[1..], &[(2, 32, 1, 1), (1, 17, 1, 1)]);
     }
 
     #[test]
