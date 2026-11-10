@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- Preserve Python's original input domain when auto selects Python because the
+  extension is unavailable; skip Rust preflight/snapshots on that route and the
+  unused auto registry snapshot for explicit Rust. Add proven NumPy complex
+  scalar elapsed-time fallback and clarify the once-per-process warning policy.
+- Validate staged grid fuel identifiers, binary flags, and supplied-fuelbed keys;
+  allow a supplied source without an unused fuel-ID input. Support inferred
+  high-rank shapes and owned output transfer above 32 axes. Fuel equality now
+  describes public physical fields independently of private cache history.
+
 - Automatic selection prefers Rust and warns once when unavailable; verified
   complex operations route to Python with a separate warning before computation.
   Rust uses float64/NaN physical arrays, while Python retains its original

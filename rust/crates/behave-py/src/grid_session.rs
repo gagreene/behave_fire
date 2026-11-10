@@ -11,16 +11,20 @@ use pyo3::prelude::*;
 use pyo3::types::PyDict;
 use std::collections::BTreeMap;
 
+/// Preserve a structural core error as a Python value error.
 fn error(e: impl std::fmt::Display) -> PyErr {
     PyValueError::new_err(e.to_string())
 }
+/// Resolve one public session field name before detached calculation.
 fn field(name: &str) -> PyResult<Field> {
     Field::from_name(name)
         .ok_or_else(|| PyValueError::new_err(format!("unknown grid field {name}")))
 }
+/// Resolve an output or retention request without evaluating science.
 fn fields(names: Vec<String>) -> PyResult<Vec<Field>> {
     names.iter().map(|name| field(name)).collect()
 }
+/// Resolve a public staged-execution name.
 fn stage(name: &str) -> PyResult<Stage> {
     match name {
         "particles" => Ok(Stage::Particles),
@@ -39,6 +43,7 @@ fn stage(name: &str) -> PyResult<Stage> {
         _ => Err(PyValueError::new_err(format!("unknown grid stage {name}"))),
     }
 }
+/// Copy a typed caller column into native-owned session storage.
 fn column(field: Field, value: &Bound<'_, PyAny>) -> PyResult<ColumnValues> {
     Ok(match field.kind() {
         FieldKind::Physical => ColumnValues::Float64(model::array(value, field.name())?),
@@ -46,6 +51,7 @@ fn column(field: Field, value: &Bound<'_, PyAny>) -> PyResult<ColumnValues> {
         FieldKind::Flag => ColumnValues::Bool(model::array(value, field.name())?),
     })
 }
+/// Copy a retained column to Python, flattening only unsupported transport ranks.
 fn array<'py, T: Element + Copy>(
     py: Python<'py>,
     shape: &[usize],

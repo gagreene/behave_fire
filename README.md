@@ -12,6 +12,9 @@ process. A separate warning accompanies supported complex-input calls routed
 to Python before native calculation. Explicit Rust rejects complex/object
 arithmetic. General object input does not trigger automatic fallback.
 
+If Python is already selected because no usable extension exists, calls retain
+Python's original complex/object behavior without Rust-specific input preflight.
+
 A NumPy-based Python port of the US Forest Service [Behave<sup>7</sup>](https://www.firelab.org/project/behave) fire behavior modeling system, supporting scalar and array calculations. The package has two calculation backends: the original Python/NumPy implementation (the behavioral reference) and a native Rust implementation selected automatically when its compiled extension is installed. The same Rust core is also a standalone crate, `behave-fire`, for Rust applications.
 
 Upstream alignment is ongoing; full C++ parity has not been established. Fuel data and heat constants follow `firelab/behave` at `f3b2943`, with an intentional correction of metric-model moisture percentages to fractions. Containment is a simplified growth model, and lightning ignition remains available only as a deprecated compatibility API. Rust performance is being validated against the public Python API; see [Performance](#performance).
@@ -316,7 +319,7 @@ Getters return independent arrays. `run_remaining` preserves transient injection
 
 ## Performance
 
-The [final Windows acceptance](docs/performance/2026-11-09-reviewed-float64-acceptance.md) passes **all 40 cases and 80 first/warmed confidence bounds**, plus scalar latency, peak-memory, complete-output, and allocation gates. At 100k/1M cells, warmed Rust speedups range from **3.18–5.52x with one worker** and **6.06–13.44x with four workers**. Ratios divide Python time by Rust time: higher means faster Rust.
+The [recorded Windows acceptance](docs/performance/2026-11-09-reviewed-float64-acceptance.md), measured at scientific source `9be8a50`, passes **all 40 cases and 80 first/warmed confidence bounds**, plus scalar latency, peak-memory, complete-output, and allocation gates. At 100k/1M cells, warmed Rust speedups range from **3.18–5.52x with one worker** and **6.06–13.44x with four workers**. Ratios divide Python time by Rust time: higher means faster Rust. The [later boundary-review follow-up](docs/performance/2026-11-09-claude-pr-review-followup.md) preserves these dated observations without claiming a new timing campaign for subsequent fixes.
 
 Measurements use original-input Python timing, seven fresh paired blocks, five warm calls, and separately checked complete outputs on an eight-core Windows x86-64 host with CPython 3.12.8 and NumPy 2.1.3. Native physical calculations use the documented float64/NaN contract. These results do not guarantee speed on other hosts or workloads; other-platform wheel correctness is separate. Raw records, complete-array bundles, controlled source provenance, and earlier failed campaigns remain available in [the benchmark history](docs/RUST_BACKEND_BENCHMARKS.md).
 

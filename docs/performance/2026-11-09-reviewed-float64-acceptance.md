@@ -18,7 +18,15 @@ expecting zero for an invalid raster cell. Only that assertion changed to expect
 NaN. Neither library nor the benchmark/oracle changed. The
 [example-only attestation](2026-11-09-reviewed-float64-example-attestation.json)
 pins the exact one-line change and both file hashes. Original measured source
-identities, binaries, reports, and complete arrays remain unchanged.
+identities, binaries, reports, and complete arrays remain unchanged. The follow-up
+also reordered two private functions in `tests/component_f64_reference.py` without
+changing their bodies. That test-only module is separate from the untouched
+`tools/core_f64_reference.py` and `tools/float64_model_reference.py` benchmark oracles.
+
+The [later PR-review follow-up](2026-11-09-claude-pr-review-followup.md) changes
+additional boundary behavior and public fuel equality. Those changes are outside
+the scope of the example-only attestation. This report remains a dated measurement
+of `9be8a50`, not a new timing certification of later commits.
 
 ## Protocol and result matrix
 
@@ -130,6 +138,9 @@ comparison passes; every observed kernel/encoder allocation count is zero.
 Sixteen additional untimed comparisons cover nonrepeating continuous inputs at
 10k/100k across all four model routes and one/four workers. Continuous data is
 not substituted for either accepted timing dataset.
+
+The continuous diagnostic varies fuel and weather inputs. Canopy operands remain
+constant in that dataset; this is not a claim that every Crown operand varies.
 
 ## Separate attribution profiles
 

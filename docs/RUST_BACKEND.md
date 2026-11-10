@@ -8,11 +8,14 @@ its original dtype, mask, and arithmetic behavior. Automatic selection can
 therefore return different types on native and Python-only installations.
 See [backend differences](BACKEND_DIFFERENCES.md) for the complete contract.
 
-The [final Windows acceptance](performance/2026-11-09-reviewed-float64-acceptance.md)
+The [recorded Windows acceptance](performance/2026-11-09-reviewed-float64-acceptance.md)
 passes every required speed, confidence, scalar, memory, and allocation gate.
 Warmed 100k/1M speedups are 3.18-5.52x with one worker and 6.06-13.44x with four,
 on the declared Windows host using CPython 3.12.8 and NumPy 2.1.3. Other hosts
 and workloads require their own speed measurements.
+The measured scientific source is `9be8a50`; the
+[later review follow-up](performance/2026-11-09-claude-pr-review-followup.md)
+does not relabel those dated results as measurements of newer boundary fixes.
 
 ## Backend selection
 
@@ -30,12 +33,18 @@ Discovery and imports stay silent and do not consume that warning. Explicit
 Python neither probes nor warns; explicit Rust raises an actionable ImportError
 when its extension is absent or incompatible.
 
-A separate once-per-process warning accompanies a verified complex-input route
-to Python. Selection happens before Rust coercion or computation. The complete
+A separate once-per-process warning accompanies the first verified complex-input
+route to Python, across all operations. Selection happens before Rust coercion or computation. The complete
 Python operation runs once, preserving its complex values and masks; its errors
 propagate. Unsupported/lossy complex operations, invalid complex controls, and
 general object/custom arithmetic raise instead of silently discarding data.
 Real masked inputs stay on Rust. Native calculation errors do not replay Python.
+
+When the extension is unavailable and Python is already preferred, calls use
+Python directly with its original input domain and exception behavior. The
+Rust-specific complex whitelist and owned-input snapshots do not apply to that
+route. Explicit Rust also avoids the registry snapshot needed only for auto
+migration; the native delegate retains its normal numerical snapshot.
 
 `requested_backend` retains the caller policy; `preferred_backend` records the
 initial available choice; `backend_in_use` reports the last completed call.
@@ -109,11 +118,11 @@ copy arrays. See `src/examples/staged_raster.py` and the Rust `staged_raster`,
 The root `rust/` workspace has two crates:
 
 - `rust/crates/behave-fire` is the independently versioned publishable core.
-  It uses only the Rust standard library for normal/build dependencies, forbids
+  The core uses only the Rust standard library for normal/build dependencies, forbids
   unsafe code, and needs no Python, NumPy, C++, network, external tables, or
   sibling repository at build/runtime. Rust-only development dependencies test it.
 - `rust/crates/behave-py` is unpublished and builds `behave_fire._rust` through
-  PyO3/numpy 0.27. It owns Python conversion and transport around the same science.
+  PyO3/numpy 0.27. The binding owns Python conversion and transport around the same science.
 
 Binding API 4 and the complete operation manifest identify compatible extensions.
 Rebuild the extension when switching source revisions. No float32 math calibration,

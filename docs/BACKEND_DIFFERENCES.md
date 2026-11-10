@@ -51,8 +51,13 @@ or incompatible extension selects Python with a once-per-process
 `BehaveBackendWarning`, including normal pure-wheel installations. Discovery and
 explicit Python selection do not consume that warning.
 
+When Python is already selected because no usable extension exists, calls retain
+Python's original complex/object input handling. Rust-specific complex preflight
+and input snapshotting are bypassed; Python's own exceptions still propagate.
+
 Only independently tested complex counterparts may route to Python before any
-Rust conversion or execution. They emit a separate complex-fallback warning.
+Rust conversion or execution. The first such complex operation emits a separate
+once-per-process warning; later complex operations share that warning state.
 Native errors and general object/custom arithmetic do not trigger replay.
 Explicit Rust rejects unsupported complex/object inputs without discarding
 imaginary values. See `src/behave_fire/_auto_routing.py` for parameter-specific

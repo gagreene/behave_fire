@@ -113,9 +113,11 @@ pub(crate) struct ReactionCoefficients {
     silica_live: f64,
 }
 impl ReactionCoefficients {
+    /// Prepare moisture-independent coefficients from a complete fuelbed.
     pub(crate) fn new(ib: &FuelbedIntermediates) -> Self {
         Self::from_inputs(&ib.into())
     }
+    /// Preserve scalar equation order while preparing immutable physical terms.
     fn from_inputs(ib: &ReactionInputs) -> Self {
         let valid = ib.sigma > 1e-7 && ib.relative_packing_ratio > 0.0;
         let sigma = if valid { ib.sigma } else { 1.0 };
@@ -135,6 +137,7 @@ impl ReactionCoefficients {
             silica_live: eta_s(ib.w_silica_live),
         }
     }
+    /// Apply cached coefficients with the public conditional-availability rules.
     pub(crate) fn run(&self, ib: &FuelbedIntermediates) -> f64 {
         self.run_selected::<true>(ib)
     }

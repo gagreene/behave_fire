@@ -111,7 +111,9 @@ pub(crate) struct SavrTerms {
     pub bins_live: [usize; 5],
 }
 impl SavrTerms {
+    /// Prepare particle exponentials and size-class bins from physical SAVRs.
     pub(crate) fn new(dead: &[f64; 5], live: &[f64; 5]) -> Self {
+        /// Retain the original positive-SAVR threshold and exponent order.
         fn exponential(savr: f64, numerator: f64) -> f64 {
             if savr > 1e-7 {
                 (numerator / savr).exp()

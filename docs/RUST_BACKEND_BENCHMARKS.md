@@ -6,6 +6,11 @@ All 40 required cases and 80 first/warmed confidence bounds pass, together with 
 
 The campaign retains 672 timing records, 64 complete model-output comparisons, 96 separate allocation observations, and all actual/reference arrays. Python timing uses original caller values/dtypes/masks; widening occurs only in the separate correctness oracle. Sixteen continuous correctness cases, 66 mask/mix/variable-containment observations, and 24 attribution profiles remain separate. No threshold or tolerance was lowered. See the [full acceptance report and portable evidence](performance/2026-11-09-reviewed-float64-acceptance.md). This campaign includes the review corrections in its frozen scientific source; earlier measurements and their metadata attestation remain historical. All earlier campaigns below remain unchanged historical evidence.
 
+The final campaign above records scientific source `9be8a50`. The
+[subsequent review follow-up](performance/2026-11-09-claude-pr-review-followup.md)
+documents later boundary fixes and the scope of the historical attestations;
+no new-source timing is inferred from the dated observations.
+
 ## API4 public serial checkpoint: confirmed GO, 2026-11-08
 
 The single approved plain-normalization candidate passed all 56 confidence bounds in a fresh three-pair screen and the required seven-NEW-pair confirmation, with frozen source/binary/harness/environment. At 100k, confirmed median speedups range from 2.930x to 4.085x and lower bounds from 2.455x to 3.810x, all above 2x required. Heterogeneous Surface at 10k, previously the only miss, now has a warmed median-ratio estimate of 2.646x and lower bound of 2.229x against 1.25x required.
