@@ -10,7 +10,7 @@ import numpy as np
 
 from ._bridge import _native
 from ._model_api4 import _buffer, _FIELDS, _registry, _settings
-from ._numeric import broadcast_shape, normalize_control, normalize_identifier, normalize_physical
+from ._numeric import broadcast_shape, normalize_control, normalize_fuel_identifier, normalize_physical
 from .fuel_models import FuelModels
 from .fuel_models_array import build_fuel_lookup_arrays
 
@@ -108,7 +108,7 @@ class _Grid:
                 raise ValueError(f'Unknown supplied fuelbed columns: {sorted(unknown)}')
         physical = {name: normalize_physical(value) for name, value in inputs.items()
                     if self._kinds[name] == 'physical'}
-        controls = {name: _flag(value) if name == 'validity' else normalize_identifier(value)
+        controls = {name: _flag(value) if name == 'validity' else normalize_fuel_identifier(value)
                     for name, value in inputs.items() if self._kinds[name] != 'physical'}
         bed = None if fuelbed is None else {
             name: _flag(value) if name == 'is_defined' else normalize_physical(value)
@@ -158,7 +158,7 @@ class _Grid:
         if kind == 'physical':
             array = normalize_physical(value)
         elif name == 'fuel_model_grid':
-            array = normalize_identifier(value)
+            array = normalize_fuel_identifier(value)
         else:
             array = normalize_control(value, np.int32) if kind == 'code' else _flag(value)
         return _buffer(array, self._shape)

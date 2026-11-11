@@ -53,7 +53,11 @@ fn custom_fuel_registration_clear_and_snapshot() {
     assert!(!fuels.set_custom_fuel_model(1, custom()));
     assert!(!fuels.set_custom_fuel_model(112, custom()));
     assert!(!fuels.clear_custom_fuel_model(1));
-    for number in [-2, 0, 14, 96, 260, 999] {
+    for number in [-100, -2, 0, 257, 258, 259, 260, 261, 999, i32::MAX] {
+        assert!(!fuels.set_custom_fuel_model(number, custom()));
+        assert_eq!(fuels.for_grid(number), fuels.for_grid(0));
+    }
+    for number in [14, 96, 256] {
         assert!(fuels.set_custom_fuel_model(number, custom()));
         let model = fuels.get(number).unwrap();
         assert_eq!(model.code, "🔥éA");
@@ -72,7 +76,7 @@ fn custom_fuel_registration_clear_and_snapshot() {
         assert!(!model.is_reserved);
         assert!(model.is_defined && model.is_dynamic);
     }
-    assert_eq!(fuels.for_grid(999).code, fuels.get(260).unwrap().code);
+    assert_eq!(fuels.for_grid(999), fuels.for_grid(0));
     assert!(!fuels.for_grid(-2).is_defined);
     assert!(!fuels.for_grid(0).is_defined);
     let snapshot = fuels.snapshot();
@@ -81,9 +85,9 @@ fn custom_fuel_registration_clear_and_snapshot() {
     assert!(snapshot.get(14).unwrap().is_defined);
     assert!(fuels.get(14).is_none());
     assert!(!fuels.for_grid(14).is_defined);
-    fuels.get_mut(260).unwrap().is_defined = false;
-    assert_eq!(fuels.for_grid(260).fuel_bed_depth, 0.0);
-    assert_eq!(fuels.get_fuel_code(999), "🔥éA");
+    fuels.get_mut(256).unwrap().is_defined = false;
+    assert_eq!(fuels.for_grid(256).fuel_bed_depth, 0.0);
+    assert_eq!(fuels.get_fuel_code(999), "");
     assert_eq!(fuels.get_fuel_code(14), "");
     assert!(fuels.is_all_fuel_load_zero(14));
     assert!(!snapshot.is_all_fuel_load_zero(14));

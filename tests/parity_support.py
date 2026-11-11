@@ -85,7 +85,10 @@ def _float64_case(case, operation, arguments):
                     return
             elif key.endswith(('_grid', '_i')):
                 ids = np.asanyarray(value)
-                if np.ma.getmaskarray(ids).any() or not np.isfinite(ids).all() or np.any(ids != np.trunc(ids)):
+                fuel_ids = key == 'fuel_model_grid' and name != 'coerce_crown_fire_inputs'
+                fractional = np.any(np.isfinite(ids) & (ids != np.trunc(ids)))
+                if (np.ma.getmaskarray(ids).any() or fractional or
+                        (not fuel_ids and not np.isfinite(ids).all())):
                     _assert_native_error(operation, arguments, ValueError)
                     return
         try:

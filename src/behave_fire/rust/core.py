@@ -8,7 +8,7 @@ from __future__ import annotations
 from ._bridge import _call, _unit_code, _validate_threads
 from ._threads import _threaded_method, _threaded_static
 from ._serialization import NativeState as _NativeState
-from ._numeric import _validate_value, normalize_identifier, normalize_physical, normalize_selector
+from ._numeric import _validate_value, normalize_fuel_identifier, normalize_physical, normalize_selector
 import numpy as np
 from typing import Union, Optional
 from .fuel_models import FuelModels
@@ -261,7 +261,7 @@ class BehaveRun(_NativeState):
         :return: dict of (*S) ndarrays in the requested output units.
         """
         conversions = {}
-        fuel_model_grid = np.atleast_1d(normalize_identifier(fuel_model_grid))
+        fuel_model_grid = np.atleast_1d(normalize_fuel_identifier(fuel_model_grid))
         m1h = _prepare_base('m1h', 'Fraction', m1h, moisture_units, conversions)
         m10h = _prepare_base('m10h', 'Fraction', m10h, moisture_units, conversions)
         m100h = _prepare_base('m100h', 'Fraction', m100h, moisture_units, conversions)

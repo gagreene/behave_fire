@@ -22,8 +22,13 @@ def test_public_final_selection_rejects_missing_flags(value):
 
 
 @pytest.mark.parametrize('value', [1.5, np.nan])
-def test_public_particle_builder_rejects_invalid_identifiers(value):
+def test_public_particle_builder_uses_fuel_specific_identifier_rules(value):
     lookup = build_fuel_lookup_arrays(FuelModels())
     arguments = {name: np.array([.06]) for name in ('m1h','m10h','m100h','mlh','mlw')}
-    with pytest.raises((TypeError, ValueError)):
-        surface.build_particle_arrays(lookup, np.array([value]), **arguments)
+    if np.isfinite(value):
+        with pytest.raises((TypeError, ValueError)):
+            surface.build_particle_arrays(lookup, np.array([value]), **arguments)
+    else:
+        result = surface.build_particle_arrays(lookup, np.array([value]), **arguments)
+        assert not result['is_defined'].any()
+        np.testing.assert_array_equal(result['depth'], [0.])

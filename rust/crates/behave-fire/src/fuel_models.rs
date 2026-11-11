@@ -113,14 +113,13 @@ impl FuelModels {
         self.records.contains_key(&number)
     }
 
-    /// Look up a fuel for grid math, matching the reference's 0..260 lookup table.
+    /// Look up a fuel for grid math, matching C++'s supported identifiers 1..=256.
     ///
-    /// Numbers are clamped first. Index zero is always an empty record even if a
+    /// Out-of-range numbers use the undefined row. Index zero is empty even if a
     /// custom model zero exists. Missing and undefined records yield all-zero
     /// properties; direct `get` preserves the original record and unbounded IDs.
     pub fn for_grid(&self, number: i32) -> &FuelModel {
-        let number = number.clamp(0, 260);
-        if number == 0 {
+        if !(1..=256).contains(&number) {
             return &self.empty;
         }
         self.get(number)
@@ -131,7 +130,7 @@ impl FuelModels {
     /// Restore an exact owned snapshot without registration-time normalization.
     ///
     /// Missing standard records stay missing; flags and base-unit values are
-    /// retained as supplied. Grid lookup still applies its documented clamping
+    /// retained as supplied. Grid lookup still applies its documented bounds
     /// and empty-record rules independently of this raw metadata snapshot.
     pub fn from_records(records: BTreeMap<i32, FuelModel>) -> Self {
         Self {
@@ -296,7 +295,7 @@ impl FuelModels {
 
     /// Return whether the slot contributes to grid lookup arrays.
     pub fn is_fuel_model_defined(&self, number: i32) -> bool {
-        self.get(number).is_some_and(|record| record.is_defined)
+        (1..=256).contains(&number) && self.get(number).is_some_and(|record| record.is_defined)
     }
 
     /// Return whether custom registration and clearing protect this slot.
@@ -310,9 +309,9 @@ impl FuelModels {
     }
 
     /// Register custom data after converting every physical field once.
-    /// Return false without conversion or mutation when the slot is reserved.
+    /// Return false without conversion or mutation for reserved or out-of-range slots.
     pub fn set_custom_fuel_model(&mut self, number: i32, input: CustomFuelModel) -> bool {
-        if self.is_fuel_model_reserved(number) {
+        if !(1..=256).contains(&number) || self.is_fuel_model_reserved(number) {
             return false;
         }
         let mut model = input.model;

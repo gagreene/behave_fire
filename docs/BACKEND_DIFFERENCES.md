@@ -18,6 +18,17 @@ Physical integers above 2^53 can round when converted to float64. This relaxatio
 applies to physical data. Identifiers, lookup indices, unit selectors, iteration
 limits, classification/status codes, and flags retain separate integral or
 boolean storage. Missing or nonintegral lookup controls fail before workers run.
+Fuel identifiers have a separate rule: IDs outside 1–256, including NaN or
+infinite fuel IDs supplied through Python, select undefined row zero. Lookup
+tables contain 257 rows, with row zero always undefined. Both backends preserve
+the existing undefined-fuel calculation path and zero spread, without clamping
+to a real fuel or adding a NaN/code/flag/storage policy. Crown potential-fire
+calculations retain their existing FM10 source and use supplied Surface results
+for final behavior. Custom registration outside 1–256 returns `False`, so custom
+models 257–260 are no longer supported. Model 256 remains supported.
+See the official [C++ definition bounds](https://github.com/firelab/behave/blob/f3b2943e69abca942e795c5b1b45276f6338abb5/src/behave/fuelModels.cpp#L863)
+and [undefined-fuel spread path](https://github.com/firelab/behave/blob/f3b2943e69abca942e795c5b1b45276f6338abb5/src/behave/surface.cpp).
+
 Existing valid unit-selector conventions and finite invalid-FDFM-index sentinel
 values remain unchanged. Classification and containment status arrays are int32;
 -1 means unavailable. Classification flags are false for code -1, so check the

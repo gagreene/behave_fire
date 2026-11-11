@@ -6,7 +6,7 @@ descriptors, and the complete per-operation contract manifest are ready.
 import numpy as np
 
 from ._bridge import _native
-from ._numeric import broadcast_shape, normalize_control, normalize_identifier, normalize_physical, normalize_selector, plan_shapes
+from ._numeric import broadcast_shape, normalize_control, normalize_fuel_identifier, normalize_physical, normalize_selector, plan_shapes
 
 _SHARED = ('m1h', 'm10h', 'm100h', 'mlh', 'mlw', 'wind_speed', 'wind_direction', 'slope', 'aspect')
 _FIELDS = {
@@ -86,7 +86,7 @@ def _prepare(kind, arguments):
         inputs['canopy_base_height'] = np.atleast_1d(normalize_physical(arguments['canopy_base_height']))
     if kind == 'surface' and arguments.get('user_waf') is not None:
         inputs['user_waf'] = np.atleast_1d(normalize_physical(arguments['user_waf']))
-    controls = {'fuel_model_grid': np.atleast_1d(normalize_identifier(arguments['fuel_model_grid']))}
+    controls = {'fuel_model_grid': np.atleast_1d(normalize_fuel_identifier(arguments['fuel_model_grid']))}
     if arguments.get('validity') is not None:
         controls['validity'] = np.atleast_1d(normalize_control(arguments['validity'], np.bool_))
     descriptors = {}

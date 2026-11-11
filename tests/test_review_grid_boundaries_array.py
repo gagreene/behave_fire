@@ -68,11 +68,17 @@ def test_integral_float_fuel_grid_is_accepted_at_construction_and_edit():
 
 
 @pytest.mark.parametrize('value', [1.5, np.nan, np.inf])
-def test_invalid_float_fuel_grid_edit_does_not_mutate_existing_ids(value):
+def test_invalid_float_fuel_grid_edit_uses_fuel_identifier_rules(value):
     grid = SurfaceGrid(_inputs(), shape=(2,))
-    with pytest.raises((ValueError, TypeError)):
+    if np.isfinite(value):
+        with pytest.raises((ValueError, TypeError)):
+            grid.set_code('fuel_model_grid', value)
+        np.testing.assert_array_equal(grid.get('fuel_model_grid'), [124, 124])
+    else:
         grid.set_code('fuel_model_grid', value)
-    np.testing.assert_array_equal(grid.get('fuel_model_grid'), [124, 124])
+        np.testing.assert_array_equal(grid.get('fuel_model_grid'), [0, 0])
+        grid.run_fused()
+        np.testing.assert_array_equal(grid.get('spread_rate'), [0., 0.])
 
 
 def test_north_relative_aspect_edit_invalidates_direction_descendants():

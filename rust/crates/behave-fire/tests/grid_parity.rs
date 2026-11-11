@@ -39,6 +39,9 @@ fn surface_batches_match_scalar_cells_bit_for_bit() {
     use behave_fire::units::SpeedUnit;
     use behave_fire::{BehaveError, FuelModels, GridShape};
     let fuels = PreparedFuels::from_registry(&FuelModels::default());
+    for id in [-100, -1, 0, 257, 261, 999, i32::MAX] {
+        assert_eq!(fuels.for_grid(id), fuels.for_grid(0));
+    }
     let plan = SurfacePlan::new(SurfaceOptions::default());
     let inputs: Vec<_> = [1, 10, 101, 0, 261]
         .into_iter()

@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- Align fuel lookup bounds with official C++ `FuelModels::isFuelModelDefined`
+  ([source](https://github.com/firelab/behave/blob/f3b2943e69abca942e795c5b1b45276f6338abb5/src/behave/fuelModels.cpp#L863)).
+  Both backends map IDs outside 1–256, including nonfinite Python fuel IDs,
+  to undefined row zero and retain the existing undefined-fuel zero-spread path.
+  Tables contain 257 rows. Custom registration outside that range returns `False`;
+  custom models 257–260 are no longer supported. Model 256 remains supported.
+  This intentionally replaces endpoint clamping, without changing output storage
+  types or introducing NaN, code, or flag rules for undefined fuel identifiers.
+
 - Preserve Python's original input domain when auto selects Python because the
   extension is unavailable; skip Rust preflight/snapshots on that route and the
   unused auto registry snapshot for explicit Rust. Add proven NumPy complex

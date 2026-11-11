@@ -16,7 +16,7 @@ Usage
 """
 import numpy as np
 from .fuel_models import FuelModels
-_MAX_FM = 260
+_MAX_FM = 256
 
 def build_fuel_lookup_arrays(fuel_models: FuelModels) -> dict:
     """Pre-build NumPy arrays of fuel properties indexed by fuel model number.

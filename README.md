@@ -1,5 +1,14 @@
 # behave_fire
 
+Fuel model IDs are supported from **1 through 256**. All other IDs, including
+NaN and infinite IDs supplied through Python, use undefined row zero rather than
+an endpoint fuel. Undefined fuels retain their existing zero-spread behavior;
+no new NaN, classification-code, flag, or storage-type policy applies.
+Custom registration outside 1–256 returns `False`; custom models 257–260 are
+no longer supported. Model 256 remains supported. This follows the official
+[C++ definition bounds](https://github.com/firelab/behave/blob/f3b2943e69abca942e795c5b1b45276f6338abb5/src/behave/fuelModels.cpp#L863)
+and [undefined-fuel spread path](https://github.com/firelab/behave/blob/f3b2943e69abca942e795c5b1b45276f6338abb5/src/behave/surface.cpp).
+
 Native models, component helpers, units, and state tools calculate physical values in float64. Float16,
 float32, and integer physical inputs widen once; masked real values become NaN,
 and physical results are plain float64 arrays. Classifications remain int32,

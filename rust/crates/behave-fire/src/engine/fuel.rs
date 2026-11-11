@@ -237,10 +237,10 @@ pub struct PreparedFuels {
 }
 
 impl PreparedFuels {
-    /// Snapshot every clamped grid slot using the registry's existing fallback rules.
+    /// Snapshot rows 0..=256, retaining undefined rows as empty fuels.
     pub fn from_registry(fuels: &FuelModels) -> Self {
         Self {
-            rows: (0..261)
+            rows: (0..257)
                 .map(|id| PreparedFuel::from_model(fuels.for_grid(id)))
                 .collect::<Vec<_>>()
                 .into_boxed_slice(),
@@ -265,9 +265,13 @@ impl PreparedFuels {
         })
     }
 
-    /// Borrow a physical record, clamping the identifier to the available numeric rows.
+    /// Borrow a supported row; absent and out-of-range identifiers use undefined row zero.
     pub fn for_grid(&self, id: i32) -> &PreparedFuel {
-        &self.rows[(id.max(0) as usize).min(self.rows.len() - 1)]
+        if (1..=256).contains(&id) {
+            self.rows.get(id as usize).unwrap_or(&self.rows[0])
+        } else {
+            &self.rows[0]
+        }
     }
 }
 
@@ -359,7 +363,8 @@ mod numeric_rows_tests {
         assert!(row.physics().is_some());
         let fuels = PreparedFuels::from_rows(vec![PreparedFuel::default(), row]).unwrap();
         assert_eq!(fuels.for_grid(-5).fuel_bed_depth, 0.0);
-        assert_eq!(fuels.for_grid(500).fuel_bed_depth, row.fuel_bed_depth);
+        assert_eq!(fuels.for_grid(500).fuel_bed_depth, 0.0);
+        assert_eq!(fuels.for_grid(1).fuel_bed_depth, row.fuel_bed_depth);
         assert!(PreparedFuels::from_rows(Vec::new()).is_err());
     }
 }

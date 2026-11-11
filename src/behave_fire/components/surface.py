@@ -42,6 +42,7 @@ Notes on units
 """
 
 import numpy as np
+from .fuel_models_array import _fuel_model_indices
 from typing import Union
 
 # ---------------------------------------------------------------------------
@@ -147,7 +148,7 @@ def build_particle_arrays(
         each of shape (*S).
     """
     # --- Coerce to at-least-1D ndarray (G2 fix) ---
-    fm    = np.atleast_1d(np.asarray(fuel_model_grid, dtype=np.int32))
+    fm    = np.atleast_1d(_fuel_model_indices(fuel_model_grid, len(lut['depth'])))
     m1h   = np.atleast_1d(np.asarray(m1h,   dtype=float))
     m10h  = np.atleast_1d(np.asarray(m10h,  dtype=float))
     m100h = np.atleast_1d(np.asarray(m100h, dtype=float))
@@ -155,8 +156,8 @@ def build_particle_arrays(
     mlw   = np.atleast_1d(np.asarray(mlw,   dtype=float))
     S = fm.shape        # spatial shape — always at least (1,) after atleast_1d
 
-    # Clamp fuel model numbers to valid range
-    fm_safe = np.clip(fm, 0, lut['depth'].shape[0] - 1)
+    # Invalid fuel identifiers select only the undefined row, never an endpoint fuel.
+    fm_safe = fm
 
     # --- Fuel loads — shape (5, *S) ---
     load_dead = np.stack([

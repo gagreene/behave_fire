@@ -41,6 +41,14 @@ def test_crown_model_widens_typed_surface_fields_without_mask_emulation(monkeypa
     assert np.isfinite(actual['crown_fire_spread_rate'][0])
 
 
+def test_surface_model_maps_identifier_overflow_to_undefined_before_integer_conversion():
+    arguments = _inputs()
+    arguments['fuel_model_grid'] = np.full(2, 2**32 + 10, np.int64)
+    actual = BehaveRun(FuelModels()).do_surface_run(**arguments)
+    np.testing.assert_array_equal(actual['spread_rate'], [0., 0.])
+    np.testing.assert_array_equal(actual['reaction_intensity'], [0., 0.])
+
+
 def test_surface_model_normalizes_each_physical_operand_only_once(monkeypatch):
     from behave_fire.rust import core, _model_api4
 
@@ -76,10 +84,3 @@ def test_surface_model_preserves_mask_before_unit_conversion(monkeypatch):
     assert calls == ['surface']
     assert np.isnan(result['reaction_intensity'][0])
     assert np.isfinite(result['reaction_intensity'][1])
-
-
-def test_surface_model_rejects_identifier_overflow_before_integer_conversion():
-    arguments = _inputs()
-    arguments['fuel_model_grid'] = np.full(2, 2**32 + 10, np.int64)
-    with pytest.raises(OverflowError):
-        BehaveRun(FuelModels()).do_surface_run(**arguments)

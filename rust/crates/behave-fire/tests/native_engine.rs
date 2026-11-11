@@ -166,8 +166,9 @@ fn prepared_fuels_snapshot_registry_and_preserve_dynamic_curing() {
         before,
         plan.run_cell(&cell, changed.for_grid(101), SurfaceTweaks::default())
     );
-    assert_eq!(prepared.for_grid(-1), prepared.for_grid(0));
-    assert_eq!(prepared.for_grid(261), prepared.for_grid(260));
+    for id in [-100, -1, 0, 257, 261, 999, i32::MAX] {
+        assert_eq!(prepared.for_grid(id), prepared.for_grid(0));
+    }
 }
 
 #[test]

@@ -88,6 +88,11 @@ fn raw_default_rows_match_grid_particle_path() {
     let fuels = FuelModels::default();
     for model in -1..=261 {
         for mlh in [0.20, 0.30, 0.60, 1.20, 1.200001] {
+            if !(1..=256).contains(&model) {
+                let row = build_particle_arrays(&fuels, model, 0.06, 0.07, 0.08, mlh, 0.90);
+                assert!(!row.is_defined);
+                assert_eq!(row.depth, 0.0);
+            }
             assert_eq!(
                 build_particle_arrays(&fuels, model, 0.06, 0.07, 0.08, mlh, 0.90),
                 build_particle_arrays_from_prepared(
