@@ -20,6 +20,7 @@ Key design points
 """
 
 import numpy as np
+from .fuel_models_array import _fuel_model_indices
 from typing import Union
 
 # ---------------------------------------------------------------------------
@@ -430,7 +431,7 @@ def run_crown_fire(
     intermediate component.
     """
     inputs = coerce_crown_fire_inputs(
-        fuel_model_grid=fuel_model_grid,
+        fuel_model_grid=_fuel_model_indices(fuel_model_grid),
         wind_speed=wind_speed,
         wind_direction=wind_direction,
         slope=slope,

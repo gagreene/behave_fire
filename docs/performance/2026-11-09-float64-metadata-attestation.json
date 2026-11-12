@@ -1,0 +1,21 @@
+{
+  "measured_commit": "fe43dce9f0389f3f25a7c787b291a5b8c30dcb61",
+  "measured_source_hash": "4581621cc13414bec602815668a6f9c04122e18be37e8e299fdcbcb3440bc1b2",
+  "timed_extension_hash": "508d2f3da3e09c4aa7d2b8f3148d0b7dfe570de5685a4d95b85fa9f3050bd4f6",
+  "changed_files": [
+    "tools/performance_contract.py"
+  ],
+  "changed_functions": [
+    "contract_errors",
+    "requested_outputs"
+  ],
+  "accepted_request_sets_unchanged": true,
+  "scientific_sources_timed_call_bodies_inputs_oracle_and_binary_unchanged": true,
+  "corrections": [
+    "Allow three existing auxiliary diagnostic route labels to describe Crown outputs.",
+    "Reject diagnostic routes when final acceptance requirements name only the four accepted routes."
+  ],
+  "original_file_sha256": "c1eb0801f3f419756b569df2d6111b9bd8db9e683bd517a1a5309f61a5ecdcf8",
+  "current_file_sha256": "46954620a1e5e5ec2583c56a1be0aaf63aadf567157322674dea87ecb19d4b84",
+  "raw_records_rewritten": false
+}

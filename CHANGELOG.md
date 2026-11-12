@@ -6,6 +6,35 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+- Align fuel lookup bounds with official C++ `FuelModels::isFuelModelDefined`
+  ([source](https://github.com/firelab/behave/blob/f3b2943e69abca942e795c5b1b45276f6338abb5/src/behave/fuelModels.cpp#L863)).
+  Both backends map IDs outside 1–256, including nonfinite Python fuel IDs,
+  to undefined row zero and retain the existing undefined-fuel zero-spread path.
+  Tables contain 257 rows. Custom registration outside that range returns `False`;
+  custom models 257–260 are no longer supported. Model 256 remains supported.
+  This intentionally replaces endpoint clamping, without changing output storage
+  types or introducing NaN, code, or flag rules for undefined fuel identifiers.
+
+- Preserve Python's original input domain when auto selects Python because the
+  extension is unavailable; skip Rust preflight/snapshots on that route and the
+  unused auto registry snapshot for explicit Rust. Add proven NumPy complex
+  scalar elapsed-time fallback and clarify the once-per-process warning policy.
+- Validate staged grid fuel identifiers, binary flags, and supplied-fuelbed keys;
+  allow a supplied source without an unused fuel-ID input. Support inferred
+  high-rank shapes and owned output transfer above 32 axes. Fuel equality now
+  describes public physical fields independently of private cache history.
+
+- Automatic selection prefers Rust and warns once when unavailable; verified
+  complex operations route to Python with a separate warning before computation.
+  Rust uses float64/NaN physical arrays, while Python retains its original
+  dtype/mask behavior. These installation-dependent differences are intentional.
+- Certify the final Windows float64 model campaign: all 40 cases and 80
+  first/warm confidence bounds pass. At 100k/1M cells, warmed speedups are
+  3.18-5.52x serial and 6.06-13.44x with four workers on the declared host.
+  Retain complete arrays, confidence/memory/scalar/allocation evidence, and
+  independent additional-layout/containment/continuous diagnostics.
+
 ### Staged Rust raster sessions
 
 - Add public Python `behave_fire.rust.SurfaceGrid` and `CrownGrid`, backed by the

@@ -38,5 +38,7 @@ fn imported_records_are_restored_without_defaults_or_unit_conversion() {
     assert_eq!(imported.get(0), Some(&record));
     assert!(imported.get(1).is_none());
     assert_eq!(imported.for_grid(0), &FuelModel::default());
-    assert_eq!(imported.for_grid(300), &FuelModel::default());
+    for id in [-100, -1, 0, 257, 261, 300, 999, i32::MAX] {
+        assert_eq!(imported.for_grid(id), &FuelModel::default());
+    }
 }

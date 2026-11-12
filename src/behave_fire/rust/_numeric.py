@@ -85,6 +85,23 @@ def normalize_flag(value):
     return np.array(data, dtype=np.bool_, copy=True, order='C', subok=False)
 
 
+def normalize_fuel_identifier(value):
+    """Own fuel IDs with the undefined-row rule instead of generic control bounds.
+
+    :param value: Real fuel identifier scalar or array; nonfinite IDs are undefined.
+    :return: Owned int32 IDs in 0..256; masked and fractional identifiers still raise.
+    """
+    from ..components.fuel_models_array import _fuel_model_indices
+
+    _validate_value(value)
+    if np.ma.isMaskedArray(value) and np.ma.getmaskarray(value).any():
+        raise ValueError('A typed identifier cannot be missing.')
+    data = np.asarray(value)
+    if data.dtype.kind == 'f' and np.any(np.isfinite(data) & (data != np.trunc(data))):
+        raise ValueError('Identifiers must be finite integral values.')
+    return _fuel_model_indices(data)
+
+
 def normalize_identifier(value):
     """Retain valid integral float identifiers without narrowing integer inputs through float64.
 
@@ -137,9 +154,15 @@ def normalize_selector(kind, value):
     """
     from ._bridge import _unit_code
 
+    if isinstance(value, IntEnum):
+        value = int(value)
+    _validate_value(value)
     # Unit indexing can discard a mask, so validate missingness on the original input.
     if np.ma.isMaskedArray(value) and np.ma.getmaskarray(value).any():
         raise ValueError("A typed selector cannot be missing.")
+    data = np.asarray(np.ma.getdata(value))
+    if data.dtype.kind == 'f' and not np.isfinite(data).all():
+        raise ValueError('A typed selector must be finite.')
     return normalize_control(_unit_code(kind, value), np.int32)
 
 

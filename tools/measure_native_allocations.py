@@ -18,6 +18,7 @@ import sys
 from types import SimpleNamespace
 
 from assemble_allocation_evidence import _hash
+from performance_contract import requested_outputs, save_outputs
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -114,6 +115,7 @@ def _worker(args):
     identity = driver._provenance(controls)
     identity["extension_hash"] = hashlib.sha256(args.extension.read_bytes()).hexdigest()
     identity["allocation_probe"] = hasattr(native, "_allocation_start")
+    identity['binding_api_version'] = native.__binding_api_version__
     if args.identity:
         return identity
     if not identity["allocation_probe"]:
@@ -130,14 +132,19 @@ def _worker(args):
         actual = call()
     finally:
         counters = native._allocation_stop()
-    expected = driver._model_call(controls, "python")()
+    expected = driver._model_call(controls, "python", normalize_reference=True)()
     driver.assert_outputs(actual, expected)
     scopes = {}
     for index, name in ((1, "kernel"), (2, "encoder")):
         requests, byte_count, calls, workers = counters[index]
         scopes[name] = ({"requests": requests, "bytes": byte_count, "calls": calls, "workers": workers,
                          "definition": name + "-loop-v1"} if calls else None)
-    return {"dataset": args.dataset, "operation": args.operation, "cells": args.cells,
+    path = args.manifest.parent/'outputs'/f'{args.dataset}-{args.operation}-{args.cells}-{args.workers}-{args.repeat}.npz'
+    fields = requested_outputs(args.operation)
+    return {**call.evidence, 'fields': fields, 'compared_fields': fields, 'output_fields': len(fields),
+            'independent_python': True, 'correctness_contract': 'f64-nan-v1',
+            'output_artifact': save_outputs(path, actual, expected, root=ROOT),
+            "dataset": args.dataset, "operation": args.operation, "cells": args.cells,
             "workers": args.workers, "repeat": args.repeat, "process_id": os.getpid(),
             "instrumented_source_hash": identity["source_hash"],
             "instrumented_extension_hash": identity["extension_hash"],
@@ -181,16 +188,16 @@ def main():
         extension = _build(target, output / name, instrumented)
         binaries[name] = extension
         identity = _child(["--extension", extension, "--identity"])
-        if identity["allocation_probe"] != instrumented or _inventory() != before:
+        if identity["allocation_probe"] != instrumented or identity['binding_api_version'] != 4 or _inventory() != before:
             raise RuntimeError("Build feature mismatch or source changed during builds")
-        builds[name] = {"source_hash": identity["source_hash"], "extension_hash": identity["extension_hash"],
+        builds[name] = {'binding_api_version': identity['binding_api_version'], "source_hash": identity["source_hash"], "extension_hash": identity["extension_hash"],
                         "source_files": before, "compiler": compiler, "target": target_name, "profile": "release",
                         "features": ["allocation-probe"] if instrumented else [],
                         "build_environment": {k: v for k, v in os.environ.items() if k in ("RUSTFLAGS", "CARGO_ENCODED_RUSTFLAGS", "CARGO_BUILD_TARGET",
                             "CARGO_PROFILE_RELEASE_LTO", "CARGO_PROFILE_RELEASE_CODEGEN_UNITS",
                             "CARGO_PROFILE_RELEASE_OPT_LEVEL", "CARGO_PROFILE_RELEASE_DEBUG",
                             "RUSTC", "RUSTC_WRAPPER", "RUSTC_WORKSPACE_WRAPPER")}}
-    manifest = {"schema_version": 1, **builds, "source_differences": [],
+    manifest = {"schema_version": 1, 'binding_api_version': 4, **builds, "source_differences": [],
                 "patch_sha256": hashlib.sha256(b"").hexdigest()}
     manifest_path = output / "manifest.json"
     _save(manifest_path, manifest)

@@ -85,12 +85,18 @@ def _float64_case(case, operation, arguments):
                     return
             elif key.endswith(('_grid', '_i')):
                 ids = np.asanyarray(value)
-                if np.ma.getmaskarray(ids).any() or not np.isfinite(ids).all() or np.any(ids != np.trunc(ids)):
+                fuel_ids = key == 'fuel_model_grid' and name != 'coerce_crown_fire_inputs'
+                fractional = np.any(np.isfinite(ids) & (ids != np.trunc(ids)))
+                if (np.ma.getmaskarray(ids).any() or fractional or
+                        (not fuel_ids and not np.isfinite(ids).all())):
                     _assert_native_error(operation, arguments, ValueError)
                     return
         try:
             if '.BehaveRun.' in case['entry_point'] or name in ('run_crown_fire', 'coerce_crown_fire_inputs'):
                 expected = model_reference(reference, arguments)
+                if name.startswith('calculate_spotting_from_'):
+                    from component_f64_reference import reference as component_reference
+                    expected = component_reference(reference, arguments)
                 if name == 'calculate_scorch_height':
                     value = np.asarray(np.ma.asarray(arguments['fireline_intensity'], dtype=np.float64).filled(np.nan))
                     expected = np.where(np.isnan(value), np.nan, expected)

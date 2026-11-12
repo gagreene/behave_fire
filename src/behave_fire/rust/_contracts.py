@@ -1,7 +1,7 @@
 """Uniform float64 physical contract and first-boundary typed input roles."""
 import numpy as np
 
-from ._numeric import _validate_value, normalize_control, normalize_flag, normalize_identifier, normalize_physical, normalize_selector
+from ._numeric import _validate_value, normalize_control, normalize_flag, normalize_fuel_identifier, normalize_identifier, normalize_physical, normalize_selector
 
 def _physical_record(value):
     """Own nested scientific records with separate exact definition flags.
@@ -34,6 +34,8 @@ def normalize_arguments(operation, arguments):
             result[name] = normalize_selector(selectors[name], value)
         elif name == 'units':
             result[name] = normalize_selector(operation.split('.')[1], value)
+        elif name == 'fuel_model_grid' and operation != 'crown.coerce_crown_fire_inputs':
+            result[name] = normalize_fuel_identifier(value)
         elif name.endswith('_grid'):
             result[name] = normalize_identifier(value)
         elif name.endswith('_i'):

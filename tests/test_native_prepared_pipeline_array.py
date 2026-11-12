@@ -111,7 +111,7 @@ def test_registry_is_sent_once_as_numeric_rows(monkeypatch, route):
     def observe(operation, arrays, controls, registry, *args, **kwargs):
         if operation in ('surface', 'crown'):
             assert registry is not None
-            assert len(registry['depth']) == 261
+            assert len(registry['depth']) == 257
             assert registry['is_defined'].dtype == np.bool_
             assert not any(key.startswith("model.") for key in arrays)
             seen.append(operation)

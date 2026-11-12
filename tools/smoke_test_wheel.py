@@ -67,6 +67,50 @@ def _direction_reversed(selected, reference):
     _compare(actual, expected)
 
 
+def _native_contract(selected):
+    """Verify installed numeric storage, independent outputs, stages, and ownership.
+
+    :param selected: Installed explicit Rust namespace.
+    :return: Successful float64, staged injection, and owned-output certification flags.
+    """
+    import numpy as np
+
+    original = np.ma.array(np.array([1., 2.], dtype=np.float32), mask=[False, True])
+    result = selected.surface.calculate_flame_length(original)
+    assert type(result) is np.ndarray and result.dtype == np.float64
+    np.testing.assert_allclose(result, [.45, np.nan], rtol=1e-9, atol=1e-12, equal_nan=True)
+    original.data[:] = 99.
+    original.mask[:] = False
+    np.testing.assert_allclose(result, [.45, np.nan], rtol=1e-9, atol=1e-12, equal_nan=True)
+    classified = selected.crown.classify_crown_fire_type(np.array([np.nan, 2.]), np.array([2., 2.]))
+    assert classified['fire_type'].dtype == np.int32
+    np.testing.assert_array_equal(classified['fire_type'], [-1, 3])
+    for name in ('is_surface_fire', 'is_passive_crown', 'is_active_crown'):
+        assert classified[name].dtype == np.bool_ and not classified[name][0]
+    independent = selected.crown.calculate_crown_heat_and_intensity(1000., np.array([]), 3., 30., .02)
+    assert independent['canopy_heat_per_unit_area'].size == 1
+    assert np.isfinite(independent['canopy_heat_per_unit_area']).all()
+    assert independent['crown_fire_line_intensity'].size == 0
+    moisture = np.full((2, 3), .06)
+    grid = selected.SurfaceGrid(dict(fuel_model_grid=124, m1h=moisture, m10h=.07, m100h=.08,
+        mlh=.6, mlw=.9, wind_speed=88., wind_direction=35., slope=12., aspect=15.,
+        canopy_cover=.4, canopy_height=30., crown_ratio=.5), shape=(2, 3), threads=4)
+    moisture[:] = np.nan
+    for stage in ('particles', 'fuelbed', 'reaction'):
+        grid.run_stage(stage)
+    reaction = grid.get('reaction_intensity')
+    assert np.isfinite(reaction).all()
+    grid.set('reaction_intensity', reaction*.5)
+    grid.run_remaining()
+    reduced = grid.get('spread_rate')
+    copy = grid.get('spread_rate')
+    copy[:] = -999.
+    np.testing.assert_array_equal(grid.get('spread_rate'), reduced)
+    grid.run_fused()
+    assert np.all(grid.get('spread_rate') > reduced)
+    return {'float64_contract': True, 'staged_injection': True, 'owned_outputs': True}
+
+
 def _native_report():
     """Describe installed native identity using supported extension metadata.
 
@@ -109,7 +153,10 @@ def main():
     assert package.is_relative_to(site), (package, site)
     assert bf.__version__ == arguments.version == importlib.metadata.version("behave-fire")
     expected = ["python", "rust"] if arguments.expect == "rust" else ["python"]
-    assert bf.available_backends() == expected
+    with warnings.catch_warnings(record=True) as discovery:
+        warnings.simplefilter('always')
+        assert bf.available_backends() == expected
+    assert not discovery, 'Backend discovery must stay silent and preserve fallback warnings'
     with warnings.catch_warnings(record=True) as caught:
         warnings.simplefilter("always")
         automatic = bf.BehaveRun(bf.FuelModels())
@@ -149,6 +196,7 @@ def main():
     selected = bf.get_backend(arguments.expect)
     python = bf.get_backend("python")
     if arguments.expect == "rust":
+        contract = _native_contract(selected)
         for normalize_half_loop in (False, True):
             _direction(selected.surface, python.surface, normalize_half_loop)
         _direction_reversed(selected.surface, python.surface)
@@ -183,6 +231,7 @@ def main():
               "package": str(package)}
     if arguments.expect == "rust":
         report.update(_native_report())
+        report.update(contract)
     print(json.dumps(report, indent=2))
 
 

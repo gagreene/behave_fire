@@ -33,6 +33,16 @@ impl PreparedWind {
     }
     /// Evaluate the ordinary wind equation with an owned invariant packing power.
     pub fn wind_phi(&self, mid: f64) -> f64 {
+        if self.sigma.is_nan() || mid.is_nan() || self.packing.is_nan() {
+            return super::calculate_wind_phi(
+                self.sigma,
+                mid,
+                self.coefficients.wind_b,
+                self.coefficients.wind_c,
+                self.packing,
+                self.coefficients.wind_e,
+            );
+        }
         if self.sigma > 1e-7 && mid > 1e-7 {
             super::wind::wind_phi_product(
                 mid,
@@ -47,8 +57,31 @@ impl PreparedWind {
     /// Evaluate effective wind with the same threshold and product order as the ordinary helper.
     pub fn effective(&self, spread: f64, r0: f64) -> f64 {
         let c = self.coefficients;
+        if [spread, r0, c.wind_b, c.wind_c, self.packing, c.wind_e]
+            .iter()
+            .any(|v| v.is_nan())
+        {
+            return super::calculate_effective_wind_speed(
+                spread,
+                r0,
+                c.wind_b,
+                c.wind_c,
+                self.packing,
+                c.wind_e,
+            );
+        }
         let r0_safe = if r0 > 1e-7 { r0 } else { 1. };
         let phi = if r0 > 1e-7 { spread / r0_safe - 1. } else { 0. };
+        if phi.is_nan() {
+            return super::calculate_effective_wind_speed(
+                spread,
+                r0,
+                c.wind_b,
+                c.wind_c,
+                self.packing,
+                c.wind_e,
+            );
+        }
         let wc = if c.wind_c > 1e-7 { c.wind_c } else { 1. };
         let wb = if c.wind_b > 1e-7 { c.wind_b } else { 1. };
         let fpm = if phi > 0. && c.wind_b > 1e-7 && c.wind_c > 1e-7 && self.packing > 1e-7 {

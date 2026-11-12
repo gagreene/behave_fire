@@ -131,7 +131,7 @@ impl CrownPlan {
         fm10: &PreparedFuel,
         tweaks: CrownTweaks,
     ) -> CrownResult {
-        run_crown::<false>(self, cell, supplied, fm10, tweaks)
+        run_crown::<true>(self, cell, supplied, fm10, tweaks)
     }
 
     /// Evaluate the float64 model contract with dependency-aware unavailable values.

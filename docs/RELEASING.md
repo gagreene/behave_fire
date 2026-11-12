@@ -18,7 +18,7 @@ python tools/check_wheel_metadata.py dist
 
 Replace `RUN_ID` with the run reported by GitHub. Use a feature branch instead of `pre_release` when validating changes before merge. CI also runs on pushes to `pre_release` and `master`; its workflow can be rerun through GitHub Actions for an existing commit. The manual command runs the full CI pipeline, including all seven native wheel targets, pure wheel, sdist, isolated installation tests and Rust/package checks. It has read-only repository permissions and no publication job.
 
-Use the `distributions` artifact from a successful run; individual `distributions-*` artifacts are intermediate build outputs. The combined artifact contains seven `cp311-abi3` native wheels, one universal `py3-none-any` wheel and one source archive. Test evidence is uploaded separately per platform/interpreter. All installation tests run outside the source checkout on CPython 3.11–3.14, with both the exact NumPy floor and a current allowed version. On every platform the complete artifact set selects Rust; a separate pure-only install selects Python silently.
+Use the `distributions` artifact from a successful run; individual `distributions-*` artifacts are intermediate build outputs. The combined artifact contains seven `cp311-abi3` native wheels, one universal `py3-none-any` wheel and one source archive. Test evidence is uploaded separately per platform/interpreter. All installation tests run outside the source checkout on CPython 3.11–3.14, with both the exact NumPy floor and a current allowed version. On every platform the complete artifact set selects Rust; a separate pure-only install selects Python and captures exactly one fallback warning. Discovery stays silent and does not consume the warning.
 
 The GitHub UI's Run workflow button depends on the workflow being available on the default branch. These build commands use the existing registered CI workflow; they do not require changing the default branch, promoting unreleased code into `master`, creating a release tag or enabling either publisher. The first validation of a newly added workflow remains its PR CI run.
 
@@ -73,8 +73,16 @@ Each row tests the exact applicable floor and a current resolver-selected binary
 
 Alpine/musl and Windows ARM64 additionally run the full default `pytest --require-rust -W error` suite on Python 3.12, matching the Python version used by the existing native source-suite jobs. `tools/test_native_wheel_suite.py` selects the compatible built wheel, installs it with binary-only test dependencies and the applicable NumPy floor in a temporary environment, and temporarily stages that wheel's exact native binary and bundled companion libraries into the matching source checkout. This preserves relative loader paths, including musl's bundled libgcc. The suite receives its complete fixtures and tools without rebuilding a different extension. All staged files are removed afterward; an existing local build or library directory is never overwritten. The separate isolated install tests remain required on all four Python versions.
 
-The corresponding evidence artifact includes a `full-suite` directory with the full pytest log, JUnit XML, wheel/binary hashes, interpreter/NumPy identity, cast fingerprints and direction-oracle data. `environment.json` records both `svml_candidate_available` and `calibrated_atan2_profile` (zero for scalar libm, one for guarded SVML). SVML is also compiled into Linux x86-64 musl wheels, but entry requires all runtime CPU/OS feature checks. Compilation alone does not establish execution: the Alpine Python 3.12 evidence from [run 42164115015](https://github.com/gagreene/behave_fire/actions/runs/42164115015) reports availability true and selected profile one with NumPy 2.1.3 and 2.5.4, confirming actual SVML use. Unsupported CPUs cannot execute that assembly; calibration selects the matching scalar path or rejects an unknown kernel.
-
+The corresponding evidence artifact includes a `full-suite` directory with the
+full pytest log, JUnit XML, wheel/binary hashes, interpreter/NumPy identity, cast
+fingerprints, and direction data. `environment.json` records the actual binding
+API version and float64 physical contract. Installed-wheel smoke tests also
+verify NaN normalization, int32 missing classifications, false missing flags,
+independently shaped outputs, staged field injection/reset, and owned buffers.
+No float32 calibration, SVML dispatch, or assembly availability applies to this
+float64 core. Retained historical notices describe removed code. Full platform
+correctness establishes functional compatibility; speed requires a separate
+measured host, as in the Windows acceptance report.
 Runner labels and setup-python ARM64 support were checked against [GitHub's runner reference](https://docs.github.com/en/actions/reference/runners/github-hosted-runners) and [actions/setup-python](https://github.com/actions/setup-python). Recheck platform availability when certifying a release.
 
 ## Owner-only publisher setup

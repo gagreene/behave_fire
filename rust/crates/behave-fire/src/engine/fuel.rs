@@ -2,7 +2,7 @@
 use crate::{FuelModel, FuelModels};
 
 /// Numerical fuel properties consumed by particle and fire calculations.
-#[derive(Clone, Copy, Debug, Default, PartialEq)]
+#[derive(Clone, Copy, Debug, Default)]
 pub struct PreparedFuel {
     /// Fuel bed depth in feet.
     pub fuel_bed_depth: f64,
@@ -36,6 +36,7 @@ pub struct PreparedFuel {
     static_cache: Option<([f64; 14], StaticPhysics)>,
 }
 
+/// Moisture-independent coefficients retained outside ordinary cell loops.
 #[derive(Clone, Copy, Debug, PartialEq)]
 struct StaticPhysics {
     fuelbed: crate::surface::PreparedFuelbed,
@@ -43,7 +44,28 @@ struct StaticPhysics {
     wind: crate::surface::PreparedWind,
 }
 
+impl PartialEq for PreparedFuel {
+    /// Compare public physical properties independently of private cache history.
+    fn eq(&self, other: &Self) -> bool {
+        self.fuel_bed_depth == other.fuel_bed_depth
+            && self.moisture_of_extinction_dead == other.moisture_of_extinction_dead
+            && self.heat_of_combustion_dead == other.heat_of_combustion_dead
+            && self.heat_of_combustion_live == other.heat_of_combustion_live
+            && self.dead_1h == other.dead_1h
+            && self.dead_10h == other.dead_10h
+            && self.dead_100h == other.dead_100h
+            && self.live_herb == other.live_herb
+            && self.live_woody == other.live_woody
+            && self.savr_1h == other.savr_1h
+            && self.savr_live_herb == other.savr_live_herb
+            && self.savr_live_woody == other.savr_live_woody
+            && self.is_dynamic == other.is_dynamic
+            && self.is_defined == other.is_defined
+    }
+}
+
 impl PreparedFuel {
+    /// Capture every physical property that determines static cached coefficients.
     fn physics_key(&self) -> [f64; 14] {
         [
             self.fuel_bed_depth,
@@ -62,6 +84,7 @@ impl PreparedFuel {
             self.is_defined as u8 as f64,
         ]
     }
+    /// Borrow static coefficients only while their exact source properties match.
     fn physics(&self) -> Option<&StaticPhysics> {
         self.static_cache
             .as_ref()
@@ -72,6 +95,7 @@ impl PreparedFuel {
             })
             .map(|(_, physics)| physics)
     }
+    /// Evaluate a fuelbed using validated cached terms or the ordinary equations.
     pub(crate) fn prepare_fuelbed(
         &self,
         particles: &crate::surface::Particles,
@@ -94,6 +118,7 @@ impl PreparedFuel {
             ),
         }
     }
+    /// Evaluate reaction intensity using validated cached coefficients when available.
     pub(crate) fn reaction_intensity(&self, bed: &crate::surface::FuelbedIntermediates) -> f64 {
         match self.physics() {
             Some(physics) => physics.reaction.run(bed),
@@ -111,10 +136,12 @@ impl PreparedFuel {
     pub(crate) fn wind_terms(&self) -> Option<crate::surface::PreparedWind> {
         self.physics().map(|p| p.wind)
     }
+    /// Capture the physical ratios that determine particle exponentials and bins.
     fn savr_key(&self) -> [f64; 3] {
         [self.savr_1h, self.savr_live_herb, self.savr_live_woody]
     }
 
+    /// Reuse particle terms only while the original physical SAVR values match.
     pub(crate) fn savr_terms(&self) -> crate::surface::SavrTerms {
         if let Some((key, terms)) = self.savr_cache {
             if key
@@ -210,10 +237,10 @@ pub struct PreparedFuels {
 }
 
 impl PreparedFuels {
-    /// Snapshot every clamped grid slot using the registry's existing fallback rules.
+    /// Snapshot rows 0..=256, retaining undefined rows as empty fuels.
     pub fn from_registry(fuels: &FuelModels) -> Self {
         Self {
-            rows: (0..261)
+            rows: (0..257)
                 .map(|id| PreparedFuel::from_model(fuels.for_grid(id)))
                 .collect::<Vec<_>>()
                 .into_boxed_slice(),
@@ -238,9 +265,13 @@ impl PreparedFuels {
         })
     }
 
-    /// Borrow a physical record, clamping the identifier to the available numeric rows.
+    /// Borrow a supported row; absent and out-of-range identifiers use undefined row zero.
     pub fn for_grid(&self, id: i32) -> &PreparedFuel {
-        &self.rows[(id.max(0) as usize).min(self.rows.len() - 1)]
+        if (1..=256).contains(&id) {
+            self.rows.get(id as usize).unwrap_or(&self.rows[0])
+        } else {
+            &self.rows[0]
+        }
     }
 }
 
@@ -332,7 +363,8 @@ mod numeric_rows_tests {
         assert!(row.physics().is_some());
         let fuels = PreparedFuels::from_rows(vec![PreparedFuel::default(), row]).unwrap();
         assert_eq!(fuels.for_grid(-5).fuel_bed_depth, 0.0);
-        assert_eq!(fuels.for_grid(500).fuel_bed_depth, row.fuel_bed_depth);
+        assert_eq!(fuels.for_grid(500).fuel_bed_depth, 0.0);
+        assert_eq!(fuels.for_grid(1).fuel_bed_depth, row.fuel_bed_depth);
         assert!(PreparedFuels::from_rows(Vec::new()).is_err());
     }
 }

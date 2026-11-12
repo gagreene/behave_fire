@@ -1,0 +1,1118 @@
+{
+  "source_commit": "fe43dce9f0389f3f25a7c787b291a5b8c30dcb61",
+  "reports": {
+    "docs/performance/2026-11-09-float64-acceptance-results.json": "60b5a81656abc951e8277e60c8bd0e5e8777d78b079b42e40798052518f31099",
+    "docs/performance/2026-11-09-float64-acceptance-check.json": "66ba424676470e01a30e856e8ccf536a6cb510e0b590bb9af8308dd36f9420f9",
+    "docs/performance/2026-11-09-float64-allocation-evidence.json": "2ff058d5db827298cc30227aaa1e5d869cec24153ac0cf77787d1cb761371868",
+    "docs/performance/2026-11-09-float64-allocation-builds.json": "24b10b4452d039a09dbd5264a664e75c753221d1756506dee67603b983596503",
+    "docs/performance/2026-11-09-float64-allocations.json": "8534df0386c37caf06d6d4657f7c6332ef040800520041a4c4087c504ca6c7a5",
+    "docs/performance/2026-11-09-float64-preoptimization-scalar.json": "e0414fb10ad5f2bd5b94be8bf8b1d492890aff8acff716b37ed215e06b204751",
+    "docs/performance/2026-11-09-float64-scheduling-pilot.json": "476d7f454e37f77bd1be9e0ff69b222f92e96508baf2867fb63a817e80fb3175",
+    "docs/performance/2026-11-09-float64-continuous-correctness.json": "c8cab2bb7b4138314e1c527234c2fc687cdb5af4a7904d2428e736b9a8d68b2f",
+    "docs/performance/2026-11-09-float64-auxiliary.json": "69a23e8f9f6b7c4c885f724b06311189454a6f9c7740db9f24e8eb57ccd1d7c2",
+    "docs/performance/2026-11-09-float64-profiles.json": "fc82106553bb43f2acf812c87bedf64a48d33b4eb6129505d5e0ef6ed29ed5c2",
+    "docs/performance/2026-11-09-float64-metadata-attestation.json": "0402510fae1a4e31f4c9411dea767506ac91794658426db3b2f4e5e4ce59799e"
+  },
+  "array_bundles": {
+    "docs/performance/2026-11-09-float64-acceptance-arrays.tar.xz": {
+      "sha256": "b168002bf74192e71799c095e936a6f33bd1c29565bc233bee67fa39f7366511",
+      "bytes": 326996,
+      "members": {
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-acceptance-results-outputs/heterogeneous-crown-1-1.npz": {
+          "sha256": "34924e237e471f94b35a12e493bcd9c2c39bbce0a95317b3b2c136cef85f67d2",
+          "bytes": 11042
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-acceptance-results-outputs/heterogeneous-crown-1-4.npz": {
+          "sha256": "34924e237e471f94b35a12e493bcd9c2c39bbce0a95317b3b2c136cef85f67d2",
+          "bytes": 11042
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-acceptance-results-outputs/heterogeneous-crown-10000-1.npz": {
+          "sha256": "a0c48539a11ea113c831d54dd2eb91115b7b048b447e4875f365dd7fb9429f81",
+          "bytes": 60801
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-acceptance-results-outputs/heterogeneous-crown-10000-4.npz": {
+          "sha256": "a0c48539a11ea113c831d54dd2eb91115b7b048b447e4875f365dd7fb9429f81",
+          "bytes": 60801
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-acceptance-results-outputs/heterogeneous-crown-100000-1.npz": {
+          "sha256": "9e37365bb3efac18de45de3a23d50c3f9d934dbbde0e762325b1c29a0a2292e0",
+          "bytes": 220287
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-acceptance-results-outputs/heterogeneous-crown-100000-4.npz": {
+          "sha256": "9e37365bb3efac18de45de3a23d50c3f9d934dbbde0e762325b1c29a0a2292e0",
+          "bytes": 220287
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-acceptance-results-outputs/heterogeneous-crown-1000000-1.npz": {
+          "sha256": "bf9df90d3f7b72d3c68847237493bd369a6e3eb4e50449fa9f416975f1ba42af",
+          "bytes": 1801837
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-acceptance-results-outputs/heterogeneous-crown-1000000-4.npz": {
+          "sha256": "bf9df90d3f7b72d3c68847237493bd369a6e3eb4e50449fa9f416975f1ba42af",
+          "bytes": 1801837
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-acceptance-results-outputs/heterogeneous-surface-1-1.npz": {
+          "sha256": "8114c9f8535bb3aa0c95d092abc67647db578bcce24fc404f1885b99cf8b9781",
+          "bytes": 6610
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-acceptance-results-outputs/heterogeneous-surface-1-4.npz": {
+          "sha256": "8114c9f8535bb3aa0c95d092abc67647db578bcce24fc404f1885b99cf8b9781",
+          "bytes": 6610
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-acceptance-results-outputs/heterogeneous-surface-10000-1.npz": {
+          "sha256": "127531a951a66b0f15f6a741b506e4fd21eb1a48734a4375a1393809b03babb9",
+          "bytes": 46387
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-acceptance-results-outputs/heterogeneous-surface-10000-4.npz": {
+          "sha256": "127531a951a66b0f15f6a741b506e4fd21eb1a48734a4375a1393809b03babb9",
+          "bytes": 46387
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-acceptance-results-outputs/heterogeneous-surface-100000-1.npz": {
+          "sha256": "9dcbb0768086ec97603fd85d04c16471ce9e2a9e3e8486c979b6cb365437c6d2",
+          "bytes": 158920
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-acceptance-results-outputs/heterogeneous-surface-100000-4.npz": {
+          "sha256": "9dcbb0768086ec97603fd85d04c16471ce9e2a9e3e8486c979b6cb365437c6d2",
+          "bytes": 158920
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-acceptance-results-outputs/heterogeneous-surface-1000000-1.npz": {
+          "sha256": "b5faef13f439e9640cb25b43b580e3274616a64f6fee890f1b961ffd38536e2c",
+          "bytes": 1271832
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-acceptance-results-outputs/heterogeneous-surface-1000000-4.npz": {
+          "sha256": "b5faef13f439e9640cb25b43b580e3274616a64f6fee890f1b961ffd38536e2c",
+          "bytes": 1271832
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-acceptance-results-outputs/heterogeneous-typed-crown-1-1.npz": {
+          "sha256": "d1f2395e5efb717e31c232cf95a0282bc64bc06cdf00c4cd1466679f67e39738",
+          "bytes": 10970
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-acceptance-results-outputs/heterogeneous-typed-crown-1-4.npz": {
+          "sha256": "d1f2395e5efb717e31c232cf95a0282bc64bc06cdf00c4cd1466679f67e39738",
+          "bytes": 10970
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-acceptance-results-outputs/heterogeneous-typed-crown-10000-1.npz": {
+          "sha256": "410a7cae4e29c5325b41de7ab5f13f6a4507243241d6473f36a389655558c3bd",
+          "bytes": 80921
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-acceptance-results-outputs/heterogeneous-typed-crown-10000-4.npz": {
+          "sha256": "410a7cae4e29c5325b41de7ab5f13f6a4507243241d6473f36a389655558c3bd",
+          "bytes": 80921
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-acceptance-results-outputs/heterogeneous-typed-crown-100000-1.npz": {
+          "sha256": "adc5d6dfc6bf78c5f60ebf7c93b2ba90e186ad217437b5c451529237f4bc9e91",
+          "bytes": 267175
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-acceptance-results-outputs/heterogeneous-typed-crown-100000-4.npz": {
+          "sha256": "adc5d6dfc6bf78c5f60ebf7c93b2ba90e186ad217437b5c451529237f4bc9e91",
+          "bytes": 267175
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-acceptance-results-outputs/heterogeneous-typed-crown-1000000-1.npz": {
+          "sha256": "d7ae0207bec80ee7f421807181d521d34d8ddb2164fedb563f7697731da71303",
+          "bytes": 2085835
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-acceptance-results-outputs/heterogeneous-typed-crown-1000000-4.npz": {
+          "sha256": "d7ae0207bec80ee7f421807181d521d34d8ddb2164fedb563f7697731da71303",
+          "bytes": 2085835
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-acceptance-results-outputs/heterogeneous-typed-crown-b-1-1.npz": {
+          "sha256": "7a4bda828a31f5a386ff4d71b632ca56bb60b3edda0ea71d3f5e065e654211f0",
+          "bytes": 11002
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-acceptance-results-outputs/heterogeneous-typed-crown-b-1-4.npz": {
+          "sha256": "7a4bda828a31f5a386ff4d71b632ca56bb60b3edda0ea71d3f5e065e654211f0",
+          "bytes": 11002
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-acceptance-results-outputs/heterogeneous-typed-crown-b-10000-1.npz": {
+          "sha256": "612a65d9839f5ac7551f7ed3c1aeebdc7080e7754941d0af9e44ac243048f1a2",
+          "bytes": 72344
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-acceptance-results-outputs/heterogeneous-typed-crown-b-10000-4.npz": {
+          "sha256": "612a65d9839f5ac7551f7ed3c1aeebdc7080e7754941d0af9e44ac243048f1a2",
+          "bytes": 72344
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-acceptance-results-outputs/heterogeneous-typed-crown-b-100000-1.npz": {
+          "sha256": "ea35fc9f85440679c937eff43a7332e3fa9a999e84813e8df66491e838c1024c",
+          "bytes": 262215
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-acceptance-results-outputs/heterogeneous-typed-crown-b-100000-4.npz": {
+          "sha256": "ea35fc9f85440679c937eff43a7332e3fa9a999e84813e8df66491e838c1024c",
+          "bytes": 262215
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-acceptance-results-outputs/heterogeneous-typed-crown-b-1000000-1.npz": {
+          "sha256": "312b6bf8c18ff1f80440aa2fb59148b193319ac26f08ba2e0ab5d410ad4e0b6d",
+          "bytes": 2112421
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-acceptance-results-outputs/heterogeneous-typed-crown-b-1000000-4.npz": {
+          "sha256": "312b6bf8c18ff1f80440aa2fb59148b193319ac26f08ba2e0ab5d410ad4e0b6d",
+          "bytes": 2112421
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-acceptance-results-outputs/uniform-crown-1-1.npz": {
+          "sha256": "1f33645eb455fcab481f7aebbbf74fdeb0fe526e3390a515263d42002112a79e",
+          "bytes": 11046
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-acceptance-results-outputs/uniform-crown-1-4.npz": {
+          "sha256": "1f33645eb455fcab481f7aebbbf74fdeb0fe526e3390a515263d42002112a79e",
+          "bytes": 11046
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-acceptance-results-outputs/uniform-crown-10000-1.npz": {
+          "sha256": "2f26515c73e5a168ec15edc2565b5064b52b96cd4484b9261bb29c2e33dd9bb6",
+          "bytes": 16510
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-acceptance-results-outputs/uniform-crown-10000-4.npz": {
+          "sha256": "2f26515c73e5a168ec15edc2565b5064b52b96cd4484b9261bb29c2e33dd9bb6",
+          "bytes": 16510
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-acceptance-results-outputs/uniform-crown-100000-1.npz": {
+          "sha256": "49e54173831f135a041c06471f7b4a6bd5611c78b8d601c409d3045a91a9757e",
+          "bytes": 54230
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-acceptance-results-outputs/uniform-crown-100000-4.npz": {
+          "sha256": "49e54173831f135a041c06471f7b4a6bd5611c78b8d601c409d3045a91a9757e",
+          "bytes": 54230
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-acceptance-results-outputs/uniform-crown-1000000-1.npz": {
+          "sha256": "3f620d7c5ff5b7ac3a117b42b47273bf9b06c5e5437e5e21e07b1b664914ed0e",
+          "bytes": 431468
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-acceptance-results-outputs/uniform-crown-1000000-4.npz": {
+          "sha256": "3f620d7c5ff5b7ac3a117b42b47273bf9b06c5e5437e5e21e07b1b664914ed0e",
+          "bytes": 431468
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-acceptance-results-outputs/uniform-surface-1-1.npz": {
+          "sha256": "562cf8ace595a21c004a16be28caa14f1b6f3c0434c52523e38b973942da36a4",
+          "bytes": 6604
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-acceptance-results-outputs/uniform-surface-1-4.npz": {
+          "sha256": "562cf8ace595a21c004a16be28caa14f1b6f3c0434c52523e38b973942da36a4",
+          "bytes": 6604
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-acceptance-results-outputs/uniform-surface-10000-1.npz": {
+          "sha256": "ac39ea871a22185b76b6163500cc3f870daabc64102f3011868024340546d5a3",
+          "bytes": 10740
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-acceptance-results-outputs/uniform-surface-10000-4.npz": {
+          "sha256": "ac39ea871a22185b76b6163500cc3f870daabc64102f3011868024340546d5a3",
+          "bytes": 10740
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-acceptance-results-outputs/uniform-surface-100000-1.npz": {
+          "sha256": "7890cedce769dce3b6edcea7cb18e9aedc37e2d84b4ac7f1fc7595b650de23b3",
+          "bytes": 39370
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-acceptance-results-outputs/uniform-surface-100000-4.npz": {
+          "sha256": "7890cedce769dce3b6edcea7cb18e9aedc37e2d84b4ac7f1fc7595b650de23b3",
+          "bytes": 39370
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-acceptance-results-outputs/uniform-surface-1000000-1.npz": {
+          "sha256": "dacf9d0fc755f88f8278f9b3ce034382e95ade5d66ceb3b6b3c0f2c235be129c",
+          "bytes": 325802
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-acceptance-results-outputs/uniform-surface-1000000-4.npz": {
+          "sha256": "dacf9d0fc755f88f8278f9b3ce034382e95ade5d66ceb3b6b3c0f2c235be129c",
+          "bytes": 325802
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-acceptance-results-outputs/uniform-typed-crown-1-1.npz": {
+          "sha256": "ec0a84c78b6b805dd6291a4ce39d74a67b5d297821a57b6f5a47706e97e6ac20",
+          "bytes": 10962
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-acceptance-results-outputs/uniform-typed-crown-1-4.npz": {
+          "sha256": "ec0a84c78b6b805dd6291a4ce39d74a67b5d297821a57b6f5a47706e97e6ac20",
+          "bytes": 10962
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-acceptance-results-outputs/uniform-typed-crown-10000-1.npz": {
+          "sha256": "b30a249dd1d012ed52e81c21ea65e23bfd9d335bed20c621ecafdd592ee7bd70",
+          "bytes": 19872
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-acceptance-results-outputs/uniform-typed-crown-10000-4.npz": {
+          "sha256": "b30a249dd1d012ed52e81c21ea65e23bfd9d335bed20c621ecafdd592ee7bd70",
+          "bytes": 19872
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-acceptance-results-outputs/uniform-typed-crown-100000-1.npz": {
+          "sha256": "0899a5caa65cac25fc7474de7678a110706fc877b3aaaebee9ece0dc2a49ae01",
+          "bytes": 85470
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-acceptance-results-outputs/uniform-typed-crown-100000-4.npz": {
+          "sha256": "0899a5caa65cac25fc7474de7678a110706fc877b3aaaebee9ece0dc2a49ae01",
+          "bytes": 85470
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-acceptance-results-outputs/uniform-typed-crown-1000000-1.npz": {
+          "sha256": "e4ef0ba56127eaf65fa0b54d2e578e9a5613c462bd36a851bc3ccc25e87af591",
+          "bytes": 741770
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-acceptance-results-outputs/uniform-typed-crown-1000000-4.npz": {
+          "sha256": "e4ef0ba56127eaf65fa0b54d2e578e9a5613c462bd36a851bc3ccc25e87af591",
+          "bytes": 741770
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-acceptance-results-outputs/uniform-typed-crown-b-1-1.npz": {
+          "sha256": "e6ad42ab6a66282152e24922904594355be2134342f0033103171450c9cf74c8",
+          "bytes": 10990
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-acceptance-results-outputs/uniform-typed-crown-b-1-4.npz": {
+          "sha256": "e6ad42ab6a66282152e24922904594355be2134342f0033103171450c9cf74c8",
+          "bytes": 10990
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-acceptance-results-outputs/uniform-typed-crown-b-10000-1.npz": {
+          "sha256": "9b122e485b38a227e8ce134fa0f34531c5e26fcb837acc19a43d0a25a434f164",
+          "bytes": 18798
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-acceptance-results-outputs/uniform-typed-crown-b-10000-4.npz": {
+          "sha256": "9b122e485b38a227e8ce134fa0f34531c5e26fcb837acc19a43d0a25a434f164",
+          "bytes": 18798
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-acceptance-results-outputs/uniform-typed-crown-b-100000-1.npz": {
+          "sha256": "e18a7f2f680bb79bc9e413519fc4e3a7b896d8abb28f0aa30981e04ee2bc20f2",
+          "bytes": 76058
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-acceptance-results-outputs/uniform-typed-crown-b-100000-4.npz": {
+          "sha256": "e18a7f2f680bb79bc9e413519fc4e3a7b896d8abb28f0aa30981e04ee2bc20f2",
+          "bytes": 76058
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-acceptance-results-outputs/uniform-typed-crown-b-1000000-1.npz": {
+          "sha256": "1055be9dd8f0766ff37bb42f7eb08457313501ad46151e9953ece8395d898820",
+          "bytes": 648646
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-acceptance-results-outputs/uniform-typed-crown-b-1000000-4.npz": {
+          "sha256": "1055be9dd8f0766ff37bb42f7eb08457313501ad46151e9953ece8395d898820",
+          "bytes": 648646
+        }
+      }
+    },
+    "docs/performance/2026-11-09-float64-allocations-arrays.tar.xz": {
+      "sha256": "367d236201ab476501bbe76e555b011da01460b88133ce9ae7e473ae4bf5a701",
+      "bytes": 187896,
+      "members": {
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-alloc-20261109/outputs/heterogeneous-crown-1000-1-0.npz": {
+          "sha256": "3e3f27145b7472b8c81e893b575b96d131738b7fa03628483f0b47910c674f54",
+          "bytes": 42614
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-alloc-20261109/outputs/heterogeneous-crown-1000-1-1.npz": {
+          "sha256": "3e3f27145b7472b8c81e893b575b96d131738b7fa03628483f0b47910c674f54",
+          "bytes": 42614
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-alloc-20261109/outputs/heterogeneous-crown-1000-1-2.npz": {
+          "sha256": "3e3f27145b7472b8c81e893b575b96d131738b7fa03628483f0b47910c674f54",
+          "bytes": 42614
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-alloc-20261109/outputs/heterogeneous-crown-1000-4-0.npz": {
+          "sha256": "3e3f27145b7472b8c81e893b575b96d131738b7fa03628483f0b47910c674f54",
+          "bytes": 42614
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-alloc-20261109/outputs/heterogeneous-crown-1000-4-1.npz": {
+          "sha256": "3e3f27145b7472b8c81e893b575b96d131738b7fa03628483f0b47910c674f54",
+          "bytes": 42614
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-alloc-20261109/outputs/heterogeneous-crown-1000-4-2.npz": {
+          "sha256": "3e3f27145b7472b8c81e893b575b96d131738b7fa03628483f0b47910c674f54",
+          "bytes": 42614
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-alloc-20261109/outputs/heterogeneous-crown-10000-1-0.npz": {
+          "sha256": "a0c48539a11ea113c831d54dd2eb91115b7b048b447e4875f365dd7fb9429f81",
+          "bytes": 60801
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-alloc-20261109/outputs/heterogeneous-crown-10000-1-1.npz": {
+          "sha256": "a0c48539a11ea113c831d54dd2eb91115b7b048b447e4875f365dd7fb9429f81",
+          "bytes": 60801
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-alloc-20261109/outputs/heterogeneous-crown-10000-1-2.npz": {
+          "sha256": "a0c48539a11ea113c831d54dd2eb91115b7b048b447e4875f365dd7fb9429f81",
+          "bytes": 60801
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-alloc-20261109/outputs/heterogeneous-crown-10000-4-0.npz": {
+          "sha256": "a0c48539a11ea113c831d54dd2eb91115b7b048b447e4875f365dd7fb9429f81",
+          "bytes": 60801
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-alloc-20261109/outputs/heterogeneous-crown-10000-4-1.npz": {
+          "sha256": "a0c48539a11ea113c831d54dd2eb91115b7b048b447e4875f365dd7fb9429f81",
+          "bytes": 60801
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-alloc-20261109/outputs/heterogeneous-crown-10000-4-2.npz": {
+          "sha256": "a0c48539a11ea113c831d54dd2eb91115b7b048b447e4875f365dd7fb9429f81",
+          "bytes": 60801
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-alloc-20261109/outputs/heterogeneous-surface-1000-1-0.npz": {
+          "sha256": "d24f43d28279f06fb1a47b5625d6bece31e7fefa99e3daf0c6a6adc2e2e10d0f",
+          "bytes": 33398
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-alloc-20261109/outputs/heterogeneous-surface-1000-1-1.npz": {
+          "sha256": "d24f43d28279f06fb1a47b5625d6bece31e7fefa99e3daf0c6a6adc2e2e10d0f",
+          "bytes": 33398
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-alloc-20261109/outputs/heterogeneous-surface-1000-1-2.npz": {
+          "sha256": "d24f43d28279f06fb1a47b5625d6bece31e7fefa99e3daf0c6a6adc2e2e10d0f",
+          "bytes": 33398
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-alloc-20261109/outputs/heterogeneous-surface-1000-4-0.npz": {
+          "sha256": "d24f43d28279f06fb1a47b5625d6bece31e7fefa99e3daf0c6a6adc2e2e10d0f",
+          "bytes": 33398
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-alloc-20261109/outputs/heterogeneous-surface-1000-4-1.npz": {
+          "sha256": "d24f43d28279f06fb1a47b5625d6bece31e7fefa99e3daf0c6a6adc2e2e10d0f",
+          "bytes": 33398
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-alloc-20261109/outputs/heterogeneous-surface-1000-4-2.npz": {
+          "sha256": "d24f43d28279f06fb1a47b5625d6bece31e7fefa99e3daf0c6a6adc2e2e10d0f",
+          "bytes": 33398
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-alloc-20261109/outputs/heterogeneous-surface-10000-1-0.npz": {
+          "sha256": "127531a951a66b0f15f6a741b506e4fd21eb1a48734a4375a1393809b03babb9",
+          "bytes": 46387
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-alloc-20261109/outputs/heterogeneous-surface-10000-1-1.npz": {
+          "sha256": "127531a951a66b0f15f6a741b506e4fd21eb1a48734a4375a1393809b03babb9",
+          "bytes": 46387
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-alloc-20261109/outputs/heterogeneous-surface-10000-1-2.npz": {
+          "sha256": "127531a951a66b0f15f6a741b506e4fd21eb1a48734a4375a1393809b03babb9",
+          "bytes": 46387
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-alloc-20261109/outputs/heterogeneous-surface-10000-4-0.npz": {
+          "sha256": "127531a951a66b0f15f6a741b506e4fd21eb1a48734a4375a1393809b03babb9",
+          "bytes": 46387
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-alloc-20261109/outputs/heterogeneous-surface-10000-4-1.npz": {
+          "sha256": "127531a951a66b0f15f6a741b506e4fd21eb1a48734a4375a1393809b03babb9",
+          "bytes": 46387
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-alloc-20261109/outputs/heterogeneous-surface-10000-4-2.npz": {
+          "sha256": "127531a951a66b0f15f6a741b506e4fd21eb1a48734a4375a1393809b03babb9",
+          "bytes": 46387
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-alloc-20261109/outputs/heterogeneous-typed-crown-1000-1-0.npz": {
+          "sha256": "d0ae1fb9dc3f8994b26baa14153908493f651a9d4e51c688a8d3fa1f221dd03f",
+          "bytes": 57993
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-alloc-20261109/outputs/heterogeneous-typed-crown-1000-1-1.npz": {
+          "sha256": "d0ae1fb9dc3f8994b26baa14153908493f651a9d4e51c688a8d3fa1f221dd03f",
+          "bytes": 57993
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-alloc-20261109/outputs/heterogeneous-typed-crown-1000-1-2.npz": {
+          "sha256": "d0ae1fb9dc3f8994b26baa14153908493f651a9d4e51c688a8d3fa1f221dd03f",
+          "bytes": 57993
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-alloc-20261109/outputs/heterogeneous-typed-crown-1000-4-0.npz": {
+          "sha256": "d0ae1fb9dc3f8994b26baa14153908493f651a9d4e51c688a8d3fa1f221dd03f",
+          "bytes": 57993
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-alloc-20261109/outputs/heterogeneous-typed-crown-1000-4-1.npz": {
+          "sha256": "d0ae1fb9dc3f8994b26baa14153908493f651a9d4e51c688a8d3fa1f221dd03f",
+          "bytes": 57993
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-alloc-20261109/outputs/heterogeneous-typed-crown-1000-4-2.npz": {
+          "sha256": "d0ae1fb9dc3f8994b26baa14153908493f651a9d4e51c688a8d3fa1f221dd03f",
+          "bytes": 57993
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-alloc-20261109/outputs/heterogeneous-typed-crown-10000-1-0.npz": {
+          "sha256": "410a7cae4e29c5325b41de7ab5f13f6a4507243241d6473f36a389655558c3bd",
+          "bytes": 80921
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-alloc-20261109/outputs/heterogeneous-typed-crown-10000-1-1.npz": {
+          "sha256": "410a7cae4e29c5325b41de7ab5f13f6a4507243241d6473f36a389655558c3bd",
+          "bytes": 80921
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-alloc-20261109/outputs/heterogeneous-typed-crown-10000-1-2.npz": {
+          "sha256": "410a7cae4e29c5325b41de7ab5f13f6a4507243241d6473f36a389655558c3bd",
+          "bytes": 80921
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-alloc-20261109/outputs/heterogeneous-typed-crown-10000-4-0.npz": {
+          "sha256": "410a7cae4e29c5325b41de7ab5f13f6a4507243241d6473f36a389655558c3bd",
+          "bytes": 80921
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-alloc-20261109/outputs/heterogeneous-typed-crown-10000-4-1.npz": {
+          "sha256": "410a7cae4e29c5325b41de7ab5f13f6a4507243241d6473f36a389655558c3bd",
+          "bytes": 80921
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-alloc-20261109/outputs/heterogeneous-typed-crown-10000-4-2.npz": {
+          "sha256": "410a7cae4e29c5325b41de7ab5f13f6a4507243241d6473f36a389655558c3bd",
+          "bytes": 80921
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-alloc-20261109/outputs/heterogeneous-typed-crown-b-1000-1-0.npz": {
+          "sha256": "0f014c1b03ada78070459aabca558e69a3198984de75c8a094de43fce2bbc14b",
+          "bytes": 49928
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-alloc-20261109/outputs/heterogeneous-typed-crown-b-1000-1-1.npz": {
+          "sha256": "0f014c1b03ada78070459aabca558e69a3198984de75c8a094de43fce2bbc14b",
+          "bytes": 49928
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-alloc-20261109/outputs/heterogeneous-typed-crown-b-1000-1-2.npz": {
+          "sha256": "0f014c1b03ada78070459aabca558e69a3198984de75c8a094de43fce2bbc14b",
+          "bytes": 49928
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-alloc-20261109/outputs/heterogeneous-typed-crown-b-1000-4-0.npz": {
+          "sha256": "0f014c1b03ada78070459aabca558e69a3198984de75c8a094de43fce2bbc14b",
+          "bytes": 49928
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-alloc-20261109/outputs/heterogeneous-typed-crown-b-1000-4-1.npz": {
+          "sha256": "0f014c1b03ada78070459aabca558e69a3198984de75c8a094de43fce2bbc14b",
+          "bytes": 49928
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-alloc-20261109/outputs/heterogeneous-typed-crown-b-1000-4-2.npz": {
+          "sha256": "0f014c1b03ada78070459aabca558e69a3198984de75c8a094de43fce2bbc14b",
+          "bytes": 49928
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-alloc-20261109/outputs/heterogeneous-typed-crown-b-10000-1-0.npz": {
+          "sha256": "612a65d9839f5ac7551f7ed3c1aeebdc7080e7754941d0af9e44ac243048f1a2",
+          "bytes": 72344
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-alloc-20261109/outputs/heterogeneous-typed-crown-b-10000-1-1.npz": {
+          "sha256": "612a65d9839f5ac7551f7ed3c1aeebdc7080e7754941d0af9e44ac243048f1a2",
+          "bytes": 72344
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-alloc-20261109/outputs/heterogeneous-typed-crown-b-10000-1-2.npz": {
+          "sha256": "612a65d9839f5ac7551f7ed3c1aeebdc7080e7754941d0af9e44ac243048f1a2",
+          "bytes": 72344
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-alloc-20261109/outputs/heterogeneous-typed-crown-b-10000-4-0.npz": {
+          "sha256": "612a65d9839f5ac7551f7ed3c1aeebdc7080e7754941d0af9e44ac243048f1a2",
+          "bytes": 72344
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-alloc-20261109/outputs/heterogeneous-typed-crown-b-10000-4-1.npz": {
+          "sha256": "612a65d9839f5ac7551f7ed3c1aeebdc7080e7754941d0af9e44ac243048f1a2",
+          "bytes": 72344
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-alloc-20261109/outputs/heterogeneous-typed-crown-b-10000-4-2.npz": {
+          "sha256": "612a65d9839f5ac7551f7ed3c1aeebdc7080e7754941d0af9e44ac243048f1a2",
+          "bytes": 72344
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-alloc-20261109/outputs/uniform-crown-1000-1-0.npz": {
+          "sha256": "58927c4b4a592c14f975ed4d9194eae9f3125fa369851ee9b69b2f982b4dd0ce",
+          "bytes": 12834
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-alloc-20261109/outputs/uniform-crown-1000-1-1.npz": {
+          "sha256": "58927c4b4a592c14f975ed4d9194eae9f3125fa369851ee9b69b2f982b4dd0ce",
+          "bytes": 12834
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-alloc-20261109/outputs/uniform-crown-1000-1-2.npz": {
+          "sha256": "58927c4b4a592c14f975ed4d9194eae9f3125fa369851ee9b69b2f982b4dd0ce",
+          "bytes": 12834
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-alloc-20261109/outputs/uniform-crown-1000-4-0.npz": {
+          "sha256": "58927c4b4a592c14f975ed4d9194eae9f3125fa369851ee9b69b2f982b4dd0ce",
+          "bytes": 12834
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-alloc-20261109/outputs/uniform-crown-1000-4-1.npz": {
+          "sha256": "58927c4b4a592c14f975ed4d9194eae9f3125fa369851ee9b69b2f982b4dd0ce",
+          "bytes": 12834
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-alloc-20261109/outputs/uniform-crown-1000-4-2.npz": {
+          "sha256": "58927c4b4a592c14f975ed4d9194eae9f3125fa369851ee9b69b2f982b4dd0ce",
+          "bytes": 12834
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-alloc-20261109/outputs/uniform-crown-10000-1-0.npz": {
+          "sha256": "2f26515c73e5a168ec15edc2565b5064b52b96cd4484b9261bb29c2e33dd9bb6",
+          "bytes": 16510
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-alloc-20261109/outputs/uniform-crown-10000-1-1.npz": {
+          "sha256": "2f26515c73e5a168ec15edc2565b5064b52b96cd4484b9261bb29c2e33dd9bb6",
+          "bytes": 16510
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-alloc-20261109/outputs/uniform-crown-10000-1-2.npz": {
+          "sha256": "2f26515c73e5a168ec15edc2565b5064b52b96cd4484b9261bb29c2e33dd9bb6",
+          "bytes": 16510
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-alloc-20261109/outputs/uniform-crown-10000-4-0.npz": {
+          "sha256": "2f26515c73e5a168ec15edc2565b5064b52b96cd4484b9261bb29c2e33dd9bb6",
+          "bytes": 16510
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-alloc-20261109/outputs/uniform-crown-10000-4-1.npz": {
+          "sha256": "2f26515c73e5a168ec15edc2565b5064b52b96cd4484b9261bb29c2e33dd9bb6",
+          "bytes": 16510
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-alloc-20261109/outputs/uniform-crown-10000-4-2.npz": {
+          "sha256": "2f26515c73e5a168ec15edc2565b5064b52b96cd4484b9261bb29c2e33dd9bb6",
+          "bytes": 16510
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-alloc-20261109/outputs/uniform-surface-1000-1-0.npz": {
+          "sha256": "bfe4f0e8cb756e88541c0bc92cd56df7143be2e39c04ba421ee80e5ae212430e",
+          "bytes": 7944
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-alloc-20261109/outputs/uniform-surface-1000-1-1.npz": {
+          "sha256": "bfe4f0e8cb756e88541c0bc92cd56df7143be2e39c04ba421ee80e5ae212430e",
+          "bytes": 7944
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-alloc-20261109/outputs/uniform-surface-1000-1-2.npz": {
+          "sha256": "bfe4f0e8cb756e88541c0bc92cd56df7143be2e39c04ba421ee80e5ae212430e",
+          "bytes": 7944
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-alloc-20261109/outputs/uniform-surface-1000-4-0.npz": {
+          "sha256": "bfe4f0e8cb756e88541c0bc92cd56df7143be2e39c04ba421ee80e5ae212430e",
+          "bytes": 7944
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-alloc-20261109/outputs/uniform-surface-1000-4-1.npz": {
+          "sha256": "bfe4f0e8cb756e88541c0bc92cd56df7143be2e39c04ba421ee80e5ae212430e",
+          "bytes": 7944
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-alloc-20261109/outputs/uniform-surface-1000-4-2.npz": {
+          "sha256": "bfe4f0e8cb756e88541c0bc92cd56df7143be2e39c04ba421ee80e5ae212430e",
+          "bytes": 7944
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-alloc-20261109/outputs/uniform-surface-10000-1-0.npz": {
+          "sha256": "ac39ea871a22185b76b6163500cc3f870daabc64102f3011868024340546d5a3",
+          "bytes": 10740
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-alloc-20261109/outputs/uniform-surface-10000-1-1.npz": {
+          "sha256": "ac39ea871a22185b76b6163500cc3f870daabc64102f3011868024340546d5a3",
+          "bytes": 10740
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-alloc-20261109/outputs/uniform-surface-10000-1-2.npz": {
+          "sha256": "ac39ea871a22185b76b6163500cc3f870daabc64102f3011868024340546d5a3",
+          "bytes": 10740
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-alloc-20261109/outputs/uniform-surface-10000-4-0.npz": {
+          "sha256": "ac39ea871a22185b76b6163500cc3f870daabc64102f3011868024340546d5a3",
+          "bytes": 10740
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-alloc-20261109/outputs/uniform-surface-10000-4-1.npz": {
+          "sha256": "ac39ea871a22185b76b6163500cc3f870daabc64102f3011868024340546d5a3",
+          "bytes": 10740
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-alloc-20261109/outputs/uniform-surface-10000-4-2.npz": {
+          "sha256": "ac39ea871a22185b76b6163500cc3f870daabc64102f3011868024340546d5a3",
+          "bytes": 10740
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-alloc-20261109/outputs/uniform-typed-crown-1000-1-0.npz": {
+          "sha256": "d3357c1e5d2bd2ac23b3d8d54684ffa852f37d763b5410efeca863fb57e1007a",
+          "bytes": 13356
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-alloc-20261109/outputs/uniform-typed-crown-1000-1-1.npz": {
+          "sha256": "d3357c1e5d2bd2ac23b3d8d54684ffa852f37d763b5410efeca863fb57e1007a",
+          "bytes": 13356
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-alloc-20261109/outputs/uniform-typed-crown-1000-1-2.npz": {
+          "sha256": "d3357c1e5d2bd2ac23b3d8d54684ffa852f37d763b5410efeca863fb57e1007a",
+          "bytes": 13356
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-alloc-20261109/outputs/uniform-typed-crown-1000-4-0.npz": {
+          "sha256": "d3357c1e5d2bd2ac23b3d8d54684ffa852f37d763b5410efeca863fb57e1007a",
+          "bytes": 13356
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-alloc-20261109/outputs/uniform-typed-crown-1000-4-1.npz": {
+          "sha256": "d3357c1e5d2bd2ac23b3d8d54684ffa852f37d763b5410efeca863fb57e1007a",
+          "bytes": 13356
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-alloc-20261109/outputs/uniform-typed-crown-1000-4-2.npz": {
+          "sha256": "d3357c1e5d2bd2ac23b3d8d54684ffa852f37d763b5410efeca863fb57e1007a",
+          "bytes": 13356
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-alloc-20261109/outputs/uniform-typed-crown-10000-1-0.npz": {
+          "sha256": "b30a249dd1d012ed52e81c21ea65e23bfd9d335bed20c621ecafdd592ee7bd70",
+          "bytes": 19872
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-alloc-20261109/outputs/uniform-typed-crown-10000-1-1.npz": {
+          "sha256": "b30a249dd1d012ed52e81c21ea65e23bfd9d335bed20c621ecafdd592ee7bd70",
+          "bytes": 19872
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-alloc-20261109/outputs/uniform-typed-crown-10000-1-2.npz": {
+          "sha256": "b30a249dd1d012ed52e81c21ea65e23bfd9d335bed20c621ecafdd592ee7bd70",
+          "bytes": 19872
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-alloc-20261109/outputs/uniform-typed-crown-10000-4-0.npz": {
+          "sha256": "b30a249dd1d012ed52e81c21ea65e23bfd9d335bed20c621ecafdd592ee7bd70",
+          "bytes": 19872
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-alloc-20261109/outputs/uniform-typed-crown-10000-4-1.npz": {
+          "sha256": "b30a249dd1d012ed52e81c21ea65e23bfd9d335bed20c621ecafdd592ee7bd70",
+          "bytes": 19872
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-alloc-20261109/outputs/uniform-typed-crown-10000-4-2.npz": {
+          "sha256": "b30a249dd1d012ed52e81c21ea65e23bfd9d335bed20c621ecafdd592ee7bd70",
+          "bytes": 19872
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-alloc-20261109/outputs/uniform-typed-crown-b-1000-1-0.npz": {
+          "sha256": "8e4b47650fd749caee672e910c9cb111751d216e2bf74fc974129be9da216228",
+          "bytes": 13166
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-alloc-20261109/outputs/uniform-typed-crown-b-1000-1-1.npz": {
+          "sha256": "8e4b47650fd749caee672e910c9cb111751d216e2bf74fc974129be9da216228",
+          "bytes": 13166
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-alloc-20261109/outputs/uniform-typed-crown-b-1000-1-2.npz": {
+          "sha256": "8e4b47650fd749caee672e910c9cb111751d216e2bf74fc974129be9da216228",
+          "bytes": 13166
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-alloc-20261109/outputs/uniform-typed-crown-b-1000-4-0.npz": {
+          "sha256": "8e4b47650fd749caee672e910c9cb111751d216e2bf74fc974129be9da216228",
+          "bytes": 13166
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-alloc-20261109/outputs/uniform-typed-crown-b-1000-4-1.npz": {
+          "sha256": "8e4b47650fd749caee672e910c9cb111751d216e2bf74fc974129be9da216228",
+          "bytes": 13166
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-alloc-20261109/outputs/uniform-typed-crown-b-1000-4-2.npz": {
+          "sha256": "8e4b47650fd749caee672e910c9cb111751d216e2bf74fc974129be9da216228",
+          "bytes": 13166
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-alloc-20261109/outputs/uniform-typed-crown-b-10000-1-0.npz": {
+          "sha256": "9b122e485b38a227e8ce134fa0f34531c5e26fcb837acc19a43d0a25a434f164",
+          "bytes": 18798
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-alloc-20261109/outputs/uniform-typed-crown-b-10000-1-1.npz": {
+          "sha256": "9b122e485b38a227e8ce134fa0f34531c5e26fcb837acc19a43d0a25a434f164",
+          "bytes": 18798
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-alloc-20261109/outputs/uniform-typed-crown-b-10000-1-2.npz": {
+          "sha256": "9b122e485b38a227e8ce134fa0f34531c5e26fcb837acc19a43d0a25a434f164",
+          "bytes": 18798
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-alloc-20261109/outputs/uniform-typed-crown-b-10000-4-0.npz": {
+          "sha256": "9b122e485b38a227e8ce134fa0f34531c5e26fcb837acc19a43d0a25a434f164",
+          "bytes": 18798
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-alloc-20261109/outputs/uniform-typed-crown-b-10000-4-1.npz": {
+          "sha256": "9b122e485b38a227e8ce134fa0f34531c5e26fcb837acc19a43d0a25a434f164",
+          "bytes": 18798
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-alloc-20261109/outputs/uniform-typed-crown-b-10000-4-2.npz": {
+          "sha256": "9b122e485b38a227e8ce134fa0f34531c5e26fcb837acc19a43d0a25a434f164",
+          "bytes": 18798
+        }
+      }
+    },
+    "docs/performance/2026-11-09-float64-continuous-01-arrays.tar.xz": {
+      "sha256": "eb01e7a94d1b3969c95d7b7377a4b44c63f8ec4a439e3b4d0da734d6d229fdce",
+      "bytes": 34627564,
+      "members": {
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-continuous-correctness-outputs/continuous-crown-10000-1.npz": {
+          "sha256": "64eff67d169857a1c0b51ddd93437d3077c4bde6d4324c0b48800bb95323dbf2",
+          "bytes": 2303414
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-continuous-correctness-outputs/continuous-crown-10000-4.npz": {
+          "sha256": "64eff67d169857a1c0b51ddd93437d3077c4bde6d4324c0b48800bb95323dbf2",
+          "bytes": 2303414
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-continuous-correctness-outputs/continuous-crown-100000-1.npz": {
+          "sha256": "3685173bbe2e094e1e38c3c22913863be5c969c47fa2676ba592180d581807b3",
+          "bytes": 22918594
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-continuous-correctness-outputs/continuous-crown-100000-4.npz": {
+          "sha256": "3685173bbe2e094e1e38c3c22913863be5c969c47fa2676ba592180d581807b3",
+          "bytes": 22918594
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-continuous-correctness-outputs/continuous-surface-10000-1.npz": {
+          "sha256": "677365d7434f221bd374ae0d065a831f55f8b4bf6807f39d004d167934bbe744",
+          "bytes": 1756653
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-continuous-correctness-outputs/continuous-surface-10000-4.npz": {
+          "sha256": "677365d7434f221bd374ae0d065a831f55f8b4bf6807f39d004d167934bbe744",
+          "bytes": 1756653
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-continuous-correctness-outputs/continuous-surface-100000-1.npz": {
+          "sha256": "c92f9b51846a5e5dd2ad5460cd67de1866644e66dbdde821e868e50976073bf4",
+          "bytes": 17490956
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-continuous-correctness-outputs/continuous-surface-100000-4.npz": {
+          "sha256": "c92f9b51846a5e5dd2ad5460cd67de1866644e66dbdde821e868e50976073bf4",
+          "bytes": 17490956
+        }
+      }
+    },
+    "docs/performance/2026-11-09-float64-continuous-02-arrays.tar.xz": {
+      "sha256": "284ff0c464d7fe2423f717b42a300742404170ed774263a71272d6d2e69043c0",
+      "bytes": 23393840,
+      "members": {
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-continuous-correctness-outputs/continuous-typed-crown-10000-1.npz": {
+          "sha256": "628b15f0fe2174d9be17df0ba5e18337f15de41a292d8175efee35c0f33c32b9",
+          "bytes": 1915271
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-continuous-correctness-outputs/continuous-typed-crown-10000-4.npz": {
+          "sha256": "628b15f0fe2174d9be17df0ba5e18337f15de41a292d8175efee35c0f33c32b9",
+          "bytes": 1915271
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-continuous-correctness-outputs/continuous-typed-crown-100000-1.npz": {
+          "sha256": "5c51710ab0bd22d74c7b3dd608f04e2c5c31f3e598f626989afd59d2d6d23bf0",
+          "bytes": 19017993
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-continuous-correctness-outputs/continuous-typed-crown-100000-4.npz": {
+          "sha256": "5c51710ab0bd22d74c7b3dd608f04e2c5c31f3e598f626989afd59d2d6d23bf0",
+          "bytes": 19017993
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-continuous-correctness-outputs/continuous-typed-crown-b-10000-1.npz": {
+          "sha256": "195073234ee197fe212fa43368b2f9f638494a02ac93ad0d9dad4c26154b7ecd",
+          "bytes": 1866976
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-continuous-correctness-outputs/continuous-typed-crown-b-10000-4.npz": {
+          "sha256": "195073234ee197fe212fa43368b2f9f638494a02ac93ad0d9dad4c26154b7ecd",
+          "bytes": 1866976
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-continuous-correctness-outputs/continuous-typed-crown-b-100000-1.npz": {
+          "sha256": "94ae5a952c14cdbe1761a6eea5d9a9f18da1ffc6fd14b4c4788c5751e1a5d4b6",
+          "bytes": 18511580
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-continuous-correctness-outputs/continuous-typed-crown-b-100000-4.npz": {
+          "sha256": "94ae5a952c14cdbe1761a6eea5d9a9f18da1ffc6fd14b4c4788c5751e1a5d4b6",
+          "bytes": 18511580
+        }
+      }
+    },
+    "docs/performance/2026-11-09-float64-auxiliary-arrays.tar.xz": {
+      "sha256": "702c1b7a6ebcf7051b0f3e86d4571c575649cc695a40a994c6e11d35746f92e4",
+      "bytes": 420064,
+      "members": {
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-auxiliary-outputs/mask-only-10000-0-0-timing.npz": {
+          "sha256": "6f325cca5f4e9b80b52e757adaf6f42b43a73bbbfd9d4b4c6eef10ae105b87fa",
+          "bytes": 79301
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-auxiliary-outputs/mask-only-10000-0-1-timing.npz": {
+          "sha256": "6f325cca5f4e9b80b52e757adaf6f42b43a73bbbfd9d4b4c6eef10ae105b87fa",
+          "bytes": 79301
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-auxiliary-outputs/mask-only-10000-0-2-timing.npz": {
+          "sha256": "6f325cca5f4e9b80b52e757adaf6f42b43a73bbbfd9d4b4c6eef10ae105b87fa",
+          "bytes": 79301
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-auxiliary-outputs/mask-only-10000-1-0-allocation.npz": {
+          "sha256": "6f325cca5f4e9b80b52e757adaf6f42b43a73bbbfd9d4b4c6eef10ae105b87fa",
+          "bytes": 79301
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-auxiliary-outputs/mask-only-10000-1-0-timing.npz": {
+          "sha256": "6f325cca5f4e9b80b52e757adaf6f42b43a73bbbfd9d4b4c6eef10ae105b87fa",
+          "bytes": 79301
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-auxiliary-outputs/mask-only-10000-1-1-timing.npz": {
+          "sha256": "6f325cca5f4e9b80b52e757adaf6f42b43a73bbbfd9d4b4c6eef10ae105b87fa",
+          "bytes": 79301
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-auxiliary-outputs/mask-only-10000-1-2-timing.npz": {
+          "sha256": "6f325cca5f4e9b80b52e757adaf6f42b43a73bbbfd9d4b4c6eef10ae105b87fa",
+          "bytes": 79301
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-auxiliary-outputs/mask-only-10000-4-0-allocation.npz": {
+          "sha256": "6f325cca5f4e9b80b52e757adaf6f42b43a73bbbfd9d4b4c6eef10ae105b87fa",
+          "bytes": 79301
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-auxiliary-outputs/mask-only-10000-4-0-timing.npz": {
+          "sha256": "6f325cca5f4e9b80b52e757adaf6f42b43a73bbbfd9d4b4c6eef10ae105b87fa",
+          "bytes": 79301
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-auxiliary-outputs/mask-only-10000-4-1-timing.npz": {
+          "sha256": "6f325cca5f4e9b80b52e757adaf6f42b43a73bbbfd9d4b4c6eef10ae105b87fa",
+          "bytes": 79301
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-auxiliary-outputs/mask-only-10000-4-2-timing.npz": {
+          "sha256": "6f325cca5f4e9b80b52e757adaf6f42b43a73bbbfd9d4b4c6eef10ae105b87fa",
+          "bytes": 79301
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-auxiliary-outputs/mask-only-100000-0-0-timing.npz": {
+          "sha256": "3a500e65afc6715cf91c6740e208532bbb502449e4a213502185969d6e6d76a4",
+          "bytes": 267628
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-auxiliary-outputs/mask-only-100000-0-1-timing.npz": {
+          "sha256": "3a500e65afc6715cf91c6740e208532bbb502449e4a213502185969d6e6d76a4",
+          "bytes": 267628
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-auxiliary-outputs/mask-only-100000-0-2-timing.npz": {
+          "sha256": "3a500e65afc6715cf91c6740e208532bbb502449e4a213502185969d6e6d76a4",
+          "bytes": 267628
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-auxiliary-outputs/mask-only-100000-1-0-allocation.npz": {
+          "sha256": "3a500e65afc6715cf91c6740e208532bbb502449e4a213502185969d6e6d76a4",
+          "bytes": 267628
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-auxiliary-outputs/mask-only-100000-1-0-timing.npz": {
+          "sha256": "3a500e65afc6715cf91c6740e208532bbb502449e4a213502185969d6e6d76a4",
+          "bytes": 267628
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-auxiliary-outputs/mask-only-100000-1-1-timing.npz": {
+          "sha256": "3a500e65afc6715cf91c6740e208532bbb502449e4a213502185969d6e6d76a4",
+          "bytes": 267628
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-auxiliary-outputs/mask-only-100000-1-2-timing.npz": {
+          "sha256": "3a500e65afc6715cf91c6740e208532bbb502449e4a213502185969d6e6d76a4",
+          "bytes": 267628
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-auxiliary-outputs/mask-only-100000-4-0-allocation.npz": {
+          "sha256": "3a500e65afc6715cf91c6740e208532bbb502449e4a213502185969d6e6d76a4",
+          "bytes": 267628
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-auxiliary-outputs/mask-only-100000-4-0-timing.npz": {
+          "sha256": "3a500e65afc6715cf91c6740e208532bbb502449e4a213502185969d6e6d76a4",
+          "bytes": 267628
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-auxiliary-outputs/mask-only-100000-4-1-timing.npz": {
+          "sha256": "3a500e65afc6715cf91c6740e208532bbb502449e4a213502185969d6e6d76a4",
+          "bytes": 267628
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-auxiliary-outputs/mask-only-100000-4-2-timing.npz": {
+          "sha256": "3a500e65afc6715cf91c6740e208532bbb502449e4a213502185969d6e6d76a4",
+          "bytes": 267628
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-auxiliary-outputs/mixed-layout-c-10000-0-0-timing.npz": {
+          "sha256": "6f519ed088245a0dfaf500deb034ee1cf03eae2b0ed1dcdf13f0624921c88471",
+          "bytes": 71498
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-auxiliary-outputs/mixed-layout-c-10000-0-1-timing.npz": {
+          "sha256": "6f519ed088245a0dfaf500deb034ee1cf03eae2b0ed1dcdf13f0624921c88471",
+          "bytes": 71498
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-auxiliary-outputs/mixed-layout-c-10000-0-2-timing.npz": {
+          "sha256": "6f519ed088245a0dfaf500deb034ee1cf03eae2b0ed1dcdf13f0624921c88471",
+          "bytes": 71498
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-auxiliary-outputs/mixed-layout-c-10000-1-0-allocation.npz": {
+          "sha256": "6f519ed088245a0dfaf500deb034ee1cf03eae2b0ed1dcdf13f0624921c88471",
+          "bytes": 71498
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-auxiliary-outputs/mixed-layout-c-10000-1-0-timing.npz": {
+          "sha256": "6f519ed088245a0dfaf500deb034ee1cf03eae2b0ed1dcdf13f0624921c88471",
+          "bytes": 71498
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-auxiliary-outputs/mixed-layout-c-10000-1-1-timing.npz": {
+          "sha256": "6f519ed088245a0dfaf500deb034ee1cf03eae2b0ed1dcdf13f0624921c88471",
+          "bytes": 71498
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-auxiliary-outputs/mixed-layout-c-10000-1-2-timing.npz": {
+          "sha256": "6f519ed088245a0dfaf500deb034ee1cf03eae2b0ed1dcdf13f0624921c88471",
+          "bytes": 71498
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-auxiliary-outputs/mixed-layout-c-10000-4-0-allocation.npz": {
+          "sha256": "6f519ed088245a0dfaf500deb034ee1cf03eae2b0ed1dcdf13f0624921c88471",
+          "bytes": 71498
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-auxiliary-outputs/mixed-layout-c-10000-4-0-timing.npz": {
+          "sha256": "6f519ed088245a0dfaf500deb034ee1cf03eae2b0ed1dcdf13f0624921c88471",
+          "bytes": 71498
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-auxiliary-outputs/mixed-layout-c-10000-4-1-timing.npz": {
+          "sha256": "6f519ed088245a0dfaf500deb034ee1cf03eae2b0ed1dcdf13f0624921c88471",
+          "bytes": 71498
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-auxiliary-outputs/mixed-layout-c-10000-4-2-timing.npz": {
+          "sha256": "6f519ed088245a0dfaf500deb034ee1cf03eae2b0ed1dcdf13f0624921c88471",
+          "bytes": 71498
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-auxiliary-outputs/mixed-layout-c-100000-0-0-timing.npz": {
+          "sha256": "d95a3609c178fd78e4b3ab6b275e5a0387e54d179ba5e8d55a6701e7822eab81",
+          "bytes": 290899
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-auxiliary-outputs/mixed-layout-c-100000-0-1-timing.npz": {
+          "sha256": "d95a3609c178fd78e4b3ab6b275e5a0387e54d179ba5e8d55a6701e7822eab81",
+          "bytes": 290899
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-auxiliary-outputs/mixed-layout-c-100000-0-2-timing.npz": {
+          "sha256": "d95a3609c178fd78e4b3ab6b275e5a0387e54d179ba5e8d55a6701e7822eab81",
+          "bytes": 290899
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-auxiliary-outputs/mixed-layout-c-100000-1-0-allocation.npz": {
+          "sha256": "d95a3609c178fd78e4b3ab6b275e5a0387e54d179ba5e8d55a6701e7822eab81",
+          "bytes": 290899
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-auxiliary-outputs/mixed-layout-c-100000-1-0-timing.npz": {
+          "sha256": "d95a3609c178fd78e4b3ab6b275e5a0387e54d179ba5e8d55a6701e7822eab81",
+          "bytes": 290899
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-auxiliary-outputs/mixed-layout-c-100000-1-1-timing.npz": {
+          "sha256": "d95a3609c178fd78e4b3ab6b275e5a0387e54d179ba5e8d55a6701e7822eab81",
+          "bytes": 290899
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-auxiliary-outputs/mixed-layout-c-100000-1-2-timing.npz": {
+          "sha256": "d95a3609c178fd78e4b3ab6b275e5a0387e54d179ba5e8d55a6701e7822eab81",
+          "bytes": 290899
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-auxiliary-outputs/mixed-layout-c-100000-4-0-allocation.npz": {
+          "sha256": "d95a3609c178fd78e4b3ab6b275e5a0387e54d179ba5e8d55a6701e7822eab81",
+          "bytes": 290899
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-auxiliary-outputs/mixed-layout-c-100000-4-0-timing.npz": {
+          "sha256": "d95a3609c178fd78e4b3ab6b275e5a0387e54d179ba5e8d55a6701e7822eab81",
+          "bytes": 290899
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-auxiliary-outputs/mixed-layout-c-100000-4-1-timing.npz": {
+          "sha256": "d95a3609c178fd78e4b3ab6b275e5a0387e54d179ba5e8d55a6701e7822eab81",
+          "bytes": 290899
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-auxiliary-outputs/mixed-layout-c-100000-4-2-timing.npz": {
+          "sha256": "d95a3609c178fd78e4b3ab6b275e5a0387e54d179ba5e8d55a6701e7822eab81",
+          "bytes": 290899
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-auxiliary-outputs/variable-containment-10000-0-0-timing.npz": {
+          "sha256": "ff466dfba73138a09a210fd6063816ea63279e22fafc53bd884b7c18358f9182",
+          "bytes": 63490
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-auxiliary-outputs/variable-containment-10000-0-1-timing.npz": {
+          "sha256": "ff466dfba73138a09a210fd6063816ea63279e22fafc53bd884b7c18358f9182",
+          "bytes": 63490
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-auxiliary-outputs/variable-containment-10000-0-2-timing.npz": {
+          "sha256": "ff466dfba73138a09a210fd6063816ea63279e22fafc53bd884b7c18358f9182",
+          "bytes": 63490
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-auxiliary-outputs/variable-containment-10000-1-0-allocation.npz": {
+          "sha256": "ff466dfba73138a09a210fd6063816ea63279e22fafc53bd884b7c18358f9182",
+          "bytes": 63490
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-auxiliary-outputs/variable-containment-10000-1-0-timing.npz": {
+          "sha256": "ff466dfba73138a09a210fd6063816ea63279e22fafc53bd884b7c18358f9182",
+          "bytes": 63490
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-auxiliary-outputs/variable-containment-10000-1-1-timing.npz": {
+          "sha256": "ff466dfba73138a09a210fd6063816ea63279e22fafc53bd884b7c18358f9182",
+          "bytes": 63490
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-auxiliary-outputs/variable-containment-10000-1-2-timing.npz": {
+          "sha256": "ff466dfba73138a09a210fd6063816ea63279e22fafc53bd884b7c18358f9182",
+          "bytes": 63490
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-auxiliary-outputs/variable-containment-10000-4-0-allocation.npz": {
+          "sha256": "ff466dfba73138a09a210fd6063816ea63279e22fafc53bd884b7c18358f9182",
+          "bytes": 63490
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-auxiliary-outputs/variable-containment-10000-4-0-timing.npz": {
+          "sha256": "ff466dfba73138a09a210fd6063816ea63279e22fafc53bd884b7c18358f9182",
+          "bytes": 63490
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-auxiliary-outputs/variable-containment-10000-4-1-timing.npz": {
+          "sha256": "ff466dfba73138a09a210fd6063816ea63279e22fafc53bd884b7c18358f9182",
+          "bytes": 63490
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-auxiliary-outputs/variable-containment-10000-4-2-timing.npz": {
+          "sha256": "ff466dfba73138a09a210fd6063816ea63279e22fafc53bd884b7c18358f9182",
+          "bytes": 63490
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-auxiliary-outputs/variable-containment-100000-0-0-timing.npz": {
+          "sha256": "d04e76e92f112a8336f31ff00a4b8b6fa9e9d22da648e3385cef30ee38d30d31",
+          "bytes": 527468
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-auxiliary-outputs/variable-containment-100000-0-1-timing.npz": {
+          "sha256": "d04e76e92f112a8336f31ff00a4b8b6fa9e9d22da648e3385cef30ee38d30d31",
+          "bytes": 527468
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-auxiliary-outputs/variable-containment-100000-0-2-timing.npz": {
+          "sha256": "d04e76e92f112a8336f31ff00a4b8b6fa9e9d22da648e3385cef30ee38d30d31",
+          "bytes": 527468
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-auxiliary-outputs/variable-containment-100000-1-0-allocation.npz": {
+          "sha256": "d04e76e92f112a8336f31ff00a4b8b6fa9e9d22da648e3385cef30ee38d30d31",
+          "bytes": 527468
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-auxiliary-outputs/variable-containment-100000-1-0-timing.npz": {
+          "sha256": "d04e76e92f112a8336f31ff00a4b8b6fa9e9d22da648e3385cef30ee38d30d31",
+          "bytes": 527468
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-auxiliary-outputs/variable-containment-100000-1-1-timing.npz": {
+          "sha256": "d04e76e92f112a8336f31ff00a4b8b6fa9e9d22da648e3385cef30ee38d30d31",
+          "bytes": 527468
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-auxiliary-outputs/variable-containment-100000-1-2-timing.npz": {
+          "sha256": "d04e76e92f112a8336f31ff00a4b8b6fa9e9d22da648e3385cef30ee38d30d31",
+          "bytes": 527468
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-auxiliary-outputs/variable-containment-100000-4-0-allocation.npz": {
+          "sha256": "d04e76e92f112a8336f31ff00a4b8b6fa9e9d22da648e3385cef30ee38d30d31",
+          "bytes": 527468
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-auxiliary-outputs/variable-containment-100000-4-0-timing.npz": {
+          "sha256": "d04e76e92f112a8336f31ff00a4b8b6fa9e9d22da648e3385cef30ee38d30d31",
+          "bytes": 527468
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-auxiliary-outputs/variable-containment-100000-4-1-timing.npz": {
+          "sha256": "d04e76e92f112a8336f31ff00a4b8b6fa9e9d22da648e3385cef30ee38d30d31",
+          "bytes": 527468
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-auxiliary-outputs/variable-containment-100000-4-2-timing.npz": {
+          "sha256": "d04e76e92f112a8336f31ff00a4b8b6fa9e9d22da648e3385cef30ee38d30d31",
+          "bytes": 527468
+        }
+      }
+    },
+    "docs/performance/2026-11-09-float64-pilot-arrays.tar.xz": {
+      "sha256": "ef70a309ee84071aac616495f9c25f32fd8bd37a6045d7f283b55127edc7acb5",
+      "bytes": 190732,
+      "members": {
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-scheduling-pilot-outputs/heterogeneous-crown-10000-0.npz": {
+          "sha256": "a0c48539a11ea113c831d54dd2eb91115b7b048b447e4875f365dd7fb9429f81",
+          "bytes": 60801
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-scheduling-pilot-outputs/heterogeneous-crown-10000-1.npz": {
+          "sha256": "a0c48539a11ea113c831d54dd2eb91115b7b048b447e4875f365dd7fb9429f81",
+          "bytes": 60801
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-scheduling-pilot-outputs/heterogeneous-crown-10000-4.npz": {
+          "sha256": "a0c48539a11ea113c831d54dd2eb91115b7b048b447e4875f365dd7fb9429f81",
+          "bytes": 60801
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-scheduling-pilot-outputs/heterogeneous-crown-100000-0.npz": {
+          "sha256": "9e37365bb3efac18de45de3a23d50c3f9d934dbbde0e762325b1c29a0a2292e0",
+          "bytes": 220287
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-scheduling-pilot-outputs/heterogeneous-crown-100000-1.npz": {
+          "sha256": "9e37365bb3efac18de45de3a23d50c3f9d934dbbde0e762325b1c29a0a2292e0",
+          "bytes": 220287
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-scheduling-pilot-outputs/heterogeneous-crown-100000-4.npz": {
+          "sha256": "9e37365bb3efac18de45de3a23d50c3f9d934dbbde0e762325b1c29a0a2292e0",
+          "bytes": 220287
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-scheduling-pilot-outputs/heterogeneous-surface-10000-0.npz": {
+          "sha256": "127531a951a66b0f15f6a741b506e4fd21eb1a48734a4375a1393809b03babb9",
+          "bytes": 46387
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-scheduling-pilot-outputs/heterogeneous-surface-10000-1.npz": {
+          "sha256": "127531a951a66b0f15f6a741b506e4fd21eb1a48734a4375a1393809b03babb9",
+          "bytes": 46387
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-scheduling-pilot-outputs/heterogeneous-surface-10000-4.npz": {
+          "sha256": "127531a951a66b0f15f6a741b506e4fd21eb1a48734a4375a1393809b03babb9",
+          "bytes": 46387
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-scheduling-pilot-outputs/heterogeneous-surface-100000-0.npz": {
+          "sha256": "9dcbb0768086ec97603fd85d04c16471ce9e2a9e3e8486c979b6cb365437c6d2",
+          "bytes": 158920
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-scheduling-pilot-outputs/heterogeneous-surface-100000-1.npz": {
+          "sha256": "9dcbb0768086ec97603fd85d04c16471ce9e2a9e3e8486c979b6cb365437c6d2",
+          "bytes": 158920
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-scheduling-pilot-outputs/heterogeneous-surface-100000-4.npz": {
+          "sha256": "9dcbb0768086ec97603fd85d04c16471ce9e2a9e3e8486c979b6cb365437c6d2",
+          "bytes": 158920
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-scheduling-pilot-outputs/heterogeneous-typed-crown-10000-0.npz": {
+          "sha256": "410a7cae4e29c5325b41de7ab5f13f6a4507243241d6473f36a389655558c3bd",
+          "bytes": 80921
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-scheduling-pilot-outputs/heterogeneous-typed-crown-10000-1.npz": {
+          "sha256": "410a7cae4e29c5325b41de7ab5f13f6a4507243241d6473f36a389655558c3bd",
+          "bytes": 80921
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-scheduling-pilot-outputs/heterogeneous-typed-crown-10000-4.npz": {
+          "sha256": "410a7cae4e29c5325b41de7ab5f13f6a4507243241d6473f36a389655558c3bd",
+          "bytes": 80921
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-scheduling-pilot-outputs/heterogeneous-typed-crown-100000-0.npz": {
+          "sha256": "adc5d6dfc6bf78c5f60ebf7c93b2ba90e186ad217437b5c451529237f4bc9e91",
+          "bytes": 267175
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-scheduling-pilot-outputs/heterogeneous-typed-crown-100000-1.npz": {
+          "sha256": "adc5d6dfc6bf78c5f60ebf7c93b2ba90e186ad217437b5c451529237f4bc9e91",
+          "bytes": 267175
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-scheduling-pilot-outputs/heterogeneous-typed-crown-100000-4.npz": {
+          "sha256": "adc5d6dfc6bf78c5f60ebf7c93b2ba90e186ad217437b5c451529237f4bc9e91",
+          "bytes": 267175
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-scheduling-pilot-outputs/heterogeneous-typed-crown-b-10000-0.npz": {
+          "sha256": "612a65d9839f5ac7551f7ed3c1aeebdc7080e7754941d0af9e44ac243048f1a2",
+          "bytes": 72344
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-scheduling-pilot-outputs/heterogeneous-typed-crown-b-10000-1.npz": {
+          "sha256": "612a65d9839f5ac7551f7ed3c1aeebdc7080e7754941d0af9e44ac243048f1a2",
+          "bytes": 72344
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-scheduling-pilot-outputs/heterogeneous-typed-crown-b-10000-4.npz": {
+          "sha256": "612a65d9839f5ac7551f7ed3c1aeebdc7080e7754941d0af9e44ac243048f1a2",
+          "bytes": 72344
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-scheduling-pilot-outputs/heterogeneous-typed-crown-b-100000-0.npz": {
+          "sha256": "ea35fc9f85440679c937eff43a7332e3fa9a999e84813e8df66491e838c1024c",
+          "bytes": 262215
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-scheduling-pilot-outputs/heterogeneous-typed-crown-b-100000-1.npz": {
+          "sha256": "ea35fc9f85440679c937eff43a7332e3fa9a999e84813e8df66491e838c1024c",
+          "bytes": 262215
+        },
+        ".superpowers/sdd/2026-11-07-rust-float64-raster-integration/task6-scheduling-pilot-outputs/heterogeneous-typed-crown-b-100000-4.npz": {
+          "sha256": "ea35fc9f85440679c937eff43a7332e3fa9a999e84813e8df66491e838c1024c",
+          "bytes": 262215
+        }
+      }
+    }
+  }
+}

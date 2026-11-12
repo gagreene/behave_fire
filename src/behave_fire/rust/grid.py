@@ -10,9 +10,21 @@ import numpy as np
 
 from ._bridge import _native
 from ._model_api4 import _buffer, _FIELDS, _registry, _settings
-from ._numeric import normalize_control, normalize_physical
+from ._numeric import broadcast_shape, normalize_control, normalize_fuel_identifier, normalize_physical
 from .fuel_models import FuelModels
 from .fuel_models_array import build_fuel_lookup_arrays
+
+
+def _flag(value):
+    """Own a structural flag without treating nonbinary integers as booleans.
+
+    :param value: Boolean or integral scalar/array containing only zero and one.
+    :return: Independent boolean storage; missing and nonbinary values raise.
+    """
+    data = normalize_control(value, np.int64)
+    if np.any((data != 0) & (data != 1)):
+        raise ValueError('Grid flags must be binary values, 0 or 1.')
+    return np.asarray(data, dtype=np.bool_)
 
 
 def _fuel_snapshot(fuels):
@@ -82,20 +94,28 @@ class _Grid:
         if unknown:
             raise ValueError(f'Unknown {self._pipeline} inputs: {sorted(unknown)}')
         missing = physical_names - set(inputs)
-        if self._pipeline == 'surface' and 'fuel_model_grid' not in inputs:
+        if self._pipeline == 'surface' and fuelbed is None and 'fuel_model_grid' not in inputs:
             missing.add('fuel_model_grid')
         if missing:
             raise ValueError(f'Missing {self._pipeline} inputs: {sorted(missing)}')
+        from ._bridge import _EMPTY_KEYS
+
+        if fuelbed is not None:
+            if self._pipeline != 'surface':
+                raise ValueError('Only Surface accepts supplied fuelbeds.')
+            unknown = set(fuelbed) - set(_EMPTY_KEYS['calculate_fuelbed_intermediates'])
+            if unknown:
+                raise ValueError(f'Unknown supplied fuelbed columns: {sorted(unknown)}')
         physical = {name: normalize_physical(value) for name, value in inputs.items()
                     if self._kinds[name] == 'physical'}
-        controls = {name: normalize_control(value, np.bool_ if name == 'validity' else np.int32)
+        controls = {name: _flag(value) if name == 'validity' else normalize_fuel_identifier(value)
                     for name, value in inputs.items() if self._kinds[name] != 'physical'}
         bed = None if fuelbed is None else {
-            name: normalize_control(value, np.bool_) if name == 'is_defined' else normalize_physical(value)
+            name: _flag(value) if name == 'is_defined' else normalize_physical(value)
             for name, value in fuelbed.items()}
         arrays = list(physical.values()) + list(controls.values()) + ([] if bed is None else list(bed.values()))
         if shape is None:
-            shape = np.broadcast_shapes(*(value.shape for value in arrays))
+            shape = broadcast_shape(*(value.shape for value in arrays))
         else:
             shape = tuple(operator.index(axis) for axis in shape)
         self._shape = tuple(shape)
@@ -103,8 +123,6 @@ class _Grid:
         controls = {name: _buffer(value, shape) for name, value in controls.items()}
         if bed is not None:
             bed = {name: _buffer(value, shape) for name, value in bed.items()}
-        from ._bridge import _EMPTY_KEYS
-
         defaults = _EMPTY_KEYS['run_surface_fire' if self._pipeline == 'surface' else 'run_crown_fire']
         selected = tuple(defaults if outputs is None else outputs)
         retained = tuple(keep)
@@ -137,8 +155,12 @@ class _Grid:
             raise ValueError(f'Unknown grid field {name}')
         if required is not None and kind != required:
             raise TypeError(f'{name} requires {kind} storage')
-        array = normalize_physical(value) if kind == 'physical' else normalize_control(
-            value, np.int32 if kind == 'code' else np.bool_)
+        if kind == 'physical':
+            array = normalize_physical(value)
+        elif name == 'fuel_model_grid':
+            array = normalize_fuel_identifier(value)
+        else:
+            array = normalize_control(value, np.int32) if kind == 'code' else _flag(value)
         return _buffer(array, self._shape)
 
     def clear_injection(self, name):
@@ -163,7 +185,8 @@ class _Grid:
         :param name: Stable native field name, including dotted particle and fuelbed names.
         :return: Independent array on the common shape; freed/uncomputed fields raise ValueError.
         """
-        return self._native.get(name)
+        result = self._native.get(name)
+        return result.reshape(self._shape) if len(self._shape) > 32 else result
 
     @property
     def outputs(self):
@@ -225,7 +248,8 @@ class _Grid:
         """Edit exact fuel identifiers or inject a Crown classification.
 
         :param name: fuel_model_grid or fire_type.
-        :param value: Integral scalar/array; fire_type accepts -1 through 3.
+        :param value: Integral scalar/array; fuel IDs also accept integral floats,
+                while fire_type requires integer storage with values -1 through 3.
         :return: None; owns replacements and invalidates descendants.
         """
         self._native.set(name, self._column(name, value, 'code'), False)
@@ -234,8 +258,10 @@ class _Grid:
         """Edit validity/definition flags or inject a classification flag.
 
         :param name: Stable boolean field name.
-        :param value: Boolean or integral scalar/array without missing values.
-        :return: None; owns replacements and invalidates descendants.
+        :param value: Boolean or integral scalar/array containing only zero and one, without missing values.
+        :return: None; owns replacements and invalidates descendants. Final Crown
+                selection prioritizes Surface, then passive, then active flags;
+                all-false classification flags leave final behavior unavailable.
         """
         self._native.set(name, self._column(name, value, 'flag'), False)
 
@@ -300,9 +326,10 @@ class CrownGrid(_Grid):
 class SurfaceGrid(_Grid):
     """Staged Surface raster accepting scalar or common-shape input columns.
 
-    Required inputs are fuel_model_grid, m1h, m10h, m100h, mlh, mlw, wind_speed,
+    Required inputs are m1h, m10h, m100h, mlh, mlw, wind_speed,
     wind_direction, slope, aspect, canopy_cover, canopy_height, and crown_ratio.
-    Optional validity and user_waf columns retain exact structural roles.
+    fuel_model_grid is required only without a supplied fuelbed. Optional
+    validity and user_waf columns retain exact structural roles.
     Physical masked values become NaN; complex/object inputs raise TypeError.
     """
 

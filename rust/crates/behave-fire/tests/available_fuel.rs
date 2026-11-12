@@ -89,7 +89,7 @@ fn missing_prepared_fuel_properties_propagate_in_surface_and_crown() {
                 "independent sigma {id}/{property}"
             );
             assert_eq!(output.midflame_wind_speed, [35.2]);
-            // The API3 legacy policy is deliberately unmigrated at this checkpoint.
+            // Public scalar plans share the configured model's missing-data policy.
             assert!(plan
                 .run_cell(
                     &SurfaceCell::new(id),
@@ -97,7 +97,7 @@ fn missing_prepared_fuel_properties_propagate_in_surface_and_crown() {
                     SurfaceTweaks::default()
                 )
                 .reaction_intensity
-                .is_finite());
+                .is_nan());
         }
         let run = ModelRun::Crown {
             raster: CrownRaster::new(

@@ -43,9 +43,13 @@ fn crown_validity_empty_shapes_and_bad_columns_keep_their_contracts() {
         .run(&plan, &fuels, &CrownTweakColumns::default(), 4)
         .unwrap();
     assert_eq!(output.validity.as_deref(), Some(validity.as_slice()));
-    assert_eq!(output.fire_type[0], 0);
-    for (_, column) in comparison_columns(output.into_named_columns()) {
-        assert_eq!(column[0].to_bits(), 0.0_f64.to_bits());
+    assert_eq!(output.fire_type[0], -1);
+    for (name, column) in comparison_columns(output.into_named_columns()) {
+        if name == "fire_type" {
+            assert_eq!(column[0], -1.);
+        } else {
+            assert!(column[0].is_nan());
+        }
     }
     let empty = CrownRaster::new(GridShape::new(vec![0, 3]).unwrap(), CrownColumns::default())
         .unwrap()
@@ -285,8 +289,10 @@ fn native_validity_is_not_a_numpy_mask() {
         )
         .unwrap();
     assert_eq!(output.validity.as_deref(), Some(validity.as_slice()));
-    assert_eq!(output.spread_rate, [99.0, 0.0, 0.0]);
-    assert_eq!(output.fire_length_to_width_ratio[1], 0.0);
+    assert_eq!(output.spread_rate[0], 99.0);
+    assert!(output.spread_rate[1].is_nan());
+    assert_eq!(output.spread_rate[2], 0.0);
+    assert!(output.fire_length_to_width_ratio[1].is_nan());
     assert_eq!(output.fire_length_to_width_ratio[2], 1.0);
 }
 

@@ -523,8 +523,10 @@ class FuelModels:
             SAVRs (e.g. ``SurfaceAreaToVolumeUnits.SurfaceAreaToVolumeUnitsEnum.SquareFeetOverCubicFeet``).
         :param is_dynamic: ``True`` if the model uses dynamic live/dead
             load transfer.
-        :return: ``True`` on success; ``False`` if the slot is reserved.
+        :return: ``True`` on success; ``False`` for reserved slots or IDs outside 1..256.
         """
+        if not 1 <= fuel_model_number <= 256:
+            return False
         existing = self.fuel_models_.get(fuel_model_number)
         if existing and existing.get('is_reserved', False):
             return False
@@ -793,6 +795,13 @@ class FuelModels:
         return m.get('is_dynamic', False) if m else False
 
     def is_fuel_model_defined(self, fuel_model_number):
+        """Test definition only within the official C++ fuel identifier range.
+
+        :param fuel_model_number: Fuel identifier to inspect.
+        :return: False outside 1..256, otherwise the stored definition flag.
+        """
+        if not 1 <= fuel_model_number <= 256:
+            return False
         m = self.get(fuel_model_number)
         return m.get('is_defined', False) if m else False
 

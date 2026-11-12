@@ -4,8 +4,8 @@
 `behave-py` crate is private and is never published to crates.io. The core has
 no normal or build dependencies, Python callbacks, build-time data generation,
 or external runtime tables. Its license is `MIT AND BSD-3-Clause`; the archive
-retains the project license, attribution notice, and NumPy and Intel SVML kernel
-licenses.
+retains the project license and historical NumPy/Intel notices. The current core
+forbids unsafe code and contains no float32/SVML emulation.
 
 The initial core version is `0.1.0`. Publication requires separate approval.
 A read-only crates.io query on 2026-11-04 returned no existing `behave-fire`

@@ -97,7 +97,8 @@ cell on the stack and never a full-grid vector of cell records.
 Overrides are per-cell columns (`SurfaceTweakColumns`, `CrownTweakColumns`)
 applied at the stage that would produce the value, so downstream outputs use
 them; `run_from_fuelbeds` resumes from edited `FuelbedColumns`. An optional native
-`validity` column skips cells that are false and returns zero payloads for them.
+`validity` column skips cells that are false and returns NaN physical values and
+classification -1 for them.
 That low-level validity policy is separate from the Python-facing NaN policy.
 `run_tile` processes a caller-chosen range and returns a
 one-dimensional tile in original logical order. Raster file input and output

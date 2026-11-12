@@ -50,3 +50,10 @@ def test_wheel_identity_report_requires_only_live_native_metadata():
     report = _tool('smoke_test_wheel')._native_report()
     assert report['native_physical_dtype'] == 'float64'
     assert report['binding_api_version'] == 4
+
+
+def test_wheel_smoke_checks_normalization_missing_fields_stages_and_owned_buffers():
+    from behave_fire import rust
+
+    result = _tool('smoke_test_wheel')._native_contract(rust)
+    assert result == {'float64_contract': True, 'staged_injection': True, 'owned_outputs': True}

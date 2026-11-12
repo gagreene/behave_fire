@@ -431,7 +431,7 @@ pub fn model_batch<'py>(
     let controls = controls(control_values, &grid)?;
     let fuels = fuels(registry)?;
     let options = options(settings)?;
-    let run = configured_run(kind, grid, &values, &controls, &fuels, options)?;
+    let run = configured_run(kind, grid, &values, &controls, &fuels, options, None)?;
     let request = match run {
         ModelRun::Surface { .. } => OutputRequest::surface(),
         ModelRun::Crown { .. } => OutputRequest::crown(),
@@ -494,6 +494,7 @@ pub(crate) fn configured_run<'a>(
     controls: &'a TypedControls,
     fuels: &'a PreparedFuels,
     options: SurfaceOptions,
+    source_override: Option<&SurfaceSource<'a>>,
 ) -> PyResult<ModelRun<'a>> {
     let TypedControls { ids, validity } = controls;
     // These operands are not read under their selected configuration. Omit them
@@ -516,15 +517,18 @@ pub(crate) fn configured_run<'a>(
     });
     Ok(match kind {
         "surface" => {
-            let ids = ids
-                .as_ref()
-                .ok_or_else(|| PyValueError::new_err("missing fuel_model_grid"))?;
+            let ids = match ids.as_ref() {
+                Some(ids) if ids.len() == 1 => PerCell::Scalar(ids[0]),
+                Some(ids) => PerCell::Cells(ids),
+                // The supplied fuelbed is the scientific source. This unused
+                // structural field never triggers a registry lookup.
+                None if matches!(source_override, Some(SurfaceSource::Fuelbeds(_))) => {
+                    PerCell::Scalar(0)
+                }
+                None => return Err(PyValueError::new_err("missing fuel_model_grid")),
+            };
             let fields = SurfaceColumns {
-                fuel_model_grid: if ids.len() == 1 {
-                    PerCell::Scalar(ids[0])
-                } else {
-                    PerCell::Cells(ids)
-                },
+                fuel_model_grid: ids,
                 m1h: column(values, "m1h")?,
                 m10h: column(values, "m10h")?,
                 m100h: column(values, "m100h")?,
@@ -580,7 +584,9 @@ pub(crate) fn configured_run<'a>(
                 raster: SurfaceRaster::new(grid, fields)
                     .map_err(|e| PyValueError::new_err(e.to_string()))?,
                 plan: SurfacePlan::new(options),
-                source: SurfaceSource::Fuels(fuels),
+                source: source_override
+                    .copied()
+                    .unwrap_or(SurfaceSource::Fuels(fuels)),
                 tweaks: SurfaceTweakColumns::default(),
             }
         }

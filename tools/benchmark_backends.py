@@ -24,6 +24,7 @@ import threading
 import time
 
 from performance_cases import OPERATIONS, assert_outputs, build_inputs, paired_schedule, supplied_surface
+from performance_contract import input_identity, requested_outputs, save_outputs
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -111,6 +112,10 @@ def _command(arguments, cells, operation, dataset, backend, threads, validation)
                "--dataset", dataset, "--seed", str(arguments.seed), "--warm-calls", str(arguments.warm_calls)]
     if validation:
         command.append("--validate-only")
+        output = getattr(arguments, 'output', None)
+        if output is not None:
+            artifact = output.parent/(output.stem+'-outputs')/f'{dataset}-{operation}-{cells}-{threads}.npz'
+            command.extend(['--artifacts', str(artifact)])
     elif arguments.profile:
         command.append("--profile")
     return command
@@ -164,6 +169,7 @@ def _model_call(arguments, backend, *, normalize_reference=False):
         model = BehaveRun(FuelModels(), threads=arguments.threads)
     else:
         model = PythonRun(FuelModels())
+    original = dict(inputs)
     if arguments.operation == "surface":
         def call():
             """Invoke Surface with normalized shape-matching input arrays.
@@ -182,6 +188,7 @@ def _model_call(arguments, backend, *, normalize_reference=False):
             phase = ((np.arange(arguments.cells) + arguments.seed) % 17) / 16
             canopy = dict(canopy_base_height=1 + 5 * phase, canopy_height=15 + 25 * phase,
                           canopy_bulk_density=.005 + .02 * phase, moisture_foliar=80 + 40 * phase)
+        original.update(surface_results=surface, **canopy)
 
         def call():
             """Invoke Crown with independently typed supplied Surface fields.
@@ -192,6 +199,13 @@ def _model_call(arguments, backend, *, normalize_reference=False):
                 from float64_model_reference import model_reference
                 return model_reference(model.do_crown_run, dict(surface_results=surface, **inputs, **canopy))
             return model.do_crown_run(surface_results=surface, **inputs, **canopy)
+    actual_backend = ('rust' if type(model).__module__.startswith('behave_fire.rust.') else
+                      'python' if type(model).__module__ == 'behave_fire.behave' else 'unknown')
+    call.evidence = dict(binding_api_version=4, actual_backend=actual_backend,
+                        input_sha256=input_identity(original),
+                        requested_outputs=requested_outputs(arguments.operation),
+                        eligible_cells=arguments.cells, eligibility={'kind': 'all'},
+                        python_timing_original_inputs=actual_backend == 'python' and not normalize_reference)
     return call
 
 
@@ -265,6 +279,9 @@ def _provenance(arguments):
     paths += [ROOT / "rust/Cargo.toml", ROOT / "rust/crates/behave-fire/Cargo.toml",
               ROOT / "rust/crates/behave-py/Cargo.toml", ROOT / "rust/Cargo.lock",
               ROOT / "pyproject.toml", Path(__file__).resolve(), ROOT / "tools/performance_cases.py"]
+    paths += [ROOT/'tools'/name for name in ('performance_contract.py', 'check_performance.py',
+              'float64_model_reference.py', 'core_f64_reference.py', 'assemble_allocation_evidence.py',
+              'measure_native_allocations.py', 'performance_requirements.json')]
     digest = hashlib.sha256()
     for path in paths:
         digest.update(path.relative_to(ROOT).as_posix().encode())
@@ -344,7 +361,8 @@ def _validation_worker(arguments):
     try:
         for name, function in originals.items():
             setattr(_rust, name, instrument(name, function))
-        actual = _model_call(arguments, "rust")()
+        call = _model_call(arguments, "rust")
+        actual = call()
     finally:
         for name, function in originals.items():
             setattr(_rust, name, function)
@@ -352,8 +370,12 @@ def _validation_worker(arguments):
                   cells=arguments.cells, threads=arguments.threads, output_fields=len(expected), passed=False,
                   correctness_contract='f64-nan-v1', independent_python=True,
                   python_timing_original_inputs=True, fields=sorted(expected), native_boundary_calls=calls)
+    result.update(call.evidence)
     try:
         assert_outputs(actual, expected)
+        result['compared_fields'] = sorted(actual)
+        artifact = getattr(arguments, 'artifacts', None)
+        result['output_artifact'] = save_outputs(artifact, actual, expected, root=ROOT) if artifact else None
         result["passed"] = True
     except AssertionError as error:
         result["error"] = str(error)
@@ -411,7 +433,7 @@ def _worker(arguments):
         sampler.join()
     first_samples = calls[0]
     sums = {key: sum(sample.get(key, 0) for sample in first_samples)
-            for key in ("owned_copy_seconds", "detached_seconds", "concatenate_seconds",
+            for key in ("owned_copy_seconds", "detached_seconds", 'kernel_seconds', 'encoder_seconds', "concatenate_seconds",
                         "numpy_transfer_seconds", "appended_bytes")} if arguments.profile else None
     native_total = sum(sample["native_boundary_total_seconds"] for sample in first_samples)
     record = dict(kind="timing", backend=arguments.backend, threads=arguments.threads,
@@ -428,6 +450,7 @@ def _worker(arguments):
                   lifetime_peak_after_bytes=peak, peak_bytes=peak,
                   sampled_peak_during_call_bytes=max(sampled + [current or 0]))
     record.update(_provenance(arguments))
+    record.update(call.evidence)
     return record
 
 
@@ -454,6 +477,7 @@ def main():
     parser.add_argument("--warm-calls", type=int)
     parser.add_argument("--profile", action="store_true")
     parser.add_argument("--validate-only", action="store_true")
+    parser.add_argument("--artifacts", type=Path)
     parser.add_argument("--baseline", type=Path)
     parser.add_argument("--allocations", type=Path, nargs="*", default=[])
     parser.add_argument("--physical-cores", type=int)
@@ -471,6 +495,8 @@ def main():
         result = _validation_worker(args) if args.validate_only else _worker(args)
         print(json.dumps(result, allow_nan=False), flush=True)
     else:
+        if args.output is not None and args.output.exists():
+            parser.error('Refuse to overwrite an existing campaign; use a new output path')
         result = _campaign(args)
         _save(result, args.output)
         if result["errors"]:

@@ -1,5 +1,6 @@
 """Owned primitive component transport with structural record and shape handling."""
 import numpy as np
+from ..components.fuel_models_array import _fuel_model_indices
 
 from ._bridge import _native
 from ._model_api4 import _buffer
@@ -31,7 +32,7 @@ def _flatten(operation, operands):
         lookup = arguments.pop('lut')
         if operation == 'surface.build_particle_arrays':
             grid = np.atleast_1d(arguments.pop('fuel_model_grid'))
-            index = np.clip(grid, 0, len(lookup['depth']) - 1)
+            index = _fuel_model_indices(grid, len(lookup['depth']))
             shape = grid.shape
         else:
             shape = tuple(arguments.pop('S')) if 'S' in arguments else np.atleast_1d(arguments['fuel_model_grid']).shape

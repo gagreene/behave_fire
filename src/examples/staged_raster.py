@@ -23,7 +23,7 @@ def main():
     print('Original Surface spread (ft/min):', grid.get('spread_rate'))
 
     crown = CrownGrid(dict(weather, canopy_base_height=3., canopy_height=30., canopy_bulk_density=0.02,
-                           moisture_foliar=1., surface_ros=5., surface_fli=1000., surface_hpua=1000.),
+                           moisture_foliar=100., surface_ros=5., surface_fli=1000., surface_hpua=1000.),
                       shape=(2, 3), keep=('fire_type',), threads=4)
     crown.run_stage('crown_fraction')
     crown.set('crown_fraction_burned', np.full((2, 3), 0.5))

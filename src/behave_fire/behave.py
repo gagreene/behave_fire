@@ -46,7 +46,7 @@ from typing import Union, Optional
 
 try:
     from .components.fuel_models import FuelModels
-    from .components.fuel_models_array import build_fuel_lookup_arrays
+    from .components.fuel_models_array import _fuel_model_indices, build_fuel_lookup_arrays
     from .components.surface import (
         build_particle_arrays,
         calculate_fuelbed_intermediates,
@@ -88,7 +88,7 @@ try:
     )
 except ImportError:
     from components.fuel_models import FuelModels
-    from components.fuel_models_array import build_fuel_lookup_arrays
+    from components.fuel_models_array import _fuel_model_indices, build_fuel_lookup_arrays
     from components.surface import (
         build_particle_arrays,
         calculate_fuelbed_intermediates,
@@ -420,7 +420,7 @@ class BehaveRun:
         :return: dict of (*S) ndarrays in the requested output units.
         """
         # Coerce all spatial inputs to at-least-1D ndarrays (G10 fix)
-        fuel_model_grid = np.atleast_1d(np.asarray(fuel_model_grid, dtype=np.int32))
+        fuel_model_grid = np.atleast_1d(_fuel_model_indices(fuel_model_grid, len(self._lut['depth'])))
         m1h   = fraction_to_base(np.atleast_1d(np.asarray(m1h,   dtype=float)), moisture_units)
         m10h  = fraction_to_base(np.atleast_1d(np.asarray(m10h,  dtype=float)), moisture_units)
         m100h = fraction_to_base(np.atleast_1d(np.asarray(m100h, dtype=float)), moisture_units)

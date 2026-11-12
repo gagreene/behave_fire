@@ -81,7 +81,7 @@ def _select(backend, stacklevel):
         if not _WARNING_EMITTED:
             reason = "unavailable" if status == "absent" else "unusable"
             warnings.warn(
-                f"Rust backend {reason} ({type(cause).__name__}: {cause}); using Python.",
+                f"Rust backend {reason} ({type(cause).__name__}: {cause}); using Python. {_INSTALL}",
                 BehaveBackendWarning,
                 stacklevel=stacklevel,
             )
@@ -188,8 +188,8 @@ class BehaveRun:
         selected = _select(backend, 3)
         self._requested_backend = backend
         self._preferred_backend = selected
-        self._registry_snapshot = None if backend == 'python' else snapshot_registry(fuel_models)
-        if backend == 'auto':
+        self._registry_snapshot = snapshot_registry(fuel_models) if backend == 'auto' and selected == 'rust' else None
+        if self._registry_snapshot is not None:
             fuel_models = self._registry_snapshot.to_python()
         namespace = importlib.import_module(f"behave_fire.{selected}")
         if selected == "python":
@@ -236,7 +236,7 @@ class BehaveRun:
         :param kwargs: Original keyword calculation inputs.
         :return: Complete delegate result; only successful calls update actual backend reporting.
         """
-        if self._requested_backend == 'python':
+        if self._preferred_backend == 'python':
             return getattr(self._python_delegate, operation)(*args, **kwargs)
         call = capture_call('model.' + operation, getattr(PythonBehaveRun, operation), args, kwargs)
         if self._requested_backend == 'rust':

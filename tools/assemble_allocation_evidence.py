@@ -36,6 +36,8 @@ def _manifest(evidence):
     for build in (timed, instrumented):
         if not isinstance(build, dict):
             raise ValueError("Missing build identity")
+        if manifest.get('binding_api_version') == 4 and build.get('binding_api_version') != 4:
+            raise ValueError('Missing timed/instrumented binding API identity')
         for field in ("source_hash", "extension_hash"):
             if not _sha256(build.get(field)):
                 raise ValueError(f"Invalid {field}")
@@ -79,12 +81,20 @@ def _scope(row, name):
     for key in ("requests", "bytes", "calls"):
         if type(scope.get(key)) is not int or scope[key] < 0:
             raise ValueError(f"Invalid {name} {key}")
-    if scope["calls"] != row["cells"]:
+    expected = row['cells']
+    if row.get('binding_api_version') == 4:
+        from performance_contract import eligible_cells
+
+        eligible = eligible_cells(row)
+        if row.get('eligible_cells') != eligible:
+            raise ValueError('Eligible cells differ from the original validity inputs')
+        expected = eligible if name == 'kernel' else row['cells']
+    if scope["calls"] != expected:
         raise ValueError(f"Incomplete {name} loop coverage")
     workers = scope.get("workers")
-    if type(workers) is not int or not 1 <= workers <= row["workers"]:
+    if type(workers) is not int or not (workers == 0 if expected == 0 else 1 <= workers <= row["workers"]):
         raise ValueError(f"Invalid actual {name} worker count")
-    if name == "kernel" and row["cells"] == 10000 and row["workers"] == 4 and workers != 4:
+    if name == "kernel" and row["cells"] == expected == 10000 and row["workers"] == 4 and workers != 4:
         raise ValueError("Four-worker check did not exercise four kernel workers")
     return scope
 
@@ -132,6 +142,14 @@ def assemble(evidence, requirements):
             processes.add(process)
             if row.get("passed") is not True:
                 raise ValueError("Missing independent full-output validation")
+            if evidence['manifest'].get('binding_api_version') == 4:
+                from performance_contract import ROOT, contract_errors
+
+                if row.get('binding_api_version') != 4:
+                    raise ValueError('Missing allocation binding contract')
+                failures = contract_errors({'records': [], 'validations': [row]}, {'binding_api_version': 4}, ROOT)
+                if failures:
+                    raise ValueError('; '.join(failures))
             for name in ("kernel", "encoder"):
                 scope = _scope(row, name)
                 if scope["requests"] != 0 or scope["bytes"] != 0:

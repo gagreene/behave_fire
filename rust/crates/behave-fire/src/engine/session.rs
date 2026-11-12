@@ -47,6 +47,7 @@ struct Slot {
     persistent: Option<ColumnValues>,
     transient: Option<ColumnValues>,
     computed: Option<ColumnValues>,
+    exposed: Option<ColumnValues>,
     freed: bool,
 }
 impl Slot {
@@ -235,6 +236,7 @@ impl GridSession {
             }
         }
         result.validate_outputs(&result.request, &result.keep)?;
+        result.refresh_visibility();
         Ok(result)
     }
     fn input(&mut self, field: Field, value: ColumnValues) {
@@ -351,10 +353,66 @@ impl GridSession {
     }
     /// Borrow a retained input, injection, override, or computed field.
     pub fn get(&self, field: Field) -> Result<FieldView<'_>, BehaveError> {
-        let values = self.slots[field as usize]
+        let slot = &self.slots[field as usize];
+        let raw = slot
             .active()
             .ok_or_else(|| access(field, "field is freed or uncomputed"))?;
+        let values = if slot.pinned() {
+            slot.exposed.as_ref().unwrap_or(raw)
+        } else {
+            raw
+        };
         Ok(FieldView { field, values })
+    }
+    /// Mask derived views while retaining original pins for later validity edits.
+    fn refresh_visibility(&mut self) {
+        let validity = match self.slots[Field::Validity as usize].active() {
+            Some(ColumnValues::Bool(values)) => values.clone(),
+            _ => vec![true],
+        };
+        let masked = validity.iter().any(|v| !v);
+        let cells = self.shape.len();
+        for &field in Field::ALL {
+            let slot = &mut self.slots[field as usize];
+            let exposed = if masked && field.producer().is_some() && slot.pinned() {
+                slot.active().map(|raw| {
+                    let valid =
+                        |index: usize| validity[if validity.len() == 1 { 0 } else { index }];
+                    match raw {
+                        ColumnValues::Float64(values) => ColumnValues::Float64(
+                            (0..cells)
+                                .map(|i| {
+                                    if valid(i) {
+                                        values[if values.len() == 1 { 0 } else { i }]
+                                    } else {
+                                        f64::NAN
+                                    }
+                                })
+                                .collect(),
+                        ),
+                        ColumnValues::Int32(values) => ColumnValues::Int32(
+                            (0..cells)
+                                .map(|i| {
+                                    if valid(i) {
+                                        values[if values.len() == 1 { 0 } else { i }]
+                                    } else {
+                                        -1
+                                    }
+                                })
+                                .collect(),
+                        ),
+                        ColumnValues::Bool(values) => ColumnValues::Bool(
+                            (0..cells)
+                                .map(|i| valid(i) && values[if values.len() == 1 { 0 } else { i }])
+                                .collect(),
+                        ),
+                    }
+                })
+            } else {
+                None
+            };
+            slot.exposed = exposed;
+        }
     }
     /// Edit an input or pin a transient physical field, including an explicit NaN.
     pub fn set_physical(&mut self, field: Field, values: Vec<f64>) -> Result<(), BehaveError> {
@@ -433,6 +491,7 @@ impl GridSession {
                 break;
             }
         }
+        self.refresh_visibility();
     }
     /// Discard derived state and transient injections while retaining input edits and overrides.
     pub fn reset(&mut self) {
@@ -441,6 +500,7 @@ impl GridSession {
             slot.transient = None;
             slot.freed = false;
         }
+        self.refresh_visibility();
     }
     /// Restart from retained inputs/overrides, clearing transient staged values.
     pub fn run_fused(&mut self) -> Result<(), ParallelError<BehaveError>> {

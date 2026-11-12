@@ -1,5 +1,14 @@
 # behave_fire
 
+Fuel model IDs are supported from **1 through 256**. All other IDs, including
+NaN and infinite IDs supplied through Python, use undefined row zero rather than
+an endpoint fuel. Undefined fuels retain their existing zero-spread behavior;
+no new NaN, classification-code, flag, or storage-type policy applies.
+Custom registration outside 1–256 returns `False`; custom models 257–260 are
+no longer supported. Model 256 remains supported. This follows the official
+[C++ definition bounds](https://github.com/firelab/behave/blob/f3b2943e69abca942e795c5b1b45276f6338abb5/src/behave/fuelModels.cpp#L863)
+and [undefined-fuel spread path](https://github.com/firelab/behave/blob/f3b2943e69abca942e795c5b1b45276f6338abb5/src/behave/surface.cpp).
+
 Native models, component helpers, units, and state tools calculate physical values in float64. Float16,
 float32, and integer physical inputs widen once; masked real values become NaN,
 and physical results are plain float64 arrays. Classifications remain int32,
@@ -11,6 +20,9 @@ Auto uses Rust when available. Otherwise it selects Python and warns once per
 process. A separate warning accompanies supported complex-input calls routed
 to Python before native calculation. Explicit Rust rejects complex/object
 arithmetic. General object input does not trigger automatic fallback.
+
+If Python is already selected because no usable extension exists, calls retain
+Python's original complex/object behavior without Rust-specific input preflight.
 
 A NumPy-based Python port of the US Forest Service [Behave<sup>7</sup>](https://www.firelab.org/project/behave) fire behavior modeling system, supporting scalar and array calculations. The package has two calculation backends: the original Python/NumPy implementation (the behavioral reference) and a native Rust implementation selected automatically when its compiled extension is installed. The same Rust core is also a standalone crate, `behave-fire`, for Rust applications.
 
@@ -273,7 +285,7 @@ Each model caches its numerical fuel snapshot at construction. Later changes to 
 
 Native `threads=1` runs serially, `threads=0` uses available parallelism, and a positive count requests that many workers, capped by actual work. Negative and non-integer counts are rejected on the native route. The automatic Python route ignores `threads`; explicit Python retains its original constructor without that argument. Create another model to choose a different backend.
 
-Rust widens float16 inputs to float32 before normal entry-point normalization. Automatic selection can therefore return float32 where Python returns float16; overflow, NaNs, and classification thresholds may also differ. Select Python when the historical float16 semantics are required. All intentional differences are listed in [docs/BACKEND_DIFFERENCES.md](docs/BACKEND_DIFFERENCES.md).
+Rust calculates physical values in float64, including float16, float32, and integer inputs. Masked physical values become NaN, and physical results are plain float64 arrays. Rounding and classification near thresholds can differ from Python's original dtype arithmetic. Select Python when that behavior is required. Controls, codes, and flags remain typed; see [docs/BACKEND_DIFFERENCES.md](docs/BACKEND_DIFFERENCES.md).
 
 ---
 
@@ -294,17 +306,31 @@ cargo run --example standalone
 cargo run --example raster_tweaks
 ```
 
-The raster engine and tweak columns are Rust interfaces. Python users keep their existing staged helpers (for example `run_surface_fire(ri, ib, ...)`) for injection, and the Python binding does not yet route public calls through the raster engine (see [Performance](#performance)). See [docs/RUST_ENGINE.md](docs/RUST_ENGINE.md) for the stage and raster contract and [docs/CRATES_IO.md](docs/CRATES_IO.md) for packaging. The crate has not been published to crates.io; publication and name ownership are separate, owner-authorized steps.
+Python models use the same native raster engine. New public `behave_fire.rust.SurfaceGrid` and `CrownGrid` expose owned staged calculations, base-unit field injection, retention, and recomputation:
+
+```python
+from behave_fire.rust import SurfaceGrid
+
+grid = SurfaceGrid(dict(fuel_model_grid=124, m1h=.06, m10h=.07, m100h=.08,
+    mlh=.6, mlw=.9, wind_speed=88., wind_direction=35., slope=12.,
+    canopy_cover=.4, canopy_height=30., crown_ratio=.5), shape=(2, 3))
+for stage in ("particles", "fuelbed", "reaction"):
+    grid.run_stage(stage)
+grid.set("reaction_intensity", grid.get("reaction_intensity") * .9)
+grid.run_remaining()
+spread_ft_min = grid.get("spread_rate")
+grid.run_fused()  # Restart from inputs and persistent overrides.
+```
+
+Getters return independent arrays. `run_remaining` preserves transient injections; explicit producer runs replace their own transient values. Fused restart clears transient injections while retaining edited inputs and persistent overrides. Grid sessions require Rust, reject complex/object data, and do not support pickling. See [the complete Python example](src/examples/staged_raster.py), [the engine contract](docs/RUST_ENGINE.md), and [standalone packaging](docs/CRATES_IO.md). Registry publication remains a separate owner-authorized step.
 
 ---
 
 ## Performance
 
-The current API4 [public serial checkpoint](docs/performance/2026-11-08-plain-normalization-public-checkpoint.md) passed **all 56 bounds** in both a fresh screen and the required seven-new-pair confirmation. Confirmed median Rust speedups were **2.93–4.09x at 100,000 cells** across Surface, Crown, and five dtype/mask layouts. Every 100k lower 95% bound exceeded the unchanged 2x requirement. Measurements used original-input Python timing on one Windows x86-64 host with CPython 3.12.8 and NumPy 2.1.3.
+The [recorded Windows acceptance](docs/performance/2026-11-09-reviewed-float64-acceptance.md), measured at scientific source `9be8a50`, passes **all 40 cases and 80 first/warmed confidence bounds**, plus scalar latency, peak-memory, complete-output, and allocation gates. At 100k/1M cells, warmed Rust speedups range from **3.18–5.52x with one worker** and **6.06–13.44x with four workers**. Ratios divide Python time by Rust time: higher means faster Rust. The [later boundary-review follow-up](docs/performance/2026-11-09-claude-pr-review-followup.md) preserves these dated observations without claiming a new timing campaign for subsequent fixes.
 
-The previously failing heterogeneous Surface 10k warmed endpoint now passes: its confirmed median-ratio estimate is 2.65x and lower 95% bound is 2.23x against 1.25x required. Earlier failed samples remain preserved; they were not discarded or pooled into the new campaign.
-
-Four-thread, million-cell, memory, and final release-platform certification remain pending. These serial results do not guarantee speed on other hosts or workloads. Earlier measurements remain in [the benchmark history](docs/RUST_BACKEND_BENCHMARKS.md). Select Python when original dtype/mask behavior is required.
+Measurements use original-input Python timing, seven fresh paired blocks, five warm calls, and separately checked complete outputs on an eight-core Windows x86-64 host with CPython 3.12.8 and NumPy 2.1.3. Native physical calculations use the documented float64/NaN contract. These results do not guarantee speed on other hosts or workloads; other-platform wheel correctness is separate. Raw records, complete-array bundles, controlled source provenance, and earlier failed campaigns remain available in [the benchmark history](docs/RUST_BACKEND_BENCHMARKS.md).
 
 ---
 
@@ -323,7 +349,7 @@ All physical quantities have a designated **base unit** stored internally (US cu
 | Area | ft² | `2` = hectares |
 | Moisture | fraction (0–1) | pass fractions; use `FractionUnits` for % ↔ fraction |
 
-> **Important:** Moisture inputs (`m1h`, `m10h`, `m100h`, `mlh`, `mlw`, `moisture_foliar`) are always **fractions** (e.g. `0.06` for 6%). Passing percent values without converting will produce silently wrong results.
+> **Important:** Fuel moisture inputs (`m1h`, `m10h`, `m100h`, `mlh`, `mlw`) are **fractions** (e.g. `0.06` for 6%). Foliar moisture (`moisture_foliar`) is **percent** (e.g. `100.0` for 100%).
 
 The full set of 17 unit classes exported from the package:
 `AreaUnits`, `BasalAreaUnits`, `LengthUnits`, `LoadingUnits`, `PressureUnits`,
@@ -472,7 +498,7 @@ Useful tools under `tools/`: `compare_backends.py` (Rust versus the frozen Pytho
 
 - **Python reference, optional Rust** — the Python implementation is the behavioral reference; the Rust backend must match it within documented tolerances. Source-only Python remains available, and compatible native wheels select the Rust backend automatically.
 - **US customary internally** — all state is stored in feet, BTU, °F, etc. Metric conversion happens only at call boundaries.
-- **No input validation** — out-of-range inputs return `0.0` silently, matching the C++ guard pattern.
+- **Input domains:** Python retains its historical guards and coercions. Rust validates structural controls before workers and uses float64 IEEE results for physical numeric domains; see [backend differences](docs/BACKEND_DIFFERENCES.md).
 - **Crown fuel is always FM10 / WAF=0.4** — hardcoded per Rothermel (1991); not configurable.
 - **Moisture as fraction** — `0.06` = 6%; see the [Unit System](#unit-system) section.
 - **Crown canopy inputs in base units** — `canopy_base_height` and `canopy_height` must be in feet, `canopy_bulk_density` in lb/ft³; no unit enum is applied to these parameters.

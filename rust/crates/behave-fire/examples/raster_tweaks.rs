@@ -27,7 +27,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let result = raster.run(&plan, &fuels, &tweaks, 1)?;
     assert_eq!(result.shape().dimensions(), [2, 3]);
     assert_eq!(result.validity.as_deref(), Some(validity.as_slice()));
-    assert_eq!(result.spread_rate[5], 0.0);
+    assert!(result.spread_rate[5].is_nan());
     // Output-only tiles keep the original logical offsets in the caller.
     let tile = raster.run_tile(2..5, &plan, &fuels, &tweaks, 1)?;
     assert_eq!(tile.spread_rate, result.spread_rate[2..5]);

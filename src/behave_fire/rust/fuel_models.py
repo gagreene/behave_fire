@@ -131,8 +131,10 @@ class FuelModels(_NativeState):
             SAVRs (e.g. ``SurfaceAreaToVolumeUnits.SurfaceAreaToVolumeUnitsEnum.SquareFeetOverCubicFeet``).
         :param is_dynamic: ``True`` if the model uses dynamic live/dead
             load transfer.
-        :return: ``True`` on success; ``False`` if the slot is reserved.
+        :return: ``True`` on success; ``False`` for reserved slots or IDs outside 1..256.
         """
+        if not 1 <= fuel_model_number <= 256:
+            return False
         existing = self.fuel_models_.get(fuel_model_number)
         if existing and existing.get('is_reserved', False):
             return False
@@ -389,6 +391,8 @@ class FuelModels(_NativeState):
         :param fuel_model_number: Input matching the public API.
         :return: Calculation result or updated receiver state.
         """
+        if not 1 <= fuel_model_number <= 256:
+            return False
         m = self.get(fuel_model_number)
         return m.get('is_defined', False) if m else False
 

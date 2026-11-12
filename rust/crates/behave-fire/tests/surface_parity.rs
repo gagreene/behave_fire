@@ -88,6 +88,11 @@ fn raw_default_rows_match_grid_particle_path() {
     let fuels = FuelModels::default();
     for model in -1..=261 {
         for mlh in [0.20, 0.30, 0.60, 1.20, 1.200001] {
+            if !(1..=256).contains(&model) {
+                let row = build_particle_arrays(&fuels, model, 0.06, 0.07, 0.08, mlh, 0.90);
+                assert!(!row.is_defined);
+                assert_eq!(row.depth, 0.0);
+            }
             assert_eq!(
                 build_particle_arrays(&fuels, model, 0.06, 0.07, 0.08, mlh, 0.90),
                 build_particle_arrays_from_prepared(
@@ -160,12 +165,33 @@ fn composed_pipeline_all_grid_models_and_custom_science_match_python() {
         let ctx = format!("model {} {:?}", x.fuel_model_grid, c["moisture"]);
         assert_eq!(c["output"].as_object().unwrap().len(), 14);
         for (k, v) in result.named_values() {
+            let missing_sink = number_value(&c["intermediates"]["heat_sink"]).is_nan();
+            let rpr = number_value(&c["intermediates"]["relative_packing_ratio"]);
+            let missing_spread = missing_sink
+                && matches!(
+                    k,
+                    "no_wind_no_slope_spread_rate"
+                        | "spread_rate"
+                        | "backing_spread_rate"
+                        | "flanking_spread_rate"
+                        | "fireline_intensity"
+                        | "flame_length"
+                        | "direction_of_max_spread"
+                );
+            let missing_ellipse = missing_sink
+                && (rpr.is_nan() || rpr > 1e-7)
+                && matches!(
+                    k,
+                    "effective_wind_speed" | "fire_length_to_width_ratio" | "eccentricity"
+                );
             check(
                 v,
                 if (k == "flame_length"
                     && number_value(&c["output"]["fireline_intensity"]).is_nan())
                     || (k == "direction_of_max_spread"
                         && number_value(&c["output"]["spread_rate"]).is_nan())
+                    || missing_spread
+                    || missing_ellipse
                 {
                     f64::NAN
                 } else {

@@ -26,9 +26,10 @@ def test_common_model_mask_is_nan_and_ids_never_coerce_through_float():
     arguments['m1h'] = np.ma.array(arguments['m1h'], mask=[False, True, False, False, False])
     actual = execute_common('surface', arguments)
     assert np.isnan(actual['reaction_intensity'][1])
-    arguments['fuel_model_grid'] = np.array([2**53+1], dtype=np.int64)
-    with pytest.raises(OverflowError):
-        execute_common('surface', arguments)
+    arguments['fuel_model_grid'] = np.full(5, 2**53+1, dtype=np.int64)
+    undefined = execute_common('surface', arguments)
+    np.testing.assert_array_equal(undefined['spread_rate'], np.zeros(5))
+    np.testing.assert_array_equal(undefined['reaction_intensity'], np.zeros(5))
 
 
 @pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64, np.int16])

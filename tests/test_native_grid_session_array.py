@@ -80,7 +80,7 @@ def test_masks_complex_and_typed_control_validation():
     assert np.isnan(grid.get('m1h')[1])
     with pytest.raises(TypeError, match='real numeric'):
         grid.set('m1h', 0.05 + 1j)
-    with pytest.raises(TypeError, match='integral'):
+    with pytest.raises(ValueError, match='integral'):
         grid.set_code('fuel_model_grid', 1.5)
     with pytest.raises(ValueError):
         grid.set('reaction_intensity', [1., 2., 3.])

@@ -1,0 +1,758 @@
+{
+  "passed": true,
+  "errors": [],
+  "cases": [
+    {
+      "dataset": "uniform",
+      "operation": "surface",
+      "cells": 10000,
+      "threads": 1,
+      "target": 1.25,
+      "first": {
+        "ratio": 2.7852017150503015,
+        "lower": 2.2229489078989917,
+        "upper": 3.1608723196531114
+      },
+      "warmed": {
+        "ratio": 2.902417891433974,
+        "lower": 2.5552659593724703,
+        "upper": 3.2138479966127913
+      },
+      "passed": true
+    },
+    {
+      "dataset": "uniform",
+      "operation": "surface",
+      "cells": 100000,
+      "threads": 1,
+      "target": 2.0,
+      "first": {
+        "ratio": 3.8982795292721075,
+        "lower": 3.876625710297473,
+        "upper": 4.053820292828387
+      },
+      "warmed": {
+        "ratio": 4.010468301430778,
+        "lower": 3.91861421609533,
+        "upper": 4.237608845954895
+      },
+      "peak_memory_ratio": 0.46733132829706114,
+      "passed": true
+    },
+    {
+      "dataset": "uniform",
+      "operation": "surface",
+      "cells": 100000,
+      "threads": 4,
+      "target": 4.0,
+      "first": {
+        "ratio": 7.181767621791052,
+        "lower": 6.631343479995484,
+        "upper": 7.614508487973028
+      },
+      "warmed": {
+        "ratio": 7.220807150346969,
+        "lower": 6.966971214380541,
+        "upper": 7.66105083735468
+      },
+      "peak_memory_ratio": 0.46806545575105973,
+      "passed": true
+    },
+    {
+      "dataset": "uniform",
+      "operation": "surface",
+      "cells": 1000000,
+      "threads": 1,
+      "target": 2.0,
+      "first": {
+        "ratio": 5.478429122015124,
+        "lower": 4.962004801929362,
+        "upper": 5.66880865353076
+      },
+      "warmed": {
+        "ratio": 5.5200500908309,
+        "lower": 5.078049281929314,
+        "upper": 5.618249318845521
+      },
+      "peak_memory_ratio": 0.28847944118510743,
+      "passed": true
+    },
+    {
+      "dataset": "uniform",
+      "operation": "surface",
+      "cells": 1000000,
+      "threads": 4,
+      "target": 4.0,
+      "first": {
+        "ratio": 13.647132346805197,
+        "lower": 12.954543023874038,
+        "upper": 14.20429382741969
+      },
+      "warmed": {
+        "ratio": 13.439989502697081,
+        "lower": 12.17255429174762,
+        "upper": 13.642716426604805
+      },
+      "peak_memory_ratio": 0.28742666491724617,
+      "passed": true
+    },
+    {
+      "dataset": "uniform",
+      "operation": "crown",
+      "cells": 10000,
+      "threads": 1,
+      "target": 1.25,
+      "first": {
+        "ratio": 2.74340108238832,
+        "lower": 2.5655422375243346,
+        "upper": 2.947148915296419
+      },
+      "warmed": {
+        "ratio": 2.714070677517467,
+        "lower": 2.4290653290308293,
+        "upper": 2.952046592906622
+      },
+      "passed": true
+    },
+    {
+      "dataset": "uniform",
+      "operation": "crown",
+      "cells": 100000,
+      "threads": 1,
+      "target": 2.0,
+      "first": {
+        "ratio": 3.4530586930758034,
+        "lower": 3.3507073683976354,
+        "upper": 3.6627598418579606
+      },
+      "warmed": {
+        "ratio": 3.2705444433487374,
+        "lower": 3.135755210697397,
+        "upper": 3.3711172832723766
+      },
+      "peak_memory_ratio": 0.6002123705866738,
+      "passed": true
+    },
+    {
+      "dataset": "uniform",
+      "operation": "crown",
+      "cells": 100000,
+      "threads": 4,
+      "target": 4.0,
+      "first": {
+        "ratio": 6.722681226192055,
+        "lower": 6.5837947577894385,
+        "upper": 7.2112042874303395
+      },
+      "warmed": {
+        "ratio": 6.465110695827915,
+        "lower": 6.340955968440531,
+        "upper": 6.773127262221403
+      },
+      "peak_memory_ratio": 0.6010972480311477,
+      "passed": true
+    },
+    {
+      "dataset": "uniform",
+      "operation": "crown",
+      "cells": 1000000,
+      "threads": 1,
+      "target": 2.0,
+      "first": {
+        "ratio": 4.813175419041241,
+        "lower": 4.594551700080397,
+        "upper": 4.903502201687772
+      },
+      "warmed": {
+        "ratio": 4.729894462596022,
+        "lower": 4.553344241847283,
+        "upper": 4.843184333870555
+      },
+      "peak_memory_ratio": 0.47491385133201297,
+      "passed": true
+    },
+    {
+      "dataset": "uniform",
+      "operation": "crown",
+      "cells": 1000000,
+      "threads": 4,
+      "target": 4.0,
+      "first": {
+        "ratio": 11.918185654309223,
+        "lower": 11.524734218143033,
+        "upper": 12.121813370952378
+      },
+      "warmed": {
+        "ratio": 11.630265787884914,
+        "lower": 11.235358020464913,
+        "upper": 12.06231711390132
+      },
+      "peak_memory_ratio": 0.4735200174014585,
+      "passed": true
+    },
+    {
+      "dataset": "uniform",
+      "operation": "typed-crown",
+      "cells": 10000,
+      "threads": 1,
+      "target": 1.0,
+      "first": {
+        "ratio": 2.894621216187401,
+        "lower": 2.6420765711543197,
+        "upper": 2.9950578226361233
+      },
+      "warmed": {
+        "ratio": 2.7594688804012892,
+        "lower": 2.634567421007018,
+        "upper": 2.937236330497522
+      },
+      "passed": true
+    },
+    {
+      "dataset": "uniform",
+      "operation": "typed-crown",
+      "cells": 100000,
+      "threads": 1,
+      "target": 2.0,
+      "first": {
+        "ratio": 3.57702203372548,
+        "lower": 3.257554520614294,
+        "upper": 3.833216886475166
+      },
+      "warmed": {
+        "ratio": 3.4796293759206534,
+        "lower": 3.412225694382982,
+        "upper": 3.5358004407539223
+      },
+      "peak_memory_ratio": 0.6069636274814585,
+      "passed": true
+    },
+    {
+      "dataset": "uniform",
+      "operation": "typed-crown",
+      "cells": 100000,
+      "threads": 4,
+      "target": 4.0,
+      "first": {
+        "ratio": 6.963794805831235,
+        "lower": 6.865526844276961,
+        "upper": 7.1342022926741135
+      },
+      "warmed": {
+        "ratio": 6.704235864984286,
+        "lower": 6.046438019889068,
+        "upper": 6.96704966674821
+      },
+      "peak_memory_ratio": 0.6071856819292091,
+      "passed": true
+    },
+    {
+      "dataset": "uniform",
+      "operation": "typed-crown",
+      "cells": 1000000,
+      "threads": 1,
+      "target": 2.0,
+      "first": {
+        "ratio": 4.705593632253705,
+        "lower": 4.47554808832775,
+        "upper": 5.036277759000372
+      },
+      "warmed": {
+        "ratio": 4.813334881185215,
+        "lower": 4.643740799838211,
+        "upper": 4.895467425006137
+      },
+      "peak_memory_ratio": 0.4822579994583475,
+      "passed": true
+    },
+    {
+      "dataset": "uniform",
+      "operation": "typed-crown",
+      "cells": 1000000,
+      "threads": 4,
+      "target": 4.0,
+      "first": {
+        "ratio": 12.056134855813099,
+        "lower": 11.359258470038576,
+        "upper": 12.674555794701286
+      },
+      "warmed": {
+        "ratio": 11.825992524951355,
+        "lower": 11.431041755393547,
+        "upper": 12.011136843055706
+      },
+      "peak_memory_ratio": 0.4809211549875247,
+      "passed": true
+    },
+    {
+      "dataset": "uniform",
+      "operation": "typed-crown-b",
+      "cells": 10000,
+      "threads": 1,
+      "target": 1.0,
+      "first": {
+        "ratio": 2.8209199868720534,
+        "lower": 2.6753342245956118,
+        "upper": 3.15236342018138
+      },
+      "warmed": {
+        "ratio": 2.9770661151536295,
+        "lower": 2.899982021691526,
+        "upper": 3.0465907078339924
+      },
+      "passed": true
+    },
+    {
+      "dataset": "uniform",
+      "operation": "typed-crown-b",
+      "cells": 100000,
+      "threads": 1,
+      "target": 2.0,
+      "first": {
+        "ratio": 3.480471335165885,
+        "lower": 3.16925776420027,
+        "upper": 3.7391348581824153
+      },
+      "warmed": {
+        "ratio": 3.461974060511141,
+        "lower": 3.1211058711586475,
+        "upper": 3.6207366103093377
+      },
+      "peak_memory_ratio": 0.6068173249650707,
+      "passed": true
+    },
+    {
+      "dataset": "uniform",
+      "operation": "typed-crown-b",
+      "cells": 100000,
+      "threads": 4,
+      "target": 4.0,
+      "first": {
+        "ratio": 6.8881347184603445,
+        "lower": 6.4343501366028235,
+        "upper": 7.084470675277016
+      },
+      "warmed": {
+        "ratio": 6.533090746284469,
+        "lower": 6.24334314653507,
+        "upper": 7.05852182937018
+      },
+      "peak_memory_ratio": 0.6082366769421835,
+      "passed": true
+    },
+    {
+      "dataset": "uniform",
+      "operation": "typed-crown-b",
+      "cells": 1000000,
+      "threads": 1,
+      "target": 2.0,
+      "first": {
+        "ratio": 4.966573991360187,
+        "lower": 4.753329519990132,
+        "upper": 5.104990530865215
+      },
+      "warmed": {
+        "ratio": 5.02183513569045,
+        "lower": 4.863669541153621,
+        "upper": 5.159770585913844
+      },
+      "peak_memory_ratio": 0.48410700982831373,
+      "passed": true
+    },
+    {
+      "dataset": "uniform",
+      "operation": "typed-crown-b",
+      "cells": 1000000,
+      "threads": 4,
+      "target": 4.0,
+      "first": {
+        "ratio": 12.127516838889706,
+        "lower": 11.118196123420063,
+        "upper": 12.551796640763387
+      },
+      "warmed": {
+        "ratio": 11.913487580418733,
+        "lower": 11.496108882307245,
+        "upper": 12.200704003308752
+      },
+      "peak_memory_ratio": 0.4829622428229149,
+      "passed": true
+    },
+    {
+      "dataset": "heterogeneous",
+      "operation": "surface",
+      "cells": 10000,
+      "threads": 1,
+      "target": 1.25,
+      "first": {
+        "ratio": 2.678642482176949,
+        "lower": 2.520011792666818,
+        "upper": 2.788203347613436
+      },
+      "warmed": {
+        "ratio": 2.6045408681876854,
+        "lower": 2.5101820198959737,
+        "upper": 2.721798214663671
+      },
+      "passed": true
+    },
+    {
+      "dataset": "heterogeneous",
+      "operation": "surface",
+      "cells": 100000,
+      "threads": 1,
+      "target": 2.0,
+      "first": {
+        "ratio": 3.427075105594303,
+        "lower": 3.2831453080011435,
+        "upper": 3.4940415929665027
+      },
+      "warmed": {
+        "ratio": 3.4753639448681364,
+        "lower": 3.374458177996339,
+        "upper": 3.5911805387879827
+      },
+      "peak_memory_ratio": 0.4669822485207101,
+      "passed": true
+    },
+    {
+      "dataset": "heterogeneous",
+      "operation": "surface",
+      "cells": 100000,
+      "threads": 4,
+      "target": 4.0,
+      "first": {
+        "ratio": 6.80737766865432,
+        "lower": 5.7787559143221605,
+        "upper": 6.957457889025637
+      },
+      "warmed": {
+        "ratio": 6.9301601088360165,
+        "lower": 6.607674800517602,
+        "upper": 7.01488377258122
+      },
+      "peak_memory_ratio": 0.4680473372781065,
+      "passed": true
+    },
+    {
+      "dataset": "heterogeneous",
+      "operation": "surface",
+      "cells": 1000000,
+      "threads": 1,
+      "target": 2.0,
+      "first": {
+        "ratio": 4.578371981236468,
+        "lower": 4.531191552600644,
+        "upper": 4.903608963683399
+      },
+      "warmed": {
+        "ratio": 4.4885233048508155,
+        "lower": 4.335891695935254,
+        "upper": 4.693470386736161
+      },
+      "peak_memory_ratio": 0.28889416587511874,
+      "passed": true
+    },
+    {
+      "dataset": "heterogeneous",
+      "operation": "surface",
+      "cells": 1000000,
+      "threads": 4,
+      "target": 4.0,
+      "first": {
+        "ratio": 11.738097772746912,
+        "lower": 11.417844104463674,
+        "upper": 12.102175701802814
+      },
+      "warmed": {
+        "ratio": 11.573810631054052,
+        "lower": 11.14700821261596,
+        "upper": 12.247648964449063
+      },
+      "peak_memory_ratio": 0.28764435334699795,
+      "passed": true
+    },
+    {
+      "dataset": "heterogeneous",
+      "operation": "crown",
+      "cells": 10000,
+      "threads": 1,
+      "target": 1.25,
+      "first": {
+        "ratio": 2.7226553224486976,
+        "lower": 2.5373920902246887,
+        "upper": 2.8124749394451256
+      },
+      "warmed": {
+        "ratio": 2.6358404817345087,
+        "lower": 2.2878758198132987,
+        "upper": 2.7794158674180647
+      },
+      "passed": true
+    },
+    {
+      "dataset": "heterogeneous",
+      "operation": "crown",
+      "cells": 100000,
+      "threads": 1,
+      "target": 2.0,
+      "first": {
+        "ratio": 3.4458879326049994,
+        "lower": 3.177788046325285,
+        "upper": 3.5170861549820334
+      },
+      "warmed": {
+        "ratio": 3.257951756037299,
+        "lower": 3.1163726676595305,
+        "upper": 3.3486874952518577
+      },
+      "peak_memory_ratio": 0.9195792774547593,
+      "passed": true
+    },
+    {
+      "dataset": "heterogeneous",
+      "operation": "crown",
+      "cells": 100000,
+      "threads": 4,
+      "target": 4.0,
+      "first": {
+        "ratio": 6.455364642242333,
+        "lower": 6.296341994899805,
+        "upper": 6.55284202637496
+      },
+      "warmed": {
+        "ratio": 6.1693799994844225,
+        "lower": 6.007131295903744,
+        "upper": 6.263800412061955
+      },
+      "peak_memory_ratio": 0.9188606519892859,
+      "passed": true
+    },
+    {
+      "dataset": "heterogeneous",
+      "operation": "crown",
+      "cells": 1000000,
+      "threads": 1,
+      "target": 2.0,
+      "first": {
+        "ratio": 4.713258069596901,
+        "lower": 4.460039532087208,
+        "upper": 4.920759372748386
+      },
+      "warmed": {
+        "ratio": 4.755206094486383,
+        "lower": 4.552922580907804,
+        "upper": 4.815221074335339
+      },
+      "peak_memory_ratio": 0.8884692271940778,
+      "passed": true
+    },
+    {
+      "dataset": "heterogeneous",
+      "operation": "crown",
+      "cells": 1000000,
+      "threads": 4,
+      "target": 4.0,
+      "first": {
+        "ratio": 11.500203585421604,
+        "lower": 10.95414281036172,
+        "upper": 11.905428206496852
+      },
+      "warmed": {
+        "ratio": 11.653811226380741,
+        "lower": 10.825957171568476,
+        "upper": 11.801942301749351
+      },
+      "peak_memory_ratio": 0.8883964319112122,
+      "passed": true
+    },
+    {
+      "dataset": "heterogeneous",
+      "operation": "typed-crown",
+      "cells": 10000,
+      "threads": 1,
+      "target": 1.0,
+      "first": {
+        "ratio": 2.834291450430792,
+        "lower": 2.4245692911863235,
+        "upper": 2.981462877840347
+      },
+      "warmed": {
+        "ratio": 2.7169159729099883,
+        "lower": 2.6343386372906132,
+        "upper": 2.79381342969588
+      },
+      "passed": true
+    },
+    {
+      "dataset": "heterogeneous",
+      "operation": "typed-crown",
+      "cells": 100000,
+      "threads": 1,
+      "target": 2.0,
+      "first": {
+        "ratio": 3.262084767059433,
+        "lower": 3.145512445292862,
+        "upper": 3.6010056181542116
+      },
+      "warmed": {
+        "ratio": 3.179434617812966,
+        "lower": 3.119034135272891,
+        "upper": 3.440616818818753
+      },
+      "peak_memory_ratio": 0.9223504721930745,
+      "passed": true
+    },
+    {
+      "dataset": "heterogeneous",
+      "operation": "typed-crown",
+      "cells": 100000,
+      "threads": 4,
+      "target": 4.0,
+      "first": {
+        "ratio": 6.469588176176514,
+        "lower": 6.227749735835624,
+        "upper": 7.019420728585478
+      },
+      "warmed": {
+        "ratio": 6.274565765268909,
+        "lower": 6.1220579820496175,
+        "upper": 6.426441332709572
+      },
+      "peak_memory_ratio": 0.9226565232598811,
+      "passed": true
+    },
+    {
+      "dataset": "heterogeneous",
+      "operation": "typed-crown",
+      "cells": 1000000,
+      "threads": 1,
+      "target": 2.0,
+      "first": {
+        "ratio": 4.751779417185293,
+        "lower": 4.600558845087263,
+        "upper": 5.059707536694635
+      },
+      "warmed": {
+        "ratio": 4.903937665301648,
+        "lower": 4.677647114495975,
+        "upper": 5.017593403984369
+      },
+      "peak_memory_ratio": 0.8938455428141663,
+      "passed": true
+    },
+    {
+      "dataset": "heterogeneous",
+      "operation": "typed-crown",
+      "cells": 1000000,
+      "threads": 4,
+      "target": 4.0,
+      "first": {
+        "ratio": 11.521569080361555,
+        "lower": 11.217822833010073,
+        "upper": 12.258612113940794
+      },
+      "warmed": {
+        "ratio": 11.454772630041429,
+        "lower": 11.063033227091992,
+        "upper": 11.720969623280462
+      },
+      "peak_memory_ratio": 0.8938511764424201,
+      "passed": true
+    },
+    {
+      "dataset": "heterogeneous",
+      "operation": "typed-crown-b",
+      "cells": 10000,
+      "threads": 1,
+      "target": 1.0,
+      "first": {
+        "ratio": 2.8181492156823635,
+        "lower": 2.7253787510182974,
+        "upper": 2.887336188337781
+      },
+      "warmed": {
+        "ratio": 2.7493313003817024,
+        "lower": 2.651178761683342,
+        "upper": 2.8166958217991005
+      },
+      "passed": true
+    },
+    {
+      "dataset": "heterogeneous",
+      "operation": "typed-crown-b",
+      "cells": 100000,
+      "threads": 1,
+      "target": 2.0,
+      "first": {
+        "ratio": 3.3337505384326933,
+        "lower": 3.197770696860462,
+        "upper": 3.429140616805466
+      },
+      "warmed": {
+        "ratio": 3.2705828717738483,
+        "lower": 3.137093690758,
+        "upper": 3.5721939929865947
+      },
+      "peak_memory_ratio": 0.92247011778074,
+      "passed": true
+    },
+    {
+      "dataset": "heterogeneous",
+      "operation": "typed-crown-b",
+      "cells": 100000,
+      "threads": 4,
+      "target": 4.0,
+      "first": {
+        "ratio": 5.809471876466488,
+        "lower": 5.473604548847481,
+        "upper": 6.14005917597872
+      },
+      "warmed": {
+        "ratio": 6.059337933275825,
+        "lower": 5.979467791467558,
+        "upper": 6.477451693875925
+      },
+      "peak_memory_ratio": 0.9218145663527304,
+      "passed": true
+    },
+    {
+      "dataset": "heterogeneous",
+      "operation": "typed-crown-b",
+      "cells": 1000000,
+      "threads": 1,
+      "target": 2.0,
+      "first": {
+        "ratio": 4.793074441655621,
+        "lower": 4.634834982277412,
+        "upper": 5.138810244487768
+      },
+      "warmed": {
+        "ratio": 4.7151077974545785,
+        "lower": 4.602965598180503,
+        "upper": 4.927986105636445
+      },
+      "peak_memory_ratio": 0.8921904654791863,
+      "passed": true
+    },
+    {
+      "dataset": "heterogeneous",
+      "operation": "typed-crown-b",
+      "cells": 1000000,
+      "threads": 4,
+      "target": 4.0,
+      "first": {
+        "ratio": 11.62487308730636,
+        "lower": 11.291668688930113,
+        "upper": 12.099503622753243
+      },
+      "warmed": {
+        "ratio": 11.279394050377336,
+        "lower": 10.895609331525684,
+        "upper": 11.421184597355381
+      },
+      "peak_memory_ratio": 0.8922270177559714,
+      "passed": true
+    }
+  ]
+}

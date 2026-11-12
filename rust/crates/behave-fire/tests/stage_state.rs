@@ -51,6 +51,15 @@ fn stage_metadata_has_one_producer_and_no_derived_cycles() {
     }
     assert!(Field::FinalFirelineIntensity
         .dependencies()
+        .contains(&Field::IsSurfaceFire));
+    assert!(Field::FinalFirelineIntensity
+        .dependencies()
+        .contains(&Field::IsPassiveCrown));
+    assert!(Field::FinalFirelineIntensity
+        .dependencies()
+        .contains(&Field::IsActiveCrown));
+    assert!(Field::IsSurfaceFire
+        .dependencies()
         .contains(&Field::FireType));
     assert!(Field::CrownFireHeatPerUnitArea
         .dependencies()

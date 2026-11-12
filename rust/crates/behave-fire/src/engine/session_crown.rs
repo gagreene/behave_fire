@@ -96,7 +96,17 @@ impl GridSession {
             | Field::FinalHeatPerUnitArea
             | Field::FinalFirelineIntensity
             | Field::FinalFlameLength => {
-                let code = self.code_value(Field::FireType, index)?;
+                // Explicit flags select final behavior; Surface wins over passive,
+                // then active. All-false flags retain unavailable classification.
+                let code = if self.flag_value(Field::IsSurfaceFire, index)? {
+                    0
+                } else if self.flag_value(Field::IsPassiveCrown, index)? {
+                    1
+                } else if self.flag_value(Field::IsActiveCrown, index)? {
+                    3
+                } else {
+                    -1
+                };
                 let sources = match field {
                     Field::FinalSpreadRate => (
                         Field::SurfaceRos,
