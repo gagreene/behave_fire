@@ -67,11 +67,22 @@ def _evidence():
                     report["validations"].append({
                         "dataset": dataset, "operation": operation, "cells": cells, "threads": threads,
                         "passed": True, "numpy": "2.1.3", "numpy_build": "test-build",
-                        "source_hash": "candidate", "extension_hash": "native", "seed": 20261105,
+                        "source_hash": "a" * 64, "extension_hash": "b" * 64, "seed": 20261105,
                     })
             report["allocations"].append({"dataset": dataset, "operation": operation,
                                           "kernel_per_cell": 0, "encoder_per_cell": 0,
-                                          "source_hash": "candidate", "extension_hash": "native"})
+                                          "source_hash": "a" * 64, "extension_hash": "b" * 64})
+    from test_allocation_evidence_array import _evidence as allocation_fixture, _updated
+    envelope = allocation_fixture()
+    prototype = copy.deepcopy(envelope["raw"])
+    envelope["raw"] = []
+    for dataset in requirements["datasets"]:
+        for operation in OPERATIONS:
+            for sample in copy.deepcopy(prototype):
+                sample.update(dataset=dataset, operation=operation, process_id=len(envelope["raw"]) + 1)
+                envelope["raw"].append(sample)
+    assembler = _tool("assemble_allocation_evidence")
+    report["allocations"] = assembler.assemble(_updated(envelope), requirements)["allocations"]
     return report, requirements
 
 
@@ -80,7 +91,7 @@ def _row(dataset, operation, cells, block, backend, threads, seconds):
             "backend": backend, "threads": threads, "first_seconds": seconds,
             "warm_seconds": [seconds] * 5, "total_seconds": seconds,
             "numpy": "2.1.3", "numpy_build": "test-build", "python": "3.12.8",
-            "platform": "test-host", "source_hash": "candidate", "extension_hash": "native",
+            "platform": "test-host", "source_hash": "a" * 64, "extension_hash": "b" * 64,
             "seed": 20261105, "peak_bytes": 800 if backend == "rust" else 1000,
             "profile": False}
 

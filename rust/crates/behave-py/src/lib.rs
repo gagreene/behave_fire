@@ -1,4 +1,6 @@
 //! Explicit owned NumPy bindings for the standalone Rust implementation.
+#[cfg(feature = "allocation-probe")]
+mod allocation_probe;
 mod arrays;
 mod capabilities;
 mod controls;
@@ -13,6 +15,11 @@ use pyo3::prelude::*;
 
 #[pymodule]
 fn _rust(module: &Bound<'_, PyModule>) -> PyResult<()> {
+    #[cfg(feature = "allocation-probe")]
+    {
+        module.add_function(wrap_pyfunction!(_allocation_start, module)?)?;
+        module.add_function(wrap_pyfunction!(_allocation_stop, module)?)?;
+    }
     module.add("__version__", env!("CARGO_PKG_VERSION"))?;
     module.add("__binding_version__", env!("CARGO_PKG_VERSION"))?;
     module.add("__core_version__", behave_fire::VERSION)?;
@@ -52,3 +59,15 @@ mod units;
 mod model;
 
 mod parallel;
+
+#[cfg(feature = "allocation-probe")]
+#[pyfunction]
+fn _allocation_start() {
+    allocation_probe::start();
+}
+
+#[cfg(feature = "allocation-probe")]
+#[pyfunction]
+fn _allocation_stop() -> Vec<(usize, usize, usize, usize)> {
+    allocation_probe::stop().to_vec()
+}

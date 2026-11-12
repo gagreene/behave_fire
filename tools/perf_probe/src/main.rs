@@ -119,7 +119,10 @@ fn arguments() -> Result<Arguments, String> {
         result.operation.as_str(),
         "surface" | "crown" | "typed-crown"
     ) || !matches!(result.layout.as_str(), "a" | "b")
-        || !matches!(result.dataset.as_str(), "uniform" | "heterogeneous")
+        || !matches!(
+            result.dataset.as_str(),
+            "uniform" | "heterogeneous" | "continuous"
+        )
         || !matches!(result.mode.as_str(), "timing" | "allocations")
         || !matches!(result.scope.as_str(), "scalar" | "raster" | "compact")
         || result.cells == 0
@@ -143,7 +146,13 @@ fn arguments() -> Result<Arguments, String> {
 
 /// Prepare a bounded repeating input period, preserving each typed mask period.
 fn build_cases<'a>(args: &Arguments, fuels: &'a PreparedFuels) -> Result<Vec<Case<'a>>, String> {
-    let base = if args.dataset == "uniform" { 1 } else { 136 };
+    let base = if args.dataset == "uniform" {
+        1
+    } else if args.dataset == "continuous" {
+        args.cells
+    } else {
+        136
+    };
     let mask_period = if args.operation != "typed-crown" {
         1
     } else if args.layout == "a" {
@@ -158,8 +167,12 @@ fn build_cases<'a>(args: &Arguments, fuels: &'a PreparedFuels) -> Result<Vec<Cas
         input.wind_speed = 8.0;
         input.wind_direction = 35.0;
         input.slope = 12.0;
-        let phase = ((index + args.seed) % 17) as f64 / 16.0;
-        if args.dataset == "heterogeneous" {
+        let phase = if args.dataset == "continuous" {
+            ((index + args.seed) as f64 * ((5.0_f64.sqrt() - 1.0) / 2.0)).fract()
+        } else {
+            ((index + args.seed) % 17) as f64 / 16.0
+        };
+        if args.dataset != "uniform" {
             input.fuel_model_grid = [1, 4, 10, 101, 124, 145, 201, 0][index % 8];
             input.m1h = 0.03 + 0.07 * phase;
             input.m10h = 0.04 + 0.08 * phase;

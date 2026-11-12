@@ -122,7 +122,7 @@ fn evaluate(
 ) -> Record {
     let p = Value::plain;
     let [rate, intensity, heat] = supplied;
-    let fm10 = plan.prepare_surface(cell, fuel, SurfaceTweaks::default());
+    let fm10 = plan.prepare_spread(cell, fuel, SurfaceTweaks::default());
     let crown_rate = p(fm10.crown_fire_spread_rate);
     let load = p(cell.canopy_bulk_density)
         .mul(p(cell.canopy_height).sub(p(cell.canopy_base_height)))
@@ -326,6 +326,12 @@ pub(super) fn run(
         Ok(output)
     };
     super::raster_probe::measure(args, run, |output| {
+        super::raster_probe::dump_typed(
+            &output.values,
+            &output.masks,
+            &output.classes,
+            &reference[0],
+        )?;
         for index in 0..args.cells {
             let expected = &reference[index % reference.len()];
             if output.classes[index] != expected.fire_type {

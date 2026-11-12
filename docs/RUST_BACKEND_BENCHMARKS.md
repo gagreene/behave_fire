@@ -1,5 +1,7 @@
 # Rust backend execution measurements
 
+The later [core recovery confirmation](RUST_ENGINE.md#recovery-core-confirmation-2026-11-06) passes the native headroom gate. The historical Python-boundary measurements below still describe the transport being replaced; end-to-end speed is not yet certified.
+
 Measured on 2026-11-04 against the final ownership-fix release build based on `7d3fb2a0dbdc73d8433a6638607e1f71703f6793`, with binding API 2, the complete backend enabled, and exact integer-alias, object, empty, complex, and weak-scalar transport. The Windows calibration selects the platform-libm atan2 profile; Linux SVML timing is not measured here. These measurements supersede the earlier development tables.
 
 ## Method
