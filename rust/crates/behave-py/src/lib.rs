@@ -3,12 +3,12 @@
 mod allocation_probe;
 mod arrays;
 mod capabilities;
-mod controls;
 mod crown;
 mod data;
 mod dispatch;
 mod masked;
 mod math_profiles;
+mod prepared;
 mod state;
 mod structures;
 use pyo3::prelude::*;

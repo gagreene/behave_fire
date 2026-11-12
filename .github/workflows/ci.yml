@@ -42,6 +42,8 @@ jobs:
           components: rustfmt, clippy
       - run: cargo fmt --manifest-path rust/Cargo.toml --all -- --check
       - run: cargo clippy --manifest-path rust/Cargo.toml --workspace --all-targets --locked -- -D warnings
+      - name: Test prepared field and allocation contracts
+        run: cargo test --manifest-path tools/field_probe/Cargo.toml --locked -- --test-threads=1
       - name: Test isolated allocation counter scopes
         shell: bash
         run: |
@@ -67,6 +69,8 @@ jobs:
         with:
           toolchain: ${{ steps.msrv.outputs.version }}
       - run: cargo check --manifest-path rust/Cargo.toml --workspace --all-targets --locked
+      - name: Test prepared field and allocation contracts
+        run: cargo test --manifest-path tools/field_probe/Cargo.toml --locked -- --test-threads=1
       - name: Test isolated allocation counter scopes
         shell: bash
         run: |

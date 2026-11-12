@@ -1,7 +1,9 @@
 //! Pass per-argument data, masks, array kind, and precision into native stages.
-use crate::{arrays::Arguments, dispatch::Cell};
+use crate::{
+    dispatch::Cell,
+    prepared::{Field, PreparedArguments},
+};
 use behave_fire::surface::masked::*;
-use behave_fire::units::*;
 pub fn output(value: MaskedValue, key: &str) -> Result<Cell, String> {
     let value = value
         .validate_output()
@@ -67,134 +69,137 @@ pub fn outputs<'a>(
     }
     Ok(result)
 }
-pub fn evaluate(operation: &str, a: &Arguments, i: usize) -> Result<Option<Cell>, String> {
+pub fn evaluate(
+    operation: &str,
+    a: &PreparedArguments<'_>,
+    i: usize,
+) -> Result<Option<Cell>, String> {
     Ok(Some(match operation {
         "surface.calculate_backing_spread_rate" => output(
             calculate_backing_spread_rate(
-                a.masked("spread_rate", i)?,
-                a.masked("eccentricity", i)?,
+                a.masked(Field::SpreadRate, i)?,
+                a.masked(Field::Eccentricity, i)?,
             ),
             "",
         )?,
         "surface.calculate_direction_of_max_spread" => output(
             calculate_direction_of_max_spread(
-                a.masked("x_component", i)?,
-                a.masked("y_component", i)?,
-                a.masked("rate_vector", i)?,
-                crate::controls::orientation(a.s("wind_orientation_mode")?),
-                a.masked("aspect", i)?,
+                a.masked(Field::XComponent, i)?,
+                a.masked(Field::YComponent, i)?,
+                a.masked(Field::RateVector, i)?,
+                a.orientation()?,
+                a.masked(Field::Aspect, i)?,
             ),
             "",
         )?,
         "surface.calculate_eccentricity" => output(
-            calculate_eccentricity(a.masked("fire_length_to_width_ratio", i)?),
+            calculate_eccentricity(a.masked(Field::FireLengthToWidthRatio, i)?),
             "",
         )?,
         "surface.calculate_effective_wind_speed" => {
             validate_condition_and(&[
-                a.masked("wind_b", i)?,
-                a.masked("wind_c", i)?,
-                a.masked("relative_packing_ratio", i)?,
+                a.masked(Field::WindB, i)?,
+                a.masked(Field::WindC, i)?,
+                a.masked(Field::RelativePackingRatio, i)?,
             ])
             .map_err(|_| "TypeError: invalid masked scalar boolean operation".to_owned())?;
             output(
                 calculate_effective_wind_speed(
-                    a.masked("spread_rate", i)?,
-                    a.masked("no_wind_no_slope_spread_rate", i)?,
-                    a.masked("wind_b", i)?,
-                    a.masked("wind_c", i)?,
-                    a.masked("relative_packing_ratio", i)?,
-                    a.masked("wind_e", i)?,
+                    a.masked(Field::SpreadRate, i)?,
+                    a.masked(Field::NoWindNoSlopeSpreadRate, i)?,
+                    a.masked(Field::WindB, i)?,
+                    a.masked(Field::WindC, i)?,
+                    a.masked(Field::RelativePackingRatio, i)?,
+                    a.masked(Field::WindE, i)?,
                 ),
                 "",
             )?
         }
         "surface.calculate_fire_area" => output(
             calculate_fire_area(
-                a.masked("forward_ros", i)?,
-                a.masked("backing_ros", i)?,
-                a.masked("lwr", i)?,
-                a.masked("elapsed_min", i)?,
-                a.n("is_crown", i)? != 0.0,
+                a.masked(Field::ForwardRos, i)?,
+                a.masked(Field::BackingRos, i)?,
+                a.masked(Field::Lwr, i)?,
+                a.masked(Field::ElapsedMin, i)?,
+                a.n(Field::IsCrown, i)? != 0.0,
             ),
             "",
         )?,
         "surface.calculate_fire_length" => output(
             calculate_fire_length(
-                a.masked("forward_ros", i)?,
-                a.masked("backing_ros", i)?,
-                a.masked("elapsed_min", i)?,
+                a.masked(Field::ForwardRos, i)?,
+                a.masked(Field::BackingRos, i)?,
+                a.masked(Field::ElapsedMin, i)?,
             ),
             "",
         )?,
         "surface.calculate_fire_length_to_width_ratio" => output(
-            calculate_fire_length_to_width_ratio(a.masked("effective_wind_speed", i)?),
+            calculate_fire_length_to_width_ratio(a.masked(Field::EffectiveWindSpeed, i)?),
             "",
         )?,
         "surface.calculate_fire_perimeter" => output(
             calculate_fire_perimeter(
-                a.masked("forward_ros", i)?,
-                a.masked("backing_ros", i)?,
-                a.masked("lwr", i)?,
-                a.masked("elapsed_min", i)?,
-                a.n("is_crown", i)? != 0.0,
+                a.masked(Field::ForwardRos, i)?,
+                a.masked(Field::BackingRos, i)?,
+                a.masked(Field::Lwr, i)?,
+                a.masked(Field::ElapsedMin, i)?,
+                a.n(Field::IsCrown, i)? != 0.0,
             ),
             "",
         )?,
         "surface.calculate_fire_width" => output(
             calculate_fire_width(
-                a.masked("forward_ros", i)?,
-                a.masked("backing_ros", i)?,
-                a.masked("lwr", i)?,
-                a.masked("elapsed_min", i)?,
+                a.masked(Field::ForwardRos, i)?,
+                a.masked(Field::BackingRos, i)?,
+                a.masked(Field::Lwr, i)?,
+                a.masked(Field::ElapsedMin, i)?,
             ),
             "",
         )?,
         "surface.calculate_flame_length" => output(
-            calculate_flame_length(a.masked("fireline_intensity", i)?),
+            calculate_flame_length(a.masked(Field::FirelineIntensity, i)?),
             "",
         )?,
         "surface.calculate_flanking_spread_rate" => output(
             calculate_flanking_spread_rate(
-                a.masked("spread_rate", i)?,
-                a.masked("backing_spread_rate", i)?,
-                a.masked("fire_length_to_width_ratio", i)?,
+                a.masked(Field::SpreadRate, i)?,
+                a.masked(Field::BackingSpreadRate, i)?,
+                a.masked(Field::FireLengthToWidthRatio, i)?,
             ),
             "",
         )?,
         "surface.calculate_no_wind_no_slope_spread_rate" => output(
             calculate_no_wind_no_slope_spread_rate(
-                a.masked("ri", i)?,
-                a.masked("propagating_flux", i)?,
-                a.masked("heat_sink", i)?,
+                a.masked(Field::Ri, i)?,
+                a.masked(Field::PropagatingFlux, i)?,
+                a.masked(Field::HeatSink, i)?,
             ),
             "",
         )?,
         "surface.calculate_residence_time" => {
-            output(calculate_residence_time(a.masked("sigma", i)?), "")?
+            output(calculate_residence_time(a.masked(Field::Sigma, i)?), "")?
         }
         "surface.calculate_slope_phi" => {
-            validate_condition_and(&[a.masked("packing_ratio", i)?])
+            validate_condition_and(&[a.masked(Field::PackingRatio, i)?])
                 .map_err(|_| "TypeError: invalid masked scalar boolean operation".to_owned())?;
             output(
                 calculate_slope_phi(
-                    a.masked("slope", i)?,
-                    SlopeUnit::try_from(a.n("slope_units", i)? as i32)
-                        .map_err(|e| e.to_string())?,
-                    a.masked("packing_ratio", i)?,
-                    a.masked("reaction_intensity", i)?,
+                    a.masked(Field::Slope, i)?,
+                    a.slope_units(i)?,
+                    a.masked(Field::PackingRatio, i)?,
+                    a.masked(Field::ReactionIntensity, i)?,
                 ),
                 "",
             )?
         }
         "surface.calculate_surface_rate_vector" => {
             let r = calculate_surface_rate_vector(
-                a.masked("no_wind_no_slope_spread_rate", i)?,
-                a.masked("wind_phi", i)?,
-                a.masked("slope_phi", i)?,
-                a.masked("wind_direction", i)?,
-                crate::controls::orientation(a.s("wind_orientation_mode")?),
-                a.masked("aspect", i)?,
+                a.masked(Field::NoWindNoSlopeSpreadRate, i)?,
+                a.masked(Field::WindPhi, i)?,
+                a.masked(Field::SlopePhi, i)?,
+                a.masked(Field::WindDirection, i)?,
+                a.orientation()?,
+                a.masked(Field::Aspect, i)?,
             );
             outputs([
                 ("x_component", r.x_component),
@@ -203,28 +208,31 @@ pub fn evaluate(operation: &str, a: &Arguments, i: usize) -> Result<Option<Cell>
             ])?
         }
         "surface.calculate_surface_wind_coefficients" => {
-            outputs(calculate_surface_wind_coefficients(a.masked("sigma", i)?).named_values())?
+            outputs(calculate_surface_wind_coefficients(a.masked(Field::Sigma, i)?).named_values())?
         }
         "surface.calculate_wind_phi" => {
-            validate_condition_and(&[a.masked("sigma", i)?, a.masked("midflame_wind_speed", i)?])
-                .map_err(|_| "TypeError: invalid masked scalar boolean operation".to_owned())?;
+            validate_condition_and(&[
+                a.masked(Field::Sigma, i)?,
+                a.masked(Field::MidflameWindSpeed, i)?,
+            ])
+            .map_err(|_| "TypeError: invalid masked scalar boolean operation".to_owned())?;
             output(
                 calculate_wind_phi(
-                    a.masked("sigma", i)?,
-                    a.masked("midflame_wind_speed", i)?,
-                    a.masked("wind_b", i)?,
-                    a.masked("wind_c", i)?,
-                    a.masked("relative_packing_ratio", i)?,
-                    a.masked("wind_e", i)?,
+                    a.masked(Field::Sigma, i)?,
+                    a.masked(Field::MidflameWindSpeed, i)?,
+                    a.masked(Field::WindB, i)?,
+                    a.masked(Field::WindC, i)?,
+                    a.masked(Field::RelativePackingRatio, i)?,
+                    a.masked(Field::WindE, i)?,
                 ),
                 "",
             )?
         }
         "surface.run_surface_fire" => crate::structures::surface_output(run_surface_fire(
-            a.masked("ri", i)?,
+            a.masked(Field::Ri, i)?,
             &crate::structures::ib(a, i)?,
             &crate::structures::input(a, i)?,
-            &crate::controls::surface(a)?,
+            &crate::prepared::controls::surface(a)?,
         )),
         _ => return Ok(None),
     }))
