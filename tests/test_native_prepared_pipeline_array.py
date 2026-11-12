@@ -2,6 +2,8 @@
 
 import numpy as np
 import pytest
+from parity_support import ROOT
+from float64_model_reference import model_reference
 
 pytestmark = pytest.mark.rust
 
@@ -43,36 +45,35 @@ def test_fused_nonbase_units_preserve_reference_outputs(route, storage, varying_
                         fireline_intensity=np.array([100, 200], np.uint16),
                         heat_per_unit_area=np.ma.array([1000., 2000.], mask=[False, True], fill_value=-17.))
         arguments.update(canopy_bulk_density=.1, canopy_bulk_density_units=1)
-        expected = python.do_crown_run(surface_results=supplied, **arguments)
+        expected = model_reference(python.do_crown_run, dict(surface_results=supplied, **arguments))
         actual = rust.do_crown_run(surface_results=supplied, **arguments)
     assert_result(actual, encode_value(expected))
 @pytest.mark.parametrize("route", ["surface", "crown"])
-def test_parallel_pipeline_profiles_current_chunk_concatenation(monkeypatch, route):
+def test_parallel_pipeline_profiles_direct_output_without_concatenation(monkeypatch, route):
     from behave_fire.python import BehaveRun as PythonRun, FuelModels
     from behave_fire.rust import BehaveRun, _bridge
 
     arguments = _inputs(10000)
     supplied = PythonRun(FuelModels()).do_surface_run(**arguments)
-    original = _bridge._native.batch
+    original = _bridge._native.model_batch
     observed = []
 
     def profile(*args, **kwargs):
         kwargs["profile"] = True
         result = original(*args, **kwargs)
-        if args[0] in ("model.run_surface", "crown.run_crown_fire"):
+        if args[0] in ('surface', 'crown'):
             observed.append((float(result["__timing.appended_bytes"]),
                              float(result["__timing.concatenate_seconds"])))
         return result
 
-    monkeypatch.setattr(_bridge._native, "batch", profile)
+    monkeypatch.setattr(_bridge._native, "model_batch", profile)
     model = BehaveRun(FuelModels(), threads=4)
     if route == "surface":
         model.do_surface_run(**arguments)
     else:
         model.do_crown_run(surface_results=supplied, **arguments)
     assert len(observed) == 1
-    assert observed[0][0] > 0
-    assert observed[0][1] > 0
+    assert observed[0] == (0., 0.)
 
 @pytest.mark.parametrize("route", ["surface", "crown"])
 def test_public_model_uses_one_native_compute_call(monkeypatch, route):
@@ -83,20 +84,20 @@ def test_public_model_uses_one_native_compute_call(monkeypatch, route):
     supplied = PythonRun(FuelModels()).do_surface_run(**arguments)
     model = BehaveRun(FuelModels())
     calls = []
-    original = _bridge._native.batch
+    original = _bridge._native.model_batch
 
     def observe(*args, **kwargs):
         calls.append(args[0])
         return original(*args, **kwargs)
 
-    monkeypatch.setattr(_bridge._native, "batch", observe)
+    monkeypatch.setattr(_bridge._native, "model_batch", observe)
     if route == "surface":
         model.do_surface_run(**arguments)
-        assert calls == ["model.run_surface"]
+        assert calls == ['surface']
     else:
         model.do_crown_run(surface_results=supplied, canopy_base_height=4., canopy_height=30.,
                            canopy_bulk_density=.01, moisture_foliar=100., **arguments)
-        assert calls == ["crown.run_crown_fire"]
+        assert calls == ['crown']
 @pytest.mark.parametrize("route", ["surface", "crown"])
 def test_registry_is_sent_once_as_numeric_rows(monkeypatch, route):
     from behave_fire.python import BehaveRun as PythonRun, FuelModels
@@ -104,19 +105,19 @@ def test_registry_is_sent_once_as_numeric_rows(monkeypatch, route):
 
     arguments = _inputs()
     supplied = PythonRun(FuelModels()).do_surface_run(**arguments)
-    original = _bridge._native.batch
+    original = _bridge._native.model_batch
     seen = []
 
-    def observe(operation, arrays, *args, **kwargs):
-        if operation in ("model.run_surface", "crown.run_crown_fire"):
-            registry = kwargs.get("registry")
+    def observe(operation, arrays, controls, registry, *args, **kwargs):
+        if operation in ('surface', 'crown'):
             assert registry is not None
-            assert len(registry["model.fuel_bed_depth"]) == 261
+            assert len(registry['depth']) == 261
+            assert registry['is_defined'].dtype == np.bool_
             assert not any(key.startswith("model.") for key in arrays)
             seen.append(operation)
-        return original(operation, arrays, *args, **kwargs)
+        return original(operation, arrays, controls, registry, *args, **kwargs)
 
-    monkeypatch.setattr(_bridge._native, "batch", observe)
+    monkeypatch.setattr(_bridge._native, "model_batch", observe)
     model = BehaveRun(FuelModels())
     if route == "surface":
         model.do_surface_run(**arguments)

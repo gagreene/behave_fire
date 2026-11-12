@@ -23,7 +23,7 @@ def test_cached_selection_and_warnings(outcome):
         import behave_fire.auto as auto
         outcome = {outcome!r}
         calls = []
-        extension = types.SimpleNamespace(__binding_api_version__=3, __backend_complete__=True, __capabilities__=auto.REQUIRED_CAPABILITIES)
+        extension = types.SimpleNamespace(__binding_api_version__=4, __backend_complete__=True, __capabilities__=auto.REQUIRED_CAPABILITIES)
         if outcome == "version": extension.__binding_api_version__ = 999
         if outcome == "incomplete": extension.__backend_complete__ = False
         original_import = importlib.import_module
@@ -48,7 +48,7 @@ def test_cached_selection_and_warnings(outcome):
             for _ in range(3):
                 model = bf.BehaveRun(bf.FuelModels())
                 assert model.backend_in_use == ("rust" if outcome == "usable" else "python")
-            assert len(caught) == (0 if outcome in ("absent", "usable") else 1)
+            assert len(caught) == (0 if outcome == "usable" else 1)
             if caught:
                 assert caught[0].category is bf.BehaveBackendWarning
                 assert caught[0].filename == "<string>"
@@ -94,7 +94,7 @@ def test_facade_and_calculation_errors_do_not_fallback():
         import importlib, importlib.util, types
         import behave_fire as bf
         from behave_fire._backend_contract import REQUIRED_CAPABILITIES
-        extension = types.SimpleNamespace(__binding_api_version__=3, __backend_complete__=True, __capabilities__=REQUIRED_CAPABILITIES)
+        extension = types.SimpleNamespace(__binding_api_version__=4, __backend_complete__=True, __capabilities__=REQUIRED_CAPABILITIES)
         importlib.util.find_spec = lambda name: object()
         original = importlib.import_module
         def load(name):
@@ -185,7 +185,7 @@ def test_missing_capability_inventory_rejects_claimed_complete_backend(capabilit
     _run(f'''
         import importlib, importlib.util, types, warnings
         import behave_fire as bf
-        extension = types.SimpleNamespace(__binding_api_version__=3, __backend_complete__=True)
+        extension = types.SimpleNamespace(__binding_api_version__=4, __backend_complete__=True)
         capabilities = {capabilities!r}
         if capabilities == "one-missing":
             from behave_fire._backend_contract import REQUIRED_CAPABILITIES
@@ -235,7 +235,7 @@ def test_static_capability_contract_matches_tracked_inventory():
 
     inventory = json.loads((Path(__file__).parent / "data/rust_api_inventory.json").read_text(encoding="utf-8"))
     expected = {entry["binding_route"] for entry in inventory["entries"] if entry["kind"] in ("function", "method")}
-    assert BINDING_API_VERSION == 3
+    assert BINDING_API_VERSION == 4
     assert REQUIRED_CAPABILITIES == expected
 
 

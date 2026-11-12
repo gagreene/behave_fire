@@ -1,4 +1,4 @@
-"""One owned input snapshot shared by a public calculation's native stages."""
+"""Backend-neutral input ownership shared by preflight and calculation stages."""
 
 from contextlib import contextmanager
 from contextvars import ContextVar
@@ -17,6 +17,28 @@ class _InputOwner:
         :return: None; initializes this calculation's identity memo.
         """
         self.memo = {}
+
+    def layout_source(self, value):
+        """Find the pre-copy array for legacy layout selection, never scientific values.
+
+        :param value: Owned array supplied to an unmigrated layout-sensitive helper.
+        :return: Original array whose shape/strides selected its kernel, or the array itself.
+        """
+        for source, snapshot in self.memo.values():
+            if snapshot is value and source is not snapshot:
+                return source
+        return value
+
+    def owns_storage(self, value):
+        """Identify plain owned allocations already registered for this public call.
+
+        :param value: Physical operand whose storage may be reused during normalization.
+        :return: True only for a registered exact ndarray that owns its allocation.
+        """
+        if type(value) is not np.ndarray or not value.flags.owndata:
+            return False
+        entry = self.memo.get(id(value))
+        return entry is not None and entry[0] is value and entry[1] is value
 
     def remember(self, value):
         """Register fresh results so later stages can reuse them and their views.
@@ -75,14 +97,18 @@ class _InputOwner:
 
 
 @contextmanager
-def _owned_inputs():
+def _owned_inputs(selected_owner=None):
     """Share ownership across nested stages and restore context after exceptions.
 
+    :param selected_owner: Captured call owner to reactivate, or None to reuse the active scope.
     :return: Scoped input owner, released when the outer public call returns.
     """
     owner = _OWNER.get()
     token = None
-    if owner is None:
+    if selected_owner is not None and owner is not selected_owner:
+        owner = selected_owner
+        token = _OWNER.set(owner)
+    elif owner is None:
         owner = _InputOwner()
         token = _OWNER.set(owner)
     try:

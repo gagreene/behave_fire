@@ -8,6 +8,8 @@ pytestmark = pytest.mark.rust
 _native = pytest.importorskip("behave_fire.rust", exc_type=ImportError)
 BehaveRun, FuelModels = _native.BehaveRun, _native.FuelModels
 from behave_fire.rust import _bridge
+from parity_support import ROOT
+from float64_model_reference import model_reference
 
 
 def _surface_inputs(shape):
@@ -35,7 +37,7 @@ def test_broadcast_crown_preserves_independent_field_shapes(width, independent):
                        fireline_intensity=np.array([200], np.uint16),
                        heat_per_unit_area=np.ma.array([1000.0], mask=[False]))
     canopy = dict(canopy_base_height=4.0, canopy_height=30.0, canopy_bulk_density=.01)
-    expected = reference.do_crown_run(surface_results=surface, **inputs, **canopy)
+    expected = model_reference(reference.do_crown_run, dict(surface_results=surface, **inputs, **canopy))
     for workers in (0, 1, 2, 4):
         actual = BehaveRun(FuelModels(), threads=workers).do_crown_run(surface_results=surface, **inputs, **canopy)
         assert actual.keys() == expected.keys()
@@ -72,7 +74,8 @@ def test_crown_three_axis_dependencies_preserve_typed_fields(width):
                    heat_per_unit_area=np.ma.array(np.full((2, 1, 1), 1000.0), mask=np.array([False, True]).reshape(2, 1, 1)))
     canopy = dict(canopy_base_height=np.full((1, 1, 4), 4.0), canopy_height=30.0,
                   canopy_bulk_density=np.full((1, 1, 4), .01), moisture_foliar=100.0)
-    expected = PythonRun(PythonFuels()).do_crown_run(surface_results=surface, **inputs, **canopy)
+    expected = model_reference(PythonRun(PythonFuels()).do_crown_run,
+                               dict(surface_results=surface, **inputs, **canopy))
     for workers in (0, 1, 2, 4):
         actual = BehaveRun(FuelModels(), threads=workers).do_crown_run(surface_results=surface, **inputs, **canopy)
         for field in expected:
@@ -126,8 +129,9 @@ def test_empty_crown_groups_share_the_pre_detach_input_snapshot(monkeypatch):
                    fireline_intensity=np.array([200], np.uint16),
                    heat_per_unit_area=np.ma.array([1000.0], mask=[False]))
     canopy = dict(canopy_base_height=np.array([4.0]), canopy_height=30.0, canopy_bulk_density=.01)
-    expected = PythonRun(PythonFuels()).do_crown_run(surface_results=surface, **inputs, **canopy)
-    original = _bridge._native.batch
+    expected = model_reference(PythonRun(PythonFuels()).do_crown_run,
+                               dict(surface_results=surface, **inputs, **canopy))
+    original = _bridge._native.model_groups
     mutated = []
 
     def mutate():
@@ -137,11 +141,11 @@ def test_empty_crown_groups_share_the_pre_detach_input_snapshot(monkeypatch):
         mutated.append(True)
 
     def record(*args, **kwargs):
-        if args[0] == "crown.run_crown_fire" and not mutated:
+        if args[0] == 'crown' and not mutated:
             kwargs["_owned_callback"] = mutate
         return original(*args, **kwargs)
 
-    monkeypatch.setattr(_bridge._native, "batch", record)
+    monkeypatch.setattr(_bridge._native, 'model_groups', record)
     actual = BehaveRun(FuelModels(), threads=4).do_crown_run(surface_results=surface, **inputs, **canopy)
     assert mutated == [True]
     for field in expected:
@@ -343,14 +347,14 @@ def test_typed_supplied_crown_outputs_are_thread_independent():
 
 
 def test_unbound_instance_calls_honor_receiver_threads(monkeypatch):
-    original = _bridge._native.batch
+    original = _bridge._native.model_batch
     seen = []
 
     def record(*args, **kwargs):
         seen.append(kwargs.get("threads", 1))
         return original(*args, **kwargs)
 
-    monkeypatch.setattr(_bridge._native, "batch", record)
+    monkeypatch.setattr(_bridge._native, 'model_batch', record)
     model = BehaveRun(FuelModels(), threads=4)
     BehaveRun.do_surface_run(model, **_surface_inputs((2,)))
     assert seen and all(value == 4 for value in seen)

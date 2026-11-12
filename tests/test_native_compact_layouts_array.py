@@ -4,6 +4,8 @@ import numpy as np
 import pytest
 
 from parity_support import assert_result, encode_value
+from float64_model_reference import model_reference
+from performance_cases import assert_outputs
 
 pytestmark = pytest.mark.rust
 
@@ -47,6 +49,6 @@ def test_compact_layouts_preserve_all_values_masks_and_types(layout, storage):
             data = np.ma.array(data, mask=[False, True, False, True, False, False, True, False], fill_value=-321.)
         surface[field] = data
     with np.errstate(all="ignore"):
-        expected = PythonRun(FuelModels()).do_crown_run(surface_results=surface, **_inputs())
+        expected = model_reference(PythonRun(FuelModels()).do_crown_run, dict(surface_results=surface, **_inputs()))
         actual = BehaveRun(FuelModels()).do_crown_run(surface_results=surface, **_inputs())
-    assert_result(actual, encode_value(expected))
+    assert_outputs(actual, expected)

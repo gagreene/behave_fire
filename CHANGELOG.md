@@ -6,6 +6,28 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Float64 models and backend routing
+
+- Move public Rust Surface/Crown models to the standalone float64 raster engine.
+  Real physical inputs widen once; masks become NaN; physical outputs are plain
+  float64 arrays. Classifications stay int32, with -1 for unavailable values.
+  Preserve output shapes and selected-branch dependencies. This intentionally
+  differs from Python dtype/mask behavior, including under automatic selection.
+- Normalize already-float64 stateless families and expose an operation-level
+  numeric-contract manifest. Remaining component/state helpers are not yet
+  covered by the new contract. Binding API4 rejects API3 extensions/saved state.
+- Warn once when auto cannot use Rust, including on pure wheels. Proven complex
+  input compatibility selects a complete Python operation before coercion, with
+  an independent warning. General object data and native errors do not trigger
+  fallback. Preserve frozen registry snapshots and actual last-completed backend
+  across copies and serialization.
+
+### Rust core output storage
+
+- Reuse immutable wind coefficients and packing powers in Surface and across Crown forward spread and backsolve for static physical fuel. Physical-fuel and actual fuelbed dependency checks prevent stale reuse; dynamic fuel retains per-cell evaluation. Floating-point product order and availability thresholds are unchanged.
+- Model batches write selected fields directly into final output buffers using safe disjoint worker slices. Integer classification columns retain int32 storage through export.
+- The unreleased Rust `into_named_vectors` adapter is replaced by typed `into_named_columns`; Rust callers must match the returned `ColumnValues` storage.
+- Add a configured Rust `run_model` entry point with float64 physical calculations, selected final columns, prepared fuels or supplied fuelbeds, and persistent per-cell overrides. Missing inputs propagate by field dependency; explicitly invalid cells produce NaN physical outputs and classification -1. See the standalone `configured_tiles` example.
 
 ### Breaking changes
 

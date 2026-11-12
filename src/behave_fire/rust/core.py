@@ -8,6 +8,7 @@ from __future__ import annotations
 from ._bridge import _call, _unit_code, _validate_threads
 from ._threads import _threaded_method, _threaded_static
 from ._serialization import NativeState as _NativeState
+from ._numeric import _validate_value, normalize_identifier, normalize_physical, normalize_selector
 import numpy as np
 from typing import Union, Optional
 from .fuel_models import FuelModels
@@ -57,13 +58,23 @@ def _prepare_base(field, kind, value, units, conversions):
     :param value: Caller input to coerce to a one-dimensional-or-higher float array.
     :param units: Caller unit selector using the reference indexing convention.
     :param conversions: Per-call native conversion descriptors to populate.
-    :return: Structural broadcast view of the owned input, before unit conversion.
+    :return: Original storage view; descriptors retain conversion axes for one later normalization.
     """
-    value = np.atleast_1d(np.asarray(value, dtype=float))
-    codes = np.asarray(_unit_code(kind, units), dtype=float)
-    shape = np.broadcast_shapes(value.shape, codes.shape)
+    value = _raw_physical(value)
+    codes = normalize_selector(kind, units)
+    np.broadcast_shapes(value.shape, codes.shape)
     conversions[field] = (kind, codes)
-    return np.broadcast_to(value, shape)
+    return value
+
+
+def _raw_physical(value):
+    """Validate original storage without widening or discarding its mask.
+
+    :param value: Already owned caller physical operand.
+    :return: At least one-dimensional original-dtype view for structural planning.
+    """
+    _validate_value(value)
+    return np.atleast_1d(np.asanyarray(value))
 
 class BehaveRun(_NativeState):
     """Explicit Rust array-mode facade with independently owned fuel lookup snapshots."""
@@ -250,21 +261,20 @@ class BehaveRun(_NativeState):
         :return: dict of (*S) ndarrays in the requested output units.
         """
         conversions = {}
-        fuel_model_grid = np.atleast_1d(np.asarray(fuel_model_grid, dtype=np.int32))
+        fuel_model_grid = np.atleast_1d(normalize_identifier(fuel_model_grid))
         m1h = _prepare_base('m1h', 'Fraction', m1h, moisture_units, conversions)
         m10h = _prepare_base('m10h', 'Fraction', m10h, moisture_units, conversions)
         m100h = _prepare_base('m100h', 'Fraction', m100h, moisture_units, conversions)
         mlh = _prepare_base('mlh', 'Fraction', mlh, moisture_units, conversions)
         mlw = _prepare_base('mlw', 'Fraction', mlw, moisture_units, conversions)
-        wind_direction = np.atleast_1d(np.asarray(wind_direction, dtype=float))
-        aspect = np.atleast_1d(np.asarray(aspect, dtype=float))
+        wind_direction = _raw_physical(wind_direction)
+        aspect = _raw_physical(aspect)
         canopy_cover = _prepare_base('canopy_cover', 'Fraction', canopy_cover, canopy_cover_units, conversions)
         canopy_height_ft = _prepare_base('canopy_height', 'Length', canopy_height, canopy_height_units, conversions)
         canopy_base_height_ft = _prepare_base('canopy_base_height', 'Length', canopy_base_height, canopy_base_height_units, conversions)
         derive_ratio = crown_ratio_units is None
         if derive_ratio:
-            ratio_shape = np.broadcast_shapes(canopy_height_ft.shape, canopy_base_height_ft.shape)
-            crown_ratio = np.broadcast_to(np.asarray(1.0), ratio_shape)
+            crown_ratio = None
         else:
             crown_ratio = _prepare_base('crown_ratio', 'Fraction', crown_ratio, crown_ratio_units, conversions)
         wind_speed_fpm = _prepare_base('wind_speed', 'Speed', wind_speed, wind_speed_units, conversions)
@@ -579,10 +589,10 @@ class BehaveRun(_NativeState):
 
         :return: dict with converted (*S) ndarrays.
         """
-        scorch_ft = length_to_base(np.asarray(scorch_height, dtype=float), scorch_height_units)
-        tree_ht_ft = length_to_base(np.asarray(tree_height, dtype=float), tree_height_units)
-        cr_frac = fraction_to_base(np.asarray(crown_ratio, dtype=float), crown_ratio_units)
-        dbh_in = length_from_base(length_to_base(np.asarray(dbh, dtype=float), dbh_units), 1)
+        scorch_ft = length_to_base(normalize_physical(scorch_height), scorch_height_units)
+        tree_ht_ft = length_to_base(normalize_physical(tree_height), tree_height_units)
+        cr_frac = fraction_to_base(normalize_physical(crown_ratio), crown_ratio_units)
+        dbh_in = length_from_base(length_to_base(normalize_physical(dbh), dbh_units), 1)
         results = calculate_crown_scorch_mortality(scorch_height_ft=scorch_ft, tree_height_ft=tree_ht_ft, crown_ratio=cr_frac, dbh_inches=dbh_in, equation_number_grid=equation_number_grid, coeffs=self._mortality_coeffs)
         return _apply_out_units(results, out_units or {}, _MORTALITY_KEY_CONVERTERS)
 

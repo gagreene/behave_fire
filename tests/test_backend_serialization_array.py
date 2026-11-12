@@ -82,7 +82,7 @@ def test_pickle_preserves_backend_threads_and_cached_snapshot(protocol):
     restored = pickle.loads(pickle.dumps(model, protocol=protocol))
     assert restored.backend_in_use == "python"
     assert restored._threads == 7
-    assert restored.__getstate__()["version"] == 1
+    assert restored.__getstate__()["version"] == 2
     np.testing.assert_array_equal(restored._delegate._lut["depth"], expected)
     assert restored._delegate._fuel_models.fuel_models_[1]["fuel_bed_depth"] == 777.0
     with pytest.raises(AttributeError):
@@ -108,6 +108,8 @@ def test_state_rejects_unknown_version_or_backend():
     state = model.__getstate__()
     with pytest.raises(ValueError, match="version"):
         model.__setstate__(dict(state, version=999))
+    with pytest.raises(ValueError, match="version"):
+        model.__setstate__(dict(state, version=1))
     with pytest.raises(ValueError, match="backend"):
         model.__setstate__(dict(state, backend="auto"))
 

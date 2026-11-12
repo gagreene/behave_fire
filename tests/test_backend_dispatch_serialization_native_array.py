@@ -56,7 +56,7 @@ def test_native_automatic_pickle_retains_selected_backend_threads_and_snapshot(_
     restored = pickle.loads(pickle.dumps(model, protocol=protocol))
     assert restored.backend_in_use == "rust"
     assert restored._threads == restored._delegate.threads == 3
-    assert restored.__getstate__()["version"] == 1
+    assert restored.__getstate__()["version"] == 2
     assert restored._delegate.__getstate__()["schema_version"] == 1
     assert restored._delegate._fuel_models.fuel_models_[1]["fuel_bed_depth"] == 777.
     np.testing.assert_array_equal(restored._delegate._lut["depth"], model._delegate._lut["depth"])

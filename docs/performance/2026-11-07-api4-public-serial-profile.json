@@ -1,0 +1,122 @@
+{
+  "kind": "timing",
+  "backend": "rust",
+  "threads": 1,
+  "dataset": "heterogeneous",
+  "cells": 10000,
+  "operation": "surface",
+  "first_seconds": 0.020222000312060118,
+  "total_seconds": 0.020222000312060118,
+  "warm_seconds": [
+    0.0173101001419127,
+    0.016771699767559767,
+    0.016183500178158283,
+    0.01695979991927743
+  ],
+  "profile": true,
+  "import_seconds": 0.3464084002189338,
+  "python_timing_original_inputs": false,
+  "actual_backend": "rust",
+  "construction_and_inputs_seconds": 0.01821230025961995,
+  "python_marshalling_and_output_seconds": 0.007079300470650196,
+  "native_stages": {
+    "owned_copy_seconds": 0.0022362,
+    "detached_seconds": 0.0106912,
+    "concatenate_seconds": 0.0,
+    "numpy_transfer_seconds": 0.0001024,
+    "appended_bytes": 0.0
+  },
+  "native_calls": [
+    {
+      "owned_copy_seconds": 0.0022362,
+      "detached_seconds": 0.0106912,
+      "kernel_seconds": 0.0074079,
+      "encoder_seconds": 0.0007636,
+      "numpy_transfer_seconds": 0.0001024,
+      "appended_bytes": 0.0,
+      "concatenate_seconds": 0.0,
+      "native_boundary_total_seconds": 0.013142699841409922,
+      "native_output_bytes": 1120000,
+      "native_metadata_bytes": 0,
+      "operation": "surface"
+    }
+  ],
+  "warm_native_calls": [
+    [
+      {
+        "owned_copy_seconds": 0.0019087,
+        "detached_seconds": 0.0110823,
+        "kernel_seconds": 0.0075236,
+        "encoder_seconds": 0.0007839,
+        "numpy_transfer_seconds": 2.36e-05,
+        "appended_bytes": 0.0,
+        "concatenate_seconds": 0.0,
+        "native_boundary_total_seconds": 0.013069399632513523,
+        "native_output_bytes": 1120000,
+        "native_metadata_bytes": 0,
+        "operation": "surface"
+      }
+    ],
+    [
+      {
+        "owned_copy_seconds": 0.0019367,
+        "detached_seconds": 0.0105804,
+        "kernel_seconds": 0.007338,
+        "encoder_seconds": 0.0007707,
+        "numpy_transfer_seconds": 2.7e-05,
+        "appended_bytes": 0.0,
+        "concatenate_seconds": 0.0,
+        "native_boundary_total_seconds": 0.012597800232470036,
+        "native_output_bytes": 1120000,
+        "native_metadata_bytes": 0,
+        "operation": "surface"
+      }
+    ],
+    [
+      {
+        "owned_copy_seconds": 0.0017829,
+        "detached_seconds": 0.0105812,
+        "kernel_seconds": 0.0073398,
+        "encoder_seconds": 0.0007724,
+        "numpy_transfer_seconds": 2.85e-05,
+        "appended_bytes": 0.0,
+        "concatenate_seconds": 0.0,
+        "native_boundary_total_seconds": 0.012449500150978565,
+        "native_output_bytes": 1120000,
+        "native_metadata_bytes": 0,
+        "operation": "surface"
+      }
+    ],
+    [
+      {
+        "owned_copy_seconds": 0.0018126,
+        "detached_seconds": 0.0106333,
+        "kernel_seconds": 0.0074107,
+        "encoder_seconds": 0.0007632,
+        "numpy_transfer_seconds": 2.27e-05,
+        "appended_bytes": 0.0,
+        "concatenate_seconds": 0.0,
+        "native_boundary_total_seconds": 0.012521800119429827,
+        "native_output_bytes": 1120000,
+        "native_metadata_bytes": 0,
+        "operation": "surface"
+      }
+    ]
+  ],
+  "output_bytes": 1120000,
+  "working_set_before_bytes": 46968832,
+  "lifetime_peak_before_bytes": 46972928,
+  "lifetime_peak_after_bytes": 51159040,
+  "peak_bytes": 51159040,
+  "sampled_peak_during_call_bytes": 51154944,
+  "python": "3.12.8 | packaged by conda-forge | (main, Dec  5 2024, 14:06:27) [MSC v.1942 64 bit (AMD64)]",
+  "numpy": "2.1.3",
+  "numpy_build": "3191b72109bea34b77531b50df8dba998af8f149d927aa6c239080a2ef17f76c",
+  "platform": "Windows-10-10.0.19044-SP0",
+  "cpu_count": 16,
+  "source_hash": "7ea2e6cd1ef060f1d94c492a344ceac00db6eb2f85b89f58b99da0a98341c11b",
+  "extension_hash": "4e201d77817a6f74508538e98f140d421a78d30e7cac2397fbee590a543eb1d1",
+  "seed": 20261105,
+  "acceptance_evidence": false,
+  "raw_profile_sha256": "7927924347ed4f6cfaafe002ad4f54f3c97850ab3ac18d257269aefe4cfe6634"
+}

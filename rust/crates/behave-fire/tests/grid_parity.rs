@@ -58,7 +58,7 @@ fn surface_batches_match_scalar_cells_bit_for_bit() {
             ))
         })
         .unwrap();
-        for (name, values) in batch.into_named_vectors() {
+        for (name, values) in comparison_columns(batch.into_named_columns()) {
             for (i, value) in values.iter().enumerate() {
                 let scalar = plan.run_cell(
                     &inputs[i],
@@ -121,7 +121,7 @@ fn crown_batches_match_scalar_and_columns_transfer_without_copying() {
             .fire_type
             .iter()
             .all(|value| *value == expected.fire_type));
-        for (name, values) in batch.into_named_vectors() {
+        for (name, values) in comparison_columns(batch.into_named_columns()) {
             let expected = if name == "fire_type" {
                 expected.fire_type as f64
             } else {
@@ -146,7 +146,7 @@ fn crown_batches_match_scalar_and_columns_transfer_without_copying() {
     })
     .unwrap();
     let pointer = batch.spread_rate.as_ptr();
-    let columns = batch.into_named_vectors();
+    let columns = comparison_columns(batch.into_named_columns());
     assert_eq!(
         columns
             .iter()
@@ -162,8 +162,7 @@ fn crown_batches_match_scalar_and_columns_transfer_without_copying() {
         Ok::<_, BehaveError>(behave_fire::surface::SurfaceResult::default())
     })
     .unwrap();
-    assert!(empty
-        .into_named_vectors()
+    assert!(comparison_columns(empty.into_named_columns())
         .iter()
         .all(|(_, values)| values.is_empty()));
 }
@@ -204,4 +203,27 @@ fn standalone_batch_validation_retains_structured_core_errors() {
             ..
         })
     ));
+}
+
+// Numerical fixture comparison only; production export retains typed columns.
+fn comparison_columns(
+    columns: Vec<(&'static str, behave_fire::output::ColumnValues)>,
+) -> Vec<(&'static str, Vec<f64>)> {
+    use behave_fire::output::ColumnValues;
+    columns
+        .into_iter()
+        .map(|(name, values)| {
+            (
+                name,
+                match values {
+                    ColumnValues::Float64(values) => values,
+                    ColumnValues::Int32(values) => values.into_iter().map(f64::from).collect(),
+                    ColumnValues::Bool(values) => values
+                        .into_iter()
+                        .map(|value| f64::from(u8::from(value)))
+                        .collect(),
+                },
+            )
+        })
+        .collect()
 }

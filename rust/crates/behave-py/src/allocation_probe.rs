@@ -6,6 +6,7 @@ use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 const OUTSIDE: usize = 0;
 pub const KERNEL: usize = 1;
 pub const ENCODER: usize = 2;
+
 static GENERATION: AtomicUsize = AtomicUsize::new(0);
 static WORKERS: [AtomicUsize; 3] = [
     AtomicUsize::new(0),

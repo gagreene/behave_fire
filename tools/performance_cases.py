@@ -3,7 +3,8 @@
 import random
 
 
-OPERATIONS = ("surface", "crown", "typed-crown", "typed-crown-b")
+OPERATIONS = ("surface", "crown", "typed-crown", "typed-crown-b", "masked-crown",
+              "masked-false-crown", "typed-crown-c")
 
 
 def assert_outputs(actual, expected):
@@ -122,4 +123,12 @@ def supplied_surface(inputs, operation, python_model, uniform=False):
         surface["spread_rate"] = np.ma.array(surface["spread_rate"], mask=np.arange(cells) % 5 == 0)
         surface["fireline_intensity"] = np.full(cells, 200, dtype=np.int32)
         surface["heat_per_unit_area"] = surface["heat_per_unit_area"].astype(np.float32)
+    elif operation in ('masked-crown', 'masked-false-crown'):
+        mask = np.arange(cells) % 7 == 0 if operation == 'masked-crown' else np.zeros(cells, dtype=bool)
+        surface['heat_per_unit_area'] = np.ma.array(surface['heat_per_unit_area'], mask=mask)
+    elif operation == 'typed-crown-c':
+        surface['spread_rate'] = surface['spread_rate'].astype(np.int16)
+        surface['fireline_intensity'] = np.ma.array(np.full(cells, 200, dtype=np.float32),
+                                                   mask=np.arange(cells) % 11 == 0)
+        surface['heat_per_unit_area'] = surface['heat_per_unit_area'].astype(np.int32)
     return surface

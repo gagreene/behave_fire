@@ -1,5 +1,31 @@
 # Rust backend implementation contract
 
+## Float64 raster migration
+
+Binding API4 routes public Surface/Crown models through the standalone float64
+raster engine. Physical inputs widen once; masked values become NaN. Physical
+outputs are plain float64 arrays, and classifications are int32 with -1 for
+unavailable values. Each output retains its public shape. Empty union grids use
+actual dependency-restricted native groups for nonempty independent Crown
+outputs. Common models use one compute boundary and transfer final core buffers
+directly; workers do not concatenate output vectors.
+
+The per-operation `__numeric_contracts__` manifest identifies migrated models,
+already-float64 stateless families, and pending component/state helpers. The
+remaining compatibility implementation is temporary and does not define the
+new model contract. Old API3 extensions and native serialized states are rejected.
+
+Auto prefers usable Rust and warns once per process when native unavailability
+requires Python. Proven compatible complex inputs select Python before any
+coercion or scientific calculation, with a separate warning. Masked real inputs
+stay on Rust. Requested policy, preferred available backend, and last completed
+call backend are separate properties. See [BACKEND_DIFFERENCES.md](BACKEND_DIFFERENCES.md).
+
+Core feasibility and the [public serial checkpoint](performance/2026-11-08-plain-normalization-public-checkpoint.md)
+have passed. The fresh screen and seven-new-pair confirmation both pass all 56
+bounds. Staged grid APIs and remaining helper migration can proceed; final
+large/four-thread, memory, allocation, and artifact acceptance still remain.
+
 ## Goal and reference
 
 Port the current Python calculation library to a self-sufficient Rust crate, provide Python bindings, and let Python callers select Python or Rust implementations. Put the Cargo workspace in root `rust/`. Deliver a mixed Python/Rust wheel and an independently usable crates.io package, following the local `cffdrs` repository's architecture and release process.
@@ -12,7 +38,7 @@ This tracked contract defines the implemented Rust backend. Native execution is 
 
 - **Complete:** every public Python calculation and stateful helper has a Rust core equivalent and an explicit native binding route, and the extension advertises a complete backend. The automatic and explicit selectors, serialization, ownership, and packaging contracts below are implemented and tested.
 - **Delivered:** the work landed on `pre_release` as an eight-layer dependent PR stack (contracts, core, surface and crown, other domains, bindings, dispatch, wheels, crate packaging), followed by the performance measurement harness, typed scalar stages, and raster columns described in [RUST_ENGINE.md](RUST_ENGINE.md).
-- **Not yet true:** the Rust backend is not faster than Python for typical workloads, and the Python binding does not yet use the raster engine. See [RUST_BACKEND_BENCHMARKS.md](RUST_BACKEND_BENCHMARKS.md).
+- **In progress:** the binding uses the float64 raster engine for Surface/Crown models; the new public speed targets are not yet certified. See [RUST_BACKEND_BENCHMARKS.md](RUST_BACKEND_BENCHMARKS.md).
 - **Not published:** neither the Python package nor the Rust crate has been uploaded to PyPI or crates.io.
 
 ## Chosen architecture
@@ -48,7 +74,7 @@ The public automatic constructor is `BehaveRun(fuel_models, *, backend="auto", t
 
 `available_backends() -> list[str]` reports importable, compatible implementations. `get_backend(backend="auto")` returns an explicit backend namespace exposing `BehaveRun`, data classes, and each existing component module by name. This gives standalone functions such as ignition, containment, slope tools, and fuel moisture a selector without changing every historical component function signature. Document `from behave_fire.python import contain` and `from behave_fire.rust import contain`; do not promise unimplemented nested import paths.
 
-Importing the root package or explicit Python namespace must never probe or import `_rust`. At selection time, use `importlib.util.find_spec("behave_fire._rust")`. Cache one probe outcome per process: absent, usable, or unusable with its cause. Absence selects Python silently for auto. An extension present but failing to load, API-incompatible, or incomplete selects Python with a public `BehaveBackendWarning` (`RuntimeWarning` subclass), naming the cause and original exception text. Emit that fallback warning once per process at the first auto selection using an unusable result, attributed to its caller; an earlier `available_backends()` query must not consume it. Forced Rust raises a chained actionable `ImportError` for absent or unusable extensions. Unexpected discovery exceptions propagate. Unknown selectors raise `ValueError`. Facade and calculation errors never trigger fallback.
+Importing the root package or explicit Python namespace must never probe or import `_rust`. At selection time, use `importlib.util.find_spec("behave_fire._rust")`. Cache one probe outcome per process: absent, usable, or unusable with its cause. An absent extension, or one failing to load, API-incompatible, or incomplete, selects Python with a public `BehaveBackendWarning` (`RuntimeWarning` subclass), naming the cause and original exception text. Emit that fallback warning once per process at the first auto selection using an absent or unusable result, attributed to its caller; an earlier `available_backends()` query must not consume it. Forced Rust raises a chained actionable `ImportError` for absent or unusable extensions. Unexpected discovery exceptions propagate. Unknown selectors raise `ValueError`. Facade and calculation errors never trigger fallback.
 
 Users wanting warnings-as-errors must configure the filter before the first warned auto selection; the once-per-process policy does not retroactively reevaluate a warning already emitted. Mark a warning as emitted only after `warnings.warn` returns successfully, so a warning promoted to an exception cannot let the next construction silently bypass strictness. Use fresh subprocesses to test cached outcomes and strictness. Existing model instances never change backend after selection.
 

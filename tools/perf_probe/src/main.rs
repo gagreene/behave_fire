@@ -2,6 +2,7 @@
 //! Allocation instrumentation is confined to this unpublished diagnostic tool.
 
 mod compact;
+mod f64_raster;
 mod raster_probe;
 
 use behave_fire::crown::{self, SurfaceFireInputs};
@@ -124,7 +125,10 @@ fn arguments() -> Result<Arguments, String> {
             "uniform" | "heterogeneous" | "continuous"
         )
         || !matches!(result.mode.as_str(), "timing" | "allocations")
-        || !matches!(result.scope.as_str(), "scalar" | "raster" | "compact")
+        || !matches!(
+            result.scope.as_str(),
+            "scalar" | "raster" | "compact" | "f64-raster"
+        )
         || result.cells == 0
         || result.repetitions == 0
     {
@@ -297,6 +301,9 @@ fn main() -> Result<(), String> {
     let args = arguments()?;
     let fuels = PreparedFuels::from_registry(&FuelModels::default());
     let cases = build_cases(&args, &fuels)?;
+    if args.scope == "f64-raster" {
+        return f64_raster::run(&args, &cases, &fuels);
+    }
     if args.scope == "compact" {
         return compact::run(&args, &cases, &fuels);
     }

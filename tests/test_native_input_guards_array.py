@@ -45,20 +45,15 @@ def _forbid_native(*args, **kwargs):
 
 @pytest.mark.parametrize("scalar_type", [_CustomFloat, _CustomInt, _CustomNumpyFloat, _CustomNumpyInt])
 @pytest.mark.parametrize("container", [lambda value: value, lambda value: [value], lambda value: (value,)], ids=["scalar", "list", "tuple"])
-def test_crown_input_coercion_preserves_custom_numeric_conversion(scalar_type, container):
+def test_crown_input_coercion_rejects_custom_numeric_conversion(scalar_type, container):
     from behave_fire.components import crown as reference
     from behave_fire.rust import crown
 
     arguments = dict(fuel_model_grid=10, wind_speed=container(scalar_type(2)), wind_direction=0.0, slope=0.0)
     expected = reference.coerce_crown_fire_inputs(**arguments)
-    actual = crown.coerce_crown_fire_inputs(**arguments)
-    assert actual.keys() == expected.keys()
-    for key in actual:
-        if key == "S":
-            assert actual[key] == expected[key]
-        else:
-            assert actual[key].dtype == expected[key].dtype
-            np.testing.assert_array_equal(actual[key], expected[key])
+    assert expected['wind_speed'][0] == 2.
+    with pytest.raises(TypeError):
+        crown.coerce_crown_fire_inputs(**arguments)
 
 
 @pytest.mark.parametrize("scalar_type", [_CustomFloat, _CustomInt, _CustomNumpyFloat, _CustomNumpyInt])

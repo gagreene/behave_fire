@@ -12,16 +12,19 @@ from behave_fire.rust import _bridge
 
 
 def _mutate_after_first_copy(monkeypatch, mutate):
-    original = _bridge._native.batch
     calls = []
 
-    def batch(*args, **kwargs):
-        if not calls:
-            kwargs["_owned_callback"] = mutate
-        calls.append(args[0])
-        return original(*args, **kwargs)
+    def instrument(original):
+        def batch(*args, **kwargs):
+            if not calls:
+                kwargs["_owned_callback"] = mutate
+            calls.append(args[0])
+            return original(*args, **kwargs)
 
-    monkeypatch.setattr(_bridge._native, "batch", batch)
+        return batch
+
+    for name in ('batch', 'model_batch', 'model_groups'):
+        monkeypatch.setattr(_bridge._native, name, instrument(getattr(_bridge._native, name)))
     return calls
 
 
@@ -119,7 +122,7 @@ def test_live_scalar_array_and_boxed_payload_types_match_reference(value):
 
 
 def test_owned_snapshot_reuses_views_and_preserves_nested_payload_metadata():
-    from behave_fire.rust._ownership import _owned_inputs
+    from behave_fire._ownership import _owned_inputs
 
     values = np.ma.array([np.int64(2**53 + 1), np.float32(-0.)], dtype=object,
                          mask=[False, True], fill_value=17)

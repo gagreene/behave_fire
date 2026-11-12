@@ -5,6 +5,9 @@ mod allocation_probe;
 #[allow(dead_code)]
 #[path = "../../../rust/crates/behave-py/src/prepared/fields.rs"]
 mod fields;
+#[allow(dead_code)]
+#[path = "../../../rust/crates/behave-py/src/model_observer.rs"]
+mod model_observer;
 
 #[allow(dead_code)]
 #[path = "../../../rust/crates/behave-py/src/prepared/keys.rs"]
@@ -228,5 +231,257 @@ mod conversion_pipeline_tests {
             vec![behave_fire::canopy_crown_ratio(height, base)]
         );
         assert_eq!(a.values["canopy_height"], vec![height]);
+    }
+}
+
+#[cfg(all(test, feature = "allocation-probe"))]
+mod direct_output_tests {
+    use behave_fire::surface::SurfaceResult;
+    use behave_fire::{batch::SurfaceBatch, output::fill_chunks, GridShape};
+
+    #[test]
+    fn borrowed_encoder_loop_has_zero_requests() {
+        let mut values = vec![f64::NAN; 10000];
+        super::allocation_probe::start();
+        fill_chunks(
+            10000,
+            4,
+            &mut [&mut values],
+            &mut [],
+            &mut [],
+            |range, shard| {
+                let _scope =
+                    super::allocation_probe::Scope::enter(super::allocation_probe::ENCODER);
+                for (local, index) in range.enumerate() {
+                    shard.physical[0][local] = index as f64;
+                }
+                Ok::<_, ()>(())
+            },
+        )
+        .unwrap();
+        let counts = super::allocation_probe::stop();
+        assert_eq!(counts[super::allocation_probe::ENCODER].0, 0);
+        assert_eq!(counts[super::allocation_probe::ENCODER].1, 0);
+        assert_eq!(values[9999], 9999.);
+    }
+
+    #[test]
+    fn full_batch_request_count_depends_on_fields_and_workers_not_cells() {
+        for workers in [1, 4] {
+            let mut requests = Vec::new();
+            for cells in [4096, 16384] {
+                super::allocation_probe::start();
+                let result = SurfaceBatch::run_with(
+                    GridShape::new(vec![cells]).unwrap(),
+                    workers,
+                    |index| {
+                        let mut result = SurfaceResult::default();
+                        result.spread_rate = index as f64;
+                        Ok::<_, ()>(result)
+                    },
+                )
+                .unwrap();
+                let counts = super::allocation_probe::stop();
+                requests.push(counts.iter().map(|scope| scope.0).sum::<usize>());
+                assert_eq!(result.spread_rate[cells - 1], (cells - 1) as f64);
+                assert_eq!(result.statistics().appended_bytes, 0);
+            }
+            assert_eq!(
+                requests[0], requests[1],
+                "batch request counts must not grow per cell, workers={workers}"
+            );
+        }
+    }
+}
+
+#[allow(dead_code)]
+#[path = "../../../rust/crates/behave-py/src/numeric/contract.rs"]
+mod contract;
+#[allow(dead_code)]
+#[path = "../../../rust/crates/behave-py/src/numeric/shape.rs"]
+mod numeric_shape;
+#[allow(dead_code)]
+#[path = "../../../rust/crates/behave-py/src/numeric/snapshot.rs"]
+mod snapshot;
+
+#[cfg(test)]
+mod numeric_contract_tests {
+    use super::{
+        contract::InputRole,
+        numeric_shape::{plan_groups, OutputDependency},
+        snapshot::{ControlSnapshot, ControlValues, PhysicalSnapshot},
+    };
+    use behave_fire::GridShape;
+
+    #[test]
+    fn owned_columns_separate_physics_from_exact_controls() {
+        let physical =
+            PhysicalSnapshot::new(GridShape::new(vec![2]).unwrap(), vec![-0.0, f64::NAN]).unwrap();
+        assert!(physical.values()[0].is_sign_negative());
+        assert!(physical.values()[1].is_nan());
+        let controls = ControlSnapshot::new(
+            InputRole::Identifier,
+            GridShape::new(vec![1]).unwrap(),
+            ControlValues::Signed(vec![(1_i64 << 53) + 1]),
+        )
+        .unwrap();
+        assert_eq!(controls.signed().unwrap()[0], (1_i64 << 53) + 1);
+        assert!(ControlSnapshot::new(
+            InputRole::Physical,
+            GridShape::new(vec![1]).unwrap(),
+            ControlValues::Signed(vec![1])
+        )
+        .is_err());
+        assert!(PhysicalSnapshot::new(GridShape::new(vec![2]).unwrap(), vec![1.0]).is_err());
+    }
+
+    #[test]
+    fn dependency_groups_keep_independent_and_empty_output_axes() {
+        let shapes = vec![
+            GridShape::new(vec![2]).unwrap(),
+            GridShape::new(vec![3]).unwrap(),
+            GridShape::new(vec![]).unwrap(),
+        ];
+        let groups = plan_groups(
+            &shapes,
+            &[
+                OutputDependency::new(0, &[0, 2]),
+                OutputDependency::new(1, &[1, 2]),
+            ],
+        )
+        .unwrap();
+        assert_eq!(groups[0].shape.dimensions(), [2]);
+        assert_eq!(groups[1].shape.dimensions(), [3]);
+        let shapes = vec![
+            GridShape::new(vec![]).unwrap(),
+            GridShape::new(vec![0]).unwrap(),
+        ];
+        let groups = plan_groups(
+            &shapes,
+            &[
+                OutputDependency::new(0, &[0]),
+                OutputDependency::new(1, &[0, 1]),
+            ],
+        )
+        .unwrap();
+        assert_eq!(groups[0].shape.len(), 1);
+        assert_eq!(groups[1].shape.len(), 0);
+        assert!(plan_groups(&shapes, &[OutputDependency::new(0, &[3])]).is_err());
+        assert!(plan_groups(
+            &shapes,
+            &[
+                OutputDependency::new(0, &[0]),
+                OutputDependency::new(0, &[1])
+            ]
+        )
+        .is_err());
+    }
+}
+
+#[cfg(test)]
+mod restricted_group_tests {
+    use super::{
+        numeric_shape::{plan_groups, OutputDependency},
+        snapshot::PhysicalSnapshot,
+    };
+    use behave_fire::GridShape;
+    #[test]
+    fn group_evaluators_cannot_read_unrelated_inputs_or_fake_empty_rows() {
+        let inputs = vec![
+            PhysicalSnapshot::new(GridShape::new(vec![2]).unwrap(), vec![1., f64::NAN]).unwrap(),
+            PhysicalSnapshot::new(GridShape::new(vec![3]).unwrap(), vec![1.; 3]).unwrap(),
+            PhysicalSnapshot::new(GridShape::new(vec![]).unwrap(), vec![2.]).unwrap(),
+            PhysicalSnapshot::new(GridShape::new(vec![]).unwrap(), vec![4.]).unwrap(),
+        ];
+        let shapes = inputs
+            .iter()
+            .map(|value| value.shape().clone())
+            .collect::<Vec<_>>();
+        let groups = plan_groups(
+            &shapes,
+            &[
+                OutputDependency::new(0, &[0, 2]),
+                OutputDependency::new(1, &[1, 3]),
+            ],
+        )
+        .unwrap();
+        assert!(groups[0].read_physical(&inputs, 1).is_err());
+        let numerator = groups[0].read_physical(&inputs, 0).unwrap();
+        let denominator = groups[0].read_physical(&inputs, 2).unwrap()[0];
+        let transition = numerator
+            .iter()
+            .map(|value| value / denominator)
+            .collect::<Vec<_>>();
+        assert_eq!(transition[0], 0.5);
+        assert!(transition[1].is_nan());
+        let numerator = groups[1].read_physical(&inputs, 1).unwrap();
+        let denominator = groups[1].read_physical(&inputs, 3).unwrap()[0];
+        assert_eq!(
+            numerator
+                .iter()
+                .map(|value| value / denominator)
+                .collect::<Vec<_>>(),
+            vec![0.25; 3]
+        );
+    }
+}
+
+#[cfg(all(test, feature = "allocation-probe"))]
+mod configured_scope_tests {
+    use super::model_observer::Observer as Probe;
+    use behave_fire::engine::{
+        run_model_observed, CrownPlan, ModelBatch, ModelRun, OutputRequest, PreparedFuels,
+    };
+    use behave_fire::raster::{CrownColumns, CrownRaster, CrownTweakColumns};
+    use behave_fire::{FuelModels, GridShape, PerCell};
+    #[test]
+    fn actual_model_kernel_and_encoder_have_zero_absolute_requests() {
+        let cells = 10000;
+        let fuels = PreparedFuels::from_registry(&FuelModels::default());
+        let heat = (0..cells)
+            .map(|i| if i % 7 == 0 { f64::NAN } else { 1000. })
+            .collect::<Vec<_>>();
+        let validity = (0..cells).map(|i| i % 17 != 0).collect::<Vec<_>>();
+        let eligible = validity.iter().filter(|&&v| v).count();
+        let raster = CrownRaster::new(
+            GridShape::new(vec![cells]).unwrap(),
+            CrownColumns {
+                surface_ros: PerCell::Scalar(2.),
+                surface_fli: PerCell::Scalar(200.),
+                surface_hpua: PerCell::Cells(&heat),
+                canopy_base_height: PerCell::Scalar(4.),
+                canopy_height: PerCell::Scalar(30.),
+                canopy_bulk_density: PerCell::Scalar(0.01),
+                validity: Some(PerCell::Cells(&validity)),
+                ..CrownColumns::default()
+            },
+        )
+        .unwrap();
+        let run = ModelRun::Crown {
+            raster,
+            plan: CrownPlan::default(),
+            fuels: &fuels,
+            tweaks: CrownTweakColumns::default(),
+        };
+        let request = OutputRequest::crown();
+        super::allocation_probe::start();
+        let output = run_model_observed(&run, &request, 4, &Probe).unwrap();
+        let counts = super::allocation_probe::stop();
+        for phase in [
+            super::allocation_probe::KERNEL,
+            super::allocation_probe::ENCODER,
+        ] {
+            assert_eq!(counts[phase].0, 0, "absolute request count in scope{phase}");
+            assert_eq!(counts[phase].1, 0);
+        }
+        assert_eq!(counts[super::allocation_probe::KERNEL].2, eligible);
+        assert_eq!(counts[super::allocation_probe::ENCODER].2, cells);
+        assert_eq!(counts[super::allocation_probe::KERNEL].3, 4);
+        if let ModelBatch::Crown(output) = output {
+            assert_eq!(output.fire_type[0], -1);
+            assert_eq!(output.final_spread_rate.len(), cells);
+        } else {
+            panic!("wrong result")
+        }
     }
 }

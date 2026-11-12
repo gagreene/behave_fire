@@ -10,7 +10,20 @@ import pytest
 ROOT = next(parent for parent in Path(__file__).resolve().parents if (parent / 'pytest.ini').is_file())
 
 
-def test_binding_api_one_is_rejected_by_every_native_entry_route():
+@pytest.mark.rust
+@pytest.mark.parametrize('version', [1, 3])
+def test_native_restore_rejects_stale_binding_state(version):
+    from behave_fire.rust import FireSize
+
+    original = FireSize()
+    state = original.__getstate__()
+    state["binding_api_version"] = version
+    with pytest.raises(ValueError, match="API"):
+        FireSize.__new__(FireSize).__setstate__(state)
+
+
+@pytest.mark.parametrize('version', [1, 3])
+def test_stale_binding_api_is_rejected_by_every_native_entry_route(version):
     source = '''
         import importlib, importlib.machinery, sys, types, warnings
         import behave_fire as bf
@@ -35,18 +48,8 @@ def test_binding_api_one_is_rejected_by_every_native_entry_route():
             else:
                 raise AssertionError('old complete API 1 extension was accepted')
     '''
+    source = source.replace('__binding_api_version__ = 1', f'__binding_api_version__ = {version}')
     result = subprocess.run([sys.executable, '-c', textwrap.dedent(source)],
                             env=dict(os.environ, PYTHONPATH=str(ROOT / 'src')),
                             capture_output=True, text=True)
     assert result.returncode == 0, result.stdout + result.stderr
-
-
-@pytest.mark.rust
-def test_native_restore_rejects_binding_api_one_state():
-    from behave_fire.rust import FireSize
-
-    original = FireSize()
-    state = original.__getstate__()
-    state["binding_api_version"] = 1
-    with pytest.raises(ValueError, match="API"):
-        FireSize.__new__(FireSize).__setstate__(state)

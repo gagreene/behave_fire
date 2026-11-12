@@ -1,7 +1,7 @@
 """Scoped worker settings for historical static and bound model calls."""
 from contextvars import ContextVar
 from functools import wraps
-from ._ownership import _owned_inputs
+from .._ownership import _owned_inputs
 
 _THREADS = ContextVar("behave_fire_native_threads", default=1)
 

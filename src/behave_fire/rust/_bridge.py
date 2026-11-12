@@ -111,21 +111,24 @@ def _call(operation, arguments):
     :param arguments: Bound argument mapping in public signature order.
     :return: Fresh result computed exclusively from the shared input snapshot.
     """
-    from ._ownership import _owned_inputs
+    from .._ownership import _owned_inputs
 
     _validate_raw_arithmetic(operation, arguments)
-    direction_profile = 0
-    if operation == 'surface.calculate_direction_of_max_spread':
-        normalized, single = _normalize_direction(arguments)
-        shape_fields = ('x_component', 'y_component', 'rate_vector')
-        if 'north' in str(arguments['wind_orientation_mode']).lower():
-            shape_fields += ('aspect',)
-        shape = np.broadcast_shapes(*(np.shape(normalized[key]) for key in shape_fields))
-        if single and all(shape):
-            # Select using original layout: a contiguous copy can select a
-            # different NumPy float32 atan2 kernel for reversed/strided inputs.
-            direction_profile = _direction_math_profile(normalized)
     with _owned_inputs() as owner:
+        direction_profile = 0
+        if operation == 'surface.calculate_direction_of_max_spread':
+            layout = dict(arguments)
+            for key in ('x_component', 'y_component'):
+                layout[key] = owner.layout_source(arguments[key])
+            normalized, single = _normalize_direction(layout)
+            shape_fields = ('x_component', 'y_component', 'rate_vector')
+            if 'north' in str(arguments['wind_orientation_mode']).lower():
+                shape_fields += ('aspect',)
+            shape = np.broadcast_shapes(*(np.shape(normalized[key]) for key in shape_fields))
+            if single and all(shape):
+                # Layout metadata comes from the original operands; all scientific
+                # values below still come exclusively from the owned snapshot.
+                direction_profile = _direction_math_profile(normalized)
         result = _call_owned(operation, owner.snapshot(arguments), direction_profile)
         return owner.remember(result)
 
@@ -138,6 +141,15 @@ def _call_owned(operation, arguments, direction_profile):
     :param direction_profile: Atan2 selector captured before copying original operands.
     :return: Fresh arrays in the reference result structure.
     """
+    if operation in ('model.run_surface', 'crown.run_crown_fire'):
+        from ._model_api4 import execute_model
+
+        return execute_model('surface' if operation == 'model.run_surface' else 'crown',
+                             arguments, threads=_THREADS.get())
+    from ._contracts import normalize_arguments, numeric_contract
+
+    migrated_stateless = numeric_contract(operation) == 'f64-stateless'
+    arguments = normalize_arguments(operation, arguments)
     native_registry = None
     arrays = {}
     integers = {}
@@ -170,9 +182,9 @@ def _call_owned(operation, arguments, direction_profile):
         if mode in arguments:
             arguments[mode] = str(arguments[mode])
     for field, kind in (('wind_speed_units', 'Speed'), ('slope_units', 'Slope'), ('temp_units', 'Temperature'), ('rh_units', 'Fraction')):
-        if field in arguments:
+        if field in arguments and not migrated_stateless:
             arguments[field] = _unit_code(kind, arguments[field])
-    if operation == 'vapor_pressure_deficit_calculator.calculate_vpd':
+    if operation == 'vapor_pressure_deficit_calculator.calculate_vpd' and not migrated_stateless:
         arguments['output_units'] = _unit_code('Pressure', arguments['output_units'])
     if name in ('calculate_direction_of_max_spread', 'calculate_surface_rate_vector', 'run_surface_fire', 'run_surface', 'run_crown_fire') and 'north' not in arguments['wind_orientation_mode'].lower():
         np.asarray(arguments['aspect'], dtype=float)
@@ -193,15 +205,17 @@ def _call_owned(operation, arguments, direction_profile):
                 arguments[key] = 0.0
         else:
             arguments['user_waf'] = None
-    if operation.startswith('units.'):
+    if operation.startswith('units.') and not migrated_stateless:
         kind = operation.split('.')[1]
         arguments['units'] = _unit_code(kind, arguments['units'])
     if operation == 'crown.get_surface_fire_inputs':
         return {key: np.asanyarray(_normalize(arguments['surface_results'][field])).copy() for key, field in (('surface_ros', 'spread_rate'), ('surface_fli', 'fireline_intensity'), ('surface_hpua', 'heat_per_unit_area'))}
     if operation == 'crown.coerce_crown_fire_inputs':
         from .behave_units import slope_to_base
+        from ._numeric import normalize_identifier, normalize_physical
         mapping = {'fm_grid': 'fuel_model_grid', 'wind_speed': 'wind_speed', 'wind_dir': 'wind_direction', 'aspect': 'aspect', 'cbh': 'canopy_base_height', 'ch': 'canopy_height', 'cbd': 'canopy_bulk_density', 'mf_pct': 'moisture_foliar'}
-        result = {key: np.atleast_1d(np.asarray(_normalize(arguments[field]), dtype=np.int32 if key == 'fm_grid' else float)).copy() for key, field in mapping.items()}
+        result = {key: np.atleast_1d(normalize_identifier(arguments[field]) if key == 'fm_grid'
+                  else normalize_physical(arguments[field])) for key, field in mapping.items()}
         result['slope_deg'] = slope_to_base(np.atleast_1d(_normalize(arguments['slope'])), arguments['slope_units'])
         result['S'] = result['fm_grid'].shape
         return result

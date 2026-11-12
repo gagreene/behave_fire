@@ -1,5 +1,33 @@
 # Rust backend execution measurements
 
+## API4 public serial checkpoint: confirmed GO, 2026-11-08
+
+The single approved plain-normalization candidate passed all 56 confidence bounds in a fresh three-pair screen and the required seven-NEW-pair confirmation, with frozen source/binary/harness/environment. At 100k, confirmed median speedups range from 2.930x to 4.085x and lower bounds from 2.455x to 3.810x, all above 2x required. Heterogeneous Surface at 10k, previously the only miss, now has a warmed median-ratio estimate of 2.646x and lower bound of 2.229x against 1.25x required.
+
+This clears the public serial prerequisite for staged-grid work. It does not certify four-thread, million-cell, memory, or final release-platform targets. See the [confirmed checkpoint](performance/2026-11-08-plain-normalization-public-checkpoint.md), [fresh screen](performance/2026-11-08-plain-normalization-public-screen.json), and [independent confirmation](performance/2026-11-08-plain-normalization-public-confirmation.json). The [bounded diagnostic](performance/2026-11-08-plain-normalization-diagnostic.md) selected one general boundary candidate; it did not establish the cause of the old slow process. All earlier failures below remain intact.
+
+## API4 public serial screen: 55/56 bounds, 2026-11-07
+
+Public Surface/Crown calls now use the float64 raster engine. The complete three-pair screen passed 55 of 56 first/warmed bounds across two datasets, seven layouts, and 10k/100k cells. At 100k, every bound passes 2x; median speedups range from 2.558x to 3.631x. The only miss is heterogeneous Surface at 10k, warmed: median-ratio estimate 2.234x, lower 95% bound 0.954x against 1.25x required. The slow process is retained, and its cause is not established.
+
+The approved single core/encoder diagnostic profile is complete. No confirmation or further optimization was attempted. Task 3 remains incomplete pending an owner decision; staged grids and subsequent migration remain unstarted. See the [complete checkpoint and proposed bounded follow-up](performance/2026-11-07-api4-public-serial-checkpoint.md), [immutable screen](performance/2026-11-07-api4-public-serial-screen.json), and [diagnostic-only profile](performance/2026-11-07-api4-public-serial-profile.json). Earlier entries below are historical evidence.
+
+## Surface/Crown core headroom: confirmed GO, 2026-11-07
+
+The Surface-enabled wind cache passes all 32 confidence bounds in both a fresh three-pair screen and the required seven-new-pair confirmation. At 100k, confirmed first/warm lower bounds range from 3.526x to 4.971x against the unchanged 2.5x core requirement. This clears the core prerequisite for the planned API4 model migration; public backend speed remains unverified. See the [complete checkpoint](performance/2026-11-07-surface-cache-core-checkpoint.md), [screen](performance/2026-11-07-surface-cache-core-screen.json), and [confirmation](performance/2026-11-07-surface-cache-core-confirmation.json). Earlier failed checkpoints below are retained as history.
+
+## Wind-cache confirmation checkpoint: 2026-11-07
+
+The cache candidate passed all 32 bounds in a fresh core screen, then passed 31 of 32 in the required seven-new-pair confirmation. Every Crown/A/B bound passes. Uniform Surface at 100k misses its first-call lower confidence bound (2.241x versus 2.5x required; median 3.814x). Work stops before API4. The [checkpoint and concrete Surface follow-up](performance/2026-11-07-wind-cache-core-checkpoint.md), [fresh screen](performance/2026-11-07-wind-cache-core-screen.json), and [confirmation](performance/2026-11-07-wind-cache-core-confirmation.json) preserve the complete evidence. No public backend speed certification is implied.
+
+## Bounded Crown investigation: 2026-11-07
+
+An isolated immutable wind-term cache reduced warmed Crown core time by about 24% (1.31-1.32x relative to the existing Rust core) in fixed diagnostic pairs. Forward Surface and backsolve repeat physical wind powers; CPU pinning did not remove variance. See the [investigation and limitations](performance/2026-11-07-crown-profile.md) and [raw diagnostic evidence](performance/2026-11-07-crown-profile.json). The integrated candidate's fresh confirmation result is recorded above; these diagnostic ratios remain separate from acceptance.
+
+## Float64 core checkpoint: 2026-11-07
+
+The configured float64 core passes complete-output correctness checks, but its first headroom screen misses 3 of 32 confidence bounds. Work stops before the Python API4 switch. This is core-only evidence; the public backend still uses API3. See the [checkpoint, timings, and owner choices](performance/2026-11-07-f64-core-checkpoint.md) and [frozen raw screen](performance/2026-11-07-f64-core-screen.json). No confirmation or repeat sampling was run.
+
 ## Recovery pipeline checkpoint: 2026-11-07
 
 **Task 4 stops at the serial-performance checkpoint.** Model calls now fuse normalization, numeric fuel preparation, shared native raster execution, and typed output into one native compute call. Ordinary Surface and Crown show faster median times. Both mixed Crown layouts remain slower than Python and miss the accepted targets. Task 5 parallel output work and final acceptance have not started.

@@ -68,6 +68,28 @@ def test_boxed_longlong_subclasses_remain_unsupported(scalar_class):
         surface.calculate_fire_length(forward, np.array([3], dtype=object), 1)
 
 
+def test_migrated_normalizing_entry_point_rejects_numeric_decimal_coercion():
+    from behave_fire.components import behave_units as reference
+    from behave_fire.rust import behave_units
+    values=np.array([Decimal('1.23456789')],dtype=object)
+    expected=reference.speed_to_base(values,5)
+    assert np.isfinite(expected).all()
+    with pytest.raises(TypeError):
+        behave_units.speed_to_base(values,5)
+
+
+@pytest.mark.parametrize('scalar_class', [CustomInt, CustomFloat, CustomNumpyInt, CustomNumpyFloat])
+def test_migrated_normalizing_entry_point_rejects_numeric_subclass_coercion(scalar_class):
+    from behave_fire.components import behave_units as reference
+    from behave_fire.rust import behave_units
+
+    values = np.array([scalar_class(2)], dtype=object)
+    expected = reference.speed_to_base(values, 5)
+    assert np.isfinite(expected).all()
+    with pytest.raises(TypeError):
+        behave_units.speed_to_base(values, 5)
+
+
 def test_mixed_boxed_numeric_payload_types_are_preserved():
     from behave_fire.components import surface as reference
     from behave_fire.rust import surface
@@ -78,26 +100,6 @@ def test_mixed_boxed_numeric_payload_types_are_preserved():
     assert actual.dtype==expected.dtype==object
     assert [type(value) for value in actual]==[type(value) for value in expected]
     np.testing.assert_array_equal(actual,expected)
-
-
-def test_normalizing_entry_point_accepts_numeric_decimal_coercion():
-    from behave_fire.components import behave_units as reference
-    from behave_fire.rust import behave_units
-    values=np.array([Decimal('1.23456789')],dtype=object)
-    expected=reference.speed_to_base(values,5)
-    actual=behave_units.speed_to_base(values,5)
-    np.testing.assert_array_equal(actual,expected)
-
-
-@pytest.mark.parametrize('scalar_class', [CustomInt, CustomFloat, CustomNumpyInt, CustomNumpyFloat])
-def test_normalizing_entry_point_preserves_numeric_subclass_coercion(scalar_class):
-    from behave_fire.components import behave_units as reference
-    from behave_fire.rust import behave_units
-
-    values = np.array([scalar_class(2)], dtype=object)
-    expected = reference.speed_to_base(values, 5)
-    actual = behave_units.speed_to_base(values, 5)
-    np.testing.assert_array_equal(actual, expected)
 
 
 @pytest.mark.parametrize('scalar_class,reference_result', [(CustomInt, 999), (CustomFloat, 777.), (CustomNumpyInt, 999), (CustomNumpyFloat, 777.)])

@@ -50,6 +50,14 @@ impl<'a> CrownRaster<'a> {
     pub fn input_cell(&self, index: usize) -> Option<CrownCell> {
         (index < self.shape.len() && self.inputs.valid(index)).then(|| self.inputs.cell(index))
     }
+    /// Read independent supplied Surface quantities at a validated cell.
+    pub(crate) fn supplied_surface(
+        &self,
+        index: usize,
+    ) -> Option<crate::crown::SurfaceFireInputs<f64>> {
+        (index < self.shape.len() && self.inputs.valid(index)).then(|| self.inputs.surface(index))
+    }
+
     /// Borrow the checked logical dimensions.
     pub fn shape(&self) -> &GridShape {
         &self.shape

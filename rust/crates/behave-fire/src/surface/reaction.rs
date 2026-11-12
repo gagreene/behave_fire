@@ -53,6 +53,11 @@ pub fn calculate_reaction_intensity(ib: &FuelbedIntermediates) -> f64 {
     ReactionCoefficients::new(ib).run(ib)
 }
 
+/// Calculate reaction using the availability policy of configured f64 models.
+pub(crate) fn calculate_reaction_intensity_available(ib: &FuelbedIntermediates) -> f64 {
+    ReactionCoefficients::new(ib).run_available(ib)
+}
+
 /// Moisture-independent reaction coefficients, retaining left-to-right products.
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub(crate) struct ReactionCoefficients {
@@ -83,8 +88,45 @@ impl ReactionCoefficients {
         }
     }
     pub(crate) fn run(&self, ib: &FuelbedIntermediates) -> f64 {
-        let dead = self.dead * eta_m(ib.w_moist_dead, ib.moe_dead) * self.silica_dead;
-        let live = self.live * eta_m(ib.w_moist_live, ib.moe_live) * self.silica_live;
+        self.run_selected::<false>(ib)
+    }
+    /// Retain cached finite coefficients without treating unknown guards as false.
+    pub(crate) fn run_available(&self, ib: &FuelbedIntermediates) -> f64 {
+        self.run_selected::<true>(ib)
+    }
+    fn run_selected<const STRICT: bool>(&self, ib: &FuelbedIntermediates) -> f64 {
+        if STRICT {
+            match crate::engine::missing::all_above(&[
+                (ib.sigma, 1e-7),
+                (ib.relative_packing_ratio, 0.),
+            ]) {
+                None => return f64::NAN,
+                Some(false) => return 0.,
+                Some(true) => {}
+            }
+        }
+        let moisture_dead = if STRICT && ib.moe_dead.is_nan() {
+            f64::NAN
+        } else {
+            eta_m(ib.w_moist_dead, ib.moe_dead)
+        };
+        let moisture_live = if STRICT && ib.moe_live.is_nan() {
+            f64::NAN
+        } else {
+            eta_m(ib.w_moist_live, ib.moe_live)
+        };
+        let silica_dead = if STRICT && ib.w_silica_dead.is_nan() {
+            f64::NAN
+        } else {
+            self.silica_dead
+        };
+        let silica_live = if STRICT && ib.w_silica_live.is_nan() {
+            f64::NAN
+        } else {
+            self.silica_live
+        };
+        let dead = self.dead * moisture_dead * silica_dead;
+        let live = self.live * moisture_live * silica_live;
         if self.valid {
             dead + live
         } else {

@@ -1,4 +1,4 @@
-"""Select a backend at construction and preserve its numerical snapshot."""
+"""Prefer a backend and preflight verified complex calls on owned input snapshots."""
 
 import copy
 import importlib
@@ -12,12 +12,14 @@ import numpy as np
 from .behave import BehaveRun as PythonBehaveRun
 from ._backend_contract import BINDING_API_VERSION, REQUIRED_CAPABILITIES
 from .components.fuel_models import FuelModels
+from ._auto_routing import capture_call, choose_backend, snapshot_registry
 
 _API_VERSION = BINDING_API_VERSION
 _INSTALL = "Rust backend unavailable; install a compatible native behave-fire wheel or rebuild the extension."
 _PROBE_LOCK = threading.RLock()
 _PROBE_RESULT = None
 _WARNING_EMITTED = False
+_COMPLEX_WARNING_EMITTED = False
 
 
 def _probe():
@@ -75,16 +77,31 @@ def _select(backend, stacklevel):
         return "rust"
     if backend == "rust":
         raise ImportError(f"{_INSTALL} Cause: {cause}") from cause
-    if status == "unusable":
-        with _PROBE_LOCK:
-            if not _WARNING_EMITTED:
-                warnings.warn(
-                    f"Rust backend unusable ({type(cause).__name__}: {cause}); using Python.",
-                    BehaveBackendWarning,
-                    stacklevel=stacklevel,
-                )
-                _WARNING_EMITTED = True
+    with _PROBE_LOCK:
+        if not _WARNING_EMITTED:
+            reason = "unavailable" if status == "absent" else "unusable"
+            warnings.warn(
+                f"Rust backend {reason} ({type(cause).__name__}: {cause}); using Python.",
+                BehaveBackendWarning,
+                stacklevel=stacklevel,
+            )
+            _WARNING_EMITTED = True
     return "python"
+
+
+def _warn_complex(operation, stacklevel):
+    """Warn once before the complete complex operation is delegated to Python.
+
+    :param operation: Public operation requiring verified Python complex arithmetic.
+    :param stacklevel: Stack depth of the external caller.
+    :return: None; a raised warning prevents delegation and does not consume the warning.
+    """
+    global _COMPLEX_WARNING_EMITTED
+    with _PROBE_LOCK:
+        if not _COMPLEX_WARNING_EMITTED:
+            warnings.warn(f'Complex input to {operation} requires the Python backend; using Python.',
+                          BehaveBackendWarning, stacklevel=stacklevel)
+            _COMPLEX_WARNING_EMITTED = True
 
 
 class _LegacyStaticMethod:
@@ -111,15 +128,15 @@ class _LegacyStaticMethod:
 
 
 class BehaveBackendWarning(RuntimeWarning):
-    """A present native extension could not be used for automatic selection."""
+    """Automatic selection uses Python because native execution is unavailable."""
 
 
 class BehaveRun:
-    """Forward calculations to the backend chosen once at construction.
+    """Prefer the selected backend and route proven complex calls before coercion.
 
     Use the explicit Python class for historical subclassing and class identity.
     Historical static class calls retain their Python implementation; instance
-    calls always use the selected delegate.
+    calls report the delegate that completed their most recent operation.
     """
 
     def __copy__(self):
@@ -129,7 +146,13 @@ class BehaveRun:
         """
         result = type(self).__new__(type(self))
         state = self.__getstate__()
-        state["delegate"] = copy.copy(self._delegate)
+        copied = {}
+        for name in ('delegate', 'rust_delegate', 'python_delegate'):
+            delegate = state[name]
+            if delegate is not None:
+                if id(delegate) not in copied:
+                    copied[id(delegate)] = copy.copy(delegate)
+                state[name] = copied[id(delegate)]
         result.__setstate__(state)
         return result
 
@@ -149,7 +172,10 @@ class BehaveRun:
 
         :return: Versioned values containing backend, threads, and delegate state.
         """
-        return {"version": 1, "backend": self._backend_in_use, "threads": self._threads, "delegate": self._delegate}
+        return {"version": 2, "requested": self._requested_backend, "preferred": self._preferred_backend,
+                "backend": self._backend_in_use, "threads": self._threads, "delegate": self._delegate,
+                "rust_delegate": self._rust_delegate, "python_delegate": self._python_delegate,
+                "registry_snapshot": self._registry_snapshot}
 
     def __init__(self, fuel_models, *, backend="auto", threads=1):
         """Choose a backend and freeze its fuel lookup at construction.
@@ -160,6 +186,11 @@ class BehaveRun:
         :return: None; initializes the selected calculation delegate.
         """
         selected = _select(backend, 3)
+        self._requested_backend = backend
+        self._preferred_backend = selected
+        self._registry_snapshot = None if backend == 'python' else snapshot_registry(fuel_models)
+        if backend == 'auto':
+            fuel_models = self._registry_snapshot.to_python()
         namespace = importlib.import_module(f"behave_fire.{selected}")
         if selected == "python":
             if not isinstance(fuel_models, FuelModels) and callable(getattr(fuel_models, "to_python", None)):
@@ -170,6 +201,8 @@ class BehaveRun:
         self._backend_in_use = selected
         self._threads = threads
         self._delegate = delegate
+        self._rust_delegate = delegate if selected == 'rust' else None
+        self._python_delegate = delegate if selected == 'python' else None
 
     def __setstate__(self, state):
         """Restore the chosen backend without recomputing or selecting another one.
@@ -177,22 +210,58 @@ class BehaveRun:
         :param state: Versioned serialized automatic model values.
         :return: None; restores the persisted numerical snapshot.
         """
-        if state.get("version") != 1:
+        if state.get("version") != 2:
             raise ValueError("unsupported automatic BehaveRun pickle state version")
         selected = state["backend"]
         if selected not in ("python", "rust"):
             raise ValueError("invalid serialized backend")
-        if selected == "rust":
+        if state.get('preferred') not in ('python', 'rust') or state.get('requested') not in ('auto', 'python', 'rust'):
+            raise ValueError('invalid serialized backend policy')
+        if state.get('rust_delegate') is not None:
             importlib.import_module("behave_fire.rust")
+        self._requested_backend = state['requested']
+        self._preferred_backend = state['preferred']
+        self._registry_snapshot = state['registry_snapshot']
+        self._rust_delegate = state['rust_delegate']
+        self._python_delegate = state['python_delegate']
         self._backend_in_use = selected
         self._threads = state["threads"]
         self._delegate = state["delegate"]
 
+    def _invoke(self, operation, *args, **kwargs):
+        """Execute one selected operation without retrying scientific failures.
+
+        :param operation: Existing public model method name.
+        :param args: Original positional calculation inputs.
+        :param kwargs: Original keyword calculation inputs.
+        :return: Complete delegate result; only successful calls update actual backend reporting.
+        """
+        if self._requested_backend == 'python':
+            return getattr(self._python_delegate, operation)(*args, **kwargs)
+        call = capture_call('model.' + operation, getattr(PythonBehaveRun, operation), args, kwargs)
+        if self._requested_backend == 'rust':
+            if call.complex_sites:
+                raise TypeError('The explicit Rust backend accepts real physical inputs; select Python for complex data.')
+            selected = 'rust'
+        else:
+            selected = choose_backend(call, self._preferred_backend)
+        if selected == 'python' and self._preferred_backend == 'rust':
+            _warn_complex(operation, 4)
+        delegate = self._rust_delegate if selected == 'rust' else self._python_delegate
+        if delegate is None:
+            namespace = importlib.import_module('behave_fire.python')
+            delegate = namespace.BehaveRun(self._registry_snapshot.to_python())
+            self._python_delegate = delegate
+        result = call.invoke(getattr(delegate, operation))
+        self._delegate = delegate
+        self._backend_in_use = selected
+        return result
+
     @property
     def backend_in_use(self):
-        """Return the backend selected at construction.
+        """Return the backend that completed the most recent calculation.
 
-        :return: Immutable public backend name, python or rust.
+        :return: Actual public backend name, python or rust; initially the construction backend.
         """
         return self._backend_in_use
 
@@ -224,7 +293,7 @@ class BehaveRun:
         :param out_units: Passed unchanged to the selected backend.
         :return: The selected backend result, preserving its array semantics.
         """
-        return self._delegate.calculate_crown_scorch_mortality(
+        return self._invoke("calculate_crown_scorch_mortality",
             scorch_height=scorch_height,
             tree_height=tree_height,
             crown_ratio=crown_ratio,
@@ -261,7 +330,7 @@ class BehaveRun:
         :param out_units: Passed unchanged to the selected backend.
         :return: The selected backend result, preserving its array semantics.
         """
-        return self._delegate.calculate_fire_area(
+        return self._invoke("calculate_fire_area",
             forward_ros=forward_ros,
             backing_ros=backing_ros,
             ros_units=ros_units,
@@ -292,7 +361,7 @@ class BehaveRun:
         :param out_units: Passed unchanged to the selected backend.
         :return: The selected backend result, preserving its array semantics.
         """
-        return self._delegate.calculate_fire_length(
+        return self._invoke("calculate_fire_length",
             forward_ros=forward_ros,
             backing_ros=backing_ros,
             ros_units=ros_units,
@@ -325,7 +394,7 @@ class BehaveRun:
         :param out_units: Passed unchanged to the selected backend.
         :return: The selected backend result, preserving its array semantics.
         """
-        return self._delegate.calculate_fire_perimeter(
+        return self._invoke("calculate_fire_perimeter",
             forward_ros=forward_ros,
             backing_ros=backing_ros,
             ros_units=ros_units,
@@ -358,7 +427,7 @@ class BehaveRun:
         :param out_units: Passed unchanged to the selected backend.
         :return: The selected backend result, preserving its array semantics.
         """
-        return self._delegate.calculate_fire_width(
+        return self._invoke("calculate_fire_width",
             forward_ros=forward_ros,
             backing_ros=backing_ros,
             ros_units=ros_units,
@@ -390,7 +459,7 @@ class BehaveRun:
         :param out_units: Passed unchanged to the selected backend.
         :return: The selected backend result, preserving its array semantics.
         """
-        return self._delegate.calculate_scorch_height(
+        return self._invoke("calculate_scorch_height",
             fireline_intensity=fireline_intensity,
             fireline_intensity_units=fireline_intensity_units,
             midflame_wind_speed=midflame_wind_speed,
@@ -422,7 +491,7 @@ class BehaveRun:
         :param out_units: Passed unchanged to the selected backend.
         :return: The selected backend result, preserving its array semantics.
         """
-        return self._delegate.calculate_spotting_from_burning_pile(
+        return self._invoke("calculate_spotting_from_burning_pile",
             flame_height=flame_height,
             flame_height_units=flame_height_units,
             wind_speed=wind_speed,
@@ -454,7 +523,7 @@ class BehaveRun:
         :param out_units: Passed unchanged to the selected backend.
         :return: The selected backend result, preserving its array semantics.
         """
-        return self._delegate.calculate_spotting_from_surface_fire(
+        return self._invoke("calculate_spotting_from_surface_fire",
             flame_length=flame_length,
             flame_length_units=flame_length_units,
             wind_speed=wind_speed,
@@ -492,7 +561,7 @@ class BehaveRun:
         :param out_units: Passed unchanged to the selected backend.
         :return: The selected backend result, preserving its array semantics.
         """
-        return self._delegate.calculate_spotting_from_torching_trees(
+        return self._invoke("calculate_spotting_from_torching_trees",
             dbh=dbh,
             dbh_units=dbh_units,
             height=height,
@@ -558,7 +627,7 @@ class BehaveRun:
         :param out_units: Passed unchanged to the selected backend.
         :return: The selected backend result, preserving its array semantics.
         """
-        return self._delegate.do_crown_run(
+        return self._invoke("do_crown_run",
             surface_results=surface_results,
             fuel_model_grid=fuel_model_grid,
             m1h=m1h,
@@ -643,7 +712,7 @@ class BehaveRun:
         :param out_units: Passed unchanged to the selected backend.
         :return: The selected backend result, preserving its array semantics.
         """
-        return self._delegate.do_surface_run(
+        return self._invoke("do_surface_run",
             fuel_model_grid=fuel_model_grid,
             m1h=m1h,
             m10h=m10h,
@@ -673,6 +742,15 @@ class BehaveRun:
         )
 
 
+    @property
+    def preferred_backend(self):
+        """Return the usable backend captured for ordinary real calculations.
+
+        :return: Cached preferred backend name, independent of complex-call fallback.
+        """
+        return self._preferred_backend
+
+
 def available_backends() -> list[str]:
     """List usable complete implementations without consuming fallback warnings.
 
@@ -682,9 +760,13 @@ def available_backends() -> list[str]:
 
 
 def get_backend(backend="auto"):
-    """Return an explicit namespace for model and standalone calculations.
+    """Return a routing namespace for auto or an explicit requested namespace.
 
     :param backend: One of auto, python, or rust.
-    :return: Explicit backend namespace containing the public component modules.
+    :return: Signature-preserving automatic namespace, or the explicit backend module.
     """
-    return importlib.import_module(f"behave_fire.{_select(backend, 3)}")
+    selected = _select(backend, 3)
+    if backend == 'auto':
+        from ._auto_namespace import AutoNamespace
+        return AutoNamespace(selected)
+    return importlib.import_module(f"behave_fire.{selected}")

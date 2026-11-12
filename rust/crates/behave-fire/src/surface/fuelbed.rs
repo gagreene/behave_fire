@@ -196,20 +196,55 @@ pub(crate) fn calculate_fuelbed_with_terms(
     p: &Particles,
     terms: &super::SavrTerms,
 ) -> FuelbedIntermediates {
+    calculate_fuelbed_selected::<false>(p, terms)
+}
+
+/// Share finite reductions while preserving unknown threshold conditions.
+pub(crate) fn calculate_fuelbed_available_with_terms(
+    p: &Particles,
+    terms: &super::SavrTerms,
+) -> FuelbedIntermediates {
+    calculate_fuelbed_selected::<true>(p, terms)
+}
+
+fn calculate_fuelbed_selected<const STRICT: bool>(
+    p: &Particles,
+    terms: &super::SavrTerms,
+) -> FuelbedIntermediates {
     let sa_d: [f64; 5] = std::array::from_fn(|n| p.load_dead[n] * p.savr_dead[n] / 32.0);
     let sa_l: [f64; 5] = std::array::from_fn(|n| p.load_live[n] * p.savr_live[n] / 32.0);
     let tsa_d: f64 = sa_d.iter().sum();
     let tsa_l: f64 = sa_l.iter().sum();
     let tsa_total = tsa_d + tsa_l;
-    let safe_tsa = if tsa_total > 1e-7 { tsa_total } else { 1.0 };
-    let frac_dead = if tsa_total > 1e-7 {
+    let safe_tsa = if STRICT && tsa_total.is_nan() {
+        f64::NAN
+    } else if tsa_total > 1e-7 {
+        tsa_total
+    } else {
+        1.0
+    };
+    let frac_dead = if STRICT && tsa_total.is_nan() {
+        f64::NAN
+    } else if tsa_total > 1e-7 {
         tsa_d / safe_tsa
     } else {
         0.0
     };
     let frac_live = 1.0 - frac_dead;
-    let safe_d = if tsa_d > 1e-7 { tsa_d } else { 1.0 };
-    let safe_l = if tsa_l > 1e-7 { tsa_l } else { 1.0 };
+    let safe_d = if STRICT && tsa_d.is_nan() {
+        f64::NAN
+    } else if tsa_d > 1e-7 {
+        tsa_d
+    } else {
+        1.0
+    };
+    let safe_l = if STRICT && tsa_l.is_nan() {
+        f64::NAN
+    } else if tsa_l > 1e-7 {
+        tsa_l
+    } else {
+        1.0
+    };
     let fp_d: [f64; 5] = std::array::from_fn(|n| sa_d[n] / safe_d);
     let fp_l: [f64; 5] = std::array::from_fn(|n| sa_l[n] / safe_l);
     let exp_d = terms.exp_dead;
@@ -220,15 +255,29 @@ pub(crate) fn calculate_fuelbed_with_terms(
         .sum();
     let fine_l: f64 = (0..5).map(|n| p.load_live[n] * exp_l500[n]).sum();
     let safe_fd = if fine_d > 1e-7 { fine_d } else { 1.0 };
-    let fine_dead_moist = if fine_d > 1e-7 {
+    let fine_dead_moist = if STRICT && fine_d.is_nan() {
+        f64::NAN
+    } else if fine_d > 1e-7 {
         fine_dm / safe_fd
     } else {
         0.0
     };
     let safe_fl = if fine_l > 1e-7 { fine_l } else { 1.0 };
-    let fdol = if fine_l > 1e-7 { fine_d / safe_fl } else { 0.0 };
+    let fdol = if STRICT && fine_l.is_nan() {
+        f64::NAN
+    } else if fine_l > 1e-7 {
+        fine_d / safe_fl
+    } else {
+        0.0
+    };
     let moe_dead = p.moe_dead;
-    let safe_md = if moe_dead > 1e-7 { moe_dead } else { 1.0 };
+    let safe_md = if STRICT && moe_dead.is_nan() {
+        f64::NAN
+    } else if moe_dead > 1e-7 {
+        moe_dead
+    } else {
+        1.0
+    };
     let moe_live = np_max(
         2.9 * fdol * (1.0 - fine_dead_moist / safe_md) - 0.226,
         moe_dead,
@@ -251,12 +300,16 @@ pub(crate) fn calculate_fuelbed_with_terms(
     let total_load = p.load_dead.iter().sum::<f64>() + p.load_live.iter().sum::<f64>();
     let depth = p.depth;
     let safe_depth = if depth > 1e-7 { depth } else { 1.0 };
-    let bulk_density = if depth > 1e-7 {
+    let bulk_density = if STRICT && depth.is_nan() {
+        f64::NAN
+    } else if depth > 1e-7 {
         total_load / safe_depth
     } else {
         0.0
     };
-    let packing_ratio = if depth > 1e-7 {
+    let packing_ratio = if STRICT && depth.is_nan() {
+        f64::NAN
+    } else if depth > 1e-7 {
         p.load_dead
             .iter()
             .map(|v| v / (safe_depth * 32.0))
@@ -269,17 +322,22 @@ pub(crate) fn calculate_fuelbed_with_terms(
         0.0
     };
     let safe_sigma = if sigma > 1e-7 { sigma } else { 1.0 };
-    let opt = if sigma > 1e-7 {
+    let opt = if STRICT && sigma.is_nan() {
+        f64::NAN
+    } else if sigma > 1e-7 {
         3.348 / safe_sigma.powf(0.8189)
     } else {
         1.0
     };
     let safe_opt = if opt > 1e-7 { opt } else { 1.0 };
-    let relative_packing_ratio = if sigma > 1e-7 && opt > 1e-7 {
-        packing_ratio / safe_opt
-    } else {
-        0.0
-    };
+    let relative_packing_ratio =
+        if STRICT && crate::engine::missing::all_above(&[(sigma, 1e-7), (opt, 1e-7)]).is_none() {
+            f64::NAN
+        } else if sigma > 1e-7 && opt > 1e-7 {
+            packing_ratio / safe_opt
+        } else {
+            0.0
+        };
     let hs_d: f64 = (0..5)
         .map(|n| frac_dead * fp_d[n] * (250.0 + 1116.0 * p.moisture_dead[n]) * exp_d[n])
         .sum();
@@ -290,7 +348,9 @@ pub(crate) fn calculate_fuelbed_with_terms(
         })
         .sum();
     let heat_sink = (hs_d + hs_l) * bulk_density;
-    let propagating_flux = if sigma > 1e-7 {
+    let propagating_flux = if STRICT && sigma.is_nan() {
+        f64::NAN
+    } else if sigma > 1e-7 {
         ((0.792 + 0.681 * safe_sigma.sqrt()) * (packing_ratio + 0.1)).exp()
             / (192.0 + 0.2595 * safe_sigma)
     } else {
@@ -335,6 +395,17 @@ pub(crate) struct PreparedFuelbed {
     exp_live: [f64; 5],
 }
 impl PreparedFuelbed {
+    /// Retain fast cached finite invariants; rebuild missing static thresholds strictly.
+    pub(crate) fn run_available(
+        &self,
+        p: &Particles,
+        terms: &super::SavrTerms,
+    ) -> FuelbedIntermediates {
+        if p.depth.is_nan() || self.template.sigma.is_nan() {
+            return calculate_fuelbed_available_with_terms(p, terms);
+        }
+        self.run(p)
+    }
     /// Prepare physical terms only after dynamic-transfer eligibility is checked.
     pub(crate) fn new(p: &Particles, terms: &super::SavrTerms) -> Self {
         let template = calculate_fuelbed_with_terms(p, terms);

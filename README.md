@@ -1,8 +1,20 @@
 # behave_fire
 
+Native Surface/Crown models now calculate physical values in float64. Float16,
+float32, and integer physical inputs widen once; masked real values become NaN,
+and physical results are plain float64 arrays. Classifications remain int32,
+with -1 for unavailable classifications. Python retains its original dtype and
+masked-array behavior. These differences also apply when `backend="auto"`
+selects Rust; see [Backend differences](docs/BACKEND_DIFFERENCES.md).
+
+Auto uses Rust when available. Otherwise it selects Python and warns once per
+process. A separate warning accompanies supported complex-input calls routed
+to Python before native calculation. Explicit Rust rejects complex/object
+arithmetic. General object input does not trigger automatic fallback.
+
 A NumPy-based Python port of the US Forest Service [Behave<sup>7</sup>](https://www.firelab.org/project/behave) fire behavior modeling system, supporting scalar and array calculations. The package has two calculation backends: the original Python/NumPy implementation (the behavioral reference) and a native Rust implementation selected automatically when its compiled extension is installed. The same Rust core is also a standalone crate, `behave-fire`, for Rust applications.
 
-Upstream alignment is ongoing; full C++ parity has not been established. Fuel data and heat constants follow `firelab/behave` at `f3b2943`, with an intentional correction of metric-model moisture percentages to fractions. Containment is a simplified growth model, and lightning ignition remains available only as a deprecated compatibility API. The Rust backend is not yet faster than Python for typical workloads; see [Performance](#performance).
+Upstream alignment is ongoing; full C++ parity has not been established. Fuel data and heat constants follow `firelab/behave` at `f3b2943`, with an intentional correction of metric-model moisture percentages to fractions. Containment is a simplified growth model, and lightning ignition remains available only as a deprecated compatibility API. Rust performance is being validated against the public Python API; see [Performance](#performance).
 
 ---
 
@@ -141,7 +153,7 @@ uv run --no-sync python -m pytest --require-rust
 
 ### Python-only use of a checkout
 
-The Python implementation needs no build step. Put `src/` on the Python path (or run scripts from the repository root; the examples set their own path). With no extension present, `backend="auto"` selects Python silently:
+The Python implementation needs no build step. Put `src/` on the Python path (or run scripts from the repository root; the examples set their own path). With no extension present, `backend="auto"` selects Python and emits a once-per-process `BehaveBackendWarning`:
 
 ```sh
 uv sync --locked --no-install-project --extra test --extra dev   # dependencies only; never installs the project
@@ -241,7 +253,7 @@ contain = get_backend("rust").contain.run_contain_sim_array
 
 `available_backends()` reports Python and, when compatible and complete, Rust. `get_backend("python")` and `get_backend("rust")` expose their model, registries, and component modules. Standalone imports include `from behave_fire.python import contain` and `from behave_fire.rust import contain`. Historical imports such as `behave_fire.components.surface` continue to use Python. Nested component import paths under the new namespaces are not required; access their module attributes.
 
-`backend="auto"` prefers a compatible, complete Rust extension. An absent extension (the universal wheel, or an unbuilt checkout) selects Python silently. A present extension with a loader error, incompatible API, or an incomplete advertised operation inventory selects Python and emits `BehaveBackendWarning`, a `RuntimeWarning` subclass, once per process, with its cause. An availability query can cache the extension status but does not consume that warning. Forced Rust raises a chained `ImportError` for any unavailable or incomplete extension. Explicit native imports permit compatible incomplete development extensions; an unsupported operation raises `NotImplementedError`. Calculation and facade errors propagate and never trigger a fallback.
+`backend="auto"` prefers a compatible, complete Rust extension. An absent extension (the universal wheel, or an unbuilt checkout), loader error, incompatible API, or incomplete advertised operation inventory selects Python and emits `BehaveBackendWarning`, a `RuntimeWarning` subclass, once per process, with its cause. An availability query can cache the extension status but does not consume that warning. Forced Rust raises a chained `ImportError` for any unavailable or incomplete extension. Explicit native imports permit compatible incomplete development extensions; an unsupported operation raises `NotImplementedError`. Calculation and facade errors propagate and never trigger a fallback.
 
 Configure strict fallback handling before the first warned automatic selection:
 
@@ -288,13 +300,11 @@ The raster engine and tweak columns are Rust interfaces. Python users keep their
 
 ## Performance
 
-The Rust backend is correct against the Python reference but is **not yet faster for typical workloads**. Measurements on one Windows x86-64 host (CPython 3.12.8, NumPy 2.1.3) in [docs/RUST_BACKEND_BENCHMARKS.md](docs/RUST_BACKEND_BENCHMARKS.md) show:
+The current API4 [public serial checkpoint](docs/performance/2026-11-08-plain-normalization-public-checkpoint.md) passed **all 56 bounds** in both a fresh screen and the required seven-new-pair confirmation. Confirmed median Rust speedups were **2.93–4.09x at 100,000 cells** across Surface, Crown, and five dtype/mask layouts. Every 100k lower 95% bound exceeded the unchanged 2x requirement. Measurements used original-input Python timing on one Windows x86-64 host with CPython 3.12.8 and NumPy 2.1.3.
 
-- Python is faster for single-cell and 10,000-cell public calls, and for serial Rust at one million cells. NumPy's compiled array operations outperform a per-cell Rust loop plus Python-boundary conversion.
-- Parallel Rust (`threads=4` or `threads=0`) is faster than Python only on large (about one million cell) surface and crown rasters in those runs.
-- Mixed-dtype or masked Crown inputs (the typed route) are substantially slower on Rust, mainly from output encoding at the Python boundary.
+The previously failing heterogeneous Surface 10k warmed endpoint now passes: its confirmed median-ratio estimate is 2.65x and lower 95% bound is 2.23x against 1.25x required. Earlier failed samples remain preserved; they were not discarded or pooled into the new campaign.
 
-A restructuring is underway: typed scalar stages and raster columns are implemented in the Rust core, and a feasibility screen of the native core found the proposed large-raster speed targets not yet met (see [docs/RUST_ENGINE.md](docs/RUST_ENGINE.md)). Select `backend="python"` when speed on small and medium inputs matters. No speedup is promised, and measurements from one host do not apply to other platforms or workloads.
+Four-thread, million-cell, memory, and final release-platform certification remain pending. These serial results do not guarantee speed on other hosts or workloads. Earlier measurements remain in [the benchmark history](docs/RUST_BACKEND_BENCHMARKS.md). Select Python when original dtype/mask behavior is required.
 
 ---
 
