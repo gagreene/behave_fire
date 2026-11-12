@@ -2,6 +2,7 @@ name: CI
 
 on:
   pull_request:
+    types: [opened, synchronize, reopened, edited]
   push:
     branches: [pre_release, master]
   workflow_call:
@@ -10,13 +11,27 @@ on:
 permissions:
   contents: read
 
+# A newer run for the same pull request, or for pre_release, cancels the older one. Every other run
+# (master, tags, workflow_dispatch, and a pull request edit that does not change the base branch) gets
+# a unique group, so it is never cancelled and never replaces a queued run. GitHub keeps only one
+# pending run per group, so a shared group would drop queued master runs even without cancellation.
+concurrency:
+  group: ci-${{ (github.event.action == 'edited' && !github.event.changes.base) && github.run_id || github.event.pull_request.number || (github.ref == 'refs/heads/pre_release' && github.ref) || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' || github.ref == 'refs/heads/pre_release' }}
+
+# Tiers: a pull request that does not target master runs the quick tier (fmt, Clippy, Rust core tests,
+# the table check, and one Python and one native job). Everything else (pull requests into master, pushes,
+# workflow_call from release.yml, and workflow_dispatch) runs the full tier. The pull_request trigger
+# includes the edited type so that changing a pull request's base branch re-evaluates the tier. An edit
+# that does not change the base branch (title or description) skips every job.
 jobs:
   rust:
+    if: ${{ !(github.event.action == 'edited' && !github.event.changes.base) }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-24.04, macos-15, windows-2025]
+        os: ${{ fromJSON(github.event_name == 'pull_request' && github.base_ref != 'master' && '["ubuntu-24.04"]' || '["ubuntu-24.04","macos-15","windows-2025"]') }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v6
@@ -38,6 +53,7 @@ jobs:
           RUSTDOCFLAGS: -D warnings
 
   msrv:
+    if: ${{ !(github.event_name == 'pull_request' && github.base_ref != 'master') && !(github.event.action == 'edited' && !github.event.changes.base) }}
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
@@ -59,11 +75,12 @@ jobs:
       - run: cargo test --manifest-path rust/Cargo.toml -p behave-fire --locked --no-fail-fast
 
   python-only:
+    if: ${{ !(github.event.action == 'edited' && !github.event.changes.base) }}
     runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
-        python: ["3.11", "3.12", "3.13", "3.14"]
+        python: ${{ fromJSON(github.event_name == 'pull_request' && github.base_ref != 'master' && '["3.12"]' || '["3.11","3.12","3.13","3.14"]') }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v6
@@ -78,11 +95,12 @@ jobs:
       - run: uv run --no-sync python -m pytest
 
   native-pytest:
+    if: ${{ !(github.event.action == 'edited' && !github.event.changes.base) }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-24.04, macos-15, windows-2025]
+        os: ${{ fromJSON(github.event_name == 'pull_request' && github.base_ref != 'master' && '["ubuntu-24.04"]' || '["ubuntu-24.04","macos-15","windows-2025"]') }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v6
@@ -143,7 +161,10 @@ jobs:
           if-no-files-found: warn
 
   wheel-validation:
+    needs: [rust, msrv, python-only, native-pytest, crate-validation]
     uses: ./.github/workflows/wheel-validation.yml
+    if: ${{ !(github.event_name == 'pull_request' && github.base_ref != 'master') && !(github.event.action == 'edited' && !github.event.changes.base) }}
 
   crate-validation:
     uses: ./.github/workflows/crate-validation.yml
+    if: ${{ !(github.event_name == 'pull_request' && github.base_ref != 'master') && !(github.event.action == 'edited' && !github.event.changes.base) }}

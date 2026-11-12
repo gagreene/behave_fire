@@ -156,6 +156,31 @@ version, operating system, latest commit SHA, and pass/skip counts in the PR
 description. Do not treat a run against an earlier commit as validation of the
 current PR head.
 
+### CI tiers
+
+The `CI` workflow (`.github/workflows/ci.yml`) runs in two tiers:
+
+- **Quick tier**, for a pull request that does not target `master` (including each
+  upper layer of a stack): `cargo fmt --check`, Clippy, the Rust core tests and the
+  documentation build on one operating system, `python-only` on one Python
+  version, and `native-pytest` on one Linux job. The MSRV, wheel, and crate
+  validation jobs are skipped.
+- **Full tier**, for a pull request into `master`, every push to `pre_release` and
+  `master`, a call from `release.yml`, and a manual `workflow_dispatch` on any
+  branch: every job and every matrix row, including the wheel and crate validation.
+  The wheel validation starts only after the other jobs have passed.
+
+A newer run for the same pull request, or for `pre_release`, cancels the older one,
+so a burst of merges ends with one full run on the last commit. Every other run
+(`master`, tags, manual dispatch) has its own concurrency group, so it is never
+cancelled and never replaces a queued run, because each `master` run gates a
+release. Changing a pull request's base branch re-runs the workflow, so retargeting
+a pull request to `master` runs the full tier; an edit to its title or description
+starts a run in which every job is skipped. A wheel or platform failure on `pre_release`
+is fixed promptly, because it can block the next pull request. The quick tier does
+not replace the local full suite and the test record above, which remain required
+for every PR.
+
 ## Dependency changes
 
 - `pyproject.toml` is the declaration of the package's dependencies, and
