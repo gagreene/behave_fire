@@ -11,13 +11,21 @@ self-contained and has no normal/build dependencies.
 | --- | --- |
 | Measurement harness, acceptance checker, native probe | Implemented (`tools/benchmark_backends.py`, `tools/check_performance.py`, `tools/perf_probe/`) |
 | Typed scalar stages and fused overrides (`engine`) | Implemented in the Rust core |
-| Raster columns, per-cell overrides, tiles (`raster`) | Implemented in the Rust core; usable from Rust only |
+| Raster columns, per-cell overrides, tiles (`raster`) | Implemented in the core and reused by model bindings; explicit tiles and tweak columns remain Rust APIs |
 | Feasibility checkpoint | Recovery confirmation passed; all required first/warm confidence bounds clear the core thresholds (see the recovery confirmation below) |
-| Prepared Python bindings, typed output transport, binding API 3 | Prepared inputs and general API-3 typed output implemented; complete model fusion remains pending |
+| Prepared Python bindings, typed output transport, binding API 3 | Prepared inputs, API-3 typed output, and one-call model fusion implemented |
 | Kernel optimization, parallel tile scheduling | Prepared physical coefficients and minimal Crown stages implemented; parallel scheduling work remains |
-| Performance targets (table below) | **Not met**; no speed claim is made for the Python Rust backend |
+| Performance targets (table below) | **Not met**; Task 4 serial screen fails for typed Crown; final acceptance is pending |
 
-Python public calls use binding API 3 with typed columns and compact metadata. Model calls still cross several native boundaries. Native raster/tweak entry points remain Rust-only, and end-to-end speed targets are not yet certified. The Python-facing calculation contract, including shapes, dtypes, masks, and tolerances, is unchanged.
+Python public calls use binding API 3 with typed columns and compact metadata. Common Surface and Crown model calls now cross one native compute boundary. Their original coercion and unit-selector validation order remains in Python; unit arithmetic runs on owned native buffers. The numeric fuel lookup is snapshotted once, prepared once, and shared by validated native raster views. Explicit tile and tweak APIs remain Rust-only.
+
+The [2026-11-07 public serial checkpoint](RUST_BACKEND_BENCHMARKS.md#recovery-pipeline-checkpoint-2026-11-07) still fails for typed Crown. Ordinary routes have faster measured medians, but complete end-to-end targets are not certified. Parallel output allocation and the final campaign remain pending an owner decision.
+
+Crown equations share a `CrownNumber` arithmetic contract. Ordinary mixed real values use compact precision, integer, mask, fill, rank, and math-profile metadata. Initial promotion and scalar edge cases reuse checked native arithmetic; weak/object or exceptional representations retain the checked native path. No Python calculations are called from Rust. The compact route is selected from payload traits, without matching benchmark dtype tuples or input values.
+
+`PreparedFuel::prepared` refreshes immutable physical coefficients after numeric edits; `PreparedFuels::from_rows` accepts numeric registry rows without names. `SurfaceRaster::evaluate_cell`, `CrownRaster::evaluate_cell`, and `CrownRaster::input_cell` let bindings and Rust callers reuse validated columns with their own output storage. Out-of-range cells return `None`; invalid pixels retain the raster's default-output behavior.
+
+The Python-facing shape, dtype, mask, and tolerance contract remains unchanged. Regression coverage also preserves negative zero at the Crown fraction's inclusive clip boundary.
 
 ## Typed scalar stages
 

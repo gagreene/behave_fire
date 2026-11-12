@@ -1,0 +1,1085 @@
+{
+  "provenance": {
+    "python": "3.12.8 | packaged by conda-forge | (main, Dec  5 2024, 14:06:27) [MSC v.1942 64 bit (AMD64)]",
+    "numpy": "2.1.3",
+    "numpy_build": "3191b72109bea34b77531b50df8dba998af8f149d927aa6c239080a2ef17f76c",
+    "platform": "Windows-10-10.0.19044-SP0",
+    "cpu_count": 16,
+    "source_hash": "979489380682ff1ec45a0da7dfb099b4e2dd5bd64dfb666a7a4a2140133565ad",
+    "extension_hash": "52a050f1755417022a4ba12b673c309843d9398e422dd1ad8cdb8fbb111cac71",
+    "seed": 20261105
+  },
+  "profile": true,
+  "records": [
+    {
+      "operation": "surface",
+      "cells": 1,
+      "first": [
+        {
+          "owned_copy_seconds": 0.0004153,
+          "detached_seconds": 0.000429,
+          "numpy_transfer_seconds": 0.0001032,
+          "concatenate_seconds": 8.6e-06,
+          "appended_bytes": 0.0,
+          "native_boundary_total_seconds": 0.0010390998795628548,
+          "native_output_bytes": 112,
+          "native_metadata_bytes": 0,
+          "operation": "model.run_surface"
+        }
+      ],
+      "warm": [
+        {
+          "owned_copy_seconds": 9.2e-05,
+          "detached_seconds": 0.0001862,
+          "numpy_transfer_seconds": 1.56e-05,
+          "concatenate_seconds": 1.7e-06,
+          "appended_bytes": 0.0,
+          "native_boundary_total_seconds": 0.00033369986340403557,
+          "native_output_bytes": 112,
+          "native_metadata_bytes": 0,
+          "operation": "model.run_surface"
+        }
+      ],
+      "traits": [
+        {
+          "operation": "model.run_surface",
+          "weak": [
+            "_weak.wind_speed_units",
+            "_weak.slope_units",
+            "_weak.aspect"
+          ],
+          "object": [],
+          "registry": true
+        },
+        {
+          "operation": "model.run_surface",
+          "weak": [
+            "_weak.wind_speed_units",
+            "_weak.slope_units",
+            "_weak.aspect"
+          ],
+          "object": [],
+          "registry": true
+        }
+      ]
+    },
+    {
+      "operation": "surface",
+      "cells": 16,
+      "first": [
+        {
+          "owned_copy_seconds": 9.48e-05,
+          "detached_seconds": 0.000234,
+          "numpy_transfer_seconds": 1.54e-05,
+          "concatenate_seconds": 1.4e-06,
+          "appended_bytes": 0.0,
+          "native_boundary_total_seconds": 0.0003876001574099064,
+          "native_output_bytes": 1792,
+          "native_metadata_bytes": 0,
+          "operation": "model.run_surface"
+        }
+      ],
+      "warm": [
+        {
+          "owned_copy_seconds": 9.29e-05,
+          "detached_seconds": 0.0001907,
+          "numpy_transfer_seconds": 1.65e-05,
+          "concatenate_seconds": 1.2e-06,
+          "appended_bytes": 0.0,
+          "native_boundary_total_seconds": 0.00033950014039874077,
+          "native_output_bytes": 1792,
+          "native_metadata_bytes": 0,
+          "operation": "model.run_surface"
+        }
+      ],
+      "traits": [
+        {
+          "operation": "model.run_surface",
+          "weak": [
+            "_weak.wind_speed_units",
+            "_weak.slope_units",
+            "_weak.aspect"
+          ],
+          "object": [],
+          "registry": true
+        },
+        {
+          "operation": "model.run_surface",
+          "weak": [
+            "_weak.wind_speed_units",
+            "_weak.slope_units",
+            "_weak.aspect"
+          ],
+          "object": [],
+          "registry": true
+        }
+      ]
+    },
+    {
+      "operation": "surface",
+      "cells": 1024,
+      "first": [
+        {
+          "owned_copy_seconds": 0.0002602,
+          "detached_seconds": 0.0013539,
+          "numpy_transfer_seconds": 2.04e-05,
+          "concatenate_seconds": 1.5e-06,
+          "appended_bytes": 0.0,
+          "native_boundary_total_seconds": 0.001679699867963791,
+          "native_output_bytes": 114688,
+          "native_metadata_bytes": 0,
+          "operation": "model.run_surface"
+        }
+      ],
+      "warm": [
+        {
+          "owned_copy_seconds": 0.0001828,
+          "detached_seconds": 0.0013516,
+          "numpy_transfer_seconds": 1.91e-05,
+          "concatenate_seconds": 1e-06,
+          "appended_bytes": 0.0,
+          "native_boundary_total_seconds": 0.0015959003940224648,
+          "native_output_bytes": 114688,
+          "native_metadata_bytes": 0,
+          "operation": "model.run_surface"
+        }
+      ],
+      "traits": [
+        {
+          "operation": "model.run_surface",
+          "weak": [
+            "_weak.wind_speed_units",
+            "_weak.slope_units",
+            "_weak.aspect"
+          ],
+          "object": [],
+          "registry": true
+        },
+        {
+          "operation": "model.run_surface",
+          "weak": [
+            "_weak.wind_speed_units",
+            "_weak.slope_units",
+            "_weak.aspect"
+          ],
+          "object": [],
+          "registry": true
+        }
+      ]
+    },
+    {
+      "operation": "surface",
+      "cells": 10000,
+      "first": [
+        {
+          "owned_copy_seconds": 0.0012752,
+          "detached_seconds": 0.0102798,
+          "numpy_transfer_seconds": 3.12e-05,
+          "concatenate_seconds": 5.7e-06,
+          "appended_bytes": 0.0,
+          "native_boundary_total_seconds": 0.011852200143039227,
+          "native_output_bytes": 1120000,
+          "native_metadata_bytes": 0,
+          "operation": "model.run_surface"
+        }
+      ],
+      "warm": [
+        {
+          "owned_copy_seconds": 0.0012365,
+          "detached_seconds": 0.0121412,
+          "numpy_transfer_seconds": 4.78e-05,
+          "concatenate_seconds": 7e-06,
+          "appended_bytes": 0.0,
+          "native_boundary_total_seconds": 0.013787899632006884,
+          "native_output_bytes": 1120000,
+          "native_metadata_bytes": 0,
+          "operation": "model.run_surface"
+        }
+      ],
+      "traits": [
+        {
+          "operation": "model.run_surface",
+          "weak": [
+            "_weak.wind_speed_units",
+            "_weak.slope_units",
+            "_weak.aspect"
+          ],
+          "object": [],
+          "registry": true
+        },
+        {
+          "operation": "model.run_surface",
+          "weak": [
+            "_weak.wind_speed_units",
+            "_weak.slope_units",
+            "_weak.aspect"
+          ],
+          "object": [],
+          "registry": true
+        }
+      ]
+    },
+    {
+      "operation": "surface",
+      "cells": 100000,
+      "first": [
+        {
+          "owned_copy_seconds": 0.0111781,
+          "detached_seconds": 0.1008708,
+          "numpy_transfer_seconds": 3.19e-05,
+          "concatenate_seconds": 6e-06,
+          "appended_bytes": 0.0,
+          "native_boundary_total_seconds": 0.11283610016107559,
+          "native_output_bytes": 11200000,
+          "native_metadata_bytes": 0,
+          "operation": "model.run_surface"
+        }
+      ],
+      "warm": [
+        {
+          "owned_copy_seconds": 0.0111831,
+          "detached_seconds": 0.1216177,
+          "numpy_transfer_seconds": 3.3e-05,
+          "concatenate_seconds": 6e-06,
+          "appended_bytes": 0.0,
+          "native_boundary_total_seconds": 0.13363660033792257,
+          "native_output_bytes": 11200000,
+          "native_metadata_bytes": 0,
+          "operation": "model.run_surface"
+        }
+      ],
+      "traits": [
+        {
+          "operation": "model.run_surface",
+          "weak": [
+            "_weak.wind_speed_units",
+            "_weak.slope_units",
+            "_weak.aspect"
+          ],
+          "object": [],
+          "registry": true
+        },
+        {
+          "operation": "model.run_surface",
+          "weak": [
+            "_weak.wind_speed_units",
+            "_weak.slope_units",
+            "_weak.aspect"
+          ],
+          "object": [],
+          "registry": true
+        }
+      ]
+    },
+    {
+      "operation": "crown",
+      "cells": 1,
+      "first": [
+        {
+          "owned_copy_seconds": 0.0001039,
+          "detached_seconds": 0.0003909,
+          "numpy_transfer_seconds": 5.61e-05,
+          "concatenate_seconds": 1.2e-06,
+          "appended_bytes": 0.0,
+          "native_boundary_total_seconds": 0.000596300233155489,
+          "native_output_bytes": 172,
+          "native_metadata_bytes": 0,
+          "operation": "crown.run_crown_fire"
+        }
+      ],
+      "warm": [
+        {
+          "owned_copy_seconds": 0.0001045,
+          "detached_seconds": 0.0002013,
+          "numpy_transfer_seconds": 3.25e-05,
+          "concatenate_seconds": 1.1e-06,
+          "appended_bytes": 0.0,
+          "native_boundary_total_seconds": 0.0003824997693300247,
+          "native_output_bytes": 172,
+          "native_metadata_bytes": 0,
+          "operation": "crown.run_crown_fire"
+        }
+      ],
+      "traits": [
+        {
+          "operation": "crown.run_crown_fire",
+          "weak": [
+            "_weak.wind_speed_units",
+            "_weak.slope_units",
+            "_weak.aspect",
+            "_weak.moisture_foliar"
+          ],
+          "object": [],
+          "registry": true
+        },
+        {
+          "operation": "crown.run_crown_fire",
+          "weak": [
+            "_weak.wind_speed_units",
+            "_weak.slope_units",
+            "_weak.aspect",
+            "_weak.moisture_foliar"
+          ],
+          "object": [],
+          "registry": true
+        }
+      ]
+    },
+    {
+      "operation": "crown",
+      "cells": 16,
+      "first": [
+        {
+          "owned_copy_seconds": 0.0001258,
+          "detached_seconds": 0.0002286,
+          "numpy_transfer_seconds": 3.77e-05,
+          "concatenate_seconds": 9e-07,
+          "appended_bytes": 0.0,
+          "native_boundary_total_seconds": 0.00043720006942749023,
+          "native_output_bytes": 2752,
+          "native_metadata_bytes": 0,
+          "operation": "crown.run_crown_fire"
+        }
+      ],
+      "warm": [
+        {
+          "owned_copy_seconds": 0.0001096,
+          "detached_seconds": 0.0002306,
+          "numpy_transfer_seconds": 3.32e-05,
+          "concatenate_seconds": 1.3e-06,
+          "appended_bytes": 0.0,
+          "native_boundary_total_seconds": 0.0004230998456478119,
+          "native_output_bytes": 2752,
+          "native_metadata_bytes": 0,
+          "operation": "crown.run_crown_fire"
+        }
+      ],
+      "traits": [
+        {
+          "operation": "crown.run_crown_fire",
+          "weak": [
+            "_weak.wind_speed_units",
+            "_weak.slope_units",
+            "_weak.aspect",
+            "_weak.moisture_foliar"
+          ],
+          "object": [],
+          "registry": true
+        },
+        {
+          "operation": "crown.run_crown_fire",
+          "weak": [
+            "_weak.wind_speed_units",
+            "_weak.slope_units",
+            "_weak.aspect",
+            "_weak.moisture_foliar"
+          ],
+          "object": [],
+          "registry": true
+        }
+      ]
+    },
+    {
+      "operation": "crown",
+      "cells": 1024,
+      "first": [
+        {
+          "owned_copy_seconds": 0.0002468,
+          "detached_seconds": 0.0028535,
+          "numpy_transfer_seconds": 5.15e-05,
+          "concatenate_seconds": 3.8e-06,
+          "appended_bytes": 0.0,
+          "native_boundary_total_seconds": 0.003210199996829033,
+          "native_output_bytes": 176128,
+          "native_metadata_bytes": 0,
+          "operation": "crown.run_crown_fire"
+        }
+      ],
+      "warm": [
+        {
+          "owned_copy_seconds": 0.0002131,
+          "detached_seconds": 0.0021856,
+          "numpy_transfer_seconds": 6.1e-05,
+          "concatenate_seconds": 4.2e-06,
+          "appended_bytes": 0.0,
+          "native_boundary_total_seconds": 0.002516800072044134,
+          "native_output_bytes": 176128,
+          "native_metadata_bytes": 0,
+          "operation": "crown.run_crown_fire"
+        }
+      ],
+      "traits": [
+        {
+          "operation": "crown.run_crown_fire",
+          "weak": [
+            "_weak.wind_speed_units",
+            "_weak.slope_units",
+            "_weak.aspect",
+            "_weak.moisture_foliar"
+          ],
+          "object": [],
+          "registry": true
+        },
+        {
+          "operation": "crown.run_crown_fire",
+          "weak": [
+            "_weak.wind_speed_units",
+            "_weak.slope_units",
+            "_weak.aspect",
+            "_weak.moisture_foliar"
+          ],
+          "object": [],
+          "registry": true
+        }
+      ]
+    },
+    {
+      "operation": "crown",
+      "cells": 10000,
+      "first": [
+        {
+          "owned_copy_seconds": 0.0015644,
+          "detached_seconds": 0.0166576,
+          "numpy_transfer_seconds": 5.98e-05,
+          "concatenate_seconds": 6.6e-06,
+          "appended_bytes": 0.0,
+          "native_boundary_total_seconds": 0.018565600272268057,
+          "native_output_bytes": 1720000,
+          "native_metadata_bytes": 0,
+          "operation": "crown.run_crown_fire"
+        }
+      ],
+      "warm": [
+        {
+          "owned_copy_seconds": 0.0022607,
+          "detached_seconds": 0.0166053,
+          "numpy_transfer_seconds": 6.78e-05,
+          "concatenate_seconds": 5.2e-06,
+          "appended_bytes": 0.0,
+          "native_boundary_total_seconds": 0.0191945000551641,
+          "native_output_bytes": 1720000,
+          "native_metadata_bytes": 0,
+          "operation": "crown.run_crown_fire"
+        }
+      ],
+      "traits": [
+        {
+          "operation": "crown.run_crown_fire",
+          "weak": [
+            "_weak.wind_speed_units",
+            "_weak.slope_units",
+            "_weak.aspect",
+            "_weak.moisture_foliar"
+          ],
+          "object": [],
+          "registry": true
+        },
+        {
+          "operation": "crown.run_crown_fire",
+          "weak": [
+            "_weak.wind_speed_units",
+            "_weak.slope_units",
+            "_weak.aspect",
+            "_weak.moisture_foliar"
+          ],
+          "object": [],
+          "registry": true
+        }
+      ]
+    },
+    {
+      "operation": "crown",
+      "cells": 100000,
+      "first": [
+        {
+          "owned_copy_seconds": 0.0143358,
+          "detached_seconds": 0.1754856,
+          "numpy_transfer_seconds": 5.4e-05,
+          "concatenate_seconds": 9e-06,
+          "appended_bytes": 0.0,
+          "native_boundary_total_seconds": 0.19079719996079803,
+          "native_output_bytes": 17200000,
+          "native_metadata_bytes": 0,
+          "operation": "crown.run_crown_fire"
+        }
+      ],
+      "warm": [
+        {
+          "owned_copy_seconds": 0.020347,
+          "detached_seconds": 0.1775321,
+          "numpy_transfer_seconds": 7.98e-05,
+          "concatenate_seconds": 7.4e-06,
+          "appended_bytes": 0.0,
+          "native_boundary_total_seconds": 0.19917470030486584,
+          "native_output_bytes": 17200000,
+          "native_metadata_bytes": 0,
+          "operation": "crown.run_crown_fire"
+        }
+      ],
+      "traits": [
+        {
+          "operation": "crown.run_crown_fire",
+          "weak": [
+            "_weak.wind_speed_units",
+            "_weak.slope_units",
+            "_weak.aspect",
+            "_weak.moisture_foliar"
+          ],
+          "object": [],
+          "registry": true
+        },
+        {
+          "operation": "crown.run_crown_fire",
+          "weak": [
+            "_weak.wind_speed_units",
+            "_weak.slope_units",
+            "_weak.aspect",
+            "_weak.moisture_foliar"
+          ],
+          "object": [],
+          "registry": true
+        }
+      ]
+    },
+    {
+      "operation": "typed-crown",
+      "cells": 1,
+      "first": [
+        {
+          "owned_copy_seconds": 0.0001131,
+          "detached_seconds": 0.0004579,
+          "numpy_transfer_seconds": 9.45e-05,
+          "concatenate_seconds": 1.4e-06,
+          "appended_bytes": 0.0,
+          "native_boundary_total_seconds": 0.0007148999720811844,
+          "native_output_bytes": 176,
+          "native_metadata_bytes": 4,
+          "operation": "crown.run_crown_fire"
+        }
+      ],
+      "warm": [
+        {
+          "owned_copy_seconds": 0.0001073,
+          "detached_seconds": 0.0002171,
+          "numpy_transfer_seconds": 6.88e-05,
+          "concatenate_seconds": 1.2e-06,
+          "appended_bytes": 0.0,
+          "native_boundary_total_seconds": 0.0004380997270345688,
+          "native_output_bytes": 176,
+          "native_metadata_bytes": 4,
+          "operation": "crown.run_crown_fire"
+        }
+      ],
+      "traits": [
+        {
+          "operation": "crown.run_crown_fire",
+          "weak": [
+            "_weak.wind_speed_units",
+            "_weak.slope_units",
+            "_weak.aspect",
+            "_weak.moisture_foliar"
+          ],
+          "object": [],
+          "registry": true
+        },
+        {
+          "operation": "crown.run_crown_fire",
+          "weak": [
+            "_weak.wind_speed_units",
+            "_weak.slope_units",
+            "_weak.aspect",
+            "_weak.moisture_foliar"
+          ],
+          "object": [],
+          "registry": true
+        }
+      ]
+    },
+    {
+      "operation": "typed-crown",
+      "cells": 16,
+      "first": [
+        {
+          "owned_copy_seconds": 0.0001102,
+          "detached_seconds": 0.0002957,
+          "numpy_transfer_seconds": 7.66e-05,
+          "concatenate_seconds": 1.3e-06,
+          "appended_bytes": 0.0,
+          "native_boundary_total_seconds": 0.0005246000364422798,
+          "native_output_bytes": 2816,
+          "native_metadata_bytes": 64,
+          "operation": "crown.run_crown_fire"
+        }
+      ],
+      "warm": [
+        {
+          "owned_copy_seconds": 0.0001022,
+          "detached_seconds": 0.000283,
+          "numpy_transfer_seconds": 7.73e-05,
+          "concatenate_seconds": 1.2e-06,
+          "appended_bytes": 0.0,
+          "native_boundary_total_seconds": 0.000501999631524086,
+          "native_output_bytes": 2816,
+          "native_metadata_bytes": 64,
+          "operation": "crown.run_crown_fire"
+        }
+      ],
+      "traits": [
+        {
+          "operation": "crown.run_crown_fire",
+          "weak": [
+            "_weak.wind_speed_units",
+            "_weak.slope_units",
+            "_weak.aspect",
+            "_weak.moisture_foliar"
+          ],
+          "object": [],
+          "registry": true
+        },
+        {
+          "operation": "crown.run_crown_fire",
+          "weak": [
+            "_weak.wind_speed_units",
+            "_weak.slope_units",
+            "_weak.aspect",
+            "_weak.moisture_foliar"
+          ],
+          "object": [],
+          "registry": true
+        }
+      ]
+    },
+    {
+      "operation": "typed-crown",
+      "cells": 1024,
+      "first": [
+        {
+          "owned_copy_seconds": 0.0002116,
+          "detached_seconds": 0.0061418,
+          "numpy_transfer_seconds": 9.61e-05,
+          "concatenate_seconds": 3.8e-06,
+          "appended_bytes": 0.0,
+          "native_boundary_total_seconds": 0.006510599981993437,
+          "native_output_bytes": 180224,
+          "native_metadata_bytes": 4096,
+          "operation": "crown.run_crown_fire"
+        }
+      ],
+      "warm": [
+        {
+          "owned_copy_seconds": 0.0002403,
+          "detached_seconds": 0.0085901,
+          "numpy_transfer_seconds": 0.0001133,
+          "concatenate_seconds": 5.2e-06,
+          "appended_bytes": 0.0,
+          "native_boundary_total_seconds": 0.009008199907839298,
+          "native_output_bytes": 180224,
+          "native_metadata_bytes": 4096,
+          "operation": "crown.run_crown_fire"
+        }
+      ],
+      "traits": [
+        {
+          "operation": "crown.run_crown_fire",
+          "weak": [
+            "_weak.wind_speed_units",
+            "_weak.slope_units",
+            "_weak.aspect",
+            "_weak.moisture_foliar"
+          ],
+          "object": [],
+          "registry": true
+        },
+        {
+          "operation": "crown.run_crown_fire",
+          "weak": [
+            "_weak.wind_speed_units",
+            "_weak.slope_units",
+            "_weak.aspect",
+            "_weak.moisture_foliar"
+          ],
+          "object": [],
+          "registry": true
+        }
+      ]
+    },
+    {
+      "operation": "typed-crown",
+      "cells": 10000,
+      "first": [
+        {
+          "owned_copy_seconds": 0.0017304,
+          "detached_seconds": 0.0664881,
+          "numpy_transfer_seconds": 9.8e-05,
+          "concatenate_seconds": 6.1e-06,
+          "appended_bytes": 0.0,
+          "native_boundary_total_seconds": 0.06858820002526045,
+          "native_output_bytes": 1760000,
+          "native_metadata_bytes": 40000,
+          "operation": "crown.run_crown_fire"
+        }
+      ],
+      "warm": [
+        {
+          "owned_copy_seconds": 0.001812,
+          "detached_seconds": 0.0675413,
+          "numpy_transfer_seconds": 0.0001042,
+          "concatenate_seconds": 5.3e-06,
+          "appended_bytes": 0.0,
+          "native_boundary_total_seconds": 0.06970580015331507,
+          "native_output_bytes": 1760000,
+          "native_metadata_bytes": 40000,
+          "operation": "crown.run_crown_fire"
+        }
+      ],
+      "traits": [
+        {
+          "operation": "crown.run_crown_fire",
+          "weak": [
+            "_weak.wind_speed_units",
+            "_weak.slope_units",
+            "_weak.aspect",
+            "_weak.moisture_foliar"
+          ],
+          "object": [],
+          "registry": true
+        },
+        {
+          "operation": "crown.run_crown_fire",
+          "weak": [
+            "_weak.wind_speed_units",
+            "_weak.slope_units",
+            "_weak.aspect",
+            "_weak.moisture_foliar"
+          ],
+          "object": [],
+          "registry": true
+        }
+      ]
+    },
+    {
+      "operation": "typed-crown",
+      "cells": 100000,
+      "first": [
+        {
+          "owned_copy_seconds": 0.0215187,
+          "detached_seconds": 0.6372748,
+          "numpy_transfer_seconds": 0.0001654,
+          "concatenate_seconds": 6.2e-06,
+          "appended_bytes": 0.0,
+          "native_boundary_total_seconds": 0.6601937999948859,
+          "native_output_bytes": 17600000,
+          "native_metadata_bytes": 400000,
+          "operation": "crown.run_crown_fire"
+        }
+      ],
+      "warm": [
+        {
+          "owned_copy_seconds": 0.0180312,
+          "detached_seconds": 0.6588642,
+          "numpy_transfer_seconds": 0.0001054,
+          "concatenate_seconds": 9.3e-06,
+          "appended_bytes": 0.0,
+          "native_boundary_total_seconds": 0.6780618000775576,
+          "native_output_bytes": 17600000,
+          "native_metadata_bytes": 400000,
+          "operation": "crown.run_crown_fire"
+        }
+      ],
+      "traits": [
+        {
+          "operation": "crown.run_crown_fire",
+          "weak": [
+            "_weak.wind_speed_units",
+            "_weak.slope_units",
+            "_weak.aspect",
+            "_weak.moisture_foliar"
+          ],
+          "object": [],
+          "registry": true
+        },
+        {
+          "operation": "crown.run_crown_fire",
+          "weak": [
+            "_weak.wind_speed_units",
+            "_weak.slope_units",
+            "_weak.aspect",
+            "_weak.moisture_foliar"
+          ],
+          "object": [],
+          "registry": true
+        }
+      ]
+    },
+    {
+      "operation": "typed-crown-b",
+      "cells": 1,
+      "first": [
+        {
+          "owned_copy_seconds": 0.0001212,
+          "detached_seconds": 0.0004278,
+          "numpy_transfer_seconds": 9.16e-05,
+          "concatenate_seconds": 1.2e-06,
+          "appended_bytes": 0.0,
+          "native_boundary_total_seconds": 0.0006903000175952911,
+          "native_output_bytes": 174,
+          "native_metadata_bytes": 2,
+          "operation": "crown.run_crown_fire"
+        }
+      ],
+      "warm": [
+        {
+          "owned_copy_seconds": 9.43e-05,
+          "detached_seconds": 0.0003335,
+          "numpy_transfer_seconds": 6.38e-05,
+          "concatenate_seconds": 7e-07,
+          "appended_bytes": 0.0,
+          "native_boundary_total_seconds": 0.0005322997458279133,
+          "native_output_bytes": 174,
+          "native_metadata_bytes": 2,
+          "operation": "crown.run_crown_fire"
+        }
+      ],
+      "traits": [
+        {
+          "operation": "crown.run_crown_fire",
+          "weak": [
+            "_weak.wind_speed_units",
+            "_weak.slope_units",
+            "_weak.aspect",
+            "_weak.moisture_foliar"
+          ],
+          "object": [],
+          "registry": true
+        },
+        {
+          "operation": "crown.run_crown_fire",
+          "weak": [
+            "_weak.wind_speed_units",
+            "_weak.slope_units",
+            "_weak.aspect",
+            "_weak.moisture_foliar"
+          ],
+          "object": [],
+          "registry": true
+        }
+      ]
+    },
+    {
+      "operation": "typed-crown-b",
+      "cells": 16,
+      "first": [
+        {
+          "owned_copy_seconds": 0.0001022,
+          "detached_seconds": 0.0003483,
+          "numpy_transfer_seconds": 7.26e-05,
+          "concatenate_seconds": 1.9e-06,
+          "appended_bytes": 0.0,
+          "native_boundary_total_seconds": 0.0005691000260412693,
+          "native_output_bytes": 2784,
+          "native_metadata_bytes": 32,
+          "operation": "crown.run_crown_fire"
+        }
+      ],
+      "warm": [
+        {
+          "owned_copy_seconds": 0.0001047,
+          "detached_seconds": 0.0002977,
+          "numpy_transfer_seconds": 6.44e-05,
+          "concatenate_seconds": 9e-07,
+          "appended_bytes": 0.0,
+          "native_boundary_total_seconds": 0.0005085999146103859,
+          "native_output_bytes": 2784,
+          "native_metadata_bytes": 32,
+          "operation": "crown.run_crown_fire"
+        }
+      ],
+      "traits": [
+        {
+          "operation": "crown.run_crown_fire",
+          "weak": [
+            "_weak.wind_speed_units",
+            "_weak.slope_units",
+            "_weak.aspect",
+            "_weak.moisture_foliar"
+          ],
+          "object": [],
+          "registry": true
+        },
+        {
+          "operation": "crown.run_crown_fire",
+          "weak": [
+            "_weak.wind_speed_units",
+            "_weak.slope_units",
+            "_weak.aspect",
+            "_weak.moisture_foliar"
+          ],
+          "object": [],
+          "registry": true
+        }
+      ]
+    },
+    {
+      "operation": "typed-crown-b",
+      "cells": 1024,
+      "first": [
+        {
+          "owned_copy_seconds": 0.0002537,
+          "detached_seconds": 0.0063008,
+          "numpy_transfer_seconds": 9.08e-05,
+          "concatenate_seconds": 2.9e-06,
+          "appended_bytes": 0.0,
+          "native_boundary_total_seconds": 0.006708600092679262,
+          "native_output_bytes": 178176,
+          "native_metadata_bytes": 2048,
+          "operation": "crown.run_crown_fire"
+        }
+      ],
+      "warm": [
+        {
+          "owned_copy_seconds": 0.0002378,
+          "detached_seconds": 0.0071706,
+          "numpy_transfer_seconds": 0.000111,
+          "concatenate_seconds": 5.7e-06,
+          "appended_bytes": 0.0,
+          "native_boundary_total_seconds": 0.007579999975860119,
+          "native_output_bytes": 178176,
+          "native_metadata_bytes": 2048,
+          "operation": "crown.run_crown_fire"
+        }
+      ],
+      "traits": [
+        {
+          "operation": "crown.run_crown_fire",
+          "weak": [
+            "_weak.wind_speed_units",
+            "_weak.slope_units",
+            "_weak.aspect",
+            "_weak.moisture_foliar"
+          ],
+          "object": [],
+          "registry": true
+        },
+        {
+          "operation": "crown.run_crown_fire",
+          "weak": [
+            "_weak.wind_speed_units",
+            "_weak.slope_units",
+            "_weak.aspect",
+            "_weak.moisture_foliar"
+          ],
+          "object": [],
+          "registry": true
+        }
+      ]
+    },
+    {
+      "operation": "typed-crown-b",
+      "cells": 10000,
+      "first": [
+        {
+          "owned_copy_seconds": 0.0017648,
+          "detached_seconds": 0.0676301,
+          "numpy_transfer_seconds": 0.0001564,
+          "concatenate_seconds": 6.5e-06,
+          "appended_bytes": 0.0,
+          "native_boundary_total_seconds": 0.0699521997012198,
+          "native_output_bytes": 1740000,
+          "native_metadata_bytes": 20000,
+          "operation": "crown.run_crown_fire"
+        }
+      ],
+      "warm": [
+        {
+          "owned_copy_seconds": 0.0027436,
+          "detached_seconds": 0.0709676,
+          "numpy_transfer_seconds": 0.0001938,
+          "concatenate_seconds": 6.9e-06,
+          "appended_bytes": 0.0,
+          "native_boundary_total_seconds": 0.07431229995563626,
+          "native_output_bytes": 1740000,
+          "native_metadata_bytes": 20000,
+          "operation": "crown.run_crown_fire"
+        }
+      ],
+      "traits": [
+        {
+          "operation": "crown.run_crown_fire",
+          "weak": [
+            "_weak.wind_speed_units",
+            "_weak.slope_units",
+            "_weak.aspect",
+            "_weak.moisture_foliar"
+          ],
+          "object": [],
+          "registry": true
+        },
+        {
+          "operation": "crown.run_crown_fire",
+          "weak": [
+            "_weak.wind_speed_units",
+            "_weak.slope_units",
+            "_weak.aspect",
+            "_weak.moisture_foliar"
+          ],
+          "object": [],
+          "registry": true
+        }
+      ]
+    },
+    {
+      "operation": "typed-crown-b",
+      "cells": 100000,
+      "first": [
+        {
+          "owned_copy_seconds": 0.0183494,
+          "detached_seconds": 0.6378439,
+          "numpy_transfer_seconds": 0.000108,
+          "concatenate_seconds": 6.4e-06,
+          "appended_bytes": 0.0,
+          "native_boundary_total_seconds": 0.6576819997280836,
+          "native_output_bytes": 17400000,
+          "native_metadata_bytes": 200000,
+          "operation": "crown.run_crown_fire"
+        }
+      ],
+      "warm": [
+        {
+          "owned_copy_seconds": 0.0165938,
+          "detached_seconds": 0.6783917,
+          "numpy_transfer_seconds": 0.0001122,
+          "concatenate_seconds": 5.7e-06,
+          "appended_bytes": 0.0,
+          "native_boundary_total_seconds": 0.6962883002124727,
+          "native_output_bytes": 17400000,
+          "native_metadata_bytes": 200000,
+          "operation": "crown.run_crown_fire"
+        }
+      ],
+      "traits": [
+        {
+          "operation": "crown.run_crown_fire",
+          "weak": [
+            "_weak.wind_speed_units",
+            "_weak.slope_units",
+            "_weak.aspect",
+            "_weak.moisture_foliar"
+          ],
+          "object": [],
+          "registry": true
+        },
+        {
+          "operation": "crown.run_crown_fire",
+          "weak": [
+            "_weak.wind_speed_units",
+            "_weak.slope_units",
+            "_weak.aspect",
+            "_weak.moisture_foliar"
+          ],
+          "object": [],
+          "registry": true
+        }
+      ]
+    }
+  ]
+}

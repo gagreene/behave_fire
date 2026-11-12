@@ -284,6 +284,20 @@ def test_pairing_and_seed_are_reproducible():
             ("python", 1), ("rust", 1), ("rust", 4)]
 
 
+def test_profile_counts_nested_api3_arrays_without_counting_scalar_schema():
+    import numpy as np
+
+    result = {"rate": np.arange(3, dtype=np.float64),
+              "__schema": {"rate": {"mask": np.array([False, True, False]),
+                                    "bits": np.arange(3, dtype=np.uint64), "fill": 17., "masked": True}},
+              "__timing.detached_seconds": np.asarray(.01)}
+    samples = []
+    profile = _tool("benchmark_backends")._profile_batch(lambda *args, **kwargs: result, samples)
+    assert profile("crown.run_crown_fire") is result
+    assert samples[0]["native_output_bytes"] == 51
+    assert samples[0]["native_metadata_bytes"] == 27
+
+
 @pytest.mark.parametrize("problem", ["profile", "screen"])
 def test_profiled_or_screen_runs_cannot_certify(problem):
     checker = _tool("check_performance")

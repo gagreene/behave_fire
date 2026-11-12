@@ -1,7 +1,7 @@
 //! Crown raster execution borrows one model-10 fuel and independent Surface columns.
 use super::{tile_shape, validity, CrownColumns, CrownRasterOutput, CrownTweakColumns};
 use crate::crown::CrownResult;
-use crate::engine::{CrownPlan, PreparedFuels};
+use crate::engine::{CrownCell, CrownPlan, CrownTweaks, PreparedFuels};
 use crate::{BehaveError, GridShape, ParallelError};
 use std::ops::Range;
 
@@ -19,6 +19,37 @@ impl<'a> CrownRaster<'a> {
         Ok(Self { shape, inputs })
     }
 
+    /// Evaluate one checked cell into caller-managed output storage.
+    ///
+    /// Returns `None` outside the raster. Invalid pixels return the same default
+    /// result as `run`; validity remains available in the caller's input columns.
+    pub fn evaluate_cell(
+        &self,
+        index: usize,
+        plan: &CrownPlan,
+        fuels: &PreparedFuels,
+        tweaks: CrownTweaks,
+    ) -> Option<CrownResult> {
+        if index >= self.shape.len() {
+            return None;
+        }
+        if !self.inputs.valid(index) {
+            return Some(CrownResult::default());
+        }
+        Some(plan.run_cell(
+            &self.inputs.cell(index),
+            &self.inputs.surface(index),
+            fuels.for_grid(10),
+            tweaks,
+        ))
+    }
+
+    /// Read validated spatial inputs for separately typed supplied Surface values.
+    ///
+    /// Returns `None` for an out-of-range or explicitly invalid pixel.
+    pub fn input_cell(&self, index: usize) -> Option<CrownCell> {
+        (index < self.shape.len() && self.inputs.valid(index)).then(|| self.inputs.cell(index))
+    }
     /// Borrow the checked logical dimensions.
     pub fn shape(&self) -> &GridShape {
         &self.shape
@@ -66,18 +97,11 @@ impl<'a> CrownRaster<'a> {
     ) -> Result<CrownRasterOutput, ParallelError<BehaveError>> {
         tweaks.validate(&self.shape).map_err(ParallelError::Work)?;
         let start = range.start;
-        let fuel = fuels.for_grid(10);
         let mut output = CrownRasterOutput::run_with(shape, threads, |offset| {
-            let index = start + offset;
-            if !self.inputs.valid(index) {
-                return Ok::<_, BehaveError>(CrownResult::default());
-            }
-            Ok(plan.run_cell(
-                &self.inputs.cell(index),
-                &self.inputs.surface(index),
-                fuel,
-                tweaks.cell(index),
-            ))
+            Ok::<_, BehaveError>(
+                self.evaluate_cell(start + offset, plan, fuels, tweaks.cell(start + offset))
+                    .expect("validated raster index"),
+            )
         })?;
         output.validity = validity(self.inputs.validity, range)?;
         Ok(output)
