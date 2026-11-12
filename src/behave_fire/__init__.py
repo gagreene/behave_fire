@@ -8,7 +8,7 @@ This package provides vectorized (NumPy array) fire behavior modeling:
 - Spot fire prediction
 - Ignition potential assessment
 - Safety zone calculations
-- Containment and support tools
+- Support tools
 
 Main entry point: the automatic BehaveRun facade in auto.py, which selects the
 Python reference implementation or the native Rust extension (backend="auto",

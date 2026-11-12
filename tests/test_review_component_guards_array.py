@@ -5,14 +5,9 @@ import pytest
 pytest.importorskip('behave_fire._rust')
 from behave_fire import FuelModels
 from behave_fire.components.fuel_models_array import build_fuel_lookup_arrays
-from behave_fire.rust import contain, crown, surface
+from behave_fire.rust import crown, surface
 
 
-@pytest.mark.parametrize('value', [1.5, np.nan])
-def test_public_containment_rejects_noninteger_iteration_controls(value):
-    with pytest.raises((TypeError, ValueError)):
-        contain.run_contain_sim_array(report_spread_rate=1., lw_ratio=2., report_size=1.,
-                                     production_rate=30., attack_time=1., max_steps=value)
 
 
 @pytest.mark.parametrize('value', [np.nan, np.ma.array([1], mask=[True])])

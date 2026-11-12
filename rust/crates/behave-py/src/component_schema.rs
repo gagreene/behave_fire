@@ -104,11 +104,6 @@ pub(crate) fn schema(operation: Operation) -> Vec<Column> {
             fields.push(column("fire_type", FieldKind::Code));
             fields
         }
-        ContainRunContainSimArray => {
-            let mut fields = vec![column("status", FieldKind::Code)];
-            fields.extend(names(&["contained_time", "final_perimeter", "final_area"]));
-            fields
-        }
         MortalityCalculateCrownScorchMortality => names(&[
             "crown_length_scorch",
             "crown_volume_scorch",

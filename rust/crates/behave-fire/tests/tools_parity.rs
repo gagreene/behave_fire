@@ -10,7 +10,7 @@
 )]
 use behave_fire::units::*;
 use behave_fire::{
-    contain, fine_dead_fuel_moisture, fire_size, ignite, mortality, safety, slope, spot,
+    fine_dead_fuel_moisture, fire_size, ignite, mortality, safety, slope, spot,
     vapor_pressure_deficit,
 };
 fn close(actual: f64, expected: f64) {

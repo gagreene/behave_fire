@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- Remove the Python, Rust core, and native containment module pending a licensing
+  review: the upstream C++ containment headers declare GNU Public License 2.
+  The module is preserved locally and is expected to return as a separate project.
+  Historical benchmark records and Git history are retained.
+
 - Align fuel lookup bounds with official C++ `FuelModels::isFuelModelDefined`
   ([source](https://github.com/firelab/behave/blob/f3b2943e69abca942e795c5b1b45276f6338abb5/src/behave/fuelModels.cpp#L863)).
   Both backends map IDs outside 1–256, including nonfinite Python fuel IDs,

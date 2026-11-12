@@ -250,7 +250,7 @@ def run_case(case):
             operation = getattr(operation, part)
     arguments = decode(case["inputs"])
     entry = case['entry_point']
-    stateless = any(f'.{family}.' in entry for family in ('behave_units', 'contain', 'ignite', 'safety', 'spot', 'vapor_pressure_deficit_calculator', 'surface', 'crown', 'fine_dead_fuel_moisture_tool'))
+    stateless = any(f'.{family}.' in entry for family in ('behave_units', 'ignite', 'safety', 'spot', 'vapor_pressure_deficit_calculator', 'surface', 'crown', 'fine_dead_fuel_moisture_tool'))
     stateless = stateless or ('.mortality.calculate_' in entry)
     if stateless or '.BehaveRun.' in entry or entry.rsplit('.', 1)[1] in ('run_crown_fire', 'coerce_crown_fire_inputs'):
         _float64_case(case, operation, arguments)

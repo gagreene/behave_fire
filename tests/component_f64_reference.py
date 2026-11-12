@@ -32,7 +32,7 @@ def _unknown_all_above(values):
 def normalize(arguments):
     """Copy supplied real physical values at float64 while retaining control roles."""
     controls = {'S', 'lut', 'is_crown', 'is_surface_fire', 'is_passive_crown', 'is_active_crown',
-                'is_defined', 'is_dynamic', 'charge_type', 'max_steps', 'species_master_table'}
+                'is_defined', 'is_dynamic', 'charge_type', 'species_master_table'}
     result = {}
     for name, value in arguments.items():
         if name in controls or name.endswith(('units', '_grid', '_i')) or isinstance(value, str) or value is None:
@@ -132,11 +132,4 @@ def reference(function, arguments):
         eq = np.clip(np.atleast_1d(args['equation_number_grid']).astype(int), 0, 120)
         known = np.any(args['coeffs'][eq] != 0., axis=-1)
         result['probability_mortality'] = np.where(missing & known, np.nan, result['probability_mortality'])
-    if name == 'run_contain_sim_array' and args.get('max_steps', 500) > 0:
-        # A NaN spread or infinity producing NaN geometry makes termination unknown.
-        missing = ~np.isfinite(np.asarray(args['report_spread_rate']))
-        missing &= np.asarray(args['report_spread_rate']) != -np.inf
-        for key in result:
-            result[key] = np.where(missing, -1 if key == 'status' else np.nan, result[key])
-        result['status'] = result['status'].astype(np.int32)
     return result

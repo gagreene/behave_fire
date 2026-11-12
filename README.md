@@ -26,7 +26,7 @@ Python's original complex/object behavior without Rust-specific input preflight.
 
 A NumPy-based Python port of the US Forest Service [Behave<sup>7</sup>](https://www.firelab.org/project/behave) fire behavior modeling system, supporting scalar and array calculations. The package has two calculation backends: the original Python/NumPy implementation (the behavioral reference) and a native Rust implementation selected automatically when its compiled extension is installed. The same Rust core is also a standalone crate, `behave-fire`, for Rust applications.
 
-Upstream alignment is ongoing; full C++ parity has not been established. Fuel data and heat constants follow `firelab/behave` at `f3b2943`, with an intentional correction of metric-model moisture percentages to fractions. Containment is a simplified growth model, and lightning ignition remains available only as a deprecated compatibility API. Rust performance is being validated against the public Python API; see [Performance](#performance).
+Upstream alignment is ongoing; full C++ parity has not been established. Fuel data and heat constants follow `firelab/behave` at `f3b2943`, with an intentional correction of metric-model moisture percentages to fractions. Lightning ignition remains available only as a deprecated compatibility API. Rust performance is being validated against the public Python API; see [Performance](#performance).
 
 ---
 
@@ -60,7 +60,6 @@ Upstream alignment is ongoing; full C++ parity has not been established. Fuel da
 | **Spotting** | Albini firebrand lofting model for burning piles, surface fires, and torching trees |
 | **Ignition** | Firebrand ignition probability; deprecated lightning calculation retained for compatibility |
 | **Safety zones** | Minimum separation distance, zone radius, and personnel capacity from radiant heat |
-| **Containment** | Simplified fixed-step ellipse growth and suppression-line accumulation (standalone function) |
 | **Support tools** | Fine dead fuel moisture (Nelson 2000 LUT), slope tool, vapor pressure deficit calculator |
 | **Unit system** | 17 physical-quantity classes with full metric ↔ US-customary conversion |
 | **Backends** | Python reference, native Rust, and an automatic selector (`python` / `rust` / `auto`) |
@@ -92,7 +91,6 @@ behave_fire/
 │   │       ├── spot.py              # Spotting distances
 │   │       ├── ignite.py            # Ignition probability
 │   │       ├── safety.py            # Safety zone calculations
-│   │       ├── contain.py           # Containment simulation (standalone function)
 │   │       ├── species_master_table.py  # Tree species database
 │   │       ├── fine_dead_fuel_moisture_tool.py
 │   │       ├── slope_tool.py
@@ -260,10 +258,10 @@ model = BehaveRun(fuels, backend="auto", threads=1)
 print(model.backend_in_use)  # "python" or "rust"; read-only
 python_model = BehaveRun(fuels, backend="python")
 rust_model = BehaveRun(fuels, backend="rust", threads=4)
-contain = get_backend("rust").contain.run_contain_sim_array
+safety = get_backend("rust").safety.calculate_safety_zone
 ```
 
-`available_backends()` reports Python and, when compatible and complete, Rust. `get_backend("python")` and `get_backend("rust")` expose their model, registries, and component modules. Standalone imports include `from behave_fire.python import contain` and `from behave_fire.rust import contain`. Historical imports such as `behave_fire.components.surface` continue to use Python. Nested component import paths under the new namespaces are not required; access their module attributes.
+`available_backends()` reports Python and, when compatible and complete, Rust. `get_backend("python")` and `get_backend("rust")` expose their model, registries, and component modules. Standalone imports include `from behave_fire.python import safety` and `from behave_fire.rust import safety`. Historical imports such as `behave_fire.components.surface` continue to use Python. Nested component import paths under the new namespaces are not required; access their module attributes.
 
 `backend="auto"` prefers a compatible, complete Rust extension. An absent extension (the universal wheel, or an unbuilt checkout), loader error, incompatible API, or incomplete advertised operation inventory selects Python and emits `BehaveBackendWarning`, a `RuntimeWarning` subclass, once per process, with its cause. An availability query can cache the extension status but does not consume that warning. Forced Rust raises a chained `ImportError` for any unavailable or incomplete extension. Explicit native imports permit compatible incomplete development extensions; an unsupported operation raises `NotImplementedError`. Calculation and facade errors propagate and never trigger a fallback.
 
@@ -293,7 +291,7 @@ Rust calculates physical values in float64, including float16, float32, and inte
 
 `rust/crates/behave-fire` is an independently versioned Rust library (`behave_fire`) with no runtime or build dependencies. It does not need Python, NumPy, a C++ compiler, or this repository. The Python extension is a thin PyO3 layer (`rust/crates/behave-py`, never published) over the same core, so native Python results and standalone Rust results come from one implementation of the equations.
 
-- **Complete calculation coverage:** surface and crown pipelines with every public stage, mortality, spotting, ignition, safety zones, fine dead fuel moisture, vapor pressure deficit, slope and ellipse helpers, and the fixed-step containment model. The `BehaveRun` Rust facade provides all eleven calculation routes.
+- **Complete calculation coverage:** surface and crown pipelines with every public stage, mortality, spotting, ignition, safety zones, fine dead fuel moisture, vapor pressure deficit, slope and ellipse helpers. The `BehaveRun` Rust facade provides all eleven calculation routes.
 - **Typed scalar stages (`engine`):** `SurfacePlan` and `CrownPlan` run a cell from numerical inputs and an immutable `PreparedFuels` snapshot. Intermediates such as `FuelbedIntermediates` can be computed, edited, and resumed.
 - **Stage injection:** `SurfaceTweaks` and `CrownTweaks` replace reaction intensity, rates, wind or slope factors, or crown thresholds at the stage that would produce them, so downstream outputs use the injected value.
 - **Raster columns (`raster`):** `SurfaceRaster` and `CrownRaster` borrow structure-of-arrays inputs (uniform scalars or per-cell slices), validate them once, and write typed output columns. `run_tile` processes a caller-chosen range. The library performs no raster file I/O.
@@ -393,18 +391,6 @@ The single public entry point for array/raster fire behavior calculations. Key m
 
 `FuelModels` ships with the standard models: the original 13, Scott–Burgan 40, and the metric (V-, M-, F-) models, stored in US customary units. Custom models can be registered with `set_custom_fuel_model()` (with unit arguments) or by populating the `fuel_models_` dict with the required field set. The Rust registry offers typed add/remove/get operations.
 
-### Containment simulation
-
-`run_contain_sim_array()` in `contain.py` is a standalone vectorized function (not a `BehaveRun` method), also available as `get_backend("rust").contain.run_contain_sim_array`. A fixed-step loop accumulates ellipse growth and suppression line; it does not implement RK4 or the full C++ ContainSim solver. No perimeter-point arrays are returned. See [the containment documentation](docs/CONTAINMENT_MODULE.md) for shape requirements, limitations, and runnable examples. Status codes are:
-
-| Code | Meaning |
-|------|---------|
-| `1` | REPORTED |
-| `3` | CONTAINED |
-| `4` | OVERRUN |
-| `5` | EXHAUSTED |
-| `8` | TIME_LIMIT_EXCEEDED |
-
 ### Ignition support
 
 Firebrand ignition remains supported. `calculate_lightning_ignition_probability()` emits `DeprecationWarning` because upstream Behave removed the model, citing an unreliable scientific basis. The function and its package re-export retain their existing signatures and numerical results for compatibility. No replacement lightning model or removal version is specified.
@@ -488,7 +474,6 @@ Useful tools under `tools/`: `compare_backends.py` (Rust versus the frozen Pytho
 | [docs/RELEASING.md](docs/RELEASING.md) | Building, validating, and releasing Python wheels and the source distribution |
 | [docs/CRATES_IO.md](docs/CRATES_IO.md) | Packaging and publishing the standalone Rust crate |
 | [docs/CONTRIBUTION_PROCEDURES.md](docs/CONTRIBUTION_PROCEDURES.md) | Branches, PRs, test records, and release routing |
-| [docs/CONTAINMENT_MODULE.md](docs/CONTAINMENT_MODULE.md) | The containment function, its limits, and examples |
 | [docs/FBFM_DESCRIPTIONS.md](docs/FBFM_DESCRIPTIONS.md) | Fire behavior fuel model descriptions |
 | [AGENTS.md](AGENTS.md) | Repository rules for coding agents |
 
@@ -517,5 +502,4 @@ Useful tools under `tools/`: `compare_backends.py` (Rust versus the frozen Pytho
 - Albini, F. A. & Baughman, R. G. (1979). *Estimating windspeeds for predicting wildland fire behavior.* USDA Forest Service Research Paper INT-221.
 - Butler, B. W. & Cohen, J. D. (1998). *Firefighter safety zones: a theoretical model based on radiative heating.* International Journal of Wildland Fire, 8(2), 73–77.
 - Nelson, R. M. (2000). *Prediction of diurnal change in 10-h fuel stick moisture content.* Canadian Journal of Forest Research, 30(7), 1071–1087.
-- Fried, J. S. & Fried, B. D. (1996). *Simulating wildfire containment with realistic tactics.* Forest Science, 42(3), 267–281.
 - Ryan, K. C. & Reinhardt, E. D. (1988). *Predicting postfire mortality of seven western conifers.* Canadian Journal of Forest Research, 18(10), 1291–1297.

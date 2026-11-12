@@ -42,21 +42,13 @@ mod primitive_component_tests {
         let mut a = Arguments::default();
         a.physical
             .insert("spread_rate".into(), vec![1., f64::NAN, 3.]);
-        a.codes
-            .insert("max_steps".into(), vec![9_007_199_254_740_993]);
         a.codes.insert("fuel_model_grid".into(), vec![124]);
         a.flags.insert("is_crown".into(), vec![true]);
         let p = Prepared::new(&a, &GridShape::new(vec![3]).unwrap()).unwrap();
-        p.require(&[
-            Field::SpreadRate,
-            Field::MaxSteps,
-            Field::FuelModelGrid,
-            Field::IsCrown,
-        ])
-        .unwrap();
+        p.require(&[Field::SpreadRate, Field::FuelModelGrid, Field::IsCrown])
+            .unwrap();
         probe::start();
         for row in 0..3 {
-            assert_eq!(p.code(Field::MaxSteps, row).unwrap(), 9_007_199_254_740_993);
             assert_eq!(p.code(Field::FuelModelGrid, row).unwrap(), 124);
             assert!(p.flag(Field::IsCrown, row).unwrap());
             assert_eq!(
@@ -66,7 +58,7 @@ mod primitive_component_tests {
         }
         let counts = probe::stop();
         assert_eq!(counts[0].0, 0);
-        assert!(p.physical(Field::MaxSteps, 0).is_err());
+        assert!(p.physical(Field::FuelModelGrid, 0).is_err());
         assert!(p.code(Field::FuelModelGrid, 3).is_err());
         assert!(p.require(&[Field::FlameLengthFt]).is_err());
     }
@@ -116,9 +108,6 @@ mod component_schema_tests {
         assert_eq!(classify.len(), 4);
         assert_eq!(classify[0].kind, FieldKind::Code);
         assert!(classify[1..].iter().all(|f| f.kind == FieldKind::Flag));
-        let contain = schema(Operation::ContainRunContainSimArray);
-        assert_eq!(contain[0].name, "status");
-        assert_eq!(contain[0].kind, FieldKind::Code);
         let crown = schema(Operation::CrownCalculateCrownSurfaceFire);
         assert_eq!(crown.len(), 72);
         assert_eq!(
@@ -140,14 +129,35 @@ mod primitive_output_tests {
 
     #[test]
     fn final_typed_component_buffers_use_disjoint_workers_without_cell_allocations() {
-        let mut output = Columns::new(schema(Operation::ContainRunContainSimArray), 1031).unwrap();
+        let mut output = Columns::new(
+            vec![
+                crate::component_schema::Column {
+                    name: "code".into(),
+                    kind: behave_fire::engine::FieldKind::Code,
+                },
+                crate::component_schema::Column {
+                    name: "first".into(),
+                    kind: behave_fire::engine::FieldKind::Physical,
+                },
+                crate::component_schema::Column {
+                    name: "second".into(),
+                    kind: behave_fire::engine::FieldKind::Physical,
+                },
+                crate::component_schema::Column {
+                    name: "third".into(),
+                    kind: behave_fire::engine::FieldKind::Physical,
+                },
+            ],
+            1031,
+        )
+        .unwrap();
         probe::start();
         output
             .fill(4, |index, row| {
-                row.i32("status", index as i32);
-                row.f64("contained_time", index as f64);
-                row.f64("final_perimeter", 2. * index as f64);
-                row.f64("final_area", 3. * index as f64);
+                row.i32("code", index as i32);
+                row.f64("first", index as f64);
+                row.f64("second", 2. * index as f64);
+                row.f64("third", 3. * index as f64);
                 Ok(())
             })
             .unwrap();

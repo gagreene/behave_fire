@@ -7,7 +7,7 @@ from ._model_api4 import _buffer
 from ._numeric import broadcast_shape
 
 _CODE_FIELDS = {'units', 'wind_speed_units', 'slope_units', 'temp_units', 'rh_units', 'output_units',
-                'max_steps', 'charge_type', 'fuel_model_grid', 'fuel_bed_type_grid'}
+                'charge_type', 'fuel_model_grid', 'fuel_bed_type_grid'}
 _FLAG_FIELDS = {'is_crown', 'is_surface_fire', 'is_passive_crown', 'is_active_crown'}
 _RATIO_FIELDS = {'crown_fire_transition_ratio': ('surface_fli', 'critical_surface_fli'),
                  'crown_fire_active_ratio': ('crown_ros', 'critical_crown_ros')}
@@ -50,8 +50,6 @@ def _flatten(operation, operands):
     arguments.pop('S', None)
     arguments.pop('_native_partition', None)
     arguments.pop('_pipeline', None)
-    if operation == 'contain.run_contain_sim_array':
-        arguments['report_spread_rate'] = np.atleast_1d(arguments['report_spread_rate'])
     if 'coeffs' in arguments:
         coefficients = arguments.pop('coeffs')
         equations = np.clip(np.atleast_1d(arguments.pop('equation_number_grid')), 0, 120)

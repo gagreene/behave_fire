@@ -17,11 +17,11 @@ REQUIRED_FILES = frozenset({
     "src/fuel_models.rs", "src/species.rs", "src/surface/mod.rs", "src/crown.rs",
     "src/mortality.rs", "src/spot.rs", "src/ignite.rs", "src/safety.rs",
     "src/vapor_pressure_deficit.rs", "src/fine_dead_fuel_moisture.rs",
-    "src/fire_size.rs", "src/slope.rs", "src/contain.rs",
+    "src/fire_size.rs", "src/slope.rs",
     "src/generated/fuel_models.rs", "src/generated/species.rs",
     "src/generated/fine_dead_fuel_moisture.rs",
     "tests/data/fuels.json", "tests/data/species.json", "tests/data/surface.json",
-    "tests/data/crown.json", "tests/data/effects.json", "tests/data/containment.json",
+    "tests/data/crown.json", "tests/data/effects.json",
     "tests/data/tools.json", "tests/data/units.json",
 })
 
