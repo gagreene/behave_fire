@@ -41,14 +41,14 @@ def test_all_eleven_instance_methods_enter_native_and_keep_signatures(_usable_na
     model = BehaveRun(FuelModels(), backend="auto", threads=3)
     reference = PythonRun(FuelModels())
     assert model.backend_in_use == "rust"
-    original = native.batch
+    original = native.component_batch
     calls = []
 
     def record(operation, *args, **kwargs):
         calls.append((operation, kwargs.get("threads", 1)))
         return original(operation, *args, **kwargs)
 
-    monkeypatch.setattr(native, "batch", record)
+    monkeypatch.setattr(native, "component_batch", record)
     model_original = native.model_batch
 
     def record_model(kind, *args, **kwargs):
@@ -131,7 +131,7 @@ def test_native_namespace_registry_routes_and_standalone_containment(_usable_nat
     assert rust.RustFuelModels is rust.FuelModels
     for name, module in (("FuelModels", "fuel_models"), ("SpeciesMasterTable", "species_master_table"), ("SpeciesMasterTableRecord", "species_master_table"), ("FireSize", "fire_size"), ("SlopeTool", "slope_tool")):
         assert getattr(rust, name) is getattr(getattr(rust, module), name)
-    original_defaults, original_batch = native.defaults, native.batch
+    original_defaults, original_batch = native.defaults, native.component_batch
     calls = []
 
     def defaults(kind):
@@ -143,7 +143,7 @@ def test_native_namespace_registry_routes_and_standalone_containment(_usable_nat
         return original_batch(operation, *args, **kwargs)
 
     monkeypatch.setattr(native, "defaults", defaults)
-    monkeypatch.setattr(native, "batch", batch)
+    monkeypatch.setattr(native, "component_batch", batch)
     native_fuels = rust.FuelModels()
     species = rust.SpeciesMasterTable()
     assert species.get_number_of_records() > 0

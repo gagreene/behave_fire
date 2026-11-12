@@ -1,432 +1,283 @@
-//! Compile the actual boundary data modules without requiring a Python linker.
-#[allow(dead_code)]
+//! Actual surviving primitive producers, with isolated allocation observations.
 #[path = "../../../rust/crates/behave-py/src/allocation_probe.rs"]
 mod allocation_probe;
-#[allow(dead_code)]
-#[path = "../../../rust/crates/behave-py/src/prepared/fields.rs"]
-mod fields;
-#[allow(dead_code)]
-#[path = "../../../rust/crates/behave-py/src/model_observer.rs"]
-mod model_observer;
-
-#[allow(dead_code)]
+#[path = "../../../rust/crates/behave-py/src/component_columns.rs"]
+mod component_columns;
+#[path = "../../../rust/crates/behave-py/src/component_schema.rs"]
+mod component_schema;
+#[path = "../../../rust/crates/behave-py/src/component_units.rs"]
+mod component_units;
 #[path = "../../../rust/crates/behave-py/src/prepared/keys.rs"]
 mod keys;
+#[path = "../../../rust/crates/behave-py/src/model_observer.rs"]
+mod model_observer;
+#[path = "../../../rust/crates/behave-py/src/operation.rs"]
+mod operation;
+#[path = "../../../rust/crates/behave-py/src/prepared/primitive.rs"]
+mod primitive;
+#[path = "../../../rust/crates/behave-py/src/prepared/selectors.rs"]
+mod selectors;
 
-#[allow(dead_code)]
-#[path = "../../../rust/crates/behave-py/src/prepared/controls.rs"]
-mod controls;
-
-#[allow(dead_code)]
-#[path = "../../../rust/crates/behave-py/src/prepared/units.rs"]
-mod units;
-
-#[allow(dead_code)]
-#[path = "../../../rust/crates/behave-py/src/prepared/unit_selectors.rs"]
-mod unit_selectors;
-
-#[allow(dead_code)]
-#[path = "../../../rust/crates/behave-py/src/column_output.rs"]
-mod column_output;
-
-#[allow(dead_code)]
-#[path = "../../../rust/crates/behave-py/src/prepared/surface.rs"]
-mod surface;
-
-#[cfg(test)]
-mod pipeline_tests {
-    use super::fields::{Arguments, PreparedArguments};
-    use super::surface::PreparedSurface;
-    use behave_fire::engine::{PreparedFuels, SurfaceTweaks};
-    use behave_fire::{FuelModels, GridShape};
-    use std::collections::BTreeMap;
-
-    #[test]
-    fn prepared_surface_borrows_owned_columns_and_reuses_numeric_fuels() {
-        let mut a = Arguments {
-            values: BTreeMap::new(),
-            strings: BTreeMap::new(),
-            integers: BTreeMap::new(),
-        };
-        for (key, value) in [
-            ("m1h", 0.06),
-            ("m10h", 0.07),
-            ("m100h", 0.08),
-            ("mlh", 0.6),
-            ("mlw", 0.9),
-            ("wind_direction", 0.0),
-            ("aspect", 0.0),
-            ("canopy_cover", 0.0),
-            ("canopy_height", 0.0),
-            ("crown_ratio", 0.0),
-            ("wind_speed_units", 0.0),
-            ("slope_units", 0.0),
-        ] {
-            a.values.insert(key.into(), vec![value]);
-        }
-        a.values.insert("fuel_model_grid".into(), vec![10.0, 124.0]);
-        a.values.insert("wind_speed".into(), vec![88.0, 176.0]);
-        a.values.insert("slope".into(), vec![0.0, 10.0]);
-        for (key, value) in [
-            ("wind_orientation_mode", "RelativeToUpslope"),
-            ("wind_height_mode", "TwentyFoot"),
-            ("waf_method", "CrownRatio"),
-        ] {
-            a.strings.insert(key.into(), value.into());
-        }
-        let shape = GridShape::new(vec![2]).unwrap();
-        let fields = PreparedArguments::new(&a, &shape).unwrap();
-        let prepared = PreparedSurface::new(&fields, shape).unwrap();
-        let raster = prepared.raster().unwrap();
-        let fuels = PreparedFuels::from_registry(&FuelModels::default());
-        super::allocation_probe::start();
-        let first = raster
-            .evaluate_cell(0, prepared.plan(), &fuels, SurfaceTweaks::default())
-            .unwrap();
-        let second = raster
-            .evaluate_cell(1, prepared.plan(), &fuels, SurfaceTweaks::default())
-            .unwrap();
-        let counts = super::allocation_probe::stop();
-        assert_eq!(
-            counts[0].0, 0,
-            "prepared execution must not allocate per cell"
-        );
-        assert!(first.spread_rate.is_finite());
-        assert!(second.spread_rate.is_finite());
-        assert_ne!(first.spread_rate, second.spread_rate);
-        assert!(
-            matches!(&prepared.wind, std::borrow::Cow::Borrowed(_)),
-            "base-unit arrays should remain borrowed owned snapshots"
-        );
+mod prepared {
+    pub(crate) use super::keys::Field;
+    pub(crate) mod primitive {
+        pub(crate) use super::super::primitive::*;
+    }
+    pub(crate) mod selectors {
+        pub(crate) use super::super::selectors::*;
     }
 }
 
-#[allow(dead_code)]
-#[path = "../../../rust/crates/behave-py/src/prepared/crown.rs"]
-mod prepared_crown;
-
 #[cfg(test)]
-mod crown_pipeline_tests {
-    use super::fields::{Arguments, PreparedArguments};
-    use super::prepared_crown::PreparedCrown;
-    use behave_fire::engine::{CrownTweaks, PreparedFuels};
-    use behave_fire::{FuelModels, GridShape};
-    use std::collections::BTreeMap;
+mod primitive_component_tests {
+    use super::{
+        allocation_probe as probe,
+        keys::Field,
+        primitive::{Arguments, Prepared},
+    };
+    use behave_fire::GridShape;
 
     #[test]
-    fn prepared_crown_preserves_varying_units_and_independent_surface_columns() {
-        let mut a = Arguments {
-            values: BTreeMap::new(),
-            strings: BTreeMap::new(),
-            integers: BTreeMap::new(),
-        };
-        for (name, values) in [
-            ("wind_speed", vec![88.0]),
-            ("wind_speed_units", vec![0.0, 1.0]),
-            ("slope", vec![0.0]),
-            ("slope_units", vec![0.0]),
-            ("surface_results.spread_rate", vec![2.0, 3.0]),
-            ("surface_results.fireline_intensity", vec![100.0]),
-            ("surface_results.heat_per_unit_area", vec![200.0]),
-        ] {
-            a.values.insert(name.into(), values);
-        }
-        let shape = GridShape::new(vec![2]).unwrap();
-        let fields = PreparedArguments::new(&a, &shape).unwrap();
-        let prepared = PreparedCrown::new(&fields, shape).unwrap();
-        let raster = prepared.raster().unwrap();
-        assert_eq!(raster.input_cell(0).unwrap().wind_speed, 88.0);
-        assert_eq!(
-            raster.input_cell(1).unwrap().wind_speed,
-            behave_fire::units::SpeedUnit::try_from(1)
-                .unwrap()
-                .to_base(88.0)
-        );
-        let fuels = PreparedFuels::from_registry(&FuelModels::default());
-        super::allocation_probe::start();
-        let first = raster
-            .evaluate_cell(0, prepared.plan(), &fuels, CrownTweaks::default())
-            .unwrap();
-        let second = raster
-            .evaluate_cell(1, prepared.plan(), &fuels, CrownTweaks::default())
-            .unwrap();
-        let counts = super::allocation_probe::stop();
-        assert_eq!(counts[0].0, 0);
-        for (index, actual) in [first, second].into_iter().enumerate() {
-            let mut supplied = behave_fire::crown::SurfaceFireInputs::<f64>::new();
-            supplied.surface_ros = [2.0, 3.0][index];
-            supplied.surface_fli = 100.0;
-            supplied.surface_hpua = 200.0;
-            let input = behave_fire::engine::CrownCell {
-                wind_speed: behave_fire::units::SpeedUnit::try_from(index as i32)
-                    .unwrap()
-                    .to_base(88.0),
-                ..behave_fire::engine::CrownCell::default()
-            };
-            let expected = behave_fire::engine::CrownPlan::default().run_cell(
-                &input,
-                &supplied,
-                fuels.for_grid(10),
-                CrownTweaks::default(),
-            );
-            assert_eq!(actual.named_values(), expected.named_values());
-            assert_eq!(actual.fire_type, expected.fire_type);
-        }
-    }
-}
-
-#[allow(dead_code)]
-#[path = "../../../rust/crates/behave-py/src/prepared/conversions.rs"]
-mod conversions;
-
-#[cfg(test)]
-mod conversion_pipeline_tests {
-    use super::{conversions, fields::Arguments};
-    use std::collections::BTreeMap;
-
-    #[test]
-    fn fused_conversions_preserve_selector_broadcast_and_derived_crown_ratio() {
-        let mut a = Arguments {
-            values: BTreeMap::new(),
-            strings: BTreeMap::new(),
-            integers: BTreeMap::new(),
-        };
-        for (name, values) in [
-            ("wind_speed", vec![2.0, 2.0]),
-            ("_convert.wind_speed", vec![0.0, 1.0]),
-            ("canopy_height", vec![10.0]),
-            ("_convert.canopy_height", vec![4.0]),
-            ("canopy_base_height", vec![2.0]),
-            ("_convert.canopy_base_height", vec![4.0]),
-            ("crown_ratio", vec![1.0]),
-        ] {
-            a.values.insert(name.into(), values);
-        }
-        for (name, value) in [
-            ("_convert.wind_speed", "Speed"),
-            ("_convert.canopy_height", "Length"),
-            ("_convert.canopy_base_height", "Length"),
-            ("_derive_crown_ratio", "true"),
-        ] {
-            a.strings.insert(name.into(), value.into());
-        }
-        conversions::apply(&mut a).unwrap();
-        assert_eq!(
-            a.values["wind_speed"],
-            vec![
-                2.0,
-                behave_fire::units::SpeedUnit::try_from(1)
-                    .unwrap()
-                    .to_base(2.0)
-            ]
-        );
-        let height = behave_fire::units::LengthUnit::try_from(4)
-            .unwrap()
-            .to_base(10.0);
-        let base = behave_fire::units::LengthUnit::try_from(4)
-            .unwrap()
-            .to_base(2.0);
-        assert_eq!(
-            a.values["crown_ratio"],
-            vec![behave_fire::canopy_crown_ratio(height, base)]
-        );
-        assert_eq!(a.values["canopy_height"], vec![height]);
-    }
-}
-
-#[cfg(all(test, feature = "allocation-probe"))]
-mod direct_output_tests {
-    use behave_fire::surface::SurfaceResult;
-    use behave_fire::{batch::SurfaceBatch, output::fill_chunks, GridShape};
-
-    #[test]
-    fn borrowed_encoder_loop_has_zero_requests() {
-        let mut values = vec![f64::NAN; 10000];
-        super::allocation_probe::start();
-        fill_chunks(
-            10000,
-            4,
-            &mut [&mut values],
-            &mut [],
-            &mut [],
-            |range, shard| {
-                let _scope =
-                    super::allocation_probe::Scope::enter(super::allocation_probe::ENCODER);
-                for (local, index) in range.enumerate() {
-                    shard.physical[0][local] = index as f64;
-                }
-                Ok::<_, ()>(())
-            },
-        )
+    fn typed_components_keep_controls_exact_and_access_without_allocations() {
+        let mut a = Arguments::default();
+        a.physical
+            .insert("spread_rate".into(), vec![1., f64::NAN, 3.]);
+        a.codes
+            .insert("max_steps".into(), vec![9_007_199_254_740_993]);
+        a.codes.insert("fuel_model_grid".into(), vec![124]);
+        a.flags.insert("is_crown".into(), vec![true]);
+        let p = Prepared::new(&a, &GridShape::new(vec![3]).unwrap()).unwrap();
+        p.require(&[
+            Field::SpreadRate,
+            Field::MaxSteps,
+            Field::FuelModelGrid,
+            Field::IsCrown,
+        ])
         .unwrap();
-        let counts = super::allocation_probe::stop();
-        assert_eq!(counts[super::allocation_probe::ENCODER].0, 0);
-        assert_eq!(counts[super::allocation_probe::ENCODER].1, 0);
-        assert_eq!(values[9999], 9999.);
-    }
-
-    #[test]
-    fn full_batch_request_count_depends_on_fields_and_workers_not_cells() {
-        for workers in [1, 4] {
-            let mut requests = Vec::new();
-            for cells in [4096, 16384] {
-                super::allocation_probe::start();
-                let result = SurfaceBatch::run_with(
-                    GridShape::new(vec![cells]).unwrap(),
-                    workers,
-                    |index| {
-                        let mut result = SurfaceResult::default();
-                        result.spread_rate = index as f64;
-                        Ok::<_, ()>(result)
-                    },
-                )
-                .unwrap();
-                let counts = super::allocation_probe::stop();
-                requests.push(counts.iter().map(|scope| scope.0).sum::<usize>());
-                assert_eq!(result.spread_rate[cells - 1], (cells - 1) as f64);
-                assert_eq!(result.statistics().appended_bytes, 0);
-            }
+        probe::start();
+        for row in 0..3 {
+            assert_eq!(p.code(Field::MaxSteps, row).unwrap(), 9_007_199_254_740_993);
+            assert_eq!(p.code(Field::FuelModelGrid, row).unwrap(), 124);
+            assert!(p.flag(Field::IsCrown, row).unwrap());
             assert_eq!(
-                requests[0], requests[1],
-                "batch request counts must not grow per cell, workers={workers}"
+                p.physical(Field::SpreadRate, row).unwrap().is_nan(),
+                row == 1
             );
+        }
+        let counts = probe::stop();
+        assert_eq!(counts[0].0, 0);
+        assert!(p.physical(Field::MaxSteps, 0).is_err());
+        assert!(p.code(Field::FuelModelGrid, 3).is_err());
+        assert!(p.require(&[Field::FlameLengthFt]).is_err());
+    }
+
+    #[test]
+    fn typed_component_validation_rejects_wrong_roles_lengths_and_retired_metadata() {
+        let shape = GridShape::new(vec![3]).unwrap();
+        for (name, values) in [
+            ("units", vec![0.]),
+            ("_single.spread_rate", vec![1.]),
+            ("spread_rate", vec![1., 2.]),
+        ] {
+            let mut a = Arguments::default();
+            a.physical.insert(name.into(), values);
+            assert!(Prepared::new(&a, &shape).is_err());
+        }
+        let mut a = Arguments::default();
+        a.codes.insert("fuel_model_grid".into(), vec![i64::MAX]);
+        assert!(Prepared::new(&a, &shape).is_err());
+        let mut a = Arguments::default();
+        a.flags.insert("spread_rate".into(), vec![true]);
+        assert!(Prepared::new(&a, &shape).is_err());
+        let mut a = Arguments::default();
+        a.physical.insert("spread_rate".into(), vec![]);
+        let p = Prepared::new(&a, &GridShape::new(vec![0]).unwrap()).unwrap();
+        p.require(&[Field::SpreadRate]).unwrap();
+        assert!(p.physical(Field::SpreadRate, 0).is_err());
+    }
+}
+
+#[cfg(test)]
+mod component_schema_tests {
+    use super::{component_schema::schema, operation::Operation};
+    use behave_fire::engine::FieldKind;
+
+    #[test]
+    fn every_operation_has_static_unique_typed_columns_without_prototype_evaluation() {
+        for &operation in Operation::ALL {
+            let fields = schema(operation);
+            assert!(!fields.is_empty());
+            for (i, field) in fields.iter().enumerate() {
+                assert!(!field.name.starts_with('_'));
+                assert!(!fields[..i].iter().any(|prior| prior.name == field.name));
+            }
+        }
+        let classify = schema(Operation::CrownClassifyCrownFireType);
+        assert_eq!(classify.len(), 4);
+        assert_eq!(classify[0].kind, FieldKind::Code);
+        assert!(classify[1..].iter().all(|f| f.kind == FieldKind::Flag));
+        let contain = schema(Operation::ContainRunContainSimArray);
+        assert_eq!(contain[0].name, "status");
+        assert_eq!(contain[0].kind, FieldKind::Code);
+        let crown = schema(Operation::CrownCalculateCrownSurfaceFire);
+        assert_eq!(crown.len(), 72);
+        assert_eq!(
+            crown.iter().filter(|f| f.kind == FieldKind::Flag).count(),
+            2
+        );
+        assert_eq!(crown[0].name, "p_crown.hoc_dead");
+        assert_eq!(crown.last().unwrap().name, "crown_length_to_width_ratio");
+    }
+}
+
+#[cfg(test)]
+mod primitive_output_tests {
+    use super::{
+        allocation_probe as probe, component_columns::Columns, component_schema::schema,
+        operation::Operation,
+    };
+    use behave_fire::output::ColumnValues;
+
+    #[test]
+    fn final_typed_component_buffers_use_disjoint_workers_without_cell_allocations() {
+        let mut output = Columns::new(schema(Operation::ContainRunContainSimArray), 1031).unwrap();
+        probe::start();
+        output
+            .fill(4, |index, row| {
+                row.i32("status", index as i32);
+                row.f64("contained_time", index as f64);
+                row.f64("final_perimeter", 2. * index as f64);
+                row.f64("final_area", 3. * index as f64);
+                Ok(())
+            })
+            .unwrap();
+        let counts = probe::stop();
+        for phase in [probe::KERNEL, probe::ENCODER] {
+            assert_eq!((counts[phase].0, counts[phase].1), (0, 0));
+            assert_eq!(counts[phase].3, 4);
+        }
+        assert_eq!(counts[probe::KERNEL].2, 1031);
+        assert_eq!(counts[probe::ENCODER].2, 4 * 1031);
+        for (index, (_, values)) in output.columns.iter().enumerate() {
+            match values {
+                ColumnValues::Int32(v) => assert_eq!(v[1030], 1030),
+                ColumnValues::Float64(v) => assert_eq!(v[1030], index as f64 * 1030.),
+                _ => panic!("unexpected output kind"),
+            }
+        }
+    }
+
+    #[test]
+    fn empty_components_never_evaluate_a_prototype_and_fields_start_unavailable() {
+        let mut empty = Columns::new(schema(Operation::CrownClassifyCrownFireType), 0).unwrap();
+        empty
+            .fill(4, |_, _| panic!("empty scientific callback"))
+            .unwrap();
+        let mut output = Columns::new(schema(Operation::CrownClassifyCrownFireType), 3).unwrap();
+        assert!(matches!(&output.columns[0].1, ColumnValues::Int32(v) if v == &[-1, -1, -1]));
+        assert!(matches!(&output.columns[1].1, ColumnValues::Bool(v) if v == &[false; 3]));
+        assert!(output.fill(1, |_, _| Ok(())).is_err());
+    }
+
+    #[test]
+    fn compound_crown_scalar_records_follow_the_same_static_typed_layout() {
+        use behave_fire::engine::{CrownCell, PreparedFuels, SurfaceOptions, SurfaceTweaks};
+        let fuels = PreparedFuels::from_registry(&behave_fire::FuelModels::default());
+        let mut output =
+            Columns::new(schema(Operation::CrownCalculateCrownSurfaceFire), 1).unwrap();
+        output
+            .fill(1, |_, row| {
+                let result = behave_fire::crown::calculate_crown_surface_fire(
+                    &CrownCell::default(),
+                    fuels.for_grid(10),
+                    &SurfaceOptions::default(),
+                    SurfaceTweaks::default(),
+                );
+                row.with_prefix("p_crown", |row| {
+                    for (name, value) in result.p_crown.named_values() {
+                        row.f64(name, value);
+                    }
+                    row.boolean("is_defined", result.p_crown.is_defined);
+                    for (name, values) in result.p_crown.named_arrays() {
+                        for (index, value) in values.into_iter().enumerate() {
+                            row.indexed_f64(name, index, value);
+                        }
+                    }
+                });
+                row.with_prefix("ib_crown", |row| {
+                    for (name, value) in result.ib_crown.named_values() {
+                        row.f64(name, value);
+                    }
+                    row.boolean("is_defined", result.ib_crown.is_defined);
+                });
+                row.with_prefix("crown_surface", |row| {
+                    for (name, value) in result.crown_surface.named_values() {
+                        row.f64(name, value);
+                    }
+                });
+                row.f64("ri_crown", result.ri_crown);
+                row.f64("crown_fire_spread_rate", result.crown_fire_spread_rate);
+                row.f64(
+                    "crown_length_to_width_ratio",
+                    result.crown_length_to_width_ratio,
+                );
+                Ok(())
+            })
+            .unwrap();
+        assert_eq!(output.columns.len(), 72);
+        assert!(matches!(&output.columns[4].1, ColumnValues::Bool(v) if v == &[true]));
+        let last = &output.columns.last().unwrap().1;
+        assert!(matches!(last, ColumnValues::Float64(v) if v[0].is_finite()));
+    }
+}
+
+#[cfg(test)]
+mod unit_producer_tests {
+    use super::{
+        allocation_probe as probe,
+        component_columns::Columns,
+        component_schema::schema,
+        component_units,
+        operation::Operation,
+        primitive::{Arguments, Prepared},
+    };
+    use behave_fire::{output::ColumnValues, GridShape};
+
+    #[test]
+    fn varying_integral_units_are_predecoded_before_actual_worker_loops() {
+        let cells = 1031;
+        let mut input = Arguments::default();
+        input.physical.insert("value".into(), vec![2.; cells]);
+        input
+            .codes
+            .insert("units".into(), (0..cells).map(|i| (i % 8) as i64).collect());
+        let prepared = Prepared::new(&input, &GridShape::new(vec![cells]).unwrap()).unwrap();
+        let operation = Operation::UnitsLengthToBase;
+        let mut output = Columns::new(schema(operation), cells).unwrap();
+        probe::start();
+        component_units::run(operation, &input, &prepared, &mut output, 4)
+            .unwrap()
+            .unwrap();
+        let counts = probe::stop();
+        for phase in [probe::KERNEL, probe::ENCODER] {
+            assert_eq!((counts[phase].0, counts[phase].1), (0, 0));
+            assert_eq!(counts[phase].2, cells);
+            assert_eq!(counts[phase].3, 4);
+        }
+        if let ColumnValues::Float64(values) = &output.columns[0].1 {
+            for (index, &actual) in values.iter().enumerate() {
+                let expected = behave_fire::units::LengthUnit::try_from((index % 8) as i32)
+                    .unwrap()
+                    .to_base(2.);
+                assert_eq!(actual, expected);
+            }
+        } else {
+            panic!("unit result must be physical f64");
         }
     }
 }
 
-#[allow(dead_code)]
-#[path = "../../../rust/crates/behave-py/src/numeric/contract.rs"]
-mod contract;
-#[allow(dead_code)]
-#[path = "../../../rust/crates/behave-py/src/numeric/shape.rs"]
-mod numeric_shape;
-#[allow(dead_code)]
-#[path = "../../../rust/crates/behave-py/src/numeric/snapshot.rs"]
-mod snapshot;
-
 #[cfg(test)]
-mod numeric_contract_tests {
-    use super::{
-        contract::InputRole,
-        numeric_shape::{plan_groups, OutputDependency},
-        snapshot::{ControlSnapshot, ControlValues, PhysicalSnapshot},
-    };
-    use behave_fire::GridShape;
-
-    #[test]
-    fn owned_columns_separate_physics_from_exact_controls() {
-        let physical =
-            PhysicalSnapshot::new(GridShape::new(vec![2]).unwrap(), vec![-0.0, f64::NAN]).unwrap();
-        assert!(physical.values()[0].is_sign_negative());
-        assert!(physical.values()[1].is_nan());
-        let controls = ControlSnapshot::new(
-            InputRole::Identifier,
-            GridShape::new(vec![1]).unwrap(),
-            ControlValues::Signed(vec![(1_i64 << 53) + 1]),
-        )
-        .unwrap();
-        assert_eq!(controls.signed().unwrap()[0], (1_i64 << 53) + 1);
-        assert!(ControlSnapshot::new(
-            InputRole::Physical,
-            GridShape::new(vec![1]).unwrap(),
-            ControlValues::Signed(vec![1])
-        )
-        .is_err());
-        assert!(PhysicalSnapshot::new(GridShape::new(vec![2]).unwrap(), vec![1.0]).is_err());
-    }
-
-    #[test]
-    fn dependency_groups_keep_independent_and_empty_output_axes() {
-        let shapes = vec![
-            GridShape::new(vec![2]).unwrap(),
-            GridShape::new(vec![3]).unwrap(),
-            GridShape::new(vec![]).unwrap(),
-        ];
-        let groups = plan_groups(
-            &shapes,
-            &[
-                OutputDependency::new(0, &[0, 2]),
-                OutputDependency::new(1, &[1, 2]),
-            ],
-        )
-        .unwrap();
-        assert_eq!(groups[0].shape.dimensions(), [2]);
-        assert_eq!(groups[1].shape.dimensions(), [3]);
-        let shapes = vec![
-            GridShape::new(vec![]).unwrap(),
-            GridShape::new(vec![0]).unwrap(),
-        ];
-        let groups = plan_groups(
-            &shapes,
-            &[
-                OutputDependency::new(0, &[0]),
-                OutputDependency::new(1, &[0, 1]),
-            ],
-        )
-        .unwrap();
-        assert_eq!(groups[0].shape.len(), 1);
-        assert_eq!(groups[1].shape.len(), 0);
-        assert!(plan_groups(&shapes, &[OutputDependency::new(0, &[3])]).is_err());
-        assert!(plan_groups(
-            &shapes,
-            &[
-                OutputDependency::new(0, &[0]),
-                OutputDependency::new(0, &[1])
-            ]
-        )
-        .is_err());
-    }
-}
-
-#[cfg(test)]
-mod restricted_group_tests {
-    use super::{
-        numeric_shape::{plan_groups, OutputDependency},
-        snapshot::PhysicalSnapshot,
-    };
-    use behave_fire::GridShape;
-    #[test]
-    fn group_evaluators_cannot_read_unrelated_inputs_or_fake_empty_rows() {
-        let inputs = vec![
-            PhysicalSnapshot::new(GridShape::new(vec![2]).unwrap(), vec![1., f64::NAN]).unwrap(),
-            PhysicalSnapshot::new(GridShape::new(vec![3]).unwrap(), vec![1.; 3]).unwrap(),
-            PhysicalSnapshot::new(GridShape::new(vec![]).unwrap(), vec![2.]).unwrap(),
-            PhysicalSnapshot::new(GridShape::new(vec![]).unwrap(), vec![4.]).unwrap(),
-        ];
-        let shapes = inputs
-            .iter()
-            .map(|value| value.shape().clone())
-            .collect::<Vec<_>>();
-        let groups = plan_groups(
-            &shapes,
-            &[
-                OutputDependency::new(0, &[0, 2]),
-                OutputDependency::new(1, &[1, 3]),
-            ],
-        )
-        .unwrap();
-        assert!(groups[0].read_physical(&inputs, 1).is_err());
-        let numerator = groups[0].read_physical(&inputs, 0).unwrap();
-        let denominator = groups[0].read_physical(&inputs, 2).unwrap()[0];
-        let transition = numerator
-            .iter()
-            .map(|value| value / denominator)
-            .collect::<Vec<_>>();
-        assert_eq!(transition[0], 0.5);
-        assert!(transition[1].is_nan());
-        let numerator = groups[1].read_physical(&inputs, 1).unwrap();
-        let denominator = groups[1].read_physical(&inputs, 3).unwrap()[0];
-        assert_eq!(
-            numerator
-                .iter()
-                .map(|value| value / denominator)
-                .collect::<Vec<_>>(),
-            vec![0.25; 3]
-        );
-    }
-}
-
-#[cfg(all(test, feature = "allocation-probe"))]
 mod configured_scope_tests {
     use super::model_observer::Observer as Probe;
     use behave_fire::engine::{
@@ -482,6 +333,57 @@ mod configured_scope_tests {
             assert_eq!(output.final_spread_rate.len(), cells);
         } else {
             panic!("wrong result")
+        }
+    }
+}
+
+#[cfg(test)]
+mod staged_scope_tests {
+    use super::{allocation_probe as probe, model_observer::Observer};
+    use behave_fire::engine::{
+        CrownPlan, Field, GridSession, ModelRun, OutputRequest, PreparedFuels,
+    };
+    use behave_fire::raster::{CrownColumns, CrownRaster, CrownTweakColumns};
+    use behave_fire::{FuelModels, GridShape, PerCell};
+
+    #[test]
+    fn staged_scientific_and_encoder_scopes_allocate_nothing_and_use_actual_workers() {
+        let fuels = PreparedFuels::from_registry(&FuelModels::default());
+        for workers in [1, 4] {
+            let valid = (0..1031).map(|i| i % 17 != 0).collect::<Vec<_>>();
+            let run = ModelRun::Crown {
+                raster: CrownRaster::new(
+                    GridShape::new(vec![1031]).unwrap(),
+                    CrownColumns {
+                        canopy_base_height: PerCell::Scalar(3.),
+                        canopy_height: PerCell::Scalar(30.),
+                        canopy_bulk_density: PerCell::Scalar(0.02),
+                        surface_ros: PerCell::Scalar(5.),
+                        surface_fli: PerCell::Scalar(1000.),
+                        surface_hpua: PerCell::Scalar(1000.),
+                        wind_speed: PerCell::Scalar(88.),
+                        validity: Some(PerCell::Cells(&valid)),
+                        ..CrownColumns::default()
+                    },
+                )
+                .unwrap(),
+                plan: CrownPlan::default(),
+                fuels: &fuels,
+                tweaks: CrownTweakColumns::default(),
+            };
+            let mut s = GridSession::new(&run, OutputRequest::crown(), &[], workers).unwrap();
+            s.set_physical(Field::CrownFractionBurned, vec![0.5])
+                .unwrap();
+            probe::start();
+            s.run_remaining_observed(&Observer).unwrap();
+            let counts = probe::stop();
+            for phase in [probe::KERNEL, probe::ENCODER] {
+                assert_eq!((counts[phase].0, counts[phase].1), (0, 0), "{counts:?}");
+                assert!(counts[phase].2 > 1031);
+                assert!(counts[phase].3 >= workers);
+            }
+            assert!(s.get(Field::FinalSpreadRate).unwrap().physical().unwrap()[0].is_nan());
+            assert!(s.get(Field::FinalSpreadRate).unwrap().physical().unwrap()[1].is_finite());
         }
     }
 }

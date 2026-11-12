@@ -82,6 +82,6 @@ def test_prepared_native_unit_loop_preserves_varying_selectors_and_threads():
     expected = np.array([LengthUnits.toBaseUnits(value, int(code)).item()
                          for value, code in zip(values, selectors)])
     for threads in (1, 4):
-        actual = _rust.batch("units.Length.to_base", {"value": values, "units": selectors}, {},
-                             values.shape, False, threads=threads)[""]
+        actual = _rust.component_batch("units.Length.to_base", {"value": values}, {"units": selectors.astype(np.int64)}, {},
+                             values.shape, threads=threads)[""]
         np.testing.assert_allclose(actual, expected, rtol=1e-9, atol=1e-12)

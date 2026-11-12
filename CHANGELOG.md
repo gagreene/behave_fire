@@ -6,6 +6,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Staged Rust raster sessions
+
+- Add public Python `behave_fire.rust.SurfaceGrid` and `CrownGrid`, backed by the
+  standalone Rust `GridSession` and borrowed `FieldView`. Sessions own inputs,
+  options, fuels or supplied Surface fuelbeds, and persistent overrides.
+- Support explicit stages, typed physical/code/flag edits, persistent overrides,
+  requested/kept fields, and worker selection. `run_remaining` preserves injected
+  values (including NaN) and recovers freed dependencies. Explicit producer runs
+  replace their transient injections; `run_fused` restarts from inputs and
+  persistent overrides. Python getters return independent arrays.
+- These grid APIs require Rust and accept real numeric inputs. They have no
+  Python fallback or pickle support. Existing facades retain API4 serialization.
+  Both languages have a `staged_raster` example using base-unit injection.
+
 ### Float64 models and backend routing
 
 - Move public Rust Surface/Crown models to the standalone float64 raster engine.
@@ -13,9 +27,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   float64 arrays. Classifications stay int32, with -1 for unavailable values.
   Preserve output shapes and selected-branch dependencies. This intentionally
   differs from Python dtype/mask behavior, including under automatic selection.
-- Normalize already-float64 stateless families and expose an operation-level
-  numeric-contract manifest. Remaining component/state helpers are not yet
-  covered by the new contract. Binding API4 rejects API3 extensions/saved state.
+- Complete float64 normalization across all 89 numerical operations and scalar
+  state tools. Keep controls, status/classification codes, and flags typed.
+  Remove NumPy dtype, masked-payload, object/weak-scalar, fixed-width integer,
+  float32, and SVML emulation. The standalone core now forbids unsafe code.
+  API4 facade/tool serialization remains value-only.
+- Add direct preinitialized component buffers, real dependency groups for
+  independent outputs, and shared fuelbed field equations for components and
+  staged sessions. Empty groups never evaluate fake prototype cells.
+- Automatic FireSize state moves completely to a verified Python counterpart
+  before supported complex operations, emits a warning, and stays pinned there.
+  Other complex state methods fail clearly without native error replay.
 - Warn once when auto cannot use Rust, including on pure wheels. Proven complex
   input compatibility selects a complete Python operation before coercion, with
   an independent warning. General object data and native errors do not trigger

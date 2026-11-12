@@ -2,7 +2,11 @@
 
 import builtins
 import importlib.util
+import json
+import os
 from pathlib import Path
+import subprocess
+import sys
 import zipfile
 
 import pytest
@@ -23,6 +27,21 @@ def _wheel(root, tag, members=None):
         for name in members or ("behave_fire/_rust.abi3.so",):
             archive.writestr(name, b"binary fixture")
     return path
+
+
+@pytest.mark.rust
+def test_actual_wheel_binary_provenance_needs_no_retired_math_profiles():
+    from behave_fire import _rust
+
+    runner = _runner()
+    root = Path(__file__).resolve().parents[1]
+    process = subprocess.run([sys.executable, '-B', '-c', runner._environment_command(), _rust.__file__],
+                             cwd=root, env=dict(os.environ, PYTHONPATH=str(root/'src')),
+                             capture_output=True, text=True, check=True)
+    evidence = json.loads(process.stdout)
+    assert evidence['binding_api_version'] == 4
+    assert evidence['native_physical_dtype'] == 'float64'
+    assert len(evidence['extension_sha256']) == 64
 
 
 @pytest.mark.parametrize("members", [("../_rust.abi3.so",), ("behave_fire/_rust.pyd", "behave_fire/_rust.abi3.so")])

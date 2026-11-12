@@ -1,5 +1,5 @@
 //! Interpret Python's permissive string controls at the binding boundary.
-use super::fields::PreparedArguments;
+use super::PreparedArguments;
 use behave_fire::engine::{SurfaceOptions, WafMethod, WindHeight, WindOrientation};
 
 fn contains(value: &str, needle: &str) -> bool {

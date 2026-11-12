@@ -1,7 +1,8 @@
 # Prepared binding field probe
 
-This unpublished Rust-only test crate compiles the production argument,
-selector, converter, and allocation-counter modules from `behave-py` directly.
+This unpublished Rust-only test crate compiles the surviving production primitive
+argument, static schema, typed converter, direct column writer, and allocation
+counter modules from `behave-py` directly.
 It tests their behavior without requiring a Python linker or reimplementing the
 production accessors.
 

@@ -66,7 +66,7 @@ def test_custom_raw_scalars_are_rejected_before_native_execution(
     from behave_fire.rust import surface
     from behave_fire.rust._bridge import _native
 
-    monkeypatch.setattr(_native, "batch", _forbid_native)
+    monkeypatch.setattr(_native, "component_batch", _forbid_native)
     with pytest.raises(TypeError, match="opaque.*arithmetic"):
         surface.calculate_flanking_spread_rate(container(scalar_type(2)), 3, 1.0)
 
@@ -79,7 +79,7 @@ def test_custom_scalar_in_later_partition_is_rejected_before_first_native_call(
     from behave_fire.rust import crown
     from behave_fire.rust._bridge import _native
 
-    monkeypatch.setattr(_native, "batch", _forbid_native)
+    monkeypatch.setattr(_native, "component_batch", _forbid_native)
     with pytest.raises(TypeError, match="opaque.*arithmetic"):
         crown.calculate_crown_fire_ratios(2.0, 4.0, scalar_type(4), 8.0)
 

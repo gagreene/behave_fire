@@ -1,0 +1,89 @@
+{
+  "purpose": "Separate descriptive staged-memory diagnostic; not final acceptance or a speed claim.",
+  "python": "3.12.8",
+  "numpy": "2.1.3",
+  "platform": "Windows-10-10.0.19044-SP0",
+  "extension_sha256": "b6d25f6ab8e9be914b217a2f6a41528c243edd49b3ce00f806b40f383bba417d",
+  "rows": [
+    {
+      "route": "surface",
+      "mode": "fused",
+      "threads": 1,
+      "cells": 100000,
+      "before_bytes": 43962368,
+      "owned_bytes": 48099328,
+      "after_completion_bytes": 59383808,
+      "lifetime_peak_bytes": 59387904
+    },
+    {
+      "route": "surface",
+      "mode": "fused",
+      "threads": 4,
+      "cells": 100000,
+      "before_bytes": 43921408,
+      "owned_bytes": 48160768,
+      "after_completion_bytes": 59793408,
+      "lifetime_peak_bytes": 59846656
+    },
+    {
+      "route": "surface",
+      "mode": "staged",
+      "threads": 1,
+      "cells": 100000,
+      "before_bytes": 43839488,
+      "owned_bytes": 48058368,
+      "after_completion_bytes": 59400192,
+      "lifetime_peak_bytes": 109961216
+    },
+    {
+      "route": "surface",
+      "mode": "staged",
+      "threads": 4,
+      "cells": 100000,
+      "before_bytes": 43888640,
+      "owned_bytes": 47947776,
+      "after_completion_bytes": 59523072,
+      "lifetime_peak_bytes": 110317568
+    },
+    {
+      "route": "crown",
+      "mode": "fused",
+      "threads": 1,
+      "cells": 100000,
+      "before_bytes": 43810816,
+      "owned_bytes": 47742976,
+      "after_completion_bytes": 65060864,
+      "lifetime_peak_bytes": 65064960
+    },
+    {
+      "route": "crown",
+      "mode": "fused",
+      "threads": 4,
+      "cells": 100000,
+      "before_bytes": 43950080,
+      "owned_bytes": 47890432,
+      "after_completion_bytes": 65527808,
+      "lifetime_peak_bytes": 65581056
+    },
+    {
+      "route": "crown",
+      "mode": "staged",
+      "threads": 1,
+      "cells": 100000,
+      "before_bytes": 43958272,
+      "owned_bytes": 48128000,
+      "after_completion_bytes": 66244608,
+      "lifetime_peak_bytes": 128339968
+    },
+    {
+      "route": "crown",
+      "mode": "staged",
+      "threads": 4,
+      "cells": 100000,
+      "before_bytes": 44007424,
+      "owned_bytes": 48062464,
+      "after_completion_bytes": 66351104,
+      "lifetime_peak_bytes": 128716800
+    }
+  ]
+}

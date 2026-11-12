@@ -1,6 +1,6 @@
 # behave_fire
 
-Native Surface/Crown models now calculate physical values in float64. Float16,
+Native models, component helpers, units, and state tools calculate physical values in float64. Float16,
 float32, and integer physical inputs widen once; masked real values become NaN,
 and physical results are plain float64 arrays. Classifications remain int32,
 with -1 for unavailable classifications. Python retains its original dtype and

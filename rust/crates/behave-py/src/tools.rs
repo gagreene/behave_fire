@@ -1,5 +1,5 @@
 //! Native tools marshalling and scalar entry-point dispatch.
-use crate::column_output::RowWriter;
+use crate::component_columns::RowWriter;
 use crate::dispatch::{named, scalar, widen};
 use crate::operation::Operation;
 use crate::prepared::{Field, PreparedArguments};
@@ -9,8 +9,7 @@ pub fn evaluate(
     operation: Operation,
     a: &PreparedArguments<'_>,
     i: usize,
-    _single: bool,
-    out: &mut RowWriter<'_>,
+    out: &mut RowWriter<'_, '_>,
 ) -> Result<Option<()>, String> {
     match operation {
         Operation::VaporPressureDeficitCalculatorCalculateVpd => named(
@@ -29,14 +28,14 @@ pub fn evaluate(
         Operation::FineDeadFuelMoistureToolCalculateFineDeadFuelMoisture => scalar(
             out,
             widen(fine_dead_fuel_moisture::calculate_fine_dead_fuel_moisture(
-                a.n(Field::DryBulbI, i)? as i32,
-                a.n(Field::RhI, i)? as i32,
-                a.n(Field::SlopeI, i)? as i32,
-                a.n(Field::AspectI, i)? as i32,
-                a.n(Field::ShadingI, i)? as i32,
-                a.n(Field::MonthI, i)? as i32,
-                a.n(Field::ElevI, i)? as i32,
-                a.n(Field::TimeI, i)? as i32,
+                a.code(Field::DryBulbI, i)? as i32,
+                a.code(Field::RhI, i)? as i32,
+                a.code(Field::SlopeI, i)? as i32,
+                a.code(Field::AspectI, i)? as i32,
+                a.code(Field::ShadingI, i)? as i32,
+                a.code(Field::MonthI, i)? as i32,
+                a.code(Field::ElevI, i)? as i32,
+                a.code(Field::TimeI, i)? as i32,
             )),
         ),
         _ => return Ok(None),

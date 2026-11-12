@@ -1,6 +1,5 @@
 //! Native contain marshalling and scalar entry-point dispatch.
-use crate::column_output::RowWriter;
-use crate::dispatch::{named, widen};
+use crate::component_columns::RowWriter;
 use crate::operation::Operation;
 use crate::prepared::{Field, PreparedArguments};
 use behave_fire::contain;
@@ -9,25 +8,24 @@ pub fn evaluate(
     operation: Operation,
     a: &PreparedArguments<'_>,
     i: usize,
-    _single: bool,
-    out: &mut RowWriter<'_>,
+    out: &mut RowWriter<'_, '_>,
 ) -> Result<Option<()>, String> {
     match operation {
-        Operation::ContainRunContainSimArray => named(
-            out,
-            contain::run_contain_sim_array(
+        Operation::ContainRunContainSimArray => {
+            let value = contain::run_contain_sim_array(
                 a.n(Field::ReportSpreadRate, i)?,
                 a.n(Field::LwRatio, i)?,
                 a.n(Field::ReportSize, i)?,
                 a.n(Field::ProductionRate, i)?,
                 a.n(Field::AttackTime, i)?,
-                a.n(Field::MaxSteps, i)? as i64,
+                a.code(Field::MaxSteps, i)?,
                 a.n(Field::DistStep, i)?,
-            )
-            .named_values()
-            .into_iter()
-            .map(|(k, v)| (k, widen(v))),
-        ),
+            );
+            out.i32("status", value.status);
+            out.f64("contained_time", value.contained_time);
+            out.f64("final_perimeter", value.final_perimeter);
+            out.f64("final_area", value.final_area);
+        }
         _ => return Ok(None),
     }
     Ok(Some(()))

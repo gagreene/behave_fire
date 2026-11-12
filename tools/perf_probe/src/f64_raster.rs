@@ -13,21 +13,17 @@ use behave_fire::raster::{
 use behave_fire::{GridShape, PerCell};
 use std::io::Write;
 
-fn supplied(case: &Case<'_>, typed: bool, missing: bool) -> SurfaceFireInputs<f64> {
+pub(super) fn supplied(case: &Case<'_>, typed: bool, missing: bool) -> SurfaceFireInputs<f64> {
     if !typed {
         return case.supplied;
     }
-    let mut result = SurfaceFireInputs::new();
-    let value = |v: behave_fire::surface::masked::MaskedValue| {
-        if missing && v.mask {
-            f64::NAN
-        } else {
-            v.value
-        }
-    };
-    result.surface_ros = value(case.typed.surface_ros);
-    result.surface_fli = value(case.typed.surface_fli);
-    result.surface_hpua = value(case.typed.surface_hpua);
+    let mut result = case.typed;
+    if missing && case.missing_ros {
+        result.surface_ros = f64::NAN;
+    }
+    if missing && case.missing_hpua {
+        result.surface_hpua = f64::NAN;
+    }
     result
 }
 
@@ -49,7 +45,7 @@ fn reference_crown(args: &Arguments, case: &Case<'_>, fuels: &PreparedFuels) -> 
             ..CrownTweaks::default()
         },
     );
-    if typed && case.typed.surface_hpua.mask {
+    if typed && case.missing_hpua {
         value.crown_fire_heat_per_unit_area = f64::NAN;
         value.crown_fire_line_intensity = f64::NAN;
         value.crown_flame_length = f64::NAN;
@@ -68,7 +64,7 @@ fn reference_crown(args: &Arguments, case: &Case<'_>, fuels: &PreparedFuels) -> 
             value.final_flame_length = f64::NAN;
         }
     }
-    if typed && case.typed.surface_ros.mask {
+    if typed && case.missing_ros {
         let fraction_missing = value.crowning_surface_fire_spread_rate
             - value.surface_fire_critical_spread_rate
             > 1e-7;
@@ -148,7 +144,7 @@ fn validate(
                     return Err(format!("wrong f64 field shape/type{name}"));
                 }
                 for (index, value) in values.iter().enumerate() {
-                    if !super::raster_probe::check_value(
+                    if !super::raster_support::check_value(
                         *value,
                         reference[index % reference.len()][slot].1,
                     ) {
@@ -200,7 +196,7 @@ pub(super) fn run(
     fuels: &PreparedFuels,
 ) -> Result<(), String> {
     if args.operation == "surface" {
-        let data = super::raster_probe::SurfaceData::new(args, cases);
+        let data = super::raster_support::SurfaceData::new(args, cases);
         let models = (0..args.cells)
             .map(|i| cases[i % cases.len()].surface.fuel_model_grid)
             .collect::<Vec<_>>();
@@ -221,13 +217,13 @@ pub(super) fn run(
                 ..SurfaceTweakColumns::default()
             },
         };
-        super::raster_probe::measure(
+        super::raster_support::measure(
             args,
             || run_model(&run, &OutputRequest::surface(), 1).map_err(|e| e.to_string()),
             |output| validate(args, cases, fuels, output),
         )
     } else {
-        let data = super::raster_probe::CrownData::new(args, cases);
+        let data = super::raster_support::CrownData::new(args, cases);
         let ros = (0..args.cells)
             .map(|i| {
                 supplied(
@@ -280,7 +276,7 @@ pub(super) fn run(
                 ..CrownTweakColumns::default()
             },
         };
-        super::raster_probe::measure(
+        super::raster_support::measure(
             args,
             || run_model(&run, &OutputRequest::crown(), 1).map_err(|e| e.to_string()),
             |output| validate(args, cases, fuels, output),

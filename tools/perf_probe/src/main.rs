@@ -1,16 +1,14 @@
 //! Standalone core attribution, not end-to-end Python performance evidence.
 //! Allocation instrumentation is confined to this unpublished diagnostic tool.
 
-mod compact;
 mod f64_raster;
-mod raster_probe;
+mod raster_support;
 
 use behave_fire::crown::{self, SurfaceFireInputs};
 use behave_fire::engine::{
     CrownCell, CrownPlan, CrownTweaks, PreparedFuel, PreparedFuels, SurfaceCell, SurfaceOptions,
     SurfacePlan, SurfaceTweaks,
 };
-use behave_fire::surface::masked::{IntegerKind, IntegerValue, MaskedValue, Precision};
 
 use behave_fire::FuelModels;
 use std::hint::black_box;
@@ -77,7 +75,9 @@ struct Case<'a> {
     surface: SurfaceCell,
     crown: CrownCell,
     supplied: SurfaceFireInputs<f64>,
-    typed: SurfaceFireInputs<MaskedValue>,
+    typed: SurfaceFireInputs<f64>,
+    missing_ros: bool,
+    missing_hpua: bool,
     fuel: &'a PreparedFuel,
 }
 
@@ -125,10 +125,7 @@ fn arguments() -> Result<Arguments, String> {
             "uniform" | "heterogeneous" | "continuous"
         )
         || !matches!(result.mode.as_str(), "timing" | "allocations")
-        || !matches!(
-            result.scope.as_str(),
-            "scalar" | "raster" | "compact" | "f64-raster"
-        )
+        || !matches!(result.scope.as_str(), "scalar" | "f64-raster")
         || result.cells == 0
         || result.repetitions == 0
     {
@@ -141,9 +138,6 @@ fn arguments() -> Result<Arguments, String> {
     }
     if result.operation == "typed-crown" && result.override_rate.is_some() {
         return Err("The checked Python-layout probe has no fused native tweak argument".into());
-    }
-    if result.scope == "compact" && result.operation != "typed-crown" {
-        return Err("compact scope supports only the two experimental typed layouts".into());
     }
     Ok(result)
 }
@@ -214,39 +208,25 @@ fn build_cases<'a>(args: &Arguments, fuels: &'a PreparedFuels) -> Result<Vec<Cas
             crown.canopy_bulk_density = 0.005 + 0.02 * phase;
             crown.moisture_foliar = 80.0 + 40.0 * phase;
         }
-        let mut typed = SurfaceFireInputs::<MaskedValue>::new();
-        if args.layout == "a" {
-            typed.surface_ros = MaskedValue::new(
-                result.spread_rate as f32 as f64,
-                false,
-                false,
-                Precision::F32,
-            );
-            typed.surface_fli = MaskedValue::plain(200.0)
-                .with_integer(IntegerValue::from_bits(IntegerKind::U16, 200));
-            typed.surface_hpua = MaskedValue::new(
-                result.heat_per_unit_area,
-                index % 7 == 0,
-                true,
-                Precision::F64,
-            );
+        // Fixture storage is widened once, before any timed core calculation.
+        let mut typed = SurfaceFireInputs::<f64>::new();
+        typed.surface_fli = 200.;
+        let (missing_ros, missing_hpua) = if args.layout == "a" {
+            typed.surface_ros = result.spread_rate as f32 as f64;
+            typed.surface_hpua = result.heat_per_unit_area;
+            (false, index % 7 == 0)
         } else {
-            typed.surface_ros =
-                MaskedValue::new(result.spread_rate, index % 5 == 0, true, Precision::F64);
-            typed.surface_fli = MaskedValue::plain(200.0)
-                .with_integer(IntegerValue::from_bits(IntegerKind::I32, 200));
-            typed.surface_hpua = MaskedValue::new(
-                result.heat_per_unit_area as f32 as f64,
-                false,
-                false,
-                Precision::F32,
-            );
-        }
+            typed.surface_ros = result.spread_rate;
+            typed.surface_hpua = result.heat_per_unit_area as f32 as f64;
+            (index % 5 == 0, false)
+        };
         cases.push(Case {
             surface: input,
             crown,
             supplied: crown::get_surface_fire_inputs(&result),
             typed,
+            missing_ros,
+            missing_hpua,
             fuel,
         });
     }
@@ -282,17 +262,14 @@ fn evaluate(args: &Arguments, case: &Case<'_>, fuels: &PreparedFuels) -> f64 {
             .final_spread_rate
         }
         _ => {
-            black_box(
-                crown::run_with_surface_inputs(
-                    black_box(&case.typed),
-                    black_box(&case.crown),
-                    black_box(fuels.for_grid(10)),
-                    &SurfaceOptions::default(),
-                )
-                .unwrap(),
-            )
+            let supplied = f64_raster::supplied(case, true, true);
+            black_box(CrownPlan::default().run_cell(
+                &case.crown,
+                &supplied,
+                fuels.for_grid(10),
+                crown_tweaks,
+            ))
             .final_spread_rate
-            .value
         }
     }
 }
@@ -303,12 +280,6 @@ fn main() -> Result<(), String> {
     let cases = build_cases(&args, &fuels)?;
     if args.scope == "f64-raster" {
         return f64_raster::run(&args, &cases, &fuels);
-    }
-    if args.scope == "compact" {
-        return compact::run(&args, &cases, &fuels);
-    }
-    if args.scope == "raster" {
-        return raster_probe::run(&args, &cases, &fuels);
     }
     black_box(evaluate(&args, &cases[0], &fuels));
     let operation = if args.operation == "typed-crown" && args.layout == "b" {
@@ -345,8 +316,45 @@ fn main() -> Result<(), String> {
         } else {
             (times[times.len() / 2 - 1] + times[times.len() / 2]) / 2.0
         };
-        println!("{{\"operation\":\"{operation}\",\"dataset\":\"{}\",\"scope\":\"scalar-core-only\",\"cells\":{},\"repetitions\":{},\"median_seconds\":{},\"prepared_period\":{},\"masked_value_bytes\":{}}}",
-                 args.dataset, args.cells, args.repetitions, median, cases.len(), std::mem::size_of::<MaskedValue>());
+        println!("{{\"operation\":\"{operation}\",\"dataset\":\"{}\",\"scope\":\"scalar-core-only\",\"cells\":{},\"repetitions\":{},\"median_seconds\":{},\"prepared_period\":{}}}",
+                 args.dataset, args.cells, args.repetitions, median, cases.len());
     }
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn actual_f64_probe_validates_all_columns_for_every_fixture_layout_and_dataset() {
+        let fuels = PreparedFuels::from_registry(&FuelModels::default());
+        for dataset in ["uniform", "heterogeneous", "continuous"] {
+            for (operation, layout) in [
+                ("surface", "a"),
+                ("crown", "a"),
+                ("typed-crown", "a"),
+                ("typed-crown", "b"),
+            ] {
+                let args = Arguments {
+                    operation: operation.into(),
+                    layout: layout.into(),
+                    dataset: dataset.into(),
+                    mode: if cfg!(feature = "count-alloc") {
+                        "allocations"
+                    } else {
+                        "timing"
+                    }
+                    .into(),
+                    cells: 64,
+                    repetitions: 1,
+                    seed: 20261105,
+                    override_rate: None,
+                    scope: "f64-raster".into(),
+                };
+                let cases = build_cases(&args, &fuels).unwrap();
+                f64_raster::run(&args, &cases, &fuels).unwrap();
+            }
+        }
+    }
 }

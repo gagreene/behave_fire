@@ -69,7 +69,11 @@ try:
         integers = {'fire_length_to_width_ratio': ('int64', bits)}
     elif subclass:
         values = values.view(UntrustedRavel)
-    result = native.batch('surface.calculate_eccentricity', {'fire_length_to_width_ratio': values.astype(np.float64) if integer else values}, {}, shape, False, integers)
+    if subclass:
+        from behave_fire.rust import surface
+        result = {'': surface.calculate_eccentricity(values.astype(np.float64) if integer else values)}
+    else:
+        result = native.component_batch('surface.calculate_eccentricity', {'fire_length_to_width_ratio': values.astype(np.float64) if integer else values}, {}, {}, shape)
 except ValueError:
     if valid:
         raise

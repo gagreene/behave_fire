@@ -1,5 +1,5 @@
 //! Direct normalized model boundary; no legacy numeric tags enter cell loops.
-use crate::prepared::units::Convert;
+use crate::component_units::Convert;
 use behave_fire::engine::{
     run_model_observed, CrownPlan, ModelBatch, ModelRun, OutputRequest, PreparedFuel,
     PreparedFuels, SurfaceOptions, SurfacePlan, SurfaceSource, WafMethod, WindHeight,
@@ -141,10 +141,26 @@ pub(crate) fn array<T: Element + Copy>(value: &Bound<'_, PyAny>, name: &str) -> 
             "{name} must have normalized native-endian storage"
         )));
     }
+    // rust-numpy's borrowed ndarray view supports at most 32 axes. Flatten
+    // normalized base arrays while attached; shape restoration uses the checked
+    // logical grid and never needs the original Python storage after detach.
+    let flattened = if value.getattr("ndim")?.extract::<usize>()? > 32 {
+        Some(value.call_method1("ravel", ("C",))?)
+    } else {
+        None
+    };
+    let value = flattened.as_ref().unwrap_or(value);
     let view = value
         .extract::<PyReadonlyArrayDyn<'_, T>>()
         .map_err(|_| PyTypeError::new_err(format!("wrong normalized dtype for {name}")))?;
-    Ok(view.as_array().iter().copied().collect())
+    let array = view.as_array();
+    // Normalized C-order columns can use a bulk owned copy. Strided private
+    // inputs retain logical C-order traversal rather than copying raw memory.
+    Ok(if let Some(values) = array.as_slice() {
+        values.to_vec()
+    } else {
+        array.iter().copied().collect()
+    })
 }
 
 fn required_array<T: Element + Copy>(values: &Bound<'_, PyDict>, name: &str) -> PyResult<Vec<T>> {
@@ -300,23 +316,47 @@ pub(crate) fn export<'py>(
         ModelBatch::Surface(v) => v.into_named_columns(),
         ModelBatch::Crown(v) => v.into_named_columns(),
     };
+    export_columns(py, columns, shape)
+}
+
+/// Move existing primitive column buffers directly into owned NumPy arrays.
+pub(crate) fn export_columns<'py, S: AsRef<str>>(
+    py: Python<'py>,
+    columns: impl IntoIterator<Item = (S, ColumnValues)>,
+    shape: &[usize],
+) -> PyResult<Bound<'py, PyDict>> {
     let result = PyDict::new(py);
     for (name, values) in columns {
+        if shape.len() > 32 {
+            // The conversion side has the same rust-numpy 32-axis limitation.
+            // Transfer the owning vector once, then restore logical axes with
+            // NumPy's checked reshape while attached to the interpreter.
+            let flat = match values {
+                ColumnValues::Float64(v) => v.into_pyarray(py).into_any(),
+                ColumnValues::Int32(v) => v.into_pyarray(py).into_any(),
+                ColumnValues::Bool(v) => v.into_pyarray(py).into_any(),
+            };
+            result.set_item(
+                name.as_ref(),
+                flat.call_method1("reshape", (shape.to_vec(),))?,
+            )?;
+            continue;
+        }
         match values {
             ColumnValues::Float64(v) => result.set_item(
-                name,
+                name.as_ref(),
                 ArrayD::from_shape_vec(IxDyn(shape), v)
                     .map_err(|e| PyValueError::new_err(e.to_string()))?
                     .into_pyarray(py),
             )?,
             ColumnValues::Int32(v) => result.set_item(
-                name,
+                name.as_ref(),
                 ArrayD::from_shape_vec(IxDyn(shape), v)
                     .map_err(|e| PyValueError::new_err(e.to_string()))?
                     .into_pyarray(py),
             )?,
             ColumnValues::Bool(v) => result.set_item(
-                name,
+                name.as_ref(),
                 ArrayD::from_shape_vec(IxDyn(shape), v)
                     .map_err(|e| PyValueError::new_err(e.to_string()))?
                     .into_pyarray(py),
@@ -388,111 +428,10 @@ pub fn model_batch<'py>(
     if derive_ratio {
         self::derive_ratio(&mut values)?;
     }
-    let TypedControls { ids, validity } = controls(control_values, &grid)?;
+    let controls = controls(control_values, &grid)?;
     let fuels = fuels(registry)?;
     let options = options(settings)?;
-    // These operands are not read under their selected configuration. Omit them
-    // from the required scientific columns rather than inventing dependencies.
-    let aspect = if options.wind_orientation == WindOrientation::North {
-        column(&values, "aspect")?
-    } else {
-        PerCell::Scalar(0.)
-    };
-    let validity = validity.as_ref().map(|v| {
-        if v.len() == 1 {
-            PerCell::Scalar(v[0])
-        } else {
-            PerCell::Cells(v)
-        }
-    });
-    let run = match kind {
-        "surface" => {
-            let ids = ids
-                .as_ref()
-                .ok_or_else(|| PyValueError::new_err("missing fuel_model_grid"))?;
-            let fields = SurfaceColumns {
-                fuel_model_grid: if ids.len() == 1 {
-                    PerCell::Scalar(ids[0])
-                } else {
-                    PerCell::Cells(ids)
-                },
-                m1h: column(&values, "m1h")?,
-                m10h: column(&values, "m10h")?,
-                m100h: column(&values, "m100h")?,
-                mlh: column(&values, "mlh")?,
-                mlw: column(&values, "mlw")?,
-                wind_speed: column(&values, "wind_speed")?,
-                wind_direction: column(&values, "wind_direction")?,
-                slope: column(&values, "slope")?,
-                aspect,
-                canopy_cover: if options.waf_method == WafMethod::UserInput
-                    && values.contains_key("user_waf")
-                {
-                    PerCell::Scalar(f64::NAN)
-                } else {
-                    column(&values, "canopy_cover")?
-                },
-                canopy_height: if options.waf_method == WafMethod::UserInput
-                    && values.contains_key("user_waf")
-                {
-                    PerCell::Scalar(f64::NAN)
-                } else {
-                    column(&values, "canopy_height")?
-                },
-                crown_ratio: if options.waf_method == WafMethod::UserInput
-                    && values.contains_key("user_waf")
-                {
-                    PerCell::Scalar(f64::NAN)
-                } else {
-                    column(&values, "crown_ratio")?
-                },
-                user_waf: values.get("user_waf").map(|v| {
-                    if v.len() == 1 {
-                        PerCell::Scalar(v[0])
-                    } else {
-                        PerCell::Cells(v)
-                    }
-                }),
-                validity,
-            };
-            ModelRun::Surface {
-                raster: SurfaceRaster::new(grid, fields)
-                    .map_err(|e| PyValueError::new_err(e.to_string()))?,
-                plan: SurfacePlan::new(options),
-                source: SurfaceSource::Fuels(&fuels),
-                tweaks: SurfaceTweakColumns::default(),
-            }
-        }
-        "crown" => {
-            let fields = CrownColumns {
-                m1h: column(&values, "m1h")?,
-                m10h: column(&values, "m10h")?,
-                m100h: column(&values, "m100h")?,
-                mlh: column(&values, "mlh")?,
-                mlw: column(&values, "mlw")?,
-                wind_speed: column(&values, "wind_speed")?,
-                wind_direction: column(&values, "wind_direction")?,
-                slope: column(&values, "slope")?,
-                aspect,
-                canopy_base_height: column(&values, "canopy_base_height")?,
-                canopy_height: column(&values, "canopy_height")?,
-                canopy_bulk_density: column(&values, "canopy_bulk_density")?,
-                moisture_foliar: column(&values, "moisture_foliar")?,
-                surface_ros: column(&values, "surface_ros")?,
-                surface_fli: column(&values, "surface_fli")?,
-                surface_hpua: column(&values, "surface_hpua")?,
-                validity,
-            };
-            ModelRun::Crown {
-                raster: CrownRaster::new(grid, fields)
-                    .map_err(|e| PyValueError::new_err(e.to_string()))?,
-                plan: CrownPlan::new(options),
-                fuels: &fuels,
-                tweaks: CrownTweakColumns::default(),
-            }
-        }
-        _ => return Err(PyValueError::new_err("unknown f64 model kind")),
-    };
+    let run = configured_run(kind, grid, &values, &controls, &fuels, options)?;
     let request = match run {
         ModelRun::Surface { .. } => OutputRequest::surface(),
         ModelRun::Crown { .. } => OutputRequest::crown(),
@@ -545,4 +484,134 @@ pub fn model_batch<'py>(
         }
     }
     Ok(result)
+}
+
+/// Borrow one configured model from validated, independently owned boundary columns.
+pub(crate) fn configured_run<'a>(
+    kind: &str,
+    grid: GridShape,
+    values: &'a BTreeMap<String, Vec<f64>>,
+    controls: &'a TypedControls,
+    fuels: &'a PreparedFuels,
+    options: SurfaceOptions,
+) -> PyResult<ModelRun<'a>> {
+    let TypedControls { ids, validity } = controls;
+    // These operands are not read under their selected configuration. Omit them
+    // from the required scientific columns rather than inventing dependencies.
+    let aspect = if options.wind_orientation == WindOrientation::North {
+        column(values, "aspect")?
+    } else {
+        values
+            .get("aspect")
+            .map(|_| column(values, "aspect"))
+            .transpose()?
+            .unwrap_or(PerCell::Scalar(0.))
+    };
+    let validity = validity.as_ref().map(|v| {
+        if v.len() == 1 {
+            PerCell::Scalar(v[0])
+        } else {
+            PerCell::Cells(v)
+        }
+    });
+    Ok(match kind {
+        "surface" => {
+            let ids = ids
+                .as_ref()
+                .ok_or_else(|| PyValueError::new_err("missing fuel_model_grid"))?;
+            let fields = SurfaceColumns {
+                fuel_model_grid: if ids.len() == 1 {
+                    PerCell::Scalar(ids[0])
+                } else {
+                    PerCell::Cells(ids)
+                },
+                m1h: column(values, "m1h")?,
+                m10h: column(values, "m10h")?,
+                m100h: column(values, "m100h")?,
+                mlh: column(values, "mlh")?,
+                mlw: column(values, "mlw")?,
+                wind_speed: column(values, "wind_speed")?,
+                wind_direction: column(values, "wind_direction")?,
+                slope: column(values, "slope")?,
+                aspect,
+                canopy_cover: if options.waf_method == WafMethod::UserInput
+                    && values.contains_key("user_waf")
+                {
+                    values
+                        .get("canopy_cover")
+                        .map(|_| column(values, "canopy_cover"))
+                        .transpose()?
+                        .unwrap_or(PerCell::Scalar(f64::NAN))
+                } else {
+                    column(values, "canopy_cover")?
+                },
+                canopy_height: if options.waf_method == WafMethod::UserInput
+                    && values.contains_key("user_waf")
+                {
+                    values
+                        .get("canopy_height")
+                        .map(|_| column(values, "canopy_height"))
+                        .transpose()?
+                        .unwrap_or(PerCell::Scalar(f64::NAN))
+                } else {
+                    column(values, "canopy_height")?
+                },
+                crown_ratio: if options.waf_method == WafMethod::UserInput
+                    && values.contains_key("user_waf")
+                {
+                    values
+                        .get("crown_ratio")
+                        .map(|_| column(values, "crown_ratio"))
+                        .transpose()?
+                        .unwrap_or(PerCell::Scalar(f64::NAN))
+                } else {
+                    column(values, "crown_ratio")?
+                },
+                user_waf: values.get("user_waf").map(|v| {
+                    if v.len() == 1 {
+                        PerCell::Scalar(v[0])
+                    } else {
+                        PerCell::Cells(v)
+                    }
+                }),
+                validity,
+            };
+            ModelRun::Surface {
+                raster: SurfaceRaster::new(grid, fields)
+                    .map_err(|e| PyValueError::new_err(e.to_string()))?,
+                plan: SurfacePlan::new(options),
+                source: SurfaceSource::Fuels(fuels),
+                tweaks: SurfaceTweakColumns::default(),
+            }
+        }
+        "crown" => {
+            let fields = CrownColumns {
+                m1h: column(values, "m1h")?,
+                m10h: column(values, "m10h")?,
+                m100h: column(values, "m100h")?,
+                mlh: column(values, "mlh")?,
+                mlw: column(values, "mlw")?,
+                wind_speed: column(values, "wind_speed")?,
+                wind_direction: column(values, "wind_direction")?,
+                slope: column(values, "slope")?,
+                aspect,
+                canopy_base_height: column(values, "canopy_base_height")?,
+                canopy_height: column(values, "canopy_height")?,
+                canopy_bulk_density: column(values, "canopy_bulk_density")?,
+                moisture_foliar: column(values, "moisture_foliar")?,
+                surface_ros: column(values, "surface_ros")?,
+                surface_fli: column(values, "surface_fli")?,
+                surface_hpua: column(values, "surface_hpua")?,
+                validity,
+            };
+            ModelRun::Crown {
+                raster: CrownRaster::new(grid, fields)
+                    .map_err(|e| PyValueError::new_err(e.to_string()))?,
+                plan: CrownPlan::new(options),
+                fuels,
+                tweaks: CrownTweakColumns::default(),
+            }
+        }
+        _ => return Err(PyValueError::new_err("unknown f64 model kind")),
+    })
 }

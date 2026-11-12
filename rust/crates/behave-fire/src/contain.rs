@@ -83,6 +83,16 @@ pub fn run(input: ContainInput) -> ContainResult {
     )
 }
 
+/// Return unavailable terminal behavior when a required step condition is unknown.
+fn unavailable() -> ContainResult {
+    ContainResult {
+        status: -1,
+        contained_time: f64::NAN,
+        final_perimeter: f64::NAN,
+        final_area: f64::NAN,
+    }
+}
+
 /// Run one cell; terminal cells freeze at the exact step of their transition.
 pub fn run_contain_sim_array(
     report_spread_rate: f64,
@@ -104,6 +114,9 @@ pub fn run_contain_sim_array(
         if !active {
             break;
         }
+        if fire_ros.is_nan() || lw_ratio.is_nan() || attack_time.is_nan() || dist_step.is_nan() {
+            return unavailable();
+        }
         let dt = dist_step / if fire_ros > 1e-7 { fire_ros } else { 1.0 };
         time += dt;
         let safe_lwr = if lw_ratio > 1e-7 { lw_ratio } else { 1.0 };
@@ -116,8 +129,18 @@ pub fn run_contain_sim_array(
             0.0
         };
         line_built += line_rate * dt;
+        if time.is_nan() || perimeter.is_nan() || area.is_nan() || line_built.is_nan() {
+            return unavailable();
+        }
         let contained_now = line_built >= perimeter && time >= attack_time;
-        let overrun_now = area > report_size * 10.0 && time < attack_time;
+        let overrun_now = if time < attack_time {
+            if report_size.is_nan() {
+                return unavailable();
+            }
+            area > report_size * 10.0
+        } else {
+            false
+        };
         if contained_now {
             status = STATUS_CONTAINED;
         }

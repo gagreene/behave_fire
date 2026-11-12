@@ -1,96 +1,90 @@
 # Backend compatibility contract
 
-## Current float64 model contract
+## Float64 Rust calculations
 
-Surface/Crown model routes widen real physical inputs to float64 once, replace
-masked values with NaN, and return plain float64 arrays. Classifications remain
-int32; -1 means unavailable. Valid IDs and selectors retain exact integer storage.
-Float32 results may differ from Python because calculations now use float64.
-Independent field shapes, conditional dependencies, units, and ownership remain
-part of the contract. Missing fields do not invalidate unrelated outputs.
+Rust uses float64 for physical calculations across models, component helpers,
+unit conversions, and scalar state tools. Real boolean, integer, float16,
+float32, and float64 inputs normalize to float64 before scientific arithmetic.
+Masked physical values become NaN. Physical results are ordinary float64 arrays;
+Rust does not preserve MaskedArray identity, fill values, raw masked payloads,
+boxed scalar types, fixed-width integer overflow, or weak-scalar promotion.
 
-Auto selects usable Rust for real inputs, including masked arrays. If native
-execution is unavailable, auto selects Python and warns once per process. A
-separate once-per-process warning accompanies complex physical inputs routed to
-a proven compatible Python operation before coercion. Explicit Rust rejects
-complex/object input. General objects and Rust scientific errors do not trigger
-fallback. Consequently, auto can return Python masked arrays or Rust plain NaN
-arrays depending on availability and the actual call. `backend_in_use` reports
-the last completed operation; `preferred_backend` reports availability preference.
+These differences also apply under `backend="auto"`: installations with usable
+Rust use this contract, while Python-only installations use the unchanged Python
+implementation and emit a fallback warning. Select `backend="python"` to retain
+Python's original dtype, mask, and arithmetic behavior.
 
-The binding's `__numeric_contracts__` lists all 89 native operations as
-`f64-model`, `f64-stateless`, or `unmigrated`. Unit conversions, spotting, ignition,
-safety, mortality calculations, VPD, and containment share real physical
-normalization. Remaining Surface/Crown component helpers and state tools retain
-their earlier numeric contracts until their separate migration. The older dtype
-and object details below describe those remaining helpers, not migrated routes.
+Physical integers above 2^53 can round when converted to float64. This relaxation
+applies to physical data. Identifiers, lookup indices, unit selectors, iteration
+limits, classification/status codes, and flags retain separate integral or
+boolean storage. Missing or nonintegral lookup controls fail before workers run.
+Existing valid unit-selector conventions and finite invalid-FDFM-index sentinel
+values remain unchanged. Classification and containment status arrays are int32;
+-1 means unavailable. Classification flags are false for code -1, so check the
+code before interpreting those flags.
 
-The Python backend at commit `7933789f00470c6bbfbe942dc22bdd7f74e192f9` is the behavioral reference for the Rust backend. Native execution is available when the compiled extension is installed. The full API, ownership, selection, and artifact contracts are in [RUST_BACKEND.md](RUST_BACKEND.md).
+## Missing values and physical domains
 
-## Intentional numerical differences
+NaN means unavailable physical data. A missing condition or denominator does not
+silently select a zero fallback. Availability follows actual field dependencies:
+unrelated outputs and valid selected branches can remain available. Explicit
+native `validity=false` skips scientific work and leaves initialized unavailable
+outputs. Individual masked values do not imply whole-cell invalidity.
 
-The Rust backend widens float16 inputs to float32 before applying each entry point's ordinary normalization. Helpers retaining input precision therefore return float32; operations that already normalize to float64 continue returning float64. Rust acceptance uses explicit Python with the same normalized inputs. Original float16 results are diagnostic only: widening can change rounding, overflow, underflow, non-finite results, exceptions, and classification thresholds. For example, `calculate_eccentricity(np.array([300], dtype=np.float16))` returns infinity, while the float32 route returns approximately 0.9999944. Select Python for exact original float16 semantics.
+Finite equations, thresholds, units, clipping, and undefined-fuel conventions
+remain scientific rules. Physical arithmetic follows float64/IEEE behavior,
+including infinity, signed zero, and NaNs produced by real-domain arithmetic.
+Rust scalar tools therefore can return NaN or infinity where Python's scalar
+`math` operations raise an exception. Structural and invalid-control errors
+remain exceptions.
 
-This policy also applies when NumPy would create a float16 intermediate from
-other input dtypes. NumPy's `arctan2` chooses a float16 loop for some boolean,
-int8, and uint8 combinations in `calculate_direction_of_max_spread`. Rust
-widens those x/y operands to float32 before that operation, using structural
-ufunc dtype resolution rather than executing the Python calculation. The
-acceptance oracle applies the same normalization. Upslope direction may return
-float32 instead of float16; north-oriented results retain their later float64
-promotion but can differ numerically from original float16 intermediates.
-Other integer operations retain their own wrapping and promotion contracts.
+Containment retains fixed distance steps, `dt = dist_step / ros`, terminal
+conditions, and iteration limits. A missing value needed by an executed step
+makes termination unavailable. Inputs belonging to unselected branches do not
+invalidate known results. Zero requested steps retain the existing time-limit
+and zero-geometry result without evaluating scientific steps.
 
-Float64 and float32 routes preserve the reference within `rtol=1e-9, atol=1e-12` and `rtol=1e-6, atol=1e-7`, respectively. Shapes, statuses, masks, NaN positions, and exception classes match the applicable oracle; message wording is not guaranteed. Any further difference must be recorded with an executable scenario before being accepted.
+## Automatic selection and complex data
 
-Float32 atan2 can use platform libm or NumPy's linked SVML kernel. One float32 rounding difference remains visible when North-oriented results later promote to float64. The native binding identifies the linked implementation using a bounded calibration over fixed finite constants, without passing user inputs to Python calculations. The guarded native SVML implementation reproduces that profile where available. Rust-only tests retain the original Windows fixture unchanged and use independently captured, exact-input scalar-profile variants in `integer_direction_platform.json`; unknown profiles fail explicitly. No numerical tolerance is widened.
+Auto selects usable Rust for real inputs, including masked arrays. An unavailable
+or incompatible extension selects Python with a once-per-process
+`BehaveBackendWarning`, including normal pure-wheel installations. Discovery and
+explicit Python selection do not consume that warning.
 
-## Native object boundary
+Only independently tested complex counterparts may route to Python before any
+Rust conversion or execution. They emit a separate complex-fallback warning.
+Native errors and general object/custom arithmetic do not trigger replay.
+Explicit Rust rejects unsupported complex/object inputs without discarding
+imaginary values. See `src/behave_fire/_auto_routing.py` for parameter-specific
+component proofs.
 
-Native arithmetic accepts booleans, fixed-width signed/unsigned integers, and
-float32/float64 values after the documented float16 widening. Characterized
-numeric-object coercion, output boxing, and exception behavior remain supported;
-`dtype=object` alone is not a reason to reject an input. Large Python integers
-remain accepted wherever the reference entry point explicitly converts them to
-a supported real dtype before calculation. General arbitrary-precision integer
-outputs and opaque custom Python-object arithmetic require the explicit Python
-backend. Rust raises `TypeError` instead of truncating values, silently changing
-the result dtype, or falling back during a calculation.
-Raw custom numeric subclasses are rejected before NumPy can erase their type,
-including direct scalars and scalar payloads in lists or tuples. Stateful native
-helpers apply the same check to their scalar arguments and stored state. Entry
-points that explicitly coerce real inputs retain their existing supported
-coercions. Ordinary built-in and NumPy numeric values remain supported.
-For example, Python's `calculate_fire_length(2**64, 0, 1)` produces an object
-array containing the exact integer; this raw-object route is unsupported by Rust.
-Complex intermediates generated from supported real inputs are a separate case:
-the native calculation preserves their resulting dtype and exception behavior.
+Automatic FireSize instances snapshot all physical fields and caller edits before
+verified complex backing/flanking calculations or direct state getters move to
+Python. The instance then stays on Python, including after serialization; later
+real inputs do not switch it back. Unsupported or lossy complex state methods
+raise before mutation. A warning converted to an error leaves the delegate
+unchanged. Explicit Rust tools retain their strict real-data contract.
 
-## Existing limitations retained
+## Grids, ownership, and serialization
 
-Raw Python sequences rejected by a reference helper whose arithmetic requires an
-ndarray are outside the parity contract. For example, the reference rejects
-`calculate_eccentricity([300])`, while native normalization may accept that list.
-Characterized entry points that successfully coerce lists remain supported.
-Use NumPy arrays for the contracted array behavior, or explicitly select Python
-for the reference's unsupported-sequence rejection behavior.
+Existing public model output names, independent dependency shapes, parameter
+names/defaults, and unit conventions remain intact. Native `SurfaceGrid` and
+`CrownGrid` have one explicit common grid, with scalar or per-cell inputs.
+Strided, readonly, endian-swapped, empty, and scalar arrays are copied in logical
+order before detached work. Getters and results own their data independently.
 
-- Containment uses a simplified fixed-step growth/line-production loop, not the full C++ ContainSim solver or RK4. The spread-rate input defines the batch shape, and report size sets the overrun threshold rather than the initial ellipse.
-- Some surface entry points require moisture arrays matching the fuel grid rather than arbitrary mutual broadcasting.
-- Masked-array handling varies by entry point. Some functions discard the mask; some calculations affect values under masked positions. The port must reproduce each observed contract rather than impose a new universal policy.
-- Lightning ignition is deprecated for scientific reliability reasons. Compatibility values remain available with the existing warning.
-- Custom fuel lookups in an existing BehaveRun are snapshots built at construction, not live views of later registry edits.
+Grid inputs and injections use base units; reaction intensity is BTU/ft^2/min.
+`run_remaining` preserves transient injections and rematerializes freed
+ancestors. Explicit producer runs replace their own transient values. Reset and
+fused restart clear transient injections while retaining input edits and
+persistent overrides. Fused runs use the configured whole-model kernel when
+possible. New grid sessions require Rust, have no Python fallback, and reject
+pickling explicitly. Existing facade/tool serialization remains API4 and stores
+values rather than native pointers.
 
-## Python API differences
-
-The native array bridge returns fresh arrays. Unboxed scalar numeric results
-may therefore be zero-dimensional NumPy arrays where Python returns a Python
-or NumPy scalar. Shape `()`, dtype, precision, values, and zero signs are
-preserved; exact scalar class and `isinstance` behavior can differ. Use the
-explicit Python backend when exact reference scalar classes matter, or
-`.item()` to request a Python scalar. This does not relax vector shapes,
-masked-array classes, boxed payload kinds, or input scalar-kind handling.
-
-The root automatic BehaveRun uses composition and therefore changes exact class identity. The historical `behave_fire.behave.BehaveRun` and explicit Python alias retain legacy identity/subclassing. Backend selection is fixed per instance. A missing or unusable extension causes a once-per-process BehaveBackendWarning and Python fallback for auto. Forced Rust raises. Calculation failures never cause fallback.
-
-The Python runtime floor is 3.11. Rust is required for source builds; native and pure-Python wheels themselves require no project compilation. Complete compiler-free installation also depends on binary dependency availability. See the artifact matrix in the implementation contract.
+The package-root BehaveRun uses composition and can have a different class
+identity/repr from `behave_fire.behave.BehaveRun`. Use the explicit Python class
+for legacy subclassing or class-identity checks. All 89 numerical operation
+entries now advertise the same `f64` contract. The core is standalone Rust with
+no normal/build dependencies and forbids unsafe code; NumPy belongs to the
+Python wrapper, not the standalone crate.

@@ -6,7 +6,6 @@ macro_rules! fields {
         pub(crate) enum Field { $($variant),+ }
         impl Field {
             pub(crate) const COUNT: usize = [$(stringify!($variant)),+].len();
-            pub(crate) const ALL: [Field; Self::COUNT] = [$(Self::$variant),+];
             pub(crate) fn from_name(name: &str) -> Option<Self> {
                 match name { $($name => Some(Self::$variant),)+ _ => None }
             }
@@ -18,20 +17,6 @@ macro_rules! fields {
 }
 fields! {
     FuelModelGrid => "fuel_model_grid",
-    GlobalBool => "_bool",
-    GlobalMixed => "_mixed",
-    GlobalParticleScalar => "_particle_scalar",
-    GlobalScalarAspect => "_scalar.aspect",
-    GlobalScalarCanopyCover => "_scalar.canopy_cover",
-    GlobalScalarCanopyHeight => "_scalar.canopy_height",
-    GlobalScalarCrownRatio => "_scalar.crown_ratio",
-    GlobalScalarSlope => "_scalar.slope",
-    GlobalScalarUserWaf => "_scalar.user_waf",
-    GlobalScalarWindDirection => "_scalar.wind_direction",
-    GlobalScalarWindSpeed => "_scalar.wind_speed",
-    GlobalScalarGrid => "_scalar_grid",
-    GlobalSimdExp => "_simd_exp",
-    GlobalSvmlAtan2 => "_svml_atan2",
     ActiveRatio => "active_ratio",
     AirTempF => "air_temp_f",
     AreaPerEquipmentSqft => "area_per_equipment_sqft",

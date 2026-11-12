@@ -7,3 +7,4 @@ from .fire_size import FireSize
 from .slope_tool import SlopeTool
 from .core import BehaveRun, RustBehaveRun
 from .fuel_models import RustFuelModels
+from .grid import CrownGrid, SurfaceGrid

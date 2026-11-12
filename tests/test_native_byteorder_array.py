@@ -26,14 +26,14 @@ def test_floating_byte_order_preserves_normalized_reference(
     if reverse:
         x, y = x[::-1], y[::-1]
     # The policy oracle widens half precision independently from the bridge.
-    expected_x = x.astype(np.float32) if x.dtype.itemsize == 2 else x
-    expected_y = y.astype(np.float32) if y.dtype.itemsize == 2 else y
+    expected_x = np.asarray(np.ma.asarray(x, dtype=np.float64).filled(np.nan))
+    expected_y = np.asarray(np.ma.asarray(y, dtype=np.float64).filled(np.nan))
     if operation == "direction":
         expected = reference.calculate_direction_of_max_spread(
             expected_x, expected_y, np.ones(3), "RelativeToNorth", 95.)
         actual = native.calculate_direction_of_max_spread(x, y, np.ones(3), "RelativeToNorth", 95.)
     else:
-        expected = reference.calculate_flame_length(expected_x)
+        expected = np.where(np.isnan(expected_x), np.nan, reference.calculate_flame_length(expected_x))
         actual = native.calculate_flame_length(x)
     assert actual.dtype == expected.dtype
     assert actual.shape == expected.shape == (3,)
@@ -42,7 +42,8 @@ def test_floating_byte_order_preserves_normalized_reference(
     if np.ma.isMaskedArray(expected):
         assert actual.fill_value == expected.fill_value
     actual_data, expected_data = np.ma.getdata(actual), np.ma.getdata(expected)
-    np.testing.assert_array_equal(np.signbit(actual_data), np.signbit(expected_data))
+    finite = np.isfinite(expected_data)
+    np.testing.assert_array_equal(np.signbit(actual_data[finite]), np.signbit(expected_data[finite]))
     np.testing.assert_allclose(actual_data, expected_data,
                                rtol=1e-6 if expected.dtype == np.float32 else 1e-9,
                                atol=1e-7 if expected.dtype == np.float32 else 1e-12)

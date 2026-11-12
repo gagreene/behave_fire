@@ -1,11 +1,11 @@
-"""API4 advertises migrated operations without mislabeling pending helpers."""
+"""API4 advertises one physical numeric contract for all operation families."""
 import numpy as np
 import pytest
 
 pytestmark = pytest.mark.rust
 
 
-def test_manifest_covers_each_operation_and_marks_only_migrated_families():
+def test_manifest_covers_each_operation_with_one_float64_contract():
     from behave_fire import _rust
     from behave_fire._backend_contract import BINDING_API_VERSION
     from behave_fire.rust._contracts import numeric_contract
@@ -15,10 +15,7 @@ def test_manifest_covers_each_operation_and_marks_only_migrated_families():
     assert len(manifest) == 89
     for name, contract in manifest.items():
         assert contract == numeric_contract(name)
-    assert manifest['model.run_surface'] == 'f64-model'
-    assert manifest['crown.run_crown_fire'] == 'f64-model'
-    assert manifest['spot.calculate_spotting_from_burning_pile'] == 'f64-stateless'
-    assert manifest['surface.calculate_fire_length'] == 'unmigrated'
+    assert set(manifest.values()) == {'f64'}
 
 
 def test_stateless_physical_values_widen_and_missing_controls_raise():

@@ -27,14 +27,17 @@ def test_direction_fixtures_match_current_host_python(case):
 
     inputs = {key: _decode(value) for key, value in case["inputs"].items()}
     normalized = dict(inputs)
-    if case["normalize_half_loop"]:
-        for key in ("x_component", "y_component"):
-            value = normalized[key]
-            normalized[key] = value.astype(np.float32) if isinstance(value, (np.ndarray, np.generic)) else np.float32(value)
+    for key, value in inputs.items():
+        if np.asanyarray(value).dtype.kind in 'Oc':
+            with pytest.raises(TypeError):
+                native.calculate_direction_of_max_spread(**inputs, **case['options'])
+            return
+        normalized[key] = np.asarray(np.ma.asarray(value, dtype=np.float64).filled(np.nan))
     with warnings.catch_warnings(), np.errstate(all="ignore"):
         warnings.simplefilter("ignore")
         try:
             expected = reference.calculate_direction_of_max_spread(**normalized, **case["options"])
+            expected = np.where(np.isnan(normalized['rate_vector']), np.nan, expected)
         except Exception as error:
             with pytest.raises(type(error)):
                 native.calculate_direction_of_max_spread(**inputs, **case["options"])

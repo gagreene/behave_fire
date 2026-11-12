@@ -30,7 +30,7 @@ pub fn calculate_safety_zone(
     number_of_equipment: f64,
     area_per_equipment_sqft: f64,
 ) -> SafetyZoneResult {
-    let separation_distance = 4.0 * flame_height_ft;
+    let separation_distance = calculate_separation_distance(flame_height_ft);
     let core =
         area_per_person_sqft * number_of_personnel + area_per_equipment_sqft * number_of_equipment;
     let core_radius = if core > 1e-7 { (core / PI).sqrt() } else { 0.0 };
@@ -40,4 +40,9 @@ pub fn calculate_safety_zone(
         radius,
         area: PI * radius.powi(2),
     }
+}
+
+/// Calculate separation from the actual flame height, independent of zone occupancy.
+pub fn calculate_separation_distance(flame_height_ft: f64) -> f64 {
+    4.0 * flame_height_ft
 }

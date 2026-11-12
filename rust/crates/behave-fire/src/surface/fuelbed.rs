@@ -1,190 +1,6 @@
 //! Fuelbed weighting follows the Python five-particle sums and guarded divisions.
-use super::{size_sorted_wfl, FuelbedIntermediates, Particles};
+use super::{FuelbedIntermediates, Particles};
 use crate::math::np_max;
-
-/// Float32 particle arithmetic, with f64 silica constants and size-bin accumulation as in Python.
-pub(super) mod single {
-    use super::{size_sorted_wfl, FuelbedIntermediates, Particles};
-    use crate::math::single::np_max;
-    struct SingleParticles {
-        load_dead: [f32; 5],
-        load_live: [f32; 5],
-        savr_dead: [f32; 5],
-        savr_live: [f32; 5],
-        moisture_dead: [f32; 5],
-        moisture_live: [f32; 5],
-        hoc_dead: f32,
-        hoc_live: f32,
-        depth: f32,
-        moe_dead: f32,
-        is_defined: bool,
-    }
-    /// Compute each float32 particle operation natively, widening only the final transport fields.
-    pub fn calculate_fuelbed_intermediates(p: &Particles) -> FuelbedIntermediates {
-        let p = SingleParticles {
-            load_dead: std::array::from_fn(|n| p.load_dead[n] as f32),
-            load_live: std::array::from_fn(|n| p.load_live[n] as f32),
-            savr_dead: std::array::from_fn(|n| p.savr_dead[n] as f32),
-            savr_live: std::array::from_fn(|n| p.savr_live[n] as f32),
-            moisture_dead: std::array::from_fn(|n| p.moisture_dead[n] as f32),
-            moisture_live: std::array::from_fn(|n| p.moisture_live[n] as f32),
-            hoc_dead: p.hoc_dead as f32,
-            hoc_live: p.hoc_live as f32,
-            depth: p.depth as f32,
-            moe_dead: p.moe_dead as f32,
-            is_defined: p.is_defined,
-        };
-        let sa_d: [f32; 5] = std::array::from_fn(|n| p.load_dead[n] * p.savr_dead[n] / 32.0);
-        let sa_l: [f32; 5] = std::array::from_fn(|n| p.load_live[n] * p.savr_live[n] / 32.0);
-        let tsa_d: f32 = sa_d.iter().sum();
-        let tsa_l: f32 = sa_l.iter().sum();
-        let tsa_total = tsa_d + tsa_l;
-        let safe_tsa = if tsa_total > 1e-7 { tsa_total } else { 1.0 };
-        let frac_dead = if tsa_total > 1e-7 {
-            tsa_d / safe_tsa
-        } else {
-            0.0
-        };
-        let frac_live = 1.0 - frac_dead;
-        let safe_d = if tsa_d > 1e-7 { tsa_d } else { 1.0 };
-        let safe_l = if tsa_l > 1e-7 { tsa_l } else { 1.0 };
-        let fp_d: [f32; 5] = std::array::from_fn(|n| sa_d[n] / safe_d);
-        let fp_l: [f32; 5] = std::array::from_fn(|n| sa_l[n] / safe_l);
-        let exp_d: [f32; 5] = std::array::from_fn(|n| {
-            if p.savr_dead[n] > 1e-7 {
-                (-138.0 / p.savr_dead[n]).exp()
-            } else {
-                0.0
-            }
-        });
-        let exp_l500: [f32; 5] = std::array::from_fn(|n| {
-            if p.savr_live[n] > 1e-7 {
-                (-500.0 / p.savr_live[n]).exp()
-            } else {
-                0.0
-            }
-        });
-        let fine_d: f32 = (0..5).map(|n| p.load_dead[n] * exp_d[n]).sum();
-        let fine_dm: f32 = (0..5)
-            .map(|n| p.load_dead[n] * exp_d[n] * p.moisture_dead[n])
-            .sum();
-        let fine_l: f32 = (0..5).map(|n| p.load_live[n] * exp_l500[n]).sum();
-        let safe_fd = if fine_d > 1e-7 { fine_d } else { 1.0 };
-        let fine_dead_moist = if fine_d > 1e-7 {
-            fine_dm / safe_fd
-        } else {
-            0.0
-        };
-        let safe_fl = if fine_l > 1e-7 { fine_l } else { 1.0 };
-        let fdol = if fine_l > 1e-7 { fine_d / safe_fl } else { 0.0 };
-        let moe_dead = p.moe_dead;
-        let safe_md = if moe_dead > 1e-7 { moe_dead } else { 1.0 };
-        let moe_live = np_max(
-            2.9 * fdol * (1.0 - fine_dead_moist / safe_md) - 0.226,
-            moe_dead,
-        );
-        let w_heat_dead: f32 = (0..5).map(|n| fp_d[n] * p.hoc_dead).sum();
-        let w_heat_live: f32 = (0..5).map(|n| fp_l[n] * p.hoc_live).sum();
-        let w_silica_dead: f64 = (0..5).map(|n| (fp_d[n] as f64) * 0.01).sum();
-        let w_silica_live: f64 = (0..5)
-            .map(|n| (fp_l[n] as f64) * if n < 2 { 0.01 } else { 0.0 })
-            .sum();
-        let w_moist_dead: f32 = (0..5).map(|n| fp_d[n] * p.moisture_dead[n]).sum();
-        let w_moist_live: f32 = (0..5).map(|n| fp_l[n] * p.moisture_live[n]).sum();
-        let w_savr_dead: f32 = (0..5).map(|n| fp_d[n] * p.savr_dead[n]).sum();
-        let w_savr_live: f32 = (0..5).map(|n| fp_l[n] * p.savr_live[n]).sum();
-        let sigma = frac_dead * w_savr_dead + frac_live * w_savr_live;
-        // Python evaluates the silica subtraction as f64 before the f32 array multiplication.
-        let wn_d: [f32; 5] =
-            std::array::from_fn(|n| p.load_dead[n] * ((1.0f64 - 0.0555f64) as f32));
-        let wn_l: [f32; 5] =
-            std::array::from_fn(|n| p.load_live[n] * ((1.0f64 - 0.0555f64) as f32));
-        let wfl_dead = size_sorted_wfl(
-            &p.savr_dead.map(f64::from),
-            &fp_d.map(f64::from),
-            &wn_d.map(f64::from),
-        );
-        let wfl_live = size_sorted_wfl(
-            &p.savr_live.map(f64::from),
-            &fp_l.map(f64::from),
-            &wn_l.map(f64::from),
-        );
-        let total_load = p.load_dead.iter().sum::<f32>() + p.load_live.iter().sum::<f32>();
-        let depth = p.depth;
-        let safe_depth = if depth > 1e-7 { depth } else { 1.0 };
-        let bulk_density = if depth > 1e-7 {
-            total_load / safe_depth
-        } else {
-            0.0
-        };
-        let packing_ratio = if depth > 1e-7 {
-            p.load_dead
-                .iter()
-                .map(|v| v / (safe_depth * 32.0))
-                .sum::<f32>()
-                + p.load_live
-                    .iter()
-                    .map(|v| v / (safe_depth * 32.0))
-                    .sum::<f32>()
-        } else {
-            0.0
-        };
-        let safe_sigma = if sigma > 1e-7 { sigma } else { 1.0 };
-        let opt = if sigma > 1e-7 {
-            3.348 / safe_sigma.powf(0.8189)
-        } else {
-            1.0
-        };
-        let safe_opt = if opt > 1e-7 { opt } else { 1.0 };
-        let relative_packing_ratio = if sigma > 1e-7 && opt > 1e-7 {
-            packing_ratio / safe_opt
-        } else {
-            0.0
-        };
-        let hs_d: f32 = (0..5)
-            .map(|n| frac_dead * fp_d[n] * (250.0 + 1116.0 * p.moisture_dead[n]) * exp_d[n])
-            .sum();
-        let hs_l: f32 = (0..5)
-            .map(|n| {
-                let exp = if p.savr_live[n] > 1e-7 {
-                    (-138.0 / p.savr_live[n]).exp()
-                } else {
-                    0.0
-                };
-                frac_live * fp_l[n] * (250.0 + 1116.0 * p.moisture_live[n]) * exp
-            })
-            .sum();
-        let heat_sink = (hs_d + hs_l) * bulk_density;
-        let propagating_flux = if sigma > 1e-7 {
-            ((0.792 + 0.681 * safe_sigma.sqrt()) * (packing_ratio + 0.1)).exp()
-                / (192.0 + 0.2595 * safe_sigma)
-        } else {
-            0.0
-        };
-        FuelbedIntermediates {
-            sigma: sigma as f64,
-            bulk_density: bulk_density as f64,
-            packing_ratio: packing_ratio as f64,
-            relative_packing_ratio: relative_packing_ratio as f64,
-            heat_sink: heat_sink as f64,
-            propagating_flux: propagating_flux as f64,
-            w_heat_dead: w_heat_dead as f64,
-            w_heat_live: w_heat_live as f64,
-            w_silica_dead,
-            w_silica_live,
-            w_moist_dead: w_moist_dead as f64,
-            w_moist_live: w_moist_live as f64,
-            wfl_dead: wfl_dead as f64,
-            wfl_live: wfl_live as f64,
-            moe_dead: moe_dead as f64,
-            moe_live: moe_live as f64,
-            frac_dead: frac_dead as f64,
-            frac_live: frac_live as f64,
-            depth: depth as f64,
-            is_defined: p.is_defined,
-        }
-    }
-}
 
 /// Calculate all twenty Python fuelbed dictionary fields for one cell, in base units.
 pub fn calculate_fuelbed_intermediates(p: &Particles) -> FuelbedIntermediates {
@@ -211,42 +27,10 @@ fn calculate_fuelbed_selected<const STRICT: bool>(
     p: &Particles,
     terms: &super::SavrTerms,
 ) -> FuelbedIntermediates {
-    let sa_d: [f64; 5] = std::array::from_fn(|n| p.load_dead[n] * p.savr_dead[n] / 32.0);
-    let sa_l: [f64; 5] = std::array::from_fn(|n| p.load_live[n] * p.savr_live[n] / 32.0);
-    let tsa_d: f64 = sa_d.iter().sum();
-    let tsa_l: f64 = sa_l.iter().sum();
-    let tsa_total = tsa_d + tsa_l;
-    let safe_tsa = if STRICT && tsa_total.is_nan() {
-        f64::NAN
-    } else if tsa_total > 1e-7 {
-        tsa_total
-    } else {
-        1.0
-    };
-    let frac_dead = if STRICT && tsa_total.is_nan() {
-        f64::NAN
-    } else if tsa_total > 1e-7 {
-        tsa_d / safe_tsa
-    } else {
-        0.0
-    };
+    let (fp_d, tsa_d) = particle_area_weights::<STRICT>(&p.load_dead, &p.savr_dead);
+    let (fp_l, tsa_l) = particle_area_weights::<STRICT>(&p.load_live, &p.savr_live);
+    let frac_dead = dead_area_fraction::<STRICT>(tsa_d, tsa_l);
     let frac_live = 1.0 - frac_dead;
-    let safe_d = if STRICT && tsa_d.is_nan() {
-        f64::NAN
-    } else if tsa_d > 1e-7 {
-        tsa_d
-    } else {
-        1.0
-    };
-    let safe_l = if STRICT && tsa_l.is_nan() {
-        f64::NAN
-    } else if tsa_l > 1e-7 {
-        tsa_l
-    } else {
-        1.0
-    };
-    let fp_d: [f64; 5] = std::array::from_fn(|n| sa_d[n] / safe_d);
-    let fp_l: [f64; 5] = std::array::from_fn(|n| sa_l[n] / safe_l);
     let exp_d = terms.exp_dead;
     let exp_l500 = terms.exp_live500;
     let fine_d: f64 = (0..5).map(|n| p.load_dead[n] * exp_d[n]).sum();
@@ -254,108 +38,36 @@ fn calculate_fuelbed_selected<const STRICT: bool>(
         .map(|n| p.load_dead[n] * exp_d[n] * p.moisture_dead[n])
         .sum();
     let fine_l: f64 = (0..5).map(|n| p.load_live[n] * exp_l500[n]).sum();
-    let safe_fd = if fine_d > 1e-7 { fine_d } else { 1.0 };
-    let fine_dead_moist = if STRICT && fine_d.is_nan() {
-        f64::NAN
-    } else if fine_d > 1e-7 {
-        fine_dm / safe_fd
-    } else {
-        0.0
-    };
-    let safe_fl = if fine_l > 1e-7 { fine_l } else { 1.0 };
-    let fdol = if STRICT && fine_l.is_nan() {
-        f64::NAN
-    } else if fine_l > 1e-7 {
-        fine_d / safe_fl
-    } else {
-        0.0
-    };
     let moe_dead = p.moe_dead;
-    let safe_md = if STRICT && moe_dead.is_nan() {
-        f64::NAN
-    } else if moe_dead > 1e-7 {
-        moe_dead
-    } else {
-        1.0
-    };
-    let moe_live = np_max(
-        2.9 * fdol * (1.0 - fine_dead_moist / safe_md) - 0.226,
-        moe_dead,
-    );
-    let w_heat_dead = (0..5).map(|n| fp_d[n] * p.hoc_dead).sum();
-    let w_heat_live = (0..5).map(|n| fp_l[n] * p.hoc_live).sum();
-    let w_silica_dead = (0..5).map(|n| fp_d[n] * 0.01).sum();
+    let moe_live = live_extinction_from_fines::<STRICT>(fine_d, fine_dm, fine_l, moe_dead);
+    let w_heat_dead = weighted_constant(&fp_d, p.hoc_dead);
+    let w_heat_live = weighted_constant(&fp_l, p.hoc_live);
+    let w_silica_dead = weighted_constant(&fp_d, 0.01);
     let w_silica_live = (0..5)
         .map(|n| fp_l[n] * if n < 2 { 0.01 } else { 0.0 })
         .sum();
-    let w_moist_dead = (0..5).map(|n| fp_d[n] * p.moisture_dead[n]).sum();
-    let w_moist_live = (0..5).map(|n| fp_l[n] * p.moisture_live[n]).sum();
-    let w_savr_dead: f64 = (0..5).map(|n| fp_d[n] * p.savr_dead[n]).sum();
-    let w_savr_live: f64 = (0..5).map(|n| fp_l[n] * p.savr_live[n]).sum();
-    let sigma = frac_dead * w_savr_dead + frac_live * w_savr_live;
+    let w_moist_dead = weighted_values(&fp_d, &p.moisture_dead);
+    let w_moist_live = weighted_values(&fp_l, &p.moisture_live);
+    let sigma = mixture_sigma(
+        frac_dead,
+        frac_live,
+        &fp_d,
+        &p.savr_dead,
+        &fp_l,
+        &p.savr_live,
+    );
     let wn_d = std::array::from_fn(|n| p.load_dead[n] * (1.0 - 0.0555));
     let wn_l = std::array::from_fn(|n| p.load_live[n] * (1.0 - 0.0555));
     let wfl_dead = super::size_sorted_prepared(&terms.bins_dead, &fp_d, &wn_d);
     let wfl_live = super::size_sorted_prepared(&terms.bins_live, &fp_l, &wn_l);
-    let total_load = p.load_dead.iter().sum::<f64>() + p.load_live.iter().sum::<f64>();
     let depth = p.depth;
-    let safe_depth = if depth > 1e-7 { depth } else { 1.0 };
-    let bulk_density = if STRICT && depth.is_nan() {
-        f64::NAN
-    } else if depth > 1e-7 {
-        total_load / safe_depth
-    } else {
-        0.0
-    };
-    let packing_ratio = if STRICT && depth.is_nan() {
-        f64::NAN
-    } else if depth > 1e-7 {
-        p.load_dead
-            .iter()
-            .map(|v| v / (safe_depth * 32.0))
-            .sum::<f64>()
-            + p.load_live
-                .iter()
-                .map(|v| v / (safe_depth * 32.0))
-                .sum::<f64>()
-    } else {
-        0.0
-    };
-    let safe_sigma = if sigma > 1e-7 { sigma } else { 1.0 };
-    let opt = if STRICT && sigma.is_nan() {
-        f64::NAN
-    } else if sigma > 1e-7 {
-        3.348 / safe_sigma.powf(0.8189)
-    } else {
-        1.0
-    };
-    let safe_opt = if opt > 1e-7 { opt } else { 1.0 };
-    let relative_packing_ratio =
-        if STRICT && crate::engine::missing::all_above(&[(sigma, 1e-7), (opt, 1e-7)]).is_none() {
-            f64::NAN
-        } else if sigma > 1e-7 && opt > 1e-7 {
-            packing_ratio / safe_opt
-        } else {
-            0.0
-        };
-    let hs_d: f64 = (0..5)
-        .map(|n| frac_dead * fp_d[n] * (250.0 + 1116.0 * p.moisture_dead[n]) * exp_d[n])
-        .sum();
-    let hs_l: f64 = (0..5)
-        .map(|n| {
-            let exp = terms.exp_live138[n];
-            frac_live * fp_l[n] * (250.0 + 1116.0 * p.moisture_live[n]) * exp
-        })
-        .sum();
+    let bulk_density = bulk_from_loads::<STRICT>(&p.load_dead, &p.load_live, depth);
+    let packing_ratio = packing_from_loads::<STRICT>(&p.load_dead, &p.load_live, depth);
+    let relative_packing_ratio = relative_packing_from_sigma::<STRICT>(sigma, packing_ratio);
+    let hs_d = heat_sink_side(frac_dead, &fp_d, &p.moisture_dead, &exp_d);
+    let hs_l = heat_sink_side(frac_live, &fp_l, &p.moisture_live, &terms.exp_live138);
     let heat_sink = (hs_d + hs_l) * bulk_density;
-    let propagating_flux = if STRICT && sigma.is_nan() {
-        f64::NAN
-    } else if sigma > 1e-7 {
-        ((0.792 + 0.681 * safe_sigma.sqrt()) * (packing_ratio + 0.1)).exp()
-            / (192.0 + 0.2595 * safe_sigma)
-    } else {
-        0.0
-    };
+    let propagating_flux = propagating_flux_from_sigma::<STRICT>(sigma, packing_ratio);
     FuelbedIntermediates {
         sigma,
         bulk_density,
@@ -377,6 +89,187 @@ fn calculate_fuelbed_selected<const STRICT: bool>(
         frac_live,
         depth,
         is_defined: p.is_defined,
+    }
+}
+
+/// Sum actual particle values in the existing weighted operation order.
+#[inline]
+pub(crate) fn weighted_values(weights: &[f64; 5], values: &[f64; 5]) -> f64 {
+    (0..5).map(|n| weights[n] * values[n]).sum()
+}
+
+/// Apply the same constant separately to each weight, preserving summation order.
+#[inline]
+pub(crate) fn weighted_constant(weights: &[f64; 5], value: f64) -> f64 {
+    (0..5).map(|n| weights[n] * value).sum()
+}
+
+/// Resolve live extinction from actual fine-fuel totals and dead extinction.
+#[inline]
+pub(crate) fn live_extinction_from_fines<const STRICT: bool>(
+    fine_d: f64,
+    fine_dm: f64,
+    fine_l: f64,
+    dead: f64,
+) -> f64 {
+    let safe_d = if fine_d > 1e-7 { fine_d } else { 1. };
+    let moisture = if STRICT && fine_d.is_nan() {
+        f64::NAN
+    } else if fine_d > 1e-7 {
+        fine_dm / safe_d
+    } else {
+        0.
+    };
+    let safe_l = if fine_l > 1e-7 { fine_l } else { 1. };
+    let ratio = if STRICT && fine_l.is_nan() {
+        f64::NAN
+    } else if fine_l > 1e-7 {
+        fine_d / safe_l
+    } else {
+        0.
+    };
+    let safe_m = if STRICT && dead.is_nan() {
+        f64::NAN
+    } else if dead > 1e-7 {
+        dead
+    } else {
+        1.
+    };
+    np_max(2.9 * ratio * (1. - moisture / safe_m) - 0.226, dead)
+}
+
+/// Calculate bulk density using actual load totals and the three-valued depth guard.
+#[inline]
+pub(crate) fn bulk_from_loads<const STRICT: bool>(
+    dead: &[f64; 5],
+    live: &[f64; 5],
+    depth: f64,
+) -> f64 {
+    let total = dead.iter().sum::<f64>() + live.iter().sum::<f64>();
+    let safe = if depth > 1e-7 { depth } else { 1. };
+    if STRICT && depth.is_nan() {
+        f64::NAN
+    } else if depth > 1e-7 {
+        total / safe
+    } else {
+        0.
+    }
+}
+
+/// Retain particle-by-particle packing division, rather than reordering it algebraically.
+#[inline]
+pub(crate) fn packing_from_loads<const STRICT: bool>(
+    dead: &[f64; 5],
+    live: &[f64; 5],
+    depth: f64,
+) -> f64 {
+    let safe = if depth > 1e-7 { depth } else { 1. };
+    if STRICT && depth.is_nan() {
+        f64::NAN
+    } else if depth > 1e-7 {
+        dead.iter().map(|v| v / (safe * 32.)).sum::<f64>()
+            + live.iter().map(|v| v / (safe * 32.)).sum::<f64>()
+    } else {
+        0.
+    }
+}
+
+/// Calculate one actual moisture/area side of the heat-sink sum.
+#[inline]
+pub(crate) fn heat_sink_side(
+    fraction: f64,
+    weights: &[f64; 5],
+    moisture: &[f64; 5],
+    exponent: &[f64; 5],
+) -> f64 {
+    (0..5)
+        .map(|n| fraction * weights[n] * (250. + 1116. * moisture[n]) * exponent[n])
+        .sum()
+}
+
+/// Return exact area weights and their sum for one actual particle side.
+#[inline]
+pub(crate) fn particle_area_weights<const STRICT: bool>(
+    load: &[f64; 5],
+    savr: &[f64; 5],
+) -> ([f64; 5], f64) {
+    let area: [f64; 5] = std::array::from_fn(|n| load[n] * savr[n] / 32.);
+    let total: f64 = area.iter().sum();
+    let safe = if STRICT && total.is_nan() {
+        f64::NAN
+    } else if total > 1e-7 {
+        total
+    } else {
+        1.
+    };
+    (std::array::from_fn(|n| area[n] / safe), total)
+}
+
+/// Resolve the dead area fraction without converting an unknown denominator to zero.
+#[inline]
+pub(crate) fn dead_area_fraction<const STRICT: bool>(dead: f64, live: f64) -> f64 {
+    let total = dead + live;
+    let safe = if STRICT && total.is_nan() {
+        f64::NAN
+    } else if total > 1e-7 {
+        total
+    } else {
+        1.
+    };
+    if STRICT && total.is_nan() {
+        f64::NAN
+    } else if total > 1e-7 {
+        dead / safe
+    } else {
+        0.
+    }
+}
+
+/// Calculate characteristic SAVR from the actual, potentially injected mixture fractions.
+#[inline]
+pub(crate) fn mixture_sigma(
+    dead: f64,
+    live: f64,
+    wd: &[f64; 5],
+    sd: &[f64; 5],
+    wl: &[f64; 5],
+    sl: &[f64; 5],
+) -> f64 {
+    let dead_savr: f64 = (0..5).map(|n| wd[n] * sd[n]).sum();
+    let live_savr: f64 = (0..5).map(|n| wl[n] * sl[n]).sum();
+    dead * dead_savr + live * live_savr
+}
+
+/// Share the actual sigma/packing dependency without rebuilding unrelated fuelbed fields.
+#[inline]
+pub(crate) fn relative_packing_from_sigma<const STRICT: bool>(sigma: f64, packing: f64) -> f64 {
+    let safe_sigma = if sigma > 1e-7 { sigma } else { 1.0 };
+    let opt = if STRICT && sigma.is_nan() {
+        f64::NAN
+    } else if sigma > 1e-7 {
+        3.348 / safe_sigma.powf(0.8189)
+    } else {
+        1.0
+    };
+    let safe_opt = if opt > 1e-7 { opt } else { 1.0 };
+    if STRICT && crate::engine::missing::all_above(&[(sigma, 1e-7), (opt, 1e-7)]).is_none() {
+        f64::NAN
+    } else if sigma > 1e-7 && opt > 1e-7 {
+        packing / safe_opt
+    } else {
+        0.0
+    }
+}
+
+/// Share the propagating-flux equation with field-level staged evaluation.
+#[inline]
+pub(crate) fn propagating_flux_from_sigma<const STRICT: bool>(sigma: f64, packing: f64) -> f64 {
+    if STRICT && sigma.is_nan() {
+        f64::NAN
+    } else if sigma > 1e-7 {
+        ((0.792 + 0.681 * sigma.sqrt()) * (packing + 0.1)).exp() / (192.0 + 0.2595 * sigma)
+    } else {
+        0.0
     }
 }
 

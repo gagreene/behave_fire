@@ -28,19 +28,7 @@ macro_rules! operations {
 }
 impl Operation {
     pub(crate) fn numeric_contract(self) -> &'static str {
-        if self.main_model() {
-            return "f64-model";
-        }
-        match self.family() {
-            Family::Contain
-            | Family::Ignite
-            | Family::Mortality
-            | Family::Safety
-            | Family::Spot
-            | Family::Units
-            | Family::VaporPressureDeficitCalculator => "f64-stateless",
-            _ => "unmigrated",
-        }
+        "f64"
     }
 }
 operations! {

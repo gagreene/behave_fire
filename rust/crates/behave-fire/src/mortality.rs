@@ -102,7 +102,26 @@ pub fn calculate_crown_scorch_mortality(
     )
 }
 
-/// Calculate crown scorch mortality from an already selected coefficient row.
+/// Calculate scorch fractions from their three actual tree and scorch inputs.
+pub fn calculate_crown_scorch_fractions(
+    scorch_height_ft: f64,
+    tree_height_ft: f64,
+    crown_ratio: f64,
+) -> (f64, f64) {
+    let crown_length = crown_ratio * tree_height_ft;
+    let crown_base = tree_height_ft - crown_length;
+    let cls = if crown_length.is_nan() {
+        f64::NAN
+    } else if crown_length > 1e-7 {
+        np_clip((scorch_height_ft - crown_base) / crown_length, 0.0, 1.0)
+    } else {
+        0.0
+    };
+    let cvs = cls.powi(2) * (3.0 - 2.0 * cls);
+    (cls, cvs)
+}
+
+/// Calculate mortality from an actual selected coefficient row.
 /// A zero coefficient triple suppresses mortality; equation numbers add no gate.
 pub fn calculate_crown_scorch_mortality_with_coefficients(
     scorch_height_ft: f64,
@@ -111,14 +130,8 @@ pub fn calculate_crown_scorch_mortality_with_coefficients(
     dbh_inches: f64,
     coefficients: [f64; 3],
 ) -> MortalityResult {
-    let crown_length = crown_ratio * tree_height_ft;
-    let crown_base = tree_height_ft - crown_length;
-    let cls = if crown_length > 1e-7 {
-        np_clip((scorch_height_ft - crown_base) / crown_length, 0.0, 1.0)
-    } else {
-        0.0
-    };
-    let cvs = cls.powi(2) * (3.0 - 2.0 * cls);
+    let (cls, cvs) =
+        calculate_crown_scorch_fractions(scorch_height_ft, tree_height_ft, crown_ratio);
     let [b1, b2, b3] = coefficients;
     let logit = b1 + b2 * dbh_inches + b3 * cvs;
     let probability = if b1 == 0.0 && b2 == 0.0 && b3 == 0.0 {
@@ -132,7 +145,6 @@ pub fn calculate_crown_scorch_mortality_with_coefficients(
         probability_mortality: np_clip(probability, 0.0, 1.0),
     }
 }
-
 /// Calculate scorch height in feet with the reference near-zero denominator rule.
 pub fn calculate_scorch_height(
     fireline_intensity_btu_ft_s: f64,
@@ -141,8 +153,16 @@ pub fn calculate_scorch_height(
 ) -> f64 {
     let fi = fireline_intensity_btu_ft_s;
     let denom = 140.0 - air_temp_f;
-    let safe_denom = if denom.abs() > 1e-7 { denom } else { 1.0 };
-    if fi > 1e-7 {
+    let safe_denom = if denom.is_nan() {
+        f64::NAN
+    } else if denom.abs() > 1e-7 {
+        denom
+    } else {
+        1.0
+    };
+    if fi.is_nan() {
+        f64::NAN
+    } else if fi > 1e-7 {
         (63.0 / safe_denom) * fi.powf(1.166667) / (fi + midflame_wind_mph.powi(3)).sqrt()
     } else {
         0.0

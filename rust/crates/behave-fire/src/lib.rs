@@ -1,14 +1,11 @@
 #![doc = include_str!("../README.md")]
-#![deny(unsafe_code)]
+#![forbid(unsafe_code)]
 #![warn(missing_docs)]
 
 mod error;
 mod grid;
 mod model;
 mod parallel;
-// The private SVML adapter audits its CPU guard, scalar ABI, and assembly calls.
-#[allow(unsafe_code)]
-mod svml;
 
 pub mod batch;
 pub mod contain;

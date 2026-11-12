@@ -1,5 +1,5 @@
 //! Native effects marshalling and scalar entry-point dispatch.
-use crate::column_output::RowWriter;
+use crate::component_columns::RowWriter;
 use crate::dispatch::{named, scalar, widen};
 use crate::operation::Operation;
 use crate::prepared::{Field, PreparedArguments};
@@ -9,8 +9,7 @@ pub fn evaluate(
     operation: Operation,
     a: &PreparedArguments<'_>,
     i: usize,
-    _single: bool,
-    out: &mut RowWriter<'_>,
+    out: &mut RowWriter<'_, '_>,
 ) -> Result<Option<()>, String> {
     match operation {
         Operation::SafetyCalculateSafetyZone => named(
@@ -70,10 +69,10 @@ pub fn evaluate(
         Operation::IgniteCalculateLightningIgnitionProbability => scalar(
             out,
             widen(ignite::calculate_lightning_ignition_probability(
-                a.n(Field::FuelBedTypeGrid, i)? as i32,
+                a.code(Field::FuelBedTypeGrid, i)? as i32,
                 a.n(Field::Moisture100hFraction, i)?,
                 a.n(Field::DuffDepthInches, i)?,
-                a.n(Field::ChargeType, i)? as i32,
+                a.code(Field::ChargeType, i)? as i32,
             )),
         ),
         Operation::MortalityCalculateScorchHeight => scalar(

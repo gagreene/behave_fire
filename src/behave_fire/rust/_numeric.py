@@ -1,5 +1,7 @@
 """Owned float64 data, typed controls, and dependency-local shape planning."""
 from dataclasses import dataclass
+from enum import IntEnum
+from itertools import zip_longest
 
 import numpy as np
 from .._ownership import _OWNER
@@ -22,6 +24,21 @@ def _validate_value(value):
             _validate_value(item)
     elif type(value) not in (bool, int, float):
         raise TypeError("Rust accepts ordinary real numeric inputs; opaque arithmetic requires Python.")
+
+
+def broadcast_shape(*shapes):
+    """Combine logical shapes without NumPy's legacy 32-axis broadcast iterator.
+
+    :param shapes: Actual operand shapes, including scalar and empty shapes.
+    :return: Broadcast shape; incompatible nonunit extents raise ValueError.
+    """
+    result = []
+    for extents in zip_longest(*(reversed(shape) for shape in shapes), fillvalue=1):
+        sizes = set(extents) - {1}
+        if len(sizes) > 1:
+            raise ValueError('Input shapes cannot be broadcast together.')
+        result.append(next(iter(sizes), 1))
+    return tuple(reversed(result))
 
 
 def normalize_control(value, dtype):
@@ -49,6 +66,23 @@ def normalize_control(value, dtype):
         if data.min().item() < limits.min or data.max().item() > limits.max:
             raise OverflowError("Control value is outside its declared integer range.")
     return np.array(data, dtype=target, copy=True, order="C", subok=False)
+
+
+def normalize_flag(value):
+    """Own a boolean condition using the public real-value truth convention.
+
+    :param value: Ordinary real boolean condition or integral enum; missing flags are invalid.
+    :return: Independent boolean array; complex/object conditions and missing values raise.
+    """
+    if isinstance(value, IntEnum):
+        value = int(value)
+    _validate_value(value)
+    if np.ma.isMaskedArray(value) and np.ma.getmaskarray(value).any():
+        raise ValueError('A typed flag cannot be missing.')
+    data = np.asarray(np.ma.getdata(value))
+    if data.dtype.kind == 'f' and np.isnan(data).any():
+        raise ValueError('A typed flag cannot be missing.')
+    return np.array(data, dtype=np.bool_, copy=True, order='C', subok=False)
 
 
 def normalize_identifier(value):
@@ -79,7 +113,9 @@ def normalize_physical(value):
             registered snapshot may be reused within the same public call.
     """
     _validate_value(value)
-    if type(value) is np.ndarray or type(value) in (bool, int, float) or isinstance(value, np.generic):
+    plain_sequence = type(value) in (list, tuple) and all(
+        type(item) in (bool, int, float) or isinstance(item, np.generic) for item in value)
+    if type(value) is np.ndarray or type(value) in (bool, int, float) or isinstance(value, np.generic) or plain_sequence:
         owner = _OWNER.get()
         if (owner is not None and owner.owns_storage(value) and value.dtype == np.float64
                 and value.flags.c_contiguous and value.flags.aligned):
@@ -117,7 +153,7 @@ def plan_shapes(inputs, dependencies):
     groups = {}
     for output, names in dependencies.items():
         required = tuple(sorted(set(names)))
-        shape = np.broadcast_shapes(*(np.shape(inputs[name]) for name in required))
+        shape = broadcast_shape(*(np.shape(inputs[name]) for name in required))
         groups.setdefault((shape, required), []).append(output)
     return [ShapeGroup(shape, required, tuple(outputs))
             for (shape, required), outputs in groups.items()]

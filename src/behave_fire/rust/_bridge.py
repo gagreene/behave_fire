@@ -1,6 +1,5 @@
 """Structural array normalization for explicit native calculations."""
 from importlib import import_module
-from threading import Lock
 import numpy as np
 from .._backend_contract import BINDING_API_VERSION
 from ._threads import _THREADS
@@ -10,12 +9,6 @@ except ImportError as error:
     raise ImportError('Rust backend unavailable; install a native behave-fire wheel or build the extension.') from error
 if getattr(_native, '__binding_api_version__', None) != BINDING_API_VERSION:
     raise ImportError('Rust backend has an incompatible binding API; rebuild or reinstall behave-fire.')
-_ATAN2_PROFILE_CACHE = None
-_ATAN2_PROFILE_LOCK = Lock()
-# NumPy AVX512 gather/scatter limit after its unsigned sizeof(float) division.
-# Negative byte strides fail this predicate in the supported NumPy sources.
-_ATAN2_MAX_STRIDE_BYTES = (0x7fffffff // 16) * 4 + 3
-_RETAIN = {'calculate_backing_spread_rate', 'calculate_eccentricity', 'calculate_fire_length', 'calculate_fire_length_to_width_ratio', 'calculate_flame_length', 'calculate_flanking_spread_rate', 'calculate_no_wind_no_slope_spread_rate', 'calculate_residence_time', 'calculate_wind_phi', 'calculate_effective_wind_speed', 'calculate_surface_wind_coefficients', 'calculate_fuelbed_intermediates', 'calculate_reaction_intensity', 'calculate_direction_of_max_spread', 'calculate_slope_phi', 'calculate_surface_rate_vector'}
 _PARTICLES = ('load_dead', 'load_live', 'savr_dead', 'savr_live', 'moisture_dead', 'moisture_live')
 _PARTICLE_FIELDS = _PARTICLES + ('hoc_dead', 'hoc_live', 'depth', 'moe_dead', 'is_defined')
 _REACTION_FIELDS = ('sigma', 'relative_packing_ratio', 'w_moist_dead', 'w_moist_live', 'moe_dead', 'moe_live', 'w_silica_dead', 'w_silica_live', 'wfl_dead', 'wfl_live', 'w_heat_dead', 'w_heat_live')
@@ -31,79 +24,6 @@ _EMPTY_KEYS.update({'assign_final_crown_fire_behavior': ('final_spread_rate', 'f
 _EMPTY_KEYS['calculate_crown_surface_fire'] = tuple(('p_crown.' + key for key in _EMPTY_KEYS['build_particle_arrays'])) + tuple(('ib_crown.' + key for key in _EMPTY_KEYS['calculate_fuelbed_intermediates'])) + tuple(('crown_surface.' + key for key in _EMPTY_KEYS['run_surface_fire'])) + ('ri_crown', 'crown_fire_spread_rate', 'crown_length_to_width_ratio')
 
 
-def _atan2_math_profile():
-    """Identify the linked NumPy atan2 kernel once from fixed intrinsic probes.
-
-    :return: One for guarded SVML or zero for scalar libm; unknown kernels raise.
-    """
-    global _ATAN2_PROFILE_CACHE
-    with _ATAN2_PROFILE_LOCK:
-        if _ATAN2_PROFILE_CACHE is None:
-            try:
-                _ATAN2_PROFILE_CACHE = (_calibrate_atan2_profile(), None)
-            except Exception as error:
-                _ATAN2_PROFILE_CACHE = (None, 'Rust backend cannot identify the NumPy float32 atan2 kernel: '
-                                        f'{error}. Rebuild or reinstall compatible NumPy and behave-fire, then restart '
-                                        'the process, or select backend="python" explicitly.')
-        selected, failure = _ATAN2_PROFILE_CACHE
-        if failure is not None:
-            # Store only text, never an exception/traceback that could retain caller arrays.
-            raise RuntimeError(failure) from None
-        return selected
-
-
-def _broadcast_buffer(value, shape):
-    """Validate broadcasting while retaining scalar buffers as single values.
-
-    :param value: Normalized numeric or metadata array.
-    :param shape: Checked result broadcast shape.
-    :return: Logical broadcast view, or the original one-element buffer.
-    """
-    broadcast = np.broadcast_to(value, shape)
-    return value if value.size == 1 else broadcast
-
-
-def _calibrate_atan2_profile():
-    """Compare fixed finite NumPy primitive results with native candidate kernels.
-
-    :return: The unique matching native profile; rejects malformed or ambiguous candidates.
-    """
-    record = _native.atan2_profile_candidates()
-    if not isinstance(record, (tuple, list)) or len(record) != 4:
-        raise RuntimeError('malformed native atan2 configuration record')
-    y_bits, x_bits, libm_bits, svml_bits = record
-    y = _calibration_bits(y_bits, 'y operands').view(np.float32)
-    x = _calibration_bits(x_bits, 'x operands').view(np.float32)
-    libm = _calibration_bits(libm_bits, 'libm results')
-    svml = None if svml_bits is None else _calibration_bits(svml_bits, 'SVML results')
-    if not (np.isfinite(y).all() and np.isfinite(x).all()):
-        raise RuntimeError('native atan2 configuration operands must be finite')
-    # Configuration identification only: no caller inputs or fire formulas enter this ufunc.
-    with np.errstate(all='ignore'):
-        observed = np.arctan2(y, x)
-    if not isinstance(observed, np.ndarray) or observed.dtype != np.float32 or observed.shape != (16,):
-        raise RuntimeError('unexpected NumPy atan2 configuration result')
-    bits = observed.view(np.uint32)
-    matches = [index for index, candidate in enumerate((libm, svml))
-               if candidate is not None and np.array_equal(bits, candidate)]
-    if len(matches) != 1:
-        raise RuntimeError('native atan2 candidates are ambiguous' if matches else 'no native atan2 candidate matches NumPy')
-    return matches[0]
-
-
-def _calibration_bits(value, name):
-    """Validate the bounded native configuration protocol before constructing arrays.
-
-    :param value: Sixteen unsigned binary32 payloads from the no-argument native helper.
-    :param name: Diagnostic field name.
-    :return: Owned uint32 array; malformed records raise without executing a probe.
-    """
-    if (not isinstance(value, (tuple, list)) or len(value) != 16
-            or any(type(bit) is not int or not 0 <= bit <= 0xffffffff for bit in value)):
-        raise RuntimeError(f'malformed native atan2 {name}')
-    return np.array(value, dtype=np.uint32)
-
-
 def _call(operation, arguments):
     """Own a public operation's inputs before its first detached native stage.
 
@@ -115,352 +35,40 @@ def _call(operation, arguments):
 
     _validate_raw_arithmetic(operation, arguments)
     with _owned_inputs() as owner:
-        direction_profile = 0
-        if operation == 'surface.calculate_direction_of_max_spread':
-            layout = dict(arguments)
-            for key in ('x_component', 'y_component'):
-                layout[key] = owner.layout_source(arguments[key])
-            normalized, single = _normalize_direction(layout)
-            shape_fields = ('x_component', 'y_component', 'rate_vector')
-            if 'north' in str(arguments['wind_orientation_mode']).lower():
-                shape_fields += ('aspect',)
-            shape = np.broadcast_shapes(*(np.shape(normalized[key]) for key in shape_fields))
-            if single and all(shape):
-                # Layout metadata comes from the original operands; all scientific
-                # values below still come exclusively from the owned snapshot.
-                direction_profile = _direction_math_profile(normalized)
-        result = _call_owned(operation, owner.snapshot(arguments), direction_profile)
+        result = _call_owned(operation, owner.snapshot(arguments))
         return owner.remember(result)
 
 
-def _call_owned(operation, arguments, direction_profile):
-    """Normalize structural inputs and call the owned native batch boundary.
+def _call_owned(operation, arguments):
+    """Dispatch owned arguments through the configured model or primitive component boundary.
 
-    :param operation: Fully qualified explicit component operation.
-    :param arguments: Bound argument mapping in public signature order.
-    :param direction_profile: Atan2 selector captured before copying original operands.
-    :return: Fresh arrays in the reference result structure.
+    :param operation: Fully qualified public operation.
+    :param arguments: Independently owned original operands.
+    :return: Float64 physical results and separately typed codes or flags.
     """
     if operation in ('model.run_surface', 'crown.run_crown_fire'):
         from ._model_api4 import execute_model
-
         return execute_model('surface' if operation == 'model.run_surface' else 'crown',
                              arguments, threads=_THREADS.get())
-    from ._contracts import normalize_arguments, numeric_contract
-
-    migrated_stateless = numeric_contract(operation) == 'f64-stateless'
+    from ._component_api4 import execute_component
+    from ._contracts import normalize_arguments
     arguments = normalize_arguments(operation, arguments)
-    native_registry = None
-    arrays = {}
-    integers = {}
-    mask_metadata = {}
-    strings = {}
-    precision = []
-    arguments = dict(arguments)
-    original_arguments = dict(arguments)
-    pipeline = arguments.pop('_pipeline', None)
-    name = operation.rsplit('.', 1)[1]
-    direction_float32 = False
-    if operation == 'surface.calculate_direction_of_max_spread':
-        arguments, direction_float32 = _normalize_direction(arguments)
-    if operation == 'contain.run_contain_sim_array':
-        import operator
-        arguments['max_steps'] = operator.index(arguments['max_steps'])
-    if operation == 'ignite.calculate_lightning_ignition_probability':
-        charge = arguments['charge_type']
-        arguments['charge_type'] = 0 if charge == 0 else 1 if charge == 1 else 2
-    if name in ('calculate_fire_area', 'calculate_fire_perimeter'):
-        arguments['is_crown'] = bool(arguments['is_crown'])
-    partition = arguments.pop('_native_partition', False)
-    if operation == 'crown.calculate_crown_fire_ratios' and (not partition):
-        fields = {'crown_fire_transition_ratio': ('surface_fli', 'critical_surface_fli'), 'crown_fire_active_ratio': ('crown_ros', 'critical_crown_ros')}
-        return _partition_fields(operation, arguments, fields)
-    if operation == 'crown.assign_final_crown_fire_behavior' and (not partition):
-        fields = {'final_spread_rate': ('is_surface_fire', 'is_passive_crown', 'surface_ros', 'passive_ros', 'crown_ros'), 'final_heat_per_unit_area': ('is_surface_fire', 'is_passive_crown', 'surface_hpua', 'passive_hpua', 'crown_hpua'), 'final_fireline_intensity': ('is_surface_fire', 'is_passive_crown', 'surface_fli', 'passive_fli', 'crown_fli'), 'final_flame_length': ('is_surface_fire', 'is_passive_crown', 'surface_fli', 'passive_fl', 'crown_fl')}
-        return _partition_fields(operation, arguments, fields)
-    for mode in ('wind_orientation_mode', 'wind_height_mode', 'waf_method'):
-        if mode in arguments:
-            arguments[mode] = str(arguments[mode])
-    for field, kind in (('wind_speed_units', 'Speed'), ('slope_units', 'Slope'), ('temp_units', 'Temperature'), ('rh_units', 'Fraction')):
-        if field in arguments and not migrated_stateless:
-            arguments[field] = _unit_code(kind, arguments[field])
-    if operation == 'vapor_pressure_deficit_calculator.calculate_vpd' and not migrated_stateless:
-        arguments['output_units'] = _unit_code('Pressure', arguments['output_units'])
-    if name in ('calculate_direction_of_max_spread', 'calculate_surface_rate_vector', 'run_surface_fire', 'run_surface', 'run_crown_fire') and 'north' not in arguments['wind_orientation_mode'].lower():
-        np.asarray(arguments['aspect'], dtype=float)
-        arguments['aspect'] = 0.0
-    if name in ('calculate_surface_wind_adjustment_factor', 'run_surface_fire', 'run_surface'):
-        supplied = arguments.get('user_waf') is not None and arguments['waf_method'].replace('_', '').lower() == 'userinput'
-        if supplied and name == 'calculate_surface_wind_adjustment_factor':
-            return _call('units.Fraction.to_base', {'value': arguments['user_waf'], 'units': 0})
-        if supplied:
-            ignored = ('canopy_cover', 'canopy_height', 'crown_ratio')
-            if pipeline:
-                if pipeline.get('derive'):
-                    arguments.pop('canopy_base_height', None)
-                pipeline = dict(pipeline, derive=False, conversions={
-                    field: descriptor for field, descriptor in pipeline['conversions'].items()
-                    if field not in ignored})
-            for key in ignored:
-                arguments[key] = 0.0
-        else:
-            arguments['user_waf'] = None
-    if operation.startswith('units.') and not migrated_stateless:
-        kind = operation.split('.')[1]
-        arguments['units'] = _unit_code(kind, arguments['units'])
-    if operation == 'crown.get_surface_fire_inputs':
-        return {key: np.asanyarray(_normalize(arguments['surface_results'][field])).copy() for key, field in (('surface_ros', 'spread_rate'), ('surface_fli', 'fireline_intensity'), ('surface_hpua', 'heat_per_unit_area'))}
-    if operation == 'crown.coerce_crown_fire_inputs':
-        from .behave_units import slope_to_base
-        from ._numeric import normalize_identifier, normalize_physical
-        mapping = {'fm_grid': 'fuel_model_grid', 'wind_speed': 'wind_speed', 'wind_dir': 'wind_direction', 'aspect': 'aspect', 'cbh': 'canopy_base_height', 'ch': 'canopy_height', 'cbd': 'canopy_bulk_density', 'mf_pct': 'moisture_foliar'}
-        result = {key: np.atleast_1d(normalize_identifier(arguments[field]) if key == 'fm_grid'
-                  else normalize_physical(arguments[field])) for key, field in mapping.items()}
-        result['slope_deg'] = slope_to_base(np.atleast_1d(_normalize(arguments['slope'])), arguments['slope_units'])
-        result['S'] = result['fm_grid'].shape
-        return result
     if operation == 'mortality.build_mortality_lookup':
         return np.array(_native.defaults('mortality'), dtype=np.float64)
-    if operation in ('surface.build_particle_arrays', 'model.run_surface'):
-        lookup = arguments.pop('lut')
-        grid = np.atleast_1d(np.asarray(arguments.pop('fuel_model_grid'), dtype=np.int32))
-        if operation == 'model.run_surface' and grid.size:
-            native_registry = _prepare_registry(lookup)
-        if native_registry is None:
-            index = np.clip(grid, 0, lookup['depth'].shape[0] - 1)
-            for key in _LOOKUP_FIELDS:
-                arguments['model.' + _FUEL_KEYS.get(key, key)] = np.asanyarray(lookup[key])[index]
-        else:
-            arguments['fuel_model_grid'] = grid
-        for key in ('m1h', 'm10h', 'm100h', 'mlh', 'mlw'):
-            arguments[key] = np.atleast_1d(np.asarray(_normalize(arguments[key]), dtype=float))
-            if arguments[key].shape != grid.shape:
-                raise ValueError('moisture arrays must match the fuel grid shape')
-    if operation.startswith('crown.') and 'lut' in arguments:
-        lookup = arguments.pop('lut')
-        shape = tuple(arguments.pop('S')) if 'S' in arguments else np.atleast_1d(np.asarray(arguments['fuel_model_grid'])).shape
-        if 'slope_deg' in arguments:
-            arguments['slope'] = arguments.pop('slope_deg')
-            arguments['slope_units'] = 0
-        if operation == 'crown.run_crown_fire' and all(shape) and len(lookup['depth']) > 10:
-            native_registry = _prepare_registry(lookup)
-        if native_registry is None:
-            for key in _LOOKUP_FIELDS:
-                arguments['model.' + _FUEL_KEYS.get(key, key)] = np.asanyarray(lookup[key])[10]
-        for key in ('m1h', 'm10h', 'm100h', 'mlh', 'mlw'):
-            arguments[key] = np.atleast_1d(np.asarray(_normalize(arguments[key]), dtype=float))
-            if arguments[key].shape != shape:
-                raise ValueError('moisture arrays must match the fuel grid shape')
-    if 'ib_crown' in arguments:
-        arguments['ib'] = arguments.pop('ib_crown')
-    supplied_shape = arguments.pop('S', None)
-    if supplied_shape is not None:
-        if not tuple(supplied_shape):
-            mask_metadata['_scalar_grid'] = np.asarray(1.0)
-    if 'coeffs' in arguments:
-        coefficients = np.asarray(arguments.pop('coeffs'))
-        equations = np.clip(np.atleast_1d(np.asarray(arguments['equation_number_grid'], dtype=np.int32)), 0, 120)
-        for column in range(3):
-            arguments[f'coefficients.{column}'] = coefficients[equations, column]
-    for key, value in list(arguments.items()):
-        if isinstance(value, dict):
-            del arguments[key]
-            fields = _PARTICLE_FIELDS if key == 'p' else (_REACTION_FIELDS if name == 'calculate_reaction_intensity' else _SPREAD_FIELDS) if key == 'ib' else ('spread_rate', 'fireline_intensity', 'heat_per_unit_area') if key == 'surface_results' else tuple(value)
-            for field in fields:
-                data = value[field]
-                if data is None:
-                    raise TypeError(f'{key}.{field} must be numeric')
-                if key == 'p' and field in _PARTICLES:
-                    data = np.asanyarray(_normalize(data))
-                    if data.ndim < 1 or data.shape[0] != 5:
-                        raise ValueError('particle arrays require five leading rows')
-                    if data.ndim == 1:
-                        mask_metadata['_particle_scalar'] = np.asarray(1.0)
-                    for j in range(5):
-                        if np.ma.isMaskedArray(data):
-                            row_value = np.ma.array(np.ma.getdata(data)[j], mask=np.ma.getmaskarray(data)[j])
-                            row_value._fill_value = data._fill_value
-                        else:
-                            row_value = data[j]
-                        arguments[f'{key}.{field}.{j}'] = row_value
-                else:
-                    arguments[f'{key}.{field}'] = data
-    for name, value in arguments.items():
-        if value is None and name == 'user_waf':
-            continue
-        if name in ('wind_orientation_mode', 'wind_height_mode', 'waf_method'):
-            strings[name] = str(value)
-        else:
-            value = _normalize(value)
-            if name in ('is_surface_fire', 'is_passive_crown', 'is_active_crown'):
-                value = np.asarray(value, dtype=bool)
-            dtype = np.asanyarray(value).dtype
-            if dtype.kind not in 'biuf' or (dtype.kind == 'f' and dtype.itemsize > 8):
-                coercion = _real_coercion(operation, name)
-                if coercion is None:
-                    if dtype.kind != 'O' or not _numeric_object(value):
-                        if operation == 'surface.calculate_direction_of_max_spread':
-                            raise AttributeError('object input does not provide the NumPy atan2 operation')
-                        raise TypeError('Arbitrary-precision or opaque object arithmetic requires the explicit Python backend.')
-                else:
-                    value = np.asarray(value, dtype=coercion)
-            numeric = np.asanyarray(value)
-            if numeric.size == 0:
-                mask_metadata['_empty.' + name] = np.asarray(1.0)
-            if numeric.dtype.kind == 'O':
-                kinds, bits, numpy_payload, type_numbers = _object_buffers(numeric)
-                mask_metadata['_object.' + name] = np.asarray(1.0)
-                mask_metadata['_object_kind.' + name] = kinds
-                mask_metadata['_integer_type.' + name] = type_numbers
-                mask_metadata['_object_numpy.' + name] = numpy_payload
-                integers[name] = ('uint64', bits)
-            if numeric.dtype.kind in 'biu':
-                mask_metadata['_integer_type.' + name] = np.asarray(numeric.dtype.num, dtype=float)
-                integers[name] = (numeric.dtype.name, np.asarray(np.ma.getdata(numeric), dtype=np.uint64))
-            if np.ma.isMaskedArray(value):
-                mask_metadata['_masked.' + name] = np.asarray(1.0)
-                mask_metadata['_mask.' + name] = np.asarray(np.ma.getmaskarray(value), dtype=float)
-                if value._fill_value is not None:
-                    mask_metadata['_fill.' + name] = np.asarray(value._fill_value, dtype=float)
-            if np.ndim(value) == 0:
-                mask_metadata['_scalar.' + name] = np.asarray(1.0)
-            if isinstance(value, np.generic):
-                mask_metadata['_numpy_scalar.' + name] = np.asarray(1.0)
-            if isinstance(value, (int, float, bool)) and (not isinstance(value, np.generic)):
-                mask_metadata['_weak.' + name] = np.asarray(1.0)
-                if isinstance(value, bool):
-                    mask_metadata['_weak_bool.' + name] = np.asarray(1.0)
-                elif isinstance(value, int):
-                    mask_metadata['_weak_integer.' + name] = np.asarray(1.0)
-            if numeric.dtype.kind == 'f' and numeric.dtype.itemsize == 4:
-                mask_metadata['_single.' + name] = np.asarray(1.0)
-            if name in ('is_surface_fire', 'is_passive_crown', 'is_active_crown'):
-                value = np.asarray(value, dtype=bool)
-            if name.endswith('_grid') or name.endswith('_i'):
-                value = np.asarray(value, dtype=np.int32)
-                if operation == 'mortality.calculate_crown_scorch_mortality':
-                    value = np.atleast_1d(value)
-            try:
-                arrays[name] = np.asarray(value, dtype=np.float64)
-            except ValueError as error:
-                function = operation.rsplit('.', 1)[1]
-                if function == 'calculate_direction_of_max_spread':
-                    raise AttributeError(str(error)) from error
-                if operation.startswith('surface.') and function in _RETAIN | {'run_surface_fire'} and (function != 'calculate_slope_phi') or (operation.startswith('crown.') and function not in ('run_crown_fire', 'calculate_crown_surface_fire')):
-                    raise TypeError(str(error)) from error
-                raise
-            if not name.endswith('units') and name != 'max_steps' and (not name.endswith('is_defined')) and (not name.startswith('coeffs.')):
-                precision.append(np.asarray(value) if isinstance(value, (tuple, list)) else value)
-    name = operation.rsplit('.', 1)[1]
-    object_input = any((np.asanyarray(value).dtype == object for value in precision))
-    if name == 'calculate_wind_phi' and np.asarray(arguments['wind_e']).dtype == bool and isinstance(arguments['wind_e'], (np.ndarray, np.generic)):
-        raise TypeError('boolean negative is not supported')
-    if name in ('calculate_fire_length', 'calculate_flanking_spread_rate') and all((np.asarray(value).dtype == bool for value in precision[:2])) and (name == 'calculate_fire_length' or any((isinstance(value, (np.ndarray, np.generic)) for value in precision[:2]))):
-        arrays['_bool'] = np.asarray(1.0)
-    if name == 'calculate_direction_of_max_spread':
-        precision = [arguments[key] for key in ('x_component', 'y_component', 'rate_vector')]
-    elif name == 'calculate_slope_phi':
-        precision = [arguments[key] for key in ('packing_ratio', 'reaction_intensity')]
-    elif name == 'calculate_surface_rate_vector':
-        precision = [arguments[key] for key in ('no_wind_no_slope_spread_rate', 'wind_phi', 'slope_phi')]
-    single = name in _RETAIN and bool(precision) and (np.result_type(*precision) == np.dtype('float32'))
-    if operation.startswith('crown.'):
-        single = bool(precision) and np.result_type(*precision) == np.dtype('float32')
-        pairs = {'calculate_crown_fraction_burned': (('crowning_surface_ros', 'surface_critical_ros'), ('surface_ros', 'surface_critical_ros')), 'calculate_crown_heat_and_intensity': (('canopy_height', 'canopy_base_height'),), 'calculate_passive_crown_fire_behavior': (('crown_ros', 'surface_ros'),)}
-        for pair in pairs.get(name, ()):
-            values = [arguments[key] for key in pair]
-            if all((np.asarray(value).dtype == bool for value in values)) and any((isinstance(value, (np.ndarray, np.generic)) for value in values)):
-                raise TypeError('boolean subtraction is not supported')
-        mixed_fields = {'calculate_critical_surface_fireline_intensity': ('canopy_base_height',), 'calculate_surface_fire_critical_spread_rate': ('critical_surface_fli',), 'assign_final_crown_fire_behavior': ('surface_ros', 'surface_hpua', 'surface_fli'), 'calculate_crowning_surface_fire_spread_rate': ('critical_crown_ros',)}
-        if name in mixed_fields and all((np.asarray(_normalize(arguments[key])).dtype == np.float32 for key in mixed_fields[name])):
-            arrays['_mixed'] = np.asarray(1.0)
-    if name == 'run_surface_fire':
-        single = np.asarray(_normalize(arguments['ri'])).dtype == np.float32
-    if operation.startswith('contain.'):
-        shape = np.atleast_1d(arrays['report_spread_rate']).shape
-    else:
-        shape = np.broadcast_shapes(*(value.shape for value in arrays.values()))
-    input_shapes = {key: value.shape for key, value in arrays.items()}
-    if pipeline:
-        for field, (kind, codes) in pipeline['conversions'].items():
-            if field in arrays:
-                arrays['_convert.' + field] = codes
-                strings['_convert.' + field] = kind
-        if pipeline.get('derive'):
-            strings['_derive_crown_ratio'] = 'true'
-    arrays.update(mask_metadata)
-    arrays['_simd_exp'] = np.asarray(_math_profile(), dtype=float)
-    arrays['_svml_atan2'] = np.asarray(direction_profile if direction_float32 and all(shape) else 0, dtype=float)
-    arrays = {key: _broadcast_buffer(value, shape) for key, value in arrays.items()}
-    integers = {key: (kind, _broadcast_buffer(bits, shape)) for key, (kind, bits) in integers.items()}
-    native_options = {} if native_registry is None else {"registry": native_registry}
-    result = _native.batch(operation, arrays, strings, shape, single, integers, threads=_THREADS.get(), **native_options)
-    metadata = result.pop("__schema")
-    result = {key: value for key, value in result.items() if not key.startswith("__timing.")}
-    if not result and 0 in shape:
-        result = {key: np.empty(shape) for key in _EMPTY_KEYS.get(name, ('',))}
-    promoted = name in ('calculate_effective_wind_speed', 'run_surface_fire', 'calculate_fuelbed_intermediates', 'calculate_slope_phi', 'calculate_surface_rate_vector') or (name == 'calculate_direction_of_max_spread' and 'north' in strings['wind_orientation_mode'].lower())
-    if single and (not promoted):
-        result = {key: value if key in metadata or value.dtype.kind in 'biu' else value.astype(np.float32) for key, value in result.items()}
-    if name == 'assign_final_crown_fire_behavior':
-        for field, sources in (('final_spread_rate', ('surface_ros', 'passive_ros', 'crown_ros')), ('final_heat_per_unit_area', ('surface_hpua', 'passive_hpua', 'crown_hpua')), ('final_fireline_intensity', ('surface_fli', 'passive_fli', 'crown_fli'))):
-            dtype = np.result_type(*[_normalize(arguments[key]) for key in sources])
-            if field not in metadata or dtype == object:
-                result[field] = result[field].astype(dtype)
-    if name == 'calculate_passive_crown_fire_behavior':
-        for field, sources in (('passive_crown_fire_spread_rate', ('surface_ros', 'crown_ros', 'cfb')), ('passive_crown_fire_heat_per_unit_area', ('surface_hpua', 'canopy_hpua', 'cfb'))):
-            dtype = np.result_type(*[_normalize(arguments[key]) for key in sources])
-            if field not in metadata or dtype == object:
-                result[field] = result[field].astype(dtype)
-    if 'is_defined' in result:
-        dtype = np.asanyarray(original_arguments['p']['is_defined']).dtype if 'p' in original_arguments else bool
-        result['is_defined'] = result['is_defined'].astype(dtype)
-    if name == 'build_particle_arrays':
-        for field in _PARTICLES:
-            result[field] = np.stack([result.pop(f'{field}.{j}') for j in range(5)])
-    if 'status' in result:
-        result['status'] = result['status'].astype(np.int32)
-    if 'fire_type' in result:
-        result['fire_type'] = result['fire_type'].astype(np.int32)
-    for field in ('is_surface_fire', 'is_passive_crown', 'is_active_crown'):
-        if field in result:
-            result[field] = result[field].astype(bool)
-    if name == 'calculate_crown_surface_fire':
-        for prefix in ('p_crown', 'ib_crown', 'crown_surface'):
-            result[prefix] = {key[len(prefix) + 1:]: result.pop(key) for key in list(result) if key.startswith(prefix + '.')}
-        for field in _PARTICLES:
-            result['p_crown'][field] = np.stack([result['p_crown'].pop(f'{field}.{j}') for j in range(5)])
-        for prefix in ('p_crown', 'ib_crown'):
-            result[prefix]['is_defined'] = result[prefix]['is_defined'].astype(bool)
-    dependencies = {'calculate_crown_scorch_mortality': {'crown_length_scorch': ('scorch_height_ft', 'tree_height_ft', 'crown_ratio'), 'crown_volume_scorch': ('scorch_height_ft', 'tree_height_ft', 'crown_ratio')}, 'calculate_safety_zone': {'separation_distance': ('flame_height_ft',)}, 'calculate_vpd': {'saturated_vp': ('temperature',)}, 'calculate_crown_fire_ratios': {'crown_fire_transition_ratio': ('surface_fli', 'critical_surface_fli'), 'crown_fire_active_ratio': ('crown_ros', 'critical_crown_ros')}, 'calculate_crown_heat_and_intensity': {'crown_fuel_load': ('canopy_base_height', 'canopy_height', 'canopy_bulk_density'), 'canopy_heat_per_unit_area': ('canopy_base_height', 'canopy_height', 'canopy_bulk_density'), 'crown_fire_heat_per_unit_area': ('surface_hpua', 'canopy_base_height', 'canopy_height', 'canopy_bulk_density')}, 'calculate_passive_crown_fire_behavior': {'passive_crown_fire_spread_rate': ('surface_ros', 'crown_ros', 'cfb'), 'passive_crown_fire_heat_per_unit_area': ('surface_hpua', 'canopy_hpua', 'cfb')}}
-    dependencies['calculate_vpd']['saturated_vp'] = ('temperature', 'temp_units', 'output_units')
-    if name == 'run_crown_fire':
-        dependencies[name] = _crown_dependencies(arguments['wind_orientation_mode'])
-    for field, sources in dependencies.get(name, {}).items():
-        if name == 'run_crown_fire':
-            target = np.broadcast_shapes(*(np.shape(original_arguments['surface_results'][key.partition('.')[2]]) if key.startswith('surface_results.') else np.atleast_1d(original_arguments[key]).shape for key in sources))
-        else:
-            target = np.broadcast_shapes(*(input_shapes.get(key, np.shape(original_arguments[key])) for key in sources))
-        if result[field].size == 0 and all((size > 0 for size in target)):
-            result[field] = _recompute_field(operation, original_arguments, field, sources)
-            metadata.pop(field, None)
-        else:
-            result[field] = _restore_shape(result[field], target)
-            if field in metadata:
-                metadata[field] = {key: _restore_shape(value, target) if isinstance(value, np.ndarray) and value.ndim else value
-                                   for key, value in metadata[field].items()}
-    for key in result:
-        result[key] = _restore_payload(result[key], metadata, key)
-        schema = metadata.get(key, {})
-        if schema.get('masked', False):
-            result[key] = np.ma.array(result[key], mask=schema['mask'])
-            if schema.get('fill_present', False):
-                result[key].set_fill_value(schema['fill'])
-    box_surface = object_input and name in _RETAIN and (name not in ('calculate_effective_wind_speed', 'calculate_reaction_intensity', 'calculate_fuelbed_intermediates'))
-    box_crown = object_input and operation.startswith('crown.') and (name not in ('run_crown_fire', 'calculate_crown_surface_fire', 'calculate_crowning_surface_fire_spread_rate', 'classify_crown_fire_type'))
-    if box_surface or box_crown:
-        result = {key: value if key in metadata else value.astype(object) for key, value in result.items()}
-    return result[''] if '' in result else result
+    if operation == 'crown.get_surface_fire_inputs':
+        return {name: np.array(arguments['surface_results'][key], dtype=np.float64, copy=True)
+                for name, key in [('surface_ros', 'spread_rate'), ('surface_fli', 'fireline_intensity'),
+                                  ('surface_hpua', 'heat_per_unit_area')]}
+    if operation == 'crown.coerce_crown_fire_inputs':
+        from .behave_units import slope_to_base
+        mapping = {'fm_grid': 'fuel_model_grid', 'wind_speed': 'wind_speed', 'wind_dir': 'wind_direction',
+                   'aspect': 'aspect', 'cbh': 'canopy_base_height', 'ch': 'canopy_height',
+                   'cbd': 'canopy_bulk_density', 'mf_pct': 'moisture_foliar'}
+        result = {key: np.atleast_1d(arguments[field]).copy() for key, field in mapping.items()}
+        result['slope_deg'] = slope_to_base(np.atleast_1d(arguments['slope']), arguments['slope_units'])
+        result['S'] = result['fm_grid'].shape
+        return result
+    return execute_component(operation, arguments, threads=_THREADS.get())
 
 
 def _crown_dependencies(wind_orientation_mode):
@@ -514,189 +122,6 @@ def _crown_dependencies(wind_orientation_mode):
     }
 
 
-def _direction_math_profile(arguments):
-    """Preserve the reference atan2 inner-loop eligibility before owned copying.
-
-    :param arguments: Normalized original direction operands, before rate/aspect broadcasting.
-    :return: Scalar kernel selector or per-cell selectors when iterator chunks differ.
-    """
-    if _atan2_math_profile() == 0:
-        return 0
-    operands = [np.asarray(arguments[key]) for key in ('y_component', 'x_component')]
-    if any(value.size == 0 for value in operands):
-        return 0
-    buffer_size = np.getbufsize()
-    shapes = [value.shape for value in operands if value.ndim]
-    trivial = (all(value.ndim == 0 or (value.ndim == 1 and
-                   ((value.dtype == np.float32 and value.flags.aligned) or value.size <= buffer_size))
-                   for value in operands)
-               and all(shape == shapes[0] for shape in shapes))
-    if trivial:
-        # NumPy pre-copies scalar/small 1-D cast or unaligned operands, while
-        # retaining even singleton negative/large strides of aligned float32.
-        strides = [0 if not value.ndim else value.strides[0]
-                   if value.dtype == np.float32 and value.flags.aligned else 4 for value in operands]
-        return int(all(0 <= stride <= _ATAN2_MAX_STRIDE_BYTES for stride in strides))
-    if all(0 <= stride <= _ATAN2_MAX_STRIDE_BYTES for value in operands for stride in value.strides):
-        return 1
-    # The buffered K-order iterator determines effective strides after casting,
-    # alignment copies, broadcasting, and axis ordering. No mathematical ufunc
-    # executes on these operands; the allocated output stores selectors only.
-    with np.errstate(all='ignore'):
-        with np.nditer(operands + [None],
-                       flags=['external_loop', 'buffered', 'grow_inner', 'zerosize_ok', 'refs_ok', 'copy_if_overlap'],
-                       op_flags=[['readonly', 'aligned'], ['readonly', 'aligned'],
-                                 ['writeonly', 'allocate', 'aligned', 'no_broadcast', 'no_subtype']],
-                       op_dtypes=[np.float32] * 3, order='K', casting='unsafe', buffersize=buffer_size) as iterator:
-            result = iterator.operands[2]
-            first = None
-            mixed = False
-            for chunk in iterator:
-                selected = int(all(0 <= value.strides[0] <= _ATAN2_MAX_STRIDE_BYTES for value in chunk))
-                chunk[2].fill(selected)
-                if first is None:
-                    first = selected
-                else:
-                    mixed |= selected != first
-    return result if mixed else int(first)
-
-
-def _math_profile():
-    """Read NumPy's active float32 exponential implementation metadata.
-
-    :return: One for NumPy's x86 SIMD kernel, zero for the baseline libm route.
-    """
-    module = import_module('numpy._core._multiarray_umath')
-    current = getattr(module, '__cpu_targets_info__', {}).get('exp', {}).get('ff', {}).get('current')
-    if current is not None:
-        return int(current.startswith(('AVX2', 'AVX512', 'X86_V3', 'X86_V4')))
-    features = getattr(module, '__cpu_features__', {})
-    targets = getattr(module, '__cpu_dispatch__', ())
-    grouped = any((target in targets and features.get(target, False) for target in ('X86_V3', 'X86_V4')))
-    return int(grouped or ('AVX2' in targets and features.get('AVX2', False) and features.get('FMA3', False)))
-
-
-def _normalize(value):
-    """Widen float16 before each entry point's ordinary coercion.
-
-    :param value: Scalar or array input.
-    :return: Input preserving its shape and mask, with float16 widened.
-    """
-    if isinstance(value, (np.ndarray, np.generic)) and value.dtype.kind == 'f' and value.dtype.itemsize == 2:
-        return value.astype(np.float32)
-    return value
-
-
-def _normalize_direction(arguments):
-    """Widen operands when NumPy would select an internal float16 atan2 loop.
-
-    :param arguments: Bound direction-helper inputs.
-    :return: Normalized inputs and whether the resulting atan2 loop uses float32.
-    """
-    result = dict(arguments)
-    operands = [_normalize(result[key]) for key in ('y_component', 'x_component')]
-    dtypes = [float if isinstance(value, float) and (not isinstance(value, np.generic)) else int if isinstance(value, int) and (not isinstance(value, (bool, np.generic))) else np.asanyarray(value).dtype for value in operands]
-    resolved = np.arctan2.resolve_dtypes((*dtypes, None))
-    for key, value in zip(('y_component', 'x_component'), operands):
-        if resolved[2] == np.dtype('float16'):
-            result[key] = value.astype(np.float32) if isinstance(value, (np.ndarray, np.generic)) else np.float32(value)
-        else:
-            result[key] = value
-    return result, resolved[2] in (np.dtype('float16'), np.dtype('float32'))
-
-
-def _numeric_kind(value):
-    """Classify scalar arithmetic without coercing away its precision.
-
-    :param value: Public scalar state or input.
-    :return: Native Python-float, NumPy-float64, or NumPy-float32 code.
-    """
-    if isinstance(value, (np.ndarray, np.generic)):
-        return 2 if value.dtype in (np.dtype('float16'), np.dtype('float32')) else 1
-    return 0
-
-
-def _numeric_object(value):
-    """Recognize supported boxed numeric payloads without executing custom operators.
-
-    :param value: Candidate object scalar or array.
-    :return: Whether every payload belongs to the supported real numeric domain.
-    """
-    integer_types = (bool, int, np.bool_, np.int8, np.int16, np.intc, np.int32, np.int64, np.longlong, np.uint8, np.uint16, np.uintc, np.uint32, np.uint64, np.ulonglong)
-    floating_types = (float, np.float16, np.float32, np.float64)
-    for item in np.ma.getdata(np.asanyarray(value)).flat:
-        if type(item) in integer_types:
-            if not -2 ** 63 <= int(item) <= 2 ** 64 - 1:
-                return False
-        elif type(item) not in floating_types:
-            return False
-    return True
-
-
-def _object_buffers(value):
-    """Encode supported object payloads without numerical arithmetic.
-
-    :param value: Object array containing supported real scalar payloads.
-    :return: Per-element dtype codes, exact integer bits, NumPy scalar flags, and exact integer type numbers.
-    """
-    values = np.asarray(np.ma.getdata(value), dtype=object)
-    kinds = np.full(values.shape, 9.0)
-    bits = np.zeros(values.shape, dtype=np.uint64)
-    numpy_payload = np.zeros(values.shape, dtype=float)
-    type_numbers = np.full(values.shape, -1.0)
-    names = ('int8', 'int16', 'int32', 'int64', 'uint8', 'uint16', 'uint32', 'uint64', 'bool')
-    for index in np.ndindex(values.shape):
-        item = values[index]
-        numpy_payload[index] = isinstance(item, np.generic)
-        if isinstance(item, (np.integer, np.bool_)):
-            type_numbers[index] = item.dtype.num
-        if isinstance(item, (bool, np.bool_)):
-            kinds[index] = 8
-            bits[index] = int(item)
-        elif isinstance(item, (int, np.integer)):
-            kinds[index] = names.index(item.dtype.name) if isinstance(item, np.integer) else 3 if item <= np.iinfo(np.int64).max else 7
-            bits[index] = int(item) & (1 << 64) - 1
-        elif isinstance(item, np.float32):
-            kinds[index] = 10
-    return (kinds, bits, numpy_payload, type_numbers)
-
-
-def _partition_fields(operation, arguments, fields):
-    """Marshal independent output dependency groups without forcing shared axes.
-
-    :param operation: Native operation route.
-    :param arguments: Complete bound arguments.
-    :param fields: Output fields and the source inputs each field depends on.
-    :return: Owned native results with independent reference shapes and dtypes.
-    """
-    for key, value in arguments.items():
-        if key in ('is_surface_fire', 'is_passive_crown', 'is_active_crown'):
-            value = np.asarray(value, dtype=bool)
-        dtype = np.asanyarray(_normalize(value)).dtype
-        if dtype.kind not in 'biuf' or (dtype.kind == 'f' and dtype.itemsize > 8):
-            if dtype.kind != 'O' or not _numeric_object(value):
-                raise TypeError('Arbitrary-precision or opaque object arithmetic requires the explicit Python backend.')
-    result = {}
-    for field, dependencies in fields.items():
-        scoped = {key: value if key in dependencies else 1.0 for key, value in arguments.items()}
-        scoped['_native_partition'] = True
-        result[field] = _call(operation, scoped)[field]
-    return result
-
-
-def _prepare_registry(lookup):
-    """Keep regular numeric fuel rows independent of raster size.
-
-    :param lookup: Already snapshotted fuel lookup columns.
-    :return: Native numeric registry, or None for irregular legacy lookup shapes.
-    """
-    columns = {key: np.asanyarray(lookup[key]) for key in _LOOKUP_FIELDS}
-    count = columns['depth'].size
-    if not count or any(value.ndim != 1 or value.size != count for value in columns.values()):
-        return None
-    return {'model.' + _FUEL_KEYS.get(key, key): np.asarray(value, dtype=float)
-            for key, value in columns.items()}
-
 def _real_coercion(operation, parameter):
     """Describe explicit reference coercion before numerical arithmetic.
 
@@ -719,93 +144,6 @@ def _real_coercion(operation, parameter):
     return np.float64 if parameter in normalized.get(name, ()) else None
 
 
-def _recompute_field(operation, arguments, field, dependencies):
-    """Evaluate an independent nonempty field when another output has zero cells.
-
-    :param operation: Native calculation route.
-    :param arguments: Original public inputs.
-    :param field: Output field to retain.
-    :param dependencies: Public inputs that determine this output field.
-    :return: Owned field computed in the native core over its own input shape.
-    """
-    if operation == 'crown.run_crown_fire':
-        scoped = dict(arguments)
-        retain_fuel = 'fuel_model_grid' in dependencies
-        if not retain_fuel:
-            scoped['fuel_model_grid'] = np.array([10], dtype=np.int32)
-            for key in ('m1h', 'm10h', 'm100h', 'mlh', 'mlw'):
-                scoped[key] = np.ones(1)
-        for key in ('wind_speed', 'wind_direction', 'slope', 'aspect', 'canopy_base_height', 'canopy_height', 'canopy_bulk_density', 'moisture_foliar'):
-            if key not in dependencies:
-                scoped[key] = 1.0
-        scoped['surface_results'] = {key: value if 'surface_results.' + key in dependencies else 1.0 for key, value in arguments['surface_results'].items()}
-        scoped['_native_partition'] = True
-        return _call(operation, scoped)[field]
-    scoped = {key: value if key in dependencies or key.endswith('units') or isinstance(value, str) else 1.0 for key, value in arguments.items()}
-    if 'coeffs' in arguments:
-        scoped['coeffs'] = np.array(_native.defaults('mortality'))
-        scoped['equation_number_grid'] = 0
-    scoped['_native_partition'] = True
-    return _call(operation, scoped)[field]
-
-
-def _restore_payload(value, metadata, key):
-    """Restore exact payload types from compact native field schemas.
-
-    :param value: Owned typed native value buffer.
-    :param metadata: Per-field constant schema and necessary variable sidecars.
-    :param key: Result field name.
-    :return: An owned numeric or object array preserving exact payload classes.
-    """
-    schema = metadata.get(key)
-    if schema is None:
-        return value
-    names = ('int8', 'int16', 'int32', 'int64', 'uint8', 'uint16', 'uint32', 'uint64', 'bool')
-    type_chars = '?bBhHiIlLqQ'
-    integer = schema.get('integer_kind', -1)
-    type_numbers = schema.get('integer_type', -1)
-    single = schema.get('single', False)
-    complex_kind = schema.get('complex', False)
-    bits = schema.get('bits')
-    if schema.get('object', False):
-        result = np.empty(value.shape, dtype=object)
-        flags = np.broadcast_to(schema.get('object_numpy', False), value.shape)
-        integers = np.broadcast_to(integer, value.shape)
-        exact_types = np.broadcast_to(type_numbers, value.shape)
-        singles = np.broadcast_to(single, value.shape)
-        complexes = np.broadcast_to(complex_kind, value.shape)
-        imaginary = np.broadcast_to(schema.get('imag', 0.0), value.shape)
-        for index in np.ndindex(value.shape):
-            if complexes[index]:
-                payload = np.asarray(complex(value[index], imaginary[index]), dtype=np.complex64 if singles[index] else np.complex128)[()]
-            elif integers[index] >= 0:
-                if bits is None:
-                    raise ValueError('native object integer payload lacks exact bits')
-                dtype = type_chars[int(exact_types[index])] if exact_types[index] >= 0 else names[int(integers[index])]
-                payload = bits[index].astype(dtype)
-            else:
-                payload = np.asarray(value[index], dtype=np.float32 if singles[index] else np.float64)[()]
-            result[index] = payload if flags[index] else payload.item()
-        return result
-    if complex_kind:
-        result = np.empty(value.shape, dtype=np.complex64 if single else np.complex128)
-        result.real = value
-        result.imag = schema.get('imag', 0.0)
-        return result
-    if integer >= 0:
-        code = int(integer)
-        if not 0 <= code <= 8:
-            raise ValueError('native output has inconsistent integer dtype metadata')
-        exact_type = int(type_numbers)
-        dtype = np.dtype(type_chars[exact_type] if exact_type >= 0 else names[code])
-        source = value if bits is None else bits
-        return source if source.dtype == dtype and source.dtype.num == dtype.num else source.astype(dtype)
-    if key == 'is_defined':
-        return value
-    dtype = np.dtype('float32' if single else 'float64')
-    return value if value.dtype == dtype else value.astype(dtype)
-
-
 def _restore_shape(value, shape):
     """Restore an output's independent broadcast shape.
 
@@ -820,52 +158,60 @@ def _restore_shape(value, shape):
 
 
 def _state(instance, domain, method, arguments):
-    """Copy helper state into a checked native operation and restore its snapshot.
+    """Own physical state as float64 and keep unit/index controls integral.
 
-    :param instance: Public native state wrapper.
-    :param domain: Native helper module name.
+    :param instance: Public native scalar-state wrapper.
+    :param domain: Native scalar helper domain.
     :param method: Selected public helper method.
     :param arguments: Bound scalar arguments, including the receiver.
-    :return: Native scalar result, or None after mutation.
+    :return: Scalar result or None; replaces physical state without dtype provenance.
     """
-    arguments = {key: value for key, value in arguments.items() if key != 'self'}
-    state = dict(vars(instance))
-    coerced = set()
-    if domain == 'fire_size':
-        coerced.add('elapsed_time')
-        if method == 'calculate_fire_basic_dimensions':
-            coerced.add('forward_spread_rate')
-            if arguments['wind_speed_units'] != 5:
-                coerced.add('effective_wind_speed')
+    from ._numeric import normalize_control, normalize_flag, normalize_physical, normalize_selector
+
+    unit_fields = {'area_units': 'Area', 'contour_units': 'Length', 'distance_units': 'Length',
+                   'map_distance_units': 'Length', 'elevation_units': 'Length',
+                   'length_units': 'Length', 'slope_units': 'Slope', 'spread_rate_units': 'Speed',
+                   'time_units': 'Time', 'wind_speed_units': 'Speed'}
+    raw = {name: value for name, value in arguments.items() if name != 'self'}
+    coerced = {'elapsed_time'} if domain == 'fire_size' else set()
+    if domain == 'fire_size' and method == 'calculate_fire_basic_dimensions':
+        coerced.add('forward_spread_rate')
+        if raw['wind_speed_units'] != 5:
+            coerced.add('effective_wind_speed')
     elif domain == 'slope_tool':
         coerced.update({'calculate_horizontal_distance': ('calculated_map_distance', 'max_slope_steepness'),
                         'calculate_slope_from_map_measurements': ('map_distance',)}.get(method, ()))
-    _validate_raw_arithmetic(domain + '.' + method, {key: value for key, value in arguments.items() if key not in coerced})
-    _validate_raw_arithmetic(domain + '.' + method, state)
-    if domain == 'fire_size':
-        state['spread_rates_are_numpy_'] = isinstance(state.get('forward_spread_rate_'), (np.ndarray, np.generic))
-        state['effective_wind_is_numpy_'] = isinstance(state.get('effective_wind_speed_'), (np.ndarray, np.generic))
-        state['ratio_is_numpy_'] = isinstance(state.get('fire_length_to_width_ratio_'), (np.ndarray, np.generic))
-        for flag, key in (('effective_wind_numeric_kind_', 'effective_wind_speed_'), ('ratio_numeric_kind_', 'fire_length_to_width_ratio_'), ('eccentricity_numeric_kind_', 'eccentricity_')):
-            state[flag] = _numeric_kind(state.get(key))
-        if method == 'calculate_fire_basic_dimensions':
-            arguments['_wind_kind'] = _numeric_kind(arguments['effective_wind_speed'])
+    _validate_raw_arithmetic(domain + '.' + method, {name: value for name, value in raw.items() if name not in coerced})
+    _validate_raw_arithmetic(domain + '.' + method, dict(vars(instance)))
+    # Each normalizer owns its data before state_call detaches. A generic deep
+    # snapshot here would duplicate every immutable scale-table list first.
+    original = raw
+    arguments = {}
+    for name, value in original.items():
+        if name in unit_fields:
+            column = normalize_selector(unit_fields[name], value)
+        elif name == 'is_crown':
+            column = normalize_flag(value)
+        elif name == 'index':
+            column = normalize_control(value, np.int64)
+        else:
+            if name in coerced:
+                if np.asarray(value).dtype.kind not in 'biuf':
+                    raise TypeError('Rust accepts real numeric inputs for explicit unit coercion.')
+                value = (np.ma.asarray(value, dtype=np.float64) if np.ma.isMaskedArray(value)
+                         else np.asarray(value, dtype=np.float64))
+            column = normalize_physical(value)
+        if column.size != 1:
+            raise TypeError(f'{domain}.{method} requires scalar {name}')
+        arguments[name] = column.item()
+    state = {}
+    for name, value in dict(vars(instance)).items():
+        column = normalize_control(value, np.int32) if name == 'representative_fractions_' else normalize_physical(value)
+        state[name] = column.tolist() if column.ndim else column.item()
     updated, result, error = _native.state_call(domain, method, state, arguments)
-    if domain == 'fire_size':
-        for flag, fields in (('spread_rates_are_numpy_', ('forward_spread_rate_', 'backing_spread_rate_', 'flanking_spread_rate_')), ('effective_wind_is_numpy_', ('effective_wind_speed_',)), ('ratio_is_numpy_', ('fire_length_to_width_ratio_',))):
-            if updated.pop(flag):
-                for key in fields:
-                    updated[key] = np.float64(updated[key])
-        for flag, key in (('effective_wind_numeric_kind_', 'effective_wind_speed_'), ('ratio_numeric_kind_', 'fire_length_to_width_ratio_'), ('eccentricity_numeric_kind_', 'eccentricity_')):
-            kind = updated.pop(flag)
-            if kind:
-                updated[key] = (np.float32 if kind == 2 else np.float64)(updated[key])
     vars(instance).update(updated)
     if error:
-        category = {'Domain': ValueError, 'Overflow': OverflowError, 'DivisionByZero': ZeroDivisionError}.get(error, RuntimeError)
-        raise category(error)
-    if method in ('get_fire_length_to_width_ratio', 'get_eccentricity', 'get_heading_to_backing_ratio'):
-        return updated[{'get_fire_length_to_width_ratio': 'fire_length_to_width_ratio_', 'get_eccentricity': 'eccentricity_', 'get_heading_to_backing_ratio': 'heading_to_backing_ratio_'}[method]]
+        raise RuntimeError(error)
     if method.startswith('get_number_of_') or method == 'get_representative_fraction_at_index':
         return int(result)
     return result

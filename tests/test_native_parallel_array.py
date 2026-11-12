@@ -54,10 +54,10 @@ def test_copy_callback_exception_propagates_before_workers():
         raise RuntimeError("copy diagnostic failed")
 
     with pytest.raises(RuntimeError, match="copy diagnostic failed"):
-        _bridge._native.batch(
+        _bridge._native.component_batch(
             "surface.calculate_fire_length",
             {"forward_ros": np.arange(5.0), "backing_ros": np.asarray(1.0), "elapsed_min": np.asarray(3.0)},
-            {}, (5,), False, threads=4, _owned_callback=fail,
+            {}, {}, (5,), threads=4, _owned_callback=fail,
         )
 
 
@@ -105,8 +105,8 @@ def test_detached_progress_without_a_python_callback():
         # The waiting thread can advance only when the native boundary releases the GIL.
         sys.setswitchinterval(60.0)
         go.set()
-        result = _bridge._native.batch(
-            "surface.calculate_fire_length", arrays, {}, (120_000,), False, threads=4,
+        result = _bridge._native.component_batch(
+            "surface.calculate_fire_length", arrays, {}, {}, (120_000,), threads=4,
         )[""]
         advanced_during_call = progressed.is_set()
     finally:
@@ -184,14 +184,14 @@ def test_fused_surface_and_crown_threads_match_python(shape):
 
 
 def test_instance_threads_reach_native_boundary(monkeypatch):
-    original = _bridge._native.batch
+    original = _bridge._native.component_batch
     requests = []
 
     def record(*args, **kwargs):
         requests.append(kwargs.get("threads", 1))
         return original(*args, **kwargs)
 
-    monkeypatch.setattr(_bridge._native, "batch", record)
+    monkeypatch.setattr(_bridge._native, "component_batch", record)
     for workers in (0, 1, 2, 4):
         model = BehaveRun(FuelModels(), threads=workers)
         requests.clear()
@@ -217,10 +217,10 @@ def test_large_positive_requests_are_capped_before_unsigned_conversion():
 @pytest.mark.parametrize("workers,error", [(-1, ValueError), (1.5, TypeError), ("4", TypeError)])
 def test_low_level_threads_validate_before_unsigned_conversion(workers, error):
     with pytest.raises(error):
-        _bridge._native.batch(
+        _bridge._native.component_batch(
             "surface.calculate_fire_length",
             {"forward_ros": np.arange(3.0), "backing_ros": np.asarray(1.0), "elapsed_min": np.asarray(3.0)},
-            {}, (3,), False, threads=workers,
+            {}, {}, (3,), threads=workers,
         )
 
 
@@ -262,10 +262,10 @@ def test_owned_inputs_are_copied_before_callback_mutation():
     worker = threading.Thread(target=mutate)
     worker.start()
     try:
-        result = _bridge._native.batch(
+        result = _bridge._native.component_batch(
             "surface.calculate_fire_length",
             {"forward_ros": source, "backing_ros": np.asarray(1.0), "elapsed_min": np.asarray(3.0)},
-            {}, source.shape, False, threads=4, _owned_callback=after_copy,
+            {}, {}, source.shape, threads=4, _owned_callback=after_copy,
         )[""]
     finally:
         copied.set()
@@ -293,7 +293,7 @@ def test_scoped_threads_restore_after_errors_and_concurrent_instances(monkeypatc
     from concurrent.futures import ThreadPoolExecutor
     from behave_fire.rust._threads import _THREADS
 
-    original = _bridge._native.batch
+    original = _bridge._native.component_batch
     barrier = threading.Barrier(2)
     seen = []
     lock = threading.Lock()
@@ -303,7 +303,7 @@ def test_scoped_threads_restore_after_errors_and_concurrent_instances(monkeypatc
             seen.append((threading.get_ident(), kwargs.get("threads")))
         return original(*args, **kwargs)
 
-    monkeypatch.setattr(_bridge._native, "batch", record)
+    monkeypatch.setattr(_bridge._native, "component_batch", record)
 
     def run(workers):
         model = BehaveRun(FuelModels(), threads=workers)

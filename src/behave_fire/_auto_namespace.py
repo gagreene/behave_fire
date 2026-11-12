@@ -47,7 +47,10 @@ class AutoNamespace(ModuleType):
 
         :return: Sorted discoverable attribute names without native discovery or execution.
         """
-        return sorted(set(dir(self._python_namespace)) | {'backend_in_use', 'preferred_backend'})
+        names = set(dir(self._python_namespace)) | {'backend_in_use', 'preferred_backend'}
+        if not self._operation_prefix and self._preferred == 'rust':
+            names.update(('CrownGrid', 'SurfaceGrid'))
+        return sorted(names)
 
     def __getattr__(self, name):
         """Resolve a counterpart or explicitly unmigrated class lazily.
@@ -58,6 +61,10 @@ class AutoNamespace(ModuleType):
         if not self._operation_prefix and name == 'BehaveRun':
             from .auto import BehaveRun
             return BehaveRun
+        if not self._operation_prefix and name in ('CrownGrid', 'SurfaceGrid'):
+            if self._preferred != 'rust':
+                raise ImportError(f'{name} is Rust-only; install a compatible native wheel or build the extension.')
+            return getattr(self._native_namespace(), name)
         try:
             value = getattr(self._python_namespace, name)
         except AttributeError:
@@ -71,8 +78,11 @@ class AutoNamespace(ModuleType):
         elif inspect.isfunction(value) and not name.startswith('_'):
             result = _wrap_function(self, name, value)
         elif inspect.isclass(value) and name in ('FireSize', 'SlopeTool') and self._preferred == 'rust':
-            # Stateful migration requires a complete tested state bridge in Task 5.
-            result = getattr(self._native_namespace(), name)
+            if name == 'FireSize':
+                from ._auto_state import fire_size_type
+                result = fire_size_type(self._status)
+            else:
+                result = getattr(self._native_namespace(), name)
         elif inspect.isclass(value) and self._operation_prefix == 'behave_units.' and self._preferred == 'rust':
             # Unit enum identities remain shared; unmigrated converter classes stay explicit.
             result = getattr(self._native_namespace(), name)
