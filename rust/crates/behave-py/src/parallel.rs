@@ -1,20 +1,17 @@
-//! Fused native model pipelines and ordered field-wise chunk concatenation.
-use crate::prepared::{Field, PreparedArguments};
-use behave_fire::{
-    batch::{CrownBatch, SurfaceBatch},
-    GridShape,
-};
-use std::collections::BTreeMap;
+//! Ordered native chunks writing directly into typed output columns.
+use crate::column_output::{ColumnBundle, RowWriter};
+use crate::operation::Operation;
+use crate::prepared::PreparedArguments;
 use std::ops::Range;
 
-/// Named output columns, concatenation duration, and appended byte count.
-type BatchEvaluation = (BTreeMap<String, Vec<f64>>, f64, usize);
+type BatchEvaluation = (ColumnBundle, f64, usize);
 
 pub fn surface(
     a: &PreparedArguments<'_>,
     i: usize,
 ) -> Result<behave_fire::surface::SurfaceResult, String> {
     let mut input = crate::structures::input(a, i)?;
+    use crate::prepared::Field;
     input.m1h = a.n(Field::M1h, i)?;
     input.m10h = a.n(Field::M10h, i)?;
     input.m100h = a.n(Field::M100h, i)?;
@@ -27,20 +24,66 @@ pub fn surface(
     Ok(plan.run_cell(&input, &fuel, behave_fire::engine::SurfaceTweaks::default()))
 }
 
-pub fn evaluate(
-    operation: &str,
+pub fn crown(
+    a: &PreparedArguments<'_>,
+    i: usize,
+) -> Result<behave_fire::crown::CrownResult, String> {
+    let plan = behave_fire::engine::CrownPlan::new(crate::prepared::controls::crown(a));
+    let input = crate::crown::input(a, i)?;
+    let surface = crate::crown::surface_values(a, i);
+    let fuel = crate::crown::fuel(a, i)?;
+    #[cfg(feature = "allocation-probe")]
+    let _scope = crate::allocation_probe::Scope::enter(crate::allocation_probe::KERNEL);
+    Ok(plan.run_cell(
+        &input,
+        &surface,
+        &fuel,
+        behave_fire::engine::CrownTweaks::default(),
+    ))
+}
+
+fn default_single(operation: Operation, a: &PreparedArguments<'_>, single: bool) -> bool {
+    if !single || operation.main_model() || operation.family() == crate::operation::Family::Units {
+        return false;
+    }
+    !matches!(
+        operation,
+        Operation::SurfaceCalculateEffectiveWindSpeed
+            | Operation::SurfaceRunSurfaceFire
+            | Operation::SurfaceCalculateFuelbedIntermediates
+            | Operation::SurfaceCalculateSlopePhi
+            | Operation::SurfaceCalculateSurfaceRateVector
+    ) && !(operation == Operation::SurfaceCalculateDirectionOfMaxSpread
+        && a.crown_options().wind_orientation == behave_fire::engine::WindOrientation::North)
+}
+
+pub fn empty(
+    operation: Operation,
     arguments: &PreparedArguments<'_>,
-    shape: &[usize],
+    single: bool,
+) -> Result<ColumnBundle, String> {
+    let mut seeds = Vec::new();
+    let mut output = RowWriter::record(&mut seeds);
+    crate::dispatch::evaluate(operation, arguments, 0, single, &mut output)?;
+    output.finish()?;
+    ColumnBundle::new(
+        seeds,
+        0,
+        default_single(operation, arguments, single),
+        arguments.metadata_varies(operation == Operation::CrownRunCrownFire),
+    )
+}
+
+pub fn evaluate(
+    operation: Operation,
+    arguments: &PreparedArguments<'_>,
+    count: usize,
     threads: usize,
 ) -> Option<Result<BatchEvaluation, String>> {
-    let shape = match GridShape::new(shape.to_vec()) {
-        Ok(shape) => shape,
-        Err(error) => return Some(Err(error.to_string())),
-    };
-    if let Some(plan) = crate::prepared::units::PreparedUnits::new(operation, arguments) {
-        return Some(plan.and_then(|plan| {
-            let chunks = behave_fire::map_chunks(shape.len(), threads, |range| plan.run(range))
-                .map_err(error)?;
+    crate::prepared::units::PreparedUnits::new(operation.name(), arguments).map(|plan| {
+        plan.and_then(|plan| {
+            let chunks =
+                behave_fire::map_chunks(count, threads, |range| plan.run(range)).map_err(error)?;
             let appended = chunks
                 .iter()
                 .skip(1)
@@ -50,121 +93,59 @@ pub fn evaluate(
             let mut chunks = chunks.into_iter();
             let mut values = chunks.next().unwrap_or_default();
             values
-                .try_reserve_exact(shape.len() - values.len())
+                .try_reserve_exact(count - values.len())
                 .map_err(|error| format!("MemoryError: {error}"))?;
             for mut chunk in chunks {
                 values.append(&mut chunk);
             }
-            let seconds = started.elapsed().as_secs_f64();
-            Ok((BTreeMap::from([(String::new(), values)]), seconds, appended))
-        }));
-    }
-    let result = if operation == "model.run_surface" {
-        SurfaceBatch::run_with(shape, threads, |index| surface(arguments, index)).map(|batch| {
-            let stats = *batch.statistics();
-            (
-                batch.into_named_vectors(),
-                stats.concatenation_seconds,
-                stats.appended_bytes,
-            )
-        })
-    } else if operation == "crown.run_crown_fire"
-        && !arguments.has_masks()
-        && !arguments.has_single()
-        && !arguments.has_integers()
-        // Crown normalizes aspect and foliar moisture to f64 arrays; unit codes
-        // are validated controls. Other weak and object payloads retain typing.
-        && !arguments.has_crown_python_payloads()
-    {
-        CrownBatch::run_with(shape, threads, |index| {
-            let plan =
-                behave_fire::engine::CrownPlan::new(crate::prepared::controls::crown(arguments));
-            let input = crate::crown::input(arguments, index)?;
-            let surface = crate::crown::surface_values(arguments, index);
-            let fuel = crate::crown::fuel(arguments, index)?;
-            #[cfg(feature = "allocation-probe")]
-            let _scope = crate::allocation_probe::Scope::enter(crate::allocation_probe::KERNEL);
-            Ok::<_, String>(plan.run_cell(
-                &input,
-                &surface,
-                &fuel,
-                behave_fire::engine::CrownTweaks::default(),
+            Ok((
+                ColumnBundle::from_f64("", values),
+                started.elapsed().as_secs_f64(),
+                appended,
             ))
         })
-        .map(|batch| {
-            let stats = *batch.statistics();
-            (
-                batch.into_named_vectors(),
-                stats.concatenation_seconds,
-                stats.appended_bytes,
-            )
-        })
-    } else {
-        return None;
-    };
-    Some(
-        result
-            .map(|(fields, seconds, bytes)| {
-                (
-                    fields
-                        .into_iter()
-                        .map(|(name, values)| (name.to_owned(), values))
-                        .collect(),
-                    seconds,
-                    bytes,
-                )
-            })
-            .map_err(error),
-    )
+    })
 }
 
 pub fn chunk(
-    operation: &str,
+    operation: Operation,
     arguments: &PreparedArguments<'_>,
     range: Range<usize>,
     single: bool,
-) -> Result<BTreeMap<String, Vec<f64>>, String> {
-    let count = range.len();
-    let mut output: BTreeMap<String, Vec<f64>> = BTreeMap::new();
-    for index in range {
-        for (name, value) in crate::dispatch::evaluate(operation, arguments, index, single)? {
-            let values = match output.entry(name) {
-                std::collections::btree_map::Entry::Occupied(entry) => entry.into_mut(),
-                std::collections::btree_map::Entry::Vacant(entry) => {
-                    let mut values = Vec::new();
-                    values
-                        .try_reserve_exact(count)
-                        .map_err(|error| format!("MemoryError: {error}"))?;
-                    entry.insert(values)
-                }
-            };
-            values.push(value);
-        }
+) -> Result<ColumnBundle, String> {
+    let mut seeds = Vec::new();
+    let mut capture = RowWriter::record(&mut seeds);
+    crate::dispatch::evaluate(operation, arguments, range.start, single, &mut capture)?;
+    capture.finish()?;
+    let mut output = ColumnBundle::new(
+        seeds,
+        range.len(),
+        default_single(operation, arguments, single),
+        arguments.metadata_varies(operation == Operation::CrownRunCrownFire),
+    )?;
+    output.write_first(operation.main_model())?;
+    for index in range.start + 1..range.end {
+        let mut row = RowWriter::row(&mut output, index - range.start, operation.main_model());
+        crate::dispatch::evaluate(operation, arguments, index, single, &mut row)?;
+        row.finish()?;
     }
+    output.check_lengths()?;
     Ok(output)
 }
 
-pub fn merge(
-    chunks: Vec<BTreeMap<String, Vec<f64>>>,
-    count: usize,
-) -> Result<BTreeMap<String, Vec<f64>>, String> {
+pub fn merge(chunks: Vec<ColumnBundle>, count: usize) -> Result<ColumnBundle, String> {
     let mut chunks = chunks.into_iter();
-    let mut output = chunks.next().unwrap_or_default();
-    if chunks.len() > 0 {
-        for values in output.values_mut() {
-            values
-                .try_reserve_exact(count - values.len())
-                .map_err(|error| format!("MemoryError: {error}"))?;
-        }
-    }
+    let mut output = chunks
+        .next()
+        .ok_or_else(|| "missing output chunks".to_owned())?;
+    output.reserve_total(count)?;
     for chunk in chunks {
-        for (name, mut values) in chunk {
-            output.entry(name).or_default().append(&mut values);
-        }
+        output.append(chunk)?;
     }
+    output.finish()?;
     Ok(output)
 }
-/// Preserve native error categories across the Python boundary.
+
 pub fn error<E: std::fmt::Display>(error: behave_fire::ParallelError<E>) -> String {
     match error {
         behave_fire::ParallelError::Work(error) => error.to_string(),

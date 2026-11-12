@@ -1,0 +1,3771 @@
+{
+  "manifest": {
+    "schema_version": 1,
+    "timed": {
+      "source_hash": "0417c62e0d772aedc6752e1b709af6e73c12654ba5464eaaf3155809db57cf91",
+      "extension_hash": "c30bb6ca7241bbbf22440e674610afb03a6fbd2f30499fe8b78a261bf30f1ca3",
+      "source_files": {
+        "pyproject.toml": "7b52e1fa46f1ad0acb06a45bf03b002810a14e30cb720998b4881bd0afc24cdb",
+        "rust/Cargo.lock": "d1d2a7bca8b52c78ef86466f0639b6c44a5b08d2a000a8af4dc3ee1da45535b2",
+        "rust/Cargo.toml": "31b5c56d96a7293e4d1298577bf422438fee6521d9f89858e23ddefd36dc75ac",
+        "rust/crates/behave-fire/Cargo.toml": "f1ada85f1a8581cf30d0ea3d6b3612ad5f1e6b782f9cbe9ab624cce438ba823f",
+        "rust/crates/behave-fire/examples/raster_tweaks.rs": "c8f1204b3aefba0176d5a645ca4bd7486d05ae5398d455d5d5316e0c2898f4c3",
+        "rust/crates/behave-fire/examples/standalone.rs": "a626b4149c4d4a4011e91579652aead1f15ba9aec50f3d76474c0f31e9f44857",
+        "rust/crates/behave-fire/src/batch.rs": "b11cae85df21640b92e1fc6786a8f194e830729bb592e6556783294b59458bb8",
+        "rust/crates/behave-fire/src/contain.rs": "c999565e719c1e6f2ccb5cc294c407d802f7ef09781a92e957c9a8bba0e1ba7e",
+        "rust/crates/behave-fire/src/crown/masked.rs": "25e542f6e66323bfaad211bcc0f669ff5f8be175446c84f42fab3d5ccf9ae2b5",
+        "rust/crates/behave-fire/src/crown/record.rs": "195db3fc2d9aef564edc873cb976ac48a10ae8b78c30c904f40907673199a4ff",
+        "rust/crates/behave-fire/src/crown.rs": "4926efcc9e4bbc6ddfc1a5a401c30abf5fed0a18365b7a93e64b5cec301e0811",
+        "rust/crates/behave-fire/src/engine/crown.rs": "4b63246d2dded78b44034c8b6ebc650949cfdca87b491c95fd988d6ea4abe3c3",
+        "rust/crates/behave-fire/src/engine/fuel.rs": "8ad8e38c2a8b5d2d2e44e838efaf2c9230501e61ed22db58100c16c8290b16d6",
+        "rust/crates/behave-fire/src/engine/mod.rs": "eb09c3a5100ad97d87c17ae5c7a109ca4b3c73a5bc939e9f188fa2bdecb727c1",
+        "rust/crates/behave-fire/src/engine/options.rs": "9defe87ea35e6c51f855445a66bd1ec6bfce816209812c5775e75e4e0dd05a19",
+        "rust/crates/behave-fire/src/engine/surface.rs": "ae7e6036fe1627c5ce1291e47cf9d18968bd12ef94a2d8e092ab33b08222d66c",
+        "rust/crates/behave-fire/src/engine/tweaks.rs": "ab3074d47556b4798209a9eff89526a39ef713ee1b4f6ea777a8873f2d8d3c09",
+        "rust/crates/behave-fire/src/error.rs": "ba624142a5fa7db29e365387d879d998b7bcf6b177b0089e03888b7d889e5326",
+        "rust/crates/behave-fire/src/fine_dead_fuel_moisture.rs": "451a1d9c190996f1416510e8c861b17928993a095956262e756bbd1d82ed83f5",
+        "rust/crates/behave-fire/src/fire_size.rs": "3c6bdad8ace949fa448ff46fa5b84bef68ad92a41a912277d4a996c2531eba81",
+        "rust/crates/behave-fire/src/fuel_models.rs": "f022114b0b9d897bfcbf40658899b0e181997c76f9af7962959fad650156f4c4",
+        "rust/crates/behave-fire/src/generated/fine_dead_fuel_moisture.rs": "694c7ab6330c0ef99713aa0d70189336cb2cda6b45001a94f0769d93e86f7595",
+        "rust/crates/behave-fire/src/generated/fuel_models.rs": "fc399af65f69e4f4df688cd9a16329db9d78bbbedb9edfbe32116189cb4ea86e",
+        "rust/crates/behave-fire/src/generated/species.rs": "15fd521d97d87ca547f6f202d43395bf421a4a3a807b1d6b2cb840650352a3d8",
+        "rust/crates/behave-fire/src/grid.rs": "b398f5cfdc9197b30af58bbe601d1a64f29a2bf4fe5a95a6a1ab4ea4965cfd1e",
+        "rust/crates/behave-fire/src/ignite.rs": "c9034994f37896d2c11d5587be43fc147309e7ac669e3af45f807937e8ac7f5a",
+        "rust/crates/behave-fire/src/lib.rs": "47ac78c85d668115ed056024c890cef60d2fd8ef398fef6f06fdb770605e98e0",
+        "rust/crates/behave-fire/src/math.rs": "ec15e1a5f75e46d7091b41fc90979712e0ac689e18c4163652abece09f6a4ce0",
+        "rust/crates/behave-fire/src/model.rs": "41ff03116335fa9a4079f185aa52529aa7bfc17d85e4ad010023aeb2ce348940",
+        "rust/crates/behave-fire/src/mortality.rs": "08ee0f50416c868b8a560a3c9435026c739e2a5f8e29c98d04657a1b14bff7bd",
+        "rust/crates/behave-fire/src/parallel.rs": "9dac6f5b0f529feba4ca6dbcc9434867f24c3d58d16512f44d7b2c4c35f35b6d",
+        "rust/crates/behave-fire/src/raster/crown.rs": "eaa9423d4c03e7588af2aea899a76919724771216c32e96ab63ec14f682df36f",
+        "rust/crates/behave-fire/src/raster/inputs.rs": "4d35e115346d35f6b09ceb5f82433508c7f69733ec414961a7311a5c6537cc2e",
+        "rust/crates/behave-fire/src/raster/mod.rs": "df75141d8a0853106ee53c2b40938c504284c6e967209098efd588ca15b4eaa3",
+        "rust/crates/behave-fire/src/raster/outputs.rs": "182773da7c1d0f4112426d94347141fbd7d1ecb18bf44229874ddcfca9da5acd",
+        "rust/crates/behave-fire/src/raster/stages.rs": "b44a618733e3b3a8bff1c42f621ceda08e35814b528be7de6012ca86219bb5e7",
+        "rust/crates/behave-fire/src/raster/surface.rs": "a4d58e71602f647f8af7fea3f574af73893457a420601bedb285c283100cda25",
+        "rust/crates/behave-fire/src/safety.rs": "cbda3b993f14c62f5e76af59da10a1fae027f59ff4dce89752aab477b25debd3",
+        "rust/crates/behave-fire/src/slope.rs": "877990aeffb2597398091a29ae2b6803a4c9f3fa1bfcefacc21f89e1de5e93a1",
+        "rust/crates/behave-fire/src/species.rs": "64e50c9750f21e1f1df5bca21c3357125246072715e09408fb80265a21f8d2ef",
+        "rust/crates/behave-fire/src/spot.rs": "f53128da15ced62991c872d1b7c975ce1b1f07e3dbaa9e9e9022972fb88f1879",
+        "rust/crates/behave-fire/src/surface/complex.rs": "2f4569def2d5d3bbe95b20923818dcbfd858af53feb547b5b802e2741aa91fcc",
+        "rust/crates/behave-fire/src/surface/fuelbed.rs": "3c1a7ba1d883b63a6046d458595334c800f4df4d8d81b45ed3ae372fe380d0b8",
+        "rust/crates/behave-fire/src/surface/geometry.rs": "2ebc470cd083e15df34575fe822ac39bf51fc2798b49e312be1a850d9f103bc4",
+        "rust/crates/behave-fire/src/surface/integer_magnitude.rs": "757b0ae5e3f15fe8a57b44547dabc4d28639b7632617802b752130564d56ba73",
+        "rust/crates/behave-fire/src/surface/integers.rs": "45ddc22d876f6f6bbf5cff9d12e1f24abede00a8b00ed7631da9a6ca6bd953b8",
+        "rust/crates/behave-fire/src/surface/masked.rs": "a06492d1c9da5ffaed325f36b7a9987143d5bf121333a1bf9272e43ac28110af",
+        "rust/crates/behave-fire/src/surface/masked_records.rs": "daab8a24e728a3ef3fbbd08270d5d56d4b42fccc7f2656d4488820a19584429c",
+        "rust/crates/behave-fire/src/surface/mod.rs": "41c34f3cb42f769640b2e946abed82297ba3f76358fe8e62f82553bd3127f7c9",
+        "rust/crates/behave-fire/src/surface/objects.rs": "dfa96f9113b61f1591c3260876c7db3db45b4bed05378dce5603131a8495446e",
+        "rust/crates/behave-fire/src/surface/particles.rs": "61e90ab621dffb663da56b79048b20468fbee117a5d9765c194eccd5829e6b4a",
+        "rust/crates/behave-fire/src/surface/reaction.rs": "3946a3bfb1e05d6fefa4106ed9569094d50b4f2b66c7b34716f51bc15189d4df",
+        "rust/crates/behave-fire/src/surface/types.rs": "b0392713e31e569e9124e42314d46080e0d292ebce012133285fbdcb2a6cf2fe",
+        "rust/crates/behave-fire/src/surface/wind.rs": "fb3a7e1a20b268397876fbbca7e2b995c1ce72455528026d0a95641efa8f4214",
+        "rust/crates/behave-fire/src/svml/atan2f.s": "4948216b9797daf10b72ff7fba79f4c16d8c00282cba904f2681e42e813fca82",
+        "rust/crates/behave-fire/src/svml.rs": "0988d28d5efca88000e70493402c68fefed738cfbce437dfe894c4853067a6da",
+        "rust/crates/behave-fire/src/units.rs": "090679874ed09c785e1bd82600d5ecd66c1b3ec4c4baefde70bc8a2419ce948b",
+        "rust/crates/behave-fire/src/vapor_pressure_deficit.rs": "11eaa280fabccc61569ca17431102595cc2f99110712618274abecab89069c8f",
+        "rust/crates/behave-fire/tests/binding_core_contracts.rs": "779c70f9c440ad418b6f68c349d02ccae823513a6fda203f054a1d1ff7be22ef",
+        "rust/crates/behave-fire/tests/chunks.rs": "41a44fa4d7d3eaedb0c84d5a0438abb878aa5413de4ade97f7e580f2c8590783",
+        "rust/crates/behave-fire/tests/containment_parity.rs": "9f572da7e6745816bd31854283c0e7ba0d3d4b077bfb8216437cdbb97dba9177",
+        "rust/crates/behave-fire/tests/crown_parity.rs": "342863be18a6e0f64e6f7a46731fa0f0d0cfe7f45675810430b342f7ee185127",
+        "rust/crates/behave-fire/tests/crown_record_parity.rs": "85c4f460609824047918f615b24d0e50c9dc8b97982aad81c923fc1854a7d960",
+        "rust/crates/behave-fire/tests/data_contract_parity.rs": "77c89bc9de41b07ef8209ecefd3723a67ffb3d9fa6272fce075945857ad3b526",
+        "rust/crates/behave-fire/tests/effects_parity.rs": "8c6538212e3d16c6e8f01c0fddba9778c9f885be6f1b85591fcc36e3ff8b5181",
+        "rust/crates/behave-fire/tests/grid_contract.rs": "26c24d5942d9364c801528ca44bd02017b4352a6f10f4d87973ece6839fad638",
+        "rust/crates/behave-fire/tests/grid_parity.rs": "b704a3faca662c35de7397a18c7bda1fe84ef605ef36b146053239c344730707",
+        "rust/crates/behave-fire/tests/integer_alias_parity.rs": "0106c29d27c0358b2e10449e874cd297336eb0e4c8d84766f2cdcc02e9f49394",
+        "rust/crates/behave-fire/tests/integer_surface_parity.rs": "45dba10b505e61853dcc4c1ef5cffd92ef845f8f0115833562ad74b3cc1061b7",
+        "rust/crates/behave-fire/tests/masked_crown_parity.rs": "62cee5e60046c2820522ea6983ba35c54054e2b17c51759db283049f2dd278a6",
+        "rust/crates/behave-fire/tests/masked_surface_parity.rs": "1363b2c09cb9e3f27b42c47eb35e0e8d0a394c04a9ac04eb93bcf894eb86696e",
+        "rust/crates/behave-fire/tests/model_domains.rs": "0a956e079ac5e189f1a4070781e4038d632a66bf039d6740b46db3a84683f0d1",
+        "rust/crates/behave-fire/tests/model_snapshot.rs": "e5884cdd4d98a37ae158f70c5ee5fba4f9c8ac860ecbd282d7a4de95ca32f909",
+        "rust/crates/behave-fire/tests/native_engine.rs": "ca926563a5a7ce475074b8e99aa0df428687e5462d77a4d19264d8637ad5dcf4",
+        "rust/crates/behave-fire/tests/native_raster.rs": "30a7d8fb6787b37cfffe3d88249d5b5aa26b1ab818e5cfd4afdfdfe546ab7749",
+        "rust/crates/behave-fire/tests/native_tweaks.rs": "38f23a799899628cf02f7c5b54b912afa8cb0fbe8c64b4cb7e7a498d657d91fd",
+        "rust/crates/behave-fire/tests/numpy_semantics.rs": "c0d8224fbe4a637c64ed5ef7deaf0c00802163127ab52b65bd6b0ce0ec14a531",
+        "rust/crates/behave-fire/tests/object_scalar_parity.rs": "adfd40d8b605d4af74618c5f53fb90aeabed32522f6b2851b33e2583cd653600",
+        "rust/crates/behave-fire/tests/prepared_physics.rs": "b7ee117f73855f1700760ccac7dc62d7d79a821fdd7e19d55f2b3100147f90c2",
+        "rust/crates/behave-fire/tests/raster_tweaks.rs": "f946fdf8f91d860a6ab70dec9c9e18652008dc4a0b42045f7cf4dc841a53a3df",
+        "rust/crates/behave-fire/tests/signed_zero_parity.rs": "ac3ba16505d9a26b70af80da16d5166646fb135e1877040b9ed0cc9695db3a49",
+        "rust/crates/behave-fire/tests/support/engine_fixture.rs": "ef37a3ed873e4cb852816daa66d7bda3bd73d8e66500a791249c6c50c830acd4",
+        "rust/crates/behave-fire/tests/surface_parity.rs": "7af9af5263a1d13120d9bcd03b5d1affcc57444c496baaebba3d88ddf9b3dbed",
+        "rust/crates/behave-fire/tests/tools_parity.rs": "99a646354a1c5750d4c6e191d6951a288bb3faedfdc3a70c3e0e714ebff9c948",
+        "rust/crates/behave-fire/tests/weak_scalar_parity.rs": "d6d4193744ca0e0f133c2e0a3243a1636b8de4d0bb70b9ee91690d4b10afa274",
+        "rust/crates/behave-py/Cargo.toml": "ae627a1fe28fa05c20255a9918288993e4daa2abee73f1ffab28af26abb18680",
+        "rust/crates/behave-py/src/allocation_probe.rs": "c9dc4162cc235c822a3294bc003b83c69dd30788560ffbb31fd7abb281fab090",
+        "rust/crates/behave-py/src/arrays.rs": "f28c030204811492b752b6906777fb092ded836342c8303bbaf170b4851a4b1f",
+        "rust/crates/behave-py/src/capabilities.rs": "2967c443963e9f256e5836cfce839068b52ae42aff499234c1bfdfd75bcc7788",
+        "rust/crates/behave-py/src/column_output.rs": "3d96b0e7abad4c7462947eb494322a771617ec5aea398c7229c0e04a2ea24672",
+        "rust/crates/behave-py/src/contain.rs": "28e72a87bdd903cfe9e132a9521a3499398eabf0a63c858ae6a0da6f532b76d6",
+        "rust/crates/behave-py/src/crown.rs": "a24f597c4597514125aa924673ddff74db5f20d16b089c04e4a8ecd380ec3daa",
+        "rust/crates/behave-py/src/crown_dispatch.rs": "9b579357cf8a6b8769cf292538c3a8f022731054b1648029bfc6410da7d67107",
+        "rust/crates/behave-py/src/crown_masked.rs": "62db28765b4a1cec15feb775ef2bd3e9cdae60455cfaf50419732796dd7e90f5",
+        "rust/crates/behave-py/src/data.rs": "194fdf87bb4d095ed97dd09470f5d29264f7150d173e20baec0c3cb3d1139ca1",
+        "rust/crates/behave-py/src/dispatch.rs": "bd33d03bd4f1d1f45452e99a8b7f2b44def7712d81d2b54ecd348a31aafdc42b",
+        "rust/crates/behave-py/src/effects.rs": "f56674c29af9e056527f58d07a4482bf9bbb04eae6ccbe5f9701cf01224b3875",
+        "rust/crates/behave-py/src/lib.rs": "994f56ae3ce7694fcd93d862272bdb6cf94e21a31f1f40b0a6340ae7f5a035c5",
+        "rust/crates/behave-py/src/masked.rs": "6eee90bf1b928eae87b5c03dd523b3f0e191d8f3d53adfe7c8242305451fab44",
+        "rust/crates/behave-py/src/masked_records.rs": "7a2f9da6fe9e386ef42edd8423b77ccfec288afef71ce84edd8cd920434095a1",
+        "rust/crates/behave-py/src/math_profiles.rs": "0311694189b7d3a5f31517a3d918f19d23587d2d6e6447846a4a8b01321db74d",
+        "rust/crates/behave-py/src/model.rs": "542a46bfc5616dae56ccd3d159e55308f4fd18872198398b2d05e4983cdb1eba",
+        "rust/crates/behave-py/src/operation.rs": "02b046a4e0e0457cda9da20e91d3dd597530da4f8d48b2653304648c0c03827a",
+        "rust/crates/behave-py/src/parallel.rs": "36f67effc8ff71df7d33de9fa6776719675466e80ba6cd1024ec2634537a0a1d",
+        "rust/crates/behave-py/src/prepared/controls.rs": "6e6d1a84d6e5195d304956864f3f78c108726185771d150be5df31f86ac60a3a",
+        "rust/crates/behave-py/src/prepared/fields.rs": "49de93c624d9f30c61d8df58756fb71850406e83f93227d5853b09491567b9b3",
+        "rust/crates/behave-py/src/prepared/keys.rs": "319d636f10a52fca639427586c73287341986b13d5feb15cee691af87dc9bbb7",
+        "rust/crates/behave-py/src/prepared/mod.rs": "e3a090f68fdf80485bd6063c56eacf612092a1f49bd7d133f01aaa13a816875b",
+        "rust/crates/behave-py/src/prepared/unit_selectors.rs": "adb6db39b134cecbe10e4d2201b15226d65449384847e5adba6217416a88ce56",
+        "rust/crates/behave-py/src/prepared/units.rs": "73c51c9deba775588473b5e1ca7d8323cccecd46683fd167f2f97dd3b4198c25",
+        "rust/crates/behave-py/src/state.rs": "b8994e195a71fadd2415abce16167b830f26f1ce228cf7357391df1d99b07ee5",
+        "rust/crates/behave-py/src/structures.rs": "d74104a7ba7bb0433df1f8e46d3cc07539f4686ea1119e9f4751fc649d99be84",
+        "rust/crates/behave-py/src/surface.rs": "d61e6f2b11744fcaa4e4e5daeb3022a5d7ccb123e64baa1288edb70e566ae6d6",
+        "rust/crates/behave-py/src/tools.rs": "ba591f3b3e07d26a7b080f6cdd0b7e3c6755a89464fcb5fc85bff5204862342e",
+        "rust/crates/behave-py/src/units.rs": "7b6262186ecd8b1cf681832ce2b5a48e79e09408cb9479f11dc9c26bdd5a34cf",
+        "src/behave_fire/__init__.py": "fba2775750dbb986afcc90a9a7f14224b25a5eec039afad1ff40135ea29a3ff1",
+        "src/behave_fire/_backend_contract.py": "a82227ce9c356c3517d2605a31193813b6c2f0c48d89a32561440a98c964b142",
+        "src/behave_fire/_version.py": "4527807abc155d9e01274e6aa53b40ff7ac324727d16c97d646758dea1580c0d",
+        "src/behave_fire/auto.py": "9795fe9292f3ae52abc389bde5ed2b7d722ff8fd55899694ef4e63202d3477a9",
+        "src/behave_fire/behave.py": "8b9c35cfe18024ba1186ba5240f939c9b647dcca8d026d7db18c447421e9f6b1",
+        "src/behave_fire/components/__init__.py": "5c88705dcf2a4073bc79bd49e5038172bd0fa5b15ca9e77d6f9717424282519d",
+        "src/behave_fire/components/behave_units.py": "426581d91466c64bdbf60bd8a686030fe8244303cdbd097b1838479937abab77",
+        "src/behave_fire/components/contain.py": "fae224dee8ecdb090e7c3e6dc73a219508a026726e1ab3483776d54121a81bb7",
+        "src/behave_fire/components/crown.py": "0e0f5fe9b8c3074b192528b020232cc95e66470d59daa3a057544c75d7d93a03",
+        "src/behave_fire/components/fine_dead_fuel_moisture_tool.py": "cb11fc2da53c66b7f7753e88aa1d1f2135c91c3e67962912d1b2c097a73a8e60",
+        "src/behave_fire/components/fire_size.py": "23c671131ae710cfa441a14307cc0dfeb2e3d36b276fc112a5308827fe9e40dc",
+        "src/behave_fire/components/fuel_models.py": "ee1b886c72c8bb0e14a4c883745b4dde97ee3e011c7fddddc5e8b63e4588d225",
+        "src/behave_fire/components/fuel_models_array.py": "f60af63d681be852ff4fe6c3864ef55521c745da6ab182382caee4543e057125",
+        "src/behave_fire/components/ignite.py": "f0518ee4bc484f1b5478ad4792ecba77481bb68dda48abd0c45442ecb78523fc",
+        "src/behave_fire/components/mortality.py": "ccdaff07b59ef140786031d8957dd3cdafbbd97fd5e372e5fe4abcb392f5bcac",
+        "src/behave_fire/components/safety.py": "ed27e7cef7aa488a92636f8dfa589fadca3e0c6ba44ccae87a9fd7c8bac168a0",
+        "src/behave_fire/components/slope_tool.py": "754ce32058173b6c149135f9b1ec443f8be21679c7cf6c8e0a64d7ef5f3fb49c",
+        "src/behave_fire/components/species_master_table.py": "afa06eb15e475d252eef8b54d34be0d202c5c0f664d75e2c87c783a3831e8c11",
+        "src/behave_fire/components/spot.py": "a0411ecf7606ee75f4b460c084cb461e0c39619a3c14ad96a4c0217733456a22",
+        "src/behave_fire/components/surface.py": "133c6938ea701599428824d1d210ca2449d9103a5324cffc3c2a0db5330e4550",
+        "src/behave_fire/components/vapor_pressure_deficit_calculator.py": "4b165f3d48a02ab49c0fcdd2a5a7df65bab8b4a6366a280cbbf23041488eb258",
+        "src/behave_fire/python/__init__.py": "69205fb38d31b2ad6f4f9af65ec221d7ceefe9730df2731984ea96d35b7439b9",
+        "src/behave_fire/rust/__init__.py": "367c9a44b435b9de093e0fcbfdd172bedc92c57536fe2088a36aaa4c2088178d",
+        "src/behave_fire/rust/_bridge.py": "6e86410a8eecc9ac668dc343554fad8c527be1f867c8cf1a758cabf543e29066",
+        "src/behave_fire/rust/_ownership.py": "a9ecb3b3888e2b033d3bf72a5140e7802949c11cfa3fd2c2d63b6ca01043c7c2",
+        "src/behave_fire/rust/_serialization.py": "49a7b891e5d25fb10411506e024a7b0059558b821b77c3eb9d096c206cc52af8",
+        "src/behave_fire/rust/_threads.py": "5d8d2128c75865df5f53c1498ee7a93830f2a786a8e73dd4490fd3c66fce067a",
+        "src/behave_fire/rust/behave_units.py": "436536ff785768887a31c50d852fd505b0286c08ff8d618c739899225c9b51b5",
+        "src/behave_fire/rust/contain.py": "0cdc2203bf2e3d571476628e17054ebd53c2b05afa0316a6524a17943eedef45",
+        "src/behave_fire/rust/core.py": "cff5597faadfa162b58cf3e1999d431f7715c8214dbf66848883cbbcb6b827e1",
+        "src/behave_fire/rust/crown.py": "db1bfac6956b9685673c45da1c5a8abf9a09fc81d42f6ad5152af14d6c653907",
+        "src/behave_fire/rust/fine_dead_fuel_moisture_tool.py": "1f935886e5f5ec871ba9c7523bbd8332e3a6413bd7ba9801d704bcc28c5a955e",
+        "src/behave_fire/rust/fire_size.py": "1083f40b772edae92f1a84f18ac11b19bda503d315f5d7ed2d21e245f6653099",
+        "src/behave_fire/rust/fuel_models.py": "f9c4a0abfc825cffc02541877ac708a1b9e6eb047e2ed121a13f9b228d123530",
+        "src/behave_fire/rust/fuel_models_array.py": "fc38f5937bd0cafe00ccd338d9abfa0fe45e69d372a8efe0169dcb46ba01a5dd",
+        "src/behave_fire/rust/ignite.py": "e75921c0c4124c1a4ef97666fd158068033a7c676b553a5aa2fd23802b5240f3",
+        "src/behave_fire/rust/mortality.py": "1b15e11f6ca641d1f7238e977fd6399e32cb2c048a78b47d3c606ee5944b65e9",
+        "src/behave_fire/rust/safety.py": "87ac0ed3c2a57af031c6353c862e19075548e9067befc28f7a74a81387c73a9a",
+        "src/behave_fire/rust/slope_tool.py": "cbf136431ac02d3ca5be51ae5f41efb71ecc98f979b189108b900cd032231ce9",
+        "src/behave_fire/rust/species_master_table.py": "5483a83bc34be7c640dab9e75a1176527dc1d782d029fe0d267f1acbe068b39e",
+        "src/behave_fire/rust/spot.py": "e54b5fc624bd889c4f0e193ad5bdaa30fd220fd2a13365a6f9c1d9b7f81a0ea1",
+        "src/behave_fire/rust/surface.py": "657e973cdf052ae51e86ff15938c3a45be3df524045ea5c5446b2c74783ba489",
+        "src/behave_fire/rust/vapor_pressure_deficit_calculator.py": "304b2960315463fe003d69d4a84f889d8d74832320acf6a25905d76805f9016d",
+        "tools/assemble_allocation_evidence.py": "af867392f95b7c3993cd6b57b7584792e27061a9cb451c612f83378c0520a68c",
+        "tools/benchmark_backends.py": "221b7918dc5e9dc92c0297367bdeeea557c88c836298d8bf31d10bfeeaa9a839",
+        "tools/build_pure_wheel.py": "ed7f687468a5d95164acf360bedeeb253fad802749c80370248d2978f63f19ce",
+        "tools/check_crate_package.py": "0546999fe8461537b8ffbd157584a306a3f76f6662edc220174cd1e37d26209e",
+        "tools/check_performance.py": "6ce7c6a81b9508c21a88112c0f7810bc28684a3830074ab5d27c4b5e879ff170",
+        "tools/check_rust_tables.py": "2aebc6fedbb1073bba8731d0c6eea9589806a751cc760a9fb958ed7d81042fec",
+        "tools/check_sdist.py": "e1bbfc361adf44291157c2d57e3904ccb3405a4fdfc0c67ade555f7212aaab16",
+        "tools/check_wheel_metadata.py": "e0d1a1528f7e1204e01a51569fb4920b2e404d7d85965c41043799be7e88b987",
+        "tools/compare_backends.py": "a5a9cc45377c4edb7e7a9526d82d16e0ba4261239a18d27844ca7ebac96872b1",
+        "tools/export_rust_reference.py": "5fd6e40bf45cdf6467c03314014a278d65b70d7ba2bd2344aa16c387ac36eb99",
+        "tools/field_probe/Cargo.lock": "13faa3863dc957954e7e048e8a87c42343037f902e0673c69d77083a4e70ecf8",
+        "tools/field_probe/Cargo.toml": "09e1fb3ce477eaec9b6b630dbd6029d5ef6cef645ba4daa2d4c90420da7823d7",
+        "tools/field_probe/src/lib.rs": "b3acc5d0b0edd5f813f8906994f30395c0a08cec20bbd5e4284f6b85e92445ea",
+        "tools/measure_native_allocations.py": "386acb8fdde6fdd22131d54d9a0fa99a1e6a1296327bfdb6d2ef865da8a13a20",
+        "tools/perf_probe/Cargo.lock": "49fd290765eb942c5377c23d21144791a199ff39e4fc14b27c68072cf105ca2a",
+        "tools/perf_probe/Cargo.toml": "9e15c63dc64c6542e6e39327b31be2bd53777793ce14243fe4c9f77845a6b388",
+        "tools/perf_probe/src/compact.rs": "50b248b286a73ea3d9a0b18cc70db0fb0ef72cc1abc74ed99950382e6ce8e3e7",
+        "tools/perf_probe/src/main.rs": "e0a03c3a625cc446568a735980a90352c5d097221f47d53a126dbdee6de0e85a",
+        "tools/perf_probe/src/raster_probe.rs": "4681f86b3df727d3956e0cef5a6551585a1349d1c88f3221ce54f3e29b5d174c",
+        "tools/performance_cases.py": "97f336a76e0849f098e55cabbcfdb3a2c22d2b33ac542faf0f129f72164dc4d2",
+        "tools/probe_direction_fixtures.py": "df0cd5599d9acfb4c8d4e40fe2687fceddb429d29f1fc21b8baa455446d30fcc",
+        "tools/probe_direction_layout.py": "91f1a737e926b2dd1fa744f49e08b323956d0ee695ee50aeb1b2a40c837d1c08",
+        "tools/probe_direction_oracle.py": "4a351d663ddf2d889bc457cbe6965c2964704d03ecfb447f2e6a8397d3b4467e",
+        "tools/probe_numpy_aliases.py": "f451ef9d6a613205c83b50d8c010b3a5f07e875b9156e34ebbce0ff773cc93ab",
+        "tools/probe_platform_oracle.py": "ed8b04b2388bf44b87ff2e0a65957e4aa522e80c1f5f94e29e87ee27d970ea82",
+        "tools/rust_consumer.rs": "a1b751840263e3adb974f50db2945133ace857250e11a13492498eb819f96f4f",
+        "tools/rust_reference_platform.py": "4de6ff966596adf08b60c8b1b0332302182dbe688ea256a9052c6c45ff89e321",
+        "tools/smoke_test_wheel.py": "d1b62be3aa68de85aa3fb59a4012643c6aa12268611f31127ce4696b7461526e",
+        "tools/test_native_wheel_suite.py": "2a58b6e3d8a807e8538b503dcf9af32a43123636a300d867226f22af14508ed9",
+        "tools/test_wheel_install.py": "e791c5f24d73ac005998c691b05839ffea4ee619978a8472bfc02780abb36a42"
+      },
+      "compiler": "rustc 1.99.0 (b940084d7 2026-09-28)\nbinary: rustc\ncommit-hash: b940084d7eb6a299eb4bfeb8e34901bc051e7ac4\ncommit-date: 2026-09-28\nhost: x86_64-pc-windows-msvc\nrelease: 1.99.0\nLLVM version: 23.1.1\n",
+      "target": "x86_64-pc-windows-msvc",
+      "profile": "release",
+      "features": [],
+      "build_environment": {}
+    },
+    "instrumented": {
+      "source_hash": "0417c62e0d772aedc6752e1b709af6e73c12654ba5464eaaf3155809db57cf91",
+      "extension_hash": "1c657b600c29f6861e14a1264eb2d28e68daad3d570c9b6ba024408423987626",
+      "source_files": {
+        "pyproject.toml": "7b52e1fa46f1ad0acb06a45bf03b002810a14e30cb720998b4881bd0afc24cdb",
+        "rust/Cargo.lock": "d1d2a7bca8b52c78ef86466f0639b6c44a5b08d2a000a8af4dc3ee1da45535b2",
+        "rust/Cargo.toml": "31b5c56d96a7293e4d1298577bf422438fee6521d9f89858e23ddefd36dc75ac",
+        "rust/crates/behave-fire/Cargo.toml": "f1ada85f1a8581cf30d0ea3d6b3612ad5f1e6b782f9cbe9ab624cce438ba823f",
+        "rust/crates/behave-fire/examples/raster_tweaks.rs": "c8f1204b3aefba0176d5a645ca4bd7486d05ae5398d455d5d5316e0c2898f4c3",
+        "rust/crates/behave-fire/examples/standalone.rs": "a626b4149c4d4a4011e91579652aead1f15ba9aec50f3d76474c0f31e9f44857",
+        "rust/crates/behave-fire/src/batch.rs": "b11cae85df21640b92e1fc6786a8f194e830729bb592e6556783294b59458bb8",
+        "rust/crates/behave-fire/src/contain.rs": "c999565e719c1e6f2ccb5cc294c407d802f7ef09781a92e957c9a8bba0e1ba7e",
+        "rust/crates/behave-fire/src/crown/masked.rs": "25e542f6e66323bfaad211bcc0f669ff5f8be175446c84f42fab3d5ccf9ae2b5",
+        "rust/crates/behave-fire/src/crown/record.rs": "195db3fc2d9aef564edc873cb976ac48a10ae8b78c30c904f40907673199a4ff",
+        "rust/crates/behave-fire/src/crown.rs": "4926efcc9e4bbc6ddfc1a5a401c30abf5fed0a18365b7a93e64b5cec301e0811",
+        "rust/crates/behave-fire/src/engine/crown.rs": "4b63246d2dded78b44034c8b6ebc650949cfdca87b491c95fd988d6ea4abe3c3",
+        "rust/crates/behave-fire/src/engine/fuel.rs": "8ad8e38c2a8b5d2d2e44e838efaf2c9230501e61ed22db58100c16c8290b16d6",
+        "rust/crates/behave-fire/src/engine/mod.rs": "eb09c3a5100ad97d87c17ae5c7a109ca4b3c73a5bc939e9f188fa2bdecb727c1",
+        "rust/crates/behave-fire/src/engine/options.rs": "9defe87ea35e6c51f855445a66bd1ec6bfce816209812c5775e75e4e0dd05a19",
+        "rust/crates/behave-fire/src/engine/surface.rs": "ae7e6036fe1627c5ce1291e47cf9d18968bd12ef94a2d8e092ab33b08222d66c",
+        "rust/crates/behave-fire/src/engine/tweaks.rs": "ab3074d47556b4798209a9eff89526a39ef713ee1b4f6ea777a8873f2d8d3c09",
+        "rust/crates/behave-fire/src/error.rs": "ba624142a5fa7db29e365387d879d998b7bcf6b177b0089e03888b7d889e5326",
+        "rust/crates/behave-fire/src/fine_dead_fuel_moisture.rs": "451a1d9c190996f1416510e8c861b17928993a095956262e756bbd1d82ed83f5",
+        "rust/crates/behave-fire/src/fire_size.rs": "3c6bdad8ace949fa448ff46fa5b84bef68ad92a41a912277d4a996c2531eba81",
+        "rust/crates/behave-fire/src/fuel_models.rs": "f022114b0b9d897bfcbf40658899b0e181997c76f9af7962959fad650156f4c4",
+        "rust/crates/behave-fire/src/generated/fine_dead_fuel_moisture.rs": "694c7ab6330c0ef99713aa0d70189336cb2cda6b45001a94f0769d93e86f7595",
+        "rust/crates/behave-fire/src/generated/fuel_models.rs": "fc399af65f69e4f4df688cd9a16329db9d78bbbedb9edfbe32116189cb4ea86e",
+        "rust/crates/behave-fire/src/generated/species.rs": "15fd521d97d87ca547f6f202d43395bf421a4a3a807b1d6b2cb840650352a3d8",
+        "rust/crates/behave-fire/src/grid.rs": "b398f5cfdc9197b30af58bbe601d1a64f29a2bf4fe5a95a6a1ab4ea4965cfd1e",
+        "rust/crates/behave-fire/src/ignite.rs": "c9034994f37896d2c11d5587be43fc147309e7ac669e3af45f807937e8ac7f5a",
+        "rust/crates/behave-fire/src/lib.rs": "47ac78c85d668115ed056024c890cef60d2fd8ef398fef6f06fdb770605e98e0",
+        "rust/crates/behave-fire/src/math.rs": "ec15e1a5f75e46d7091b41fc90979712e0ac689e18c4163652abece09f6a4ce0",
+        "rust/crates/behave-fire/src/model.rs": "41ff03116335fa9a4079f185aa52529aa7bfc17d85e4ad010023aeb2ce348940",
+        "rust/crates/behave-fire/src/mortality.rs": "08ee0f50416c868b8a560a3c9435026c739e2a5f8e29c98d04657a1b14bff7bd",
+        "rust/crates/behave-fire/src/parallel.rs": "9dac6f5b0f529feba4ca6dbcc9434867f24c3d58d16512f44d7b2c4c35f35b6d",
+        "rust/crates/behave-fire/src/raster/crown.rs": "eaa9423d4c03e7588af2aea899a76919724771216c32e96ab63ec14f682df36f",
+        "rust/crates/behave-fire/src/raster/inputs.rs": "4d35e115346d35f6b09ceb5f82433508c7f69733ec414961a7311a5c6537cc2e",
+        "rust/crates/behave-fire/src/raster/mod.rs": "df75141d8a0853106ee53c2b40938c504284c6e967209098efd588ca15b4eaa3",
+        "rust/crates/behave-fire/src/raster/outputs.rs": "182773da7c1d0f4112426d94347141fbd7d1ecb18bf44229874ddcfca9da5acd",
+        "rust/crates/behave-fire/src/raster/stages.rs": "b44a618733e3b3a8bff1c42f621ceda08e35814b528be7de6012ca86219bb5e7",
+        "rust/crates/behave-fire/src/raster/surface.rs": "a4d58e71602f647f8af7fea3f574af73893457a420601bedb285c283100cda25",
+        "rust/crates/behave-fire/src/safety.rs": "cbda3b993f14c62f5e76af59da10a1fae027f59ff4dce89752aab477b25debd3",
+        "rust/crates/behave-fire/src/slope.rs": "877990aeffb2597398091a29ae2b6803a4c9f3fa1bfcefacc21f89e1de5e93a1",
+        "rust/crates/behave-fire/src/species.rs": "64e50c9750f21e1f1df5bca21c3357125246072715e09408fb80265a21f8d2ef",
+        "rust/crates/behave-fire/src/spot.rs": "f53128da15ced62991c872d1b7c975ce1b1f07e3dbaa9e9e9022972fb88f1879",
+        "rust/crates/behave-fire/src/surface/complex.rs": "2f4569def2d5d3bbe95b20923818dcbfd858af53feb547b5b802e2741aa91fcc",
+        "rust/crates/behave-fire/src/surface/fuelbed.rs": "3c1a7ba1d883b63a6046d458595334c800f4df4d8d81b45ed3ae372fe380d0b8",
+        "rust/crates/behave-fire/src/surface/geometry.rs": "2ebc470cd083e15df34575fe822ac39bf51fc2798b49e312be1a850d9f103bc4",
+        "rust/crates/behave-fire/src/surface/integer_magnitude.rs": "757b0ae5e3f15fe8a57b44547dabc4d28639b7632617802b752130564d56ba73",
+        "rust/crates/behave-fire/src/surface/integers.rs": "45ddc22d876f6f6bbf5cff9d12e1f24abede00a8b00ed7631da9a6ca6bd953b8",
+        "rust/crates/behave-fire/src/surface/masked.rs": "a06492d1c9da5ffaed325f36b7a9987143d5bf121333a1bf9272e43ac28110af",
+        "rust/crates/behave-fire/src/surface/masked_records.rs": "daab8a24e728a3ef3fbbd08270d5d56d4b42fccc7f2656d4488820a19584429c",
+        "rust/crates/behave-fire/src/surface/mod.rs": "41c34f3cb42f769640b2e946abed82297ba3f76358fe8e62f82553bd3127f7c9",
+        "rust/crates/behave-fire/src/surface/objects.rs": "dfa96f9113b61f1591c3260876c7db3db45b4bed05378dce5603131a8495446e",
+        "rust/crates/behave-fire/src/surface/particles.rs": "61e90ab621dffb663da56b79048b20468fbee117a5d9765c194eccd5829e6b4a",
+        "rust/crates/behave-fire/src/surface/reaction.rs": "3946a3bfb1e05d6fefa4106ed9569094d50b4f2b66c7b34716f51bc15189d4df",
+        "rust/crates/behave-fire/src/surface/types.rs": "b0392713e31e569e9124e42314d46080e0d292ebce012133285fbdcb2a6cf2fe",
+        "rust/crates/behave-fire/src/surface/wind.rs": "fb3a7e1a20b268397876fbbca7e2b995c1ce72455528026d0a95641efa8f4214",
+        "rust/crates/behave-fire/src/svml/atan2f.s": "4948216b9797daf10b72ff7fba79f4c16d8c00282cba904f2681e42e813fca82",
+        "rust/crates/behave-fire/src/svml.rs": "0988d28d5efca88000e70493402c68fefed738cfbce437dfe894c4853067a6da",
+        "rust/crates/behave-fire/src/units.rs": "090679874ed09c785e1bd82600d5ecd66c1b3ec4c4baefde70bc8a2419ce948b",
+        "rust/crates/behave-fire/src/vapor_pressure_deficit.rs": "11eaa280fabccc61569ca17431102595cc2f99110712618274abecab89069c8f",
+        "rust/crates/behave-fire/tests/binding_core_contracts.rs": "779c70f9c440ad418b6f68c349d02ccae823513a6fda203f054a1d1ff7be22ef",
+        "rust/crates/behave-fire/tests/chunks.rs": "41a44fa4d7d3eaedb0c84d5a0438abb878aa5413de4ade97f7e580f2c8590783",
+        "rust/crates/behave-fire/tests/containment_parity.rs": "9f572da7e6745816bd31854283c0e7ba0d3d4b077bfb8216437cdbb97dba9177",
+        "rust/crates/behave-fire/tests/crown_parity.rs": "342863be18a6e0f64e6f7a46731fa0f0d0cfe7f45675810430b342f7ee185127",
+        "rust/crates/behave-fire/tests/crown_record_parity.rs": "85c4f460609824047918f615b24d0e50c9dc8b97982aad81c923fc1854a7d960",
+        "rust/crates/behave-fire/tests/data_contract_parity.rs": "77c89bc9de41b07ef8209ecefd3723a67ffb3d9fa6272fce075945857ad3b526",
+        "rust/crates/behave-fire/tests/effects_parity.rs": "8c6538212e3d16c6e8f01c0fddba9778c9f885be6f1b85591fcc36e3ff8b5181",
+        "rust/crates/behave-fire/tests/grid_contract.rs": "26c24d5942d9364c801528ca44bd02017b4352a6f10f4d87973ece6839fad638",
+        "rust/crates/behave-fire/tests/grid_parity.rs": "b704a3faca662c35de7397a18c7bda1fe84ef605ef36b146053239c344730707",
+        "rust/crates/behave-fire/tests/integer_alias_parity.rs": "0106c29d27c0358b2e10449e874cd297336eb0e4c8d84766f2cdcc02e9f49394",
+        "rust/crates/behave-fire/tests/integer_surface_parity.rs": "45dba10b505e61853dcc4c1ef5cffd92ef845f8f0115833562ad74b3cc1061b7",
+        "rust/crates/behave-fire/tests/masked_crown_parity.rs": "62cee5e60046c2820522ea6983ba35c54054e2b17c51759db283049f2dd278a6",
+        "rust/crates/behave-fire/tests/masked_surface_parity.rs": "1363b2c09cb9e3f27b42c47eb35e0e8d0a394c04a9ac04eb93bcf894eb86696e",
+        "rust/crates/behave-fire/tests/model_domains.rs": "0a956e079ac5e189f1a4070781e4038d632a66bf039d6740b46db3a84683f0d1",
+        "rust/crates/behave-fire/tests/model_snapshot.rs": "e5884cdd4d98a37ae158f70c5ee5fba4f9c8ac860ecbd282d7a4de95ca32f909",
+        "rust/crates/behave-fire/tests/native_engine.rs": "ca926563a5a7ce475074b8e99aa0df428687e5462d77a4d19264d8637ad5dcf4",
+        "rust/crates/behave-fire/tests/native_raster.rs": "30a7d8fb6787b37cfffe3d88249d5b5aa26b1ab818e5cfd4afdfdfe546ab7749",
+        "rust/crates/behave-fire/tests/native_tweaks.rs": "38f23a799899628cf02f7c5b54b912afa8cb0fbe8c64b4cb7e7a498d657d91fd",
+        "rust/crates/behave-fire/tests/numpy_semantics.rs": "c0d8224fbe4a637c64ed5ef7deaf0c00802163127ab52b65bd6b0ce0ec14a531",
+        "rust/crates/behave-fire/tests/object_scalar_parity.rs": "adfd40d8b605d4af74618c5f53fb90aeabed32522f6b2851b33e2583cd653600",
+        "rust/crates/behave-fire/tests/prepared_physics.rs": "b7ee117f73855f1700760ccac7dc62d7d79a821fdd7e19d55f2b3100147f90c2",
+        "rust/crates/behave-fire/tests/raster_tweaks.rs": "f946fdf8f91d860a6ab70dec9c9e18652008dc4a0b42045f7cf4dc841a53a3df",
+        "rust/crates/behave-fire/tests/signed_zero_parity.rs": "ac3ba16505d9a26b70af80da16d5166646fb135e1877040b9ed0cc9695db3a49",
+        "rust/crates/behave-fire/tests/support/engine_fixture.rs": "ef37a3ed873e4cb852816daa66d7bda3bd73d8e66500a791249c6c50c830acd4",
+        "rust/crates/behave-fire/tests/surface_parity.rs": "7af9af5263a1d13120d9bcd03b5d1affcc57444c496baaebba3d88ddf9b3dbed",
+        "rust/crates/behave-fire/tests/tools_parity.rs": "99a646354a1c5750d4c6e191d6951a288bb3faedfdc3a70c3e0e714ebff9c948",
+        "rust/crates/behave-fire/tests/weak_scalar_parity.rs": "d6d4193744ca0e0f133c2e0a3243a1636b8de4d0bb70b9ee91690d4b10afa274",
+        "rust/crates/behave-py/Cargo.toml": "ae627a1fe28fa05c20255a9918288993e4daa2abee73f1ffab28af26abb18680",
+        "rust/crates/behave-py/src/allocation_probe.rs": "c9dc4162cc235c822a3294bc003b83c69dd30788560ffbb31fd7abb281fab090",
+        "rust/crates/behave-py/src/arrays.rs": "f28c030204811492b752b6906777fb092ded836342c8303bbaf170b4851a4b1f",
+        "rust/crates/behave-py/src/capabilities.rs": "2967c443963e9f256e5836cfce839068b52ae42aff499234c1bfdfd75bcc7788",
+        "rust/crates/behave-py/src/column_output.rs": "3d96b0e7abad4c7462947eb494322a771617ec5aea398c7229c0e04a2ea24672",
+        "rust/crates/behave-py/src/contain.rs": "28e72a87bdd903cfe9e132a9521a3499398eabf0a63c858ae6a0da6f532b76d6",
+        "rust/crates/behave-py/src/crown.rs": "a24f597c4597514125aa924673ddff74db5f20d16b089c04e4a8ecd380ec3daa",
+        "rust/crates/behave-py/src/crown_dispatch.rs": "9b579357cf8a6b8769cf292538c3a8f022731054b1648029bfc6410da7d67107",
+        "rust/crates/behave-py/src/crown_masked.rs": "62db28765b4a1cec15feb775ef2bd3e9cdae60455cfaf50419732796dd7e90f5",
+        "rust/crates/behave-py/src/data.rs": "194fdf87bb4d095ed97dd09470f5d29264f7150d173e20baec0c3cb3d1139ca1",
+        "rust/crates/behave-py/src/dispatch.rs": "bd33d03bd4f1d1f45452e99a8b7f2b44def7712d81d2b54ecd348a31aafdc42b",
+        "rust/crates/behave-py/src/effects.rs": "f56674c29af9e056527f58d07a4482bf9bbb04eae6ccbe5f9701cf01224b3875",
+        "rust/crates/behave-py/src/lib.rs": "994f56ae3ce7694fcd93d862272bdb6cf94e21a31f1f40b0a6340ae7f5a035c5",
+        "rust/crates/behave-py/src/masked.rs": "6eee90bf1b928eae87b5c03dd523b3f0e191d8f3d53adfe7c8242305451fab44",
+        "rust/crates/behave-py/src/masked_records.rs": "7a2f9da6fe9e386ef42edd8423b77ccfec288afef71ce84edd8cd920434095a1",
+        "rust/crates/behave-py/src/math_profiles.rs": "0311694189b7d3a5f31517a3d918f19d23587d2d6e6447846a4a8b01321db74d",
+        "rust/crates/behave-py/src/model.rs": "542a46bfc5616dae56ccd3d159e55308f4fd18872198398b2d05e4983cdb1eba",
+        "rust/crates/behave-py/src/operation.rs": "02b046a4e0e0457cda9da20e91d3dd597530da4f8d48b2653304648c0c03827a",
+        "rust/crates/behave-py/src/parallel.rs": "36f67effc8ff71df7d33de9fa6776719675466e80ba6cd1024ec2634537a0a1d",
+        "rust/crates/behave-py/src/prepared/controls.rs": "6e6d1a84d6e5195d304956864f3f78c108726185771d150be5df31f86ac60a3a",
+        "rust/crates/behave-py/src/prepared/fields.rs": "49de93c624d9f30c61d8df58756fb71850406e83f93227d5853b09491567b9b3",
+        "rust/crates/behave-py/src/prepared/keys.rs": "319d636f10a52fca639427586c73287341986b13d5feb15cee691af87dc9bbb7",
+        "rust/crates/behave-py/src/prepared/mod.rs": "e3a090f68fdf80485bd6063c56eacf612092a1f49bd7d133f01aaa13a816875b",
+        "rust/crates/behave-py/src/prepared/unit_selectors.rs": "adb6db39b134cecbe10e4d2201b15226d65449384847e5adba6217416a88ce56",
+        "rust/crates/behave-py/src/prepared/units.rs": "73c51c9deba775588473b5e1ca7d8323cccecd46683fd167f2f97dd3b4198c25",
+        "rust/crates/behave-py/src/state.rs": "b8994e195a71fadd2415abce16167b830f26f1ce228cf7357391df1d99b07ee5",
+        "rust/crates/behave-py/src/structures.rs": "d74104a7ba7bb0433df1f8e46d3cc07539f4686ea1119e9f4751fc649d99be84",
+        "rust/crates/behave-py/src/surface.rs": "d61e6f2b11744fcaa4e4e5daeb3022a5d7ccb123e64baa1288edb70e566ae6d6",
+        "rust/crates/behave-py/src/tools.rs": "ba591f3b3e07d26a7b080f6cdd0b7e3c6755a89464fcb5fc85bff5204862342e",
+        "rust/crates/behave-py/src/units.rs": "7b6262186ecd8b1cf681832ce2b5a48e79e09408cb9479f11dc9c26bdd5a34cf",
+        "src/behave_fire/__init__.py": "fba2775750dbb986afcc90a9a7f14224b25a5eec039afad1ff40135ea29a3ff1",
+        "src/behave_fire/_backend_contract.py": "a82227ce9c356c3517d2605a31193813b6c2f0c48d89a32561440a98c964b142",
+        "src/behave_fire/_version.py": "4527807abc155d9e01274e6aa53b40ff7ac324727d16c97d646758dea1580c0d",
+        "src/behave_fire/auto.py": "9795fe9292f3ae52abc389bde5ed2b7d722ff8fd55899694ef4e63202d3477a9",
+        "src/behave_fire/behave.py": "8b9c35cfe18024ba1186ba5240f939c9b647dcca8d026d7db18c447421e9f6b1",
+        "src/behave_fire/components/__init__.py": "5c88705dcf2a4073bc79bd49e5038172bd0fa5b15ca9e77d6f9717424282519d",
+        "src/behave_fire/components/behave_units.py": "426581d91466c64bdbf60bd8a686030fe8244303cdbd097b1838479937abab77",
+        "src/behave_fire/components/contain.py": "fae224dee8ecdb090e7c3e6dc73a219508a026726e1ab3483776d54121a81bb7",
+        "src/behave_fire/components/crown.py": "0e0f5fe9b8c3074b192528b020232cc95e66470d59daa3a057544c75d7d93a03",
+        "src/behave_fire/components/fine_dead_fuel_moisture_tool.py": "cb11fc2da53c66b7f7753e88aa1d1f2135c91c3e67962912d1b2c097a73a8e60",
+        "src/behave_fire/components/fire_size.py": "23c671131ae710cfa441a14307cc0dfeb2e3d36b276fc112a5308827fe9e40dc",
+        "src/behave_fire/components/fuel_models.py": "ee1b886c72c8bb0e14a4c883745b4dde97ee3e011c7fddddc5e8b63e4588d225",
+        "src/behave_fire/components/fuel_models_array.py": "f60af63d681be852ff4fe6c3864ef55521c745da6ab182382caee4543e057125",
+        "src/behave_fire/components/ignite.py": "f0518ee4bc484f1b5478ad4792ecba77481bb68dda48abd0c45442ecb78523fc",
+        "src/behave_fire/components/mortality.py": "ccdaff07b59ef140786031d8957dd3cdafbbd97fd5e372e5fe4abcb392f5bcac",
+        "src/behave_fire/components/safety.py": "ed27e7cef7aa488a92636f8dfa589fadca3e0c6ba44ccae87a9fd7c8bac168a0",
+        "src/behave_fire/components/slope_tool.py": "754ce32058173b6c149135f9b1ec443f8be21679c7cf6c8e0a64d7ef5f3fb49c",
+        "src/behave_fire/components/species_master_table.py": "afa06eb15e475d252eef8b54d34be0d202c5c0f664d75e2c87c783a3831e8c11",
+        "src/behave_fire/components/spot.py": "a0411ecf7606ee75f4b460c084cb461e0c39619a3c14ad96a4c0217733456a22",
+        "src/behave_fire/components/surface.py": "133c6938ea701599428824d1d210ca2449d9103a5324cffc3c2a0db5330e4550",
+        "src/behave_fire/components/vapor_pressure_deficit_calculator.py": "4b165f3d48a02ab49c0fcdd2a5a7df65bab8b4a6366a280cbbf23041488eb258",
+        "src/behave_fire/python/__init__.py": "69205fb38d31b2ad6f4f9af65ec221d7ceefe9730df2731984ea96d35b7439b9",
+        "src/behave_fire/rust/__init__.py": "367c9a44b435b9de093e0fcbfdd172bedc92c57536fe2088a36aaa4c2088178d",
+        "src/behave_fire/rust/_bridge.py": "6e86410a8eecc9ac668dc343554fad8c527be1f867c8cf1a758cabf543e29066",
+        "src/behave_fire/rust/_ownership.py": "a9ecb3b3888e2b033d3bf72a5140e7802949c11cfa3fd2c2d63b6ca01043c7c2",
+        "src/behave_fire/rust/_serialization.py": "49a7b891e5d25fb10411506e024a7b0059558b821b77c3eb9d096c206cc52af8",
+        "src/behave_fire/rust/_threads.py": "5d8d2128c75865df5f53c1498ee7a93830f2a786a8e73dd4490fd3c66fce067a",
+        "src/behave_fire/rust/behave_units.py": "436536ff785768887a31c50d852fd505b0286c08ff8d618c739899225c9b51b5",
+        "src/behave_fire/rust/contain.py": "0cdc2203bf2e3d571476628e17054ebd53c2b05afa0316a6524a17943eedef45",
+        "src/behave_fire/rust/core.py": "cff5597faadfa162b58cf3e1999d431f7715c8214dbf66848883cbbcb6b827e1",
+        "src/behave_fire/rust/crown.py": "db1bfac6956b9685673c45da1c5a8abf9a09fc81d42f6ad5152af14d6c653907",
+        "src/behave_fire/rust/fine_dead_fuel_moisture_tool.py": "1f935886e5f5ec871ba9c7523bbd8332e3a6413bd7ba9801d704bcc28c5a955e",
+        "src/behave_fire/rust/fire_size.py": "1083f40b772edae92f1a84f18ac11b19bda503d315f5d7ed2d21e245f6653099",
+        "src/behave_fire/rust/fuel_models.py": "f9c4a0abfc825cffc02541877ac708a1b9e6eb047e2ed121a13f9b228d123530",
+        "src/behave_fire/rust/fuel_models_array.py": "fc38f5937bd0cafe00ccd338d9abfa0fe45e69d372a8efe0169dcb46ba01a5dd",
+        "src/behave_fire/rust/ignite.py": "e75921c0c4124c1a4ef97666fd158068033a7c676b553a5aa2fd23802b5240f3",
+        "src/behave_fire/rust/mortality.py": "1b15e11f6ca641d1f7238e977fd6399e32cb2c048a78b47d3c606ee5944b65e9",
+        "src/behave_fire/rust/safety.py": "87ac0ed3c2a57af031c6353c862e19075548e9067befc28f7a74a81387c73a9a",
+        "src/behave_fire/rust/slope_tool.py": "cbf136431ac02d3ca5be51ae5f41efb71ecc98f979b189108b900cd032231ce9",
+        "src/behave_fire/rust/species_master_table.py": "5483a83bc34be7c640dab9e75a1176527dc1d782d029fe0d267f1acbe068b39e",
+        "src/behave_fire/rust/spot.py": "e54b5fc624bd889c4f0e193ad5bdaa30fd220fd2a13365a6f9c1d9b7f81a0ea1",
+        "src/behave_fire/rust/surface.py": "657e973cdf052ae51e86ff15938c3a45be3df524045ea5c5446b2c74783ba489",
+        "src/behave_fire/rust/vapor_pressure_deficit_calculator.py": "304b2960315463fe003d69d4a84f889d8d74832320acf6a25905d76805f9016d",
+        "tools/assemble_allocation_evidence.py": "af867392f95b7c3993cd6b57b7584792e27061a9cb451c612f83378c0520a68c",
+        "tools/benchmark_backends.py": "221b7918dc5e9dc92c0297367bdeeea557c88c836298d8bf31d10bfeeaa9a839",
+        "tools/build_pure_wheel.py": "ed7f687468a5d95164acf360bedeeb253fad802749c80370248d2978f63f19ce",
+        "tools/check_crate_package.py": "0546999fe8461537b8ffbd157584a306a3f76f6662edc220174cd1e37d26209e",
+        "tools/check_performance.py": "6ce7c6a81b9508c21a88112c0f7810bc28684a3830074ab5d27c4b5e879ff170",
+        "tools/check_rust_tables.py": "2aebc6fedbb1073bba8731d0c6eea9589806a751cc760a9fb958ed7d81042fec",
+        "tools/check_sdist.py": "e1bbfc361adf44291157c2d57e3904ccb3405a4fdfc0c67ade555f7212aaab16",
+        "tools/check_wheel_metadata.py": "e0d1a1528f7e1204e01a51569fb4920b2e404d7d85965c41043799be7e88b987",
+        "tools/compare_backends.py": "a5a9cc45377c4edb7e7a9526d82d16e0ba4261239a18d27844ca7ebac96872b1",
+        "tools/export_rust_reference.py": "5fd6e40bf45cdf6467c03314014a278d65b70d7ba2bd2344aa16c387ac36eb99",
+        "tools/field_probe/Cargo.lock": "13faa3863dc957954e7e048e8a87c42343037f902e0673c69d77083a4e70ecf8",
+        "tools/field_probe/Cargo.toml": "09e1fb3ce477eaec9b6b630dbd6029d5ef6cef645ba4daa2d4c90420da7823d7",
+        "tools/field_probe/src/lib.rs": "b3acc5d0b0edd5f813f8906994f30395c0a08cec20bbd5e4284f6b85e92445ea",
+        "tools/measure_native_allocations.py": "386acb8fdde6fdd22131d54d9a0fa99a1e6a1296327bfdb6d2ef865da8a13a20",
+        "tools/perf_probe/Cargo.lock": "49fd290765eb942c5377c23d21144791a199ff39e4fc14b27c68072cf105ca2a",
+        "tools/perf_probe/Cargo.toml": "9e15c63dc64c6542e6e39327b31be2bd53777793ce14243fe4c9f77845a6b388",
+        "tools/perf_probe/src/compact.rs": "50b248b286a73ea3d9a0b18cc70db0fb0ef72cc1abc74ed99950382e6ce8e3e7",
+        "tools/perf_probe/src/main.rs": "e0a03c3a625cc446568a735980a90352c5d097221f47d53a126dbdee6de0e85a",
+        "tools/perf_probe/src/raster_probe.rs": "4681f86b3df727d3956e0cef5a6551585a1349d1c88f3221ce54f3e29b5d174c",
+        "tools/performance_cases.py": "97f336a76e0849f098e55cabbcfdb3a2c22d2b33ac542faf0f129f72164dc4d2",
+        "tools/probe_direction_fixtures.py": "df0cd5599d9acfb4c8d4e40fe2687fceddb429d29f1fc21b8baa455446d30fcc",
+        "tools/probe_direction_layout.py": "91f1a737e926b2dd1fa744f49e08b323956d0ee695ee50aeb1b2a40c837d1c08",
+        "tools/probe_direction_oracle.py": "4a351d663ddf2d889bc457cbe6965c2964704d03ecfb447f2e6a8397d3b4467e",
+        "tools/probe_numpy_aliases.py": "f451ef9d6a613205c83b50d8c010b3a5f07e875b9156e34ebbce0ff773cc93ab",
+        "tools/probe_platform_oracle.py": "ed8b04b2388bf44b87ff2e0a65957e4aa522e80c1f5f94e29e87ee27d970ea82",
+        "tools/rust_consumer.rs": "a1b751840263e3adb974f50db2945133ace857250e11a13492498eb819f96f4f",
+        "tools/rust_reference_platform.py": "4de6ff966596adf08b60c8b1b0332302182dbe688ea256a9052c6c45ff89e321",
+        "tools/smoke_test_wheel.py": "d1b62be3aa68de85aa3fb59a4012643c6aa12268611f31127ce4696b7461526e",
+        "tools/test_native_wheel_suite.py": "2a58b6e3d8a807e8538b503dcf9af32a43123636a300d867226f22af14508ed9",
+        "tools/test_wheel_install.py": "e791c5f24d73ac005998c691b05839ffea4ee619978a8472bfc02780abb36a42"
+      },
+      "compiler": "rustc 1.99.0 (b940084d7 2026-09-28)\nbinary: rustc\ncommit-hash: b940084d7eb6a299eb4bfeb8e34901bc051e7ac4\ncommit-date: 2026-09-28\nhost: x86_64-pc-windows-msvc\nrelease: 1.99.0\nLLVM version: 23.1.1\n",
+      "target": "x86_64-pc-windows-msvc",
+      "profile": "release",
+      "features": [
+        "allocation-probe"
+      ],
+      "build_environment": {}
+    },
+    "source_differences": [],
+    "patch_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "manifest_sha256": "0c014224370187411c0c4f803494e343ea272427ff87d71754063e58419ccf76",
+  "raw": [
+    {
+      "dataset": "uniform",
+      "operation": "surface",
+      "cells": 1000,
+      "workers": 1,
+      "repeat": 0,
+      "process_id": 108196,
+      "instrumented_source_hash": "0417c62e0d772aedc6752e1b709af6e73c12654ba5464eaaf3155809db57cf91",
+      "instrumented_extension_hash": "1c657b600c29f6861e14a1264eb2d28e68daad3d570c9b6ba024408423987626",
+      "manifest_sha256": "0c014224370187411c0c4f803494e343ea272427ff87d71754063e58419ccf76",
+      "passed": true,
+      "scopes": {
+        "kernel": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 1000,
+          "workers": 1,
+          "definition": "kernel-loop-v1"
+        },
+        "encoder": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 1000,
+          "workers": 1,
+          "definition": "encoder-loop-v1"
+        }
+      },
+      "outside_scopes": {
+        "requests": 590,
+        "bytes": 531664
+      },
+      "python": "3.12.8 | packaged by conda-forge | (main, Dec  5 2024, 14:06:27) [MSC v.1942 64 bit (AMD64)]",
+      "numpy": "2.1.3",
+      "numpy_build": "3191b72109bea34b77531b50df8dba998af8f149d927aa6c239080a2ef17f76c"
+    },
+    {
+      "dataset": "uniform",
+      "operation": "surface",
+      "cells": 1000,
+      "workers": 1,
+      "repeat": 1,
+      "process_id": 140144,
+      "instrumented_source_hash": "0417c62e0d772aedc6752e1b709af6e73c12654ba5464eaaf3155809db57cf91",
+      "instrumented_extension_hash": "1c657b600c29f6861e14a1264eb2d28e68daad3d570c9b6ba024408423987626",
+      "manifest_sha256": "0c014224370187411c0c4f803494e343ea272427ff87d71754063e58419ccf76",
+      "passed": true,
+      "scopes": {
+        "kernel": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 1000,
+          "workers": 1,
+          "definition": "kernel-loop-v1"
+        },
+        "encoder": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 1000,
+          "workers": 1,
+          "definition": "encoder-loop-v1"
+        }
+      },
+      "outside_scopes": {
+        "requests": 590,
+        "bytes": 531664
+      },
+      "python": "3.12.8 | packaged by conda-forge | (main, Dec  5 2024, 14:06:27) [MSC v.1942 64 bit (AMD64)]",
+      "numpy": "2.1.3",
+      "numpy_build": "3191b72109bea34b77531b50df8dba998af8f149d927aa6c239080a2ef17f76c"
+    },
+    {
+      "dataset": "uniform",
+      "operation": "surface",
+      "cells": 1000,
+      "workers": 1,
+      "repeat": 2,
+      "process_id": 93812,
+      "instrumented_source_hash": "0417c62e0d772aedc6752e1b709af6e73c12654ba5464eaaf3155809db57cf91",
+      "instrumented_extension_hash": "1c657b600c29f6861e14a1264eb2d28e68daad3d570c9b6ba024408423987626",
+      "manifest_sha256": "0c014224370187411c0c4f803494e343ea272427ff87d71754063e58419ccf76",
+      "passed": true,
+      "scopes": {
+        "kernel": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 1000,
+          "workers": 1,
+          "definition": "kernel-loop-v1"
+        },
+        "encoder": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 1000,
+          "workers": 1,
+          "definition": "encoder-loop-v1"
+        }
+      },
+      "outside_scopes": {
+        "requests": 590,
+        "bytes": 531664
+      },
+      "python": "3.12.8 | packaged by conda-forge | (main, Dec  5 2024, 14:06:27) [MSC v.1942 64 bit (AMD64)]",
+      "numpy": "2.1.3",
+      "numpy_build": "3191b72109bea34b77531b50df8dba998af8f149d927aa6c239080a2ef17f76c"
+    },
+    {
+      "dataset": "uniform",
+      "operation": "surface",
+      "cells": 1000,
+      "workers": 4,
+      "repeat": 0,
+      "process_id": 131776,
+      "instrumented_source_hash": "0417c62e0d772aedc6752e1b709af6e73c12654ba5464eaaf3155809db57cf91",
+      "instrumented_extension_hash": "1c657b600c29f6861e14a1264eb2d28e68daad3d570c9b6ba024408423987626",
+      "manifest_sha256": "0c014224370187411c0c4f803494e343ea272427ff87d71754063e58419ccf76",
+      "passed": true,
+      "scopes": {
+        "kernel": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 1000,
+          "workers": 1,
+          "definition": "kernel-loop-v1"
+        },
+        "encoder": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 1000,
+          "workers": 1,
+          "definition": "encoder-loop-v1"
+        }
+      },
+      "outside_scopes": {
+        "requests": 590,
+        "bytes": 531664
+      },
+      "python": "3.12.8 | packaged by conda-forge | (main, Dec  5 2024, 14:06:27) [MSC v.1942 64 bit (AMD64)]",
+      "numpy": "2.1.3",
+      "numpy_build": "3191b72109bea34b77531b50df8dba998af8f149d927aa6c239080a2ef17f76c"
+    },
+    {
+      "dataset": "uniform",
+      "operation": "surface",
+      "cells": 1000,
+      "workers": 4,
+      "repeat": 1,
+      "process_id": 127672,
+      "instrumented_source_hash": "0417c62e0d772aedc6752e1b709af6e73c12654ba5464eaaf3155809db57cf91",
+      "instrumented_extension_hash": "1c657b600c29f6861e14a1264eb2d28e68daad3d570c9b6ba024408423987626",
+      "manifest_sha256": "0c014224370187411c0c4f803494e343ea272427ff87d71754063e58419ccf76",
+      "passed": true,
+      "scopes": {
+        "kernel": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 1000,
+          "workers": 1,
+          "definition": "kernel-loop-v1"
+        },
+        "encoder": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 1000,
+          "workers": 1,
+          "definition": "encoder-loop-v1"
+        }
+      },
+      "outside_scopes": {
+        "requests": 590,
+        "bytes": 531664
+      },
+      "python": "3.12.8 | packaged by conda-forge | (main, Dec  5 2024, 14:06:27) [MSC v.1942 64 bit (AMD64)]",
+      "numpy": "2.1.3",
+      "numpy_build": "3191b72109bea34b77531b50df8dba998af8f149d927aa6c239080a2ef17f76c"
+    },
+    {
+      "dataset": "uniform",
+      "operation": "surface",
+      "cells": 1000,
+      "workers": 4,
+      "repeat": 2,
+      "process_id": 31304,
+      "instrumented_source_hash": "0417c62e0d772aedc6752e1b709af6e73c12654ba5464eaaf3155809db57cf91",
+      "instrumented_extension_hash": "1c657b600c29f6861e14a1264eb2d28e68daad3d570c9b6ba024408423987626",
+      "manifest_sha256": "0c014224370187411c0c4f803494e343ea272427ff87d71754063e58419ccf76",
+      "passed": true,
+      "scopes": {
+        "kernel": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 1000,
+          "workers": 1,
+          "definition": "kernel-loop-v1"
+        },
+        "encoder": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 1000,
+          "workers": 1,
+          "definition": "encoder-loop-v1"
+        }
+      },
+      "outside_scopes": {
+        "requests": 590,
+        "bytes": 531664
+      },
+      "python": "3.12.8 | packaged by conda-forge | (main, Dec  5 2024, 14:06:27) [MSC v.1942 64 bit (AMD64)]",
+      "numpy": "2.1.3",
+      "numpy_build": "3191b72109bea34b77531b50df8dba998af8f149d927aa6c239080a2ef17f76c"
+    },
+    {
+      "dataset": "uniform",
+      "operation": "surface",
+      "cells": 10000,
+      "workers": 1,
+      "repeat": 0,
+      "process_id": 117484,
+      "instrumented_source_hash": "0417c62e0d772aedc6752e1b709af6e73c12654ba5464eaaf3155809db57cf91",
+      "instrumented_extension_hash": "1c657b600c29f6861e14a1264eb2d28e68daad3d570c9b6ba024408423987626",
+      "manifest_sha256": "0c014224370187411c0c4f803494e343ea272427ff87d71754063e58419ccf76",
+      "passed": true,
+      "scopes": {
+        "kernel": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 10000,
+          "workers": 1,
+          "definition": "kernel-loop-v1"
+        },
+        "encoder": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 10000,
+          "workers": 1,
+          "definition": "encoder-loop-v1"
+        }
+      },
+      "outside_scopes": {
+        "requests": 590,
+        "bytes": 4275664
+      },
+      "python": "3.12.8 | packaged by conda-forge | (main, Dec  5 2024, 14:06:27) [MSC v.1942 64 bit (AMD64)]",
+      "numpy": "2.1.3",
+      "numpy_build": "3191b72109bea34b77531b50df8dba998af8f149d927aa6c239080a2ef17f76c"
+    },
+    {
+      "dataset": "uniform",
+      "operation": "surface",
+      "cells": 10000,
+      "workers": 1,
+      "repeat": 1,
+      "process_id": 105892,
+      "instrumented_source_hash": "0417c62e0d772aedc6752e1b709af6e73c12654ba5464eaaf3155809db57cf91",
+      "instrumented_extension_hash": "1c657b600c29f6861e14a1264eb2d28e68daad3d570c9b6ba024408423987626",
+      "manifest_sha256": "0c014224370187411c0c4f803494e343ea272427ff87d71754063e58419ccf76",
+      "passed": true,
+      "scopes": {
+        "kernel": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 10000,
+          "workers": 1,
+          "definition": "kernel-loop-v1"
+        },
+        "encoder": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 10000,
+          "workers": 1,
+          "definition": "encoder-loop-v1"
+        }
+      },
+      "outside_scopes": {
+        "requests": 590,
+        "bytes": 4275664
+      },
+      "python": "3.12.8 | packaged by conda-forge | (main, Dec  5 2024, 14:06:27) [MSC v.1942 64 bit (AMD64)]",
+      "numpy": "2.1.3",
+      "numpy_build": "3191b72109bea34b77531b50df8dba998af8f149d927aa6c239080a2ef17f76c"
+    },
+    {
+      "dataset": "uniform",
+      "operation": "surface",
+      "cells": 10000,
+      "workers": 1,
+      "repeat": 2,
+      "process_id": 138940,
+      "instrumented_source_hash": "0417c62e0d772aedc6752e1b709af6e73c12654ba5464eaaf3155809db57cf91",
+      "instrumented_extension_hash": "1c657b600c29f6861e14a1264eb2d28e68daad3d570c9b6ba024408423987626",
+      "manifest_sha256": "0c014224370187411c0c4f803494e343ea272427ff87d71754063e58419ccf76",
+      "passed": true,
+      "scopes": {
+        "kernel": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 10000,
+          "workers": 1,
+          "definition": "kernel-loop-v1"
+        },
+        "encoder": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 10000,
+          "workers": 1,
+          "definition": "encoder-loop-v1"
+        }
+      },
+      "outside_scopes": {
+        "requests": 590,
+        "bytes": 4275664
+      },
+      "python": "3.12.8 | packaged by conda-forge | (main, Dec  5 2024, 14:06:27) [MSC v.1942 64 bit (AMD64)]",
+      "numpy": "2.1.3",
+      "numpy_build": "3191b72109bea34b77531b50df8dba998af8f149d927aa6c239080a2ef17f76c"
+    },
+    {
+      "dataset": "uniform",
+      "operation": "surface",
+      "cells": 10000,
+      "workers": 4,
+      "repeat": 0,
+      "process_id": 126720,
+      "instrumented_source_hash": "0417c62e0d772aedc6752e1b709af6e73c12654ba5464eaaf3155809db57cf91",
+      "instrumented_extension_hash": "1c657b600c29f6861e14a1264eb2d28e68daad3d570c9b6ba024408423987626",
+      "manifest_sha256": "0c014224370187411c0c4f803494e343ea272427ff87d71754063e58419ccf76",
+      "passed": true,
+      "scopes": {
+        "kernel": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 10000,
+          "workers": 4,
+          "definition": "kernel-loop-v1"
+        },
+        "encoder": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 10000,
+          "workers": 4,
+          "definition": "encoder-loop-v1"
+        }
+      },
+      "outside_scopes": {
+        "requests": 843,
+        "bytes": 6012630
+      },
+      "python": "3.12.8 | packaged by conda-forge | (main, Dec  5 2024, 14:06:27) [MSC v.1942 64 bit (AMD64)]",
+      "numpy": "2.1.3",
+      "numpy_build": "3191b72109bea34b77531b50df8dba998af8f149d927aa6c239080a2ef17f76c"
+    },
+    {
+      "dataset": "uniform",
+      "operation": "surface",
+      "cells": 10000,
+      "workers": 4,
+      "repeat": 1,
+      "process_id": 70520,
+      "instrumented_source_hash": "0417c62e0d772aedc6752e1b709af6e73c12654ba5464eaaf3155809db57cf91",
+      "instrumented_extension_hash": "1c657b600c29f6861e14a1264eb2d28e68daad3d570c9b6ba024408423987626",
+      "manifest_sha256": "0c014224370187411c0c4f803494e343ea272427ff87d71754063e58419ccf76",
+      "passed": true,
+      "scopes": {
+        "kernel": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 10000,
+          "workers": 4,
+          "definition": "kernel-loop-v1"
+        },
+        "encoder": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 10000,
+          "workers": 4,
+          "definition": "encoder-loop-v1"
+        }
+      },
+      "outside_scopes": {
+        "requests": 843,
+        "bytes": 6012630
+      },
+      "python": "3.12.8 | packaged by conda-forge | (main, Dec  5 2024, 14:06:27) [MSC v.1942 64 bit (AMD64)]",
+      "numpy": "2.1.3",
+      "numpy_build": "3191b72109bea34b77531b50df8dba998af8f149d927aa6c239080a2ef17f76c"
+    },
+    {
+      "dataset": "uniform",
+      "operation": "surface",
+      "cells": 10000,
+      "workers": 4,
+      "repeat": 2,
+      "process_id": 40972,
+      "instrumented_source_hash": "0417c62e0d772aedc6752e1b709af6e73c12654ba5464eaaf3155809db57cf91",
+      "instrumented_extension_hash": "1c657b600c29f6861e14a1264eb2d28e68daad3d570c9b6ba024408423987626",
+      "manifest_sha256": "0c014224370187411c0c4f803494e343ea272427ff87d71754063e58419ccf76",
+      "passed": true,
+      "scopes": {
+        "kernel": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 10000,
+          "workers": 4,
+          "definition": "kernel-loop-v1"
+        },
+        "encoder": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 10000,
+          "workers": 4,
+          "definition": "encoder-loop-v1"
+        }
+      },
+      "outside_scopes": {
+        "requests": 843,
+        "bytes": 6012630
+      },
+      "python": "3.12.8 | packaged by conda-forge | (main, Dec  5 2024, 14:06:27) [MSC v.1942 64 bit (AMD64)]",
+      "numpy": "2.1.3",
+      "numpy_build": "3191b72109bea34b77531b50df8dba998af8f149d927aa6c239080a2ef17f76c"
+    },
+    {
+      "dataset": "uniform",
+      "operation": "crown",
+      "cells": 1000,
+      "workers": 1,
+      "repeat": 0,
+      "process_id": 109884,
+      "instrumented_source_hash": "0417c62e0d772aedc6752e1b709af6e73c12654ba5464eaaf3155809db57cf91",
+      "instrumented_extension_hash": "1c657b600c29f6861e14a1264eb2d28e68daad3d570c9b6ba024408423987626",
+      "manifest_sha256": "0c014224370187411c0c4f803494e343ea272427ff87d71754063e58419ccf76",
+      "passed": true,
+      "scopes": {
+        "kernel": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 1000,
+          "workers": 1,
+          "definition": "kernel-loop-v1"
+        },
+        "encoder": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 1000,
+          "workers": 1,
+          "definition": "encoder-loop-v1"
+        }
+      },
+      "outside_scopes": {
+        "requests": 683,
+        "bytes": 554442
+      },
+      "python": "3.12.8 | packaged by conda-forge | (main, Dec  5 2024, 14:06:27) [MSC v.1942 64 bit (AMD64)]",
+      "numpy": "2.1.3",
+      "numpy_build": "3191b72109bea34b77531b50df8dba998af8f149d927aa6c239080a2ef17f76c"
+    },
+    {
+      "dataset": "uniform",
+      "operation": "crown",
+      "cells": 1000,
+      "workers": 1,
+      "repeat": 1,
+      "process_id": 58980,
+      "instrumented_source_hash": "0417c62e0d772aedc6752e1b709af6e73c12654ba5464eaaf3155809db57cf91",
+      "instrumented_extension_hash": "1c657b600c29f6861e14a1264eb2d28e68daad3d570c9b6ba024408423987626",
+      "manifest_sha256": "0c014224370187411c0c4f803494e343ea272427ff87d71754063e58419ccf76",
+      "passed": true,
+      "scopes": {
+        "kernel": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 1000,
+          "workers": 1,
+          "definition": "kernel-loop-v1"
+        },
+        "encoder": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 1000,
+          "workers": 1,
+          "definition": "encoder-loop-v1"
+        }
+      },
+      "outside_scopes": {
+        "requests": 683,
+        "bytes": 554442
+      },
+      "python": "3.12.8 | packaged by conda-forge | (main, Dec  5 2024, 14:06:27) [MSC v.1942 64 bit (AMD64)]",
+      "numpy": "2.1.3",
+      "numpy_build": "3191b72109bea34b77531b50df8dba998af8f149d927aa6c239080a2ef17f76c"
+    },
+    {
+      "dataset": "uniform",
+      "operation": "crown",
+      "cells": 1000,
+      "workers": 1,
+      "repeat": 2,
+      "process_id": 95448,
+      "instrumented_source_hash": "0417c62e0d772aedc6752e1b709af6e73c12654ba5464eaaf3155809db57cf91",
+      "instrumented_extension_hash": "1c657b600c29f6861e14a1264eb2d28e68daad3d570c9b6ba024408423987626",
+      "manifest_sha256": "0c014224370187411c0c4f803494e343ea272427ff87d71754063e58419ccf76",
+      "passed": true,
+      "scopes": {
+        "kernel": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 1000,
+          "workers": 1,
+          "definition": "kernel-loop-v1"
+        },
+        "encoder": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 1000,
+          "workers": 1,
+          "definition": "encoder-loop-v1"
+        }
+      },
+      "outside_scopes": {
+        "requests": 683,
+        "bytes": 554442
+      },
+      "python": "3.12.8 | packaged by conda-forge | (main, Dec  5 2024, 14:06:27) [MSC v.1942 64 bit (AMD64)]",
+      "numpy": "2.1.3",
+      "numpy_build": "3191b72109bea34b77531b50df8dba998af8f149d927aa6c239080a2ef17f76c"
+    },
+    {
+      "dataset": "uniform",
+      "operation": "crown",
+      "cells": 1000,
+      "workers": 4,
+      "repeat": 0,
+      "process_id": 82400,
+      "instrumented_source_hash": "0417c62e0d772aedc6752e1b709af6e73c12654ba5464eaaf3155809db57cf91",
+      "instrumented_extension_hash": "1c657b600c29f6861e14a1264eb2d28e68daad3d570c9b6ba024408423987626",
+      "manifest_sha256": "0c014224370187411c0c4f803494e343ea272427ff87d71754063e58419ccf76",
+      "passed": true,
+      "scopes": {
+        "kernel": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 1000,
+          "workers": 1,
+          "definition": "kernel-loop-v1"
+        },
+        "encoder": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 1000,
+          "workers": 1,
+          "definition": "encoder-loop-v1"
+        }
+      },
+      "outside_scopes": {
+        "requests": 683,
+        "bytes": 554442
+      },
+      "python": "3.12.8 | packaged by conda-forge | (main, Dec  5 2024, 14:06:27) [MSC v.1942 64 bit (AMD64)]",
+      "numpy": "2.1.3",
+      "numpy_build": "3191b72109bea34b77531b50df8dba998af8f149d927aa6c239080a2ef17f76c"
+    },
+    {
+      "dataset": "uniform",
+      "operation": "crown",
+      "cells": 1000,
+      "workers": 4,
+      "repeat": 1,
+      "process_id": 111612,
+      "instrumented_source_hash": "0417c62e0d772aedc6752e1b709af6e73c12654ba5464eaaf3155809db57cf91",
+      "instrumented_extension_hash": "1c657b600c29f6861e14a1264eb2d28e68daad3d570c9b6ba024408423987626",
+      "manifest_sha256": "0c014224370187411c0c4f803494e343ea272427ff87d71754063e58419ccf76",
+      "passed": true,
+      "scopes": {
+        "kernel": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 1000,
+          "workers": 1,
+          "definition": "kernel-loop-v1"
+        },
+        "encoder": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 1000,
+          "workers": 1,
+          "definition": "encoder-loop-v1"
+        }
+      },
+      "outside_scopes": {
+        "requests": 683,
+        "bytes": 554442
+      },
+      "python": "3.12.8 | packaged by conda-forge | (main, Dec  5 2024, 14:06:27) [MSC v.1942 64 bit (AMD64)]",
+      "numpy": "2.1.3",
+      "numpy_build": "3191b72109bea34b77531b50df8dba998af8f149d927aa6c239080a2ef17f76c"
+    },
+    {
+      "dataset": "uniform",
+      "operation": "crown",
+      "cells": 1000,
+      "workers": 4,
+      "repeat": 2,
+      "process_id": 31092,
+      "instrumented_source_hash": "0417c62e0d772aedc6752e1b709af6e73c12654ba5464eaaf3155809db57cf91",
+      "instrumented_extension_hash": "1c657b600c29f6861e14a1264eb2d28e68daad3d570c9b6ba024408423987626",
+      "manifest_sha256": "0c014224370187411c0c4f803494e343ea272427ff87d71754063e58419ccf76",
+      "passed": true,
+      "scopes": {
+        "kernel": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 1000,
+          "workers": 1,
+          "definition": "kernel-loop-v1"
+        },
+        "encoder": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 1000,
+          "workers": 1,
+          "definition": "encoder-loop-v1"
+        }
+      },
+      "outside_scopes": {
+        "requests": 683,
+        "bytes": 554442
+      },
+      "python": "3.12.8 | packaged by conda-forge | (main, Dec  5 2024, 14:06:27) [MSC v.1942 64 bit (AMD64)]",
+      "numpy": "2.1.3",
+      "numpy_build": "3191b72109bea34b77531b50df8dba998af8f149d927aa6c239080a2ef17f76c"
+    },
+    {
+      "dataset": "uniform",
+      "operation": "crown",
+      "cells": 10000,
+      "workers": 1,
+      "repeat": 0,
+      "process_id": 92344,
+      "instrumented_source_hash": "0417c62e0d772aedc6752e1b709af6e73c12654ba5464eaaf3155809db57cf91",
+      "instrumented_extension_hash": "1c657b600c29f6861e14a1264eb2d28e68daad3d570c9b6ba024408423987626",
+      "manifest_sha256": "0c014224370187411c0c4f803494e343ea272427ff87d71754063e58419ccf76",
+      "passed": true,
+      "scopes": {
+        "kernel": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 10000,
+          "workers": 1,
+          "definition": "kernel-loop-v1"
+        },
+        "encoder": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 10000,
+          "workers": 1,
+          "definition": "encoder-loop-v1"
+        }
+      },
+      "outside_scopes": {
+        "requests": 683,
+        "bytes": 4046442
+      },
+      "python": "3.12.8 | packaged by conda-forge | (main, Dec  5 2024, 14:06:27) [MSC v.1942 64 bit (AMD64)]",
+      "numpy": "2.1.3",
+      "numpy_build": "3191b72109bea34b77531b50df8dba998af8f149d927aa6c239080a2ef17f76c"
+    },
+    {
+      "dataset": "uniform",
+      "operation": "crown",
+      "cells": 10000,
+      "workers": 1,
+      "repeat": 1,
+      "process_id": 80184,
+      "instrumented_source_hash": "0417c62e0d772aedc6752e1b709af6e73c12654ba5464eaaf3155809db57cf91",
+      "instrumented_extension_hash": "1c657b600c29f6861e14a1264eb2d28e68daad3d570c9b6ba024408423987626",
+      "manifest_sha256": "0c014224370187411c0c4f803494e343ea272427ff87d71754063e58419ccf76",
+      "passed": true,
+      "scopes": {
+        "kernel": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 10000,
+          "workers": 1,
+          "definition": "kernel-loop-v1"
+        },
+        "encoder": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 10000,
+          "workers": 1,
+          "definition": "encoder-loop-v1"
+        }
+      },
+      "outside_scopes": {
+        "requests": 683,
+        "bytes": 4046442
+      },
+      "python": "3.12.8 | packaged by conda-forge | (main, Dec  5 2024, 14:06:27) [MSC v.1942 64 bit (AMD64)]",
+      "numpy": "2.1.3",
+      "numpy_build": "3191b72109bea34b77531b50df8dba998af8f149d927aa6c239080a2ef17f76c"
+    },
+    {
+      "dataset": "uniform",
+      "operation": "crown",
+      "cells": 10000,
+      "workers": 1,
+      "repeat": 2,
+      "process_id": 133864,
+      "instrumented_source_hash": "0417c62e0d772aedc6752e1b709af6e73c12654ba5464eaaf3155809db57cf91",
+      "instrumented_extension_hash": "1c657b600c29f6861e14a1264eb2d28e68daad3d570c9b6ba024408423987626",
+      "manifest_sha256": "0c014224370187411c0c4f803494e343ea272427ff87d71754063e58419ccf76",
+      "passed": true,
+      "scopes": {
+        "kernel": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 10000,
+          "workers": 1,
+          "definition": "kernel-loop-v1"
+        },
+        "encoder": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 10000,
+          "workers": 1,
+          "definition": "encoder-loop-v1"
+        }
+      },
+      "outside_scopes": {
+        "requests": 683,
+        "bytes": 4046442
+      },
+      "python": "3.12.8 | packaged by conda-forge | (main, Dec  5 2024, 14:06:27) [MSC v.1942 64 bit (AMD64)]",
+      "numpy": "2.1.3",
+      "numpy_build": "3191b72109bea34b77531b50df8dba998af8f149d927aa6c239080a2ef17f76c"
+    },
+    {
+      "dataset": "uniform",
+      "operation": "crown",
+      "cells": 10000,
+      "workers": 4,
+      "repeat": 0,
+      "process_id": 53560,
+      "instrumented_source_hash": "0417c62e0d772aedc6752e1b709af6e73c12654ba5464eaaf3155809db57cf91",
+      "instrumented_extension_hash": "1c657b600c29f6861e14a1264eb2d28e68daad3d570c9b6ba024408423987626",
+      "manifest_sha256": "0c014224370187411c0c4f803494e343ea272427ff87d71754063e58419ccf76",
+      "passed": true,
+      "scopes": {
+        "kernel": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 10000,
+          "workers": 4,
+          "definition": "kernel-loop-v1"
+        },
+        "encoder": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 10000,
+          "workers": 4,
+          "definition": "encoder-loop-v1"
+        }
+      },
+      "outside_scopes": {
+        "requests": 995,
+        "bytes": 6424307
+      },
+      "python": "3.12.8 | packaged by conda-forge | (main, Dec  5 2024, 14:06:27) [MSC v.1942 64 bit (AMD64)]",
+      "numpy": "2.1.3",
+      "numpy_build": "3191b72109bea34b77531b50df8dba998af8f149d927aa6c239080a2ef17f76c"
+    },
+    {
+      "dataset": "uniform",
+      "operation": "crown",
+      "cells": 10000,
+      "workers": 4,
+      "repeat": 1,
+      "process_id": 88428,
+      "instrumented_source_hash": "0417c62e0d772aedc6752e1b709af6e73c12654ba5464eaaf3155809db57cf91",
+      "instrumented_extension_hash": "1c657b600c29f6861e14a1264eb2d28e68daad3d570c9b6ba024408423987626",
+      "manifest_sha256": "0c014224370187411c0c4f803494e343ea272427ff87d71754063e58419ccf76",
+      "passed": true,
+      "scopes": {
+        "kernel": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 10000,
+          "workers": 4,
+          "definition": "kernel-loop-v1"
+        },
+        "encoder": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 10000,
+          "workers": 4,
+          "definition": "encoder-loop-v1"
+        }
+      },
+      "outside_scopes": {
+        "requests": 995,
+        "bytes": 6424307
+      },
+      "python": "3.12.8 | packaged by conda-forge | (main, Dec  5 2024, 14:06:27) [MSC v.1942 64 bit (AMD64)]",
+      "numpy": "2.1.3",
+      "numpy_build": "3191b72109bea34b77531b50df8dba998af8f149d927aa6c239080a2ef17f76c"
+    },
+    {
+      "dataset": "uniform",
+      "operation": "crown",
+      "cells": 10000,
+      "workers": 4,
+      "repeat": 2,
+      "process_id": 131368,
+      "instrumented_source_hash": "0417c62e0d772aedc6752e1b709af6e73c12654ba5464eaaf3155809db57cf91",
+      "instrumented_extension_hash": "1c657b600c29f6861e14a1264eb2d28e68daad3d570c9b6ba024408423987626",
+      "manifest_sha256": "0c014224370187411c0c4f803494e343ea272427ff87d71754063e58419ccf76",
+      "passed": true,
+      "scopes": {
+        "kernel": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 10000,
+          "workers": 4,
+          "definition": "kernel-loop-v1"
+        },
+        "encoder": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 10000,
+          "workers": 4,
+          "definition": "encoder-loop-v1"
+        }
+      },
+      "outside_scopes": {
+        "requests": 995,
+        "bytes": 6424307
+      },
+      "python": "3.12.8 | packaged by conda-forge | (main, Dec  5 2024, 14:06:27) [MSC v.1942 64 bit (AMD64)]",
+      "numpy": "2.1.3",
+      "numpy_build": "3191b72109bea34b77531b50df8dba998af8f149d927aa6c239080a2ef17f76c"
+    },
+    {
+      "dataset": "uniform",
+      "operation": "typed-crown",
+      "cells": 1000,
+      "workers": 1,
+      "repeat": 0,
+      "process_id": 78824,
+      "instrumented_source_hash": "0417c62e0d772aedc6752e1b709af6e73c12654ba5464eaaf3155809db57cf91",
+      "instrumented_extension_hash": "1c657b600c29f6861e14a1264eb2d28e68daad3d570c9b6ba024408423987626",
+      "manifest_sha256": "0c014224370187411c0c4f803494e343ea272427ff87d71754063e58419ccf76",
+      "passed": true,
+      "scopes": {
+        "kernel": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 1000,
+          "workers": 1,
+          "definition": "kernel-loop-v1"
+        },
+        "encoder": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 1000,
+          "workers": 1,
+          "definition": "encoder-loop-v1"
+        }
+      },
+      "outside_scopes": {
+        "requests": 703,
+        "bytes": 577051
+      },
+      "python": "3.12.8 | packaged by conda-forge | (main, Dec  5 2024, 14:06:27) [MSC v.1942 64 bit (AMD64)]",
+      "numpy": "2.1.3",
+      "numpy_build": "3191b72109bea34b77531b50df8dba998af8f149d927aa6c239080a2ef17f76c"
+    },
+    {
+      "dataset": "uniform",
+      "operation": "typed-crown",
+      "cells": 1000,
+      "workers": 1,
+      "repeat": 1,
+      "process_id": 24080,
+      "instrumented_source_hash": "0417c62e0d772aedc6752e1b709af6e73c12654ba5464eaaf3155809db57cf91",
+      "instrumented_extension_hash": "1c657b600c29f6861e14a1264eb2d28e68daad3d570c9b6ba024408423987626",
+      "manifest_sha256": "0c014224370187411c0c4f803494e343ea272427ff87d71754063e58419ccf76",
+      "passed": true,
+      "scopes": {
+        "kernel": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 1000,
+          "workers": 1,
+          "definition": "kernel-loop-v1"
+        },
+        "encoder": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 1000,
+          "workers": 1,
+          "definition": "encoder-loop-v1"
+        }
+      },
+      "outside_scopes": {
+        "requests": 703,
+        "bytes": 577051
+      },
+      "python": "3.12.8 | packaged by conda-forge | (main, Dec  5 2024, 14:06:27) [MSC v.1942 64 bit (AMD64)]",
+      "numpy": "2.1.3",
+      "numpy_build": "3191b72109bea34b77531b50df8dba998af8f149d927aa6c239080a2ef17f76c"
+    },
+    {
+      "dataset": "uniform",
+      "operation": "typed-crown",
+      "cells": 1000,
+      "workers": 1,
+      "repeat": 2,
+      "process_id": 34404,
+      "instrumented_source_hash": "0417c62e0d772aedc6752e1b709af6e73c12654ba5464eaaf3155809db57cf91",
+      "instrumented_extension_hash": "1c657b600c29f6861e14a1264eb2d28e68daad3d570c9b6ba024408423987626",
+      "manifest_sha256": "0c014224370187411c0c4f803494e343ea272427ff87d71754063e58419ccf76",
+      "passed": true,
+      "scopes": {
+        "kernel": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 1000,
+          "workers": 1,
+          "definition": "kernel-loop-v1"
+        },
+        "encoder": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 1000,
+          "workers": 1,
+          "definition": "encoder-loop-v1"
+        }
+      },
+      "outside_scopes": {
+        "requests": 703,
+        "bytes": 577051
+      },
+      "python": "3.12.8 | packaged by conda-forge | (main, Dec  5 2024, 14:06:27) [MSC v.1942 64 bit (AMD64)]",
+      "numpy": "2.1.3",
+      "numpy_build": "3191b72109bea34b77531b50df8dba998af8f149d927aa6c239080a2ef17f76c"
+    },
+    {
+      "dataset": "uniform",
+      "operation": "typed-crown",
+      "cells": 1000,
+      "workers": 4,
+      "repeat": 0,
+      "process_id": 9656,
+      "instrumented_source_hash": "0417c62e0d772aedc6752e1b709af6e73c12654ba5464eaaf3155809db57cf91",
+      "instrumented_extension_hash": "1c657b600c29f6861e14a1264eb2d28e68daad3d570c9b6ba024408423987626",
+      "manifest_sha256": "0c014224370187411c0c4f803494e343ea272427ff87d71754063e58419ccf76",
+      "passed": true,
+      "scopes": {
+        "kernel": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 1000,
+          "workers": 1,
+          "definition": "kernel-loop-v1"
+        },
+        "encoder": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 1000,
+          "workers": 1,
+          "definition": "encoder-loop-v1"
+        }
+      },
+      "outside_scopes": {
+        "requests": 703,
+        "bytes": 577051
+      },
+      "python": "3.12.8 | packaged by conda-forge | (main, Dec  5 2024, 14:06:27) [MSC v.1942 64 bit (AMD64)]",
+      "numpy": "2.1.3",
+      "numpy_build": "3191b72109bea34b77531b50df8dba998af8f149d927aa6c239080a2ef17f76c"
+    },
+    {
+      "dataset": "uniform",
+      "operation": "typed-crown",
+      "cells": 1000,
+      "workers": 4,
+      "repeat": 1,
+      "process_id": 55856,
+      "instrumented_source_hash": "0417c62e0d772aedc6752e1b709af6e73c12654ba5464eaaf3155809db57cf91",
+      "instrumented_extension_hash": "1c657b600c29f6861e14a1264eb2d28e68daad3d570c9b6ba024408423987626",
+      "manifest_sha256": "0c014224370187411c0c4f803494e343ea272427ff87d71754063e58419ccf76",
+      "passed": true,
+      "scopes": {
+        "kernel": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 1000,
+          "workers": 1,
+          "definition": "kernel-loop-v1"
+        },
+        "encoder": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 1000,
+          "workers": 1,
+          "definition": "encoder-loop-v1"
+        }
+      },
+      "outside_scopes": {
+        "requests": 703,
+        "bytes": 577051
+      },
+      "python": "3.12.8 | packaged by conda-forge | (main, Dec  5 2024, 14:06:27) [MSC v.1942 64 bit (AMD64)]",
+      "numpy": "2.1.3",
+      "numpy_build": "3191b72109bea34b77531b50df8dba998af8f149d927aa6c239080a2ef17f76c"
+    },
+    {
+      "dataset": "uniform",
+      "operation": "typed-crown",
+      "cells": 1000,
+      "workers": 4,
+      "repeat": 2,
+      "process_id": 86968,
+      "instrumented_source_hash": "0417c62e0d772aedc6752e1b709af6e73c12654ba5464eaaf3155809db57cf91",
+      "instrumented_extension_hash": "1c657b600c29f6861e14a1264eb2d28e68daad3d570c9b6ba024408423987626",
+      "manifest_sha256": "0c014224370187411c0c4f803494e343ea272427ff87d71754063e58419ccf76",
+      "passed": true,
+      "scopes": {
+        "kernel": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 1000,
+          "workers": 1,
+          "definition": "kernel-loop-v1"
+        },
+        "encoder": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 1000,
+          "workers": 1,
+          "definition": "encoder-loop-v1"
+        }
+      },
+      "outside_scopes": {
+        "requests": 703,
+        "bytes": 577051
+      },
+      "python": "3.12.8 | packaged by conda-forge | (main, Dec  5 2024, 14:06:27) [MSC v.1942 64 bit (AMD64)]",
+      "numpy": "2.1.3",
+      "numpy_build": "3191b72109bea34b77531b50df8dba998af8f149d927aa6c239080a2ef17f76c"
+    },
+    {
+      "dataset": "uniform",
+      "operation": "typed-crown",
+      "cells": 10000,
+      "workers": 1,
+      "repeat": 0,
+      "process_id": 19752,
+      "instrumented_source_hash": "0417c62e0d772aedc6752e1b709af6e73c12654ba5464eaaf3155809db57cf91",
+      "instrumented_extension_hash": "1c657b600c29f6861e14a1264eb2d28e68daad3d570c9b6ba024408423987626",
+      "manifest_sha256": "0c014224370187411c0c4f803494e343ea272427ff87d71754063e58419ccf76",
+      "passed": true,
+      "scopes": {
+        "kernel": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 10000,
+          "workers": 1,
+          "definition": "kernel-loop-v1"
+        },
+        "encoder": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 10000,
+          "workers": 1,
+          "definition": "encoder-loop-v1"
+        }
+      },
+      "outside_scopes": {
+        "requests": 703,
+        "bytes": 4249051
+      },
+      "python": "3.12.8 | packaged by conda-forge | (main, Dec  5 2024, 14:06:27) [MSC v.1942 64 bit (AMD64)]",
+      "numpy": "2.1.3",
+      "numpy_build": "3191b72109bea34b77531b50df8dba998af8f149d927aa6c239080a2ef17f76c"
+    },
+    {
+      "dataset": "uniform",
+      "operation": "typed-crown",
+      "cells": 10000,
+      "workers": 1,
+      "repeat": 1,
+      "process_id": 118432,
+      "instrumented_source_hash": "0417c62e0d772aedc6752e1b709af6e73c12654ba5464eaaf3155809db57cf91",
+      "instrumented_extension_hash": "1c657b600c29f6861e14a1264eb2d28e68daad3d570c9b6ba024408423987626",
+      "manifest_sha256": "0c014224370187411c0c4f803494e343ea272427ff87d71754063e58419ccf76",
+      "passed": true,
+      "scopes": {
+        "kernel": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 10000,
+          "workers": 1,
+          "definition": "kernel-loop-v1"
+        },
+        "encoder": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 10000,
+          "workers": 1,
+          "definition": "encoder-loop-v1"
+        }
+      },
+      "outside_scopes": {
+        "requests": 703,
+        "bytes": 4249051
+      },
+      "python": "3.12.8 | packaged by conda-forge | (main, Dec  5 2024, 14:06:27) [MSC v.1942 64 bit (AMD64)]",
+      "numpy": "2.1.3",
+      "numpy_build": "3191b72109bea34b77531b50df8dba998af8f149d927aa6c239080a2ef17f76c"
+    },
+    {
+      "dataset": "uniform",
+      "operation": "typed-crown",
+      "cells": 10000,
+      "workers": 1,
+      "repeat": 2,
+      "process_id": 68508,
+      "instrumented_source_hash": "0417c62e0d772aedc6752e1b709af6e73c12654ba5464eaaf3155809db57cf91",
+      "instrumented_extension_hash": "1c657b600c29f6861e14a1264eb2d28e68daad3d570c9b6ba024408423987626",
+      "manifest_sha256": "0c014224370187411c0c4f803494e343ea272427ff87d71754063e58419ccf76",
+      "passed": true,
+      "scopes": {
+        "kernel": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 10000,
+          "workers": 1,
+          "definition": "kernel-loop-v1"
+        },
+        "encoder": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 10000,
+          "workers": 1,
+          "definition": "encoder-loop-v1"
+        }
+      },
+      "outside_scopes": {
+        "requests": 703,
+        "bytes": 4249051
+      },
+      "python": "3.12.8 | packaged by conda-forge | (main, Dec  5 2024, 14:06:27) [MSC v.1942 64 bit (AMD64)]",
+      "numpy": "2.1.3",
+      "numpy_build": "3191b72109bea34b77531b50df8dba998af8f149d927aa6c239080a2ef17f76c"
+    },
+    {
+      "dataset": "uniform",
+      "operation": "typed-crown",
+      "cells": 10000,
+      "workers": 4,
+      "repeat": 0,
+      "process_id": 103972,
+      "instrumented_source_hash": "0417c62e0d772aedc6752e1b709af6e73c12654ba5464eaaf3155809db57cf91",
+      "instrumented_extension_hash": "1c657b600c29f6861e14a1264eb2d28e68daad3d570c9b6ba024408423987626",
+      "manifest_sha256": "0c014224370187411c0c4f803494e343ea272427ff87d71754063e58419ccf76",
+      "passed": true,
+      "scopes": {
+        "kernel": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 10000,
+          "workers": 4,
+          "definition": "kernel-loop-v1"
+        },
+        "encoder": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 10000,
+          "workers": 4,
+          "definition": "encoder-loop-v1"
+        }
+      },
+      "outside_scopes": {
+        "requests": 1031,
+        "bytes": 6666916
+      },
+      "python": "3.12.8 | packaged by conda-forge | (main, Dec  5 2024, 14:06:27) [MSC v.1942 64 bit (AMD64)]",
+      "numpy": "2.1.3",
+      "numpy_build": "3191b72109bea34b77531b50df8dba998af8f149d927aa6c239080a2ef17f76c"
+    },
+    {
+      "dataset": "uniform",
+      "operation": "typed-crown",
+      "cells": 10000,
+      "workers": 4,
+      "repeat": 1,
+      "process_id": 73812,
+      "instrumented_source_hash": "0417c62e0d772aedc6752e1b709af6e73c12654ba5464eaaf3155809db57cf91",
+      "instrumented_extension_hash": "1c657b600c29f6861e14a1264eb2d28e68daad3d570c9b6ba024408423987626",
+      "manifest_sha256": "0c014224370187411c0c4f803494e343ea272427ff87d71754063e58419ccf76",
+      "passed": true,
+      "scopes": {
+        "kernel": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 10000,
+          "workers": 4,
+          "definition": "kernel-loop-v1"
+        },
+        "encoder": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 10000,
+          "workers": 4,
+          "definition": "encoder-loop-v1"
+        }
+      },
+      "outside_scopes": {
+        "requests": 1031,
+        "bytes": 6666916
+      },
+      "python": "3.12.8 | packaged by conda-forge | (main, Dec  5 2024, 14:06:27) [MSC v.1942 64 bit (AMD64)]",
+      "numpy": "2.1.3",
+      "numpy_build": "3191b72109bea34b77531b50df8dba998af8f149d927aa6c239080a2ef17f76c"
+    },
+    {
+      "dataset": "uniform",
+      "operation": "typed-crown",
+      "cells": 10000,
+      "workers": 4,
+      "repeat": 2,
+      "process_id": 91684,
+      "instrumented_source_hash": "0417c62e0d772aedc6752e1b709af6e73c12654ba5464eaaf3155809db57cf91",
+      "instrumented_extension_hash": "1c657b600c29f6861e14a1264eb2d28e68daad3d570c9b6ba024408423987626",
+      "manifest_sha256": "0c014224370187411c0c4f803494e343ea272427ff87d71754063e58419ccf76",
+      "passed": true,
+      "scopes": {
+        "kernel": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 10000,
+          "workers": 4,
+          "definition": "kernel-loop-v1"
+        },
+        "encoder": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 10000,
+          "workers": 4,
+          "definition": "encoder-loop-v1"
+        }
+      },
+      "outside_scopes": {
+        "requests": 1031,
+        "bytes": 6666916
+      },
+      "python": "3.12.8 | packaged by conda-forge | (main, Dec  5 2024, 14:06:27) [MSC v.1942 64 bit (AMD64)]",
+      "numpy": "2.1.3",
+      "numpy_build": "3191b72109bea34b77531b50df8dba998af8f149d927aa6c239080a2ef17f76c"
+    },
+    {
+      "dataset": "uniform",
+      "operation": "typed-crown-b",
+      "cells": 1000,
+      "workers": 1,
+      "repeat": 0,
+      "process_id": 114764,
+      "instrumented_source_hash": "0417c62e0d772aedc6752e1b709af6e73c12654ba5464eaaf3155809db57cf91",
+      "instrumented_extension_hash": "1c657b600c29f6861e14a1264eb2d28e68daad3d570c9b6ba024408423987626",
+      "manifest_sha256": "0c014224370187411c0c4f803494e343ea272427ff87d71754063e58419ccf76",
+      "passed": true,
+      "scopes": {
+        "kernel": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 1000,
+          "workers": 1,
+          "definition": "kernel-loop-v1"
+        },
+        "encoder": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 1000,
+          "workers": 1,
+          "definition": "encoder-loop-v1"
+        }
+      },
+      "outside_scopes": {
+        "requests": 701,
+        "bytes": 575043
+      },
+      "python": "3.12.8 | packaged by conda-forge | (main, Dec  5 2024, 14:06:27) [MSC v.1942 64 bit (AMD64)]",
+      "numpy": "2.1.3",
+      "numpy_build": "3191b72109bea34b77531b50df8dba998af8f149d927aa6c239080a2ef17f76c"
+    },
+    {
+      "dataset": "uniform",
+      "operation": "typed-crown-b",
+      "cells": 1000,
+      "workers": 1,
+      "repeat": 1,
+      "process_id": 79716,
+      "instrumented_source_hash": "0417c62e0d772aedc6752e1b709af6e73c12654ba5464eaaf3155809db57cf91",
+      "instrumented_extension_hash": "1c657b600c29f6861e14a1264eb2d28e68daad3d570c9b6ba024408423987626",
+      "manifest_sha256": "0c014224370187411c0c4f803494e343ea272427ff87d71754063e58419ccf76",
+      "passed": true,
+      "scopes": {
+        "kernel": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 1000,
+          "workers": 1,
+          "definition": "kernel-loop-v1"
+        },
+        "encoder": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 1000,
+          "workers": 1,
+          "definition": "encoder-loop-v1"
+        }
+      },
+      "outside_scopes": {
+        "requests": 701,
+        "bytes": 575043
+      },
+      "python": "3.12.8 | packaged by conda-forge | (main, Dec  5 2024, 14:06:27) [MSC v.1942 64 bit (AMD64)]",
+      "numpy": "2.1.3",
+      "numpy_build": "3191b72109bea34b77531b50df8dba998af8f149d927aa6c239080a2ef17f76c"
+    },
+    {
+      "dataset": "uniform",
+      "operation": "typed-crown-b",
+      "cells": 1000,
+      "workers": 1,
+      "repeat": 2,
+      "process_id": 116396,
+      "instrumented_source_hash": "0417c62e0d772aedc6752e1b709af6e73c12654ba5464eaaf3155809db57cf91",
+      "instrumented_extension_hash": "1c657b600c29f6861e14a1264eb2d28e68daad3d570c9b6ba024408423987626",
+      "manifest_sha256": "0c014224370187411c0c4f803494e343ea272427ff87d71754063e58419ccf76",
+      "passed": true,
+      "scopes": {
+        "kernel": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 1000,
+          "workers": 1,
+          "definition": "kernel-loop-v1"
+        },
+        "encoder": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 1000,
+          "workers": 1,
+          "definition": "encoder-loop-v1"
+        }
+      },
+      "outside_scopes": {
+        "requests": 701,
+        "bytes": 575043
+      },
+      "python": "3.12.8 | packaged by conda-forge | (main, Dec  5 2024, 14:06:27) [MSC v.1942 64 bit (AMD64)]",
+      "numpy": "2.1.3",
+      "numpy_build": "3191b72109bea34b77531b50df8dba998af8f149d927aa6c239080a2ef17f76c"
+    },
+    {
+      "dataset": "uniform",
+      "operation": "typed-crown-b",
+      "cells": 1000,
+      "workers": 4,
+      "repeat": 0,
+      "process_id": 53356,
+      "instrumented_source_hash": "0417c62e0d772aedc6752e1b709af6e73c12654ba5464eaaf3155809db57cf91",
+      "instrumented_extension_hash": "1c657b600c29f6861e14a1264eb2d28e68daad3d570c9b6ba024408423987626",
+      "manifest_sha256": "0c014224370187411c0c4f803494e343ea272427ff87d71754063e58419ccf76",
+      "passed": true,
+      "scopes": {
+        "kernel": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 1000,
+          "workers": 1,
+          "definition": "kernel-loop-v1"
+        },
+        "encoder": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 1000,
+          "workers": 1,
+          "definition": "encoder-loop-v1"
+        }
+      },
+      "outside_scopes": {
+        "requests": 701,
+        "bytes": 575043
+      },
+      "python": "3.12.8 | packaged by conda-forge | (main, Dec  5 2024, 14:06:27) [MSC v.1942 64 bit (AMD64)]",
+      "numpy": "2.1.3",
+      "numpy_build": "3191b72109bea34b77531b50df8dba998af8f149d927aa6c239080a2ef17f76c"
+    },
+    {
+      "dataset": "uniform",
+      "operation": "typed-crown-b",
+      "cells": 1000,
+      "workers": 4,
+      "repeat": 1,
+      "process_id": 20292,
+      "instrumented_source_hash": "0417c62e0d772aedc6752e1b709af6e73c12654ba5464eaaf3155809db57cf91",
+      "instrumented_extension_hash": "1c657b600c29f6861e14a1264eb2d28e68daad3d570c9b6ba024408423987626",
+      "manifest_sha256": "0c014224370187411c0c4f803494e343ea272427ff87d71754063e58419ccf76",
+      "passed": true,
+      "scopes": {
+        "kernel": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 1000,
+          "workers": 1,
+          "definition": "kernel-loop-v1"
+        },
+        "encoder": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 1000,
+          "workers": 1,
+          "definition": "encoder-loop-v1"
+        }
+      },
+      "outside_scopes": {
+        "requests": 701,
+        "bytes": 575043
+      },
+      "python": "3.12.8 | packaged by conda-forge | (main, Dec  5 2024, 14:06:27) [MSC v.1942 64 bit (AMD64)]",
+      "numpy": "2.1.3",
+      "numpy_build": "3191b72109bea34b77531b50df8dba998af8f149d927aa6c239080a2ef17f76c"
+    },
+    {
+      "dataset": "uniform",
+      "operation": "typed-crown-b",
+      "cells": 1000,
+      "workers": 4,
+      "repeat": 2,
+      "process_id": 51904,
+      "instrumented_source_hash": "0417c62e0d772aedc6752e1b709af6e73c12654ba5464eaaf3155809db57cf91",
+      "instrumented_extension_hash": "1c657b600c29f6861e14a1264eb2d28e68daad3d570c9b6ba024408423987626",
+      "manifest_sha256": "0c014224370187411c0c4f803494e343ea272427ff87d71754063e58419ccf76",
+      "passed": true,
+      "scopes": {
+        "kernel": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 1000,
+          "workers": 1,
+          "definition": "kernel-loop-v1"
+        },
+        "encoder": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 1000,
+          "workers": 1,
+          "definition": "encoder-loop-v1"
+        }
+      },
+      "outside_scopes": {
+        "requests": 701,
+        "bytes": 575043
+      },
+      "python": "3.12.8 | packaged by conda-forge | (main, Dec  5 2024, 14:06:27) [MSC v.1942 64 bit (AMD64)]",
+      "numpy": "2.1.3",
+      "numpy_build": "3191b72109bea34b77531b50df8dba998af8f149d927aa6c239080a2ef17f76c"
+    },
+    {
+      "dataset": "uniform",
+      "operation": "typed-crown-b",
+      "cells": 10000,
+      "workers": 1,
+      "repeat": 0,
+      "process_id": 120152,
+      "instrumented_source_hash": "0417c62e0d772aedc6752e1b709af6e73c12654ba5464eaaf3155809db57cf91",
+      "instrumented_extension_hash": "1c657b600c29f6861e14a1264eb2d28e68daad3d570c9b6ba024408423987626",
+      "manifest_sha256": "0c014224370187411c0c4f803494e343ea272427ff87d71754063e58419ccf76",
+      "passed": true,
+      "scopes": {
+        "kernel": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 10000,
+          "workers": 1,
+          "definition": "kernel-loop-v1"
+        },
+        "encoder": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 10000,
+          "workers": 1,
+          "definition": "encoder-loop-v1"
+        }
+      },
+      "outside_scopes": {
+        "requests": 701,
+        "bytes": 4229043
+      },
+      "python": "3.12.8 | packaged by conda-forge | (main, Dec  5 2024, 14:06:27) [MSC v.1942 64 bit (AMD64)]",
+      "numpy": "2.1.3",
+      "numpy_build": "3191b72109bea34b77531b50df8dba998af8f149d927aa6c239080a2ef17f76c"
+    },
+    {
+      "dataset": "uniform",
+      "operation": "typed-crown-b",
+      "cells": 10000,
+      "workers": 1,
+      "repeat": 1,
+      "process_id": 139732,
+      "instrumented_source_hash": "0417c62e0d772aedc6752e1b709af6e73c12654ba5464eaaf3155809db57cf91",
+      "instrumented_extension_hash": "1c657b600c29f6861e14a1264eb2d28e68daad3d570c9b6ba024408423987626",
+      "manifest_sha256": "0c014224370187411c0c4f803494e343ea272427ff87d71754063e58419ccf76",
+      "passed": true,
+      "scopes": {
+        "kernel": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 10000,
+          "workers": 1,
+          "definition": "kernel-loop-v1"
+        },
+        "encoder": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 10000,
+          "workers": 1,
+          "definition": "encoder-loop-v1"
+        }
+      },
+      "outside_scopes": {
+        "requests": 701,
+        "bytes": 4229043
+      },
+      "python": "3.12.8 | packaged by conda-forge | (main, Dec  5 2024, 14:06:27) [MSC v.1942 64 bit (AMD64)]",
+      "numpy": "2.1.3",
+      "numpy_build": "3191b72109bea34b77531b50df8dba998af8f149d927aa6c239080a2ef17f76c"
+    },
+    {
+      "dataset": "uniform",
+      "operation": "typed-crown-b",
+      "cells": 10000,
+      "workers": 1,
+      "repeat": 2,
+      "process_id": 61424,
+      "instrumented_source_hash": "0417c62e0d772aedc6752e1b709af6e73c12654ba5464eaaf3155809db57cf91",
+      "instrumented_extension_hash": "1c657b600c29f6861e14a1264eb2d28e68daad3d570c9b6ba024408423987626",
+      "manifest_sha256": "0c014224370187411c0c4f803494e343ea272427ff87d71754063e58419ccf76",
+      "passed": true,
+      "scopes": {
+        "kernel": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 10000,
+          "workers": 1,
+          "definition": "kernel-loop-v1"
+        },
+        "encoder": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 10000,
+          "workers": 1,
+          "definition": "encoder-loop-v1"
+        }
+      },
+      "outside_scopes": {
+        "requests": 701,
+        "bytes": 4229043
+      },
+      "python": "3.12.8 | packaged by conda-forge | (main, Dec  5 2024, 14:06:27) [MSC v.1942 64 bit (AMD64)]",
+      "numpy": "2.1.3",
+      "numpy_build": "3191b72109bea34b77531b50df8dba998af8f149d927aa6c239080a2ef17f76c"
+    },
+    {
+      "dataset": "uniform",
+      "operation": "typed-crown-b",
+      "cells": 10000,
+      "workers": 4,
+      "repeat": 0,
+      "process_id": 24772,
+      "instrumented_source_hash": "0417c62e0d772aedc6752e1b709af6e73c12654ba5464eaaf3155809db57cf91",
+      "instrumented_extension_hash": "1c657b600c29f6861e14a1264eb2d28e68daad3d570c9b6ba024408423987626",
+      "manifest_sha256": "0c014224370187411c0c4f803494e343ea272427ff87d71754063e58419ccf76",
+      "passed": true,
+      "scopes": {
+        "kernel": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 10000,
+          "workers": 4,
+          "definition": "kernel-loop-v1"
+        },
+        "encoder": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 10000,
+          "workers": 4,
+          "definition": "encoder-loop-v1"
+        }
+      },
+      "outside_scopes": {
+        "requests": 1021,
+        "bytes": 6626908
+      },
+      "python": "3.12.8 | packaged by conda-forge | (main, Dec  5 2024, 14:06:27) [MSC v.1942 64 bit (AMD64)]",
+      "numpy": "2.1.3",
+      "numpy_build": "3191b72109bea34b77531b50df8dba998af8f149d927aa6c239080a2ef17f76c"
+    },
+    {
+      "dataset": "uniform",
+      "operation": "typed-crown-b",
+      "cells": 10000,
+      "workers": 4,
+      "repeat": 1,
+      "process_id": 54452,
+      "instrumented_source_hash": "0417c62e0d772aedc6752e1b709af6e73c12654ba5464eaaf3155809db57cf91",
+      "instrumented_extension_hash": "1c657b600c29f6861e14a1264eb2d28e68daad3d570c9b6ba024408423987626",
+      "manifest_sha256": "0c014224370187411c0c4f803494e343ea272427ff87d71754063e58419ccf76",
+      "passed": true,
+      "scopes": {
+        "kernel": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 10000,
+          "workers": 4,
+          "definition": "kernel-loop-v1"
+        },
+        "encoder": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 10000,
+          "workers": 4,
+          "definition": "encoder-loop-v1"
+        }
+      },
+      "outside_scopes": {
+        "requests": 1021,
+        "bytes": 6626908
+      },
+      "python": "3.12.8 | packaged by conda-forge | (main, Dec  5 2024, 14:06:27) [MSC v.1942 64 bit (AMD64)]",
+      "numpy": "2.1.3",
+      "numpy_build": "3191b72109bea34b77531b50df8dba998af8f149d927aa6c239080a2ef17f76c"
+    },
+    {
+      "dataset": "uniform",
+      "operation": "typed-crown-b",
+      "cells": 10000,
+      "workers": 4,
+      "repeat": 2,
+      "process_id": 48936,
+      "instrumented_source_hash": "0417c62e0d772aedc6752e1b709af6e73c12654ba5464eaaf3155809db57cf91",
+      "instrumented_extension_hash": "1c657b600c29f6861e14a1264eb2d28e68daad3d570c9b6ba024408423987626",
+      "manifest_sha256": "0c014224370187411c0c4f803494e343ea272427ff87d71754063e58419ccf76",
+      "passed": true,
+      "scopes": {
+        "kernel": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 10000,
+          "workers": 4,
+          "definition": "kernel-loop-v1"
+        },
+        "encoder": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 10000,
+          "workers": 4,
+          "definition": "encoder-loop-v1"
+        }
+      },
+      "outside_scopes": {
+        "requests": 1021,
+        "bytes": 6626908
+      },
+      "python": "3.12.8 | packaged by conda-forge | (main, Dec  5 2024, 14:06:27) [MSC v.1942 64 bit (AMD64)]",
+      "numpy": "2.1.3",
+      "numpy_build": "3191b72109bea34b77531b50df8dba998af8f149d927aa6c239080a2ef17f76c"
+    },
+    {
+      "dataset": "heterogeneous",
+      "operation": "surface",
+      "cells": 1000,
+      "workers": 1,
+      "repeat": 0,
+      "process_id": 35324,
+      "instrumented_source_hash": "0417c62e0d772aedc6752e1b709af6e73c12654ba5464eaaf3155809db57cf91",
+      "instrumented_extension_hash": "1c657b600c29f6861e14a1264eb2d28e68daad3d570c9b6ba024408423987626",
+      "manifest_sha256": "0c014224370187411c0c4f803494e343ea272427ff87d71754063e58419ccf76",
+      "passed": true,
+      "scopes": {
+        "kernel": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 1000,
+          "workers": 1,
+          "definition": "kernel-loop-v1"
+        },
+        "encoder": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 1000,
+          "workers": 1,
+          "definition": "encoder-loop-v1"
+        }
+      },
+      "outside_scopes": {
+        "requests": 590,
+        "bytes": 531664
+      },
+      "python": "3.12.8 | packaged by conda-forge | (main, Dec  5 2024, 14:06:27) [MSC v.1942 64 bit (AMD64)]",
+      "numpy": "2.1.3",
+      "numpy_build": "3191b72109bea34b77531b50df8dba998af8f149d927aa6c239080a2ef17f76c"
+    },
+    {
+      "dataset": "heterogeneous",
+      "operation": "surface",
+      "cells": 1000,
+      "workers": 1,
+      "repeat": 1,
+      "process_id": 41060,
+      "instrumented_source_hash": "0417c62e0d772aedc6752e1b709af6e73c12654ba5464eaaf3155809db57cf91",
+      "instrumented_extension_hash": "1c657b600c29f6861e14a1264eb2d28e68daad3d570c9b6ba024408423987626",
+      "manifest_sha256": "0c014224370187411c0c4f803494e343ea272427ff87d71754063e58419ccf76",
+      "passed": true,
+      "scopes": {
+        "kernel": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 1000,
+          "workers": 1,
+          "definition": "kernel-loop-v1"
+        },
+        "encoder": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 1000,
+          "workers": 1,
+          "definition": "encoder-loop-v1"
+        }
+      },
+      "outside_scopes": {
+        "requests": 590,
+        "bytes": 531664
+      },
+      "python": "3.12.8 | packaged by conda-forge | (main, Dec  5 2024, 14:06:27) [MSC v.1942 64 bit (AMD64)]",
+      "numpy": "2.1.3",
+      "numpy_build": "3191b72109bea34b77531b50df8dba998af8f149d927aa6c239080a2ef17f76c"
+    },
+    {
+      "dataset": "heterogeneous",
+      "operation": "surface",
+      "cells": 1000,
+      "workers": 1,
+      "repeat": 2,
+      "process_id": 12428,
+      "instrumented_source_hash": "0417c62e0d772aedc6752e1b709af6e73c12654ba5464eaaf3155809db57cf91",
+      "instrumented_extension_hash": "1c657b600c29f6861e14a1264eb2d28e68daad3d570c9b6ba024408423987626",
+      "manifest_sha256": "0c014224370187411c0c4f803494e343ea272427ff87d71754063e58419ccf76",
+      "passed": true,
+      "scopes": {
+        "kernel": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 1000,
+          "workers": 1,
+          "definition": "kernel-loop-v1"
+        },
+        "encoder": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 1000,
+          "workers": 1,
+          "definition": "encoder-loop-v1"
+        }
+      },
+      "outside_scopes": {
+        "requests": 590,
+        "bytes": 531664
+      },
+      "python": "3.12.8 | packaged by conda-forge | (main, Dec  5 2024, 14:06:27) [MSC v.1942 64 bit (AMD64)]",
+      "numpy": "2.1.3",
+      "numpy_build": "3191b72109bea34b77531b50df8dba998af8f149d927aa6c239080a2ef17f76c"
+    },
+    {
+      "dataset": "heterogeneous",
+      "operation": "surface",
+      "cells": 1000,
+      "workers": 4,
+      "repeat": 0,
+      "process_id": 115244,
+      "instrumented_source_hash": "0417c62e0d772aedc6752e1b709af6e73c12654ba5464eaaf3155809db57cf91",
+      "instrumented_extension_hash": "1c657b600c29f6861e14a1264eb2d28e68daad3d570c9b6ba024408423987626",
+      "manifest_sha256": "0c014224370187411c0c4f803494e343ea272427ff87d71754063e58419ccf76",
+      "passed": true,
+      "scopes": {
+        "kernel": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 1000,
+          "workers": 1,
+          "definition": "kernel-loop-v1"
+        },
+        "encoder": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 1000,
+          "workers": 1,
+          "definition": "encoder-loop-v1"
+        }
+      },
+      "outside_scopes": {
+        "requests": 590,
+        "bytes": 531664
+      },
+      "python": "3.12.8 | packaged by conda-forge | (main, Dec  5 2024, 14:06:27) [MSC v.1942 64 bit (AMD64)]",
+      "numpy": "2.1.3",
+      "numpy_build": "3191b72109bea34b77531b50df8dba998af8f149d927aa6c239080a2ef17f76c"
+    },
+    {
+      "dataset": "heterogeneous",
+      "operation": "surface",
+      "cells": 1000,
+      "workers": 4,
+      "repeat": 1,
+      "process_id": 133776,
+      "instrumented_source_hash": "0417c62e0d772aedc6752e1b709af6e73c12654ba5464eaaf3155809db57cf91",
+      "instrumented_extension_hash": "1c657b600c29f6861e14a1264eb2d28e68daad3d570c9b6ba024408423987626",
+      "manifest_sha256": "0c014224370187411c0c4f803494e343ea272427ff87d71754063e58419ccf76",
+      "passed": true,
+      "scopes": {
+        "kernel": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 1000,
+          "workers": 1,
+          "definition": "kernel-loop-v1"
+        },
+        "encoder": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 1000,
+          "workers": 1,
+          "definition": "encoder-loop-v1"
+        }
+      },
+      "outside_scopes": {
+        "requests": 590,
+        "bytes": 531664
+      },
+      "python": "3.12.8 | packaged by conda-forge | (main, Dec  5 2024, 14:06:27) [MSC v.1942 64 bit (AMD64)]",
+      "numpy": "2.1.3",
+      "numpy_build": "3191b72109bea34b77531b50df8dba998af8f149d927aa6c239080a2ef17f76c"
+    },
+    {
+      "dataset": "heterogeneous",
+      "operation": "surface",
+      "cells": 1000,
+      "workers": 4,
+      "repeat": 2,
+      "process_id": 5496,
+      "instrumented_source_hash": "0417c62e0d772aedc6752e1b709af6e73c12654ba5464eaaf3155809db57cf91",
+      "instrumented_extension_hash": "1c657b600c29f6861e14a1264eb2d28e68daad3d570c9b6ba024408423987626",
+      "manifest_sha256": "0c014224370187411c0c4f803494e343ea272427ff87d71754063e58419ccf76",
+      "passed": true,
+      "scopes": {
+        "kernel": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 1000,
+          "workers": 1,
+          "definition": "kernel-loop-v1"
+        },
+        "encoder": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 1000,
+          "workers": 1,
+          "definition": "encoder-loop-v1"
+        }
+      },
+      "outside_scopes": {
+        "requests": 590,
+        "bytes": 531664
+      },
+      "python": "3.12.8 | packaged by conda-forge | (main, Dec  5 2024, 14:06:27) [MSC v.1942 64 bit (AMD64)]",
+      "numpy": "2.1.3",
+      "numpy_build": "3191b72109bea34b77531b50df8dba998af8f149d927aa6c239080a2ef17f76c"
+    },
+    {
+      "dataset": "heterogeneous",
+      "operation": "surface",
+      "cells": 10000,
+      "workers": 1,
+      "repeat": 0,
+      "process_id": 33560,
+      "instrumented_source_hash": "0417c62e0d772aedc6752e1b709af6e73c12654ba5464eaaf3155809db57cf91",
+      "instrumented_extension_hash": "1c657b600c29f6861e14a1264eb2d28e68daad3d570c9b6ba024408423987626",
+      "manifest_sha256": "0c014224370187411c0c4f803494e343ea272427ff87d71754063e58419ccf76",
+      "passed": true,
+      "scopes": {
+        "kernel": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 10000,
+          "workers": 1,
+          "definition": "kernel-loop-v1"
+        },
+        "encoder": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 10000,
+          "workers": 1,
+          "definition": "encoder-loop-v1"
+        }
+      },
+      "outside_scopes": {
+        "requests": 590,
+        "bytes": 4275664
+      },
+      "python": "3.12.8 | packaged by conda-forge | (main, Dec  5 2024, 14:06:27) [MSC v.1942 64 bit (AMD64)]",
+      "numpy": "2.1.3",
+      "numpy_build": "3191b72109bea34b77531b50df8dba998af8f149d927aa6c239080a2ef17f76c"
+    },
+    {
+      "dataset": "heterogeneous",
+      "operation": "surface",
+      "cells": 10000,
+      "workers": 1,
+      "repeat": 1,
+      "process_id": 7704,
+      "instrumented_source_hash": "0417c62e0d772aedc6752e1b709af6e73c12654ba5464eaaf3155809db57cf91",
+      "instrumented_extension_hash": "1c657b600c29f6861e14a1264eb2d28e68daad3d570c9b6ba024408423987626",
+      "manifest_sha256": "0c014224370187411c0c4f803494e343ea272427ff87d71754063e58419ccf76",
+      "passed": true,
+      "scopes": {
+        "kernel": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 10000,
+          "workers": 1,
+          "definition": "kernel-loop-v1"
+        },
+        "encoder": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 10000,
+          "workers": 1,
+          "definition": "encoder-loop-v1"
+        }
+      },
+      "outside_scopes": {
+        "requests": 590,
+        "bytes": 4275664
+      },
+      "python": "3.12.8 | packaged by conda-forge | (main, Dec  5 2024, 14:06:27) [MSC v.1942 64 bit (AMD64)]",
+      "numpy": "2.1.3",
+      "numpy_build": "3191b72109bea34b77531b50df8dba998af8f149d927aa6c239080a2ef17f76c"
+    },
+    {
+      "dataset": "heterogeneous",
+      "operation": "surface",
+      "cells": 10000,
+      "workers": 1,
+      "repeat": 2,
+      "process_id": 105652,
+      "instrumented_source_hash": "0417c62e0d772aedc6752e1b709af6e73c12654ba5464eaaf3155809db57cf91",
+      "instrumented_extension_hash": "1c657b600c29f6861e14a1264eb2d28e68daad3d570c9b6ba024408423987626",
+      "manifest_sha256": "0c014224370187411c0c4f803494e343ea272427ff87d71754063e58419ccf76",
+      "passed": true,
+      "scopes": {
+        "kernel": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 10000,
+          "workers": 1,
+          "definition": "kernel-loop-v1"
+        },
+        "encoder": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 10000,
+          "workers": 1,
+          "definition": "encoder-loop-v1"
+        }
+      },
+      "outside_scopes": {
+        "requests": 590,
+        "bytes": 4275664
+      },
+      "python": "3.12.8 | packaged by conda-forge | (main, Dec  5 2024, 14:06:27) [MSC v.1942 64 bit (AMD64)]",
+      "numpy": "2.1.3",
+      "numpy_build": "3191b72109bea34b77531b50df8dba998af8f149d927aa6c239080a2ef17f76c"
+    },
+    {
+      "dataset": "heterogeneous",
+      "operation": "surface",
+      "cells": 10000,
+      "workers": 4,
+      "repeat": 0,
+      "process_id": 57420,
+      "instrumented_source_hash": "0417c62e0d772aedc6752e1b709af6e73c12654ba5464eaaf3155809db57cf91",
+      "instrumented_extension_hash": "1c657b600c29f6861e14a1264eb2d28e68daad3d570c9b6ba024408423987626",
+      "manifest_sha256": "0c014224370187411c0c4f803494e343ea272427ff87d71754063e58419ccf76",
+      "passed": true,
+      "scopes": {
+        "kernel": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 10000,
+          "workers": 4,
+          "definition": "kernel-loop-v1"
+        },
+        "encoder": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 10000,
+          "workers": 4,
+          "definition": "encoder-loop-v1"
+        }
+      },
+      "outside_scopes": {
+        "requests": 843,
+        "bytes": 6012630
+      },
+      "python": "3.12.8 | packaged by conda-forge | (main, Dec  5 2024, 14:06:27) [MSC v.1942 64 bit (AMD64)]",
+      "numpy": "2.1.3",
+      "numpy_build": "3191b72109bea34b77531b50df8dba998af8f149d927aa6c239080a2ef17f76c"
+    },
+    {
+      "dataset": "heterogeneous",
+      "operation": "surface",
+      "cells": 10000,
+      "workers": 4,
+      "repeat": 1,
+      "process_id": 53204,
+      "instrumented_source_hash": "0417c62e0d772aedc6752e1b709af6e73c12654ba5464eaaf3155809db57cf91",
+      "instrumented_extension_hash": "1c657b600c29f6861e14a1264eb2d28e68daad3d570c9b6ba024408423987626",
+      "manifest_sha256": "0c014224370187411c0c4f803494e343ea272427ff87d71754063e58419ccf76",
+      "passed": true,
+      "scopes": {
+        "kernel": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 10000,
+          "workers": 4,
+          "definition": "kernel-loop-v1"
+        },
+        "encoder": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 10000,
+          "workers": 4,
+          "definition": "encoder-loop-v1"
+        }
+      },
+      "outside_scopes": {
+        "requests": 843,
+        "bytes": 6012630
+      },
+      "python": "3.12.8 | packaged by conda-forge | (main, Dec  5 2024, 14:06:27) [MSC v.1942 64 bit (AMD64)]",
+      "numpy": "2.1.3",
+      "numpy_build": "3191b72109bea34b77531b50df8dba998af8f149d927aa6c239080a2ef17f76c"
+    },
+    {
+      "dataset": "heterogeneous",
+      "operation": "surface",
+      "cells": 10000,
+      "workers": 4,
+      "repeat": 2,
+      "process_id": 115932,
+      "instrumented_source_hash": "0417c62e0d772aedc6752e1b709af6e73c12654ba5464eaaf3155809db57cf91",
+      "instrumented_extension_hash": "1c657b600c29f6861e14a1264eb2d28e68daad3d570c9b6ba024408423987626",
+      "manifest_sha256": "0c014224370187411c0c4f803494e343ea272427ff87d71754063e58419ccf76",
+      "passed": true,
+      "scopes": {
+        "kernel": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 10000,
+          "workers": 4,
+          "definition": "kernel-loop-v1"
+        },
+        "encoder": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 10000,
+          "workers": 4,
+          "definition": "encoder-loop-v1"
+        }
+      },
+      "outside_scopes": {
+        "requests": 843,
+        "bytes": 6012630
+      },
+      "python": "3.12.8 | packaged by conda-forge | (main, Dec  5 2024, 14:06:27) [MSC v.1942 64 bit (AMD64)]",
+      "numpy": "2.1.3",
+      "numpy_build": "3191b72109bea34b77531b50df8dba998af8f149d927aa6c239080a2ef17f76c"
+    },
+    {
+      "dataset": "heterogeneous",
+      "operation": "crown",
+      "cells": 1000,
+      "workers": 1,
+      "repeat": 0,
+      "process_id": 115088,
+      "instrumented_source_hash": "0417c62e0d772aedc6752e1b709af6e73c12654ba5464eaaf3155809db57cf91",
+      "instrumented_extension_hash": "1c657b600c29f6861e14a1264eb2d28e68daad3d570c9b6ba024408423987626",
+      "manifest_sha256": "0c014224370187411c0c4f803494e343ea272427ff87d71754063e58419ccf76",
+      "passed": true,
+      "scopes": {
+        "kernel": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 1000,
+          "workers": 1,
+          "definition": "kernel-loop-v1"
+        },
+        "encoder": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 1000,
+          "workers": 1,
+          "definition": "encoder-loop-v1"
+        }
+      },
+      "outside_scopes": {
+        "requests": 677,
+        "bytes": 633350
+      },
+      "python": "3.12.8 | packaged by conda-forge | (main, Dec  5 2024, 14:06:27) [MSC v.1942 64 bit (AMD64)]",
+      "numpy": "2.1.3",
+      "numpy_build": "3191b72109bea34b77531b50df8dba998af8f149d927aa6c239080a2ef17f76c"
+    },
+    {
+      "dataset": "heterogeneous",
+      "operation": "crown",
+      "cells": 1000,
+      "workers": 1,
+      "repeat": 1,
+      "process_id": 61468,
+      "instrumented_source_hash": "0417c62e0d772aedc6752e1b709af6e73c12654ba5464eaaf3155809db57cf91",
+      "instrumented_extension_hash": "1c657b600c29f6861e14a1264eb2d28e68daad3d570c9b6ba024408423987626",
+      "manifest_sha256": "0c014224370187411c0c4f803494e343ea272427ff87d71754063e58419ccf76",
+      "passed": true,
+      "scopes": {
+        "kernel": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 1000,
+          "workers": 1,
+          "definition": "kernel-loop-v1"
+        },
+        "encoder": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 1000,
+          "workers": 1,
+          "definition": "encoder-loop-v1"
+        }
+      },
+      "outside_scopes": {
+        "requests": 677,
+        "bytes": 633350
+      },
+      "python": "3.12.8 | packaged by conda-forge | (main, Dec  5 2024, 14:06:27) [MSC v.1942 64 bit (AMD64)]",
+      "numpy": "2.1.3",
+      "numpy_build": "3191b72109bea34b77531b50df8dba998af8f149d927aa6c239080a2ef17f76c"
+    },
+    {
+      "dataset": "heterogeneous",
+      "operation": "crown",
+      "cells": 1000,
+      "workers": 1,
+      "repeat": 2,
+      "process_id": 117504,
+      "instrumented_source_hash": "0417c62e0d772aedc6752e1b709af6e73c12654ba5464eaaf3155809db57cf91",
+      "instrumented_extension_hash": "1c657b600c29f6861e14a1264eb2d28e68daad3d570c9b6ba024408423987626",
+      "manifest_sha256": "0c014224370187411c0c4f803494e343ea272427ff87d71754063e58419ccf76",
+      "passed": true,
+      "scopes": {
+        "kernel": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 1000,
+          "workers": 1,
+          "definition": "kernel-loop-v1"
+        },
+        "encoder": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 1000,
+          "workers": 1,
+          "definition": "encoder-loop-v1"
+        }
+      },
+      "outside_scopes": {
+        "requests": 677,
+        "bytes": 633350
+      },
+      "python": "3.12.8 | packaged by conda-forge | (main, Dec  5 2024, 14:06:27) [MSC v.1942 64 bit (AMD64)]",
+      "numpy": "2.1.3",
+      "numpy_build": "3191b72109bea34b77531b50df8dba998af8f149d927aa6c239080a2ef17f76c"
+    },
+    {
+      "dataset": "heterogeneous",
+      "operation": "crown",
+      "cells": 1000,
+      "workers": 4,
+      "repeat": 0,
+      "process_id": 37092,
+      "instrumented_source_hash": "0417c62e0d772aedc6752e1b709af6e73c12654ba5464eaaf3155809db57cf91",
+      "instrumented_extension_hash": "1c657b600c29f6861e14a1264eb2d28e68daad3d570c9b6ba024408423987626",
+      "manifest_sha256": "0c014224370187411c0c4f803494e343ea272427ff87d71754063e58419ccf76",
+      "passed": true,
+      "scopes": {
+        "kernel": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 1000,
+          "workers": 1,
+          "definition": "kernel-loop-v1"
+        },
+        "encoder": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 1000,
+          "workers": 1,
+          "definition": "encoder-loop-v1"
+        }
+      },
+      "outside_scopes": {
+        "requests": 677,
+        "bytes": 633350
+      },
+      "python": "3.12.8 | packaged by conda-forge | (main, Dec  5 2024, 14:06:27) [MSC v.1942 64 bit (AMD64)]",
+      "numpy": "2.1.3",
+      "numpy_build": "3191b72109bea34b77531b50df8dba998af8f149d927aa6c239080a2ef17f76c"
+    },
+    {
+      "dataset": "heterogeneous",
+      "operation": "crown",
+      "cells": 1000,
+      "workers": 4,
+      "repeat": 1,
+      "process_id": 61444,
+      "instrumented_source_hash": "0417c62e0d772aedc6752e1b709af6e73c12654ba5464eaaf3155809db57cf91",
+      "instrumented_extension_hash": "1c657b600c29f6861e14a1264eb2d28e68daad3d570c9b6ba024408423987626",
+      "manifest_sha256": "0c014224370187411c0c4f803494e343ea272427ff87d71754063e58419ccf76",
+      "passed": true,
+      "scopes": {
+        "kernel": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 1000,
+          "workers": 1,
+          "definition": "kernel-loop-v1"
+        },
+        "encoder": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 1000,
+          "workers": 1,
+          "definition": "encoder-loop-v1"
+        }
+      },
+      "outside_scopes": {
+        "requests": 677,
+        "bytes": 633350
+      },
+      "python": "3.12.8 | packaged by conda-forge | (main, Dec  5 2024, 14:06:27) [MSC v.1942 64 bit (AMD64)]",
+      "numpy": "2.1.3",
+      "numpy_build": "3191b72109bea34b77531b50df8dba998af8f149d927aa6c239080a2ef17f76c"
+    },
+    {
+      "dataset": "heterogeneous",
+      "operation": "crown",
+      "cells": 1000,
+      "workers": 4,
+      "repeat": 2,
+      "process_id": 139328,
+      "instrumented_source_hash": "0417c62e0d772aedc6752e1b709af6e73c12654ba5464eaaf3155809db57cf91",
+      "instrumented_extension_hash": "1c657b600c29f6861e14a1264eb2d28e68daad3d570c9b6ba024408423987626",
+      "manifest_sha256": "0c014224370187411c0c4f803494e343ea272427ff87d71754063e58419ccf76",
+      "passed": true,
+      "scopes": {
+        "kernel": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 1000,
+          "workers": 1,
+          "definition": "kernel-loop-v1"
+        },
+        "encoder": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 1000,
+          "workers": 1,
+          "definition": "encoder-loop-v1"
+        }
+      },
+      "outside_scopes": {
+        "requests": 677,
+        "bytes": 633350
+      },
+      "python": "3.12.8 | packaged by conda-forge | (main, Dec  5 2024, 14:06:27) [MSC v.1942 64 bit (AMD64)]",
+      "numpy": "2.1.3",
+      "numpy_build": "3191b72109bea34b77531b50df8dba998af8f149d927aa6c239080a2ef17f76c"
+    },
+    {
+      "dataset": "heterogeneous",
+      "operation": "crown",
+      "cells": 10000,
+      "workers": 1,
+      "repeat": 0,
+      "process_id": 14960,
+      "instrumented_source_hash": "0417c62e0d772aedc6752e1b709af6e73c12654ba5464eaaf3155809db57cf91",
+      "instrumented_extension_hash": "1c657b600c29f6861e14a1264eb2d28e68daad3d570c9b6ba024408423987626",
+      "manifest_sha256": "0c014224370187411c0c4f803494e343ea272427ff87d71754063e58419ccf76",
+      "passed": true,
+      "scopes": {
+        "kernel": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 10000,
+          "workers": 1,
+          "definition": "kernel-loop-v1"
+        },
+        "encoder": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 10000,
+          "workers": 1,
+          "definition": "encoder-loop-v1"
+        }
+      },
+      "outside_scopes": {
+        "requests": 677,
+        "bytes": 4845350
+      },
+      "python": "3.12.8 | packaged by conda-forge | (main, Dec  5 2024, 14:06:27) [MSC v.1942 64 bit (AMD64)]",
+      "numpy": "2.1.3",
+      "numpy_build": "3191b72109bea34b77531b50df8dba998af8f149d927aa6c239080a2ef17f76c"
+    },
+    {
+      "dataset": "heterogeneous",
+      "operation": "crown",
+      "cells": 10000,
+      "workers": 1,
+      "repeat": 1,
+      "process_id": 70184,
+      "instrumented_source_hash": "0417c62e0d772aedc6752e1b709af6e73c12654ba5464eaaf3155809db57cf91",
+      "instrumented_extension_hash": "1c657b600c29f6861e14a1264eb2d28e68daad3d570c9b6ba024408423987626",
+      "manifest_sha256": "0c014224370187411c0c4f803494e343ea272427ff87d71754063e58419ccf76",
+      "passed": true,
+      "scopes": {
+        "kernel": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 10000,
+          "workers": 1,
+          "definition": "kernel-loop-v1"
+        },
+        "encoder": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 10000,
+          "workers": 1,
+          "definition": "encoder-loop-v1"
+        }
+      },
+      "outside_scopes": {
+        "requests": 677,
+        "bytes": 4845350
+      },
+      "python": "3.12.8 | packaged by conda-forge | (main, Dec  5 2024, 14:06:27) [MSC v.1942 64 bit (AMD64)]",
+      "numpy": "2.1.3",
+      "numpy_build": "3191b72109bea34b77531b50df8dba998af8f149d927aa6c239080a2ef17f76c"
+    },
+    {
+      "dataset": "heterogeneous",
+      "operation": "crown",
+      "cells": 10000,
+      "workers": 1,
+      "repeat": 2,
+      "process_id": 91756,
+      "instrumented_source_hash": "0417c62e0d772aedc6752e1b709af6e73c12654ba5464eaaf3155809db57cf91",
+      "instrumented_extension_hash": "1c657b600c29f6861e14a1264eb2d28e68daad3d570c9b6ba024408423987626",
+      "manifest_sha256": "0c014224370187411c0c4f803494e343ea272427ff87d71754063e58419ccf76",
+      "passed": true,
+      "scopes": {
+        "kernel": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 10000,
+          "workers": 1,
+          "definition": "kernel-loop-v1"
+        },
+        "encoder": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 10000,
+          "workers": 1,
+          "definition": "encoder-loop-v1"
+        }
+      },
+      "outside_scopes": {
+        "requests": 677,
+        "bytes": 4845350
+      },
+      "python": "3.12.8 | packaged by conda-forge | (main, Dec  5 2024, 14:06:27) [MSC v.1942 64 bit (AMD64)]",
+      "numpy": "2.1.3",
+      "numpy_build": "3191b72109bea34b77531b50df8dba998af8f149d927aa6c239080a2ef17f76c"
+    },
+    {
+      "dataset": "heterogeneous",
+      "operation": "crown",
+      "cells": 10000,
+      "workers": 4,
+      "repeat": 0,
+      "process_id": 28924,
+      "instrumented_source_hash": "0417c62e0d772aedc6752e1b709af6e73c12654ba5464eaaf3155809db57cf91",
+      "instrumented_extension_hash": "1c657b600c29f6861e14a1264eb2d28e68daad3d570c9b6ba024408423987626",
+      "manifest_sha256": "0c014224370187411c0c4f803494e343ea272427ff87d71754063e58419ccf76",
+      "passed": true,
+      "scopes": {
+        "kernel": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 10000,
+          "workers": 4,
+          "definition": "kernel-loop-v1"
+        },
+        "encoder": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 10000,
+          "workers": 4,
+          "definition": "encoder-loop-v1"
+        }
+      },
+      "outside_scopes": {
+        "requests": 1043,
+        "bytes": 7465567
+      },
+      "python": "3.12.8 | packaged by conda-forge | (main, Dec  5 2024, 14:06:27) [MSC v.1942 64 bit (AMD64)]",
+      "numpy": "2.1.3",
+      "numpy_build": "3191b72109bea34b77531b50df8dba998af8f149d927aa6c239080a2ef17f76c"
+    },
+    {
+      "dataset": "heterogeneous",
+      "operation": "crown",
+      "cells": 10000,
+      "workers": 4,
+      "repeat": 1,
+      "process_id": 37760,
+      "instrumented_source_hash": "0417c62e0d772aedc6752e1b709af6e73c12654ba5464eaaf3155809db57cf91",
+      "instrumented_extension_hash": "1c657b600c29f6861e14a1264eb2d28e68daad3d570c9b6ba024408423987626",
+      "manifest_sha256": "0c014224370187411c0c4f803494e343ea272427ff87d71754063e58419ccf76",
+      "passed": true,
+      "scopes": {
+        "kernel": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 10000,
+          "workers": 4,
+          "definition": "kernel-loop-v1"
+        },
+        "encoder": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 10000,
+          "workers": 4,
+          "definition": "encoder-loop-v1"
+        }
+      },
+      "outside_scopes": {
+        "requests": 1043,
+        "bytes": 7465567
+      },
+      "python": "3.12.8 | packaged by conda-forge | (main, Dec  5 2024, 14:06:27) [MSC v.1942 64 bit (AMD64)]",
+      "numpy": "2.1.3",
+      "numpy_build": "3191b72109bea34b77531b50df8dba998af8f149d927aa6c239080a2ef17f76c"
+    },
+    {
+      "dataset": "heterogeneous",
+      "operation": "crown",
+      "cells": 10000,
+      "workers": 4,
+      "repeat": 2,
+      "process_id": 39720,
+      "instrumented_source_hash": "0417c62e0d772aedc6752e1b709af6e73c12654ba5464eaaf3155809db57cf91",
+      "instrumented_extension_hash": "1c657b600c29f6861e14a1264eb2d28e68daad3d570c9b6ba024408423987626",
+      "manifest_sha256": "0c014224370187411c0c4f803494e343ea272427ff87d71754063e58419ccf76",
+      "passed": true,
+      "scopes": {
+        "kernel": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 10000,
+          "workers": 4,
+          "definition": "kernel-loop-v1"
+        },
+        "encoder": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 10000,
+          "workers": 4,
+          "definition": "encoder-loop-v1"
+        }
+      },
+      "outside_scopes": {
+        "requests": 1043,
+        "bytes": 7465567
+      },
+      "python": "3.12.8 | packaged by conda-forge | (main, Dec  5 2024, 14:06:27) [MSC v.1942 64 bit (AMD64)]",
+      "numpy": "2.1.3",
+      "numpy_build": "3191b72109bea34b77531b50df8dba998af8f149d927aa6c239080a2ef17f76c"
+    },
+    {
+      "dataset": "heterogeneous",
+      "operation": "typed-crown",
+      "cells": 1000,
+      "workers": 1,
+      "repeat": 0,
+      "process_id": 44640,
+      "instrumented_source_hash": "0417c62e0d772aedc6752e1b709af6e73c12654ba5464eaaf3155809db57cf91",
+      "instrumented_extension_hash": "1c657b600c29f6861e14a1264eb2d28e68daad3d570c9b6ba024408423987626",
+      "manifest_sha256": "0c014224370187411c0c4f803494e343ea272427ff87d71754063e58419ccf76",
+      "passed": true,
+      "scopes": {
+        "kernel": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 1000,
+          "workers": 1,
+          "definition": "kernel-loop-v1"
+        },
+        "encoder": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 1000,
+          "workers": 1,
+          "definition": "encoder-loop-v1"
+        }
+      },
+      "outside_scopes": {
+        "requests": 697,
+        "bytes": 655959
+      },
+      "python": "3.12.8 | packaged by conda-forge | (main, Dec  5 2024, 14:06:27) [MSC v.1942 64 bit (AMD64)]",
+      "numpy": "2.1.3",
+      "numpy_build": "3191b72109bea34b77531b50df8dba998af8f149d927aa6c239080a2ef17f76c"
+    },
+    {
+      "dataset": "heterogeneous",
+      "operation": "typed-crown",
+      "cells": 1000,
+      "workers": 1,
+      "repeat": 1,
+      "process_id": 84632,
+      "instrumented_source_hash": "0417c62e0d772aedc6752e1b709af6e73c12654ba5464eaaf3155809db57cf91",
+      "instrumented_extension_hash": "1c657b600c29f6861e14a1264eb2d28e68daad3d570c9b6ba024408423987626",
+      "manifest_sha256": "0c014224370187411c0c4f803494e343ea272427ff87d71754063e58419ccf76",
+      "passed": true,
+      "scopes": {
+        "kernel": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 1000,
+          "workers": 1,
+          "definition": "kernel-loop-v1"
+        },
+        "encoder": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 1000,
+          "workers": 1,
+          "definition": "encoder-loop-v1"
+        }
+      },
+      "outside_scopes": {
+        "requests": 697,
+        "bytes": 655959
+      },
+      "python": "3.12.8 | packaged by conda-forge | (main, Dec  5 2024, 14:06:27) [MSC v.1942 64 bit (AMD64)]",
+      "numpy": "2.1.3",
+      "numpy_build": "3191b72109bea34b77531b50df8dba998af8f149d927aa6c239080a2ef17f76c"
+    },
+    {
+      "dataset": "heterogeneous",
+      "operation": "typed-crown",
+      "cells": 1000,
+      "workers": 1,
+      "repeat": 2,
+      "process_id": 47340,
+      "instrumented_source_hash": "0417c62e0d772aedc6752e1b709af6e73c12654ba5464eaaf3155809db57cf91",
+      "instrumented_extension_hash": "1c657b600c29f6861e14a1264eb2d28e68daad3d570c9b6ba024408423987626",
+      "manifest_sha256": "0c014224370187411c0c4f803494e343ea272427ff87d71754063e58419ccf76",
+      "passed": true,
+      "scopes": {
+        "kernel": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 1000,
+          "workers": 1,
+          "definition": "kernel-loop-v1"
+        },
+        "encoder": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 1000,
+          "workers": 1,
+          "definition": "encoder-loop-v1"
+        }
+      },
+      "outside_scopes": {
+        "requests": 697,
+        "bytes": 655959
+      },
+      "python": "3.12.8 | packaged by conda-forge | (main, Dec  5 2024, 14:06:27) [MSC v.1942 64 bit (AMD64)]",
+      "numpy": "2.1.3",
+      "numpy_build": "3191b72109bea34b77531b50df8dba998af8f149d927aa6c239080a2ef17f76c"
+    },
+    {
+      "dataset": "heterogeneous",
+      "operation": "typed-crown",
+      "cells": 1000,
+      "workers": 4,
+      "repeat": 0,
+      "process_id": 107180,
+      "instrumented_source_hash": "0417c62e0d772aedc6752e1b709af6e73c12654ba5464eaaf3155809db57cf91",
+      "instrumented_extension_hash": "1c657b600c29f6861e14a1264eb2d28e68daad3d570c9b6ba024408423987626",
+      "manifest_sha256": "0c014224370187411c0c4f803494e343ea272427ff87d71754063e58419ccf76",
+      "passed": true,
+      "scopes": {
+        "kernel": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 1000,
+          "workers": 1,
+          "definition": "kernel-loop-v1"
+        },
+        "encoder": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 1000,
+          "workers": 1,
+          "definition": "encoder-loop-v1"
+        }
+      },
+      "outside_scopes": {
+        "requests": 697,
+        "bytes": 655959
+      },
+      "python": "3.12.8 | packaged by conda-forge | (main, Dec  5 2024, 14:06:27) [MSC v.1942 64 bit (AMD64)]",
+      "numpy": "2.1.3",
+      "numpy_build": "3191b72109bea34b77531b50df8dba998af8f149d927aa6c239080a2ef17f76c"
+    },
+    {
+      "dataset": "heterogeneous",
+      "operation": "typed-crown",
+      "cells": 1000,
+      "workers": 4,
+      "repeat": 1,
+      "process_id": 94184,
+      "instrumented_source_hash": "0417c62e0d772aedc6752e1b709af6e73c12654ba5464eaaf3155809db57cf91",
+      "instrumented_extension_hash": "1c657b600c29f6861e14a1264eb2d28e68daad3d570c9b6ba024408423987626",
+      "manifest_sha256": "0c014224370187411c0c4f803494e343ea272427ff87d71754063e58419ccf76",
+      "passed": true,
+      "scopes": {
+        "kernel": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 1000,
+          "workers": 1,
+          "definition": "kernel-loop-v1"
+        },
+        "encoder": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 1000,
+          "workers": 1,
+          "definition": "encoder-loop-v1"
+        }
+      },
+      "outside_scopes": {
+        "requests": 697,
+        "bytes": 655959
+      },
+      "python": "3.12.8 | packaged by conda-forge | (main, Dec  5 2024, 14:06:27) [MSC v.1942 64 bit (AMD64)]",
+      "numpy": "2.1.3",
+      "numpy_build": "3191b72109bea34b77531b50df8dba998af8f149d927aa6c239080a2ef17f76c"
+    },
+    {
+      "dataset": "heterogeneous",
+      "operation": "typed-crown",
+      "cells": 1000,
+      "workers": 4,
+      "repeat": 2,
+      "process_id": 17084,
+      "instrumented_source_hash": "0417c62e0d772aedc6752e1b709af6e73c12654ba5464eaaf3155809db57cf91",
+      "instrumented_extension_hash": "1c657b600c29f6861e14a1264eb2d28e68daad3d570c9b6ba024408423987626",
+      "manifest_sha256": "0c014224370187411c0c4f803494e343ea272427ff87d71754063e58419ccf76",
+      "passed": true,
+      "scopes": {
+        "kernel": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 1000,
+          "workers": 1,
+          "definition": "kernel-loop-v1"
+        },
+        "encoder": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 1000,
+          "workers": 1,
+          "definition": "encoder-loop-v1"
+        }
+      },
+      "outside_scopes": {
+        "requests": 697,
+        "bytes": 655959
+      },
+      "python": "3.12.8 | packaged by conda-forge | (main, Dec  5 2024, 14:06:27) [MSC v.1942 64 bit (AMD64)]",
+      "numpy": "2.1.3",
+      "numpy_build": "3191b72109bea34b77531b50df8dba998af8f149d927aa6c239080a2ef17f76c"
+    },
+    {
+      "dataset": "heterogeneous",
+      "operation": "typed-crown",
+      "cells": 10000,
+      "workers": 1,
+      "repeat": 0,
+      "process_id": 20320,
+      "instrumented_source_hash": "0417c62e0d772aedc6752e1b709af6e73c12654ba5464eaaf3155809db57cf91",
+      "instrumented_extension_hash": "1c657b600c29f6861e14a1264eb2d28e68daad3d570c9b6ba024408423987626",
+      "manifest_sha256": "0c014224370187411c0c4f803494e343ea272427ff87d71754063e58419ccf76",
+      "passed": true,
+      "scopes": {
+        "kernel": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 10000,
+          "workers": 1,
+          "definition": "kernel-loop-v1"
+        },
+        "encoder": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 10000,
+          "workers": 1,
+          "definition": "encoder-loop-v1"
+        }
+      },
+      "outside_scopes": {
+        "requests": 697,
+        "bytes": 5047959
+      },
+      "python": "3.12.8 | packaged by conda-forge | (main, Dec  5 2024, 14:06:27) [MSC v.1942 64 bit (AMD64)]",
+      "numpy": "2.1.3",
+      "numpy_build": "3191b72109bea34b77531b50df8dba998af8f149d927aa6c239080a2ef17f76c"
+    },
+    {
+      "dataset": "heterogeneous",
+      "operation": "typed-crown",
+      "cells": 10000,
+      "workers": 1,
+      "repeat": 1,
+      "process_id": 8420,
+      "instrumented_source_hash": "0417c62e0d772aedc6752e1b709af6e73c12654ba5464eaaf3155809db57cf91",
+      "instrumented_extension_hash": "1c657b600c29f6861e14a1264eb2d28e68daad3d570c9b6ba024408423987626",
+      "manifest_sha256": "0c014224370187411c0c4f803494e343ea272427ff87d71754063e58419ccf76",
+      "passed": true,
+      "scopes": {
+        "kernel": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 10000,
+          "workers": 1,
+          "definition": "kernel-loop-v1"
+        },
+        "encoder": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 10000,
+          "workers": 1,
+          "definition": "encoder-loop-v1"
+        }
+      },
+      "outside_scopes": {
+        "requests": 697,
+        "bytes": 5047959
+      },
+      "python": "3.12.8 | packaged by conda-forge | (main, Dec  5 2024, 14:06:27) [MSC v.1942 64 bit (AMD64)]",
+      "numpy": "2.1.3",
+      "numpy_build": "3191b72109bea34b77531b50df8dba998af8f149d927aa6c239080a2ef17f76c"
+    },
+    {
+      "dataset": "heterogeneous",
+      "operation": "typed-crown",
+      "cells": 10000,
+      "workers": 1,
+      "repeat": 2,
+      "process_id": 66788,
+      "instrumented_source_hash": "0417c62e0d772aedc6752e1b709af6e73c12654ba5464eaaf3155809db57cf91",
+      "instrumented_extension_hash": "1c657b600c29f6861e14a1264eb2d28e68daad3d570c9b6ba024408423987626",
+      "manifest_sha256": "0c014224370187411c0c4f803494e343ea272427ff87d71754063e58419ccf76",
+      "passed": true,
+      "scopes": {
+        "kernel": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 10000,
+          "workers": 1,
+          "definition": "kernel-loop-v1"
+        },
+        "encoder": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 10000,
+          "workers": 1,
+          "definition": "encoder-loop-v1"
+        }
+      },
+      "outside_scopes": {
+        "requests": 697,
+        "bytes": 5047959
+      },
+      "python": "3.12.8 | packaged by conda-forge | (main, Dec  5 2024, 14:06:27) [MSC v.1942 64 bit (AMD64)]",
+      "numpy": "2.1.3",
+      "numpy_build": "3191b72109bea34b77531b50df8dba998af8f149d927aa6c239080a2ef17f76c"
+    },
+    {
+      "dataset": "heterogeneous",
+      "operation": "typed-crown",
+      "cells": 10000,
+      "workers": 4,
+      "repeat": 0,
+      "process_id": 11920,
+      "instrumented_source_hash": "0417c62e0d772aedc6752e1b709af6e73c12654ba5464eaaf3155809db57cf91",
+      "instrumented_extension_hash": "1c657b600c29f6861e14a1264eb2d28e68daad3d570c9b6ba024408423987626",
+      "manifest_sha256": "0c014224370187411c0c4f803494e343ea272427ff87d71754063e58419ccf76",
+      "passed": true,
+      "scopes": {
+        "kernel": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 10000,
+          "workers": 4,
+          "definition": "kernel-loop-v1"
+        },
+        "encoder": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 10000,
+          "workers": 4,
+          "definition": "encoder-loop-v1"
+        }
+      },
+      "outside_scopes": {
+        "requests": 1079,
+        "bytes": 7708176
+      },
+      "python": "3.12.8 | packaged by conda-forge | (main, Dec  5 2024, 14:06:27) [MSC v.1942 64 bit (AMD64)]",
+      "numpy": "2.1.3",
+      "numpy_build": "3191b72109bea34b77531b50df8dba998af8f149d927aa6c239080a2ef17f76c"
+    },
+    {
+      "dataset": "heterogeneous",
+      "operation": "typed-crown",
+      "cells": 10000,
+      "workers": 4,
+      "repeat": 1,
+      "process_id": 108620,
+      "instrumented_source_hash": "0417c62e0d772aedc6752e1b709af6e73c12654ba5464eaaf3155809db57cf91",
+      "instrumented_extension_hash": "1c657b600c29f6861e14a1264eb2d28e68daad3d570c9b6ba024408423987626",
+      "manifest_sha256": "0c014224370187411c0c4f803494e343ea272427ff87d71754063e58419ccf76",
+      "passed": true,
+      "scopes": {
+        "kernel": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 10000,
+          "workers": 4,
+          "definition": "kernel-loop-v1"
+        },
+        "encoder": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 10000,
+          "workers": 4,
+          "definition": "encoder-loop-v1"
+        }
+      },
+      "outside_scopes": {
+        "requests": 1079,
+        "bytes": 7708176
+      },
+      "python": "3.12.8 | packaged by conda-forge | (main, Dec  5 2024, 14:06:27) [MSC v.1942 64 bit (AMD64)]",
+      "numpy": "2.1.3",
+      "numpy_build": "3191b72109bea34b77531b50df8dba998af8f149d927aa6c239080a2ef17f76c"
+    },
+    {
+      "dataset": "heterogeneous",
+      "operation": "typed-crown",
+      "cells": 10000,
+      "workers": 4,
+      "repeat": 2,
+      "process_id": 29372,
+      "instrumented_source_hash": "0417c62e0d772aedc6752e1b709af6e73c12654ba5464eaaf3155809db57cf91",
+      "instrumented_extension_hash": "1c657b600c29f6861e14a1264eb2d28e68daad3d570c9b6ba024408423987626",
+      "manifest_sha256": "0c014224370187411c0c4f803494e343ea272427ff87d71754063e58419ccf76",
+      "passed": true,
+      "scopes": {
+        "kernel": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 10000,
+          "workers": 4,
+          "definition": "kernel-loop-v1"
+        },
+        "encoder": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 10000,
+          "workers": 4,
+          "definition": "encoder-loop-v1"
+        }
+      },
+      "outside_scopes": {
+        "requests": 1079,
+        "bytes": 7708176
+      },
+      "python": "3.12.8 | packaged by conda-forge | (main, Dec  5 2024, 14:06:27) [MSC v.1942 64 bit (AMD64)]",
+      "numpy": "2.1.3",
+      "numpy_build": "3191b72109bea34b77531b50df8dba998af8f149d927aa6c239080a2ef17f76c"
+    },
+    {
+      "dataset": "heterogeneous",
+      "operation": "typed-crown-b",
+      "cells": 1000,
+      "workers": 1,
+      "repeat": 0,
+      "process_id": 137360,
+      "instrumented_source_hash": "0417c62e0d772aedc6752e1b709af6e73c12654ba5464eaaf3155809db57cf91",
+      "instrumented_extension_hash": "1c657b600c29f6861e14a1264eb2d28e68daad3d570c9b6ba024408423987626",
+      "manifest_sha256": "0c014224370187411c0c4f803494e343ea272427ff87d71754063e58419ccf76",
+      "passed": true,
+      "scopes": {
+        "kernel": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 1000,
+          "workers": 1,
+          "definition": "kernel-loop-v1"
+        },
+        "encoder": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 1000,
+          "workers": 1,
+          "definition": "encoder-loop-v1"
+        }
+      },
+      "outside_scopes": {
+        "requests": 695,
+        "bytes": 653951
+      },
+      "python": "3.12.8 | packaged by conda-forge | (main, Dec  5 2024, 14:06:27) [MSC v.1942 64 bit (AMD64)]",
+      "numpy": "2.1.3",
+      "numpy_build": "3191b72109bea34b77531b50df8dba998af8f149d927aa6c239080a2ef17f76c"
+    },
+    {
+      "dataset": "heterogeneous",
+      "operation": "typed-crown-b",
+      "cells": 1000,
+      "workers": 1,
+      "repeat": 1,
+      "process_id": 60124,
+      "instrumented_source_hash": "0417c62e0d772aedc6752e1b709af6e73c12654ba5464eaaf3155809db57cf91",
+      "instrumented_extension_hash": "1c657b600c29f6861e14a1264eb2d28e68daad3d570c9b6ba024408423987626",
+      "manifest_sha256": "0c014224370187411c0c4f803494e343ea272427ff87d71754063e58419ccf76",
+      "passed": true,
+      "scopes": {
+        "kernel": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 1000,
+          "workers": 1,
+          "definition": "kernel-loop-v1"
+        },
+        "encoder": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 1000,
+          "workers": 1,
+          "definition": "encoder-loop-v1"
+        }
+      },
+      "outside_scopes": {
+        "requests": 695,
+        "bytes": 653951
+      },
+      "python": "3.12.8 | packaged by conda-forge | (main, Dec  5 2024, 14:06:27) [MSC v.1942 64 bit (AMD64)]",
+      "numpy": "2.1.3",
+      "numpy_build": "3191b72109bea34b77531b50df8dba998af8f149d927aa6c239080a2ef17f76c"
+    },
+    {
+      "dataset": "heterogeneous",
+      "operation": "typed-crown-b",
+      "cells": 1000,
+      "workers": 1,
+      "repeat": 2,
+      "process_id": 116692,
+      "instrumented_source_hash": "0417c62e0d772aedc6752e1b709af6e73c12654ba5464eaaf3155809db57cf91",
+      "instrumented_extension_hash": "1c657b600c29f6861e14a1264eb2d28e68daad3d570c9b6ba024408423987626",
+      "manifest_sha256": "0c014224370187411c0c4f803494e343ea272427ff87d71754063e58419ccf76",
+      "passed": true,
+      "scopes": {
+        "kernel": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 1000,
+          "workers": 1,
+          "definition": "kernel-loop-v1"
+        },
+        "encoder": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 1000,
+          "workers": 1,
+          "definition": "encoder-loop-v1"
+        }
+      },
+      "outside_scopes": {
+        "requests": 695,
+        "bytes": 653951
+      },
+      "python": "3.12.8 | packaged by conda-forge | (main, Dec  5 2024, 14:06:27) [MSC v.1942 64 bit (AMD64)]",
+      "numpy": "2.1.3",
+      "numpy_build": "3191b72109bea34b77531b50df8dba998af8f149d927aa6c239080a2ef17f76c"
+    },
+    {
+      "dataset": "heterogeneous",
+      "operation": "typed-crown-b",
+      "cells": 1000,
+      "workers": 4,
+      "repeat": 0,
+      "process_id": 119940,
+      "instrumented_source_hash": "0417c62e0d772aedc6752e1b709af6e73c12654ba5464eaaf3155809db57cf91",
+      "instrumented_extension_hash": "1c657b600c29f6861e14a1264eb2d28e68daad3d570c9b6ba024408423987626",
+      "manifest_sha256": "0c014224370187411c0c4f803494e343ea272427ff87d71754063e58419ccf76",
+      "passed": true,
+      "scopes": {
+        "kernel": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 1000,
+          "workers": 1,
+          "definition": "kernel-loop-v1"
+        },
+        "encoder": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 1000,
+          "workers": 1,
+          "definition": "encoder-loop-v1"
+        }
+      },
+      "outside_scopes": {
+        "requests": 695,
+        "bytes": 653951
+      },
+      "python": "3.12.8 | packaged by conda-forge | (main, Dec  5 2024, 14:06:27) [MSC v.1942 64 bit (AMD64)]",
+      "numpy": "2.1.3",
+      "numpy_build": "3191b72109bea34b77531b50df8dba998af8f149d927aa6c239080a2ef17f76c"
+    },
+    {
+      "dataset": "heterogeneous",
+      "operation": "typed-crown-b",
+      "cells": 1000,
+      "workers": 4,
+      "repeat": 1,
+      "process_id": 99780,
+      "instrumented_source_hash": "0417c62e0d772aedc6752e1b709af6e73c12654ba5464eaaf3155809db57cf91",
+      "instrumented_extension_hash": "1c657b600c29f6861e14a1264eb2d28e68daad3d570c9b6ba024408423987626",
+      "manifest_sha256": "0c014224370187411c0c4f803494e343ea272427ff87d71754063e58419ccf76",
+      "passed": true,
+      "scopes": {
+        "kernel": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 1000,
+          "workers": 1,
+          "definition": "kernel-loop-v1"
+        },
+        "encoder": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 1000,
+          "workers": 1,
+          "definition": "encoder-loop-v1"
+        }
+      },
+      "outside_scopes": {
+        "requests": 695,
+        "bytes": 653951
+      },
+      "python": "3.12.8 | packaged by conda-forge | (main, Dec  5 2024, 14:06:27) [MSC v.1942 64 bit (AMD64)]",
+      "numpy": "2.1.3",
+      "numpy_build": "3191b72109bea34b77531b50df8dba998af8f149d927aa6c239080a2ef17f76c"
+    },
+    {
+      "dataset": "heterogeneous",
+      "operation": "typed-crown-b",
+      "cells": 1000,
+      "workers": 4,
+      "repeat": 2,
+      "process_id": 98064,
+      "instrumented_source_hash": "0417c62e0d772aedc6752e1b709af6e73c12654ba5464eaaf3155809db57cf91",
+      "instrumented_extension_hash": "1c657b600c29f6861e14a1264eb2d28e68daad3d570c9b6ba024408423987626",
+      "manifest_sha256": "0c014224370187411c0c4f803494e343ea272427ff87d71754063e58419ccf76",
+      "passed": true,
+      "scopes": {
+        "kernel": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 1000,
+          "workers": 1,
+          "definition": "kernel-loop-v1"
+        },
+        "encoder": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 1000,
+          "workers": 1,
+          "definition": "encoder-loop-v1"
+        }
+      },
+      "outside_scopes": {
+        "requests": 695,
+        "bytes": 653951
+      },
+      "python": "3.12.8 | packaged by conda-forge | (main, Dec  5 2024, 14:06:27) [MSC v.1942 64 bit (AMD64)]",
+      "numpy": "2.1.3",
+      "numpy_build": "3191b72109bea34b77531b50df8dba998af8f149d927aa6c239080a2ef17f76c"
+    },
+    {
+      "dataset": "heterogeneous",
+      "operation": "typed-crown-b",
+      "cells": 10000,
+      "workers": 1,
+      "repeat": 0,
+      "process_id": 111024,
+      "instrumented_source_hash": "0417c62e0d772aedc6752e1b709af6e73c12654ba5464eaaf3155809db57cf91",
+      "instrumented_extension_hash": "1c657b600c29f6861e14a1264eb2d28e68daad3d570c9b6ba024408423987626",
+      "manifest_sha256": "0c014224370187411c0c4f803494e343ea272427ff87d71754063e58419ccf76",
+      "passed": true,
+      "scopes": {
+        "kernel": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 10000,
+          "workers": 1,
+          "definition": "kernel-loop-v1"
+        },
+        "encoder": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 10000,
+          "workers": 1,
+          "definition": "encoder-loop-v1"
+        }
+      },
+      "outside_scopes": {
+        "requests": 695,
+        "bytes": 5027951
+      },
+      "python": "3.12.8 | packaged by conda-forge | (main, Dec  5 2024, 14:06:27) [MSC v.1942 64 bit (AMD64)]",
+      "numpy": "2.1.3",
+      "numpy_build": "3191b72109bea34b77531b50df8dba998af8f149d927aa6c239080a2ef17f76c"
+    },
+    {
+      "dataset": "heterogeneous",
+      "operation": "typed-crown-b",
+      "cells": 10000,
+      "workers": 1,
+      "repeat": 1,
+      "process_id": 139396,
+      "instrumented_source_hash": "0417c62e0d772aedc6752e1b709af6e73c12654ba5464eaaf3155809db57cf91",
+      "instrumented_extension_hash": "1c657b600c29f6861e14a1264eb2d28e68daad3d570c9b6ba024408423987626",
+      "manifest_sha256": "0c014224370187411c0c4f803494e343ea272427ff87d71754063e58419ccf76",
+      "passed": true,
+      "scopes": {
+        "kernel": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 10000,
+          "workers": 1,
+          "definition": "kernel-loop-v1"
+        },
+        "encoder": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 10000,
+          "workers": 1,
+          "definition": "encoder-loop-v1"
+        }
+      },
+      "outside_scopes": {
+        "requests": 695,
+        "bytes": 5027951
+      },
+      "python": "3.12.8 | packaged by conda-forge | (main, Dec  5 2024, 14:06:27) [MSC v.1942 64 bit (AMD64)]",
+      "numpy": "2.1.3",
+      "numpy_build": "3191b72109bea34b77531b50df8dba998af8f149d927aa6c239080a2ef17f76c"
+    },
+    {
+      "dataset": "heterogeneous",
+      "operation": "typed-crown-b",
+      "cells": 10000,
+      "workers": 1,
+      "repeat": 2,
+      "process_id": 35376,
+      "instrumented_source_hash": "0417c62e0d772aedc6752e1b709af6e73c12654ba5464eaaf3155809db57cf91",
+      "instrumented_extension_hash": "1c657b600c29f6861e14a1264eb2d28e68daad3d570c9b6ba024408423987626",
+      "manifest_sha256": "0c014224370187411c0c4f803494e343ea272427ff87d71754063e58419ccf76",
+      "passed": true,
+      "scopes": {
+        "kernel": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 10000,
+          "workers": 1,
+          "definition": "kernel-loop-v1"
+        },
+        "encoder": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 10000,
+          "workers": 1,
+          "definition": "encoder-loop-v1"
+        }
+      },
+      "outside_scopes": {
+        "requests": 695,
+        "bytes": 5027951
+      },
+      "python": "3.12.8 | packaged by conda-forge | (main, Dec  5 2024, 14:06:27) [MSC v.1942 64 bit (AMD64)]",
+      "numpy": "2.1.3",
+      "numpy_build": "3191b72109bea34b77531b50df8dba998af8f149d927aa6c239080a2ef17f76c"
+    },
+    {
+      "dataset": "heterogeneous",
+      "operation": "typed-crown-b",
+      "cells": 10000,
+      "workers": 4,
+      "repeat": 0,
+      "process_id": 12668,
+      "instrumented_source_hash": "0417c62e0d772aedc6752e1b709af6e73c12654ba5464eaaf3155809db57cf91",
+      "instrumented_extension_hash": "1c657b600c29f6861e14a1264eb2d28e68daad3d570c9b6ba024408423987626",
+      "manifest_sha256": "0c014224370187411c0c4f803494e343ea272427ff87d71754063e58419ccf76",
+      "passed": true,
+      "scopes": {
+        "kernel": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 10000,
+          "workers": 4,
+          "definition": "kernel-loop-v1"
+        },
+        "encoder": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 10000,
+          "workers": 4,
+          "definition": "encoder-loop-v1"
+        }
+      },
+      "outside_scopes": {
+        "requests": 1069,
+        "bytes": 7668168
+      },
+      "python": "3.12.8 | packaged by conda-forge | (main, Dec  5 2024, 14:06:27) [MSC v.1942 64 bit (AMD64)]",
+      "numpy": "2.1.3",
+      "numpy_build": "3191b72109bea34b77531b50df8dba998af8f149d927aa6c239080a2ef17f76c"
+    },
+    {
+      "dataset": "heterogeneous",
+      "operation": "typed-crown-b",
+      "cells": 10000,
+      "workers": 4,
+      "repeat": 1,
+      "process_id": 51280,
+      "instrumented_source_hash": "0417c62e0d772aedc6752e1b709af6e73c12654ba5464eaaf3155809db57cf91",
+      "instrumented_extension_hash": "1c657b600c29f6861e14a1264eb2d28e68daad3d570c9b6ba024408423987626",
+      "manifest_sha256": "0c014224370187411c0c4f803494e343ea272427ff87d71754063e58419ccf76",
+      "passed": true,
+      "scopes": {
+        "kernel": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 10000,
+          "workers": 4,
+          "definition": "kernel-loop-v1"
+        },
+        "encoder": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 10000,
+          "workers": 4,
+          "definition": "encoder-loop-v1"
+        }
+      },
+      "outside_scopes": {
+        "requests": 1069,
+        "bytes": 7668168
+      },
+      "python": "3.12.8 | packaged by conda-forge | (main, Dec  5 2024, 14:06:27) [MSC v.1942 64 bit (AMD64)]",
+      "numpy": "2.1.3",
+      "numpy_build": "3191b72109bea34b77531b50df8dba998af8f149d927aa6c239080a2ef17f76c"
+    },
+    {
+      "dataset": "heterogeneous",
+      "operation": "typed-crown-b",
+      "cells": 10000,
+      "workers": 4,
+      "repeat": 2,
+      "process_id": 128744,
+      "instrumented_source_hash": "0417c62e0d772aedc6752e1b709af6e73c12654ba5464eaaf3155809db57cf91",
+      "instrumented_extension_hash": "1c657b600c29f6861e14a1264eb2d28e68daad3d570c9b6ba024408423987626",
+      "manifest_sha256": "0c014224370187411c0c4f803494e343ea272427ff87d71754063e58419ccf76",
+      "passed": true,
+      "scopes": {
+        "kernel": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 10000,
+          "workers": 4,
+          "definition": "kernel-loop-v1"
+        },
+        "encoder": {
+          "requests": 0,
+          "bytes": 0,
+          "calls": 10000,
+          "workers": 4,
+          "definition": "encoder-loop-v1"
+        }
+      },
+      "outside_scopes": {
+        "requests": 1069,
+        "bytes": 7668168
+      },
+      "python": "3.12.8 | packaged by conda-forge | (main, Dec  5 2024, 14:06:27) [MSC v.1942 64 bit (AMD64)]",
+      "numpy": "2.1.3",
+      "numpy_build": "3191b72109bea34b77531b50df8dba998af8f149d927aa6c239080a2ef17f76c"
+    }
+  ],
+  "raw_sha256": "a192ddbcd020ea9f981b9bf1df1455e5b24d5b8fbe548f98f14c4f8323d5ab94"
+}

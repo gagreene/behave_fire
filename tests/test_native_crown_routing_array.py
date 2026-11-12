@@ -52,14 +52,14 @@ def test_crown_normalized_controls_preserve_routing_and_reference(
         kwargs["profile"] = True
         result = original(*args, **kwargs)
         if args[0] == "crown.run_crown_fire":
-            metadata.append(sum(array.nbytes for key, array in result.items() if key.startswith("__") and not key.startswith("__timing.")))
+            metadata.append(bool(result["__schema"]))
         return result
 
     monkeypatch.setattr(_bridge._native, "batch", profile)
     with np.errstate(all="ignore"):
         expected = reference.do_crown_run(surface_results=surface, **inputs)
         actual = BehaveRun(FuelModels()).do_crown_run(surface_results=surface, **inputs)
-    assert metadata and all((amount == 0) == (surface_kind == "f64") for amount in metadata)
+    assert metadata and all(present == (surface_kind != "f64") for present in metadata)
     assert actual.keys() == expected.keys()
     for key in expected:
         assert actual[key].dtype == expected[key].dtype, key

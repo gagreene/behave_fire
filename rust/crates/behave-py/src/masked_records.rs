@@ -1,6 +1,7 @@
 //! Typed particle and fuelbed dictionaries preserve per-field dtype and masks.
+use crate::column_output::RowWriter;
+use crate::operation::Operation;
 use crate::{
-    dispatch::Cell,
     masked::output,
     prepared::{Field, PreparedArguments},
 };
@@ -244,25 +245,29 @@ pub fn intermediates(
     };
     Ok(r)
 }
-pub fn fields(r: MaskedFuelbedIntermediates) -> Result<Cell, String> {
-    crate::masked::outputs(r.named_values())
+pub fn fields(out: &mut RowWriter<'_>, r: MaskedFuelbedIntermediates) -> Result<(), String> {
+    crate::masked::outputs(out, r.named_values())
 }
 pub fn evaluate(
-    operation: &str,
+    operation: Operation,
     a: &PreparedArguments<'_>,
     i: usize,
-) -> Result<Option<Cell>, String> {
-    Ok(Some(match operation {
-        "surface.calculate_fuelbed_intermediates" => fields(
+    out: &mut RowWriter<'_>,
+) -> Result<Option<()>, String> {
+    match operation {
+        Operation::SurfaceCalculateFuelbedIntermediates => fields(
+            out,
             try_calculate_fuelbed_intermediates(&particles(a, i)?)
                 .map_err(crate::arrays::masked_error)?,
         )?,
-        "surface.calculate_reaction_intensity" => output(
+        Operation::SurfaceCalculateReactionIntensity => output(
+            out,
             try_calculate_reaction_intensity(&intermediates(a, i)?)
                 .map_err(crate::arrays::masked_error)?,
             "",
         )?,
-        "surface.run_surface_fire" => crate::structures::surface_output(
+        Operation::SurfaceRunSurfaceFire => crate::structures::surface_output(
+            out,
             try_run_surface_fire_with_intermediates_and_shape(
                 a.masked(Field::Ri, i)?,
                 &intermediates(a, i)?,
@@ -273,7 +278,8 @@ pub fn evaluate(
             .map_err(crate::arrays::masked_error)?,
         ),
         _ => return Ok(None),
-    }))
+    }
+    Ok(Some(()))
 }
 fn input_shape(a: &PreparedArguments<'_>, i: usize) -> SurfaceInputShape {
     let mut shape = SurfaceInputShape::uniform(false);

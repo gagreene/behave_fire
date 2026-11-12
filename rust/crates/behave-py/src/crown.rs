@@ -1,6 +1,6 @@
 //! Structured native crown inputs and nested outputs.
 use crate::{
-    dispatch::Cell,
+    column_output::RowWriter,
     prepared::{Field, PreparedArguments},
     structures,
 };
@@ -57,22 +57,20 @@ pub fn surface_values(a: &PreparedArguments<'_>, i: usize) -> SurfaceFireInputs<
         .unwrap_or(0.0);
     values
 }
-pub fn surface_output(r: CrownSurfaceResult) -> Cell {
-    let mut out = Cell::new();
-    for (k, v) in structures::particles_output(r.p_crown) {
-        out.insert(format!("p_crown.{k}"), v);
-    }
-    for (k, v) in structures::fuelbed_output(r.ib_crown) {
-        out.insert(format!("ib_crown.{k}"), v);
-    }
-    for (k, v) in r.crown_surface.named_values() {
-        out.insert(format!("crown_surface.{k}"), v);
-    }
-    out.insert("ri_crown".into(), r.ri_crown);
-    out.insert("crown_fire_spread_rate".into(), r.crown_fire_spread_rate);
-    out.insert(
-        "crown_length_to_width_ratio".into(),
-        r.crown_length_to_width_ratio,
+pub fn surface_output(out: &mut RowWriter<'_>, result: CrownSurfaceResult) {
+    out.with_prefix("p_crown", |out| {
+        structures::particles_output(out, result.p_crown)
+    });
+    out.with_prefix("ib_crown", |out| {
+        structures::fuelbed_output(out, result.ib_crown)
+    });
+    out.with_prefix("crown_surface", |out| {
+        structures::surface_output(out, result.crown_surface)
+    });
+    out.f64("ri_crown", result.ri_crown);
+    out.f64("crown_fire_spread_rate", result.crown_fire_spread_rate);
+    out.f64(
+        "crown_length_to_width_ratio",
+        result.crown_length_to_width_ratio,
     );
-    out
 }

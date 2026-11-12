@@ -1,8 +1,10 @@
 //! Owned array boundary. No Python references survive into detached execution.
+use crate::column_output::{Buffer, ColumnBundle};
+use crate::operation::Operation;
 use crate::prepared::{Arguments, PreparedArguments};
 
 use numpy::ndarray::{ArrayD, IxDyn};
-use numpy::{IntoPyArray, PyReadonlyArrayDyn, PyUntypedArrayMethods};
+use numpy::{Element, IntoPyArray, PyReadonlyArrayDyn, PyUntypedArrayMethods};
 use pyo3::exceptions::{PyNotImplementedError, PyValueError};
 use pyo3::prelude::*;
 use pyo3::types::PyDict;
@@ -55,11 +57,9 @@ pub fn batch<'py>(
     } else {
         1
     };
-    if !crate::dispatch::supported(operation) {
-        return Err(PyNotImplementedError::new_err(format!(
-            "Native operation is unavailable: {operation}"
-        )));
-    }
+    let operation = Operation::parse(operation).ok_or_else(|| {
+        PyNotImplementedError::new_err(format!("Native operation is unavailable: {operation}"))
+    })?;
     let shape: Vec<usize> = shape
         .extract()
         .map_err(|_| PyValueError::new_err("shape dimensions must be nonnegative integers"))?;
@@ -94,7 +94,7 @@ pub fn batch<'py>(
         ));
     }
     // Keep measured thresholds at pipeline boundaries, not in generic map_chunks.
-    let threshold = if matches!(operation, "model.run_surface" | "crown.run_crown_fire") {
+    let threshold = if operation.main_model() {
         behave_fire::batch::PIPELINE_PARALLEL_MIN_CELLS
     } else {
         10_000
@@ -168,7 +168,6 @@ pub fn batch<'py>(
         strings,
         integers: owned_integers,
     };
-    let operation = operation.to_owned();
     let copied = started.elapsed().as_secs_f64();
     if let Some(callback) = _owned_callback {
         callback.call0()?;
@@ -180,31 +179,13 @@ pub fn batch<'py>(
         .detach(|| {
             let grid_shape =
                 behave_fire::GridShape::new(shape.clone()).map_err(|error| error.to_string())?;
-            let mut output: BTreeMap<String, Vec<f64>> = BTreeMap::new();
             if count == 0 {
                 let prototype_arguments = arguments.empty_prototype();
                 let prototype = PreparedArguments::new(&prototype_arguments, &grid_shape)?;
-                let fields = if operation == "model.run_surface" {
-                    crate::structures::surface_output(crate::parallel::surface(&prototype, 0)?)
-                } else {
-                    crate::dispatch::evaluate(&operation, &prototype, 0, single)?
-                };
-                for (name, value) in fields {
-                    let retain = name.starts_with("__single.")
-                        || name.starts_with("__masked.")
-                        || name.starts_with("__integer_dtype.")
-                        || name.starts_with("__integer_type.")
-                        || name.starts_with("__complex.")
-                        || name.starts_with("__object.")
-                        || name.starts_with("__object_numpy.")
-                        || name.starts_with("__fill");
-                    output.insert(name, if retain { vec![value] } else { Vec::new() });
-                }
-                return Ok::<_, String>(output);
+                return crate::parallel::empty(operation, &prototype, single);
             }
             let prepared = PreparedArguments::new(&arguments, &grid_shape)?;
-            if let Some(result) =
-                crate::parallel::evaluate(&operation, &prepared, &shape, requested)
+            if let Some(result) = crate::parallel::evaluate(operation, &prepared, count, requested)
             {
                 return result.map(|(columns, seconds, bytes)| {
                     concatenate_seconds = seconds;
@@ -213,17 +194,12 @@ pub fn batch<'py>(
                 });
             }
             let chunks = behave_fire::map_chunks(count, requested, |range| {
-                crate::parallel::chunk(&operation, &prepared, range, single)
+                crate::parallel::chunk(operation, &prepared, range, single)
             })
             .map_err(crate::parallel::error)?;
-            appended_bytes = chunks
-                .iter()
-                .skip(1)
-                .flat_map(|chunk| chunk.values())
-                .map(|values| values.len() * std::mem::size_of::<f64>())
-                .sum();
+            appended_bytes = chunks.iter().skip(1).map(ColumnBundle::bytes).sum();
             let concatenate_started = std::time::Instant::now();
-            output = crate::parallel::merge(chunks, count)?;
+            let output = crate::parallel::merge(chunks, count)?;
             concatenate_seconds = concatenate_started.elapsed().as_secs_f64();
             Ok::<_, String>(output)
         })
@@ -248,24 +224,7 @@ pub fn batch<'py>(
         })?;
     let detached_seconds = detached_started.elapsed().as_secs_f64();
     let transfer_started = std::time::Instant::now();
-    let output = PyDict::new(py);
-    for (name, values) in result {
-        let dimensions = if count == 0 && values.len() == 1 {
-            &[][..]
-        } else {
-            shape.as_slice()
-        };
-        if dimensions.len() > 32 {
-            // Transfer owned storage through the supported one-axis conversion,
-            // then use NumPy's structural reshape for its valid higher ranks.
-            let array = values.into_pyarray(py);
-            output.set_item(name, array.call_method1("reshape", (dimensions.to_vec(),))?)?;
-            continue;
-        }
-        let array = ArrayD::from_shape_vec(IxDyn(dimensions), values)
-            .map_err(|e| PyValueError::new_err(e.to_string()))?;
-        output.set_item(name, array.into_pyarray(py))?;
-    }
+    let output = transfer_columns(py, result, &shape)?;
     if profile {
         for (name, value) in [
             ("__timing.owned_copy_seconds", copied),
@@ -282,5 +241,96 @@ pub fn batch<'py>(
             output.set_item(name, array.into_pyarray(py))?;
         }
     }
+    Ok(output)
+}
+
+fn set_array<T: Element>(
+    output: &Bound<'_, PyDict>,
+    name: &str,
+    values: Vec<T>,
+    shape: &[usize],
+) -> PyResult<()> {
+    if shape.len() > 32 {
+        let array = values.into_pyarray(output.py());
+        output.set_item(name, array.call_method1("reshape", (shape.to_vec(),))?)?;
+    } else {
+        let array = ArrayD::from_shape_vec(IxDyn(shape), values)
+            .map_err(|error| PyValueError::new_err(error.to_string()))?;
+        output.set_item(name, array.into_pyarray(output.py()))?;
+    }
+    Ok(())
+}
+
+fn transfer_columns<'py>(
+    py: Python<'py>,
+    mut bundle: ColumnBundle,
+    shape: &[usize],
+) -> PyResult<Bound<'py, PyDict>> {
+    let output = PyDict::new(py);
+    let schemas = PyDict::new(py);
+    bundle.columns.sort_by(|a, b| a.name.cmp(&b.name));
+    for column in bundle.columns {
+        let name = column.name;
+        match column.data {
+            Buffer::F64(v) => set_array(&output, &name, v, shape)?,
+            Buffer::F32(v) => set_array(&output, &name, v, shape)?,
+            Buffer::I8(v) => set_array(&output, &name, v, shape)?,
+            Buffer::I16(v) => set_array(&output, &name, v, shape)?,
+            Buffer::I32(v) => set_array(&output, &name, v, shape)?,
+            Buffer::I64(v) => set_array(&output, &name, v, shape)?,
+            Buffer::U8(v) => set_array(&output, &name, v, shape)?,
+            Buffer::U16(v) => set_array(&output, &name, v, shape)?,
+            Buffer::U32(v) => set_array(&output, &name, v, shape)?,
+            Buffer::U64(v) => set_array(&output, &name, v, shape)?,
+            Buffer::Bool(v) => set_array(&output, &name, v, shape)?,
+        }
+        if let Some(metadata) = column.metadata {
+            let schema = PyDict::new(py);
+            schema.set_item("masked", metadata.masked)?;
+            schema.set_item("single", metadata.single)?;
+            schema.set_item("complex", metadata.complex)?;
+            schema.set_item("object", metadata.object)?;
+            schema.set_item("object_numpy", metadata.object_numpy)?;
+            schema.set_item("integer_kind", metadata.integer_kind)?;
+            schema.set_item("integer_type", metadata.integer_type)?;
+            schema.set_item("fill_present", metadata.fill_present)?;
+            schema.set_item("fill", metadata.fill)?;
+            if metadata.masked {
+                if let Some(mask) = metadata.mask {
+                    set_array(&schema, "mask", mask, shape)?;
+                }
+            }
+            if metadata.complex {
+                if let Some(imaginary) = metadata.imaginary {
+                    set_array(&schema, "imag", imaginary, shape)?;
+                }
+            }
+            if let Some(dynamic) = metadata.dynamic {
+                macro_rules! compact {
+                    ($key:literal,$values:expr,$default:expr) => {{
+                        let values = $values;
+                        let first = values.first().copied().unwrap_or($default);
+                        if values.iter().all(|value| *value == first) {
+                            schema.set_item($key, first)?;
+                        } else {
+                            set_array(&schema, $key, values, shape)?;
+                        }
+                    }};
+                }
+                if metadata.object {
+                    compact!("single", dynamic.single, metadata.single);
+                    compact!("integer_kind", dynamic.integer_kind, metadata.integer_kind);
+                    compact!("integer_type", dynamic.integer_type, metadata.integer_type);
+                    compact!("complex", dynamic.complex, metadata.complex);
+                    compact!("object_numpy", dynamic.object_numpy, metadata.object_numpy);
+                }
+                if metadata.integer_any && (metadata.object || !metadata.complex) {
+                    set_array(&schema, "bits", dynamic.bits, shape)?;
+                }
+            }
+            schemas.set_item(name, schema)?;
+        }
+    }
+    output.set_item("__schema", schemas)?;
     Ok(output)
 }

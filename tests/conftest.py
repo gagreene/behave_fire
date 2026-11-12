@@ -6,7 +6,7 @@ import pytest
 
 
 def pytest_addoption(parser):
-    parser.addoption("--require-rust", action="store_true", default=False, help="Require the native extension and binding API version 2.")
+    parser.addoption("--require-rust", action="store_true", default=False, help="Require the native extension and binding API version 3.")
 
 
 def pytest_collection_modifyitems(config, items):
@@ -22,7 +22,7 @@ def pytest_configure(config):
     error = None
     try:
         native = import_module("behave_fire._rust")
-        if getattr(native, "__binding_api_version__", None) != 2:
+        if getattr(native, "__binding_api_version__", None) != 3:
             raise ImportError("behave_fire._rust has an incompatible binding API; expected version 2")
     except Exception as caught:
         error = caught

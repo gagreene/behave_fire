@@ -21,3 +21,7 @@ mod units;
 #[allow(dead_code)]
 #[path = "../../../rust/crates/behave-py/src/prepared/unit_selectors.rs"]
 mod unit_selectors;
+
+#[allow(dead_code)]
+#[path = "../../../rust/crates/behave-py/src/column_output.rs"]
+mod column_output;
