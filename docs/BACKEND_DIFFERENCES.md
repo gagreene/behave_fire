@@ -26,8 +26,17 @@ to a real fuel or adding a NaN/code/flag/storage policy. Crown potential-fire
 calculations retain their existing FM10 source and use supplied Surface results
 for final behavior. Custom registration outside 1–256 returns `False`, so custom
 models 257–260 are no longer supported. Model 256 remains supported.
-See the official [C++ definition bounds](https://github.com/firelab/behave/blob/f3b2943e69abca942e795c5b1b45276f6338abb5/src/behave/fuelModels.cpp#L863)
-and [undefined-fuel spread path](https://github.com/firelab/behave/blob/f3b2943e69abca942e795c5b1b45276f6338abb5/src/behave/surface.cpp).
+The range follows the official [C++ definition bounds](https://github.com/firelab/behave/blob/f3b2943e69abca942e795c5b1b45276f6338abb5/src/behave/fuelModels.cpp#L863)
+(`isFuelModelDefined` accepts 1 through 256). The upstream C++ does not match
+this behavior for every ID. Its model table has 256 entries (indices 0 through
+255), its property getters have no bounds checks, and `setCustomFuelModel` has no
+range check. In its [surface run](https://github.com/firelab/behave/blob/f3b2943e69abca942e795c5b1b45276f6338abb5/src/behave/surface.cpp#L97),
+the zero-load check (which calls the unchecked getters) runs before the
+definition check, so an ID below 0 or above 255 reads outside the table before
+the definition check can reject it. ID 256 passes the range check but is also
+outside the table. The C++ therefore has no defined result for those IDs, and the
+behave_fire result for them (undefined row zero and zero spread) is a decision of
+this project, not a behavior that was compared against the C++.
 
 Existing valid unit-selector conventions and finite invalid-FDFM-index sentinel
 values remain unchanged. Classification arrays are int32;
