@@ -35,8 +35,11 @@ the zero-load check (which calls the unchecked getters) runs before the
 definition check, so an ID below 0 or above 255 reads outside the table before
 the definition check can reject it. ID 256 passes the range check but is also
 outside the table. The C++ therefore has no defined result for those IDs, and the
-behave_fire result for them (undefined row zero and zero spread) is a decision of
-this project, not a behavior that was compared against the C++.
+behave_fire behavior at these boundaries is a project decision, rather than a
+result compared against the C++. IDs outside 1–256 select undefined row zero
+and give zero spread. ID 256 remains a valid registration slot: a defined custom
+model there is used normally and can produce nonzero spread. An undefined
+in-range model retains the existing undefined-fuel defaults.
 
 Existing valid unit-selector conventions and finite invalid-FDFM-index sentinel
 values remain unchanged. Classification arrays are int32;

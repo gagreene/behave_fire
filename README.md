@@ -123,7 +123,7 @@ behave_fire/
 │       │   │   ├── engine/                                   # Typed scalar science, independent of any array runtime
 │       │   │   │   ├── mod.rs                                # Module root and reusable numerical inputs
 │       │   │   │   ├── options.rs                            # Enum-valued numerical configuration (string interpretation belongs to adapters)
-│       │   │   │   ├── fuel.rs                               # Prepared numeric fuel snapshots without names, dictionaries, or heap-owned fields
+│       │   │   │   ├── fuel.rs                               # Prepared per-fuel numeric records and immutable dense lookup snapshots
 │       │   │   │   ├── fuelbed_fields.rs                     # Field-level fuelbed science shared by sessions and component dependency groups
 │       │   │   │   ├── field.rs                              # Compile-time physical and categorical output identities
 │       │   │   │   ├── missing.rs                            # Explicit whole-cell unavailable results (no NumPy metadata)

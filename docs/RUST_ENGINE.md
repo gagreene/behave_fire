@@ -1,6 +1,6 @@
 # Native Rust raster engine
 
-All 89 native operation entries now use float64 physical arithmetic with separate
+All 88 native operation entries now use float64 physical arithmetic with separate
 integer controls and boolean flags. Masked physical inputs become NaN; physical
 outputs are ordinary float64 arrays. Python remains the unchanged reference and
 handles only explicitly selected or verified automatic complex fallback routes.
@@ -17,8 +17,15 @@ core forbids unsafe code and has no normal or build dependencies.
 per-field injections, explicit output retention, and recomputation. Rust callers
 can use `engine::GridSession` without Python. Model batches and sessions share
 the scientific equations; component fuelbed calculations also use the session's
-field evaluator. Codes and status arrays use int32, with -1 for unknown status;
+field evaluator. Classification codes use int32, with -1 when unavailable;
 missing classifications clear their boolean flags.
+
+Fuel registries have 257 lookup rows, indexed 0 through 256. Supported fuel IDs
+are 1 through 256; other IDs select undefined row zero and retain the existing
+zero-spread behavior. Custom model 256 is supported. These boundary behaviors
+are project decisions where the pinned C++ has unsafe lookups; they are not
+claims of computed C++ parity. See [the fuel-ID contract](BACKEND_DIFFERENCES.md)
+for the distinction between the C++ definition bounds and its storage bounds.
 
 The [recorded Windows acceptance](performance/2026-11-09-reviewed-float64-acceptance.md)
 passes all 40 cases and 80 first/warmed confidence bounds, scalar regression
@@ -36,8 +43,10 @@ documents subsequent boundary corrections separately from these measurements.
 
 The following design notes and dated campaigns describe earlier revisions.
 References to API 3, compact or masked arithmetic, float32 profiles, old Rust
-entry points, and prior feasibility failures are historical. The contract above
-and `BACKEND_DIFFERENCES.md` describe the current implementation.
+entry points, the former 0–260 fuel lookup, and prior feasibility failures are
+historical. The contract above and `BACKEND_DIFFERENCES.md` describe the current
+implementation.
+
 ## Typed scalar stages
 
 `engine::SurfaceCell` and `engine::CrownCell` contain numerical values in

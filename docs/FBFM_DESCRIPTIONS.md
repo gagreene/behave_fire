@@ -127,5 +127,10 @@ This file lists the defined fuel models available in the `behave_fire` repositor
 
 ## Notes
 
+- Supported numeric IDs are 1 through 256. Not every slot is defined by default.
+  Custom registration rejects IDs outside that range and reserved models; ID 256
+  is available for a custom model. Undefined lookup rows retain the existing
+  zero-spread behavior. See [Backend differences](BACKEND_DIFFERENCES.md) for the
+  fuel-ID rules and the pinned C++ boundary limitations.
 - Many additional numeric slots are reserved for future or custom models, but they are not populated by default.
 - This list reflects the currently defined entries in the local `behave_fire` source, not a generic external Behave reference.
