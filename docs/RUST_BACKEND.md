@@ -77,13 +77,20 @@ sessions reject pickling explicitly.
 
 Float64 normalization intentionally changes float32 rounding, integer overflow,
 weak-scalar promotion, MaskedArray identity/fill values, and boxed scalar behavior.
-Physical integers above 2^53 can round. IDs, selectors, iteration limits, codes,
+Physical integers above 2^53 can round. IDs, selectors, thread counts, codes,
 and flags remain typed, with entry-point-specific validation before workers.
-Missing classifications/statuses use int32 -1; missing classification flags are
+Missing classifications use int32 -1; missing classification flags are
 false. Missing physical denominators do not become valid zero. Output availability
 follows actual dependencies and selected branches rather than masking whole cells.
 Structural errors raise before computation; physical numeric domains use IEEE
 NaN/infinity. Finite scientific equations and existing unit constants remain.
+
+Fuel IDs use the separate [fuel-ID contract](BACKEND_DIFFERENCES.md): lookup
+tables have rows 0 through 256, with row zero undefined. IDs outside 1–256,
+including nonfinite real fuel IDs supplied through Python, select row zero.
+Defined custom models at ID 256 remain supported. The pinned C++ has unsafe
+lookups for negative IDs and IDs above 255, so these port boundary behaviors
+have no computed C++ result to compare against.
 
 Inputs, registry values, and overrides are snapshotted before detached native
 work. Scalars stay compact; real broadcast columns materialize once. Logical

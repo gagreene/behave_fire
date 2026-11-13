@@ -12,8 +12,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   The module is preserved locally and is expected to return as a separate project.
   Historical benchmark records and Git history are retained.
 
-- Align fuel lookup bounds with official C++ `FuelModels::isFuelModelDefined`
+- Follow the official C++ `FuelModels::isFuelModelDefined` bounds (1–256) for fuel
+  lookups
   ([source](https://github.com/firelab/behave/blob/f3b2943e69abca942e795c5b1b45276f6338abb5/src/behave/fuelModels.cpp#L863)).
+  The C++ stores only indices 0–255 and runs its zero-load check with unchecked
+  lookups before the definition check, so it has no defined result for IDs below
+  0 or above 255 (ID 256 passes its range check but is outside its storage).
+  The behave_fire result for those IDs is a project decision, not a compared
+  C++ behavior.
   Both backends map IDs outside 1–256, including nonfinite Python fuel IDs,
   to undefined row zero and retain the existing undefined-fuel zero-spread path.
   Tables contain 257 rows. Custom registration outside that range returns `False`;

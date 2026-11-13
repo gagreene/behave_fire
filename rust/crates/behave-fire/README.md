@@ -59,6 +59,20 @@ data notices and record their provenance.
 
 ## Surface and crown calculations
 
+Fuel IDs 1 through 256 are supported. `PreparedFuels::from_registry` creates
+257 lookup rows, with row zero undefined. IDs outside that range select row zero
+and retain the existing undefined-fuel zero-spread behavior. Custom registration
+outside 1–256 returns false, and reserved models cannot be overwritten. A defined
+custom model at ID 256 is used normally and can produce nonzero spread.
+
+The range follows the pinned C++ `isFuelModelDefined` predicate, but its fuel
+vector stores only indices 0 through 255 and its Surface zero-load check uses
+unchecked getters before checking definition. Negative IDs and IDs above 255,
+including 256, therefore have no defined raw C++ Surface result. The Rust behavior
+at those boundaries is a project decision, rather than a computed parity claim.
+See the pinned [definition query](https://github.com/firelab/behave/blob/f3b2943e69abca942e795c5b1b45276f6338abb5/src/behave/fuelModels.cpp#L863)
+and [Surface run](https://github.com/firelab/behave/blob/f3b2943e69abca942e795c5b1b45276f6338abb5/src/behave/surface.cpp#L97).
+
 The scalar surface and crown pipelines and their public stages are available
 without Python. Inputs and outputs use the documented reference base units;
 typed unit selectors are available where the reference accepts units.

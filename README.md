@@ -5,9 +5,15 @@ NaN and infinite IDs supplied through Python, use undefined row zero rather than
 an endpoint fuel. Undefined fuels retain their existing zero-spread behavior;
 no new NaN, classification-code, flag, or storage-type policy applies.
 Custom registration outside 1–256 returns `False`; custom models 257–260 are
-no longer supported. Model 256 remains supported. This follows the official
-[C++ definition bounds](https://github.com/firelab/behave/blob/f3b2943e69abca942e795c5b1b45276f6338abb5/src/behave/fuelModels.cpp#L863)
-and [undefined-fuel spread path](https://github.com/firelab/behave/blob/f3b2943e69abca942e795c5b1b45276f6338abb5/src/behave/surface.cpp).
+no longer supported. Model 256 remains supported. The range follows the official
+[C++ definition bounds](https://github.com/firelab/behave/blob/f3b2943e69abca942e795c5b1b45276f6338abb5/src/behave/fuelModels.cpp#L863).
+The upstream C++ stores 256 fuel models (indices 0 through 255) and, in
+[its surface run](https://github.com/firelab/behave/blob/f3b2943e69abca942e795c5b1b45276f6338abb5/src/behave/surface.cpp#L97),
+checks for zero fuel load with unchecked lookups before it checks the definition.
+For IDs below 0 and above 255 it therefore reads outside its storage and has no
+defined result (ID 256 passes its range check but is outside its storage), so
+there is no C++ result to compare against for those IDs. See
+[Backend differences](docs/BACKEND_DIFFERENCES.md).
 
 Native models, component helpers, units, and state tools calculate physical values in float64. Float16,
 float32, and integer physical inputs widen once; masked real values become NaN,
@@ -99,15 +105,83 @@ behave_fire/
 │       ├── landscape_fire_behavior.py   # Full 10 km × 10 km raster demo
 │       ├── data/                        # Auto-generated GeoTIFF inputs
 │       └── results/                     # GeoTIFF outputs + summary PNG
-├── rust/                            # Cargo workspace
+├── rust/                            # Cargo workspace (members: behave-fire, behave-py; default member: behave-fire)
+│   ├── Cargo.toml / Cargo.lock      #   Workspace manifest and locked dependency set (no Cargo.toml at the repository root)
 │   └── crates/
-│       ├── behave-fire/             # Standalone Rust core (publishable crate)
-│       │   ├── src/                 #   engine/ (scalar stages), raster/ (columns, tiles), surface/, crown/, ...
-│       │   ├── examples/            #   standalone.rs, raster_tweaks.rs
-│       │   └── tests/               #   Golden/parity tests with compact packaged fixtures
+│       ├── behave-fire/             # Standalone Rust core (publishable crate): no runtime or build dependencies, no unsafe code
+│       │   ├── Cargo.toml, README.md, LICENSE, NOTICE, LICENSES/   #   Crate metadata, documentation, and bundled notices
+│       │   ├── src/
+│       │   │   ├── lib.rs                                    # Public API and module declarations (forbids unsafe code)
+│       │   │   ├── model.rs                                  # Owned registry state shared by the model calculation methods
+│       │   │   ├── batch.rs                                  # Model batch owners filled directly through borrowed output slices
+│       │   │   ├── parallel.rs                               # Bounded, ordered chunk execution with scoped native workers
+│       │   │   ├── output.rs                                 # Borrowed slices into final typed output buffers
+│       │   │   ├── grid.rs                                   # Checked row-major shape metadata and owned typed per-cell results
+│       │   │   ├── error.rs                                  # BehaveError: malformed API input, distinct from a scientific no-data result
+│       │   │   ├── math.rs                                   # Scalar operations with NumPy-compatible NaN and signed-zero behavior
+│       │   │   ├── units.rs                                  # Typed scalar unit conversions preserving the Python float64 operation order
+│       │   │   ├── engine/                                   # Typed scalar science, independent of any array runtime
+│       │   │   │   ├── mod.rs                                # Module root and reusable numerical inputs
+│       │   │   │   ├── options.rs                            # Enum-valued numerical configuration (string interpretation belongs to adapters)
+│       │   │   │   ├── fuel.rs                               # Prepared per-fuel numeric records and immutable dense lookup snapshots
+│       │   │   │   ├── fuelbed_fields.rs                     # Field-level fuelbed science shared by sessions and component dependency groups
+│       │   │   │   ├── field.rs                              # Compile-time physical and categorical output identities
+│       │   │   │   ├── missing.rs                            # Explicit whole-cell unavailable results (no NumPy metadata)
+│       │   │   │   ├── state.rs                              # Reusable numeric cell state; absent slots are never fabricated inputs
+│       │   │   │   ├── stage.rs                              # Stages group shared equations; field dependencies support partial injection
+│       │   │   │   ├── tweaks.rs                             # Explicit stage overrides applied before their dependent outputs
+│       │   │   │   ├── surface.rs                            # Surface stage composition over numerical cells and enum-valued controls
+│       │   │   │   ├── crown.rs                              # Crown composition with borrowed model-10 fuel and independent Surface values
+│       │   │   │   ├── run.rs                                # Fully configured borrowed model runs over the typed batch owners
+│       │   │   │   ├── session.rs                            # Owned, typed field slots with explicit injection and recomputation lifetimes
+│       │   │   │   ├── session_surface.rs                    # Scalar Surface stage composition using only declared, retained fields
+│       │   │   │   ├── session_crown.rs                      # Independent Crown fields and selected final branches from staged values
+│       │   │   │   └── session_fused.rs                      # Reborrows the owned snapshot for the configured model kernel
+│       │   │   ├── raster/                                   # Row-major raster execution over borrowed columns
+│       │   │   │   ├── mod.rs                                # Borrowed raster columns, explicit stage inputs, and tile execution
+│       │   │   │   ├── inputs.rs                             # Single field lists that keep packing and length checks consistent
+│       │   │   │   ├── stages.rs                             # Explicit raster stage inputs and override columns, separate from science
+│       │   │   │   ├── outputs.rs                            # Reuses the owned typed buffers instead of parallel containers
+│       │   │   │   ├── surface.rs                            # Surface raster execution; assembles only the current scalar cell on the stack
+│       │   │   │   └── crown.rs                              # Crown raster execution with one model-10 fuel and independent Surface columns
+│       │   │   ├── surface/                                  # Scalar surface fire stages in reference base units
+│       │   │   │   ├── mod.rs                                # Module root for the surface stages
+│       │   │   │   ├── types.rs                              # Particles, fuelbed intermediates, results, wind coefficients, and rate vectors
+│       │   │   │   ├── particles.rs                          # Fixed five-particle construction with dynamic herb transfer
+│       │   │   │   ├── fuelbed.rs                            # Fuelbed weighting that follows the Python five-particle sums
+│       │   │   │   ├── reaction.rs                           # Reaction and residence stages with dependency-aware missing values
+│       │   │   │   ├── wind.rs                               # Wind and slope stages with enum-valued direction, height, and adjustment
+│       │   │   │   ├── prepared_wind.rs                      # Immutable wind terms shared by forward spread and the Crown backsolve
+│       │   │   │   └── geometry.rs                           # Ellipse geometry, spread, and intensity helpers in Python operation order
+│       │   │   ├── crown.rs                                  # Crown fire stages in base units (ft, ft/min, lb/ft³, BTU/ft², BTU/ft/s)
+│       │   │   ├── fire_size.rs                              # Stateful fire ellipse helper (base-unit float64 values)
+│       │   │   ├── mortality.rs                              # Scorch and logistic tree mortality
+│       │   │   ├── spot.rs                                   # Flat-terrain spotting equations
+│       │   │   ├── ignite.rs                                 # Fuel temperature and ignition probabilities
+│       │   │   ├── safety.rs                                 # Butler and Cohen safety-zone geometry
+│       │   │   ├── slope.rs                                  # Stateful slope helper (raw-distance conversion and table behavior)
+│       │   │   ├── vapor_pressure_deficit.rs                 # Unit-aware Tetens vapor pressure calculations
+│       │   │   ├── fine_dead_fuel_moisture.rs                # Standalone fine dead fuel moisture lookup, with the invalid-index sentinel
+│       │   │   ├── fuel_models.rs                            # Owned fuel registries, typed custom registration, and grid lookup semantics
+│       │   │   ├── species.rs                                # Species registry with case-insensitive operations
+│       │   │   └── generated/                                # Generated tables (fuel_models.rs, species.rs, fine_dead_fuel_moisture.rs); do not edit, regenerate with tools/check_rust_tables.py
+│       │   ├── examples/            #   standalone.rs, raster_tweaks.rs, staged_raster.rs, configured_tiles.rs
+│       │   └── tests/               #   Golden and parity test files, with data/ holding the compact packaged fixtures
 │       └── behave-py/               # Unpublished PyO3 bindings, built as behave_fire._rust
+│           └── src/
+│               ├── lib.rs           #     Module list and the explicit owned NumPy bindings
+│               ├── operation.rs     #     Typed operation enum for the native operation entries
+│               ├── capabilities.rs  #     Native capability list that mirrors the Python backend contract
+│               ├── dispatch.rs      #     Typed operation dispatch (numerical work stays in the core crate)
+│               ├── component_*.rs   #     Per-component column adapters, schemas, and requirements
+│               ├── model*.rs, crown*.rs, surface*.rs   # Model, crown, and surface binding routes and field writers
+│               ├── grid_session.rs  #     Python-owned staged sessions
+│               ├── numeric/         #     Numeric snapshot, shape, and contract handling for Python inputs
+│               ├── prepared/        #     Primitive argument parsing: controls, selectors, and keys
+│               ├── structures.rs, data.rs, state.rs, effects.rs, tools.rs   # Structured records, default-table export, checked stateful tools, effects and tools bindings
+│               └── allocation_probe.rs  #  Allocation diagnostics, compiled only under the allocation-probe feature
 ├── tests/                           # Python tests, fixtures, and the legacy harness (test_behave.py)
-├── tools/                           # Parity, benchmark, packaging, and artifact-validation tools
+├── tools/                           # Parity, benchmark, packaging, and artifact-validation tools, plus the Rust probe crates (field_probe, perf_probe) and rust_consumer.rs
 ├── docs/                            # Contracts, procedures, and measurements (see Documentation)
 ├── .github/workflows/               # CI, wheel validation, and release workflows
 ├── pyproject.toml                   # Maturin build configuration and Python metadata
