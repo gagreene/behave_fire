@@ -3,6 +3,48 @@
 These procedures apply to changes proposed for behave_fire. The root [`README.md`](../README.md) describes the
 package and how to run its tests.
 
+## Function organization
+
+- Organize functions alphabetically in every code file, in every language (Python, Rust, and any other), to make them easier to locate in an IDE. This covers top-level functions and the methods within a class, `impl` block, or equivalent.
+- Python: group dunder methods first, then other underscore names, then public names. Alphabetize each group case-insensitively by the full name.
+- Rust: group non-`pub` functions first, then `pub` functions, alphabetically by name within each group. In other languages, group private functions before public functions and alphabetize each group by the bare name.
+- Apply the same organization to production modules and test modules.
+- Preserve a non-alphabetical order only when a framework, runtime dependency, or the idiomatic conventions of the language require it, and document the reason in the file. In Rust, that includes `use` and `mod` declarations, a trailing `#[cfg(test)] mod tests` block, trait-implementation method order set by the trait, and items whose declaration order matters, such as macros defined before use.
+
+## Function signatures and docstrings
+
+- Keep short function signatures on one line.
+- When a signature must wrap, put the opening parenthesis after the function name, place one parameter per line with an eight-space continuation indent, and align the closing parenthesis with `def`.
+- Give every production function and method a docstring, including private, nested, and `None`-returning helpers.
+- Use reStructuredText fields: a concise summary, a blank line, one `:param name:` entry per input in signature order, and a final `:return:` entry.
+- Indent wrapped `:param` and `:return:` descriptions by eight spaces, and describe side effects in `:return:` when a function writes files instead of returning a value.
+- Apply these rules to first-party production code. Do not reformat vendored or generated code solely to enforce this preference.
+
+## Rust and native backend
+
+- The Cargo workspace is in `rust/` (core crate `behave-fire`, unpublished PyO3 bindings `behave-py`); there is no `Cargo.toml` at the repository root, so pass `--manifest-path rust/Cargo.toml`. Build, test, and lint commands appear below under "Local tests before every PR merge".
+- The Python implementation under `src/behave_fire/components/` is the behavioral reference. Rust must match it within the documented tolerances; do not change expected values to make a change pass, and treat regenerating fixtures (`tools/export_rust_reference.py`) as an explicit, reviewed action. A suspected Python defect needs an explicit fix decision; Rust results must not silently differ from Python.
+- Keep the `behave-fire` core free of normal and build dependencies and of any Python, NumPy, or C++ requirement. Record intentional Rust/Python differences in `docs/BACKEND_DIFFERENCES.md`.
+- Never publish to PyPI or crates.io, create release tags, or enable publishing switches without the user's direct permission. See `docs/RELEASING.md` and `docs/CRATES_IO.md`.
+
+## Local-only files and staging
+
+- Plans, ledgers, scratch files, PR-description drafts, agent instruction files (`AGENTS.md`, `.claude/`, skill files), session logs, `development/`, `.superpowers/`, `*.pdb`, and `rust/target/` are never committed or pushed.
+- `.claude/` is listed in `.gitignore`. `AGENTS.md` is not tracked and is excluded locally through `.git/info/exclude`, which lives in the common git directory. Every linked worktree of a clone shares it, but a fresh clone does not inherit it, so add `AGENTS.md` and `.claude/` to `.git/info/exclude` once per clone. A worktree created from a branch that does not track `AGENTS.md` has no copy of the guidance file, so bootstrap the local guidance files per worktree.
+- Stage explicit paths. Never use `git add -A`, `git add .`, or `git commit -a`.
+- Check `git diff --cached --name-only` before every commit and `git diff --name-only <base> HEAD` after it. Stop and report if a local-only file appears.
+
+### Fresh clones and linked worktrees
+
+Set up the exclusions once per clone, using `git rev-parse --git-path info/exclude`
+to locate the common exclusion file. Add `AGENTS.md` and `.claude/` on separate
+lines if they are absent. Linked worktrees share that exclusion file.
+
+Bootstrap local guidance separately in each worktree: create an untracked
+`AGENTS.md` and, when used, `.claude/CLAUDE.md` with a short pointer to these
+procedures. Preserve personal instructions locally. Do not copy personal paths,
+session-context settings, or personal e-mail addresses into tracked documents.
+
 ## Branches, commits, and pushes
 
 1. Create a focused work branch from its intended PR base under the merge
@@ -12,12 +54,17 @@ package and how to run its tests.
 2. Use commits that describe the actual change. Do not add AI authorship or
    attribution statements to commit messages, PR titles, or PR descriptions.
    All commits must be verified and authored by a human. Use the GitHub noreply
-   address for commits and tags, never a personal e-mail address.
+   address `127547449+gagreene@users.noreply.github.com` for commits, tags,
+   and package metadata, never a personal e-mail address. Before the first commit,
+   check `git config user.email`; stop and tell the user if it differs.
 3. Coding agents must obtain the user's **direct permission** before creating
    or amending any commit. They must obtain **separate direct permission** before
    pushing a commit, branch, or tag. Permission to edit, test, stage, prepare a
    PR, or continue work does not grant permission to commit or push. Do not
    automate commits or pushes without explicit user authorization for each action.
+   After preparing and validating changes, stop and report what is ready, then
+   ask separately before committing and before pushing. Never otherwise modify
+   an existing commit without the user's direct permission.
 
 ## Merge routing and releases
 
