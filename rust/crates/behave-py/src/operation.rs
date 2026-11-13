@@ -1,7 +1,6 @@
 //! Decode operation identity once, before any cell loop.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(crate) enum Family {
-    Contain,
     Crown,
     FineDeadFuelMoistureTool,
     Ignite,
@@ -32,7 +31,6 @@ impl Operation {
     }
 }
 operations! {
-    ContainRunContainSimArray: Contain => "contain.run_contain_sim_array",
     CrownAssignFinalCrownFireBehavior: Crown => "crown.assign_final_crown_fire_behavior",
     CrownCalculateCriticalCrownFireSpreadRate: Crown => "crown.calculate_critical_crown_fire_spread_rate",
     CrownCalculateCriticalSurfaceFirelineIntensity: Crown => "crown.calculate_critical_surface_fireline_intensity",

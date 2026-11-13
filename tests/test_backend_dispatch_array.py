@@ -147,7 +147,7 @@ def test_imports_and_explicit_python_never_probe():
             try: bf.BehaveRun(bf.FuelModels(), backend=value)
             except ValueError: pass
             else: raise AssertionError("invalid constructor selector accepted")
-        modules = ("behave_units", "contain", "crown", "fine_dead_fuel_moisture_tool", "fire_size", "fuel_models", "fuel_models_array", "ignite", "mortality", "safety", "slope_tool", "species_master_table", "spot", "surface", "vapor_pressure_deficit_calculator")
+        modules = ("behave_units", "crown", "fine_dead_fuel_moisture_tool", "fire_size", "fuel_models", "fuel_models_array", "ignite", "mortality", "safety", "slope_tool", "species_master_table", "spot", "surface", "vapor_pressure_deficit_calculator")
         import importlib
         for name in modules:
             assert getattr(py, name) is importlib.import_module("behave_fire.components." + name)

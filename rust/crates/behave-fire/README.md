@@ -4,7 +4,7 @@ Standalone Rust core for the behave_fire fire-behavior port. The library provide
 checked grid inputs, owned fuel/species data, unit conversions, and complete
 scalar surface and crown pipelines with their component stages. It also includes
 mortality, spotting, ignition, safety zones, vapor pressure deficit, fine dead
-fuel moisture, stateful slope/ellipse tools, and the reference containment model.
+fuel moisture and stateful slope/ellipse tools.
 The optional Python extension uses this same core through a separate, unpublished
 binding crate. Rust applications do not need that extension.
 
@@ -128,8 +128,6 @@ let mortality = model.calculate_crown_scorch_mortality(
 assert!((0.0..=1.0).contains(&mortality.probability_mortality));
 ```
 
-Containment intentionally reproduces the Python fixed-step approximation and
-its status codes; it does not implement RK4 or the complete upstream ContainSim.
 Lightning ignition remains available as a deprecated compatibility calculation.
 
 Run `cargo run --example standalone` from this crate directory for a complete

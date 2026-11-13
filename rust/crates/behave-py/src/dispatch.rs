@@ -41,7 +41,6 @@ pub fn evaluate(
         Family::VaporPressureDeficitCalculator | Family::FineDeadFuelMoistureTool => {
             crate::tools::evaluate(operation, a, index, out)?
         }
-        Family::Contain => crate::contain::evaluate(operation, a, index, out)?,
         Family::Units => {
             return Err("unit program must be prepared before component iteration".into())
         }

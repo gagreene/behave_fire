@@ -27,7 +27,6 @@ fn role(field: Field) -> Role {
         Field::FuelModelGrid
         | Field::FuelBedTypeGrid
         | Field::ChargeType
-        | Field::MaxSteps
         | Field::DryBulbI
         | Field::RhI
         | Field::SlopeI
@@ -116,7 +115,7 @@ impl<'a> Prepared<'a> {
         }
         for (name, values) in &arguments.codes {
             let field = resolve(name, Role::Code)?;
-            if field != Field::MaxSteps && values.iter().any(|&v| i32::try_from(v).is_err()) {
+            if values.iter().any(|&v| i32::try_from(v).is_err()) {
                 return Err(format!(
                     "component control {name} is outside the int32 range"
                 ));

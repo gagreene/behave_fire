@@ -114,17 +114,16 @@ def test_incomplete_real_extension_remains_explicit_only(monkeypatch):
     _assert_result(rust.surface.calculate_fire_length(np.array([1.]), .5, 3.), np.array([4.5]))
 
 
-def test_native_namespace_registry_routes_and_standalone_containment(_usable_native, monkeypatch):
+def test_native_namespace_registry_routes(_usable_native, monkeypatch):
     import importlib
     from behave_fire import BehaveRun, FuelModels, available_backends, get_backend
-    from behave_fire.python import contain as python_contain
 
     rust = get_backend("rust")
     assert rust is _usable_native
     automatic = get_backend()
     assert automatic.preferred_backend == automatic.backend_in_use == 'rust'
     assert available_backends() == ["python", "rust"]
-    names = ("behave_units", "contain", "crown", "fine_dead_fuel_moisture_tool", "fire_size", "fuel_models", "fuel_models_array", "ignite", "mortality", "safety", "slope_tool", "species_master_table", "spot", "surface", "vapor_pressure_deficit_calculator")
+    names = ("behave_units", "crown", "fine_dead_fuel_moisture_tool", "fire_size", "fuel_models", "fuel_models_array", "ignite", "mortality", "safety", "slope_tool", "species_master_table", "spot", "surface", "vapor_pressure_deficit_calculator")
     for name in names:
         assert getattr(rust, name) is importlib.import_module("behave_fire.rust." + name)
     assert rust.RustBehaveRun is rust.BehaveRun
@@ -159,7 +158,3 @@ def test_native_namespace_registry_routes_and_standalone_containment(_usable_nat
     model = BehaveRun(native_fuels, backend="python")
     native_fuels.fuel_models_[1]["fuel_bed_depth"] = 999.
     assert model._delegate._fuel_models.fuel_models_[1]["fuel_bed_depth"] != 999.
-    args = (np.array([1., 2.]), np.array([2., 2.]), np.array([1., 2.]), np.array([30., 40.]), np.array([0., 0.]))
-    actual = get_backend("rust").contain.run_contain_sim_array(*args, max_steps=10)
-    _assert_result(actual, python_contain.run_contain_sim_array(*args, max_steps=10))
-    assert ("batch", "contain.run_contain_sim_array") in calls

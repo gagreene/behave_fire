@@ -32,7 +32,7 @@ from rust_reference_platform import canonical_case
 
 from behave_fire.behave import BehaveRun
 from behave_fire.components import behave_units, crown, surface
-from behave_fire.components import contain, fine_dead_fuel_moisture_tool, ignite, mortality
+from behave_fire.components import fine_dead_fuel_moisture_tool, ignite, mortality
 from behave_fire.components.fuel_models import FuelModels
 from behave_fire.components.fuel_models_array import build_fuel_lookup_arrays
 from behave_fire.components.mortality import build_mortality_lookup
@@ -84,13 +84,6 @@ def _boundary_cases():
         values.update({"wind_direction": np.array([0., 90., 180., 270.]),
                        "aspect": np.array([0., 90., 180., 270.]), "wind_orientation_mode": orientation})
         cases.append(_case(runner.do_surface_run, values, f"surface/wind-{orientation}"))
-    values = _context((3,))
-    values.update({"report_spread_rate": np.ones(3), "lw_ratio": 1.,
-                   "report_size": np.array([1., 1e-8, 1.]), "production_rate": np.array([1000., 0., 0.]),
-                   "attack_time": np.array([0., 1000., 1000.]), "max_steps": 10})
-    cases.append(_case(contain.run_contain_sim_array, values, "containment/mixed-terminal"))
-    values["max_steps"] = 0
-    cases.append(_case(contain.run_contain_sim_array, values, "containment/no-steps"))
     return cases
 
 
@@ -174,12 +167,11 @@ def _context(shape=(1,), dtype="float64"):
         "crown_fl": 10, "critical_surface_fli": 150, "critical_crown_ros": 30,
         "passive_ros": 15, "passive_hpua": 1500, "passive_fli": 200,
         "passive_fl": 7, "canopy_hpua": 1000, "cfb": .4,
-        "transition_ratio": 1, "active_ratio": 1, "report_spread_rate": 1,
-        "lw_ratio": 2, "report_size": 1, "production_rate": 1000, "attack_time": 0,
+        "transition_ratio": 1, "active_ratio": 1,
     }
     values.update({name: array(value) for name, value in constants.items()})
     values.update({"units": 0, "temp_units": 0, "rh_units": 0, "elapsed_min": 10.,
-                   "elapsed_time": 10., "charge_type": 0, "max_steps": 10,
+                   "elapsed_time": 10., "charge_type": 0,
                    "fireline_intensity_units": 0, "temperature_units": 0,
                    "flame_length_units": 0, "flame_height_units": 0,
                    "cover_height_units": 0, "dbh_units": 1, "height_units": 0,
@@ -502,8 +494,7 @@ def build_documents():
         "mortality_coefficients": encode_value(build_mortality_lookup(species))})
     groups = {"units": ["behave_units"], "surface": ["surface"], "crown": ["crown"],
               "effects": ["mortality", "ignite", "spot", "safety"],
-              "tools": ["fine_dead_fuel_moisture_tool", "vapor_pressure_deficit_calculator", "fire_size", "slope_tool"],
-              "containment": ["contain"]}
+              "tools": ["fine_dead_fuel_moisture_tool", "vapor_pressure_deficit_calculator", "fire_size", "slope_tool"]}
     for group, domains in groups.items():
         compact = [case for domain in domains for case in cases.get(domain, [])
                    if case["id"].endswith("/baseline")]
@@ -516,7 +507,7 @@ def build_documents():
         "fine_dead_fuel_moisture_correction": encode_value(fine_dead_fuel_moisture_tool._CORR),
         "lightning_coefficients": encode_value(ignite._LIG_COEFFS)})
     for group, prefix in (("effects", "lightning/"), ("effects", "mortality/"),
-                          ("surface", "surface/wind-"), ("containment", "containment/"), ("crown", "crown/")):
+                          ("surface", "surface/wind-"), ("crown", "crown/")):
         documents[f"rust/crates/behave-fire/tests/data/{group}.json"]["cases"].extend(
             case for case in cases["boundaries"] if case["id"].startswith(prefix))
     return documents
@@ -576,12 +567,6 @@ def build_inventory():
     for module in _modules():
         domain = _domain(module.__name__.rsplit(".", 1)[1])
         for name, obj in sorted(vars(module).items()):
-            if name.startswith("STATUS_"):
-                entries.append({"python_name": f"{module.__name__}.{name}", "kind": "status constant",
-                                "value": int(obj), "rust_core": f"{domain}::{name}",
-                                "binding_route": f"behave_fire.rust.contain.{name}",
-                                "aliases": [], "status": "planned", "role": "status value"})
-                continue
             if name.startswith("_") or getattr(obj, "__module__", None) != module.__name__:
                 continue
             canonical = f"{module.__name__}.{name}"

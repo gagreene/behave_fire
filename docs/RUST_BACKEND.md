@@ -1,6 +1,6 @@
 # Rust backend contract
 
-All 89 native operation entries and scalar state tools use float64 physical
+All 88 native operation entries and scalar state tools use float64 physical
 arithmetic. Real float16, float32, integer, and boolean physical inputs widen
 once. Masked physical values become NaN; physical results are plain float64
 arrays. Codes and flags retain separate integer/boolean storage. Python keeps

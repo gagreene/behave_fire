@@ -53,7 +53,6 @@ def _cases(count):
         'mortality': lambda: r.mortality.calculate_crown_scorch_mortality(values * 20., 80., 0.5, 12., indices + 1, coefficients),
         'vpd': lambda: r.vapor_pressure_deficit_calculator.calculate_vpd(values + 25., 0, 0.4, 0),
         'fdfm': lambda: r.fine_dead_fuel_moisture_tool.calculate_fine_dead_fuel_moisture(indices, 0, 0, 0, 0, 0, 0, 0),
-        'containment': lambda: r.contain.run_contain_sim_array(values * 5., 2., 1., 120., values, max_steps=32),
         'ignite': lambda: r.ignite.calculate_firebrand_ignition_probability(values + 70., 0.5, 0.06),
         'safety': lambda: r.safety.calculate_safety_zone(values * 10., 3., 50., 1., 300.),
         'spot': lambda: r.spot.calculate_spotting_from_surface_fire(values * 5., 5., 20.),

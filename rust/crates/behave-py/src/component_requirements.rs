@@ -2,15 +2,6 @@
 use crate::{operation::Operation, prepared::Field};
 pub(crate) fn fields(operation: Operation) -> &'static [Field] {
     match operation {
-        Operation::ContainRunContainSimArray => &[
-            Field::ReportSpreadRate,
-            Field::LwRatio,
-            Field::ReportSize,
-            Field::ProductionRate,
-            Field::AttackTime,
-            Field::MaxSteps,
-            Field::DistStep,
-        ],
         Operation::CrownAssignFinalCrownFireBehavior => &[
             Field::IsSurfaceFire,
             Field::IsPassiveCrown,

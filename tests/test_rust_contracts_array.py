@@ -12,7 +12,6 @@ import numpy as np
 import pytest
 
 from behave_fire.behave import BehaveRun
-from behave_fire.components.contain import run_contain_sim_array
 from behave_fire.components.fuel_models import FuelModels
 from behave_fire.components.species_master_table import SpeciesMasterTable, SpeciesMasterTableRecord
 from behave_fire.components.surface import calculate_eccentricity
@@ -105,8 +104,7 @@ def test_export_inventory_covers_facade_and_standalone_routes():
     methods = [name for name in entries if name.startswith("behave_fire.behave.BehaveRun.")
                and not name.rsplit(".", 1)[1].startswith("_")]
     assert len(methods) == 11
-    for name in ("behave_fire.components.contain.run_contain_sim_array",
-                 "behave_fire.components.fire_size.FireSize.get_fire_area",
+    for name in ("behave_fire.components.fire_size.FireSize.get_fire_area",
                  "behave_fire.components.slope_tool.SlopeTool.calculate_horizontal_distance",
                  "behave_fire.components.ignite.calculate_fuel_temperature"):
         assert entries[name]["rust_core"]
@@ -221,9 +219,7 @@ def test_export_science_cases_cover_lightning_equations_and_terminal_states():
     cases = documents["tests/data/rust_port/boundaries.json"]["cases"]
     ids = {case["id"] for case in cases}
     assert {f"lightning/charge-{charge}" for charge in range(3)} <= ids
-    assert {"mortality/all-equations", "containment/mixed-terminal", "surface/all-fuel-slots"} <= ids
-    mixed = next(case for case in cases if case["id"] == "containment/mixed-terminal")
-    assert mixed["output"]["status"]["values"] == [3, 4, 8]
+    assert {"mortality/all-equations", "surface/all-fuel-slots"} <= ids
 
 
 def test_first_contract_difference_names_signature_path_and_respects_output_tolerance():
@@ -335,16 +331,3 @@ if __name__ == "__main__":
     assert result.returncode == 0, result.stderr
     assert result.stderr == ""
     assert json.loads(result.stdout) == [1.0, 91.0]
-
-
-def test_terminal_containment_cells_freeze_while_active_cells_advance():
-    arguments = dict(report_spread_rate=np.array([1.0, 1.0, 1.0]), lw_ratio=1.0,
-                     report_size=np.array([1.0, 1e-8, 1.0]),
-                     production_rate=np.array([1000.0, 0.0, 0.0]),
-                     attack_time=np.array([0.0, 1000.0, 1000.0]))
-    early = run_contain_sim_array(**arguments, max_steps=2)
-    late = run_contain_sim_array(**arguments, max_steps=10)
-    np.testing.assert_array_equal(late["status"], [3, 4, 8])
-    assert late["status"].dtype == np.int32
-    np.testing.assert_array_equal(late["final_area"][:2], early["final_area"][:2])
-    assert late["final_area"][2] > early["final_area"][2]

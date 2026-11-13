@@ -8,7 +8,6 @@ mod model;
 mod parallel;
 
 pub mod batch;
-pub mod contain;
 pub mod crown;
 pub mod engine;
 pub mod fine_dead_fuel_moisture;

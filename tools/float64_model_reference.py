@@ -100,7 +100,7 @@ def normalize_inputs(arguments):
     controls = {'fuel_model_grid', 'validity', 'wind_orientation_mode', 'wind_height_mode', 'waf_method',
                 'lut', 'out_units', 'crown_ratio_units'}
     for name, value in arguments.items():
-        if name in controls or name.endswith(('units', '_grid', '_i')) or name in ('charge_type', 'max_steps') or value is None:
+        if name in controls or name.endswith(('units', '_grid', '_i')) or name == 'charge_type' or value is None:
             result[name] = value
         elif name == 'surface_results':
             result[name] = {key: np.asarray(np.ma.asarray(item, dtype=np.float64).filled(np.nan))

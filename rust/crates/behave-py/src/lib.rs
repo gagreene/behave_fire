@@ -79,8 +79,6 @@ mod grid_session;
 
 mod tools;
 
-mod contain;
-
 mod model;
 
 #[cfg(feature = "allocation-probe")]

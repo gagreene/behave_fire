@@ -48,11 +48,6 @@ def normalize_arguments(operation, arguments):
                 raise ValueError('charge_type cannot be missing')
             # The public enum explicitly treats every other value as unknown.
             result[name] = 0 if value == 0 else 1 if value == 1 else 2
-        elif name == 'max_steps':
-            data = normalize_control(value, np.int64)
-            if data.ndim:
-                raise TypeError(f'{name} must be a scalar control')
-            result[name] = data.item()
         elif name == 'S':
             result[name] = value
         elif name in ('is_surface_fire', 'is_passive_crown', 'is_active_crown'):

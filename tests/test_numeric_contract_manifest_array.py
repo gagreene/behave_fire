@@ -12,7 +12,7 @@ def test_manifest_covers_each_operation_with_one_float64_contract():
 
     assert BINDING_API_VERSION == _rust.__binding_api_version__ == 4
     manifest = _rust.__numeric_contracts__
-    assert len(manifest) == 89
+    assert len(manifest) == 88
     for name, contract in manifest.items():
         assert contract == numeric_contract(name)
     assert set(manifest.values()) == {'f64'}

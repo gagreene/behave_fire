@@ -25,29 +25,8 @@ def test_all_unit_families_widen_once_and_preserve_missing_physical_values(famil
         np.testing.assert_allclose(actual, expected, rtol=2e-14, equal_nan=True)
 
 
-def test_containment_missing_inputs_have_typed_unavailable_status():
-    from behave_fire.rust import contain
-
-    actual = contain.run_contain_sim_array(np.array([np.nan, 0., 5.]), 2., 1., 100., 0., max_steps=4)
-    assert actual['status'].dtype == np.int32
-    assert actual['status'][0] == -1
-    for name in ('contained_time', 'final_perimeter', 'final_area'):
-        assert np.isnan(actual[name][0])
-    assert actual['status'][1] != -1
 
 
-def test_containment_missing_unselected_inputs_do_not_invalidate_known_terminal_behavior():
-    from behave_fire.rust import contain
-
-    for original, reference, attack, steps in [(np.nan, 0., 1000., 4), (100., 100., 0., 0)]:
-        actual = contain.run_contain_sim_array(5., 2., 1., original, attack, max_steps=steps)
-        expected = contain.run_contain_sim_array(5., 2., 1., reference, attack, max_steps=steps)
-        for name in actual:
-            np.testing.assert_array_equal(actual[name], expected[name])
-    missing_report = contain.run_contain_sim_array(5., 2., np.nan, 100., 0., max_steps=4)
-    finite_report = contain.run_contain_sim_array(5., 2., 1., 100., 0., max_steps=4)
-    for name in missing_report:
-        np.testing.assert_array_equal(missing_report[name], finite_report[name])
 
 
 def test_crown_components_use_float64_and_unavailable_codes_without_mask_payloads():

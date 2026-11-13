@@ -16,7 +16,7 @@ _SPREAD_FIELDS = ('sigma', 'relative_packing_ratio', 'propagating_flux', 'heat_s
 _LOOKUP_FIELDS = ('depth', 'moe_dead', 'hoc_dead', 'hoc_live', 'dead_1h', 'dead_10h', 'dead_100h', 'live_herb', 'live_woody', 'savr_1h', 'savr_lh', 'savr_lw', 'is_dynamic', 'is_defined')
 _FUEL_KEYS = {'depth': 'fuel_bed_depth', 'moe_dead': 'moisture_of_extinction_dead', 'hoc_dead': 'heat_of_combustion_dead', 'hoc_live': 'heat_of_combustion_live', 'savr_lh': 'savr_live_herb', 'savr_lw': 'savr_live_woody'}
 _UNIT_COUNTS = {'Area': 6, 'Length': 8, 'Loading': 4, 'Pressure': 9, 'SurfaceAreaToVolume': 4, 'Speed': 7, 'Density': 2, 'HeatPerUnitArea': 3, 'HeatSourceAndReactionIntensity': 5, 'FirelineIntensity': 5, 'Time': 5}
-_EMPTY_KEYS = {'calculate_safety_zone': ('separation_distance', 'radius', 'area'), 'run_contain_sim_array': ('status', 'contained_time', 'final_perimeter', 'final_area'), 'calculate_crown_scorch_mortality': ('crown_length_scorch', 'crown_volume_scorch', 'probability_mortality'), 'calculate_vpd': ('vpd', 'actual_vp', 'saturated_vp'), 'calculate_surface_rate_vector': ('x_component', 'y_component', 'rate_vector'), 'calculate_surface_wind_coefficients': ('safe_sigma', 'wind_c', 'wind_b', 'wind_e')}
+_EMPTY_KEYS = {'calculate_safety_zone': ('separation_distance', 'radius', 'area'), 'calculate_crown_scorch_mortality': ('crown_length_scorch', 'crown_volume_scorch', 'probability_mortality'), 'calculate_vpd': ('vpd', 'actual_vp', 'saturated_vp'), 'calculate_surface_rate_vector': ('x_component', 'y_component', 'rate_vector'), 'calculate_surface_wind_coefficients': ('safe_sigma', 'wind_c', 'wind_b', 'wind_e')}
 _EMPTY_KEYS['run_surface_fire'] = ('spread_rate', 'backing_spread_rate', 'flanking_spread_rate', 'flame_length', 'fireline_intensity', 'heat_per_unit_area', 'effective_wind_speed', 'fire_length_to_width_ratio', 'eccentricity', 'direction_of_max_spread', 'residence_time', 'reaction_intensity', 'midflame_wind_speed', 'no_wind_no_slope_spread_rate')
 _EMPTY_KEYS['build_particle_arrays'] = ('hoc_dead', 'hoc_live', 'depth', 'moe_dead', 'is_defined') + tuple((f'{key}.{j}' for key in _PARTICLES for j in range(5)))
 _EMPTY_KEYS['calculate_fuelbed_intermediates'] = ('sigma', 'bulk_density', 'packing_ratio', 'relative_packing_ratio', 'heat_sink', 'propagating_flux', 'w_heat_dead', 'w_heat_live', 'w_silica_dead', 'w_silica_live', 'w_moist_dead', 'w_moist_live', 'wfl_dead', 'wfl_live', 'moe_dead', 'moe_live', 'frac_dead', 'frac_live', 'depth', 'is_defined')
@@ -132,7 +132,7 @@ def _real_coercion(operation, parameter):
     if parameter.endswith(('_grid', '_i')):
         return np.int32
     module, name = operation.split('.', 1)
-    if module in ('units', 'safety', 'spot', 'ignite', 'contain', 'vapor_pressure_deficit_calculator', 'fine_dead_fuel_moisture_tool'):
+    if module in ('units', 'safety', 'spot', 'ignite', 'vapor_pressure_deficit_calculator', 'fine_dead_fuel_moisture_tool'):
         return np.float64
     if module == 'mortality':
         return None if parameter.startswith('coefficients.') else np.float64
@@ -243,7 +243,7 @@ def _validate_raw_arithmetic(operation, arguments, prefix=''):
     :return: None; unsupported custom arithmetic raises TypeError before native calls.
     """
     controls = {'S', 'charge_type', 'index', 'is_crown', 'is_surface_fire',
-                'is_passive_crown', 'is_active_crown', 'max_steps',
+                'is_passive_crown', 'is_active_crown',
                 'wind_orientation_mode', 'wind_height_mode', 'waf_method'}
     for name, value in arguments.items():
         parameter = prefix + name

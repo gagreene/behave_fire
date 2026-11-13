@@ -60,7 +60,6 @@ pub const OPERATIONS: &[&str] = &[
     "behave_fire.rust.behave_units.temp_to_base",
     "behave_fire.rust.behave_units.time_from_base",
     "behave_fire.rust.behave_units.time_to_base",
-    "behave_fire.rust.contain.run_contain_sim_array",
     "behave_fire.rust.core.BehaveRun.__init__",
     "behave_fire.rust.core.BehaveRun.calculate_crown_scorch_mortality",
     "behave_fire.rust.core.BehaveRun.calculate_fire_area",

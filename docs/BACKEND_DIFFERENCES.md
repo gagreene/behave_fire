@@ -30,7 +30,7 @@ See the official [C++ definition bounds](https://github.com/firelab/behave/blob/
 and [undefined-fuel spread path](https://github.com/firelab/behave/blob/f3b2943e69abca942e795c5b1b45276f6338abb5/src/behave/surface.cpp).
 
 Existing valid unit-selector conventions and finite invalid-FDFM-index sentinel
-values remain unchanged. Classification and containment status arrays are int32;
+values remain unchanged. Classification arrays are int32;
 -1 means unavailable. Classification flags are false for code -1, so check the
 code before interpreting those flags.
 
@@ -48,12 +48,6 @@ including infinity, signed zero, and NaNs produced by real-domain arithmetic.
 Rust scalar tools therefore can return NaN or infinity where Python's scalar
 `math` operations raise an exception. Structural and invalid-control errors
 remain exceptions.
-
-Containment retains fixed distance steps, `dt = dist_step / ros`, terminal
-conditions, and iteration limits. A missing value needed by an executed step
-makes termination unavailable. Inputs belonging to unselected branches do not
-invalidate known results. Zero requested steps retain the existing time-limit
-and zero-geometry result without evaluating scientific steps.
 
 ## Automatic selection and complex data
 
