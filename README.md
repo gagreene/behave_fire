@@ -548,6 +548,7 @@ Useful tools under `tools/`: `compare_backends.py` (Rust versus the frozen Pytho
 | [docs/RELEASING.md](docs/RELEASING.md) | Building, validating, and releasing Python wheels and the source distribution |
 | [docs/CRATES_IO.md](docs/CRATES_IO.md) | Packaging and publishing the standalone Rust crate |
 | [docs/CONTRIBUTION_PROCEDURES.md](docs/CONTRIBUTION_PROCEDURES.md) | Branches, PRs, test records, release routing, and contributor rules |
+| [docs/CPP_VALIDATION.md](docs/CPP_VALIDATION.md) | Pinned C++ Surface observations and pending scientific findings |
 | [docs/FBFM_DESCRIPTIONS.md](docs/FBFM_DESCRIPTIONS.md) | Fire behavior fuel model descriptions |
 
 ---

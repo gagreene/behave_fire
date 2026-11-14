@@ -11,3 +11,14 @@ LICENSES/* text eol=lf
 rust/crates/behave-fire/LICENSE text eol=lf
 rust/crates/behave-fire/NOTICE text eol=lf
 rust/crates/behave-fire/LICENSES/* text eol=lf
+
+# Pinned C++ observation hashes must survive Windows and Unix checkouts.
+tests/data/cpp_reference/** text eol=lf
+rust/crates/behave-fire/tests/data/cpp_reference/** text eol=lf
+reference/behave_cpp_overlay/** text eol=lf
+tools/cpp_reference.py text eol=lf
+tools/cpp_inventory.py text eol=lf
+tools/check_cpp_driver.py text eol=lf
+tools/export_cpp_crate.py text eol=lf
+tests/test_cpp*_array.py text eol=lf
+rust/crates/behave-fire/tests/cpp_reference.rs text eol=lf

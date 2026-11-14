@@ -1,0 +1,26 @@
+{
+  "approval_gate": "Phase 3 owner review",
+  "approved": false,
+  "fields": {
+    "fireline_intensity_btu_ft_s": {
+      "kind": "relative_absolute",
+      "proposal": null
+    },
+    "flame_length_ft": {
+      "kind": "relative_absolute",
+      "proposal": null
+    },
+    "heat_per_unit_area_btu_ft2": {
+      "kind": "relative_absolute",
+      "proposal": null
+    },
+    "length_to_width_ratio": {
+      "kind": "relative_absolute",
+      "proposal": null
+    },
+    "spread_chains_per_hour": {
+      "kind": "relative_absolute",
+      "proposal": null
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "rust/crates/behave-fire/tests/data/cpp_reference/surface/cases.jsonl": "266d08d8b82d65d950461c73e70b44c228ad7b54fbe99eb1d14ed8af6add66da",
+  "rust/crates/behave-fire/tests/data/cpp_reference/surface/manifest.json": "dd3766a4a522c2aa86190230da11cdee15dc66e449da092d975c09590f555e61",
+  "rust/crates/behave-fire/tests/data/cpp_reference/surface/results.jsonl": "ae006838d93bbb9533df74340085110c479315cb8238a8ce488a68fe5e9e1b71",
+  "rust/crates/behave-fire/tests/data/cpp_reference/surface/tolerance-policy.json": "c5c79f56eb1bbe46814d9762d29fab0a36e07da9799de835c3a9fd29e2f3bb56",
+  "tests/data/cpp_reference/findings.json": "9a514ae8600a9fb4f2a99a469b6e0825d792aa2a48fac10fc16c9a3ad57def11",
+  "tests/data/cpp_reference/inventory.json": "ace2728f8287e660dbf77fd430ea6c556987187770b870533001ff1950520827",
+  "tests/data/cpp_reference/negative-expected.json": "7cd40e4585d77417b751e3633f20b9b263b07a9b1f20d04d323cacf46225c475",
+  "tests/data/cpp_reference/negative-inputs.jsonl": "8dc900d12a20b19c222f2e590bf37dc9dacb5c0c7eb6a94a3738f99b7b98e9dd",
+  "tests/data/cpp_reference/surface/applicability.json": "f0dd712e07048b0e1d95b2541f00c2526f56473a415fad73938fed37440a8226",
+  "tests/data/cpp_reference/surface/cases.jsonl": "266d08d8b82d65d950461c73e70b44c228ad7b54fbe99eb1d14ed8af6add66da",
+  "tests/data/cpp_reference/surface/manifest.json": "39e75b886c69607977227a90361e0ef7585fabf7736cdded1352fca151bc1409",
+  "tests/data/cpp_reference/surface/profiles.json": "e13fb9db40a36a830e949b07a9355f12432644d04856b45d92aa49e3e37300c6",
+  "tests/data/cpp_reference/surface/results.jsonl": "ae006838d93bbb9533df74340085110c479315cb8238a8ce488a68fe5e9e1b71",
+  "tests/data/cpp_reference/tolerance-policy.json": "c5c79f56eb1bbe46814d9762d29fab0a36e07da9799de835c3a9fd29e2f3bb56",
+  "tools/check_cpp_driver.py": "4668b2480bd14abc4bcb308c2a5af03fe3ad464911408383ed207f8ed287a93d",
+  "tools/cpp_inventory.py": "22c0862f101fb789f25f883ac17db62abe791881956b60e9d98b5b50d0bfb2c6",
+  "tools/cpp_reference.py": "fe575e111af4cb422bf0b21cdbc8c3357186f879c118db57e44a0c7579686e46",
+  "tools/export_cpp_crate.py": "2d2a3a464346517c8dc761682d572825ec2fd1e2127f6e4d378512c4ac42235a"
+}

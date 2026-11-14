@@ -23,6 +23,11 @@ REQUIRED_FILES = frozenset({
     "tests/data/fuels.json", "tests/data/species.json", "tests/data/surface.json",
     "tests/data/crown.json", "tests/data/effects.json",
     "tests/data/tools.json", "tests/data/units.json",
+    "tests/cpp_reference.rs",
+    "tests/data/cpp_reference/surface/cases.jsonl",
+    "tests/data/cpp_reference/surface/manifest.json",
+    "tests/data/cpp_reference/surface/results.jsonl",
+    "tests/data/cpp_reference/surface/tolerance-policy.json",
 })
 
 
@@ -98,6 +103,8 @@ def inspect_crate(path):
             if not entry.isfile():
                 raise ValueError(f"nonregular archive path: {entry.name}")
             name = PurePosixPath(*parts[1:]).as_posix()
+            if any(part in {"behave_cpp", "behave_cpp_overlay"} for part in parts[1:]):
+                raise ValueError(f"C++ reference payload in crate archive: {name}")
             if name in files:
                 raise ValueError(f"duplicate archive path: {name}")
             if name.endswith((".py", ".pyd", ".so", ".dylib", ".dll", ".exe")) or "rust_port" in parts:
