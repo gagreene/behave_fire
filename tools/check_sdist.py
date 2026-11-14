@@ -1,4 +1,4 @@
-"""Inspect source distributions and require the actual tracked Rust inputs."""
+"""Inspect source distributions and require the actual tracked build inputs."""
 
 import argparse
 import hashlib
@@ -98,7 +98,7 @@ def check_archive(path, expected=()):
 
 
 def check_tracked(root):
-    """Require every source input selected for git-mode source packaging.
+    """Require every declared build input to be tracked before source packaging.
 
     :param root: Repository root whose Git index defines the source archive.
     :return: Sorted tracked inventory; missing inputs raise ValueError.
@@ -111,7 +111,7 @@ def check_tracked(root):
     inputs.update(path.relative_to(root).as_posix() for path in (root / "src/behave_fire").rglob("*") if path.is_file() and "__pycache__" not in path.parts and path.suffix.lower() not in {".pyc", ".pyd", ".so", ".dylib", ".pdb"})
     missing = inputs - tracked
     if missing:
-        raise ValueError(f"git-mode sdist requires tracked inputs: {sorted(missing)}")
+        raise ValueError(f"sdist requires tracked inputs: {sorted(missing)}")
     return sorted(inputs)
 
 

@@ -52,6 +52,7 @@ def _tar(path, prefix, files):
 def test_cpp_reference_exclusions_apply_to_all_maturin_formats():
     configuration = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))
     exclusions = configuration["tool"]["maturin"]["exclude"]
+    assert "reference/behave_cpp" in exclusions
     assert "reference/behave_cpp/**" in exclusions
     assert "reference/behave_cpp_overlay/**" in exclusions
 
