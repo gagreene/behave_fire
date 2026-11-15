@@ -1,7 +1,7 @@
-//! Independent C++ Surface observations, pending owner-approved numeric policy.
+//! Independent C++ Surface observations with a fail-closed calibrated policy.
 //!
 //! Passing these tests validates fixture structure, real core evaluation, and a
-//! fail-closed review gate. The gate does not certify scientific parity. Run with
+//! calibrated gate, while preserving documented original-unit differences. Run with
 //! `--test cpp_reference -- --nocapture` to retain every raw numeric difference.
 
 use behave_fire::engine::{
@@ -74,7 +74,7 @@ fn compare_core_to_cpp(case: &Value, golden: &Value, fuels: &FuelModels) -> Vec<
                 "exact_bits": cpp.to_bits() == rust.to_bits(),
                 "cpp_finite": cpp.is_finite(),
                 "rust_finite": rust.is_finite(),
-                "comparison_status": "requires_owner_review",
+                "comparison_status": "raw_observation",
             })
         })
         .collect()

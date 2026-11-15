@@ -12,9 +12,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   last-bit reference differences, including derived fixture intermediates.
 - Preserve fractional extinction values for the 23 inconsistent upstream fuel
   records and add separately declared Percent-unit custom controls. The original
-  numbered C++ observations remain unchanged. Numerical acceptance remains
-  conditional on manual GNU/MSVC and seven-platform calibration at the unchanged
-  owner-approved `1e-12` relative and absolute caps.
+  numbered C++ observations remain unchanged. Manual GNU/MSVC and seven-platform
+  calibration passed the unchanged owner-approved `1e-12` relative and absolute
+  caps, activating Surface comparisons with documented original-unit differences.
+- Keep native extension binaries in wheels while excluding compiled files from
+  source archives. Global binary exclusions previously stripped the extension
+  from wheels carrying a native platform tag.
 
 - Align Python and Rust Surface boundaries with official Behave C++ at
   `f3b2943`: retain effective wind and elliptical shape for positive baseline

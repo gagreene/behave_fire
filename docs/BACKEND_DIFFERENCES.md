@@ -65,6 +65,9 @@ and [flame-length cutoff](https://github.com/firelab/behave/blob/f3b2943e69abca9
 
 The shared Surface reaction calculation follows the pinned C++ multiplication
 order for moisture damping, with unchanged coefficients and extinction guards.
+The Surface comparison caps passed GNU/MSVC and all seven native platforms
+([qualification evidence](CPP_VALIDATION.md)); original numbered-unit differences
+remain documented and have separate explicit Percent-unit controls.
 This deliberately changes last-bit Python results and corresponding derived
 fixture intermediates. Both ports retain fractional extinction values for the
 23 inconsistent numbered C++ records. Their separately labelled Percent-unit
