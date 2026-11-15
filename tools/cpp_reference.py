@@ -210,17 +210,13 @@ def _rows(path):
 
 
 def _source_digest(path):
-    """Normalize only UTF-8 text source line endings, retaining binary identities.
+    """Normalize Git text-auto line endings without assuming a source encoding.
 
     :param path: Trusted upstream file.
-    :return: SHA256 with CRLF translation only for nonbinary UTF-8 text.
+    :return: SHA256 with CRLF translation only when Git's binary probe finds no NUL.
     """
     payload = Path(path).read_bytes()
-    try:
-        payload.decode("utf-8")
-        text = b"\0" not in payload
-    except UnicodeDecodeError:
-        text = False
+    text = b"\0" not in payload[:8000]
     return hashlib.sha256(payload.replace(b"\r\n", b"\n") if text else payload).hexdigest()
 
 

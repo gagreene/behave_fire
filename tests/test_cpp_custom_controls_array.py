@@ -95,3 +95,7 @@ def test_cross_compiler_trust_normalizes_text_but_preserves_binary_bytes(tmp_pat
     first = reference._source_digest(binary)
     binary.write_bytes(b'\x00\n')
     assert reference._source_digest(binary) != first
+    text.write_bytes(b'// temperature \xb0C\r\n')
+    first = reference._source_digest(text)
+    text.write_bytes(b'// temperature \xb0C\n')
+    assert reference._source_digest(text) == first
