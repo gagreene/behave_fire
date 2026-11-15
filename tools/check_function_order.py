@@ -92,14 +92,17 @@ def _python_value(value):
     return type(value).__name__, repr(value)
 
 
-def _rust_tokens(text):
+def _rust_tokens(text, spacing=False):
     """Tokenize Rust without discarding string contents, attributes, or comments.
 
     :param text: Rust item source validated by the item scanner.
+    :param spacing: Retain joint punctuation spacing observed by procedural macros.
     :return: Lexical tokens with insignificant whitespace removed.
     """
     tokens = []
     i = 0
+    previous_end = -1
+    previous_punct = False
     while i < len(text):
         if text[i].isspace():
             i += 1
@@ -146,7 +149,11 @@ def _rust_tokens(text):
                                 r'|\d[\d_]*(?:\.[\d_]+)?(?:[eE][+-]?[\d_]+)?\w*'
                                 r'|::|->|=>|\.\.=|\.\.|<<=?|>>=?|&&|\|\||[=!<>+*/%&|^-]=', text[i:])
                 i += word.end() if word else 1
-        tokens.append(text[start:i])
+        token = text[start:i]
+        punct = all(char in '!#$%&()*+,-./:;<=>?@[\\]^`{|}~' for char in token)
+        joint = previous_punct and punct and start == previous_end
+        tokens.append((token, joint) if spacing else token)
+        previous_end, previous_punct = i, punct
     return tuple(tokens)
 
 
@@ -176,21 +183,21 @@ def _rust_value(text):
     for token in tokens[:index]:
         end_prefix = text.index(token, end_prefix) + len(token)
     functions = {}
-    other = [('container', tokens[:index])]
+    other = [('container', _rust_tokens(text[:end_prefix], spacing=True))]
     text = text[end_prefix:]
     for start, end in scan_items(text):
         chunk = text[start:end]
         info = classify(chunk)
         if info[0] == 'fn':
-            functions.setdefault(info[1], []).append(_rust_tokens(chunk))
+            functions.setdefault(info[1], []).append(_rust_tokens(chunk, spacing=True))
         elif info[1] and (re.match(r'(?:unsafe\s+)?impl\b', info[1]) or MOD_RE.match(info[1])):
             span = body_span(chunk)
             if span is None:
                 raise ValueError('Malformed Rust container')
-            other.append((_rust_tokens(chunk[:span[0]]), _rust_value(chunk[span[0]:span[1]]),
-                          _rust_tokens(chunk[span[1]:])))
+            other.append((_rust_tokens(chunk[:span[0]], spacing=True), _rust_value(chunk[span[0]:span[1]]),
+                          _rust_tokens(chunk[span[1]:], spacing=True)))
         else:
-            other.append(_rust_tokens(chunk))
+            other.append(_rust_tokens(chunk, spacing=True))
     return other, sorted(functions.items())
 
 

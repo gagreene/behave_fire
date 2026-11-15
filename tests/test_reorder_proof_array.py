@@ -47,6 +47,7 @@ def test_declaration_reordering_preserves_identity(suffix, before, after):
     ('.rs', 'const X:u8=1; fn f(){}', 'const X:u8=2; fn f(){}'),
     ('.rs', 'mod a { fn f(){} } mod b {}', 'mod a {} mod b { fn f(){} }'),
     ('.rs', 'fn f(){let x=1e-3;}', 'fn f(){let x=1e - 3;}'),
+    ('.rs', 'fn f(){m!(?&);}', 'fn f(){m!(? &);}'),
     ('.rs', 'macro_rules! c { ($x:literal)=>{1}; ($x:tt $y:tt)=>{2}; } fn f()->u8 {c!(1.)}',
      'macro_rules! c { ($x:literal)=>{1}; ($x:tt $y:tt)=>{2}; } fn f()->u8 {c!(1 .)}'),
     ('.py', '# order-exempt: dependency\ndef z(): pass\ndef a(): pass',
