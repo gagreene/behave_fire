@@ -111,7 +111,7 @@ def check_driver(driver, directory, root=ROOT, build_receipt=None, exact_replay=
     """
     driver, directory, root = Path(driver).resolve(), Path(directory).resolve(), Path(root).resolve()
     directory.mkdir(parents=True, exist_ok=True)
-    data = load_reference(root)
+    data = load_reference(root, measurement=True)
     build = _prepared_build(root) if build_receipt is None else build_receipt
     if (_digest(driver) != build["driver_sha256"] or build["upstream_sha"] != PIN
             or (build.get("driver_source_sha256_lf") or build.get("driver_source_sha256"))

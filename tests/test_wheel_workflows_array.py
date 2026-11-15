@@ -9,6 +9,20 @@ import yaml
 ROOT = Path(__file__).parents[1]
 
 
+def test_built_wheels_all_receive_cpp_payload_checks_before_aggregation():
+    workflow = yaml.load((ROOT / '.github/workflows/wheel-validation.yml').read_text(), Loader=yaml.BaseLoader)
+    steps = workflow['jobs']['check-distributions']['steps']
+    checks = [(index, step) for index, step in enumerate(steps)
+              if 'tools/check_sdist.py --wheel' in step.get('run', '')]
+    assert len(checks) == 1, 'Every produced native and pure wheel needs the no-copy payload check'
+    index, step = checks[0]
+    assert step['shell'] == 'bash'
+    assert 'for wheel in dist/*.whl' in step['run']
+    assert '"$wheel"' in step['run']
+    metadata_index = next(i for i, entry in enumerate(steps) if 'tools/check_wheel_metadata.py' in entry.get('run', ''))
+    assert index < metadata_index
+
+
 def test_manual_cpp_calibration_uses_both_compilers_and_only_manual_submodules():
     workflow = yaml.load((ROOT / '.github/workflows/ci.yml').read_text(), Loader=yaml.BaseLoader)
     job = workflow['jobs']['cpp-calibration']

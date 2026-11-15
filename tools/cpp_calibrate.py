@@ -118,7 +118,7 @@ def _validate_observations(root, report):
     :param report: One compiler or port report.
     :return: Compact validated count summary.
     """
-    data = reference.load_reference(root)
+    data = reference.load_reference(root, measurement=True)
     fields = controls.calibration_policy(root)
     if report.get("kind") == "ports":
         key = report.get("platform_key", "")
@@ -300,7 +300,7 @@ def measure_cpp(root, directory, expected_compiler=None):
 
     root, directory = Path(root).resolve(), Path(directory).resolve()
     driver, build = build_driver(root, directory, expected_compiler)
-    data = reference.load_reference(root)
+    data = reference.load_reference(root, measurement=True)
     protocol = check_driver(driver, directory / "protocol", root, build_receipt=build, exact_replay=False)
     observations = []
     for dataset, cases, results in (("surface", data["cases"], data["results"]),

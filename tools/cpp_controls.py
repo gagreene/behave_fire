@@ -253,7 +253,7 @@ def measure_ports(root, report, backends=("python", "rust"), expected_platform=N
 
     :param root: Repository root with verified offline observations.
     :param report: Evidence output path.
-    :param backends: Explicit implementations; absence is an error, never a skip.
+    :param backends: Explicit implementations; native metadata is required only when Rust is requested.
     :param expected_platform: Optional matrix identity, checked against the actual host.
     :return: Evidence without activating the production policy.
     """
@@ -266,7 +266,7 @@ def measure_ports(root, report, backends=("python", "rust"), expected_platform=N
     source = str(root / "src")
     if source not in sys.path:
         sys.path.insert(0, source)
-    data = reference.load_reference(root)
+    data = reference.load_reference(root, measurement=True)
     controls = load(root, data["cases"])
     fields = calibration_policy(root)
     numbered = {case["id"]: case for case in data["cases"]}
@@ -298,15 +298,17 @@ def measure_ports(root, report, backends=("python", "rust"), expected_platform=N
             raise ValueError("Incomplete port calibration")
         counts[backend] = dict(cases=total, fields=total * len(reference.FIELDS), paired_cases=paired,
                                original_unit_difference_cases=139)
-    from behave_fire import _rust
-
     result = dict(schema_version=1, kind="ports", upstream_sha=reference.PIN, passed=True,
                   parity_approved=False, artifacts=_artifacts(root), fields=fields, counts=counts,
                   platform=platform.platform(), system=platform.system(), machine=platform.machine(),
                   platform_key=platform_key, python=sys.version, numpy=np.__version__, observations=records,
-                  documented_differences=documented, binding_api_version=_rust.__binding_api_version__,
-                  extension_sha256=reference._digest(Path(_rust.__file__)),
+                  documented_differences=documented,
                   libc_family="musl" if platform_key == "linux-musl-x86_64" else platform.libc_ver()[0])
+    if 'rust' in backends:
+        from behave_fire import _rust
+
+        result.update(binding_api_version=_rust.__binding_api_version__,
+                      extension_sha256=reference._digest(Path(_rust.__file__)))
     reference._json(report, result)
     return result
 

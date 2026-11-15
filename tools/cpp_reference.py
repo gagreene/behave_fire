@@ -398,7 +398,7 @@ def compare_backends(root, report_dir):
     from behave_fire import BehaveRun
     from behave_fire.components.fuel_models import FuelModels
 
-    data = load_reference(root)
+    data = load_reference(root, measurement=True)
     mappings = dict(fireline_intensity_btu_ft_s="fireline_intensity", flame_length_ft="flame_length",
                     heat_per_unit_area_btu_ft2="heat_per_unit_area", length_to_width_ratio="fire_length_to_width_ratio",
                     spread_chains_per_hour="spread_rate")
@@ -464,7 +464,8 @@ def generate_reference(root, driver, attestation, reason):
     if receipt["upstream_sha"] != PIN or receipt["driver_sha256"] != _digest(driver):
         raise ValueError("Untrusted pin or executable")
     overlay = root / "reference/behave_cpp_overlay/driver.cpp"
-    expected_source = receipt.get("driver_source_sha256_lf", receipt["driver_source_sha256"])
+    expected_source = (receipt['driver_source_sha256_lf'] if 'driver_source_sha256_lf' in receipt
+                       else receipt['driver_source_sha256'])
     if expected_source != _text_digest(overlay):
         raise ValueError("Driver source differs from build receipt")
     directory = root / "tests/data/cpp_reference/surface"
@@ -501,11 +502,12 @@ def generate_reference(root, driver, attestation, reason):
     return {"cases": len(cases), "available": manifest["available"], "unavailable": len(cases)-manifest["available"]}
 
 
-def load_reference(root=ROOT):
+def load_reference(root=ROOT, *, measurement=False):
     """Verify every shipped artifact and enforce complete independent observations.
 
     :param root: Repository root; no upstream checkout is read offline.
-    :return: Validated cases, results, manifest, and unapproved/approved policy.
+    :param measurement: Verify reference integrity without requiring previous source qualification.
+    :return: Validated artifacts; measurement views always carry an unapproved policy and cannot certify acceptance.
     """
     root = Path(root).resolve()
     directory = root / "tests/data/cpp_reference"
@@ -554,7 +556,7 @@ def load_reference(root=ROOT):
             or any(not isinstance(item, dict) or item.get("kind") != "relative_absolute"
                    for item in policy["fields"].values())):
         raise ValueError("Missing field tolerance classification")
-    if policy["approved"]:
+    if policy["approved"] and not measurement:
         from cpp_calibrate import validate_qualification
 
         qualification = directory / "calibration/qualification.json"
@@ -572,6 +574,8 @@ def load_reference(root=ROOT):
     controls = load(root, cases)
     _prepared_build(root)
     budget = check_fixture_budget(root)
+    if measurement:
+        policy = dict(policy, approved=False)
     return dict(cases=cases, results=results, manifest=manifest, policy=policy, controls=controls, budget=budget)
 
 

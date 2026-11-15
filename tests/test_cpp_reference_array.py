@@ -58,14 +58,14 @@ def test_default_observations_need_neither_cpp_sources_nor_overlay(tmp_path):
     assert data["manifest"]["available"] == 583
 
 
-@pytest.mark.rust
-def test_default_qualified_policy_checks_both_backends_and_unit_controls(tmp_path):
+@pytest.mark.parametrize('backend', ['python', pytest.param('rust', marks=pytest.mark.rust)])
+def test_default_qualified_policy_checks_selected_backend_and_unit_controls(tmp_path, backend):
     import cpp_controls
 
     data = reference.load_reference()
-    report = cpp_controls.measure_ports(ROOT, tmp_path / 'surface-check.json')
+    report = cpp_controls.measure_ports(ROOT, tmp_path / 'surface-check.json', backends=(backend,))
     assert report['counts'] == {backend: dict(cases=583, fields=2915, paired_cases=139,
-        original_unit_difference_cases=139) for backend in ('python', 'rust')}
+        original_unit_difference_cases=139)}
     if data['policy']['approved']:
         assert data['policy']['qualification']['calibration_complete'] is True
 
