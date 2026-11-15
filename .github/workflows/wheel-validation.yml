@@ -2,7 +2,16 @@ name: Wheel validation
 
 on:
   workflow_call:
+    inputs:
+      cpp_calibration:
+        type: boolean
+        required: false
+        default: false
   workflow_dispatch:
+    inputs:
+      cpp_calibration:
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -108,8 +117,11 @@ jobs:
     runs-on: ${{ matrix.platform.os }}
     steps:
       - uses: actions/checkout@v4
+        if: ${{ !(inputs.cpp_calibration && matrix.python == '3.12') }}
         with:
           sparse-checkout: tools
+      - uses: actions/checkout@v4
+        if: ${{ inputs.cpp_calibration && matrix.python == '3.12' }}
       - uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python }}
@@ -130,6 +142,16 @@ jobs:
         with:
           name: evidence-${{ matrix.platform.artifact }}-${{ matrix.python }}
           path: ${{ runner.temp }}/evidence
+      - name: Qualify native Surface comparison caps
+        if: ${{ inputs.cpp_calibration && matrix.python == '3.12' }}
+        run: python tools/test_native_wheel_suite.py --wheels "${{ runner.temp }}/artifacts" --report-dir "${{ runner.temp }}/cpp-full-suite" --cpp-calibration --cpp-platform '${{ matrix.platform.artifact }}'
+      - name: Preserve native calibration evidence
+        if: ${{ always() && inputs.cpp_calibration && matrix.python == '3.12' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: cpp-calibration-${{ matrix.platform.artifact }}
+          path: ${{ runner.temp }}/cpp-full-suite/*-calibration.json
+          if-no-files-found: error
 
   test-alpine-platform:
     needs: [build-native-wheels, build-pure-wheel]
@@ -157,8 +179,11 @@ jobs:
       - name: Run the full native suite against the musllinux wheel
         if: matrix.python == '3.12'
         shell: bash
+        env:
+          BEHAVE_CPP_CALIBRATION: ${{ inputs.cpp_calibration }}
+          BEHAVE_CPP_PLATFORM: linux-musl-x86_64
         run: |
-          docker run --rm --platform linux/amd64 -v "$GITHUB_WORKSPACE:/source" -v "$RUNNER_TEMP/alpine:/artifacts" -w /source '${{ matrix.image }}' sh -ec '
+          docker run --rm --platform linux/amd64 -e BEHAVE_CPP_CALIBRATION -e BEHAVE_CPP_PLATFORM -e GITHUB_ACTIONS -e GITHUB_SHA -e GITHUB_RUN_ID -e GITHUB_REPOSITORY -e GITHUB_EVENT_NAME -v "$GITHUB_WORKSPACE:/source" -v "$RUNNER_TEMP/alpine:/artifacts" -w /source '${{ matrix.image }}' sh -ec '
             apk add --no-cache git
             export GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=safe.directory GIT_CONFIG_VALUE_0=/source
             python tools/test_native_wheel_suite.py --wheels /artifacts/wheels --report-dir /artifacts/full-suite
@@ -170,6 +195,13 @@ jobs:
           path: |
             ${{ runner.temp }}/alpine/evidence
             ${{ runner.temp }}/alpine/full-suite
+      - name: Preserve musl calibration evidence
+        if: ${{ always() && inputs.cpp_calibration && matrix.python == '3.12' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: cpp-calibration-linux-musl-x86_64
+          path: ${{ runner.temp }}/alpine/full-suite/*-calibration.json
+          if-no-files-found: error
 
   test-windows-arm64-platform:
     needs: [build-native-wheels, build-pure-wheel]
@@ -198,6 +230,9 @@ jobs:
       - name: Run the full native suite against the Windows ARM64 wheel
         if: matrix.python == '3.12'
         shell: pwsh
+        env:
+          BEHAVE_CPP_CALIBRATION: ${{ inputs.cpp_calibration }}
+          BEHAVE_CPP_PLATFORM: windows-arm64
         run: python tools/test_native_wheel_suite.py --wheels "$env:RUNNER_TEMP/artifacts" --report-dir "$env:RUNNER_TEMP/full-suite"
       - uses: actions/upload-artifact@v4
         if: always()
@@ -206,6 +241,13 @@ jobs:
           path: |
             ${{ runner.temp }}/evidence
             ${{ runner.temp }}/full-suite
+      - name: Preserve Windows ARM64 calibration evidence
+        if: ${{ always() && inputs.cpp_calibration && matrix.python == '3.12' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: cpp-calibration-windows-arm64
+          path: ${{ runner.temp }}/full-suite/*-calibration.json
+          if-no-files-found: error
 
   check-distributions:
     needs: [build-sdist, test-native-platforms, test-alpine-platform, test-windows-arm64-platform]

@@ -1,0 +1,72 @@
+{
+  "activation_requirements": {
+    "compilers": [
+      "GNU",
+      "MSVC"
+    ],
+    "platforms": [
+      "linux-x86_64",
+      "linux-aarch64",
+      "linux-musl-x86_64",
+      "macos-x86_64",
+      "macos-arm64",
+      "windows-x86_64",
+      "windows-arm64"
+    ]
+  },
+  "approval_gate": "Cross-compiler and platform calibration must pass unchanged caps",
+  "approved": false,
+  "conditional_owner_approval": true,
+  "documented_unit_source_models": [
+    110,
+    111,
+    150,
+    151,
+    152,
+    153,
+    154,
+    155,
+    156,
+    157,
+    158,
+    159,
+    166,
+    167,
+    168,
+    169,
+    170,
+    171,
+    172,
+    190,
+    191,
+    192,
+    193
+  ],
+  "fields": {
+    "fireline_intensity_btu_ft_s": {
+      "atol": 1e-12,
+      "kind": "relative_absolute",
+      "rtol": 1e-12
+    },
+    "flame_length_ft": {
+      "atol": 1e-12,
+      "kind": "relative_absolute",
+      "rtol": 1e-12
+    },
+    "heat_per_unit_area_btu_ft2": {
+      "atol": 1e-12,
+      "kind": "relative_absolute",
+      "rtol": 1e-12
+    },
+    "length_to_width_ratio": {
+      "atol": 1e-12,
+      "kind": "relative_absolute",
+      "rtol": 1e-12
+    },
+    "spread_chains_per_hour": {
+      "atol": 1e-12,
+      "kind": "relative_absolute",
+      "rtol": 1e-12
+    }
+  }
+}

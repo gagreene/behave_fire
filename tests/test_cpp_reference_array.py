@@ -29,22 +29,26 @@ def _rewrite(root, relative, value):
 
 def _snapshot(tmp_path):
     hashes = json.loads((ROOT / "tests/data/cpp_reference/hashes.json").read_text())
-    for relative in [*hashes, "tests/data/cpp_reference/hashes.json"]:
+    qualification = ROOT / "tests/data/cpp_reference/calibration/qualification.json"
+    sources = json.loads(qualification.read_text()).get('source_files', {}) if qualification.is_file() else {}
+    for relative in {*hashes, *sources, "tests/data/cpp_reference/hashes.json"}:
         target = tmp_path / relative
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(ROOT / relative, target)
     return tmp_path
 
 
-def test_default_observations_are_offline_and_pending():
+def test_default_observations_are_offline_and_policy_gated():
     data = reference.load_reference()
     assert len(data["cases"]) == 634
     assert data["manifest"]["available"] == 583
     assert data["manifest"]["submodule_checkout_used"] is False
-    assert data["policy"]["approved"] is False
     result = next(row["output"] for row in data["results"] if row["status"] == "ok")
-    with pytest.raises(reference.UnapprovedCppPolicy):
-        reference.assert_matches_cpp(result, result, data["policy"])
+    if data['policy']['approved']:
+        reference.assert_matches_cpp(result, result, data['policy'])
+    else:
+        with pytest.raises(reference.UnapprovedCppPolicy):
+            reference.assert_matches_cpp(result, result, data["policy"])
 
 
 def test_default_observations_need_neither_cpp_sources_nor_overlay(tmp_path):
@@ -52,6 +56,18 @@ def test_default_observations_need_neither_cpp_sources_nor_overlay(tmp_path):
     assert not (root / "reference").exists()
     data = reference.load_reference(root)
     assert data["manifest"]["available"] == 583
+
+
+@pytest.mark.rust
+def test_default_qualified_policy_checks_both_backends_and_unit_controls(tmp_path):
+    import cpp_controls
+
+    data = reference.load_reference()
+    report = cpp_controls.measure_ports(ROOT, tmp_path / 'surface-check.json')
+    assert report['counts'] == {backend: dict(cases=583, fields=2915, paired_cases=139,
+        original_unit_difference_cases=139) for backend in ('python', 'rust')}
+    if data['policy']['approved']:
+        assert data['policy']['qualification']['calibration_complete'] is True
 
 
 @pytest.mark.parametrize("mutation", ("drop", "field", "duplicate", "unavailable", "status"))

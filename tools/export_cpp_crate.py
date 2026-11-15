@@ -19,16 +19,20 @@ INPUTS = {
 }
 
 
-def export(source, destination, check=False):
+def export(source, destination, check=False, dataset="surface"):
     """Copy or verify an explicit, byte-preserving fixture allowlist.
 
     :param source: Canonical tests/data/cpp_reference directory.
     :param destination: Crate-local tests/data/cpp_reference/surface directory.
     :param check: Check existing copies without changing files when True.
+    :param dataset: Numbered Surface observations or explicit custom-input controls.
     :return: Sorted payload and manifest names; raises for missing inputs or drift.
     """
-    payloads = {name: (source / relative).read_bytes() for name, relative in INPUTS.items()}
-    canonical = json.loads((source / "surface/manifest.json").read_text(encoding="utf-8"))
+    if dataset not in ("surface", "surface_custom"):
+        raise ValueError("Unknown C++ dataset")
+    paths = {name: relative.replace("surface/", dataset + "/") for name, relative in INPUTS.items()}
+    payloads = {name: (source / relative).read_bytes() for name, relative in paths.items()}
+    canonical = json.loads((source / dataset / "manifest.json").read_text(encoding="utf-8"))
     if canonical["upstream_sha"] != PIN:
         raise ValueError("canonical C++ reference pin changed")
     manifest = {
@@ -57,12 +61,13 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--check", action="store_true")
     arguments = parser.parse_args()
-    names = export(
-        ROOT / "tests/data/cpp_reference",
-        ROOT / "rust/crates/behave-fire/tests/data/cpp_reference/surface",
-        arguments.check,
-    )
-    print("\n".join(names))
+    for dataset in ("surface", "surface_custom"):
+        names = export(
+            ROOT / "tests/data/cpp_reference",
+            ROOT / "rust/crates/behave-fire/tests/data/cpp_reference" / dataset,
+            arguments.check, dataset,
+        )
+        print(dataset + ": " + ", ".join(names))
 
 
 if __name__ == "__main__":

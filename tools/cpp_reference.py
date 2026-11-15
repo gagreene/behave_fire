@@ -16,7 +16,15 @@ FIELDS = ("fireline_intensity_btu_ft_s", "flame_length_ft", "heat_per_unit_area_
           "length_to_width_ratio", "spread_chains_per_hour")
 INPUTS = {"id", "operation", "fuel_model", "wind_direction", "m1h", "m10h", "m100h", "mlh", "mlw",
           "wind_speed", "slope", "aspect", "canopy_cover", "canopy_height", "crown_ratio"}
-OPTIONAL_INPUTS = {"wind_height", "wind_orientation", "waf_method", "user_waf", "moisture_mode", "session"}
+OPTIONAL_INPUTS = {"wind_height", "wind_orientation", "waf_method", "user_waf", "moisture_mode", "session",
+                   "fuel_mode", "moe_percent"}
+MOE_PERCENT_CONTROLS = {
+    110: 24., 111: 24., 150: 20., 151: 13., 152: 15., 153: 15., 154: 25.,
+    155: 25., 156: 20., 157: 35., 158: 24., 159: 35., 166: 26., 167: 30.,
+    168: 35., 169: 30., 170: 27., 171: 40., 172: 32., 190: 28., 191: 25.,
+    192: 45., 193: 26.,
+}
+CONTROL_MODEL = 250
 
 
 class UnapprovedCppPolicy(ValueError):
@@ -95,6 +103,17 @@ def _cases():
     return records, profiles
 
 
+def _custom_cases(cases):
+    """Declare a distinct, explicit Percent-unit control for each affected scenario.
+
+    :param cases: Original numbered-model Surface inputs.
+    :return: New control cases retaining all original weather and geometry inputs.
+    """
+    return [dict(case, id="custom-" + case["id"], fuel_mode="percent_unit_custom",
+                 moe_percent=MOE_PERCENT_CONTROLS[case["fuel_model"]])
+            for case in cases if case["fuel_model"] in MOE_PERCENT_CONTROLS]
+
+
 def _digest(path):
     """Hash one artifact byte for byte.
 
@@ -125,6 +144,25 @@ def _json(path, value):
     Path(path).write_text(json.dumps(value, indent=2, sort_keys=True, allow_nan=False) + "\n", encoding="utf-8", newline="\n")
 
 
+def _prepared_build(root):
+    """Read the current prepared driver without rewriting historical build provenance.
+
+    :param root: Repository root.
+    :return: Verified current build record, or the original preparation record.
+    """
+    directory = Path(root) / "tests/data/cpp_reference"
+    manifest = _document(directory / "surface/manifest.json")
+    path = directory / "prepared-build.json"
+    if not path.is_file():
+        return manifest["build_inputs"]
+    prepared = _document(path)
+    if (prepared["upstream_sha"] != PIN
+            or prepared["historical_manifest_sha256"] != _digest(directory / "surface/manifest.json")
+            or prepared["original_replay_sha256"] != _digest(directory / "surface/results.jsonl")):
+        raise ValueError("Prepared build does not preserve historical observations")
+    return prepared
+
+
 def _reject_constant(value):
     """Reject non-standard bare JSON float constants.
 
@@ -144,9 +182,13 @@ def _required_artifacts(root):
     mandatory = {"tests/data/cpp_reference/" + name for name in (
         "inventory.json", "findings.json", "tolerance-policy.json", "surface/cases.jsonl",
         "surface/results.jsonl", "surface/manifest.json", "surface/profiles.json", "surface/applicability.json",
-        "negative-inputs.jsonl", "negative-expected.json")}
-    mandatory.update("tools/" + name for name in ("cpp_reference.py", "cpp_inventory.py", "export_cpp_crate.py", "check_cpp_driver.py"))
+        "negative-inputs.jsonl", "negative-expected.json", "prepared-build.json",
+        "surface_custom/cases.jsonl", "surface_custom/results.jsonl", "surface_custom/manifest.json")}
+    mandatory.update("tools/" + name for name in ("cpp_reference.py", "cpp_controls.py", "cpp_inventory.py",
+                                                 "cpp_calibrate.py", "export_cpp_crate.py", "check_cpp_driver.py"))
     mandatory.update("rust/crates/behave-fire/tests/data/cpp_reference/surface/" + name
+                     for name in ("cases.jsonl", "results.jsonl", "manifest.json", "tolerance-policy.json"))
+    mandatory.update("rust/crates/behave-fire/tests/data/cpp_reference/surface_custom/" + name
                      for name in ("cases.jsonl", "results.jsonl", "manifest.json", "tolerance-policy.json"))
     mandatory.update(p.relative_to(root).as_posix() for p in base.rglob("*") if p.is_file() and p.name != "hashes.json")
     return mandatory
@@ -165,6 +207,21 @@ def _rows(path):
     if len({row["id"] for row in rows}) != len(rows):
         raise ValueError("Duplicate case ID")
     return rows
+
+
+def _source_digest(path):
+    """Normalize only UTF-8 text source line endings, retaining binary identities.
+
+    :param path: Trusted upstream file.
+    :return: SHA256 with CRLF translation only for nonbinary UTF-8 text.
+    """
+    payload = Path(path).read_bytes()
+    try:
+        payload.decode("utf-8")
+        text = b"\0" not in payload
+    except UnicodeDecodeError:
+        text = False
+    return hashlib.sha256(payload.replace(b"\r\n", b"\n") if text else payload).hexdigest()
 
 
 def _text_digest(path):
@@ -210,6 +267,16 @@ def _validate_case(case):
         raise ValueError("Case schema changed")
     if type(case["fuel_model"]) is not int or not 0 <= case["fuel_model"] <= 255:
         raise ValueError("Unsafe fuel storage ID")
+    mode = case.get("fuel_mode", "numbered")
+    if mode not in ("numbered", "percent_unit_custom"):
+        raise ValueError("Unsupported fuel mode")
+    if mode == "percent_unit_custom":
+        value = case.get("moe_percent")
+        if (case["fuel_model"] not in MOE_PERCENT_CONTROLS or type(value) not in (int, float)
+                or not math.isfinite(value) or value != MOE_PERCENT_CONTROLS[case["fuel_model"]]):
+            raise ValueError("Unreviewed custom Percent-unit extinction definition")
+    elif "moe_percent" in case:
+        raise ValueError("Unused custom extinction quantity")
     if type(case["wind_direction"]) is not int or case["wind_direction"] not in (0, 90, 180, 270, 360):
         raise ValueError("Unsafe wind-direction grid")
     maximum = dict(m1h=300, m10h=300, m100h=300, mlh=300, mlw=300, wind_speed=40,
@@ -460,10 +527,24 @@ def load_reference(root=ROOT):
             or any(not isinstance(item, dict) or item.get("kind") != "relative_absolute"
                    for item in policy["fields"].values())):
         raise ValueError("Missing field tolerance classification")
+    if policy["approved"]:
+        from cpp_calibrate import validate_qualification
+
+        qualification = directory / "calibration/qualification.json"
+        if not qualification.is_file():
+            raise ValueError("Active comparison policy lacks complete calibration qualification")
+        record = _document(qualification)
+        if policy.get("qualification") != record:
+            raise ValueError("Embedded calibration qualification differs from the reviewed record")
+        validate_qualification(root, record)
     from cpp_inventory import validate_inventory
 
     validate_inventory(_document(directory / "inventory.json"))
-    return dict(cases=cases, results=results, manifest=manifest, policy=policy)
+    from cpp_controls import load
+
+    controls = load(root, cases)
+    _prepared_build(root)
+    return dict(cases=cases, results=results, manifest=manifest, policy=policy, controls=controls)
 
 
 def main(argv=None):
@@ -519,20 +600,23 @@ def require_live_checkout(root=ROOT):
     if _untrusted_changes(dirty):
         raise ValueError("Modified C++ dependency is not a trusted live oracle")
     manifest = _document(Path(root) / "tests/data/cpp_reference/surface/manifest.json")
-    expected_source = manifest["build_inputs"].get("driver_source_sha256_lf", manifest["build_inputs"]["driver_source_sha256"])
+    prepared = _prepared_build(root)
+    expected_source = prepared.get("driver_source_sha256_lf") or prepared["driver_source_sha256"]
     if expected_source != _text_digest(Path(root) / "reference/behave_cpp_overlay/driver.cpp"):
         raise ValueError("Live driver source differs from recorded observations")
-    trusted = manifest["build_inputs"]["upstream_source_hashes"]
+    trusted = prepared.get("upstream_source_sha256_portable", manifest["build_inputs"]["upstream_source_hashes"])
+    digest = _source_digest if "upstream_source_sha256_portable" in prepared else _digest
     tracked = set(subprocess.check_output(["git", "-C", str(path), "ls-files", "-z"], text=True).split("\0")) - {""}
     if not trusted or set(trusted) != tracked:
         raise ValueError("Incomplete live source hash inventory")
-    for relative, expected in manifest["prepared_overlay_sha256"].items():
+    overlay = prepared.get("prepared_overlay_sha256", manifest["prepared_overlay_sha256"])
+    for relative, expected in overlay.items():
         source = Path(root) / "reference/behave_cpp_overlay" / relative
         if source.parent != Path(root) / "reference/behave_cpp_overlay" or _text_digest(source) != expected:
             raise ValueError("Live overlay differs from prepared observations")
     for relative, expected in trusted.items():
         source = (path / relative).resolve()
-        if not source.is_relative_to(path.resolve()) or _digest(source) != expected:
+        if not source.is_relative_to(path.resolve()) or digest(source) != expected:
             raise ValueError(f"Modified trusted C++ input: {relative}")
     return path
 

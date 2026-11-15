@@ -12,6 +12,12 @@ use behave_fire::fuel_models::FuelModels;
 use serde_json::{json, Value};
 use std::collections::{BTreeMap, BTreeSet};
 
+#[path = "support/cpp_hash.rs"]
+mod cpp_hash;
+use cpp_hash::sha256;
+#[path = "support/cpp_policy.rs"]
+mod cpp_policy;
+
 const FIELDS: [&str; 5] = [
     "fireline_intensity_btu_ft_s",
     "flame_length_ft",
@@ -22,7 +28,9 @@ const FIELDS: [&str; 5] = [
 
 #[derive(Debug, Eq, PartialEq)]
 enum ReviewRequired {
-    ApprovedPolicyNotImplemented,
+    MissingCalibration,
+    NumericalMismatch,
+    IncompleteCoverage,
     RequiresOwnerReview,
 }
 
@@ -55,6 +63,7 @@ fn compare_core_to_cpp(case: &Value, golden: &Value, fuels: &FuelModels) -> Vec<
             };
             json!({
                 "id": case["id"],
+                "source_model": case["fuel_model"],
                 "field": field,
                 "cpp": cpp.to_string(),
                 "rust": rust.to_string(),
@@ -76,12 +85,40 @@ fn comparison_gate(policy: &Value, observations: &[Value]) -> Result<(), ReviewR
     if policy["approved"].as_bool() != Some(true) {
         return Err(ReviewRequired::RequiresOwnerReview);
     }
-    // An approval bit alone cannot implement or authorize scientific thresholds.
-    Err(ReviewRequired::ApprovedPolicyNotImplemented)
+    cpp_policy::require_qualification(policy).map_err(|_| ReviewRequired::MissingCalibration)?;
+    let mut compared = 0;
+    let mut documented = 0;
+    for row in observations {
+        let model = row["source_model"]
+            .as_i64()
+            .ok_or(ReviewRequired::IncompleteCoverage)?;
+        if cpp_policy::unit_record(model) {
+            documented += 1;
+            continue;
+        }
+        let left = row["rust"]
+            .as_str()
+            .and_then(|value| value.parse::<f64>().ok())
+            .ok_or(ReviewRequired::NumericalMismatch)?;
+        let right = row["cpp"]
+            .as_str()
+            .and_then(|value| value.parse::<f64>().ok())
+            .ok_or(ReviewRequired::NumericalMismatch)?;
+        let field = row["field"]
+            .as_str()
+            .ok_or(ReviewRequired::IncompleteCoverage)?;
+        cpp_policy::compare(left, right, policy, field)
+            .map_err(|_| ReviewRequired::NumericalMismatch)?;
+        compared += 1;
+    }
+    if compared != 2220 || documented != 695 {
+        return Err(ReviewRequired::IncompleteCoverage);
+    }
+    Ok(())
 }
 
 #[test]
-fn cpp_surface_raw_differences_require_owner_review() {
+fn cpp_surface_observations_follow_the_qualified_policy() {
     verify_manifest();
     let cases = parse_rows(include_str!("data/cpp_reference/surface/cases.jsonl"));
     let results = parse_rows(include_str!("data/cpp_reference/surface/results.jsonl"));
@@ -89,7 +126,7 @@ fn cpp_surface_raw_differences_require_owner_review() {
         "data/cpp_reference/surface/tolerance-policy.json"
     ))
     .unwrap();
-    assert_eq!(policy["approved"], false);
+    assert_eq!(policy["conditional_owner_approval"], true);
     let expected_fields: BTreeSet<_> = FIELDS.into_iter().collect();
     let policy_fields: BTreeSet<_> = policy["fields"]
         .as_object()
@@ -100,7 +137,8 @@ fn cpp_surface_raw_differences_require_owner_review() {
     assert_eq!(policy_fields, expected_fields);
     for field in FIELDS {
         assert_eq!(policy["fields"][field]["kind"], "relative_absolute");
-        assert!(policy["fields"][field]["proposal"].is_null());
+        assert_eq!(policy["fields"][field]["rtol"].as_f64(), Some(1e-12));
+        assert_eq!(policy["fields"][field]["atol"].as_f64(), Some(1e-12));
     }
     assert!(!cases.is_empty());
     assert_eq!(
@@ -143,13 +181,20 @@ fn cpp_surface_raw_differences_require_owner_review() {
     for observation in &observations {
         println!("CPP_SURFACE_RAW {observation}");
     }
-    assert_eq!(
-        comparison_gate(&policy, &observations),
-        Err(ReviewRequired::RequiresOwnerReview),
-    );
+    if policy["approved"].as_bool() == Some(true) {
+        assert_eq!(comparison_gate(&policy, &observations), Ok(()));
+    } else {
+        assert_eq!(
+            comparison_gate(&policy, &observations),
+            Err(ReviewRequired::RequiresOwnerReview)
+        );
+    }
     println!(
-        "CPP_SURFACE_REVIEW_REQUIRED cases={} observations={} unavailable={} parity_certified=false",
-        cases.len(), observations.len(), unavailable,
+        "CPP_SURFACE_POLICY cases={} observations={} unavailable={} qualified={}",
+        cases.len(),
+        observations.len(),
+        unavailable,
+        policy["approved"],
     );
 }
 
@@ -183,80 +228,8 @@ fn pending_policy_cannot_certify_even_exact_values() {
     );
     assert_eq!(
         comparison_gate(&json!({"approved": true}), &observations),
-        Err(ReviewRequired::ApprovedPolicyNotImplemented),
+        Err(ReviewRequired::MissingCalibration),
     );
-}
-
-fn sha256(source: &[u8]) -> String {
-    const K: [u32; 64] = [
-        0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4,
-        0xab1c5ed5, 0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe,
-        0x9bdc06a7, 0xc19bf174, 0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f,
-        0x4a7484aa, 0x5cb0a9dc, 0x76f988da, 0x983e5152, 0xa831c66d, 0xb00327c8, 0xbf597fc7,
-        0xc6e00bf3, 0xd5a79147, 0x06ca6351, 0x14292967, 0x27b70a85, 0x2e1b2138, 0x4d2c6dfc,
-        0x53380d13, 0x650a7354, 0x766a0abb, 0x81c2c92e, 0x92722c85, 0xa2bfe8a1, 0xa81a664b,
-        0xc24b8b70, 0xc76c51a3, 0xd192e819, 0xd6990624, 0xf40e3585, 0x106aa070, 0x19a4c116,
-        0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,
-        0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7,
-        0xc67178f2,
-    ];
-    let mut state = [
-        0x6a09e667u32,
-        0xbb67ae85,
-        0x3c6ef372,
-        0xa54ff53a,
-        0x510e527f,
-        0x9b05688c,
-        0x1f83d9ab,
-        0x5be0cd19,
-    ];
-    let mut padded = source.to_vec();
-    padded.push(0x80);
-    while padded.len() % 64 != 56 {
-        padded.push(0);
-    }
-    padded.extend_from_slice(&(source.len() as u64).wrapping_mul(8).to_be_bytes());
-    for block in padded.chunks_exact(64) {
-        let mut words = [0u32; 64];
-        for (index, word) in block.chunks_exact(4).enumerate() {
-            words[index] = u32::from_be_bytes(word.try_into().unwrap());
-        }
-        for index in 16..64 {
-            let left = words[index - 15];
-            let right = words[index - 2];
-            let s0 = left.rotate_right(7) ^ left.rotate_right(18) ^ (left >> 3);
-            let s1 = right.rotate_right(17) ^ right.rotate_right(19) ^ (right >> 10);
-            words[index] = words[index - 16]
-                .wrapping_add(s0)
-                .wrapping_add(words[index - 7])
-                .wrapping_add(s1);
-        }
-        let [mut a, mut b, mut c, mut d, mut e, mut f, mut g, mut h] = state;
-        for index in 0..64 {
-            let s1 = e.rotate_right(6) ^ e.rotate_right(11) ^ e.rotate_right(25);
-            let choice = (e & f) ^ (!e & g);
-            let first = h
-                .wrapping_add(s1)
-                .wrapping_add(choice)
-                .wrapping_add(K[index])
-                .wrapping_add(words[index]);
-            let s0 = a.rotate_right(2) ^ a.rotate_right(13) ^ a.rotate_right(22);
-            let majority = (a & b) ^ (a & c) ^ (b & c);
-            let second = s0.wrapping_add(majority);
-            h = g;
-            g = f;
-            f = e;
-            e = d.wrapping_add(first);
-            d = c;
-            c = b;
-            b = a;
-            a = first.wrapping_add(second);
-        }
-        for (slot, value) in state.iter_mut().zip([a, b, c, d, e, f, g, h]) {
-            *slot = slot.wrapping_add(value);
-        }
-    }
-    state.iter().map(|word| format!("{word:08x}")).collect()
 }
 
 #[test]

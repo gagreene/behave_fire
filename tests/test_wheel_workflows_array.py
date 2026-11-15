@@ -9,6 +9,22 @@ import yaml
 ROOT = Path(__file__).parents[1]
 
 
+def test_manual_cpp_calibration_uses_both_compilers_and_only_manual_submodules():
+    workflow = yaml.load((ROOT / '.github/workflows/ci.yml').read_text(), Loader=yaml.BaseLoader)
+    job = workflow['jobs']['cpp-calibration']
+    assert job['if'] == "${{ github.event_name == 'workflow_dispatch' }}"
+    assert {(row['os'], row['compiler']) for row in job['strategy']['matrix']['include']} == {
+        ('ubuntu-24.04', 'GNU'), ('windows-2025', 'MSVC')}
+    checkout = next(step for step in job['steps'] if step.get('uses') == 'actions/checkout@v4')
+    assert checkout['with']['submodules'] == 'recursive'
+    for name, ordinary in workflow['jobs'].items():
+        if name != 'cpp-calibration':
+            for step in ordinary.get('steps', []):
+                if step.get('uses') == 'actions/checkout@v4':
+                    assert step.get('with', {}).get('submodules', 'false') == 'false'
+    assert workflow['jobs']['wheel-validation']['with']['cpp_calibration'] == "${{ github.event_name == 'workflow_dispatch' }}"
+
+
 def test_maturin_action_uses_only_one_compatibility_setting():
     root = Path(__file__).resolve().parents[1]
     workflow = yaml.safe_load((root / ".github/workflows/wheel-validation.yml").read_text())

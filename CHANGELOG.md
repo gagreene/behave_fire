@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- Match the pinned C++ moisture-damping multiplication order in Python and Rust
+  without changing coefficients or extinction guards. Refresh the reviewed
+  last-bit reference differences, including derived fixture intermediates.
+- Preserve fractional extinction values for the 23 inconsistent upstream fuel
+  records and add separately declared Percent-unit custom controls. The original
+  numbered C++ observations remain unchanged. Numerical acceptance remains
+  conditional on manual GNU/MSVC and seven-platform calibration at the unchanged
+  owner-approved `1e-12` relative and absolute caps.
+
 - Align Python and Rust Surface boundaries with official Behave C++ at
   `f3b2943`: retain effective wind and elliptical shape for positive baseline
   spread at or below `1e-7 ft/min`, and return zero Surface flame length when

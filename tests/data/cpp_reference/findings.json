@@ -99,6 +99,7 @@
     "evidence": "fuelModels.cpp:126,340,486-509; surfaceFuelbedIntermediates.cpp:341; Python fuel_models.py:6,310-325",
     "finding": "Twenty-three numbered C++ registry records store dead moisture-of-extinction values 100 times the Python fractional convention.",
     "id": "F-014",
+    "observation_scope": "Historical measurements before the owner-approved damping alignment and explicit unit controls",
     "observed_case": {
       "absolute": 1602.1601478624093,
       "backend": "python",
@@ -108,7 +109,7 @@
       "port": 1047.4059417058265,
       "relative": 0.6046877464843656
     },
-    "status": "pending Phase 3 owner decision; no scientific fix or tolerance change"
+    "status": "Owner approved retaining fractional port records and documenting original C++ differences; 139 explicit Percent-unit controls pair numbered and custom port outputs; original observations preserved"
   },
   {
     "analysis": "development/cpp-pilot/DIFFERENCES-ANALYSIS.md",
@@ -152,6 +153,7 @@
     "evidence": "C++ surfaceFireReactionIntensity.cpp:136; Python surface.py:685",
     "finding": "Damping-polynomial evaluation order yields different tiny cancellation residuals near extinction; large relative differences are not material-output errors.",
     "id": "F-017",
+    "observation_scope": "Historical measurements before the owner-approved damping alignment and explicit unit controls",
     "observed_case": {
       "absolute": 4.6632962066303345e-28,
       "backend": "python",
@@ -161,6 +163,6 @@
       "port": 5.246208232456036e-28,
       "relative": 8.000000000042403
     },
-    "status": "pending Phase 3 owner decision; no scientific fix or tolerance change"
+    "status": "Owner approved C++ multiplication order and the exactly classified reference refresh on 2026-11-14; Python/Rust boundary regressions pass; numerical caps remain conditional on complete calibration"
   }
 ]

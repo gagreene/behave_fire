@@ -63,6 +63,14 @@ and [flame-length cutoff](https://github.com/firelab/behave/blob/f3b2943e69abca9
 
 ## Missing values and physical domains
 
+The shared Surface reaction calculation follows the pinned C++ multiplication
+order for moisture damping, with unchanged coefficients and extinction guards.
+This deliberately changes last-bit Python results and corresponding derived
+fixture intermediates. Both ports retain fractional extinction values for the
+23 inconsistent numbered C++ records. Their separately labelled Percent-unit
+custom controls preserve the original C++ observations and check the equations
+on matching physical definitions (see [C++ validation](CPP_VALIDATION.md)).
+
 NaN means unavailable physical data. A missing condition or denominator does not
 silently select a zero fallback. Availability follows actual field dependencies:
 unrelated outputs and valid selected branches can remain available. Explicit

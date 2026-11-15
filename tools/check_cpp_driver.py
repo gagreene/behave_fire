@@ -5,7 +5,67 @@ import json
 from pathlib import Path
 import subprocess
 
-from cpp_reference import ROOT, _digest, _document, _unique_object, load_reference
+from cpp_reference import PIN, ROOT, _digest, _document, _prepared_build, _text_digest, _unique_object, load_reference
+
+
+def _check_custom(driver, directory, data, root):
+    """Qualify new custom inputs without weakening any original driver control.
+
+    :param driver: Source-matched executable.
+    :param directory: Existing evidence directory.
+    :param data: Verified original and custom observations.
+    :param root: Source checkout root.
+    :return: Explicit custom rejection, trap, duplicate, and state counts.
+    """
+    inputs = root / "tests/data/cpp_reference/surface_custom/cases.jsonl"
+    cases = data["controls"]["cases"]
+    base = cases[0]
+    invalid = []
+    for index, (field, value) in enumerate([
+            ("fuel_mode", "automatic"), ("fuel_model", -1), ("fuel_model", 0), ("fuel_model", 1),
+            ("fuel_model", 256), ("fuel_model", 2147483647), ("fuel_model", 110.),
+            ("moe_percent", 0), ("moe_percent", -1), ("moe_percent", .24), ("moe_percent", 101),
+            ("moe_percent", "NaN"), ("moe_percent", "Inf"), ("moe_percent", "-Inf"),
+            ("moe_percent", True), ("moe_percent", "24")]):
+        row = dict(base, id=f"custom-negative-{index}")
+        row[field] = value
+        invalid.append(row)
+    for field in ("fuel_mode", "moe_percent"):
+        row = dict(base, id="custom-missing-" + field)
+        del row[field]
+        invalid.append(row)
+    path = directory / "custom-negative-inputs.jsonl"
+    path.write_text("".join(json.dumps(row, allow_nan=False) + "\n" for row in invalid), encoding="utf-8")
+    rows = _read_lines(_run(driver, directory, "custom-negative", path, "--forbid-upstream", 0))
+    if len(rows) != 18 or any(row["status"] != "rejected" or row["upstream_entries"] != 0 for row in rows):
+        raise ValueError("An unreviewed custom definition reached upstream")
+    _run(driver, directory, "custom-entry-trap", inputs, "--forbid-upstream", 86)
+    _run(driver, directory, "custom-geometry-trap", inputs, "--forbid-geometry", 87)
+    if (b"UPSTREAM_ENTRY_BLOCKED" not in (directory / "custom-entry-trap.stderr").read_bytes()
+            or b"GEOMETRY_ENTRY_BLOCKED" not in (directory / "custom-geometry-trap.stderr").read_bytes()):
+        raise ValueError("Custom control traps were not active")
+    fresh = {row["id"]: row for row in _read_lines(_run(driver, directory, "custom-fresh", inputs, None, 0))}
+    duplicate = directory / "custom-duplicate-inputs.jsonl"
+    duplicate.write_text((json.dumps(base) + "\n") * 2, encoding="utf-8")
+    rows = _read_lines(_run(driver, directory, "custom-duplicate", duplicate, None, 0))
+    if len(rows) != 2 or rows[0] != fresh[base["id"]] or rows[1].get("error") != "duplicate_id" or rows[1]["upstream_entries"] != 0:
+        raise ValueError("Duplicate custom case reached upstream twice")
+    other = next(case for case in cases if case["fuel_model"] == 151)
+    skipped = next(case for case, result in zip(data["cases"], data["results"]) if result["status"] == "unavailable")
+    sequence = [dict(base, id="custom-state-A1", session="percent-state"),
+                dict(other, id="custom-state-B", session="percent-state"),
+                dict(skipped, id="custom-state-unavailable", session="percent-state"),
+                dict(base, id="custom-state-A2", session="percent-state")]
+    path = directory / "custom-state-inputs.jsonl"
+    path.write_text("".join(json.dumps(row) + "\n" for row in sequence), encoding="utf-8")
+    rows = _read_lines(_run(driver, directory, "custom-state", path, None, 0))
+    if (len(rows) != 4 or rows[0]["output"] != rows[3]["output"]
+            or rows[0]["output"] != fresh[base["id"]]["output"]
+            or rows[2]["status"] != "unavailable" or rows[2]["geometry_entries"] != 0):
+        raise ValueError("Custom definition state did not restore a fresh full run")
+    return dict(custom_negative_cases=18, custom_negative_upstream_entries=0,
+                custom_upstream_trap_exit=86, custom_geometry_trap_exit=87,
+                custom_duplicate_ids_rejected=True, custom_state_sequence_checked=True)
 
 
 def _read_lines(path):
@@ -39,18 +99,23 @@ def _run(driver, directory, name, input_path, flag, expected_exit):
     return output
 
 
-def check_driver(driver, directory, root=ROOT):
+def check_driver(driver, directory, root=ROOT, build_receipt=None, exact_replay=True):
     """Verify exact replay, guarded rejections, and active entry traps.
 
     :param driver: Out-of-tree executable supplied explicitly by the operator.
     :param directory: Retained scratch directory.
     :param root: Candidate repository root.
+    :param build_receipt: Optional identity of another source-matched compiler build.
+    :param exact_replay: Require byte identity, or explicitly measure the conditional caps.
     :return: Control counts without a cross-implementation parity verdict.
     """
     driver, directory, root = Path(driver).resolve(), Path(directory).resolve(), Path(root).resolve()
     directory.mkdir(parents=True, exist_ok=True)
     data = load_reference(root)
-    if _digest(driver) != data["manifest"]["build_inputs"]["driver_sha256"]:
+    build = _prepared_build(root) if build_receipt is None else build_receipt
+    if (_digest(driver) != build["driver_sha256"] or build["upstream_sha"] != PIN
+            or (build.get("driver_source_sha256_lf") or build.get("driver_source_sha256"))
+            != _text_digest(root / "reference/behave_cpp_overlay/driver.cpp")):
         raise ValueError("Driver binary does not match the recorded build")
     source = root / "tests/data/cpp_reference"
     negative = _run(driver, directory, "negative", source / "negative-inputs.jsonl", "--forbid-upstream", 0)
@@ -74,8 +139,21 @@ def check_driver(driver, directory, root=ROOT):
     if b"GEOMETRY_ENTRY_BLOCKED" not in (directory / "geometry-positive-trap.stderr").read_bytes():
         raise ValueError("Geometry trap was not active")
     repeated = _run(driver, directory, "repeat", cases, None, 0)
-    if repeated.read_bytes() != (source / "surface/results.jsonl").read_bytes():
+    byte_identical = repeated.read_bytes() == (source / "surface/results.jsonl").read_bytes()
+    if exact_replay and not byte_identical:
         raise ValueError("Exact-driver replay differs from stored observations")
+    if not exact_replay:
+        from cpp_controls import calibration_policy, check_values
+
+        actual_rows = _read_lines(repeated)
+        if [row["id"] for row in actual_rows] != [row["id"] for row in data["results"]]:
+            raise ValueError("Compiler replay case identities changed")
+        for actual_row, expected_row in zip(actual_rows, data["results"]):
+            if set(actual_row) != set(expected_row) or any(actual_row[key] != expected_row[key]
+                                                         for key in expected_row if key != "output"):
+                raise ValueError("Compiler replay execution contract changed")
+            if expected_row["status"] == "ok":
+                check_values(actual_row["output"], expected_row["output"], calibration_policy(root))
     indexed = {row["id"]: row for row in _read_lines(repeated)}
     if (indexed["fm124-state-A1"]["output"] != indexed["fm124-state-A2"]["output"]
             or indexed["fm124-state-A1"]["output"] != indexed["fm124-angle0"]["output"]
@@ -89,8 +167,9 @@ def check_driver(driver, directory, root=ROOT):
         raise ValueError("Duplicate case ID reached upstream twice")
     summary = dict(negative_cases=len(actual), negative_upstream_entries=0, unavailable_cases=len(rows),
                    unavailable_geometry_entries=0, upstream_trap_exit=86, geometry_trap_exit=87,
-                   replay_cases=len(data["cases"]), replay_byte_identical=True, duplicate_ids_rejected=True,
+                   replay_cases=len(data["cases"]), replay_byte_identical=byte_identical, duplicate_ids_rejected=True,
                    state_sequence_checked=True, scientific_parity_approved=False)
+    summary.update(_check_custom(driver, directory, data, root))
     (directory / "summary.json").write_text(json.dumps(summary, indent=2) + "\n", encoding="utf-8")
     return summary
 

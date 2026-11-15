@@ -62,6 +62,21 @@ def _run(command, root, log, environment):
             print(log.read_text(encoding="utf-8", errors="replace")[-8000:], flush=True)
 
 
+def _run_calibration(python, root, reports, environment, platform_key):
+    """Calibrate while the actual wheel extension and companion libraries are staged.
+
+    :param python: Isolated interpreter that ran the wheel suite.
+    :param root: Source checkout root.
+    :param reports: Existing evidence directory.
+    :param environment: The same source and dependency environment as the suite.
+    :param platform_key: Declared native matrix identity, checked by the child.
+    :return: None; preserves the report and propagates any calibration failure.
+    """
+    _run([python, "-B", "tools/cpp_calibrate.py", "--ports", "--platform-key", platform_key,
+          "--report", reports / (platform_key + "-calibration.json")],
+         root, reports / "cpp-calibration.log", environment)
+
+
 def _select_native_wheel(wheels, supported):
     """Choose exactly one compatible project native wheel, never the pure fallback.
 
@@ -132,7 +147,14 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--wheels", type=Path, required=True)
     parser.add_argument("--report-dir", type=Path, required=True)
+    parser.add_argument("--cpp-calibration", action="store_true",
+                        default=os.environ.get("BEHAVE_CPP_CALIBRATION") == "true")
+    parser.add_argument("--cpp-platform", default=os.environ.get("BEHAVE_CPP_PLATFORM"), choices=(
+        "linux-x86_64", "linux-aarch64", "linux-musl-x86_64", "macos-x86_64", "macos-arm64",
+        "windows-x86_64", "windows-arm64"))
     arguments = parser.parse_args()
+    if arguments.cpp_calibration and arguments.cpp_platform is None:
+        parser.error("Calibration requires an explicit --cpp-platform matrix identity")
     root = Path(__file__).resolve().parents[1]
     reports = arguments.report_dir.resolve()
     reports.mkdir(parents=True, exist_ok=True)
@@ -163,6 +185,8 @@ def main():
             _run([python, "-B", "-m", "pytest", "--require-rust", "-W", "error", "--tb=short",
                   "-p", "no:cacheprovider", "--junitxml", reports / "pytest.xml"],
                  root, reports / "pytest.log", environment)
+            if arguments.cpp_calibration:
+                _run_calibration(python, root, reports, environment, arguments.cpp_platform)
 
 
 if __name__ == "__main__":

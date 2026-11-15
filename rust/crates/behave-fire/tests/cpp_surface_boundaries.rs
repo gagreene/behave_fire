@@ -70,6 +70,32 @@ fn prepared_engine_preserves_wind_at_tiny_positive_spread() {
 }
 
 #[test]
+fn reaction_order_matches_pinned_cpp_near_extinction() {
+    let fuels = FuelModels::default();
+    let fuel = PreparedFuel::from_model(fuels.for_grid(204));
+    let moisture = f64::from_bits(0.25_f64.to_bits() - 1);
+    let cell = SurfaceCell {
+        fuel_model_grid: 204,
+        m1h: moisture,
+        m10h: moisture,
+        m100h: moisture,
+        wind_speed: 440.,
+        slope: behave_fire::units::SlopeUnit::Percent.to_base(30.),
+        canopy_cover: 0.5,
+        canopy_height: 30.,
+        crown_ratio: 0.5,
+        ..SurfaceCell::default()
+    };
+    let result = SurfacePlan::default().run_cell(&cell, &fuel, SurfaceTweaks::default());
+    let expected = 1.0275732980668905e-12_f64;
+    assert!(
+        (result.heat_per_unit_area - expected).abs() <= 1e-12_f64.max(1e-12 * expected.abs()),
+        "heat={}, pinned C++={expected}",
+        result.heat_per_unit_area
+    );
+}
+
+#[test]
 fn zero_and_negative_denominators_remain_guarded() {
     for (spread, r0) in [(0., 0.), (1., 0.), (-1., -1.)] {
         assert_eq!(

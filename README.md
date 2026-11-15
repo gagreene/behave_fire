@@ -581,6 +581,14 @@ and [flame-length cutoff](https://github.com/firelab/behave/blob/f3b2943e69abca9
 The separate moisture-of-extinction discrepancy remains under review
 (see [C++ validation](docs/CPP_VALIDATION.md)).
 
+Moisture damping uses the pinned C++ multiplication order with the same empirical
+coefficients. The 23 upstream fuel records with inconsistent extinction units
+retain their fractional values here. Separately declared custom-fuel controls
+exercise the C++ equations with explicit Percent inputs. Comparison caps are
+conditionally approved at `1e-12` relative and absolute, with activation requiring
+the complete manual compiler and native-platform qualification described in
+[C++ validation](docs/CPP_VALIDATION.md).
+
 ## References
 
 - Rothermel, R. C. (1972). *A mathematical model for predicting fire spread in wildland fuels.* USDA Forest Service Research Paper INT-115.

@@ -1,6 +1,8 @@
 """Regressions for the owner-approved Surface boundaries in pinned Behave C++."""
 
 from importlib import import_module
+import json
+from pathlib import Path
 
 import numpy as np
 import pytest
@@ -86,3 +88,23 @@ def test_grid_fused_supported_tweaks_preserve_small_spread_shape():
     intensity = grid.get('fireline_intensity')
     assert np.all((intensity > 0.) & (intensity < 1e-7))
     np.testing.assert_array_equal(grid.get('flame_length'), np.zeros(2))
+
+
+def test_reaction_order_matches_pinned_cpp_near_extinction(_surface_backend):
+    """The damping expression must not introduce the old threefold heat residual."""
+    from behave_fire import BehaveRun
+    from behave_fire.components.fuel_models import FuelModels
+
+    reference = Path(__file__).parent / 'data/cpp_reference/surface'
+    case = next(row for row in map(json.loads, (reference / 'cases.jsonl').read_text().splitlines())
+                if row['id'] == 'fm204-extinction-below')
+    expected = next(row for row in map(json.loads, (reference / 'results.jsonl').read_text().splitlines())
+                    if row['id'] == case['id'])['output']['heat_per_unit_area_btu_ft2']
+    inputs = {key: case[key] for key in ('m1h', 'm10h', 'm100h', 'mlh', 'mlw', 'wind_speed',
+                                        'wind_direction', 'slope', 'aspect', 'canopy_cover',
+                                        'canopy_height', 'crown_ratio')}
+    inputs.update(fuel_model_grid=204, wind_speed_units=5, slope_units=1, moisture_units=1,
+                  canopy_cover_units=1, crown_ratio_units=0, wind_orientation_mode='RelativeToNorth')
+    backend = 'rust' if _surface_backend.__name__.startswith('behave_fire.rust.') else 'python'
+    result = BehaveRun(FuelModels(), backend=backend).do_surface_run(**inputs)
+    np.testing.assert_allclose(result['heat_per_unit_area'], expected, rtol=1e-12, atol=1e-12)

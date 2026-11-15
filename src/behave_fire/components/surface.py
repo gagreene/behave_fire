@@ -691,12 +691,17 @@ def calculate_reaction_intensity(ib: dict) -> np.ndarray:
     gamma     = gamma_max * (safe_rpr ** aa) * np.exp(aa * (1.0 - safe_rpr))
 
     def _eta_m(moisture, moe):
-        """Moisture damping coefficient (0–1)."""
+        """Evaluate moisture damping in the pinned C++ multiplication order.
+
+        :param moisture: Weighted fuel moisture fraction.
+        :param moe: Moisture-of-extinction fraction.
+        :return: Damping coefficient with the existing extinction guards.
+        """
         rm = np.where(moe > 1e-7, moisture / np.where(moe > 1e-7, moe, 1.0), 1.0)
         extinguished = (moe < 1e-7) | (rm >= 1.0)
         return np.where(
             extinguished, 0.0,
-            1.0 - 2.59 * rm + 5.11 * rm ** 2 - 3.52 * rm ** 3
+            1.0 - (2.59 * rm) + ((5.11 * rm) * rm) - (((3.52 * rm) * rm) * rm)
         )
 
     def _eta_s(silica):

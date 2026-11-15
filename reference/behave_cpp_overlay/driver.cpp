@@ -134,7 +134,13 @@ double numeric(const Value& value, const std::string& field) {
     return result;
 }
 
-struct Request { std::string id; int model; double direction; std::map<std::string, double> physical; std::map<std::string,std::string> modes; double user_waf; std::string session; };
+const std::map<int, double> percent_controls = {
+    {110,24},{111,24},{150,20},{151,13},{152,15},{153,15},{154,25},
+    {155,25},{156,20},{157,35},{158,24},{159,35},{166,26},{167,30},
+    {168,35},{169,30},{170,27},{171,40},{172,32},{190,28},{191,25},
+    {192,45},{193,26}
+};
+struct Request { std::string id; int model; double direction; std::map<std::string, double> physical; std::map<std::string,std::string> modes; double user_waf; std::string session; bool percent_control; double moe_percent; };
 Request validate(const std::map<std::string, Value>& input) {
     // Deny known hazardous special-mode inputs before any upstream construction.
     // These checks do not enable those out-of-scope operations.
@@ -151,8 +157,8 @@ Request validate(const std::map<std::string, Value>& input) {
                 throw std::runtime_error("chaparral_index_" + field);
         }
     }
-    const std::set<std::string> optional = {"wind_height","wind_orientation","waf_method","user_waf","moisture_mode","session"};
-    const std::set<std::string> fields = {"id", "operation", "fuel_model", "wind_direction", "m1h", "m10h", "m100h", "mlh", "mlw", "wind_speed", "slope", "aspect", "canopy_cover", "canopy_height", "crown_ratio", "wind_height","wind_orientation","waf_method","user_waf","moisture_mode","session"};
+    const std::set<std::string> optional = {"wind_height","wind_orientation","waf_method","user_waf","moisture_mode","session","fuel_mode","moe_percent"};
+    const std::set<std::string> fields = {"id", "operation", "fuel_model", "wind_direction", "m1h", "m10h", "m100h", "mlh", "mlw", "wind_speed", "slope", "aspect", "canopy_cover", "canopy_height", "crown_ratio", "wind_height","wind_orientation","waf_method","user_waf","moisture_mode","session","fuel_mode","moe_percent"};
     for (const auto& item : input)
         if (!fields.count(item.first)) throw std::runtime_error("unsupported_field");
     for (const auto& field : fields)
@@ -210,7 +216,23 @@ Request validate(const std::map<std::string, Value>& input) {
         for (unsigned char c : value.text) if (!std::isalnum(c) && c != '_' && c != '-' && c != '.') throw std::runtime_error("invalid_session");
         session = value.text;
     }
-    return {input.at("id").text, static_cast<int>(model), direction, physical, modes, user_waf, session};
+    bool percent_control = false;
+    if (input.count("fuel_mode")) {
+        const Value& mode = input.at("fuel_mode");
+        if (mode.kind != Value::String || (mode.text != "numbered" && mode.text != "percent_unit_custom"))
+            throw std::runtime_error("unsupported_fuel_mode");
+        percent_control = mode.text == "percent_unit_custom";
+    }
+    double moe_percent = 0.0;
+    if (percent_control) {
+        const auto expected = percent_controls.find(static_cast<int>(model));
+        if (expected == percent_controls.end() || !input.count("moe_percent"))
+            throw std::runtime_error("unreviewed_percent_control");
+        moe_percent = numeric(input.at("moe_percent"), "moe_percent");
+        if (!std::isfinite(moe_percent) || moe_percent != expected->second)
+            throw std::runtime_error("unreviewed_percent_quantity");
+    } else if (input.count("moe_percent")) throw std::runtime_error("unused_custom_moe");
+    return {input.at("id").text, static_cast<int>(model), direction, physical, modes, user_waf, session, percent_control, moe_percent};
 }
 
 struct Unavailable {};
@@ -220,13 +242,36 @@ struct Session {
     Surface surface;
     Session() : fuels(), surface(fuels) {}
 };
+
+// Registration follows validation and precedes execution; no numbered record is edited.
+int register_percent_control(FuelModels& fuels, const Request& request) {
+    if (!request.percent_control) return request.model;
+    const int source = request.model;
+    const int custom = 250;
+    const auto heat = HeatOfCombustionUnits::BtusPerPound;
+    const auto loading = LoadingUnits::PoundsPerSquareFoot;
+    const auto savr = SurfaceAreaToVolumeUnits::SquareFeetOverCubicFeet;
+    const bool accepted = fuels.setCustomFuelModel(custom, "UNIT_CONTROL", "Explicit Percent-unit control",
+        fuels.getFuelbedDepth(source, LengthUnits::Feet), LengthUnits::Feet,
+        request.moe_percent, FractionUnits::Percent,
+        fuels.getHeatOfCombustionDead(source, heat), fuels.getHeatOfCombustionLive(source, heat), heat,
+        fuels.getFuelLoadOneHour(source, loading), fuels.getFuelLoadTenHour(source, loading),
+        fuels.getFuelLoadHundredHour(source, loading), fuels.getFuelLoadLiveHerbaceous(source, loading),
+        fuels.getFuelLoadLiveWoody(source, loading), loading, fuels.getSavrOneHour(source, savr),
+        fuels.getSavrLiveHerbaceous(source, savr), fuels.getSavrLiveWoody(source, savr), savr,
+        fuels.getIsDynamic(source));
+    if (!accepted) throw std::runtime_error("custom_registration_failed");
+    return custom;
+}
+
 std::string run(const Request& request, bool forbid_geometry, bool& geometry_entered, std::unique_ptr<Session>& session) {
     FuelModels fuels;
     if (!fuels.isFuelModelDefined(request.model) || fuels.isAllFuelLoadZero(request.model))
         throw Unavailable{};
     if (!session) session.reset(new Session);
+    const int model = register_percent_control(session->fuels, request);
     Surface& surface = session->surface;
-    surface.updateSurfaceInputs(request.model, request.physical.at("m1h"), request.physical.at("m10h"), request.physical.at("m100h"), request.physical.at("mlh"), request.physical.at("mlw"),
+    surface.updateSurfaceInputs(model, request.physical.at("m1h"), request.physical.at("m10h"), request.physical.at("m100h"), request.physical.at("mlh"), request.physical.at("mlw"),
         FractionUnits::Percent, request.physical.at("wind_speed"), SpeedUnits::MilesPerHour,
         (request.modes.at("wind_height") == "TenMeter" ? WindHeightInputMode::TenMeter : WindHeightInputMode::TwentyFoot), request.direction,
         (request.modes.at("wind_orientation") == "North" ? WindAndSpreadOrientationMode::RelativeToNorth : WindAndSpreadOrientationMode::RelativeToUpslope), request.physical.at("slope"),
