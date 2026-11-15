@@ -5157,7 +5157,7 @@
       "signature": "void WindAjustmentFactor::applyLogProfile(const double canopyCover, const double canopyHeight, const double fuelbedDepth)"
     }
   ],
-  "phase": "Task 3 Surface pilot; findings and policy pending owner review",
+  "phase": "Task 3: qualified Surface run and five outputs; remaining function coverage is not claimed",
   "pilot_observations": {
     "approval": false,
     "available": 583,
@@ -52163,8 +52163,8 @@
     },
     {
       "access": "public",
-      "approval": null,
-      "dataset": null,
+      "approval": "Owner-approved Surface boundaries, damping order, explicit Percent-unit controls, and unchanged calibrated 1e-12 caps (2026-11-14); fixture ceilings approved 2026-11-15. Original 23 inconsistent numbered-unit records use their separate control witnesses.",
+      "dataset": "surface",
       "definition_candidates": [
         {
           "definition_parameters": "",
@@ -52175,10 +52175,23 @@
         }
       ],
       "deleted": false,
-      "execution_evidence": [],
+      "execution_evidence": [
+        {
+          "file": "surface/cases.jsonl",
+          "sha256": "266d08d8b82d65d950461c73e70b44c228ad7b54fbe99eb1d14ed8af6add66da"
+        },
+        {
+          "file": "surface/results.jsonl",
+          "sha256": "ae006838d93bbb9533df74340085110c479315cb8238a8ce488a68fe5e9e1b71"
+        },
+        {
+          "file": "surface/manifest.json",
+          "sha256": "39e75b886c69607977227a90361e0ef7585fabf7736cdded1352fca151bc1409"
+        }
+      ],
       "file": "src/behave/surface.h",
       "forwarded_cpp_ids": [],
-      "function_status": "pending_pilot",
+      "function_status": "tested",
       "id": "da29ed7e56865168ac47",
       "kind": "method",
       "lexically_qualified_signature": "void Surface::doSurfaceRunInDirectionOfMaxSpread()",
@@ -52232,6 +52245,14 @@
           "relation": "explicit_named_operation_candidate",
           "signature": "pub fn do_surface_run( &self, plan: &SurfacePlan, input: &SurfaceCell, tweaks: SurfaceTweaks, ) -> crate::surface::SurfaceResult",
           "target": "behave_fire::model::<BehaveRun>::do_surface_run"
+        },
+        {
+          "evidence": "Public Surface run and independently compared core output: complete_max_spread_run",
+          "file": "rust/crates/behave-fire/src/engine/surface.rs",
+          "line": 97,
+          "relation": "observed_composed_output",
+          "signature": "pub fn run_cell( &self, cell: &SurfaceCell, fuel: &PreparedFuel, tweaks: SurfaceTweaks, ) -> SurfaceResult",
+          "target": "behave_fire::engine::surface::<SurfacePlan>::run_cell"
         }
       ],
       "scientific_candidate": true,
@@ -52489,8 +52510,8 @@
     },
     {
       "access": "public",
-      "approval": null,
-      "dataset": null,
+      "approval": "Owner-approved Surface boundaries, damping order, explicit Percent-unit controls, and unchanged calibrated 1e-12 caps (2026-11-14); fixture ceilings approved 2026-11-15. Original 23 inconsistent numbered-unit records use their separate control witnesses.",
+      "dataset": "surface",
       "definition_candidates": [
         {
           "definition_parameters": "SpeedUnits::SpeedUnitsEnum spreadRateUnits",
@@ -52501,10 +52522,23 @@
         }
       ],
       "deleted": false,
-      "execution_evidence": [],
+      "execution_evidence": [
+        {
+          "file": "surface/cases.jsonl",
+          "sha256": "266d08d8b82d65d950461c73e70b44c228ad7b54fbe99eb1d14ed8af6add66da"
+        },
+        {
+          "file": "surface/results.jsonl",
+          "sha256": "ae006838d93bbb9533df74340085110c479315cb8238a8ce488a68fe5e9e1b71"
+        },
+        {
+          "file": "surface/manifest.json",
+          "sha256": "39e75b886c69607977227a90361e0ef7585fabf7736cdded1352fca151bc1409"
+        }
+      ],
       "file": "src/behave/surface.h",
       "forwarded_cpp_ids": [],
-      "function_status": "pending_pilot",
+      "function_status": "tested",
       "id": "d73efe6110f38955f7ca",
       "kind": "method",
       "lexically_qualified_signature": "double Surface::getSpreadRate(SpeedUnits::SpeedUnitsEnum spreadRateUnits) const",
@@ -52544,6 +52578,14 @@
           "relation": "returned_dictionary_field_candidate",
           "signature": "run_surface_fire(ri: Union[float, np.ndarray], ib: dict, wind_speed: Union[float, np.ndarray], wind_speed_units: int, wind_direction: Union[float, np.ndarray], wind_orientation_mode: str, slope: Union[float, np.ndarray], slope_units: int=0, aspect: Union[float, np.ndarray]=0.0, canopy_cover: Union[float, np.ndarray]=0.0, canopy_height: Union[float, np.ndarray]=0.0, crown_ratio: Union[float, np.ndarray]=0.0, wind_height_mode: str='TwentyFoot', waf_method: str='UseCrownRatio', user_waf: Union[float, np.ndarray, None]=None) -> dict",
           "target": "behave_fire.components.surface.run_surface_fire"
+        },
+        {
+          "evidence": "Public Surface run and independently compared core output: spread_chains_per_hour",
+          "file": "src/behave_fire/behave.py",
+          "line": 253,
+          "relation": "observed_composed_output",
+          "signature": "do_surface_run(self, fuel_model_grid: Union[int, np.ndarray], m1h: Union[float, np.ndarray], m10h: Union[float, np.ndarray], m100h: Union[float, np.ndarray], mlh: Union[float, np.ndarray], mlw: Union[float, np.ndarray], wind_speed: Union[float, np.ndarray], wind_speed_units: int, wind_direction: Union[float, np.ndarray], wind_orientation_mode: str, slope: Union[float, np.ndarray], slope_units: int=0, moisture_units: int=0, aspect: Union[float, np.ndarray]=0.0, canopy_cover: Union[float, np.ndarray]=0.0, canopy_cover_units: int=0, canopy_height: Union[float, np.ndarray]=0.0, canopy_height_units: int=0, canopy_base_height: Union[float, np.ndarray]=0.0, canopy_base_height_units: int=0, crown_ratio: Union[float, np.ndarray]=0.0, crown_ratio_units: Optional[int]=0, wind_height_mode: str='TwentyFoot', waf_method: str='UseCrownRatio', user_waf: Union[float, np.ndarray, None]=None, out_units: Optional[dict]=None) -> dict",
+          "target": "behave_fire.behave.BehaveRun.do_surface_run"
         }
       ],
       "qualified_name": "Surface::getSpreadRate",
@@ -52551,7 +52593,16 @@
       "route_ids": [
         "surface_single"
       ],
-      "rust_targets": [],
+      "rust_targets": [
+        {
+          "evidence": "Public Surface run and independently compared core output: spread_chains_per_hour",
+          "file": "rust/crates/behave-fire/src/engine/surface.rs",
+          "line": 97,
+          "relation": "observed_composed_output",
+          "signature": "pub fn run_cell( &self, cell: &SurfaceCell, fuel: &PreparedFuel, tweaks: SurfaceTweaks, ) -> SurfaceResult",
+          "target": "behave_fire::engine::surface::<SurfacePlan>::run_cell"
+        }
+      ],
       "scientific_candidate": true,
       "signature": "double Surface::getSpreadRate(SpeedUnits::SpeedUnitsEnum spreadRateUnits) const"
     },
@@ -53167,8 +53218,8 @@
     },
     {
       "access": "public",
-      "approval": null,
-      "dataset": null,
+      "approval": "Owner-approved Surface boundaries, damping order, explicit Percent-unit controls, and unchanged calibrated 1e-12 caps (2026-11-14); fixture ceilings approved 2026-11-15. Original 23 inconsistent numbered-unit records use their separate control witnesses.",
+      "dataset": "surface",
       "definition_candidates": [
         {
           "definition_parameters": "LengthUnits::LengthUnitsEnum flameLengthUnits",
@@ -53179,10 +53230,23 @@
         }
       ],
       "deleted": false,
-      "execution_evidence": [],
+      "execution_evidence": [
+        {
+          "file": "surface/cases.jsonl",
+          "sha256": "266d08d8b82d65d950461c73e70b44c228ad7b54fbe99eb1d14ed8af6add66da"
+        },
+        {
+          "file": "surface/results.jsonl",
+          "sha256": "ae006838d93bbb9533df74340085110c479315cb8238a8ce488a68fe5e9e1b71"
+        },
+        {
+          "file": "surface/manifest.json",
+          "sha256": "39e75b886c69607977227a90361e0ef7585fabf7736cdded1352fca151bc1409"
+        }
+      ],
       "file": "src/behave/surface.h",
       "forwarded_cpp_ids": [],
-      "function_status": "pending_pilot",
+      "function_status": "tested",
       "id": "668ac22fdd52acf422bd",
       "kind": "method",
       "lexically_qualified_signature": "double Surface::getFlameLength(LengthUnits::LengthUnitsEnum flameLengthUnits) const",
@@ -53222,6 +53286,14 @@
           "relation": "returned_dictionary_field_candidate",
           "signature": "run_surface_fire(ri: Union[float, np.ndarray], ib: dict, wind_speed: Union[float, np.ndarray], wind_speed_units: int, wind_direction: Union[float, np.ndarray], wind_orientation_mode: str, slope: Union[float, np.ndarray], slope_units: int=0, aspect: Union[float, np.ndarray]=0.0, canopy_cover: Union[float, np.ndarray]=0.0, canopy_height: Union[float, np.ndarray]=0.0, crown_ratio: Union[float, np.ndarray]=0.0, wind_height_mode: str='TwentyFoot', waf_method: str='UseCrownRatio', user_waf: Union[float, np.ndarray, None]=None) -> dict",
           "target": "behave_fire.components.surface.run_surface_fire"
+        },
+        {
+          "evidence": "Public Surface run and independently compared core output: flame_length_ft",
+          "file": "src/behave_fire/behave.py",
+          "line": 253,
+          "relation": "observed_composed_output",
+          "signature": "do_surface_run(self, fuel_model_grid: Union[int, np.ndarray], m1h: Union[float, np.ndarray], m10h: Union[float, np.ndarray], m100h: Union[float, np.ndarray], mlh: Union[float, np.ndarray], mlw: Union[float, np.ndarray], wind_speed: Union[float, np.ndarray], wind_speed_units: int, wind_direction: Union[float, np.ndarray], wind_orientation_mode: str, slope: Union[float, np.ndarray], slope_units: int=0, moisture_units: int=0, aspect: Union[float, np.ndarray]=0.0, canopy_cover: Union[float, np.ndarray]=0.0, canopy_cover_units: int=0, canopy_height: Union[float, np.ndarray]=0.0, canopy_height_units: int=0, canopy_base_height: Union[float, np.ndarray]=0.0, canopy_base_height_units: int=0, crown_ratio: Union[float, np.ndarray]=0.0, crown_ratio_units: Optional[int]=0, wind_height_mode: str='TwentyFoot', waf_method: str='UseCrownRatio', user_waf: Union[float, np.ndarray, None]=None, out_units: Optional[dict]=None) -> dict",
+          "target": "behave_fire.behave.BehaveRun.do_surface_run"
         }
       ],
       "qualified_name": "Surface::getFlameLength",
@@ -53229,7 +53301,16 @@
       "route_ids": [
         "surface_single"
       ],
-      "rust_targets": [],
+      "rust_targets": [
+        {
+          "evidence": "Public Surface run and independently compared core output: flame_length_ft",
+          "file": "rust/crates/behave-fire/src/engine/surface.rs",
+          "line": 97,
+          "relation": "observed_composed_output",
+          "signature": "pub fn run_cell( &self, cell: &SurfaceCell, fuel: &PreparedFuel, tweaks: SurfaceTweaks, ) -> SurfaceResult",
+          "target": "behave_fire::engine::surface::<SurfacePlan>::run_cell"
+        }
+      ],
       "scientific_candidate": true,
       "signature": "double Surface::getFlameLength(LengthUnits::LengthUnitsEnum flameLengthUnits) const"
     },
@@ -53409,8 +53490,8 @@
     },
     {
       "access": "public",
-      "approval": null,
-      "dataset": null,
+      "approval": "Owner-approved Surface boundaries, damping order, explicit Percent-unit controls, and unchanged calibrated 1e-12 caps (2026-11-14); fixture ceilings approved 2026-11-15. Original 23 inconsistent numbered-unit records use their separate control witnesses.",
+      "dataset": "surface",
       "definition_candidates": [
         {
           "definition_parameters": "",
@@ -53421,12 +53502,25 @@
         }
       ],
       "deleted": false,
-      "execution_evidence": [],
+      "execution_evidence": [
+        {
+          "file": "surface/cases.jsonl",
+          "sha256": "266d08d8b82d65d950461c73e70b44c228ad7b54fbe99eb1d14ed8af6add66da"
+        },
+        {
+          "file": "surface/results.jsonl",
+          "sha256": "ae006838d93bbb9533df74340085110c479315cb8238a8ce488a68fe5e9e1b71"
+        },
+        {
+          "file": "surface/manifest.json",
+          "sha256": "39e75b886c69607977227a90361e0ef7585fabf7736cdded1352fca151bc1409"
+        }
+      ],
       "file": "src/behave/surface.h",
       "forwarded_cpp_ids": [
         "63d9e2bae17b401c6fc4"
       ],
-      "function_status": "pending_pilot",
+      "function_status": "tested",
       "id": "88dbb46e8d19cbc15402",
       "kind": "method",
       "lexically_qualified_signature": "double Surface::getFireLengthToWidthRatio() const",
@@ -53475,6 +53569,14 @@
           "relation": "trivial_cpp_forwarder_to_callable_identity_candidate",
           "signature": "get_fire_length_to_width_ratio(self)",
           "target": "behave_fire.components.fire_size.FireSize.get_fire_length_to_width_ratio"
+        },
+        {
+          "evidence": "Public Surface run and independently compared core output: length_to_width_ratio",
+          "file": "src/behave_fire/behave.py",
+          "line": 253,
+          "relation": "observed_composed_output",
+          "signature": "do_surface_run(self, fuel_model_grid: Union[int, np.ndarray], m1h: Union[float, np.ndarray], m10h: Union[float, np.ndarray], m100h: Union[float, np.ndarray], mlh: Union[float, np.ndarray], mlw: Union[float, np.ndarray], wind_speed: Union[float, np.ndarray], wind_speed_units: int, wind_direction: Union[float, np.ndarray], wind_orientation_mode: str, slope: Union[float, np.ndarray], slope_units: int=0, moisture_units: int=0, aspect: Union[float, np.ndarray]=0.0, canopy_cover: Union[float, np.ndarray]=0.0, canopy_cover_units: int=0, canopy_height: Union[float, np.ndarray]=0.0, canopy_height_units: int=0, canopy_base_height: Union[float, np.ndarray]=0.0, canopy_base_height_units: int=0, crown_ratio: Union[float, np.ndarray]=0.0, crown_ratio_units: Optional[int]=0, wind_height_mode: str='TwentyFoot', waf_method: str='UseCrownRatio', user_waf: Union[float, np.ndarray, None]=None, out_units: Optional[dict]=None) -> dict",
+          "target": "behave_fire.behave.BehaveRun.do_surface_run"
         }
       ],
       "qualified_name": "Surface::getFireLengthToWidthRatio",
@@ -53491,6 +53593,14 @@
           "relation": "trivial_cpp_forwarder_to_callable_identity_candidate",
           "signature": "pub fn get_fire_length_to_width_ratio(&self) -> f64",
           "target": "behave_fire::fire_size::<FireSize>::get_fire_length_to_width_ratio"
+        },
+        {
+          "evidence": "Public Surface run and independently compared core output: length_to_width_ratio",
+          "file": "rust/crates/behave-fire/src/engine/surface.rs",
+          "line": 97,
+          "relation": "observed_composed_output",
+          "signature": "pub fn run_cell( &self, cell: &SurfaceCell, fuel: &PreparedFuel, tweaks: SurfaceTweaks, ) -> SurfaceResult",
+          "target": "behave_fire::engine::surface::<SurfacePlan>::run_cell"
         }
       ],
       "scientific_candidate": true,
@@ -53658,8 +53768,8 @@
     },
     {
       "access": "public",
-      "approval": null,
-      "dataset": null,
+      "approval": "Owner-approved Surface boundaries, damping order, explicit Percent-unit controls, and unchanged calibrated 1e-12 caps (2026-11-14); fixture ceilings approved 2026-11-15. Original 23 inconsistent numbered-unit records use their separate control witnesses.",
+      "dataset": "surface",
       "definition_candidates": [
         {
           "definition_parameters": "FirelineIntensityUnits::FirelineIntensityUnitsEnum firelineIntensityUnits",
@@ -53670,10 +53780,23 @@
         }
       ],
       "deleted": false,
-      "execution_evidence": [],
+      "execution_evidence": [
+        {
+          "file": "surface/cases.jsonl",
+          "sha256": "266d08d8b82d65d950461c73e70b44c228ad7b54fbe99eb1d14ed8af6add66da"
+        },
+        {
+          "file": "surface/results.jsonl",
+          "sha256": "ae006838d93bbb9533df74340085110c479315cb8238a8ce488a68fe5e9e1b71"
+        },
+        {
+          "file": "surface/manifest.json",
+          "sha256": "39e75b886c69607977227a90361e0ef7585fabf7736cdded1352fca151bc1409"
+        }
+      ],
       "file": "src/behave/surface.h",
       "forwarded_cpp_ids": [],
-      "function_status": "pending_pilot",
+      "function_status": "tested",
       "id": "77b6f55b71d8497a33ba",
       "kind": "method",
       "lexically_qualified_signature": "double Surface::getFirelineIntensity(FirelineIntensityUnits::FirelineIntensityUnitsEnum firelineIntensityUnits) const",
@@ -53713,6 +53836,14 @@
           "relation": "returned_dictionary_field_candidate",
           "signature": "run_surface_fire(ri: Union[float, np.ndarray], ib: dict, wind_speed: Union[float, np.ndarray], wind_speed_units: int, wind_direction: Union[float, np.ndarray], wind_orientation_mode: str, slope: Union[float, np.ndarray], slope_units: int=0, aspect: Union[float, np.ndarray]=0.0, canopy_cover: Union[float, np.ndarray]=0.0, canopy_height: Union[float, np.ndarray]=0.0, crown_ratio: Union[float, np.ndarray]=0.0, wind_height_mode: str='TwentyFoot', waf_method: str='UseCrownRatio', user_waf: Union[float, np.ndarray, None]=None) -> dict",
           "target": "behave_fire.components.surface.run_surface_fire"
+        },
+        {
+          "evidence": "Public Surface run and independently compared core output: fireline_intensity_btu_ft_s",
+          "file": "src/behave_fire/behave.py",
+          "line": 253,
+          "relation": "observed_composed_output",
+          "signature": "do_surface_run(self, fuel_model_grid: Union[int, np.ndarray], m1h: Union[float, np.ndarray], m10h: Union[float, np.ndarray], m100h: Union[float, np.ndarray], mlh: Union[float, np.ndarray], mlw: Union[float, np.ndarray], wind_speed: Union[float, np.ndarray], wind_speed_units: int, wind_direction: Union[float, np.ndarray], wind_orientation_mode: str, slope: Union[float, np.ndarray], slope_units: int=0, moisture_units: int=0, aspect: Union[float, np.ndarray]=0.0, canopy_cover: Union[float, np.ndarray]=0.0, canopy_cover_units: int=0, canopy_height: Union[float, np.ndarray]=0.0, canopy_height_units: int=0, canopy_base_height: Union[float, np.ndarray]=0.0, canopy_base_height_units: int=0, crown_ratio: Union[float, np.ndarray]=0.0, crown_ratio_units: Optional[int]=0, wind_height_mode: str='TwentyFoot', waf_method: str='UseCrownRatio', user_waf: Union[float, np.ndarray, None]=None, out_units: Optional[dict]=None) -> dict",
+          "target": "behave_fire.behave.BehaveRun.do_surface_run"
         }
       ],
       "qualified_name": "Surface::getFirelineIntensity",
@@ -53720,7 +53851,16 @@
       "route_ids": [
         "surface_single"
       ],
-      "rust_targets": [],
+      "rust_targets": [
+        {
+          "evidence": "Public Surface run and independently compared core output: fireline_intensity_btu_ft_s",
+          "file": "rust/crates/behave-fire/src/engine/surface.rs",
+          "line": 97,
+          "relation": "observed_composed_output",
+          "signature": "pub fn run_cell( &self, cell: &SurfaceCell, fuel: &PreparedFuel, tweaks: SurfaceTweaks, ) -> SurfaceResult",
+          "target": "behave_fire::engine::surface::<SurfacePlan>::run_cell"
+        }
+      ],
       "scientific_candidate": true,
       "signature": "double Surface::getFirelineIntensity(FirelineIntensityUnits::FirelineIntensityUnitsEnum firelineIntensityUnits) const"
     },
@@ -53900,8 +54040,8 @@
     },
     {
       "access": "public",
-      "approval": null,
-      "dataset": null,
+      "approval": "Owner-approved Surface boundaries, damping order, explicit Percent-unit controls, and unchanged calibrated 1e-12 caps (2026-11-14); fixture ceilings approved 2026-11-15. Original 23 inconsistent numbered-unit records use their separate control witnesses.",
+      "dataset": "surface",
       "definition_candidates": [
         {
           "definition_parameters": "HeatPerUnitAreaUnits::HeatPerUnitAreaUnitsEnum heatPerUnitAreaUnits",
@@ -53912,10 +54052,23 @@
         }
       ],
       "deleted": false,
-      "execution_evidence": [],
+      "execution_evidence": [
+        {
+          "file": "surface/cases.jsonl",
+          "sha256": "266d08d8b82d65d950461c73e70b44c228ad7b54fbe99eb1d14ed8af6add66da"
+        },
+        {
+          "file": "surface/results.jsonl",
+          "sha256": "ae006838d93bbb9533df74340085110c479315cb8238a8ce488a68fe5e9e1b71"
+        },
+        {
+          "file": "surface/manifest.json",
+          "sha256": "39e75b886c69607977227a90361e0ef7585fabf7736cdded1352fca151bc1409"
+        }
+      ],
       "file": "src/behave/surface.h",
       "forwarded_cpp_ids": [],
-      "function_status": "pending_pilot",
+      "function_status": "tested",
       "id": "8c63b303e848beae80e6",
       "kind": "method",
       "lexically_qualified_signature": "double Surface::getHeatPerUnitArea(HeatPerUnitAreaUnits::HeatPerUnitAreaUnitsEnum heatPerUnitAreaUnits) const",
@@ -53955,6 +54108,14 @@
           "relation": "returned_dictionary_field_candidate",
           "signature": "run_surface_fire(ri: Union[float, np.ndarray], ib: dict, wind_speed: Union[float, np.ndarray], wind_speed_units: int, wind_direction: Union[float, np.ndarray], wind_orientation_mode: str, slope: Union[float, np.ndarray], slope_units: int=0, aspect: Union[float, np.ndarray]=0.0, canopy_cover: Union[float, np.ndarray]=0.0, canopy_height: Union[float, np.ndarray]=0.0, crown_ratio: Union[float, np.ndarray]=0.0, wind_height_mode: str='TwentyFoot', waf_method: str='UseCrownRatio', user_waf: Union[float, np.ndarray, None]=None) -> dict",
           "target": "behave_fire.components.surface.run_surface_fire"
+        },
+        {
+          "evidence": "Public Surface run and independently compared core output: heat_per_unit_area_btu_ft2",
+          "file": "src/behave_fire/behave.py",
+          "line": 253,
+          "relation": "observed_composed_output",
+          "signature": "do_surface_run(self, fuel_model_grid: Union[int, np.ndarray], m1h: Union[float, np.ndarray], m10h: Union[float, np.ndarray], m100h: Union[float, np.ndarray], mlh: Union[float, np.ndarray], mlw: Union[float, np.ndarray], wind_speed: Union[float, np.ndarray], wind_speed_units: int, wind_direction: Union[float, np.ndarray], wind_orientation_mode: str, slope: Union[float, np.ndarray], slope_units: int=0, moisture_units: int=0, aspect: Union[float, np.ndarray]=0.0, canopy_cover: Union[float, np.ndarray]=0.0, canopy_cover_units: int=0, canopy_height: Union[float, np.ndarray]=0.0, canopy_height_units: int=0, canopy_base_height: Union[float, np.ndarray]=0.0, canopy_base_height_units: int=0, crown_ratio: Union[float, np.ndarray]=0.0, crown_ratio_units: Optional[int]=0, wind_height_mode: str='TwentyFoot', waf_method: str='UseCrownRatio', user_waf: Union[float, np.ndarray, None]=None, out_units: Optional[dict]=None) -> dict",
+          "target": "behave_fire.behave.BehaveRun.do_surface_run"
         }
       ],
       "qualified_name": "Surface::getHeatPerUnitArea",
@@ -53962,7 +54123,16 @@
       "route_ids": [
         "surface_single"
       ],
-      "rust_targets": [],
+      "rust_targets": [
+        {
+          "evidence": "Public Surface run and independently compared core output: heat_per_unit_area_btu_ft2",
+          "file": "rust/crates/behave-fire/src/engine/surface.rs",
+          "line": 97,
+          "relation": "observed_composed_output",
+          "signature": "pub fn run_cell( &self, cell: &SurfaceCell, fuel: &PreparedFuel, tweaks: SurfaceTweaks, ) -> SurfaceResult",
+          "target": "behave_fire::engine::surface::<SurfacePlan>::run_cell"
+        }
+      ],
       "scientific_candidate": true,
       "signature": "double Surface::getHeatPerUnitArea(HeatPerUnitAreaUnits::HeatPerUnitAreaUnitsEnum heatPerUnitAreaUnits) const"
     },
@@ -87161,6 +87331,11 @@
     {
       "coverage_status": "not_executed_phase0",
       "cpp_ids": [
+        "668ac22fdd52acf422bd",
+        "77b6f55b71d8497a33ba",
+        "88dbb46e8d19cbc15402",
+        "8c63b303e848beae80e6",
+        "d73efe6110f38955f7ca",
         "da29ed7e56865168ac47"
       ],
       "file": "src/behave_fire/behave.py",
@@ -87578,12 +87753,25 @@
       "contract": {
         "independent_cases": "Fresh objects per independent case;explicit transition cases only;validate every primitive/derived bound before every call,including setters and getters.",
         "state_lifecycle": "State setters, getters, constructors, resets, and copy contracts are assigned to this bundle; assignment is not execution evidence.",
-        "status": "source_only_pending_execution",
+        "status": "fresh_and_reused_surface_runs_checked",
         "units": "Explicit declared unit enums and conversion bounds are checked before every call."
       },
       "dataset": "surface",
-      "executable_now": false,
-      "execution_evidence": [],
+      "executable_now": true,
+      "execution_evidence": [
+        {
+          "file": "surface/cases.jsonl",
+          "sha256": "266d08d8b82d65d950461c73e70b44c228ad7b54fbe99eb1d14ed8af6add66da"
+        },
+        {
+          "file": "surface/results.jsonl",
+          "sha256": "ae006838d93bbb9533df74340085110c479315cb8238a8ce488a68fe5e9e1b71"
+        },
+        {
+          "file": "surface/manifest.json",
+          "sha256": "39e75b886c69607977227a90361e0ef7585fabf7736cdded1352fca151bc1409"
+        }
+      ],
       "guard_ids": [
         "fuel_storage",
         "surface_modes",
@@ -87597,10 +87785,17 @@
         "670aaf1b1596fa2a7649",
         "da29ed7e56865168ac47"
       ],
-      "notes": "Current full-run candidate.",
-      "qualification": "Source-only;execution waits for approved next phases;unresolved identities unavailable.",
+      "notes": "The executable max-spread route covers its five queried outputs. Assignment of other methods to this bundle does not claim that those methods were numerically tested.",
+      "qualification": {
+        "complete_runs": 722,
+        "directly_tested_functions": 6,
+        "numbered_custom_pairs": 139,
+        "policy": "tolerance-policy.json",
+        "unavailable": 51,
+        "unit_controls": "surface_custom"
+      },
       "route_id": "surface_single",
-      "status": "pending_pilot"
+      "status": "qualified_surface_outputs"
     },
     {
       "assigned_method_ids": [
@@ -92893,7 +93088,14 @@
     {
       "access": "pub",
       "coverage_status": "not_executed_phase0",
-      "cpp_ids": [],
+      "cpp_ids": [
+        "668ac22fdd52acf422bd",
+        "77b6f55b71d8497a33ba",
+        "88dbb46e8d19cbc15402",
+        "8c63b303e848beae80e6",
+        "d73efe6110f38955f7ca",
+        "da29ed7e56865168ac47"
+      ],
       "file": "rust/crates/behave-fire/src/engine/surface.rs",
       "line": 97,
       "mapping_status": "unmapped_review_required",

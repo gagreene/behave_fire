@@ -585,8 +585,8 @@ Moisture damping uses the pinned C++ multiplication order with the same empirica
 coefficients. The 23 upstream fuel records with inconsistent extinction units
 retain their fractional values here. Separately declared custom-fuel controls
 exercise the C++ equations with explicit Percent inputs. Comparison caps of
-`1e-12` relative and absolute are active after the complete manual GNU/MSVC and
-seven-native-platform qualification described in
+`1e-12` relative and absolute require a current complete manual GNU/MSVC and
+seven-native-platform qualification before acceptance, as described in
 [C++ validation](docs/CPP_VALIDATION.md).
 
 ## References

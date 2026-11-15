@@ -1,6 +1,7 @@
 """Prepare and inspect pinned C++ observations without approving scientific parity."""
 
 import argparse
+import gzip
 import hashlib
 import json
 import math
@@ -25,6 +26,9 @@ MOE_PERCENT_CONTROLS = {
     192: 45., 193: 26.,
 }
 CONTROL_MODEL = 250
+FIXTURE_BUDGET = {'case_limit': 800,
+                  'canonical': {'raw_bytes': 6 * 1024 ** 2, 'gzip_bytes': 512 * 1024},
+                  'standalone': {'raw_bytes': 512 * 1024, 'gzip_bytes': 64 * 1024}}
 
 
 class UnapprovedCppPolicy(ValueError):
@@ -180,7 +184,7 @@ def _required_artifacts(root):
     """
     base = root / "tests/data/cpp_reference"
     mandatory = {"tests/data/cpp_reference/" + name for name in (
-        "inventory.json", "findings.json", "tolerance-policy.json", "surface/cases.jsonl",
+        "inventory.json", "findings.json", "tolerance-policy.json", "fixture-budget.json", "surface/cases.jsonl",
         "surface/results.jsonl", "surface/manifest.json", "surface/profiles.json", "surface/applicability.json",
         "negative-inputs.jsonl", "negative-expected.json", "prepared-build.json",
         "surface_custom/cases.jsonl", "surface_custom/results.jsonl", "surface_custom/manifest.json")}
@@ -354,6 +358,33 @@ def assert_matches_cpp(actual, expected, policy):
             raise AssertionError(f"{field}: signed-zero mismatch")
         if not math.isclose(actual[field], expected[field], rel_tol=relative, abs_tol=absolute):
             raise AssertionError(f"{field}: port={actual[field]!r}, C++={expected[field]!r}")
+
+
+def check_fixture_budget(root=ROOT):
+    """Enforce the owner's case and deterministic compressed/uncompressed fixture ceilings.
+
+    :param root: Checkout containing canonical and standalone copied Surface fixtures.
+    :return: Actual case count and byte measurements; raises for drift or unapproved limits.
+    """
+    root = Path(root)
+    canonical = root / 'tests/data/cpp_reference'
+    policy = _document(canonical / 'fixture-budget.json')
+    if policy.get('approved') is not True or policy.get('limits') != FIXTURE_BUDGET:
+        raise ValueError('Unapproved fixture budget limits')
+    cases = sum(sum(bool(line.strip()) for line in (canonical / dataset / 'cases.jsonl').read_bytes().splitlines())
+                for dataset in ('surface', 'surface_custom'))
+    if cases > FIXTURE_BUDGET['case_limit']:
+        raise ValueError('Surface fixture case budget exceeded')
+    measured = {'cases': cases}
+    for name, directory in [('canonical', canonical),
+                            ('standalone', root / 'rust/crates/behave-fire/tests/data/cpp_reference')]:
+        files = sorted(path for path in directory.rglob('*') if path.is_file())
+        payload = b''.join(path.read_bytes() for path in files)
+        actual = {'raw_bytes': len(payload), 'gzip_bytes': len(gzip.compress(payload, mtime=0))}
+        if any(actual[key] > limit for key, limit in FIXTURE_BUDGET[name].items()):
+            raise ValueError(f'{name} fixture budget exceeded: {actual}')
+        measured[name] = actual
+    return measured
 
 
 def compare_backends(root, report_dir):
@@ -535,12 +566,13 @@ def load_reference(root=ROOT):
         validate_qualification(root, record)
     from cpp_inventory import validate_inventory
 
-    validate_inventory(_document(directory / "inventory.json"))
+    validate_inventory(_document(directory / "inventory.json"), reference_root=directory)
     from cpp_controls import load
 
     controls = load(root, cases)
     _prepared_build(root)
-    return dict(cases=cases, results=results, manifest=manifest, policy=policy, controls=controls)
+    budget = check_fixture_budget(root)
+    return dict(cases=cases, results=results, manifest=manifest, policy=policy, controls=controls, budget=budget)
 
 
 def main(argv=None):

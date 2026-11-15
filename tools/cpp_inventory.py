@@ -6,6 +6,8 @@ import hashlib
 import json
 from pathlib import Path
 import re
+import subprocess
+import sys
 
 
 CPP_SHA = "f3b2943e69abca942e795c5b1b45276f6338abb5"
@@ -29,11 +31,12 @@ FUNCTION_FIELDS = {
 STATUSES = {"pending_pilot", "not_in_pilot", "tested", "waived", "no_counterpart", "deferred", "unreachable_oracle"}
 
 
-def _check_execution_evidence(evidence, dataset):
+def _check_execution_evidence(evidence, dataset, root):
     """Require hashed case, result, and manifest files for an execution claim.
 
     :param evidence: Relative artifact paths and expected SHA-256 values.
     :param dataset: Dataset directory within the committed reference artifacts.
+    :param root: Selected reference directory, never an external fallback.
     :return: None; raise ValueError when any execution artifact is absent or changed.
     """
     if not isinstance(dataset, str) or not re.fullmatch(r"[a-z0-9_]+", dataset):
@@ -42,10 +45,11 @@ def _check_execution_evidence(evidence, dataset):
     expected = {f"{dataset}/{name}" for name in ("cases.jsonl", "results.jsonl", "manifest.json")}
     if {row["file"] for row in evidence} != expected:
         raise ValueError("Execution evidence must include the dataset cases, results, and manifest")
-    root = Path(__file__).resolve().parents[1] / "tests/data/cpp_reference"
+    root = Path(root).resolve()
     for row in evidence:
-        path = root / row["file"]
-        if not path.is_file() or hashlib.sha256(path.read_bytes()).hexdigest() != row["sha256"]:
+        path = (root / row["file"]).resolve()
+        if (not path.is_relative_to(root) or not path.is_file()
+                or hashlib.sha256(path.read_bytes()).hexdigest() != row["sha256"]):
             raise ValueError(f"Missing or changed execution evidence: {row['file']}")
 
 
@@ -124,16 +128,20 @@ def main():
                         / "tests/data/cpp_reference/inventory.json")
     arguments = parser.parse_args()
     inventory = json.loads(arguments.inventory.read_text(encoding="utf-8"))
-    print(json.dumps(validate_inventory(inventory, require_ready=arguments.require_ready), sort_keys=True))
+    print(json.dumps(validate_inventory(inventory, require_ready=arguments.require_ready,
+                                         reference_root=arguments.inventory.resolve().parent), sort_keys=True))
 
 
-def validate_inventory(inventory, require_ready=False):
+def validate_inventory(inventory, require_ready=False, reference_root=None):
     """Validate hybrid coverage and distinguish preparation from qualified science.
 
     :param inventory: Committed source-derived snapshot, read without a live checkout.
     :param require_ready: Require executable evidence for at least one scientific bundle.
+    :param reference_root: Explicit artifact directory; defaults to this tool's checkout for direct callers.
     :return: Counts of structurally valid declarations, bundles, and tested functions.
     """
+    reference_root = (Path(__file__).resolve().parents[1] / 'tests/data/cpp_reference'
+                      if reference_root is None else Path(reference_root))
     _require_fields(inventory, {"schema_version", "cpp_sha", "port_sha", "phase", "coverage_unit",
                               "expected_counts", "snapshot_inputs", "source_inputs", "public_functions",
                               "nonpublic_functions", "routes", "state_unit_contracts", "guards", "enums",
@@ -162,7 +170,7 @@ def validate_inventory(inventory, require_ready=False):
         if status == "tested" and (not row["dataset"] or not row["execution_evidence"]):
             raise ValueError("Tested function lacks dataset and execution evidence")
         if status == "tested":
-            _check_execution_evidence(row["execution_evidence"], row["dataset"])
+            _check_execution_evidence(row["execution_evidence"], row["dataset"], reference_root)
             if not row["approval"]:
                 raise ValueError("Tested function lacks owner-approved field policy and finding decision")
         if status == "waived" and (not row["owner_approved_waiver"] or not row["approval"]):
@@ -209,13 +217,30 @@ def validate_inventory(inventory, require_ready=False):
         if route["executable_now"]:
             if not route["dataset"] or not route["execution_evidence"]:
                 raise ValueError("Executable route lacks dataset and execution evidence")
-            _check_execution_evidence(route["execution_evidence"], route["dataset"])
+            _check_execution_evidence(route["execution_evidence"], route["dataset"], reference_root)
             if any(functions[identity]["scientific_candidate"] for identity in assigned):
+                if not any(functions[identity]['scientific_candidate']
+                           and functions[identity]['function_status'] == 'tested' for identity in assigned):
+                    raise ValueError('Executable scientific route lacks per-function witnesses')
                 executable.add(route_id)
     if any(not set(row["route_ids"]) <= route_ids for row in rows):
         raise ValueError("Missing route bundle for public function")
     if require_ready and not executable:
         raise ValueError("No executable scientific routes; pilot findings and owner approval remain pending")
+    if require_ready:
+        reference_root = Path(reference_root).resolve()
+        root = reference_root.parent.parent.parent
+        if root / 'tests/data/cpp_reference' != reference_root:
+            raise ValueError('Complete qualification requires a canonical reference directory')
+        policy = reference_root / 'tolerance-policy.json'
+        if not policy.is_file() or json.loads(policy.read_text(encoding='utf-8')).get('approved') is not True:
+            raise ValueError('Scientific qualification policy is inactive')
+        # Use the explicit sibling script, independent of caller imports and module caches.
+        # Its normal structural inventory call does not request readiness, so this cannot recurse.
+        result = subprocess.run([sys.executable, '-B', str(Path(__file__).with_name('cpp_reference.py')),
+                                 '--root', str(root), '--check'], capture_output=True, text=True, check=False)
+        if result.returncode != 0:
+            raise ValueError('Scientific qualification failed: ' + result.stderr[-4000:])
     if len(inventory["nonpublic_functions"]) != 194:
         raise ValueError("Nonpublic join scope changed")
     for row in inventory["nonpublic_functions"]:

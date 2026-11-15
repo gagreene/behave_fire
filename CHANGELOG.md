@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- Enforce the approved Surface fixture ceilings: 800 cases, 6 MiB raw and
+  512 KiB gzip for canonical fixtures, and 512 KiB raw and 64 KiB gzip for
+  standalone copies. Bind inventory evidence to the selected snapshot and
+  require six exact Surface function witnesses plus active qualification for
+  readiness, without claiming coverage of other assigned methods.
+
 - Match the pinned C++ moisture-damping multiplication order in Python and Rust
   without changing coefficients or extinction guards. Refresh the reviewed
   last-bit reference differences, including derived fixture intermediates.
