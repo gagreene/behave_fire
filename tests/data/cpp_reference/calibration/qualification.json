@@ -1,5 +1,5 @@
 {
-  "activation_reason": "Unchanged owner-approved Surface caps requalified with approved budgets and six exact witnesses in complete run 43742687637 at 095d96a",
+  "activation_reason": "PR31 four technical review fixes requalified at unchanged caps by complete run 43752200280 at 8ba5085",
   "artifacts": {
     "tests/data/cpp_reference/surface/cases.jsonl": "266d08d8b82d65d950461c73e70b44c228ad7b54fbe99eb1d14ed8af6add66da",
     "tests/data/cpp_reference/surface/results.jsonl": "ae006838d93bbb9533df74340085110c479315cb8238a8ce488a68fe5e9e1b71",
@@ -7,7 +7,7 @@
     "tests/data/cpp_reference/surface_custom/results.jsonl": "04e96268466338364a350d53ac05b639f1a7758c78911aaee97da389c0f779a2"
   },
   "calibration_complete": true,
-  "ci_run_url": "https://github.com/gagreene/behave_fire/actions/runs/43742687637",
+  "ci_run_url": "https://github.com/gagreene/behave_fire/actions/runs/43752200280",
   "fields": {
     "fireline_intensity_btu_ft_s": {
       "atol": 1e-12,
@@ -42,7 +42,7 @@
   },
   "reports": {
     "cpp-GNU": {
-      "sha256": "ee9e221d8bf2f93bff3b91e047b7f1c23541a781dbaed5cedbd7d6cf2e5315c4",
+      "sha256": "25631d1d01ce66c7c2b624288696da69e1a62e7d6613c70523e3067e1fe13aa2",
       "summary": {
         "available": 722,
         "cases": 773,
@@ -51,7 +51,7 @@
       }
     },
     "cpp-MSVC": {
-      "sha256": "f2559cd6827e62565ade37bfe96cd072f92896d53fa9b243beac4b710cfbb897",
+      "sha256": "1e57aee5801d91683e10c4e31262f5496b37acac082cfb7ab0be4993af1b3bd3",
       "summary": {
         "available": 722,
         "cases": 773,
@@ -60,7 +60,7 @@
       }
     },
     "ports-linux-aarch64": {
-      "sha256": "fb0e72c0572ad217268446b725bcafd562c9a2bab7e1bb588514083974f595a5",
+      "sha256": "217c61dcd6c172b9602acd14144f817d936affed198e4c75be769b61ac97b03f",
       "summary": {
         "cases_per_backend": 583,
         "fields_per_backend": 2915,
@@ -68,7 +68,7 @@
       }
     },
     "ports-linux-musl-x86_64": {
-      "sha256": "b5d749664ede4c604ab3ef3c5a161b9af5b028450f7b7f342be40f0a314ad722",
+      "sha256": "defac54c942a8080ebbf29f395d8530e1a4a5e1f685a3c93fd22a71e2e4c84e1",
       "summary": {
         "cases_per_backend": 583,
         "fields_per_backend": 2915,
@@ -76,7 +76,7 @@
       }
     },
     "ports-linux-x86_64": {
-      "sha256": "b27918dd0e71cee269837a7410a73780706344420299b3511f6039e469cb465f",
+      "sha256": "db20eda1a34a3f9349c3e3f7f124fe05afa8ba40ac245d9eeadb136c9e0784d5",
       "summary": {
         "cases_per_backend": 583,
         "fields_per_backend": 2915,
@@ -84,7 +84,7 @@
       }
     },
     "ports-macos-arm64": {
-      "sha256": "a0af7369c55a2bc3ee90ca3f0cf9e2be6173486b3aa148fd299567e5388f4cf9",
+      "sha256": "95045229c3a21a848cec92a2593f538d6e28b885b31273cf97aa2b27ee512cf1",
       "summary": {
         "cases_per_backend": 583,
         "fields_per_backend": 2915,
@@ -92,7 +92,7 @@
       }
     },
     "ports-macos-x86_64": {
-      "sha256": "893abfcd60972f113b7644928f02bc088d78d336088a783dfccc453d47b6cff7",
+      "sha256": "1ee12c27e6bfd6cda7cd07b060261a1d023f80ce71e4bf1ef38f60b371d68d14",
       "summary": {
         "cases_per_backend": 583,
         "fields_per_backend": 2915,
@@ -100,7 +100,7 @@
       }
     },
     "ports-windows-arm64": {
-      "sha256": "aab1ddb58858c4af24f3e4e80ababe00c1bd7c3d65992e65d399c08e636dd42b",
+      "sha256": "f3988a2c8c2665eee3a353acdd91a91f7632d7da0c5918a3c0aa709207615433",
       "summary": {
         "cases_per_backend": 583,
         "fields_per_backend": 2915,
@@ -108,7 +108,7 @@
       }
     },
     "ports-windows-x86_64": {
-      "sha256": "2275f773d3b80ba2aec87c790bf9aa3d56c0decf35efb3852b1ed2b0f7c4af83",
+      "sha256": "bac8b80c4bc207fa6bd72b2009f77dad6a53f9d5062359990ca231e1707dc490",
       "summary": {
         "cases_per_backend": 583,
         "fields_per_backend": 2915,
@@ -117,13 +117,13 @@
     }
   },
   "schema_version": 1,
-  "source_commit": "095d96aa6e1e3ec55e53dc9b73c228506ee15427",
+  "source_commit": "8ba5085a636d4f8ebc6dbc5747dbe311c0a22b4b",
   "source_files": {
     ".github/workflows/ci.yml": "67d1bddfd5be308551353df9faa6afccd5e8e446045139b576fae515f7b26dab",
     ".github/workflows/crate-validation.yml": "970147b312a0719d1e63318b2f8b8f200479c5592e5e368cbfd2407893ac1f6d",
     ".github/workflows/release-crate.yml": "20ecaa481e1f6b5e73c1e5019da3ffe2db6de037529c2eb300f5c4a3adbfa2f3",
     ".github/workflows/release.yml": "8bcbc7c87a325d8505c88436e384d52d733a5d08b9dcc1b92b201b15c34dcfcd",
-    ".github/workflows/wheel-validation.yml": "b0e78a9405d9a912c3d554c5b87c47031d7efc1856d5940c51c1f229663d732e",
+    ".github/workflows/wheel-validation.yml": "f14d3ce305d5c341351e5d1b17d14a2b28359d246376e130230c57c424cf8c0f",
     "pyproject.toml": "e510a7aac3e9c0d79d9d8eeb9cb02d9b33a636b173b46ee91394bd30d0ad5148",
     "rust/Cargo.lock": "d1d2a7bca8b52c78ef86466f0639b6c44a5b08d2a000a8af4dc3ee1da45535b2",
     "rust/Cargo.toml": "31b5c56d96a7293e4d1298577bf422438fee6521d9f89858e23ddefd36dc75ac",
@@ -275,7 +275,7 @@
     "tools/benchmark_public_serial_f64.py": "7f7fd35f13b15744675dfef0fe99cb2b12ff2d729da7480c2bb409121c8d4d50",
     "tools/build_pure_wheel.py": "ed7f687468a5d95164acf360bedeeb253fad802749c80370248d2978f63f19ce",
     "tools/check_core_f64.py": "6bb1a859277153ee4f8aa2d25afd77097538ceadb4066d61fc5607e79eb62cd9",
-    "tools/check_cpp_driver.py": "a52c3fee21245ed3d8c1b54700b7ae7cf0dabeea7a227297fe30c8f15fe742a5",
+    "tools/check_cpp_driver.py": "4cebe80a4854f639f7a6fd727c71fa23558c271a2c314a86011f7e9bb1a5c967",
     "tools/check_crate_package.py": "b9ac32e996e46b75ded563df322954c66864d07955ce7a1c09a475cfcfb90281",
     "tools/check_performance.py": "34fa57f516763374125f74a0d024226b76a4ad2944ffd178c3936fb827b5c8e3",
     "tools/check_public_serial_f64.py": "dcef3b190c3842b512066e539d0654759dc75cc8e7139883d291102e3e953213",
@@ -284,10 +284,10 @@
     "tools/check_wheel_metadata.py": "e0d1a1528f7e1204e01a51569fb4920b2e404d7d85965c41043799be7e88b987",
     "tools/compare_backends.py": "a5a9cc45377c4edb7e7a9526d82d16e0ba4261239a18d27844ca7ebac96872b1",
     "tools/core_f64_reference.py": "138ef249706ff2392f4da85e05290eda11275017db4baf1af4c59e90a3bb19c8",
-    "tools/cpp_calibrate.py": "26f56a467a2f42ea29c624ea9c6053633ec6f0f342e2949b28acdc67490e7011",
-    "tools/cpp_controls.py": "d8087a2590e06330aa6f4fd6b16b04db689bb8d770e3a20a6ccd01485c8ade5e",
+    "tools/cpp_calibrate.py": "4e557ed4506beee74f5197d48879a936718691eee4a43d6f79160076ef2b52d2",
+    "tools/cpp_controls.py": "77600705535363d93fa9b3ae2e8d9b3e3ab00d1999d7e2704db5f288d7462a38",
     "tools/cpp_inventory.py": "b101377b9ac44e3cc57e2279668afc9ec503ce64c52277305000dc77ecd52918",
-    "tools/cpp_reference.py": "ff3e9aa08e943dfc41fb560e01a3aea717e48ef731c7e35abcb108f1da259021",
+    "tools/cpp_reference.py": "8512056e849b4d3eecd2d5eede2d43d3d1a76e1423afa4ef7600fa567f96b23c",
     "tools/export_cpp_crate.py": "02ab1173b4fcc4deebe24892ab2960ff56772dfaad3762e371df0467ed83042e",
     "tools/export_rust_reference.py": "c71eedccb7f1ed100200eec9821d21e27c097a885d137d530660aaa7c9a97b74",
     "tools/float64_model_reference.py": "f4c2f704e969b5ba20320146154143576bff1df6493d784def2a21644735c187",
