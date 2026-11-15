@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- Align Python and Rust Surface boundaries with official Behave C++ at
+  `f3b2943`: retain effective wind and elliptical shape for positive baseline
+  spread at or below `1e-7 ft/min`, and return zero Surface flame length when
+  fireline intensity is strictly below `1e-7 BTU/ft/s`. The threshold itself
+  uses the existing flame equation. These intentionally change earlier Python
+  results near extinction; zero-denominator guards remain in place.
+
 - Remove the Python, Rust core, and native containment module pending a licensing
   review: the upstream C++ containment headers declare GNU Public License 2.
   The module is preserved locally and is expected to return as a separate project.

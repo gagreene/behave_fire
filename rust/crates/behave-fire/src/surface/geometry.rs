@@ -47,12 +47,12 @@ macro_rules! retaining_geometry {
                 1.0
             }
         }
-        /// Calculate flame length in feet from fireline intensity in BTU/ft/s.
+        /// Calculate feet of flame with the C++ cutoff strictly below 1e-7 BTU/ft/s.
         pub fn calculate_flame_length(fireline_intensity: $t) -> $t {
             if fireline_intensity.is_nan() {
                 return <$t>::NAN;
             }
-            if fireline_intensity > 0.0 {
+            if fireline_intensity >= 1e-7 {
                 0.45 * fireline_intensity.powf(0.46)
             } else {
                 0.0

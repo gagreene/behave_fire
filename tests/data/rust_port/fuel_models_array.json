@@ -3742,7 +3742,7 @@
       "src/behave_fire/components/slope_tool.py": "754ce32058173b6c149135f9b1ec443f8be21679c7cf6c8e0a64d7ef5f3fb49c",
       "src/behave_fire/components/species_master_table.py": "afa06eb15e475d252eef8b54d34be0d202c5c0f664d75e2c87c783a3831e8c11",
       "src/behave_fire/components/spot.py": "a0411ecf7606ee75f4b460c084cb461e0c39619a3c14ad96a4c0217733456a22",
-      "src/behave_fire/components/surface.py": "234193248b1b07bbaaae854810c578756ce89d0dcfc54967961e4393c8e9f4f4",
+      "src/behave_fire/components/surface.py": "8d3633c5c215dec07017fdaa441320bfebaff215ad15e12f01d3a053c45caf2e",
       "src/behave_fire/components/vapor_pressure_deficit_calculator.py": "4b165f3d48a02ab49c0fcdd2a5a7df65bab8b4a6366a280cbbf23041488eb258"
     }
   },

@@ -20002,7 +20002,7 @@
           1
         ],
         "values": [
-          0.00027115181373346084
+          0.0
         ]
       },
       "policy": "acceptance",
@@ -64969,7 +64969,7 @@
             1
           ],
           "values": [
-            3.238067933850802e-11
+            1.5431358626885597e-11
           ]
         },
         "direction_of_max_spread": {
@@ -64987,7 +64987,7 @@
             1
           ],
           "values": [
-            0.0
+            0.35449902227322644
           ]
         },
         "effective_wind_speed": {
@@ -64996,7 +64996,7 @@
             1
           ],
           "values": [
-            0.0
+            0.8492774330696571
           ]
         },
         "fire_length_to_width_ratio": {
@@ -65005,7 +65005,7 @@
             1
           ],
           "values": [
-            1.0
+            1.0694542232930275
           ]
         },
         "fireline_intensity": {
@@ -65023,7 +65023,7 @@
             1
           ],
           "values": [
-            3.1698758406241715e-10
+            0.0
           ]
         },
         "flanking_spread_rate": {
@@ -65032,7 +65032,7 @@
             1
           ],
           "values": [
-            3.238067933850802e-11
+            2.235347569069969e-11
           ]
         },
         "heat_per_unit_area": {
@@ -65362,7 +65362,7 @@
             1
           ],
           "values": [
-            3.238067933850802e-11
+            1.5431358626885597e-11
           ]
         },
         "direction_of_max_spread": {
@@ -65380,7 +65380,7 @@
             1
           ],
           "values": [
-            0.0
+            0.35449902227322644
           ]
         },
         "effective_wind_speed": {
@@ -65389,7 +65389,7 @@
             1
           ],
           "values": [
-            0.0
+            0.8492774330696571
           ]
         },
         "fire_length_to_width_ratio": {
@@ -65398,7 +65398,7 @@
             1
           ],
           "values": [
-            1.0
+            1.0694542232930275
           ]
         },
         "fireline_intensity": {
@@ -65416,7 +65416,7 @@
             1
           ],
           "values": [
-            3.169875840624172e-10
+            0.0
           ]
         },
         "flanking_spread_rate": {
@@ -65425,7 +65425,7 @@
             1
           ],
           "values": [
-            3.238067933850802e-11
+            2.235347569069969e-11
           ]
         },
         "heat_per_unit_area": {
@@ -65755,7 +65755,7 @@
             1
           ],
           "values": [
-            3.2380679338508027e-11
+            1.54313586268856e-11
           ]
         },
         "direction_of_max_spread": {
@@ -65773,7 +65773,7 @@
             1
           ],
           "values": [
-            0.0
+            0.35449902227322644
           ]
         },
         "effective_wind_speed": {
@@ -65782,7 +65782,7 @@
             1
           ],
           "values": [
-            0.0
+            0.8492774330696571
           ]
         },
         "fire_length_to_width_ratio": {
@@ -65791,7 +65791,7 @@
             1
           ],
           "values": [
-            1.0
+            1.0694542232930275
           ]
         },
         "fireline_intensity": {
@@ -65809,7 +65809,7 @@
             1
           ],
           "values": [
-            3.1698758406241725e-10
+            0.0
           ]
         },
         "flanking_spread_rate": {
@@ -65818,7 +65818,7 @@
             1
           ],
           "values": [
-            3.2380679338508027e-11
+            2.2353475690699694e-11
           ]
         },
         "heat_per_unit_area": {
@@ -69737,7 +69737,7 @@
       "src/behave_fire/components/slope_tool.py": "754ce32058173b6c149135f9b1ec443f8be21679c7cf6c8e0a64d7ef5f3fb49c",
       "src/behave_fire/components/species_master_table.py": "afa06eb15e475d252eef8b54d34be0d202c5c0f664d75e2c87c783a3831e8c11",
       "src/behave_fire/components/spot.py": "a0411ecf7606ee75f4b460c084cb461e0c39619a3c14ad96a4c0217733456a22",
-      "src/behave_fire/components/surface.py": "234193248b1b07bbaaae854810c578756ce89d0dcfc54967961e4393c8e9f4f4",
+      "src/behave_fire/components/surface.py": "8d3633c5c215dec07017fdaa441320bfebaff215ad15e12f01d3a053c45caf2e",
       "src/behave_fire/components/vapor_pressure_deficit_calculator.py": "4b165f3d48a02ab49c0fcdd2a5a7df65bab8b4a6366a280cbbf23041488eb258"
     }
   },

@@ -34,14 +34,14 @@ macro_rules! retaining_wind {
             relative_packing_ratio: $t,
             wind_e: $t,
         ) -> $speed {
-            let r0 = if no_wind_no_slope_spread_rate > 1e-7 {
+            let r0 = if no_wind_no_slope_spread_rate > 0.0 {
                 no_wind_no_slope_spread_rate
             } else {
                 1.0
             };
             let phi = if no_wind_no_slope_spread_rate.is_nan() {
                 <$t>::NAN
-            } else if no_wind_no_slope_spread_rate > 1e-7 {
+            } else if no_wind_no_slope_spread_rate > 0.0 {
                 spread_rate / r0 - 1.0
             } else {
                 0.0

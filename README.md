@@ -566,6 +566,21 @@ Useful tools under `tools/`: `compare_backends.py` (Rust versus the frozen Pytho
 
 ---
 
+## Surface boundary behavior
+
+Python and Rust retain wind-driven elliptical shape for tiny positive baseline
+spread, including rates at or below `1e-7 ft/min`. Zero wind and zero slope
+produce a circular shape. Zero and nonpositive baseline rates retain guarded
+effective-wind handling.
+
+Surface flame length is zero for fireline intensity strictly below
+`1e-7 BTU/ft/s`; at and above that threshold, the existing Byram equation applies.
+These deliberately change the previous Python behavior to follow the pinned
+[C++ effective-wind calculation](https://github.com/firelab/behave/blob/f3b2943e69abca942e795c5b1b45276f6338abb5/src/behave/surfaceFire.cpp#L406)
+and [flame-length cutoff](https://github.com/firelab/behave/blob/f3b2943e69abca942e795c5b1b45276f6338abb5/src/behave/surfaceFire.cpp#L218).
+The separate moisture-of-extinction discrepancy remains under review
+(see [C++ validation](docs/CPP_VALIDATION.md)).
+
 ## References
 
 - Rothermel, R. C. (1972). *A mathematical model for predicting fire spread in wildland fuels.* USDA Forest Service Research Paper INT-115.

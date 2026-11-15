@@ -3,7 +3,7 @@
   "rust/crates/behave-fire/tests/data/cpp_reference/surface/manifest.json": "dd3766a4a522c2aa86190230da11cdee15dc66e449da092d975c09590f555e61",
   "rust/crates/behave-fire/tests/data/cpp_reference/surface/results.jsonl": "ae006838d93bbb9533df74340085110c479315cb8238a8ce488a68fe5e9e1b71",
   "rust/crates/behave-fire/tests/data/cpp_reference/surface/tolerance-policy.json": "c5c79f56eb1bbe46814d9762d29fab0a36e07da9799de835c3a9fd29e2f3bb56",
-  "tests/data/cpp_reference/findings.json": "9a514ae8600a9fb4f2a99a469b6e0825d792aa2a48fac10fc16c9a3ad57def11",
+  "tests/data/cpp_reference/findings.json": "8e52a4144178aeb74f71f5fc1e43107537d31b31cc5901a4de340d277917c6a6",
   "tests/data/cpp_reference/inventory.json": "ace2728f8287e660dbf77fd430ea6c556987187770b870533001ff1950520827",
   "tests/data/cpp_reference/negative-expected.json": "7cd40e4585d77417b751e3633f20b9b263b07a9b1f20d04d323cacf46225c475",
   "tests/data/cpp_reference/negative-inputs.jsonl": "8dc900d12a20b19c222f2e590bf37dc9dacb5c0c7eb6a94a3738f99b7b98e9dd",

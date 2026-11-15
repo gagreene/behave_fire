@@ -319,7 +319,7 @@ fn run_selected_stages<const FINISH: u8, const STRICT: bool>(
     if STRICT {
         let phi = if r0.is_nan() {
             f64::NAN
-        } else if r0 > 1e-7 {
+        } else if r0 > 0.0 {
             spread_rate / r0 - 1.0
         } else {
             0.0

@@ -70,8 +70,8 @@ impl PreparedWind {
                 c.wind_e,
             );
         }
-        let r0_safe = if r0 > 1e-7 { r0 } else { 1. };
-        let phi = if r0 > 1e-7 { spread / r0_safe - 1. } else { 0. };
+        let r0_safe = if r0 > 0. { r0 } else { 1. };
+        let phi = if r0 > 0. { spread / r0_safe - 1. } else { 0. };
         if phi.is_nan() {
             return super::calculate_effective_wind_speed(
                 spread,

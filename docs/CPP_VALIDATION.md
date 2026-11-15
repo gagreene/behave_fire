@@ -36,9 +36,15 @@ numeric coverage. The readiness check rejects this pending state.
 | F-012 | MSVC needs the empty `_USE_MATH_DEFINES` definition for the unchanged source. | Registered build note. |
 | F-013 | Skipped zero-load calculations leave the separate FireSize geometry uninitialized. | Registered unsafe route; driver returns unavailable before Surface construction. |
 | F-014 | Twenty-three C++ records store dead moisture-of-extinction values 100 times the Python fractional convention. | Open; no science change. |
-| F-015 | Low-spread effective-wind guards differ, so extinction-boundary ellipse ratios can differ materially. | Open; no broad tolerance applied. |
-| F-016 | C++ suppresses flame length below intensity `1e-7`; Python applies the law for any positive intensity. | Open boundary convention. |
+| F-015 | The ports previously discarded effective wind at baseline spread at or below `1e-7 ft/min`. | Owner approved matching C++ for positive spread; zero-denominator guards retained. |
+| F-016 | The ports previously returned positive flame length below the C++ intensity cutoff of `1e-7 BTU/ft/s`. | Owner approved the same strict cutoff; the threshold itself retains the Byram equation. |
 | F-017 | Polynomial evaluation order gives different tiny extinction residuals. | Open floating-point comparison policy. |
+
+The two approved boundary changes have scalar, array, staged/fused grid, and
+standalone core regressions. Their approval does not approve tolerances, resolve
+the fuel-table moisture discrepancy, or establish full C++ parity. Original
+observations in the findings register remain historical evidence from before
+the boundary changes.
 
 For example, `fm159-angle0` has C++ intensity 2649.566089568236 and Python/Rust
 intensity 1047.4059417058265 Btu/ft/s. The corresponding heat and spread differences

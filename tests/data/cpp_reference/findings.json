@@ -116,6 +116,7 @@
     "evidence": "Python surface.py:282-286; C++ surfaceFire.cpp:406",
     "finding": "Low-spread effective-wind guards differ, producing different ellipse ratios at extinction boundaries.",
     "id": "F-015",
+    "observation_scope": "Historical measurements before the owner-approved boundary alignment",
     "observed_case": {
       "absolute": 0.06945421887837466,
       "backend": "python",
@@ -125,7 +126,7 @@
       "port": 1.0,
       "relative": 0.06494361109839472
     },
-    "status": "pending Phase 3 owner decision; no scientific fix or tolerance change"
+    "status": "Owner approved matching C++ for positive baseline spread on 2026-11-14; boundary regressions pass; pinned reference review remains pending; no tolerance change"
   },
   {
     "analysis": "development/cpp-pilot/DIFFERENCES-ANALYSIS.md",
@@ -133,6 +134,7 @@
     "evidence": "C++ surfaceFire.cpp:218; Python surface.py:437-438",
     "finding": "C++ flame length has a small-intensity cutoff while Python applies its law for any positive intensity.",
     "id": "F-016",
+    "observation_scope": "Historical measurements before the owner-approved boundary alignment",
     "observed_case": {
       "absolute": 1.2715734607518977e-13,
       "backend": "python",
@@ -142,7 +144,7 @@
       "port": 1.2715734607518977e-13,
       "relative": null
     },
-    "status": "pending Phase 3 owner decision; no scientific fix or tolerance change"
+    "status": "Owner approved the C++ strict intensity cutoff on 2026-11-14; boundary regressions pass; pinned reference review remains pending; no tolerance change"
   },
   {
     "analysis": "development/cpp-pilot/DIFFERENCES-ANALYSIS.md",
