@@ -29,10 +29,21 @@ from pathlib import Path
 SKIP = {'.venv', 'target', '__pycache__', '.git', 'node_modules', 'build', 'dist'}
 LABEL = re.compile(r'^\s*(?:#|//) ---- (.*) ----\s*$', re.M)
 EXEMPT = re.compile(r'(?:#|//)\s*order-exempt:\s*(\S.*)$')
+RUST_WHITESPACE = frozenset('\t\n\v\f\r \u0085\u200e\u200f\u2028\u2029')
 
 FN_RE = re.compile(r'^(?P<vis>pub(?:\([^)]*\))?\s+)?'
                    r'(?:(?:const|async|unsafe|extern(?:\s+"[^"]*")?)\s+)*fn\s+(?P<name>\w+)')
 MOD_RE = re.compile(r'^(?:pub(?:\([^)]*\))?\s+)?mod\s+\w+\s*\{')
+
+
+def _python_comment_lines(source):
+    """Extract real Python comment tokens, excluding all string contents.
+
+    :param source: Python source text.
+    :return: Line numbers mapped to comment text and indentation.
+    """
+    return {token.start[0]: (token.string, token.start[1])
+            for token in tokenize.generate_tokens(io.StringIO(source).readline) if token.type == tokenize.COMMENT}
 
 
 def _python_comments(source):
@@ -53,6 +64,7 @@ def _python_exemptions(tree, lines):
     :return: Qualified definition identities mapped to exemption marker text.
     """
     result = {}
+    comments = _python_comment_lines('\n'.join(lines))
     counts = Counter()
     pending = [(tree, ())]
     while pending:
@@ -61,11 +73,32 @@ def _python_exemptions(tree, lines):
             scope = (*scope, node.name)
             counts[scope] += 1
             start = min([node.lineno] + [item.lineno for item in node.decorator_list])
-            candidates = ([lines[start - 2]] if start > 1 else []) + [lines[node.lineno - 1]]
+            candidates = [comments[line][0] for line in (start - 1, node.lineno) if line in comments
+                          and (line == node.lineno or comments[line][1] == node.col_offset)]
             result[scope, counts[scope]] = tuple(match.group(0) for line in candidates
                                                 if (match := EXEMPT.search(line)))
         pending.extend((child, scope) for child in reversed(list(ast.iter_child_nodes(node))))
     return result
+
+
+def _python_scope_comments(nodes, lines, comments):
+    """Select comments owned by one direct statement scope.
+
+    :param nodes: Direct AST statements in the scope.
+    :param lines: Original source lines.
+    :param comments: Actual comment tokens by line.
+    :return: Comments at this scope's indentation outside nested statement bodies.
+    """
+    if not nodes:
+        return {}
+    indent = nodes[0].col_offset
+    first = min([nodes[0].lineno] + [item.lineno for item in getattr(nodes[0], 'decorator_list', [])])
+    while first > 1 and (not lines[first - 2].strip() or first - 1 in comments):
+        first -= 1
+    last = nodes[-1].end_lineno
+    return {line: value for line, value in comments.items()
+            if first <= line <= last and value[1] == indent
+            and not any(node.lineno <= line <= node.end_lineno for node in nodes)}
 
 
 def _python_value(value):
@@ -92,19 +125,40 @@ def _python_value(value):
     return type(value).__name__, repr(value)
 
 
+def _rust_identifier_end(text, start):
+    """Retain identifier adjacency conservatively across Unicode database versions.
+
+    :param text: Rust source text.
+    :param start: Candidate identifier offset.
+    :return: End offset; uncertain non-ASCII characters are retained rather than normalized away.
+    """
+    if start >= len(text):
+        return start
+    char = text[start]
+    if not (char == '_' or char.isidentifier() or (ord(char) > 127 and char not in RUST_WHITESPACE)):
+        return start
+    end = start + 1
+    while end < len(text):
+        char = text[end]
+        if not (char.isascii() and (char.isalnum() or char == '_')
+                or ord(char) > 127 and char not in RUST_WHITESPACE):
+            break
+        end += 1
+    return end
+
+
 def _rust_tokens(text, spacing=False):
     """Tokenize Rust without discarding string contents, attributes, or comments.
 
     :param text: Rust item source validated by the item scanner.
-    :param spacing: Retain joint punctuation spacing observed by procedural macros.
+    :param spacing: Retain all token adjacency; conservatively reject non-order formatting changes.
     :return: Lexical tokens with insignificant whitespace removed.
     """
     tokens = []
     i = 0
     previous_end = -1
-    previous_punct = False
     while i < len(text):
-        if text[i].isspace():
+        if text[i] in RUST_WHITESPACE:
             i += 1
             continue
         start = i
@@ -145,15 +199,19 @@ def _rust_tokens(text, spacing=False):
             elif char:
                 i += char.end()
             else:
-                word = re.match(r'(?:r#)?[^\W\d]\w*|\d[\d_]*\.(?![.\w])'
+                identifier = _rust_identifier_end(text, i + 2) if text.startswith('r#', i) else i
+                if identifier <= i + 2:
+                    identifier = _rust_identifier_end(text, i)
+                word = re.match(r'\d[\d_]*\.(?![.\w])'
                                 r'|\d[\d_]*(?:\.[\d_]+)?(?:[eE][+-]?[\d_]+)?\w*'
                                 r'|::|->|=>|\.\.=|\.\.|<<=?|>>=?|&&|\|\||[=!<>+*/%&|^-]=', text[i:])
-                i += word.end() if word else 1
+                i = identifier if identifier > i else i + (word.end() if word else 1)
+            if raw or quoted or char:
+                i = _rust_identifier_end(text, i)
         token = text[start:i]
-        punct = all(char in '!#$%&()*+,-./:;<=>?@[\\]^`{|}~' for char in token)
-        joint = previous_punct and punct and start == previous_end
+        joint = start == previous_end
         tokens.append((token, joint) if spacing else token)
-        previous_end, previous_punct = i, punct
+        previous_end = i
     return tuple(tokens)
 
 
@@ -237,7 +295,7 @@ def body_span(chunk):
             j = chunk.find('*/', i + 2)
             i = n if j < 0 else j + 2
             continue
-        m = re.match(r'b?r(#*)"', chunk[i:i + 12])
+        m = re.match(r'(?:br|cr|r)(#*)"', chunk[i:])
         if m and (i == 0 or not (chunk[i - 1].isalnum() or chunk[i - 1] == '_')):
             close = '"' + m.group(1)
             j = chunk.find(close, i + len(m.group(0)))
@@ -265,7 +323,7 @@ def body_span(chunk):
     return None
 
 
-def check_py_body(nodes, scope, is_test, lines, problems, path, require_labels=True):
+def check_py_body(nodes, scope, is_test, lines, problems, path, require_labels=True, comments=None):
     """Inspect check py body according to the function-order rule.
 
     :param nodes: AST statements in this scope.
@@ -275,13 +333,16 @@ def check_py_body(nodes, scope, is_test, lines, problems, path, require_labels=T
     :param problems: Mutable diagnostic list.
     :param path: Source file to inspect.
     :param require_labels: Require test labels; helper placement is always checked.
+    :param comments: Optional cached comment tokens.
     :return: Computed scanner result or diagnostics appended to the supplied list.
     """
     entries = []
+    if comments is None:
+        comments = _python_comment_lines('\n'.join(lines))
     for n in nodes:
         if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef)):
             start = min([n.lineno] + [d.lineno for d in n.decorator_list])
-            if py_exempt(lines, start, n.lineno):
+            if py_exempt(lines, start, n.lineno, comments=comments):
                 continue
             if not entries or entries[-1][0] != n.name:
                 entries.append((n.name, start))
@@ -294,10 +355,12 @@ def check_py_body(nodes, scope, is_test, lines, problems, path, require_labels=T
         problems.append(f'{path}: {scope}: functions out of order near {first!r} '
                         f'(expected {expected[names.index(first)]!r})')
     if is_test:
-        check_py_test_section(entries, lines, problems, path, require_labels=require_labels)
+        own_comments = _python_scope_comments(nodes, lines, comments)
+        check_py_test_section(entries, lines, problems, path, require_labels=require_labels, comments=own_comments)
+        labels_in_order('\n'.join(value[0] for value in own_comments.values()), problems, path + ': ' + scope)
 
 
-def check_py_test_section(entries, lines, problems, path, require_labels=True):
+def check_py_test_section(entries, lines, problems, path, require_labels=True, comments=None):
     """Every test in a labelled group, and every helper before the first test.
 
     :param entries: Definition names and source positions.
@@ -305,9 +368,12 @@ def check_py_test_section(entries, lines, problems, path, require_labels=True):
     :param problems: Mutable diagnostic list.
     :param path: Source file to inspect.
     :param require_labels: Require test labels; helper placement is always checked.
+    :param comments: Optional scope-owned comment tokens.
     :return: Computed scanner result or diagnostics appended to the supplied list.
     """
-    label_lines = [i + 1 for i, line in enumerate(lines) if LABEL.match(line)]
+    if comments is None:
+        comments = _python_comment_lines('\n'.join(lines))
+    label_lines = [line for line, value in comments.items() if LABEL.match(value[0])]
     tests = [(name, start) for name, start in entries if name.startswith('test')]
     for name, start in tests:
         if require_labels and not any(label < start for label in label_lines):
@@ -330,14 +396,14 @@ def check_python(path, problems, require_labels=True):
     text = path.read_text(encoding='utf-8-sig')
     tree = ast.parse(text)
     lines = text.splitlines()
+    comments = _python_comment_lines(text)
     is_test = path.name.startswith('test_')
     where = path.as_posix()
     scopes = []
     py_scopes(tree.body, '<module>', is_test, scopes)
     for nodes, scope, scope_is_test in scopes:
-        check_py_body(nodes, scope, scope_is_test, lines, problems, where, require_labels=require_labels)
-    if is_test:
-        labels_in_order(text, problems, where)
+        check_py_body(nodes, scope, scope_is_test, lines, problems, where,
+                      require_labels=require_labels, comments=comments)
 
 
 def check_rust(path, problems, require_labels=True):
@@ -421,32 +487,40 @@ def classify(chunk):
     :param chunk: One Rust item including attributes and trivia.
     :return: Computed scanner result or diagnostics appended to the supplied list.
     """
-    lines = chunk.split('\n')
+    tokens = _rust_tokens(chunk)
     attrs = []
-    code = None
-    depth = 0
     offset = 0
-    k = 0
-    while k < len(lines):
-        s, depth = trim_comments(lines[k], depth)
-        if s.startswith(('#[', '#![')):
-            attrs.append(s)
-            # multi-line attribute
-            while attrs[-1].count('[') > attrs[-1].count(']') and k + 1 < len(lines):
-                k += 1
-                attrs[-1] += lines[k].strip()
-        elif s and not s.startswith('//'):
-            code = s
+    index = 0
+    while index < len(tokens):
+        token = tokens[index]
+        if token.startswith(('//', '/*')):
+            offset = chunk.index(token, offset) + len(token)
+            index += 1
+        elif token == '#' and (tokens[index:index + 2] == ('#', '[')
+                               or tokens[index:index + 3] == ('#', '!', '[')):
+            begin = index
+            depth = 0
+            while index < len(tokens):
+                value = tokens[index]
+                offset = chunk.index(value, offset) + len(value)
+                depth += (value == '[') - (value == ']')
+                index += 1
+                if value == ']' and depth == 0:
+                    break
+            if depth:
+                raise ValueError('Unterminated Rust attribute')
+            attrs.append(''.join(tokens[begin:index]))
+        else:
+            offset = chunk.index(token, offset)
             break
-        offset += len(lines[k]) + 1
-        k += 1
-    if code is None:
+    if index == len(tokens):
         return 'other', None, False, False, attrs, len(chunk), ''
+    code = chunk[offset:].split('\n', 1)[0]
     m = FN_RE.match(code)
     if m:
         return ('fn', m.group('name'), bool(m.group('vis')), any(a.startswith('#[test') for a in attrs), attrs,
-                offset, lines[k])
-    return 'other', code, False, False, attrs, offset, lines[k]
+                offset, code)
+    return 'other', code, False, False, attrs, offset, code
 
 
 def labels_in_order(text, problems, where):
@@ -518,16 +592,20 @@ def prove_reorder(before, after, suffix):
         raise ValueError('Source differs beyond declaration order within its original scope')
 
 
-def py_exempt(lines, start, def_line):
+def py_exempt(lines, start, def_line, comments=None):
     """True when the line above the definition (or its decorator) or the ``def`` line carries a reasoned marker.
 
     :param lines: Original source lines.
     :param start: First decorator or declaration line.
     :param def_line: Declaration line number.
+    :param comments: Optional cached comment tokens.
     :return: Computed scanner result or diagnostics appended to the supplied list.
     """
-    candidates = [lines[start - 2]] if start >= 2 else []
-    candidates.append(lines[def_line - 1])
+    if comments is None:
+        comments = _python_comment_lines('\n'.join(lines))
+    indent = len(lines[def_line - 1]) - len(lines[def_line - 1].lstrip())
+    candidates = [comments[line][0] for line in (start - 1, def_line) if line in comments
+                  and (line == def_line or comments[line][1] == indent)]
     return any(EXEMPT.search(line) for line in candidates)
 
 
@@ -553,7 +631,17 @@ def py_scopes(nodes, scope, is_test, out):
     out.append((nodes, scope, is_test))
     for n in nodes:
         if isinstance(n, ast.ClassDef):
-            py_scopes(n.body, n.name, False, out)
+            unittest = any((isinstance(base, ast.Name) and base.id == 'TestCase')
+                           or (isinstance(base, ast.Attribute) and base.attr == 'TestCase') for base in n.bases)
+            opted_out = any(isinstance(item, (ast.Assign, ast.AnnAssign)) and isinstance(item.value, ast.Constant)
+                            and item.value.value is False
+                            and any(isinstance(target, ast.Name) and target.id == '__test__'
+                                    for target in (item.targets if isinstance(item, ast.Assign) else [item.target]))
+                            for item in n.body)
+            custom_init = any(isinstance(item, ast.FunctionDef) and item.name in {'__init__', '__new__'}
+                              for item in n.body)
+            collected = is_test and not opted_out and (unittest or (n.name.startswith('Test') and not custom_init))
+            py_scopes(n.body, scope + '.' + n.name, collected, out)
         elif not isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef)):
             for block in blocks_of(n):
                 py_scopes(block, f'{scope} > {type(n).__name__.lower()}', is_test, out)
@@ -604,7 +692,7 @@ def scan_items(text):
             if level:
                 raise ValueError('unterminated block comment')
             continue
-        m = re.match(r'b?r(#*)"', text[i:i + 12])
+        m = re.match(r'(?:br|cr|r)(#*)"', text[i:])
         if m and (i == 0 or not (text[i - 1].isalnum() or text[i - 1] == '_')):
             close = '"' + m.group(1)
             j = text.find(close, i + len(m.group(0)))
