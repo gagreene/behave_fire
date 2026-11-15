@@ -71,7 +71,15 @@ include = [
     { path = "NOTICE", format = "sdist" },
     { path = "docs/CPP_VALIDATION.md", format = "sdist" },
 ]
-exclude = ["**/target/**", "**/build/**", "**/*.pyd", "**/*.so", "**/*.dylib", ".superpowers/**", ".claude/**", ".idea/**", "rust/target/**", "**/__pycache__/**", "**/*.pyc", "dist/**", "build/**", "**/*.pdb", "**/*.crate", "**/*.egg-info/**", "tests/data/rust_port/**", "reference/behave_cpp", "reference/behave_cpp/**", "reference/behave_cpp_overlay/**"]
+exclude = [
+    { path = "**/*.pyd", format = "sdist" },
+    { path = "**/*.so", format = "sdist" },
+    { path = "**/*.dylib", format = "sdist" },
+    "**/target/**", "**/build/**", ".superpowers/**", ".claude/**", ".idea/**",
+    "rust/target/**", "**/__pycache__/**", "**/*.pyc", "dist/**", "build/**", "**/*.pdb",
+    "**/*.crate", "**/*.egg-info/**", "tests/data/rust_port/**", "reference/behave_cpp",
+    "reference/behave_cpp/**", "reference/behave_cpp_overlay/**",
+]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
