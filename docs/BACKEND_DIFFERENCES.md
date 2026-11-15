@@ -46,7 +46,33 @@ values remain unchanged. Classification arrays are int32;
 -1 means unavailable. Classification flags are false for code -1, so check the
 code before interpreting those flags.
 
+## Shared Surface boundary behavior
+
+Both backends now follow the pinned C++ effective-wind equation for positive
+baseline spread at or below `1e-7 ft/min`, rather than discarding the wind effect
+and forcing a circle. Zero wind and zero slope still give length-to-width ratio
+1. Nonpositive baseline rates remain guarded against division by zero.
+
+Both backends also return zero Surface flame length when fireline intensity is
+strictly below `1e-7 BTU/ft/s`. At and above the threshold, the existing Byram
+equation applies. These are intentional changes to Python numerical behavior,
+with the same physical rules applied in Rust's component, prepared, fused, and
+staged Surface paths. Existing missing-value and dtype contracts still apply.
+Sources: the pinned [effective-wind equation](https://github.com/firelab/behave/blob/f3b2943e69abca942e795c5b1b45276f6338abb5/src/behave/surfaceFire.cpp#L406)
+and [flame-length cutoff](https://github.com/firelab/behave/blob/f3b2943e69abca942e795c5b1b45276f6338abb5/src/behave/surfaceFire.cpp#L218).
+
 ## Missing values and physical domains
+
+The shared Surface reaction calculation follows the pinned C++ multiplication
+order for moisture damping, with unchanged coefficients and extinction guards.
+The Surface comparison caps passed GNU/MSVC and all seven native platforms
+([qualification evidence](CPP_VALIDATION.md)); original numbered-unit differences
+remain documented and have separate explicit Percent-unit controls.
+This deliberately changes last-bit Python results and corresponding derived
+fixture intermediates. Both ports retain fractional extinction values for the
+23 inconsistent numbered C++ records. Their separately labelled Percent-unit
+custom controls preserve the original C++ observations and check the equations
+on matching physical definitions (see [C++ validation](CPP_VALIDATION.md)).
 
 NaN means unavailable physical data. A missing condition or denominator does not
 silently select a zero fallback. Availability follows actual field dependencies:

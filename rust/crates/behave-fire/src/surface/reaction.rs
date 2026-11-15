@@ -32,13 +32,13 @@ macro_rules! retaining_reaction {
                 0.0
             }
         }
-        /// Moisture damping coefficient; preserve the strict extinction threshold and polynomial order.
+        /// Preserve the extinction guards and the pinned C++ multiplication order.
         fn eta_m(moisture: $t, moe: $t) -> $t {
             let rm = if moe > 1e-7 { moisture / moe } else { 1.0 };
             if moe < 1e-7 || rm >= 1.0 {
                 0.0
             } else {
-                1.0 - 2.59 * rm + 5.11 * rm.powi(2) - 3.52 * rm.powi(3)
+                1.0 - (2.59 * rm) + ((5.11 * rm) * rm) - (((3.52 * rm) * rm) * rm)
             }
         }
         /// Mineral damping coefficient with NumPy NaN/threshold behavior.

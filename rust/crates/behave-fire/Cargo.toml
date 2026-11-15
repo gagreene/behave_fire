@@ -9,6 +9,7 @@ repository.workspace = true
 readme = "README.md"
 keywords = ["wildfire", "fire-behavior", "forestry", "science"]
 categories = ["science"]
+exclude = ["reference/behave_cpp/**", "reference/behave_cpp_overlay/**"]
 
 [lib]
 name = "behave_fire"

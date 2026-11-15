@@ -277,11 +277,21 @@ def calculate_effective_wind_speed(
         relative_packing_ratio: Union[float, np.ndarray],
         wind_e: Union[float, np.ndarray],
 ) -> np.ndarray:
-    """Calculate effective wind speed (mph) used for fire shape."""
+    """Calculate effective wind speed without suppressing tiny positive spread.
+
+    :param spread_rate: Forward spread rate in ft/min.
+    :param no_wind_no_slope_spread_rate: Baseline spread rate in ft/min.
+    :param wind_b: Dimensionless wind exponent.
+    :param wind_c: Wind coefficient for speed in ft/min.
+    :param relative_packing_ratio: Dimensionless relative packing ratio.
+    :param wind_e: Dimensionless packing exponent.
+    :return: Effective wind speed in mph; nonpositive baseline rates remain guarded.
+    """
     _, speed_from_base, _ = _load_surface_unit_converters()
-    safe_r0 = np.where(no_wind_no_slope_spread_rate > 1e-7, no_wind_no_slope_spread_rate, 1.0)
+    # C++ retains the spread ratio for every positive baseline rate.
+    safe_r0 = np.where(no_wind_no_slope_spread_rate > 0, no_wind_no_slope_spread_rate, 1.0)
     phi_eff = np.where(
-        no_wind_no_slope_spread_rate > 1e-7,
+        no_wind_no_slope_spread_rate > 0,
         spread_rate / safe_r0 - 1.0,
         0.0,
     )
@@ -433,9 +443,13 @@ def calculate_fireline_intensity(
 def calculate_flame_length(
         fireline_intensity: Union[float, np.ndarray],
 ) -> np.ndarray:
-    """Calculate flame length (ft)."""
-    safe_fli = np.where(fireline_intensity > 0, fireline_intensity, 0.0)
-    return np.where(fireline_intensity > 0, 0.45 * (safe_fli ** 0.46), 0.0)
+    """Calculate flame length using the C++ small-intensity cutoff.
+
+    :param fireline_intensity: Fireline intensity in BTU/ft/s.
+    :return: Flame length in feet, zero below intensity 1e-7; the threshold uses Byram's law.
+    """
+    safe_fli = np.where(fireline_intensity >= 1e-7, fireline_intensity, 0.0)
+    return np.where(fireline_intensity >= 1e-7, 0.45 * (safe_fli ** 0.46), 0.0)
 
 def calculate_flanking_spread_rate(
         spread_rate: Union[float, np.ndarray],
@@ -677,12 +691,17 @@ def calculate_reaction_intensity(ib: dict) -> np.ndarray:
     gamma     = gamma_max * (safe_rpr ** aa) * np.exp(aa * (1.0 - safe_rpr))
 
     def _eta_m(moisture, moe):
-        """Moisture damping coefficient (0–1)."""
+        """Evaluate moisture damping in the pinned C++ multiplication order.
+
+        :param moisture: Weighted fuel moisture fraction.
+        :param moe: Moisture-of-extinction fraction.
+        :return: Damping coefficient with the existing extinction guards.
+        """
         rm = np.where(moe > 1e-7, moisture / np.where(moe > 1e-7, moe, 1.0), 1.0)
         extinguished = (moe < 1e-7) | (rm >= 1.0)
         return np.where(
             extinguished, 0.0,
-            1.0 - 2.59 * rm + 5.11 * rm ** 2 - 3.52 * rm ** 3
+            1.0 - (2.59 * rm) + ((5.11 * rm) * rm) - (((3.52 * rm) * rm) * rm)
         )
 
     def _eta_s(silica):

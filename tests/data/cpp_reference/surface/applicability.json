@@ -1,0 +1,51 @@
+{
+  "supported": {
+    "wind_height": [
+      "TwentyFoot",
+      "TenMeter"
+    ],
+    "wind_orientation": [
+      "North",
+      "Upslope"
+    ],
+    "waf_method": [
+      "CrownRatio",
+      "UserInput"
+    ],
+    "moisture_mode": [
+      "BySizeClass"
+    ]
+  },
+  "measured_mode_cases": 48,
+  "state_sequence": [
+    "A",
+    "B",
+    "unavailable",
+    "A"
+  ],
+  "state_cases": 4,
+  "excluded_cpp_controls": [
+    {
+      "control": "moisture aggregate and scenario input modes",
+      "reason": "Current Python Surface facade accepts five size-class inputs and has no aggregate/scenario mode parameter; no counterpart under owner decision 13. Equal-size-class physical profiles are included, without claiming the absent state API."
+    },
+    {
+      "control": "DirectMidflame wind-height selector",
+      "reason": "Current Python facade documents and distinguishes TwentyFoot and TenMeter only; no direct-midflame selector is implemented."
+    },
+    {
+      "control": "DontUseCrownRatio WAF selector",
+      "reason": "Current Python facade distinguishes automatic CrownRatio and UserInput only; no separate DontUseCrownRatio control is implemented."
+    },
+    {
+      "control": "special fuels and two-fuel models",
+      "reason": "Explicit owner decision 13; not numbered FBFM additions."
+    }
+  ],
+  "evidence": [
+    "src/behave_fire/behave.py:do_surface_run signature",
+    "src/behave_fire/components/surface.py:calculate_twenty_foot_wind_speed",
+    "src/behave_fire/components/surface.py:calculate_wind_adjustment_factor"
+  ],
+  "approval": "Scope exclusions follow recorded no-counterpart policy; numeric policy remains unapproved"
+}

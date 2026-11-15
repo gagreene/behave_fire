@@ -32,6 +32,17 @@ class PackagingTests(unittest.TestCase):
                 with self.assertRaisesRegex(ValueError, "compiled"):
                     builder.stage_project(root, root / "stage")
 
+    def test_native_extension_exclusions_do_not_strip_wheel_binaries(self):
+        import fnmatch
+        import tomllib
+        settings = tomllib.loads((TOOLS.parent / 'pyproject.toml').read_text())['tool']['maturin']
+        for binary in ('behave_fire/_rust.pyd', 'behave_fire/_rust.abi3.so', 'behave_fire.libs/helper.dylib'):
+            with self.subTest(binary=binary):
+                for artifact, excluded in [('wheel', False), ('sdist', True)]:
+                    patterns = [item if isinstance(item, str) else item['path'] for item in settings['exclude']
+                                if isinstance(item, str) or item.get('format', artifact) == artifact]
+                    self.assertEqual(any(fnmatch.fnmatch(binary, pattern) for pattern in patterns), excluded)
+
     def test_numpy_markers_cover_exact_conditional_floor(self):
         import tomllib
         from packaging.markers import default_environment

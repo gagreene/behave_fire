@@ -7,6 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- Enforce the approved Surface fixture ceilings: 800 cases, 6 MiB raw and
+  512 KiB gzip for canonical fixtures, and 512 KiB raw and 64 KiB gzip for
+  standalone copies. Bind inventory evidence to the selected snapshot and
+  require six exact Surface function witnesses plus active qualification for
+  readiness, without claiming coverage of other assigned methods.
+
+- Match the pinned C++ moisture-damping multiplication order in Python and Rust
+  without changing coefficients or extinction guards. Refresh the reviewed
+  last-bit reference differences, including derived fixture intermediates.
+- Preserve fractional extinction values for the 23 inconsistent upstream fuel
+  records and add separately declared Percent-unit custom controls. The original
+  numbered C++ observations remain unchanged. Manual GNU/MSVC and seven-platform
+  calibration passed the unchanged owner-approved `1e-12` relative and absolute
+  caps, activating Surface comparisons with documented original-unit differences.
+- Keep native extension binaries in wheels while excluding compiled files from
+  source archives. Global binary exclusions previously stripped the extension
+  from wheels carrying a native platform tag.
+
+- Align Python and Rust Surface boundaries with official Behave C++ at
+  `f3b2943`: retain effective wind and elliptical shape for positive baseline
+  spread at or below `1e-7 ft/min`, and return zero Surface flame length when
+  fireline intensity is strictly below `1e-7 BTU/ft/s`. The threshold itself
+  uses the existing flame equation. These intentionally change earlier Python
+  results near extinction; zero-denominator guards remain in place.
+
 - Remove the Python, Rust core, and native containment module pending a licensing
   review: the upstream C++ containment headers declare GNU Public License 2.
   The module is preserved locally and is expected to return as a separate project.

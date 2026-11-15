@@ -56,6 +56,8 @@ def test_ambiguous_or_unsafe_extension_payload_is_rejected(tmp_path, members):
     assert not list(package.iterdir())
 
 
+
+
 def test_companion_library_staging_and_cleanup_preserve_loader_layout(tmp_path):
     runner = _runner()
     wheel = _wheel(tmp_path, "cp311-abi3-musllinux_1_2_x86_64",
@@ -97,6 +99,35 @@ def test_companion_library_staging_rejects_path_escape(tmp_path, member):
             pytest.fail("unsafe library was staged")
     assert not (tmp_path / "escape.so").exists()
     assert not list(package.iterdir())
+
+
+def test_cpp_calibration_child_uses_staged_extension_and_propagates_failure(tmp_path):
+    runner = _runner()
+    root = tmp_path / 'source'
+    package = root / 'src/behave_fire'
+    package.mkdir(parents=True)
+    (root / 'tools').mkdir()
+    reports = tmp_path / 'reports'
+    reports.mkdir()
+    (root / 'tools/cpp_calibrate.py').write_text(
+        "import argparse,json,os\nfrom pathlib import Path\n"
+        "parser=argparse.ArgumentParser()\nparser.add_argument('--ports',action='store_true')\n"
+        "parser.add_argument('--report',type=Path)\nparser.add_argument('--platform-key')\n"
+        "args=parser.parse_args()\nassert Path('src/behave_fire/_rust.pyd').is_file()\n"
+        "assert os.environ['PYTHONPATH']==str(Path.cwd()/'src')\n"
+        "if Path('fail').exists(): raise SystemExit(7)\n"
+        "args.report.write_text(json.dumps({'platform':args.platform_key}))\n")
+    wheel = _wheel(tmp_path, 'cp311-abi3-win_amd64', ('behave_fire/_rust.pyd',))
+    environment = dict(os.environ, PYTHONPATH=str(root / 'src'))
+    with runner._stage_extension(wheel, package):
+        runner._run_calibration(sys.executable, root, reports, environment, 'windows-x86_64')
+    assert json.loads((reports / 'windows-x86_64-calibration.json').read_text()) == {'platform': 'windows-x86_64'}
+    (root / 'fail').touch()
+    with pytest.raises(subprocess.CalledProcessError) as failure:
+        with runner._stage_extension(wheel, package):
+            runner._run_calibration(sys.executable, root, reports, environment, 'windows-x86_64')
+    assert failure.value.returncode == 7
+    assert not (package / '_rust.pyd').exists()
 
 
 @pytest.mark.parametrize("suffix", ["pyd", "abi3.so"])

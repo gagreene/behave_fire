@@ -32,7 +32,7 @@ Python's original complex/object behavior without Rust-specific input preflight.
 
 A NumPy-based Python port of the US Forest Service [Behave<sup>7</sup>](https://www.firelab.org/project/behave) fire behavior modeling system, supporting scalar and array calculations. The package has two calculation backends: the original Python/NumPy implementation (the behavioral reference) and a native Rust implementation selected automatically when its compiled extension is installed. The same Rust core is also a standalone crate, `behave-fire`, for Rust applications.
 
-Upstream alignment is ongoing; full C++ parity has not been established. Fuel data and heat constants follow `firelab/behave` at `f3b2943`, with an intentional correction of metric-model moisture percentages to fractions. Lightning ignition remains available only as a deprecated compatibility API. Rust performance is being validated against the public Python API; see [Performance](#performance).
+Upstream alignment is ongoing; full C++ parity has not been established. Fuel data and heat constants follow `firelab/behave` at `f3b2943`, with documented extinction-unit exceptions for 23 records that retain fractional values here. Lightning ignition remains available only as a deprecated compatibility API. Rust performance is being validated against the public Python API; see [Performance](#performance).
 
 ---
 
@@ -548,6 +548,7 @@ Useful tools under `tools/`: `compare_backends.py` (Rust versus the frozen Pytho
 | [docs/RELEASING.md](docs/RELEASING.md) | Building, validating, and releasing Python wheels and the source distribution |
 | [docs/CRATES_IO.md](docs/CRATES_IO.md) | Packaging and publishing the standalone Rust crate |
 | [docs/CONTRIBUTION_PROCEDURES.md](docs/CONTRIBUTION_PROCEDURES.md) | Branches, PRs, test records, release routing, and contributor rules |
+| [docs/CPP_VALIDATION.md](docs/CPP_VALIDATION.md) | Pinned C++ Surface validation and documented unit differences |
 | [docs/FBFM_DESCRIPTIONS.md](docs/FBFM_DESCRIPTIONS.md) | Fire behavior fuel model descriptions |
 
 ---
@@ -564,6 +565,29 @@ Useful tools under `tools/`: `compare_backends.py` (Rust versus the frozen Pytho
 - **Fuel snapshots** — each `BehaveRun` copies the fuel registry at construction; later registry edits do not affect an existing model.
 
 ---
+
+## Surface boundary behavior
+
+Python and Rust retain wind-driven elliptical shape for tiny positive baseline
+spread, including rates at or below `1e-7 ft/min`. Zero wind and zero slope
+produce a circular shape. Zero and nonpositive baseline rates retain guarded
+effective-wind handling.
+
+Surface flame length is zero for fireline intensity strictly below
+`1e-7 BTU/ft/s`; at and above that threshold, the existing Byram equation applies.
+These deliberately change the previous Python behavior to follow the pinned
+[C++ effective-wind calculation](https://github.com/firelab/behave/blob/f3b2943e69abca942e795c5b1b45276f6338abb5/src/behave/surfaceFire.cpp#L406)
+and [flame-length cutoff](https://github.com/firelab/behave/blob/f3b2943e69abca942e795c5b1b45276f6338abb5/src/behave/surfaceFire.cpp#L218).
+The separate moisture-of-extinction discrepancy has an explicit unit-control
+disposition (see [C++ validation](docs/CPP_VALIDATION.md)).
+
+Moisture damping uses the pinned C++ multiplication order with the same empirical
+coefficients. The 23 upstream fuel records with inconsistent extinction units
+retain their fractional values here. Separately declared custom-fuel controls
+exercise the C++ equations with explicit Percent inputs. Comparison caps of
+`1e-12` relative and absolute require a current complete manual GNU/MSVC and
+seven-native-platform qualification before acceptance, as described in
+[C++ validation](docs/CPP_VALIDATION.md).
 
 ## References
 

@@ -125,7 +125,7 @@ impl GridSession {
                 let rpr = p(Field::FuelbedRelativePackingRatio)?;
                 let phi = if r0.is_nan() {
                     f64::NAN
-                } else if r0 > 1e-7 {
+                } else if r0 > 0.0 {
                     spread / r0 - 1.
                 } else {
                     0.
