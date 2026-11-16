@@ -139,6 +139,52 @@ def _python_value(value):
     return type(value).__name__, repr(value)
 
 
+def _rust_exemption_comments(text, start, end, code_offset):
+    """Select reasoned directive comments attached outside this declaration's attributes.
+
+    :param text: Rust source in the current scope.
+    :param start: Item start including leading trivia.
+    :param end: Item end including ordinary trailing comments.
+    :param code_offset: Declaration offset relative to the item start.
+    :return: Attached exemption marker texts in source order.
+    """
+    tokens = _rust_token_spans(text[start:end])
+    declaration = start + code_offset
+    function = next((start + begin for token, begin, _finish in tokens
+                     if token == 'fn' and begin >= code_offset), declaration)
+    inline_lines = {text.rfind('\n', 0, position) + 1 for position in (declaration, function)}
+    candidates = []
+    depth = 0
+    for token, begin, finish in tokens:
+        begin += start
+        finish += start
+        line_start = text.rfind('\n', 0, begin) + 1
+        if begin < declaration:
+            if not depth and token.startswith('//') and not text[line_start:begin].strip():
+                # Attributes can sit between the marker and its function, but unrelated blank lines cannot.
+                remainder = text[finish:declaration]
+                if '\n\n' not in remainder and not re.search(r'\n[ \t]+\n', remainder):
+                    candidates.append(token)
+            depth += (token in ('[', '(', '{')) - (token in (']', ')', '}'))
+        elif token.startswith('//') and line_start in inline_lines:
+            candidates.append(token)
+    return tuple(match.group(0) for comment in candidates if (match := EXEMPT.match(comment)))
+
+
+def _rust_generic_depth(depth, token):
+    """Interpret contextual generic closers without changing lexical proof tokens.
+
+    :param depth: Current generic nesting depth outside other delimiter groups.
+    :param token: Current Rust lexical token.
+    :return: Updated depth, including closers adjacent to an assignment.
+    """
+    if token in ('<', '<<'):
+        return depth + len(token)
+    if token in ('>', '>>', '>=', '>>='):
+        return max(0, depth - len(token.rstrip('=')))
+    return depth
+
+
 def _rust_header(tokens):
     """Read declaration header tokens independently of line wrapping and comments.
 
@@ -187,6 +233,30 @@ def _rust_identifier_end(text, start):
                 or ord(char) > 127 and char not in RUST_WHITESPACE):
             break
         end += 1
+    return end
+
+
+def _rust_item_end(text, tokens, index):
+    """Keep ordinary same-line trailing comments with their preceding item.
+
+    :param text: Rust source text.
+    :param tokens: Positioned lexical tokens.
+    :param index: Current item terminator index.
+    :return: End offset including attached comments, excluding documentation for the next item.
+    """
+    end = tokens[index][2]
+    index += 1
+    while index < len(tokens):
+        token, begin, finish = tokens[index]
+        outer_doc = ((token.startswith('///') and not token.startswith('////'))
+                     or (token.startswith('/**') and not token.startswith('/***') and token != '/**/'))
+        if ('\n' in text[end:begin] or not token.startswith(('//', '/*'))
+                or outer_doc or token.startswith(('//!', '/*!'))):
+            break
+        end = finish
+        if token.startswith('//') or '\n' in token:
+            break
+        index += 1
     return end
 
 
@@ -324,7 +394,8 @@ def _rust_value(text):
         chunk = text[start:end]
         info = classify(chunk)
         if info[0] == 'fn':
-            functions.setdefault(info[1], []).append(_rust_tokens(chunk, spacing=True))
+            functions.setdefault(info[1], []).append((_rust_tokens(chunk, spacing=True),
+                                                       _rust_exemption_comments(text, start, end, info[5])))
         elif info[1] and _rust_header(_rust_tokens(info[1]))[0][:1] in (['impl'], ['mod']):
             span = body_span(chunk)
             if span is None:
@@ -365,8 +436,8 @@ def body_span(chunk):
     for token, begin, end in _rust_token_spans(chunk):
         if token.startswith(('//', '/*')):
             continue
-        if not stack and token in ('<', '<<', '>', '>>'):
-            angles = max(0, angles + (len(token) if token.startswith('<') else -len(token)))
+        if not stack:
+            angles = _rust_generic_depth(angles, token)
         if token in ('(', '[', '{'):
             if token == '{' and not stack and not angles:
                 opening = end
@@ -709,33 +780,11 @@ def rust_exempt(text, start, end, code_offset):
 
     :param text: Source text in the current scope.
     :param start: Item start, including leading trivia.
-    :param end: Item end, excluding a following trailing comment.
+    :param end: Item end, including attached ordinary trailing comments.
     :param code_offset: Declaration offset relative to the item start.
     :return: Whether a directly attached comment exempts the declaration.
     """
-    declaration = start + code_offset
-    line_end = text.find('\n', declaration)
-    line_end = len(text) if line_end < 0 else line_end
-    candidates = []
-    trailing_end = text.find('\n', end)
-    trailing_end = len(text) if trailing_end < 0 else trailing_end
-    for token, begin, finish in _rust_token_spans(text[start:trailing_end]):
-        begin += start
-        finish += start
-        if not token.startswith('//'):
-            continue
-        line_start = text.rfind('\n', 0, begin) + 1
-        if start <= begin < declaration and not text[line_start:begin].strip():
-            # Attributes can sit between the marker and its function, but unrelated blank lines cannot.
-            remainder = text[finish:declaration]
-            if '\n\n' not in remainder and not re.search(r'\n[ \t]+\n', remainder):
-                candidates.append(token)
-        elif declaration <= begin <= line_end and begin >= end:
-            if not text[end:begin].strip():
-                candidates.append(token)
-        elif declaration <= begin < min(end, line_end):
-            candidates.append(token)
-    return any(EXEMPT.search(comment) for comment in candidates)
+    return bool(_rust_exemption_comments(text, start, end, code_offset))
 
 
 def scan_items(text):
@@ -756,9 +805,9 @@ def scan_items(text):
     for index, (token, _begin, end) in enumerate(tokens):
         if token.startswith(('//', '/*')):
             continue
-        if not stack and not initializer and token in ('<', '<<', '>', '>>'):
-            angles = max(0, angles + (len(token) if token.startswith('<') else -len(token)))
-        if not stack and not angles and token == '=':
+        if not stack and not initializer:
+            angles = _rust_generic_depth(angles, token)
+        if not stack and not angles and token in ('=', '>=', '>>='):
             initializer = True
         if token in ('(', '[', '{'):
             stack.append(token)
@@ -766,14 +815,19 @@ def scan_items(text):
             if not stack or stack.pop() != {')': '(', ']': '[', '}': '{'}[token]:
                 raise ValueError('unbalanced closing delimiter')
             if not stack and not angles and not initializer and token == '}':
-                if index + 1 == len(tokens) or tokens[index + 1][0] != ';':
+                next_index = index + 1
+                while next_index < len(tokens) and tokens[next_index][0].startswith(('//', '/*')):
+                    next_index += 1
+                if next_index == len(tokens) or tokens[next_index][0] != ';':
                     # End of a braced item; whatever follows on the line starts the next item.
+                    end = _rust_item_end(text, tokens, index)
                     items.append((start, end))
                     start = end
                     item_has_code = False
                     initializer = False
                     continue
         if token == ';' and not stack and not angles and item_has_code:
+            end = _rust_item_end(text, tokens, index)
             items.append((start, end))
             start = end
             item_has_code = False

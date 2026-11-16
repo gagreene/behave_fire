@@ -80,6 +80,34 @@ def test_rust_exemptions_remain_attached_to_their_declaration(tmp_path, source):
     assert not _problems(tmp_path, source)
 
 
+@pytest.mark.parametrize('marker', ['/// order-exempt: documentation example',
+                                  '// An example marker is // order-exempt: documentation example'])
+def test_rust_documentation_examples_do_not_grant_exemptions(tmp_path, marker):
+    source = marker + '\nfn zebra() {}\nfn alpha() {}'
+    assert any('out of order' in problem for problem in _problems(tmp_path, source))
+
+
+def test_rust_exemption_comments_inside_attributes_do_not_exempt_functions(tmp_path):
+    source = ('#[cfg(any(\n // order-exempt: example inside attribute\n unix, windows))]\n'
+              'fn zebra() {}\nfn alpha() {}')
+    assert any('out of order' in problem for problem in _problems(tmp_path, source))
+
+
+@pytest.mark.parametrize('qualifiers', ['pub\n', 'pub(crate)\nunsafe\n'])
+def test_rust_exemptions_on_actual_function_line_survive_wrapped_qualifiers(tmp_path, qualifiers):
+    source = qualifiers + 'fn zebra() {} // order-exempt: compile-time dependency\npub fn alpha() {}'
+    assert not _problems(tmp_path, source)
+
+
+def test_rust_proof_keeps_trailing_exemptions_on_their_original_function():
+    before = 'fn zebra() {} // order-exempt: belongs to zebra\nfn alpha() {}'
+    transferred = '// order-exempt: belongs to zebra\nfn alpha() {}\nfn zebra() {}'
+    retained = 'fn alpha() {}\nfn zebra() {} // order-exempt: belongs to zebra'
+    with pytest.raises(ValueError):
+        _checker().prove_reorder(before, transferred, '.rs')
+    _checker().prove_reorder(before, retained, '.rs')
+
+
 def test_rust_external_module_declarations_remain_unchanged():
     before = 'pub mod data;\nfn zebra() {}\nfn alpha() {}'
     after = 'pub mod data;\nfn alpha() {}\nfn zebra() {}'
@@ -131,6 +159,18 @@ def test_rust_statement_initializers_cannot_hide_following_functions(tmp_path, v
     prefix = f'const X: T = {value};\n'
     before = prefix + 'fn zebra() {}\nfn alpha() {}'
     after = prefix + 'fn alpha() {}\nfn zebra() {}'
+    assert any('out of order' in problem for problem in _problems(tmp_path, before))
+    _checker().prove_reorder(before, after, '.rs')
+
+
+@pytest.mark.parametrize('prefix', ['const X: Option<u8>=None;',
+                                  'const X: Option<Option<u8>>=None;', 'type X<T>=Option<T>;',
+                                  'use std::{fmt, io} /* comment */ ;',
+                                  'use std::{fmt, io} /* outer /* nested */ comment */ ;',
+                                  'use std::{fmt, io} // comment\n;'])
+def test_rust_type_assignments_and_commented_terminators_keep_functions_visible(tmp_path, prefix):
+    before = prefix + '\nfn zebra() {}\nfn alpha() {}'
+    after = prefix + '\nfn alpha() {}\nfn zebra() {}'
     assert any('out of order' in problem for problem in _problems(tmp_path, before))
     _checker().prove_reorder(before, after, '.rs')
 
