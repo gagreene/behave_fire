@@ -14,8 +14,8 @@
       "windows-arm64"
     ]
   },
-  "approval_gate": "Unchanged owner-approved caps await qualification of Task5a Python declaration reorder",
-  "approved": false,
+  "approval_gate": "Conditionally owner-approved caps qualified by complete manual CI evidence",
+  "approved": true,
   "conditional_owner_approval": true,
   "documented_unit_source_models": [
     110,
@@ -68,5 +68,315 @@
       "kind": "relative_absolute",
       "rtol": 1e-12
     }
+  },
+  "qualification": {
+    "activation_reason": "Task5a declaration-only Python reorder qualified across both compilers and all seven native platforms; numerical inputs, outputs, defaults, and caps unchanged",
+    "artifacts": {
+      "tests/data/cpp_reference/surface/cases.jsonl": "266d08d8b82d65d950461c73e70b44c228ad7b54fbe99eb1d14ed8af6add66da",
+      "tests/data/cpp_reference/surface/results.jsonl": "ae006838d93bbb9533df74340085110c479315cb8238a8ce488a68fe5e9e1b71",
+      "tests/data/cpp_reference/surface_custom/cases.jsonl": "62d6971537447beae8092a6eddba78495afac0522d8dfca6142ac938c4192867",
+      "tests/data/cpp_reference/surface_custom/results.jsonl": "04e96268466338364a350d53ac05b639f1a7758c78911aaee97da389c0f779a2"
+    },
+    "calibration_complete": true,
+    "ci_run_url": "https://github.com/gagreene/behave_fire/actions/runs/43945818389",
+    "fields": {
+      "fireline_intensity_btu_ft_s": {
+        "atol": 1e-12,
+        "kind": "relative_absolute",
+        "rtol": 1e-12
+      },
+      "flame_length_ft": {
+        "atol": 1e-12,
+        "kind": "relative_absolute",
+        "rtol": 1e-12
+      },
+      "heat_per_unit_area_btu_ft2": {
+        "atol": 1e-12,
+        "kind": "relative_absolute",
+        "rtol": 1e-12
+      },
+      "length_to_width_ratio": {
+        "atol": 1e-12,
+        "kind": "relative_absolute",
+        "rtol": 1e-12
+      },
+      "spread_chains_per_hour": {
+        "atol": 1e-12,
+        "kind": "relative_absolute",
+        "rtol": 1e-12
+      }
+    },
+    "overlay_sha256": {
+      "CMakeLists.txt": "c0e8fcd808dbfbbc993a4a16d782eef580b0982e496cb776fe473d27cf6a7a31",
+      "driver.cpp": "eb2498786e11cbb9c25a312b2e4d1e29c519e0a09be02de46d1a08bd5609b6ee",
+      "probe.cpp": "48338485a0b6f3fd64d0b3542a56c996e043d5e77e9887f0189101c1065df015"
+    },
+    "reports": {
+      "cpp-GNU": {
+        "sha256": "37c64aa337f669c5e8f75a0f26d975446a9438ba056ddaf9741d15b51702834f",
+        "summary": {
+          "available": 722,
+          "cases": 773,
+          "fields": 3610,
+          "unavailable": 51
+        }
+      },
+      "cpp-MSVC": {
+        "sha256": "285d635cf84bd47b66240578f7853afc05c5eec784341bfe538bb68382cd4529",
+        "summary": {
+          "available": 722,
+          "cases": 773,
+          "fields": 3610,
+          "unavailable": 51
+        }
+      },
+      "ports-linux-aarch64": {
+        "sha256": "6997e60217ecf036d668cb32d17e433a315c2ae7c67dcc25ecf0cad48c475494",
+        "summary": {
+          "cases_per_backend": 583,
+          "fields_per_backend": 2915,
+          "paired_cases_per_backend": 139
+        }
+      },
+      "ports-linux-musl-x86_64": {
+        "sha256": "c82ad0fe921c07b0410944e10dc8e20c0a8adf05ba472f6bd4f73cc396c0589a",
+        "summary": {
+          "cases_per_backend": 583,
+          "fields_per_backend": 2915,
+          "paired_cases_per_backend": 139
+        }
+      },
+      "ports-linux-x86_64": {
+        "sha256": "7ba1eacec1073ffc79e4eccde039356d11eddc21c6ea30aa1c05bda186dbc206",
+        "summary": {
+          "cases_per_backend": 583,
+          "fields_per_backend": 2915,
+          "paired_cases_per_backend": 139
+        }
+      },
+      "ports-macos-arm64": {
+        "sha256": "c1b29710a1caf07f7f9bcea44cf91bd2c7e27458541ebb58cafc6a6eaecbf216",
+        "summary": {
+          "cases_per_backend": 583,
+          "fields_per_backend": 2915,
+          "paired_cases_per_backend": 139
+        }
+      },
+      "ports-macos-x86_64": {
+        "sha256": "7c2611877ffea436520f36a976cf0893eec079e01c63cd0a369aa526573e44dc",
+        "summary": {
+          "cases_per_backend": 583,
+          "fields_per_backend": 2915,
+          "paired_cases_per_backend": 139
+        }
+      },
+      "ports-windows-arm64": {
+        "sha256": "0bbf97c0cad1b5db34468fb393738a434c263b603475a1dd892ee4bf8a5a507a",
+        "summary": {
+          "cases_per_backend": 583,
+          "fields_per_backend": 2915,
+          "paired_cases_per_backend": 139
+        }
+      },
+      "ports-windows-x86_64": {
+        "sha256": "e225e29230f08545e9020945c9f9a5950222724fe9673d094e3c64cc349dfc1e",
+        "summary": {
+          "cases_per_backend": 583,
+          "fields_per_backend": 2915,
+          "paired_cases_per_backend": 139
+        }
+      }
+    },
+    "schema_version": 1,
+    "source_commit": "7a4ff06ec7a29efb8c08097c934c3cbfc7c9179d",
+    "source_files": {
+      ".github/workflows/ci.yml": "67d1bddfd5be308551353df9faa6afccd5e8e446045139b576fae515f7b26dab",
+      ".github/workflows/crate-validation.yml": "970147b312a0719d1e63318b2f8b8f200479c5592e5e368cbfd2407893ac1f6d",
+      ".github/workflows/release-crate.yml": "20ecaa481e1f6b5e73c1e5019da3ffe2db6de037529c2eb300f5c4a3adbfa2f3",
+      ".github/workflows/release.yml": "8bcbc7c87a325d8505c88436e384d52d733a5d08b9dcc1b92b201b15c34dcfcd",
+      ".github/workflows/wheel-validation.yml": "f14d3ce305d5c341351e5d1b17d14a2b28359d246376e130230c57c424cf8c0f",
+      "pyproject.toml": "a88c31d49c645e22fd267cbb23660b1db255309f0932025ea4c68a6bfb652fcc",
+      "rust/Cargo.lock": "d1d2a7bca8b52c78ef86466f0639b6c44a5b08d2a000a8af4dc3ee1da45535b2",
+      "rust/Cargo.toml": "31b5c56d96a7293e4d1298577bf422438fee6521d9f89858e23ddefd36dc75ac",
+      "rust/crates/behave-fire/Cargo.toml": "b1326b42c725b7d50dfe6834cbbf28fafc8648e39e0825aeb232d43ec2b323c6",
+      "rust/crates/behave-fire/src/batch.rs": "b114e723f4c65747e699726e28e604be3b2b9c162b349e71d48a419d7e6be24d",
+      "rust/crates/behave-fire/src/crown.rs": "33e3ddf4c14b96c99088c25b50bba35e7f2dfb918b12816231f47cf2934e6133",
+      "rust/crates/behave-fire/src/engine/crown.rs": "42ccf859424f633c55136c8a05860c78f1bdec9d8033b90e0796fad29d822e64",
+      "rust/crates/behave-fire/src/engine/field.rs": "f38fc553b6c32da41dbab31fb336512756f08e1936d1180b73275c8ff92d7c96",
+      "rust/crates/behave-fire/src/engine/fuel.rs": "2c5072f64e300500ab7d7fa2ce9167a648ad7a94370c11ab16462d2557f82588",
+      "rust/crates/behave-fire/src/engine/fuelbed_fields.rs": "8c032e8bedc550bdc54e3ccaca56be91607e40d882929db1ac602038518c948f",
+      "rust/crates/behave-fire/src/engine/missing.rs": "942cb10afc1cb26687d7582a17554015fbac4d97459337a2fd45018e7a22c1d6",
+      "rust/crates/behave-fire/src/engine/mod.rs": "3c3f57c35167375ea5471bc3804ce32c8c3780bdfdfa32ebc234693918f6d316",
+      "rust/crates/behave-fire/src/engine/options.rs": "9defe87ea35e6c51f855445a66bd1ec6bfce816209812c5775e75e4e0dd05a19",
+      "rust/crates/behave-fire/src/engine/run.rs": "e45f9918a6682892a22b174a6f31eb0cc11995d0abdad4c591e657e2969ffa10",
+      "rust/crates/behave-fire/src/engine/session.rs": "3a23e20c180ab1bde0ef391335525718f35264f5189293bac7329fb61aa92920",
+      "rust/crates/behave-fire/src/engine/session_crown.rs": "a64bb4a1775061143996483d8218a92c180a4a46df2034b38ec8ae8a464e3be4",
+      "rust/crates/behave-fire/src/engine/session_fused.rs": "55e183fbcf3ea5d2bda96d893d536e964dcc3b89ebb7515986bb5a7f8ff2be89",
+      "rust/crates/behave-fire/src/engine/session_surface.rs": "1103ebe324dc467bcaac53512b4ca97386e3a59b6ee5aa337d45542a1c8f5330",
+      "rust/crates/behave-fire/src/engine/stage.rs": "90b35a7c54c41f0eacefaa3f58c714738978fa628050ec6a488118449ae47d6d",
+      "rust/crates/behave-fire/src/engine/state.rs": "577570d613211a0c90df05f3eb7da22ac59deda6fc2e840058e2df1e04f62b3f",
+      "rust/crates/behave-fire/src/engine/surface.rs": "42ad7f31cf733a88936f587bd7381d6ece28202c9aba8d14fc6616929d9399d4",
+      "rust/crates/behave-fire/src/engine/tweaks.rs": "ab3074d47556b4798209a9eff89526a39ef713ee1b4f6ea777a8873f2d8d3c09",
+      "rust/crates/behave-fire/src/error.rs": "fc1acc257d4f043bdd7081b55aac846fa4adbfbb44e2efa06cec2a2e32596121",
+      "rust/crates/behave-fire/src/fine_dead_fuel_moisture.rs": "451a1d9c190996f1416510e8c861b17928993a095956262e756bbd1d82ed83f5",
+      "rust/crates/behave-fire/src/fire_size.rs": "3d532a6237b461d65bbdc9946e2aa2751f2d80011d3e3f8c944f97df538e1e70",
+      "rust/crates/behave-fire/src/fuel_models.rs": "76ff7cce2af974484ba4fb500bc215549716cb44f315e62ab56e64767d0af4bf",
+      "rust/crates/behave-fire/src/generated/fine_dead_fuel_moisture.rs": "694c7ab6330c0ef99713aa0d70189336cb2cda6b45001a94f0769d93e86f7595",
+      "rust/crates/behave-fire/src/generated/fuel_models.rs": "fc399af65f69e4f4df688cd9a16329db9d78bbbedb9edfbe32116189cb4ea86e",
+      "rust/crates/behave-fire/src/generated/species.rs": "15fd521d97d87ca547f6f202d43395bf421a4a3a807b1d6b2cb840650352a3d8",
+      "rust/crates/behave-fire/src/grid.rs": "b398f5cfdc9197b30af58bbe601d1a64f29a2bf4fe5a95a6a1ab4ea4965cfd1e",
+      "rust/crates/behave-fire/src/ignite.rs": "c9034994f37896d2c11d5587be43fc147309e7ac669e3af45f807937e8ac7f5a",
+      "rust/crates/behave-fire/src/lib.rs": "eb6a0079ad6b699a0161b1cb162a664dca3bb494c7dc460ee8ce5396dce3c3f9",
+      "rust/crates/behave-fire/src/math.rs": "002763d0578c26f8297c78771783156c7aaa641a8f07d1cbd57d436c91da83e6",
+      "rust/crates/behave-fire/src/model.rs": "41ff03116335fa9a4079f185aa52529aa7bfc17d85e4ad010023aeb2ce348940",
+      "rust/crates/behave-fire/src/mortality.rs": "9ec25a32dc07e27c3dd480357d8a386619ffa9ba84fad450b56ec2c00a80f33c",
+      "rust/crates/behave-fire/src/output.rs": "11284f155e182132c29e6a935b3c143aec7cd65a0aaa67bfd420c0fdc2777285",
+      "rust/crates/behave-fire/src/parallel.rs": "80843c94bdbd07194cfd679174ec613ef6a9ef53c98e1af4fca8aeddde632de7",
+      "rust/crates/behave-fire/src/raster/crown.rs": "b037f9a157e5f239efe54ca694f26c3b376999182fa89b49958203476f1b538d",
+      "rust/crates/behave-fire/src/raster/inputs.rs": "4d35e115346d35f6b09ceb5f82433508c7f69733ec414961a7311a5c6537cc2e",
+      "rust/crates/behave-fire/src/raster/mod.rs": "df75141d8a0853106ee53c2b40938c504284c6e967209098efd588ca15b4eaa3",
+      "rust/crates/behave-fire/src/raster/outputs.rs": "182773da7c1d0f4112426d94347141fbd7d1ecb18bf44229874ddcfca9da5acd",
+      "rust/crates/behave-fire/src/raster/stages.rs": "b44a618733e3b3a8bff1c42f621ceda08e35814b528be7de6012ca86219bb5e7",
+      "rust/crates/behave-fire/src/raster/surface.rs": "621d4491de0167a401fa274f8c8f7a1ded0a302da06832772f46c2fe9cf903c8",
+      "rust/crates/behave-fire/src/safety.rs": "105feb3a4e7315172e12f4a7fe010197dc787d07175a3389cf870c4037713267",
+      "rust/crates/behave-fire/src/slope.rs": "2faf7dbcf13357ccb90a3d9d66a9a93d19f08d53e1258d86b7915b48b6697bbd",
+      "rust/crates/behave-fire/src/species.rs": "64e50c9750f21e1f1df5bca21c3357125246072715e09408fb80265a21f8d2ef",
+      "rust/crates/behave-fire/src/spot.rs": "c111a72b607a708d8b9de491f50785d5dac8df9ecf9a1935632eb3a63ae2dde0",
+      "rust/crates/behave-fire/src/surface/fuelbed.rs": "23ff3097d8045752cc90cc22b0a76f3692db2c6a8485d9228e16b13c6359d57f",
+      "rust/crates/behave-fire/src/surface/geometry.rs": "90c79e3aec0ab3b4ac6fec5cf28882490197cfaa4ed7c35ee9351adce285e6eb",
+      "rust/crates/behave-fire/src/surface/mod.rs": "7497db3e46ca2919dd8cd24fd6961ddf52a835c2033e0da8af3302ea34b4ca8b",
+      "rust/crates/behave-fire/src/surface/particles.rs": "4602743b332d9bafae3bfd3fc42e2fb42003c28660759f5f3574e3c4e7525419",
+      "rust/crates/behave-fire/src/surface/prepared_wind.rs": "262555790497c02abc4782961c591d7fbd7b6756ed00a36b51942c19ffed0545",
+      "rust/crates/behave-fire/src/surface/reaction.rs": "27c23efbebb841f92eb8b4815f87c8222a20a2e42fe99d7935b834af64bc33b5",
+      "rust/crates/behave-fire/src/surface/types.rs": "b0392713e31e569e9124e42314d46080e0d292ebce012133285fbdcb2a6cf2fe",
+      "rust/crates/behave-fire/src/surface/wind.rs": "5194d38d530a4485017da73e226b3dc6e18493cd4bc521e34086564a57399627",
+      "rust/crates/behave-fire/src/units.rs": "090679874ed09c785e1bd82600d5ecd66c1b3ec4c4baefde70bc8a2419ce948b",
+      "rust/crates/behave-fire/src/vapor_pressure_deficit.rs": "5d7c3c60d48d06754f834005e9f0ec892e5b74de28788e1e3301c519e7bce745",
+      "rust/crates/behave-py/Cargo.toml": "ae627a1fe28fa05c20255a9918288993e4daa2abee73f1ffab28af26abb18680",
+      "rust/crates/behave-py/src/allocation_probe.rs": "30c9a6750fc3ddf610f427a994df4aa6fdb627592a77542aa2863a40bf92a108",
+      "rust/crates/behave-py/src/capabilities.rs": "b4a0edbf8a0793c234db22d2e97530cb28515676a197200bffea1cf0cfd28e9f",
+      "rust/crates/behave-py/src/component_columns.rs": "30699d9e4fbe57d0a66ca779d1dfc5cad037e0c650071797630d5cb809352e5f",
+      "rust/crates/behave-py/src/component_f64.rs": "32e1f83acd53d263b3eba5553b6cbaba9d6830461573492035bda1a7f6322fe1",
+      "rust/crates/behave-py/src/component_fuelbed.rs": "32a5f2fe21b915d9428ef220f0029a85d9878c15b1b52e8f0c4befbb13c8644e",
+      "rust/crates/behave-py/src/component_independent.rs": "b58bfa8499a4988564044fe64c8a48cc9beb7e3e97c30edc215c99adac32d846",
+      "rust/crates/behave-py/src/component_requirements.rs": "eccbf7ff1912a9156a51463ad55fd228b201c3e49508f0804c0add45b094398d",
+      "rust/crates/behave-py/src/component_schema.rs": "d90ac037163d35afac59f684ed68bf6057ce876ba2b593daba01b35e0cc0fe3e",
+      "rust/crates/behave-py/src/component_selected.rs": "40a6a45bfe6dee1ee87090032627ecb403cacd35f5b124395a3a912fffefac17",
+      "rust/crates/behave-py/src/component_units.rs": "fe74c7b1bac47745f4357979f8a5cbfd5b77fd8325a09b78ec3bf6b98cfbe6ca",
+      "rust/crates/behave-py/src/crown.rs": "e697ab2faf8d1d33af28446d09cccdd52163d20e7a7e974551a171c1d7d19ebc",
+      "rust/crates/behave-py/src/crown_dispatch.rs": "056fd2fae2f265557ddee97fe0c538d01cbd659190aba39bdcb9a64de55180b6",
+      "rust/crates/behave-py/src/crown_fields.rs": "37761caf190aaf1a5b729cfb549f915599295472537c9a20784e77c3c3f0e0c6",
+      "rust/crates/behave-py/src/data.rs": "194fdf87bb4d095ed97dd09470f5d29264f7150d173e20baec0c3cb3d1139ca1",
+      "rust/crates/behave-py/src/dispatch.rs": "22c62d2ea958450f3314a8d9092093cda91122ad03ced3bb9aebdb5adc58b441",
+      "rust/crates/behave-py/src/effects.rs": "4f585fe5e168bf7a1ad74f97682a062e2a9e0492618e3803c043d1a9273bcb27",
+      "rust/crates/behave-py/src/grid_session.rs": "501f90e37a621ffd55095a92d2684f7177deb51a83a556e3cf0ba0de5d44abd6",
+      "rust/crates/behave-py/src/lib.rs": "4f68e24305d639076e57a8403bff8a1189e5a4ad8ce714213e8472ff61a1adb3",
+      "rust/crates/behave-py/src/model.rs": "8679fd6fc120275d942cf38f7c996e6dc858ca3bc99095d809d1fa6a59b5e7d1",
+      "rust/crates/behave-py/src/model_f64.rs": "7d240e7c5ffa2dcb3c7140249d8c7227a5c66606d4645243abb49919607ecc3c",
+      "rust/crates/behave-py/src/model_fields.rs": "325ae04581ced3c4171fed90f46505f2e395cfa05017fb1a80a5f218919273e0",
+      "rust/crates/behave-py/src/model_groups.rs": "af20023d7e92025406acd58a3fada7ca698af0d87532ecc8fe20f2eaaa83ca51",
+      "rust/crates/behave-py/src/model_observer.rs": "03041fcdfaf652f6d13474d4ec1256e0ec9d9ce8d107a3bc52e055046de0fab3",
+      "rust/crates/behave-py/src/numeric/contract.rs": "4e695d27f311845de0de94a660a5c3ce5f9e9ce3773eafdb598d4ebfffdf948e",
+      "rust/crates/behave-py/src/numeric/shape.rs": "9b561793ee5ba5be3e731320f102f257591d5f369faf572089da66fb550da72f",
+      "rust/crates/behave-py/src/numeric/snapshot.rs": "90f0378f7d7ec08a7b71d8c50b87d15cc353ad401427627cee40de6e37c769e4",
+      "rust/crates/behave-py/src/operation.rs": "3c9843066fab456d568d01486649c43120d2fa08aec682c1cac2a78467ea09db",
+      "rust/crates/behave-py/src/prepared/controls.rs": "3e4dc2521478f7f78a09f4cb063c7bb344f722afb3109ccafa6f5e5dbe33f5f8",
+      "rust/crates/behave-py/src/prepared/keys.rs": "e817c08b0285f3870b1c33220ca9c4bd6d3285e6968828787c1b50180450461b",
+      "rust/crates/behave-py/src/prepared/mod.rs": "c23319086fb807cb5db7e252793a9270853b0d74fad4dfa900e497807bab2b4c",
+      "rust/crates/behave-py/src/prepared/primitive.rs": "6edc47c09693b70c0eb442c62651faa95a4d68de88763b3f4cb5037baa5f5dc5",
+      "rust/crates/behave-py/src/prepared/selectors.rs": "7f044dbdefff3f259434bcf9f27bcc42147d6b6ecd042ad8f190c8a7149bd5e8",
+      "rust/crates/behave-py/src/state.rs": "02847bcb6465af600593c13d809149996bf5c6a8ae90235e88c52a45c8fb4ec5",
+      "rust/crates/behave-py/src/structures.rs": "061d2775072c5f9bf65ca99aa9deddb4651d2a6e0bee5c8d5144c1e318b1fbd0",
+      "rust/crates/behave-py/src/surface.rs": "f1b406ce7d2383522621d709bc240c52b95cc1babaeda96a17dd4b28fc96699b",
+      "rust/crates/behave-py/src/surface_fields.rs": "3581184764f527c49e57ca6637282514c55dab59a23b528d8ecdd59bdc5a0b4a",
+      "rust/crates/behave-py/src/tools.rs": "dc01f52b08b765b68a752de0f91204c16761053de7db8ddd09436e3b08bc0c8d",
+      "src/behave_fire/__init__.py": "ccad08cf292c2fbc27579e64f7cd8e14b35a940ca8654316250ce21d1a0f384d",
+      "src/behave_fire/_auto_namespace.py": "8e4e78d5f4d7be1309e432d411b61dd5225fe445e664c15f25f5ea8ef74199cc",
+      "src/behave_fire/_auto_routing.py": "9385022b99b6e875f981208e4a28fc54f0897e77592fb0dfedadd9140340f0fc",
+      "src/behave_fire/_auto_state.py": "6913c8956b8730ea66bc27bc3a4aa7430deef418a0730ab5d82d429933102ab3",
+      "src/behave_fire/_backend_contract.py": "ccc58a4574071f898fb2c10c6f3579ab556f49dece220192b0ff39806f94fb0e",
+      "src/behave_fire/_ownership.py": "6c87e51715f8dbbd4f4b9381c09652d4cb054f6ff25e0060810dd69408769a62",
+      "src/behave_fire/_version.py": "4527807abc155d9e01274e6aa53b40ff7ac324727d16c97d646758dea1580c0d",
+      "src/behave_fire/auto.py": "6a1253494ed1210fa094fc458d5a2061eb6c3e1bc2339d5310f75f275338d408",
+      "src/behave_fire/behave.py": "b8a49317bb159374a12a1d183a3bf7d3c5611a8547c83fb001b26179180fe6e4",
+      "src/behave_fire/components/__init__.py": "5c88705dcf2a4073bc79bd49e5038172bd0fa5b15ca9e77d6f9717424282519d",
+      "src/behave_fire/components/behave_units.py": "d93e22857d8af8402fd45936f6d000d1fa4ca9ef63f72ef16db26b027809f287",
+      "src/behave_fire/components/crown.py": "9e7083b1cb862620fa2a86b17abde22e9518d928645ead4b0fcb2cdeedc986c7",
+      "src/behave_fire/components/fine_dead_fuel_moisture_tool.py": "cb11fc2da53c66b7f7753e88aa1d1f2135c91c3e67962912d1b2c097a73a8e60",
+      "src/behave_fire/components/fire_size.py": "a5e9f6746792f26f2766567a0fd9b6bbe8d1c7ceabbebf1f9cfe2d68c40bac57",
+      "src/behave_fire/components/fuel_models.py": "24bcc5f8c47af75dba02a0ac4fe1348fd15abca4b360b395a8d1bf2e0c1349e9",
+      "src/behave_fire/components/fuel_models_array.py": "7f1d824b5bbd1990d67c7c195cc6922930a5fdf5b847b7c7a8df58c0701f7024",
+      "src/behave_fire/components/ignite.py": "8f3a18e6acbc8034a32e2caac599200b6f1c47be1daa3f5b38b5a24da5607ced",
+      "src/behave_fire/components/mortality.py": "ade58d08cbad6674ffb965c7ea1b9cb7f698b57e901a79581d44bcb172cbf08b",
+      "src/behave_fire/components/safety.py": "ed27e7cef7aa488a92636f8dfa589fadca3e0c6ba44ccae87a9fd7c8bac168a0",
+      "src/behave_fire/components/slope_tool.py": "4cd39b1941e95e2f2300c89796fdd3bf7d33b8997706a950913757074b654124",
+      "src/behave_fire/components/species_master_table.py": "feccfd4fb2ba102b122914d92ab986cf1b63c3323bcfed2465c288adb319cddd",
+      "src/behave_fire/components/spot.py": "0592e0e0b3942cfceb3d706e3a88d4cb3b4f1c74a39a01a995036be7268a0ab2",
+      "src/behave_fire/components/surface.py": "3811908c4da85633b1730455c9ff3b10472b79e3facf4b4dfa0bd778f2ef74e8",
+      "src/behave_fire/components/vapor_pressure_deficit_calculator.py": "4b165f3d48a02ab49c0fcdd2a5a7df65bab8b4a6366a280cbbf23041488eb258",
+      "src/behave_fire/python/__init__.py": "6be9e19f1eb48fd3a47038436fa8de5926f5cc2add3578f870b2a2709180c943",
+      "src/behave_fire/rust/__init__.py": "7e68cd0a05977485537ee46d6f593a99024245322fd82b3c9df1a5c7dfbac16d",
+      "src/behave_fire/rust/_bridge.py": "2ce8d05d453741d3c4cd1e49cd3acaf8d647d37baa731ca0e24b8c6aee3ec6ba",
+      "src/behave_fire/rust/_component_api4.py": "837e908d2add484ee8c0572ae6dc6c51ca48d7a1a14648cf59a4567b8767e5fc",
+      "src/behave_fire/rust/_contracts.py": "eeec83ab5fe36e2a9a324418093776c6b302b80a7a5f5cdd99a1bd6ad4222bc6",
+      "src/behave_fire/rust/_model_api4.py": "a3353ee0263b91bba77036df3ea7cfa523b39250010db58370629fb93aeae9e5",
+      "src/behave_fire/rust/_numeric.py": "c04710d2eec318d17513ceea63af08aaa7613462acf99492079bb474643a836a",
+      "src/behave_fire/rust/_serialization.py": "d159987e3e46e03e70737faab68f0229d3575959593f479c0179629ff0649e01",
+      "src/behave_fire/rust/_threads.py": "7a20e6eca24e145e8ea7eb6a14b7bc946a3a4c39b9eb1ebd2baed3a0afed39c1",
+      "src/behave_fire/rust/behave_units.py": "c859ae1cee2f9cee9f3d093c938e4fe1d728badc9cb0a10598c6a1f92679ec79",
+      "src/behave_fire/rust/core.py": "645ead8bb46d127bc630c303135174e57637e4a63a972184610e03dfa9769c70",
+      "src/behave_fire/rust/crown.py": "db1bfac6956b9685673c45da1c5a8abf9a09fc81d42f6ad5152af14d6c653907",
+      "src/behave_fire/rust/fine_dead_fuel_moisture_tool.py": "1f935886e5f5ec871ba9c7523bbd8332e3a6413bd7ba9801d704bcc28c5a955e",
+      "src/behave_fire/rust/fire_size.py": "e99d4b82196845fb22bbb20f2ce0c13cc7b9a3c640bf00154b9ee0544cda68e0",
+      "src/behave_fire/rust/fuel_models.py": "f89847fa3c7901feb61f4ebc1b6d2722e040adb3e5fa971466298eb3766e5121",
+      "src/behave_fire/rust/fuel_models_array.py": "8f972beda6ec25e2f03ba785d9730ea0cb15785bcef97fbead523a62111e1364",
+      "src/behave_fire/rust/grid.py": "3269ff025bde130daef1fc83fd7b80c792bc31e4afdfed4e9ee7bdd9379fdc39",
+      "src/behave_fire/rust/ignite.py": "e75921c0c4124c1a4ef97666fd158068033a7c676b553a5aa2fd23802b5240f3",
+      "src/behave_fire/rust/mortality.py": "1b15e11f6ca641d1f7238e977fd6399e32cb2c048a78b47d3c606ee5944b65e9",
+      "src/behave_fire/rust/safety.py": "87ac0ed3c2a57af031c6353c862e19075548e9067befc28f7a74a81387c73a9a",
+      "src/behave_fire/rust/slope_tool.py": "c3692f3dff8da05bf49f4246280d33fd367d906ca518a0c185d1f3efef136168",
+      "src/behave_fire/rust/species_master_table.py": "6332096ffedb14b196aa3600a4f447aa7dbe5d1fe4102cf8b77e3c92b12e2ba0",
+      "src/behave_fire/rust/spot.py": "e54b5fc624bd889c4f0e193ad5bdaa30fd220fd2a13365a6f9c1d9b7f81a0ea1",
+      "src/behave_fire/rust/surface.py": "657e973cdf052ae51e86ff15938c3a45be3df524045ea5c5446b2c74783ba489",
+      "src/behave_fire/rust/vapor_pressure_deficit_calculator.py": "304b2960315463fe003d69d4a84f889d8d74832320acf6a25905d76805f9016d",
+      "tools/assemble_allocation_evidence.py": "e171d1b4de994b77fce99b8c81e0ccb4a9e0742b7d32b0affb9310a50ad6281c",
+      "tools/benchmark_backends.py": "819f020135dd8b15e812a44d4f8faf68e6f31cdcd1cd30f9d3481238ae550600",
+      "tools/benchmark_component_families.py": "87cb587b49f5b70030aa031faa087b17a5d3a945a5aefe859ed89635d2732ac6",
+      "tools/benchmark_core_f64.py": "74d6ff28582b451a6d88e33560fed989e4ab00830aa1805c0bdad08477465c3b",
+      "tools/benchmark_public_serial_f64.py": "7f7fd35f13b15744675dfef0fe99cb2b12ff2d729da7480c2bb409121c8d4d50",
+      "tools/build_pure_wheel.py": "ed7f687468a5d95164acf360bedeeb253fad802749c80370248d2978f63f19ce",
+      "tools/check_core_f64.py": "6bb1a859277153ee4f8aa2d25afd77097538ceadb4066d61fc5607e79eb62cd9",
+      "tools/check_cpp_driver.py": "4cebe80a4854f639f7a6fd727c71fa23558c271a2c314a86011f7e9bb1a5c967",
+      "tools/check_crate_package.py": "b9ac32e996e46b75ded563df322954c66864d07955ce7a1c09a475cfcfb90281",
+      "tools/check_function_order.py": "4debea611e505cd19b49ed6123a31cb80886ff3d7ce6b44706bc31068ead0d9c",
+      "tools/check_performance.py": "34fa57f516763374125f74a0d024226b76a4ad2944ffd178c3936fb827b5c8e3",
+      "tools/check_public_serial_f64.py": "dcef3b190c3842b512066e539d0654759dc75cc8e7139883d291102e3e953213",
+      "tools/check_rust_tables.py": "2aebc6fedbb1073bba8731d0c6eea9589806a751cc760a9fb958ed7d81042fec",
+      "tools/check_sdist.py": "d9b2cbbfb612986299df0be62ae0821dc755b851e46ac31386519b6957dfa44c",
+      "tools/check_wheel_metadata.py": "e0d1a1528f7e1204e01a51569fb4920b2e404d7d85965c41043799be7e88b987",
+      "tools/compare_backends.py": "a5a9cc45377c4edb7e7a9526d82d16e0ba4261239a18d27844ca7ebac96872b1",
+      "tools/core_f64_reference.py": "138ef249706ff2392f4da85e05290eda11275017db4baf1af4c59e90a3bb19c8",
+      "tools/cpp_calibrate.py": "4e557ed4506beee74f5197d48879a936718691eee4a43d6f79160076ef2b52d2",
+      "tools/cpp_controls.py": "77600705535363d93fa9b3ae2e8d9b3e3ab00d1999d7e2704db5f288d7462a38",
+      "tools/cpp_inventory.py": "b101377b9ac44e3cc57e2279668afc9ec503ce64c52277305000dc77ecd52918",
+      "tools/cpp_reference.py": "8512056e849b4d3eecd2d5eede2d43d3d1a76e1423afa4ef7600fa567f96b23c",
+      "tools/export_cpp_crate.py": "02ab1173b4fcc4deebe24892ab2960ff56772dfaad3762e371df0467ed83042e",
+      "tools/export_rust_reference.py": "c71eedccb7f1ed100200eec9821d21e27c097a885d137d530660aaa7c9a97b74",
+      "tools/float64_model_reference.py": "f4c2f704e969b5ba20320146154143576bff1df6493d784def2a21644735c187",
+      "tools/measure_native_allocations.py": "1120fd049b8fbe976896e88207e552a024a3019f02649d190aa7fde3b69cb635",
+      "tools/performance_cases.py": "2f6f78712a514ca81a4b43719929ba51ed9ee7d1f976283009bf08f51b088f6b",
+      "tools/performance_contract.py": "46954620a1e5e5ec2583c56a1be0aaf63aadf567157322674dea87ecb19d4b84",
+      "tools/probe_direction_fixtures.py": "df0cd5599d9acfb4c8d4e40fe2687fceddb429d29f1fc21b8baa455446d30fcc",
+      "tools/probe_direction_layout.py": "53a4e156cb704cf70cda6b2c26622306d58e05df74a17be1f745923640a5f215",
+      "tools/probe_direction_oracle.py": "ca31800a1a15b4d733ad1c37c7c437e3cee9757b477c646d8d2c16543f8f9bab",
+      "tools/probe_numpy_aliases.py": "f451ef9d6a613205c83b50d8c010b3a5f07e875b9156e34ebbce0ff773cc93ab",
+      "tools/probe_platform_oracle.py": "ed8b04b2388bf44b87ff2e0a65957e4aa522e80c1f5f94e29e87ee27d970ea82",
+      "tools/rust_reference_platform.py": "4de6ff966596adf08b60c8b1b0332302182dbe688ea256a9052c6c45ff89e321",
+      "tools/smoke_test_wheel.py": "4912e36a4cadfe3573ef9a819bc4c62f20af4b4d97241477fbd14c06ea93e893",
+      "tools/test_native_wheel_suite.py": "586893aaf673c9809c10e2e340690b29450929a81c1de9e5dae84896b044c675",
+      "tools/test_wheel_install.py": "e791c5f24d73ac005998c691b05839ffea4ee619978a8472bfc02780abb36a42",
+      "uv.lock": "c259b3a141f671cfa47424d8668c3b6cfe3a75a6ec086594a8f47e3aab970101"
+    },
+    "upstream_sha": "f3b2943e69abca942e795c5b1b45276f6338abb5"
   }
 }
