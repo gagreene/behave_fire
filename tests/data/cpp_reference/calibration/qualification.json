@@ -1,5 +1,5 @@
 {
-  "activation_reason": "PR32 lexical review fixes qualified at unchanged caps by complete run43776186162 atd9e2627",
+  "activation_reason": "PR32 declaration proof and lexical ownership fixes qualified across both compilers and all seven native platforms; scientific sources and caps unchanged",
   "artifacts": {
     "tests/data/cpp_reference/surface/cases.jsonl": "266d08d8b82d65d950461c73e70b44c228ad7b54fbe99eb1d14ed8af6add66da",
     "tests/data/cpp_reference/surface/results.jsonl": "ae006838d93bbb9533df74340085110c479315cb8238a8ce488a68fe5e9e1b71",
@@ -7,7 +7,7 @@
     "tests/data/cpp_reference/surface_custom/results.jsonl": "04e96268466338364a350d53ac05b639f1a7758c78911aaee97da389c0f779a2"
   },
   "calibration_complete": true,
-  "ci_run_url": "https://github.com/gagreene/behave_fire/actions/runs/43776186162",
+  "ci_run_url": "https://github.com/gagreene/behave_fire/actions/runs/43783298274",
   "fields": {
     "fireline_intensity_btu_ft_s": {
       "atol": 1e-12,
@@ -42,7 +42,7 @@
   },
   "reports": {
     "cpp-GNU": {
-      "sha256": "a8fe749a46a0496a1a431123fe749ce0285dee27cd872cd00593fd7c87fa5f4f",
+      "sha256": "53f914a457a8c97da7cd73f7d884754c509a4c74665c72cfa5b63fc04e991c73",
       "summary": {
         "available": 722,
         "cases": 773,
@@ -51,7 +51,7 @@
       }
     },
     "cpp-MSVC": {
-      "sha256": "d3afe8051688c00a172e83156c98c7e49f6cb346babf10012ac6d7e804885967",
+      "sha256": "5951d092176654a0387c74ac47c0b021dd5403911faaa3a0bd2ce994f1462578",
       "summary": {
         "available": 722,
         "cases": 773,
@@ -60,7 +60,7 @@
       }
     },
     "ports-linux-aarch64": {
-      "sha256": "d128fd46a406b599de8f69841ebcaeba55facfc3778afca2550b32de580d398d",
+      "sha256": "366d7cb4cbeca8147600073d804a4e83883266b04350ce4ade1f166cc0c2d462",
       "summary": {
         "cases_per_backend": 583,
         "fields_per_backend": 2915,
@@ -68,7 +68,7 @@
       }
     },
     "ports-linux-musl-x86_64": {
-      "sha256": "8e848956fa7ab0795197799a42025e09db3cd5a0d4c204b51b44ed82bf59b5d0",
+      "sha256": "e182078d9409c5a7dddbe4e958d149551bd953799aee9466380585b692bc5249",
       "summary": {
         "cases_per_backend": 583,
         "fields_per_backend": 2915,
@@ -76,7 +76,7 @@
       }
     },
     "ports-linux-x86_64": {
-      "sha256": "0774cc8b758bed03eb6f94da3ff314dab5faab614333e27103f12ff5ff2fe885",
+      "sha256": "0adefdd16dd7c3932225f60020afd68e6814dcd4fcc8e2e9e6d859f447aaeec6",
       "summary": {
         "cases_per_backend": 583,
         "fields_per_backend": 2915,
@@ -84,7 +84,7 @@
       }
     },
     "ports-macos-arm64": {
-      "sha256": "040494ba18c693dd063c420a435c2ac19ab7ede067fd0d0fdc4026b875c3e349",
+      "sha256": "f097dae6b0e18c008912782b4a7dc2fd4e3ec0ee1b34a2b0573e2068e628469c",
       "summary": {
         "cases_per_backend": 583,
         "fields_per_backend": 2915,
@@ -92,7 +92,7 @@
       }
     },
     "ports-macos-x86_64": {
-      "sha256": "524dbf026addeb1a218f54aa77873f90e3e026526b7b42aff535e1dfbc630ff5",
+      "sha256": "32bd582b93d0dd9ede9991ee1c14882021d063c9e4191af5428df5a7189fb798",
       "summary": {
         "cases_per_backend": 583,
         "fields_per_backend": 2915,
@@ -100,7 +100,7 @@
       }
     },
     "ports-windows-arm64": {
-      "sha256": "a426790d2792574781ca41741be0629b9b7aa87314177c470a6cb1f0caa49f60",
+      "sha256": "b8e7af4b8629a034ab2b7fae11c3ec0edcff0aa6bff313b7c7056c3f1d8b6248",
       "summary": {
         "cases_per_backend": 583,
         "fields_per_backend": 2915,
@@ -108,7 +108,7 @@
       }
     },
     "ports-windows-x86_64": {
-      "sha256": "63556307b9599aa0b9b20d54563fd923f8c01f71191867db9c91240f4357c2cd",
+      "sha256": "7293fb5d660e185c68655a3d0cb82209675dc453854ee2963b776910fccac5df",
       "summary": {
         "cases_per_backend": 583,
         "fields_per_backend": 2915,
@@ -117,7 +117,7 @@
     }
   },
   "schema_version": 1,
-  "source_commit": "d9e26278302cd6e0143467e7f21f2a5936e53306",
+  "source_commit": "96643315b5376b5855b216c9bf7d05bc1bcfb6d4",
   "source_files": {
     ".github/workflows/ci.yml": "67d1bddfd5be308551353df9faa6afccd5e8e446045139b576fae515f7b26dab",
     ".github/workflows/crate-validation.yml": "970147b312a0719d1e63318b2f8b8f200479c5592e5e368cbfd2407893ac1f6d",
@@ -277,7 +277,7 @@
     "tools/check_core_f64.py": "6bb1a859277153ee4f8aa2d25afd77097538ceadb4066d61fc5607e79eb62cd9",
     "tools/check_cpp_driver.py": "4cebe80a4854f639f7a6fd727c71fa23558c271a2c314a86011f7e9bb1a5c967",
     "tools/check_crate_package.py": "b9ac32e996e46b75ded563df322954c66864d07955ce7a1c09a475cfcfb90281",
-    "tools/check_function_order.py": "e49b08938137ee2acaed568f6110ff9f61c3292e336f5db55cce64f0b0ceae35",
+    "tools/check_function_order.py": "4d9de733efddf63f5e22ccf2147b5a346d96b2b31d68b9ca598afa5a42c20baa",
     "tools/check_performance.py": "34fa57f516763374125f74a0d024226b76a4ad2944ffd178c3936fb827b5c8e3",
     "tools/check_public_serial_f64.py": "dcef3b190c3842b512066e539d0654759dc75cc8e7139883d291102e3e953213",
     "tools/check_rust_tables.py": "2aebc6fedbb1073bba8731d0c6eea9589806a751cc760a9fb958ed7d81042fec",
