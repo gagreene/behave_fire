@@ -26,19 +26,6 @@ pub struct Particles {
     pub is_defined: bool,
 }
 impl Particles {
-    /// Construct a zero-valued record for explicit stage inputs.
-    pub fn new() -> Self {
-        Self::default()
-    }
-    /// Return numeric scalar fields under their exact Python keys.
-    pub fn named_values(&self) -> [(&'static str, f64); 4] {
-        [
-            ("hoc_dead", self.hoc_dead),
-            ("hoc_live", self.hoc_live),
-            ("depth", self.depth),
-            ("moe_dead", self.moe_dead),
-        ]
-    }
     /// Return the five particles per life state in Python order.
     pub fn named_arrays(&self) -> [(&'static str, [f64; 5]); 6] {
         [
@@ -49,6 +36,19 @@ impl Particles {
             ("moisture_dead", self.moisture_dead),
             ("moisture_live", self.moisture_live),
         ]
+    }
+    /// Return numeric scalar fields under their exact Python keys.
+    pub fn named_values(&self) -> [(&'static str, f64); 4] {
+        [
+            ("hoc_dead", self.hoc_dead),
+            ("hoc_live", self.hoc_live),
+            ("depth", self.depth),
+            ("moe_dead", self.moe_dead),
+        ]
+    }
+    /// Construct a zero-valued record for explicit stage inputs.
+    pub fn new() -> Self {
+        Self::default()
     }
 }
 /// Named scalar equivalents of the Python FuelbedIntermediates mapping.
@@ -97,10 +97,6 @@ pub struct FuelbedIntermediates {
     pub is_defined: bool,
 }
 impl FuelbedIntermediates {
-    /// Construct a zero-valued record for explicit stage inputs.
-    pub fn new() -> Self {
-        Self::default()
-    }
     /// Return numeric scalar fields under their exact Python keys.
     pub fn named_values(&self) -> [(&'static str, f64); 19] {
         [
@@ -124,6 +120,10 @@ impl FuelbedIntermediates {
             ("frac_live", self.frac_live),
             ("depth", self.depth),
         ]
+    }
+    /// Construct a zero-valued record for explicit stage inputs.
+    pub fn new() -> Self {
+        Self::default()
     }
 }
 /// Named scalar equivalents of the Python SurfaceResult mapping.
@@ -160,10 +160,6 @@ pub struct SurfaceResult {
     pub no_wind_no_slope_spread_rate: f64,
 }
 impl SurfaceResult {
-    /// Construct a zero-valued record for explicit stage inputs.
-    pub fn new() -> Self {
-        Self::default()
-    }
     /// Return numeric scalar fields under their exact Python keys.
     pub fn named_values(&self) -> [(&'static str, f64); 14] {
         [
@@ -189,6 +185,10 @@ impl SurfaceResult {
             ),
         ]
     }
+    /// Construct a zero-valued record for explicit stage inputs.
+    pub fn new() -> Self {
+        Self::default()
+    }
 }
 /// Named scalar equivalents of the Python WindCoefficients mapping.
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
@@ -204,10 +204,6 @@ pub struct WindCoefficients {
     pub wind_e: f64,
 }
 impl WindCoefficients {
-    /// Construct a zero-valued record for explicit stage inputs.
-    pub fn new() -> Self {
-        Self::default()
-    }
     /// Return numeric scalar fields under their exact Python keys.
     pub fn named_values(&self) -> [(&'static str, f64); 4] {
         [
@@ -216,6 +212,10 @@ impl WindCoefficients {
             ("wind_b", self.wind_b),
             ("wind_e", self.wind_e),
         ]
+    }
+    /// Construct a zero-valued record for explicit stage inputs.
+    pub fn new() -> Self {
+        Self::default()
     }
 }
 /// Named scalar equivalents of the Python RateVector mapping.
@@ -230,10 +230,6 @@ pub struct RateVector {
     pub rate_vector: f64,
 }
 impl RateVector {
-    /// Construct a zero-valued record for explicit stage inputs.
-    pub fn new() -> Self {
-        Self::default()
-    }
     /// Return numeric scalar fields under their exact Python keys.
     pub fn named_values(&self) -> [(&'static str, f64); 3] {
         [
@@ -241,5 +237,9 @@ impl RateVector {
             ("y_component", self.y_component),
             ("rate_vector", self.rate_vector),
         ]
+    }
+    /// Construct a zero-valued record for explicit stage inputs.
+    pub fn new() -> Self {
+        Self::default()
     }
 }

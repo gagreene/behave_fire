@@ -65,6 +65,17 @@ impl PartialEq for PreparedFuel {
 }
 
 impl PreparedFuel {
+    /// Borrow static coefficients only while their exact source properties match.
+    fn physics(&self) -> Option<&StaticPhysics> {
+        self.static_cache
+            .as_ref()
+            .filter(|(key, _)| {
+                key.iter()
+                    .zip(self.physics_key())
+                    .all(|(a, b)| a.to_bits() == b.to_bits())
+            })
+            .map(|(_, physics)| physics)
+    }
     /// Capture every physical property that determines static cached coefficients.
     fn physics_key(&self) -> [f64; 14] {
         [
@@ -84,16 +95,31 @@ impl PreparedFuel {
             self.is_defined as u8 as f64,
         ]
     }
-    /// Borrow static coefficients only while their exact source properties match.
-    fn physics(&self) -> Option<&StaticPhysics> {
-        self.static_cache
-            .as_ref()
-            .filter(|(key, _)| {
-                key.iter()
-                    .zip(self.physics_key())
-                    .all(|(a, b)| a.to_bits() == b.to_bits())
-            })
-            .map(|(_, physics)| physics)
+    /// Capture the physical ratios that determine particle exponentials and bins.
+    fn savr_key(&self) -> [f64; 3] {
+        [self.savr_1h, self.savr_live_herb, self.savr_live_woody]
+    }
+    /// Copy physical properties without normalizing undefined rows or cloning names.
+    pub fn from_model(model: &FuelModel) -> Self {
+        let result = Self {
+            fuel_bed_depth: model.fuel_bed_depth,
+            moisture_of_extinction_dead: model.moisture_of_extinction_dead,
+            heat_of_combustion_dead: model.heat_of_combustion_dead,
+            heat_of_combustion_live: model.heat_of_combustion_live,
+            dead_1h: model.dead_1h,
+            dead_10h: model.dead_10h,
+            dead_100h: model.dead_100h,
+            live_herb: model.live_herb,
+            live_woody: model.live_woody,
+            savr_1h: model.savr_1h,
+            savr_live_herb: model.savr_live_herb,
+            savr_live_woody: model.savr_live_woody,
+            is_dynamic: model.is_dynamic,
+            is_defined: model.is_defined,
+            savr_cache: None,
+            static_cache: None,
+        };
+        result.prepared()
     }
     /// Evaluate a fuelbed using validated cached terms or the ordinary equations.
     pub(crate) fn prepare_fuelbed(
@@ -118,45 +144,6 @@ impl PreparedFuel {
             ),
         }
     }
-    /// Evaluate reaction intensity using validated cached coefficients when available.
-    pub(crate) fn reaction_intensity(&self, bed: &crate::surface::FuelbedIntermediates) -> f64 {
-        match self.physics() {
-            Some(physics) => physics.reaction.run(bed),
-            None => crate::surface::calculate_reaction_intensity(bed),
-        }
-    }
-    /// Apply strict availability through cached or ordinary reaction coefficients.
-    pub fn reaction_intensity_available(&self, bed: &crate::surface::FuelbedIntermediates) -> f64 {
-        match self.physics() {
-            Some(physics) => physics.reaction.run_available(bed),
-            None => crate::surface::calculate_reaction_intensity_available(bed),
-        }
-    }
-    /// Return validated static wind physics without caching dynamic moisture transfers.
-    pub(crate) fn wind_terms(&self) -> Option<crate::surface::PreparedWind> {
-        self.physics().map(|p| p.wind)
-    }
-    /// Capture the physical ratios that determine particle exponentials and bins.
-    fn savr_key(&self) -> [f64; 3] {
-        [self.savr_1h, self.savr_live_herb, self.savr_live_woody]
-    }
-
-    /// Reuse particle terms only while the original physical SAVR values match.
-    pub(crate) fn savr_terms(&self) -> crate::surface::SavrTerms {
-        if let Some((key, terms)) = self.savr_cache {
-            if key
-                .iter()
-                .zip(self.savr_key())
-                .all(|(a, b)| a.to_bits() == b.to_bits())
-            {
-                return terms;
-            }
-        }
-        crate::surface::SavrTerms::new(
-            &[self.savr_1h, 109.0, 30.0, self.savr_live_herb, 0.0],
-            &[self.savr_live_herb, self.savr_live_woody, 0.0, 0.0, 0.0],
-        )
-    }
     /// Prepare a numeric row after direct construction or edits, without registry names.
     pub fn prepared(mut self) -> Self {
         self.savr_cache = None;
@@ -179,27 +166,40 @@ impl PreparedFuel {
         }
         self
     }
-    /// Copy physical properties without normalizing undefined rows or cloning names.
-    pub fn from_model(model: &FuelModel) -> Self {
-        let result = Self {
-            fuel_bed_depth: model.fuel_bed_depth,
-            moisture_of_extinction_dead: model.moisture_of_extinction_dead,
-            heat_of_combustion_dead: model.heat_of_combustion_dead,
-            heat_of_combustion_live: model.heat_of_combustion_live,
-            dead_1h: model.dead_1h,
-            dead_10h: model.dead_10h,
-            dead_100h: model.dead_100h,
-            live_herb: model.live_herb,
-            live_woody: model.live_woody,
-            savr_1h: model.savr_1h,
-            savr_live_herb: model.savr_live_herb,
-            savr_live_woody: model.savr_live_woody,
-            is_dynamic: model.is_dynamic,
-            is_defined: model.is_defined,
-            savr_cache: None,
-            static_cache: None,
-        };
-        result.prepared()
+    /// Evaluate reaction intensity using validated cached coefficients when available.
+    pub(crate) fn reaction_intensity(&self, bed: &crate::surface::FuelbedIntermediates) -> f64 {
+        match self.physics() {
+            Some(physics) => physics.reaction.run(bed),
+            None => crate::surface::calculate_reaction_intensity(bed),
+        }
+    }
+
+    /// Apply strict availability through cached or ordinary reaction coefficients.
+    pub fn reaction_intensity_available(&self, bed: &crate::surface::FuelbedIntermediates) -> f64 {
+        match self.physics() {
+            Some(physics) => physics.reaction.run_available(bed),
+            None => crate::surface::calculate_reaction_intensity_available(bed),
+        }
+    }
+    /// Reuse particle terms only while the original physical SAVR values match.
+    pub(crate) fn savr_terms(&self) -> crate::surface::SavrTerms {
+        if let Some((key, terms)) = self.savr_cache {
+            if key
+                .iter()
+                .zip(self.savr_key())
+                .all(|(a, b)| a.to_bits() == b.to_bits())
+            {
+                return terms;
+            }
+        }
+        crate::surface::SavrTerms::new(
+            &[self.savr_1h, 109.0, 30.0, self.savr_live_herb, 0.0],
+            &[self.savr_live_herb, self.savr_live_woody, 0.0, 0.0, 0.0],
+        )
+    }
+    /// Return validated static wind physics without caching dynamic moisture transfers.
+    pub(crate) fn wind_terms(&self) -> Option<crate::surface::PreparedWind> {
+        self.physics().map(|p| p.wind)
     }
 }
 
@@ -237,6 +237,15 @@ pub struct PreparedFuels {
 }
 
 impl PreparedFuels {
+    /// Borrow a supported row; absent and out-of-range identifiers use undefined row zero.
+    pub fn for_grid(&self, id: i32) -> &PreparedFuel {
+        if (1..=256).contains(&id) {
+            self.rows.get(id as usize).unwrap_or(&self.rows[0])
+        } else {
+            &self.rows[0]
+        }
+    }
+
     /// Snapshot rows 0..=256, retaining undefined rows as empty fuels.
     pub fn from_registry(fuels: &FuelModels) -> Self {
         Self {
@@ -263,15 +272,6 @@ impl PreparedFuels {
                 .collect::<Vec<_>>()
                 .into_boxed_slice(),
         })
-    }
-
-    /// Borrow a supported row; absent and out-of-range identifiers use undefined row zero.
-    pub fn for_grid(&self, id: i32) -> &PreparedFuel {
-        if (1..=256).contains(&id) {
-            self.rows.get(id as usize).unwrap_or(&self.rows[0])
-        } else {
-            &self.rows[0]
-        }
     }
 }
 

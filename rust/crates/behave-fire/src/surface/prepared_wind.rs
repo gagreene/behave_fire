@@ -10,50 +10,6 @@ pub(crate) struct PreparedWind {
     negative: f64,
 }
 impl PreparedWind {
-    /// Prepare both powers separately to retain the reference's rounding order.
-    pub fn new(bed: &FuelbedIntermediates) -> Self {
-        let c = super::calculate_surface_wind_coefficients(bed.sigma);
-        let packing = if bed.relative_packing_ratio > 1e-7 {
-            bed.relative_packing_ratio
-        } else {
-            1.
-        };
-        Self {
-            coefficients: c,
-            sigma: bed.sigma,
-            packing: bed.relative_packing_ratio,
-            positive: packing.powf(c.wind_e),
-            negative: packing.powf(-c.wind_e),
-        }
-    }
-    /// Reject stale terms after supplied fuelbed or physical fuel edits.
-    pub fn matches(&self, bed: &FuelbedIntermediates) -> bool {
-        self.sigma.to_bits() == bed.sigma.to_bits()
-            && self.packing.to_bits() == bed.relative_packing_ratio.to_bits()
-    }
-    /// Evaluate the ordinary wind equation with an owned invariant packing power.
-    pub fn wind_phi(&self, mid: f64) -> f64 {
-        if self.sigma.is_nan() || mid.is_nan() || self.packing.is_nan() {
-            return super::calculate_wind_phi(
-                self.sigma,
-                mid,
-                self.coefficients.wind_b,
-                self.coefficients.wind_c,
-                self.packing,
-                self.coefficients.wind_e,
-            );
-        }
-        if self.sigma > 1e-7 && mid > 1e-7 {
-            super::wind::wind_phi_product(
-                mid,
-                self.coefficients.wind_b,
-                self.coefficients.wind_c,
-                self.negative,
-            )
-        } else {
-            0.
-        }
-    }
     /// Evaluate effective wind with the same threshold and product order as the ordinary helper.
     pub fn effective(&self, spread: f64, r0: f64) -> f64 {
         let c = self.coefficients;
@@ -90,6 +46,50 @@ impl PreparedWind {
             0.
         };
         fpm * 0.01136363636
+    }
+    /// Reject stale terms after supplied fuelbed or physical fuel edits.
+    pub fn matches(&self, bed: &FuelbedIntermediates) -> bool {
+        self.sigma.to_bits() == bed.sigma.to_bits()
+            && self.packing.to_bits() == bed.relative_packing_ratio.to_bits()
+    }
+    /// Prepare both powers separately to retain the reference's rounding order.
+    pub fn new(bed: &FuelbedIntermediates) -> Self {
+        let c = super::calculate_surface_wind_coefficients(bed.sigma);
+        let packing = if bed.relative_packing_ratio > 1e-7 {
+            bed.relative_packing_ratio
+        } else {
+            1.
+        };
+        Self {
+            coefficients: c,
+            sigma: bed.sigma,
+            packing: bed.relative_packing_ratio,
+            positive: packing.powf(c.wind_e),
+            negative: packing.powf(-c.wind_e),
+        }
+    }
+    /// Evaluate the ordinary wind equation with an owned invariant packing power.
+    pub fn wind_phi(&self, mid: f64) -> f64 {
+        if self.sigma.is_nan() || mid.is_nan() || self.packing.is_nan() {
+            return super::calculate_wind_phi(
+                self.sigma,
+                mid,
+                self.coefficients.wind_b,
+                self.coefficients.wind_c,
+                self.packing,
+                self.coefficients.wind_e,
+            );
+        }
+        if self.sigma > 1e-7 && mid > 1e-7 {
+            super::wind::wind_phi_product(
+                mid,
+                self.coefficients.wind_b,
+                self.coefficients.wind_c,
+                self.negative,
+            )
+        } else {
+            0.
+        }
     }
 }
 

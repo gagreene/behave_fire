@@ -24,9 +24,6 @@ impl From<usize> for Scalar {
         Self::Code(value as i64)
     }
 }
-fn scalar(value: impl Into<Scalar>) -> Option<Scalar> {
-    Some(value.into())
-}
 fn export(py: Python<'_>, value: Option<Scalar>) -> PyResult<Option<Bound<'_, PyAny>>> {
     value
         .map(|value| match value {
@@ -40,6 +37,9 @@ fn export(py: Python<'_>, value: Option<Scalar>) -> PyResult<Option<Bound<'_, Py
                 .map_err(Into::into),
         })
         .transpose()
+}
+fn scalar(value: impl Into<Scalar>) -> Option<Scalar> {
+    Some(value.into())
 }
 #[pyfunction]
 #[allow(clippy::type_complexity)]

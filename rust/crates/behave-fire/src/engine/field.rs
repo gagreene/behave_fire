@@ -195,6 +195,18 @@ pub struct OutputRequest {
     fields: Vec<Field>,
 }
 impl OutputRequest {
+    /// Whether a field was selected.
+    pub fn contains(&self, field: Field) -> bool {
+        self.fields.contains(&field)
+    }
+    /// Request every default Crown result.
+    pub fn crown() -> Self {
+        Self::new(CROWN_FIELDS)
+    }
+    /// Requested fields in caller order.
+    pub fn fields(&self) -> &[Field] {
+        &self.fields
+    }
     /// Request named fields, retaining the first occurrence of each.
     pub fn new(fields: &[Field]) -> Self {
         let mut unique = Vec::with_capacity(fields.len());
@@ -209,18 +221,6 @@ impl OutputRequest {
     pub fn surface() -> Self {
         Self::new(SURFACE_FIELDS)
     }
-    /// Request every default Crown result.
-    pub fn crown() -> Self {
-        Self::new(CROWN_FIELDS)
-    }
-    /// Whether a field was selected.
-    pub fn contains(&self, field: Field) -> bool {
-        self.fields.contains(&field)
-    }
-    /// Requested fields in caller order.
-    pub fn fields(&self) -> &[Field] {
-        &self.fields
-    }
 }
 
 /// Physical data and typed control/flag slots have different storage.
@@ -234,19 +234,6 @@ pub enum FieldKind {
     Flag,
 }
 impl Field {
-    /// The field's fixed storage role, unrelated to NumPy numeric dtypes.
-    pub const fn kind(self) -> FieldKind {
-        match self {
-            Self::FireType | Self::FuelModelGrid => FieldKind::Code,
-            Self::ParticleDefined
-            | Self::FuelbedDefined
-            | Self::Validity
-            | Self::IsSurfaceFire
-            | Self::IsPassiveCrown
-            | Self::IsActiveCrown => FieldKind::Flag,
-            _ => FieldKind::Physical,
-        }
-    }
     pub(crate) const fn code_slot(self) -> Option<usize> {
         match self {
             Self::FireType => Some(0),
@@ -263,6 +250,19 @@ impl Field {
             Self::IsPassiveCrown => Some(4),
             Self::IsActiveCrown => Some(5),
             _ => None,
+        }
+    }
+    /// The field's fixed storage role, unrelated to NumPy numeric dtypes.
+    pub const fn kind(self) -> FieldKind {
+        match self {
+            Self::FireType | Self::FuelModelGrid => FieldKind::Code,
+            Self::ParticleDefined
+            | Self::FuelbedDefined
+            | Self::Validity
+            | Self::IsSurfaceFire
+            | Self::IsPassiveCrown
+            | Self::IsActiveCrown => FieldKind::Flag,
+            _ => FieldKind::Physical,
         }
     }
 }

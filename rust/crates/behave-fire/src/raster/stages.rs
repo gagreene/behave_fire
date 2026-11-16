@@ -46,16 +46,6 @@ pub struct CrownTweakColumns<'a> {
 }
 
 impl CrownTweakColumns<'_> {
-    pub(crate) fn validate(&self, shape: &GridShape) -> Result<(), BehaveError> {
-        self.fm10.validate(shape)?;
-        validate_optional(
-            &self.critical_surface_intensity,
-            shape,
-            "critical_surface_intensity",
-        )?;
-        validate_optional(&self.critical_crown_rate, shape, "critical_crown_rate")?;
-        validate_optional(&self.crown_fraction_burned, shape, "crown_fraction_burned")
-    }
     pub(crate) fn cell(&self, index: usize) -> CrownTweaks {
         CrownTweaks {
             fm10: self.fm10.cell(index),
@@ -67,6 +57,16 @@ impl CrownTweakColumns<'_> {
                 .crown_fraction_burned
                 .map(|column| value(&column, index)),
         }
+    }
+    pub(crate) fn validate(&self, shape: &GridShape) -> Result<(), BehaveError> {
+        self.fm10.validate(shape)?;
+        validate_optional(
+            &self.critical_surface_intensity,
+            shape,
+            "critical_surface_intensity",
+        )?;
+        validate_optional(&self.critical_crown_rate, shape, "critical_crown_rate")?;
+        validate_optional(&self.crown_fraction_burned, shape, "crown_fraction_burned")
     }
 }
 

@@ -188,117 +188,6 @@ impl Stage {
     }
 }
 impl Field {
-    /// The one producing stage; caller/algorithm inputs have no producer.
-    pub const fn producer(self) -> Option<Stage> {
-        match self {
-            Self::ParticleHocDead
-            | Self::ParticleHocLive
-            | Self::ParticleDepth
-            | Self::ParticleMoeDead
-            | Self::ParticleDefined
-            | Self::ParticleLoadDead0
-            | Self::ParticleLoadDead1
-            | Self::ParticleLoadDead2
-            | Self::ParticleLoadDead3
-            | Self::ParticleLoadDead4
-            | Self::ParticleLoadLive0
-            | Self::ParticleLoadLive1
-            | Self::ParticleLoadLive2
-            | Self::ParticleLoadLive3
-            | Self::ParticleLoadLive4
-            | Self::ParticleSavrDead0
-            | Self::ParticleSavrDead1
-            | Self::ParticleSavrDead2
-            | Self::ParticleSavrDead3
-            | Self::ParticleSavrDead4
-            | Self::ParticleSavrLive0
-            | Self::ParticleSavrLive1
-            | Self::ParticleSavrLive2
-            | Self::ParticleSavrLive3
-            | Self::ParticleSavrLive4
-            | Self::ParticleMoistureDead0
-            | Self::ParticleMoistureDead1
-            | Self::ParticleMoistureDead2
-            | Self::ParticleMoistureDead3
-            | Self::ParticleMoistureDead4
-            | Self::ParticleMoistureLive0
-            | Self::ParticleMoistureLive1
-            | Self::ParticleMoistureLive2
-            | Self::ParticleMoistureLive3
-            | Self::ParticleMoistureLive4 => Some(Stage::Particles),
-            Self::FuelbedDefined
-            | Self::FuelbedSigma
-            | Self::FuelbedBulkDensity
-            | Self::FuelbedPackingRatio
-            | Self::FuelbedRelativePackingRatio
-            | Self::FuelbedHeatSink
-            | Self::FuelbedPropagatingFlux
-            | Self::FuelbedWHeatDead
-            | Self::FuelbedWHeatLive
-            | Self::FuelbedWSilicaDead
-            | Self::FuelbedWSilicaLive
-            | Self::FuelbedWMoistDead
-            | Self::FuelbedWMoistLive
-            | Self::FuelbedWflDead
-            | Self::FuelbedWflLive
-            | Self::FuelbedMoeDead
-            | Self::FuelbedMoeLive
-            | Self::FuelbedFracDead
-            | Self::FuelbedFracLive
-            | Self::FuelbedDepth => Some(Stage::Fuelbed),
-            Self::ReactionIntensity => Some(Stage::Reaction),
-            Self::WindB
-            | Self::WindC
-            | Self::WindE
-            | Self::Wind20
-            | Self::Waf
-            | Self::MidflameWindSpeed
-            | Self::WindPhi
-            | Self::SlopePhi => Some(Stage::SurfaceWind),
-            Self::NoWindNoSlopeSpreadRate
-            | Self::VectorX
-            | Self::VectorY
-            | Self::RateVector
-            | Self::SpreadRate
-            | Self::EffectiveWindSpeed
-            | Self::DirectionOfMaxSpread => Some(Stage::SurfaceSpread),
-            Self::FireLengthToWidthRatio
-            | Self::Eccentricity
-            | Self::BackingSpreadRate
-            | Self::FlankingSpreadRate
-            | Self::ResidenceTime
-            | Self::HeatPerUnitArea
-            | Self::FirelineIntensity
-            | Self::FlameLength => Some(Stage::SurfaceGeometry),
-            Self::CrownFireSpreadRate | Self::CrownLengthToWidthRatio => Some(Stage::CrownSpread),
-            Self::CrownCriticalSurfaceFireLineIntensity | Self::CrownCriticalFireSpreadRate => {
-                Some(Stage::CrownCritical)
-            }
-            Self::CrownFuelLoad
-            | Self::CanopyHeatPerUnitArea
-            | Self::CrownFireHeatPerUnitArea
-            | Self::CrownFireLineIntensity
-            | Self::CrownFlameLength => Some(Stage::CrownHeat),
-            Self::CrownFireTransitionRatio
-            | Self::CrownFireActiveRatio
-            | Self::FireType
-            | Self::IsSurfaceFire
-            | Self::IsPassiveCrown
-            | Self::IsActiveCrown => Some(Stage::CrownRatios),
-            Self::SurfaceFireCriticalSpreadRate
-            | Self::CrowningSurfaceFireSpreadRate
-            | Self::CrownFractionBurned => Some(Stage::CrownFraction),
-            Self::PassiveCrownFireSpreadRate
-            | Self::PassiveCrownFireHeatPerUnitArea
-            | Self::PassiveCrownFireLineIntensity
-            | Self::PassiveCrownFireFlameLength => Some(Stage::CrownPassive),
-            Self::FinalSpreadRate
-            | Self::FinalHeatPerUnitArea
-            | Self::FinalFirelineIntensity
-            | Self::FinalFlameLength => Some(Stage::CrownFinal),
-            _ => None,
-        }
-    }
     /// Possible direct reads; control/selection rules choose actual required inputs.
     ///
     /// This graph supports common-grid staged invalidation/liveness. Python output
@@ -769,6 +658,117 @@ impl Field {
                 Self::FuelbedRelativePackingRatio,
             ],
             _ => &[],
+        }
+    }
+    /// The one producing stage; caller/algorithm inputs have no producer.
+    pub const fn producer(self) -> Option<Stage> {
+        match self {
+            Self::ParticleHocDead
+            | Self::ParticleHocLive
+            | Self::ParticleDepth
+            | Self::ParticleMoeDead
+            | Self::ParticleDefined
+            | Self::ParticleLoadDead0
+            | Self::ParticleLoadDead1
+            | Self::ParticleLoadDead2
+            | Self::ParticleLoadDead3
+            | Self::ParticleLoadDead4
+            | Self::ParticleLoadLive0
+            | Self::ParticleLoadLive1
+            | Self::ParticleLoadLive2
+            | Self::ParticleLoadLive3
+            | Self::ParticleLoadLive4
+            | Self::ParticleSavrDead0
+            | Self::ParticleSavrDead1
+            | Self::ParticleSavrDead2
+            | Self::ParticleSavrDead3
+            | Self::ParticleSavrDead4
+            | Self::ParticleSavrLive0
+            | Self::ParticleSavrLive1
+            | Self::ParticleSavrLive2
+            | Self::ParticleSavrLive3
+            | Self::ParticleSavrLive4
+            | Self::ParticleMoistureDead0
+            | Self::ParticleMoistureDead1
+            | Self::ParticleMoistureDead2
+            | Self::ParticleMoistureDead3
+            | Self::ParticleMoistureDead4
+            | Self::ParticleMoistureLive0
+            | Self::ParticleMoistureLive1
+            | Self::ParticleMoistureLive2
+            | Self::ParticleMoistureLive3
+            | Self::ParticleMoistureLive4 => Some(Stage::Particles),
+            Self::FuelbedDefined
+            | Self::FuelbedSigma
+            | Self::FuelbedBulkDensity
+            | Self::FuelbedPackingRatio
+            | Self::FuelbedRelativePackingRatio
+            | Self::FuelbedHeatSink
+            | Self::FuelbedPropagatingFlux
+            | Self::FuelbedWHeatDead
+            | Self::FuelbedWHeatLive
+            | Self::FuelbedWSilicaDead
+            | Self::FuelbedWSilicaLive
+            | Self::FuelbedWMoistDead
+            | Self::FuelbedWMoistLive
+            | Self::FuelbedWflDead
+            | Self::FuelbedWflLive
+            | Self::FuelbedMoeDead
+            | Self::FuelbedMoeLive
+            | Self::FuelbedFracDead
+            | Self::FuelbedFracLive
+            | Self::FuelbedDepth => Some(Stage::Fuelbed),
+            Self::ReactionIntensity => Some(Stage::Reaction),
+            Self::WindB
+            | Self::WindC
+            | Self::WindE
+            | Self::Wind20
+            | Self::Waf
+            | Self::MidflameWindSpeed
+            | Self::WindPhi
+            | Self::SlopePhi => Some(Stage::SurfaceWind),
+            Self::NoWindNoSlopeSpreadRate
+            | Self::VectorX
+            | Self::VectorY
+            | Self::RateVector
+            | Self::SpreadRate
+            | Self::EffectiveWindSpeed
+            | Self::DirectionOfMaxSpread => Some(Stage::SurfaceSpread),
+            Self::FireLengthToWidthRatio
+            | Self::Eccentricity
+            | Self::BackingSpreadRate
+            | Self::FlankingSpreadRate
+            | Self::ResidenceTime
+            | Self::HeatPerUnitArea
+            | Self::FirelineIntensity
+            | Self::FlameLength => Some(Stage::SurfaceGeometry),
+            Self::CrownFireSpreadRate | Self::CrownLengthToWidthRatio => Some(Stage::CrownSpread),
+            Self::CrownCriticalSurfaceFireLineIntensity | Self::CrownCriticalFireSpreadRate => {
+                Some(Stage::CrownCritical)
+            }
+            Self::CrownFuelLoad
+            | Self::CanopyHeatPerUnitArea
+            | Self::CrownFireHeatPerUnitArea
+            | Self::CrownFireLineIntensity
+            | Self::CrownFlameLength => Some(Stage::CrownHeat),
+            Self::CrownFireTransitionRatio
+            | Self::CrownFireActiveRatio
+            | Self::FireType
+            | Self::IsSurfaceFire
+            | Self::IsPassiveCrown
+            | Self::IsActiveCrown => Some(Stage::CrownRatios),
+            Self::SurfaceFireCriticalSpreadRate
+            | Self::CrowningSurfaceFireSpreadRate
+            | Self::CrownFractionBurned => Some(Stage::CrownFraction),
+            Self::PassiveCrownFireSpreadRate
+            | Self::PassiveCrownFireHeatPerUnitArea
+            | Self::PassiveCrownFireLineIntensity
+            | Self::PassiveCrownFireFlameLength => Some(Stage::CrownPassive),
+            Self::FinalSpreadRate
+            | Self::FinalHeatPerUnitArea
+            | Self::FinalFirelineIntensity
+            | Self::FinalFlameLength => Some(Stage::CrownFinal),
+            _ => None,
         }
     }
 }

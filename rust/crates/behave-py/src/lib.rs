@@ -25,6 +25,30 @@ mod structures;
 mod surface_fields;
 use pyo3::prelude::*;
 
+#[cfg(feature = "allocation-probe")]
+#[pyfunction]
+fn _allocation_start() {
+    allocation_probe::start();
+}
+
+mod surface;
+
+mod crown_dispatch;
+
+mod effects;
+
+mod grid_session;
+
+mod tools;
+
+mod model;
+
+#[cfg(feature = "allocation-probe")]
+#[pyfunction]
+fn _allocation_stop() -> Vec<(usize, usize, usize, usize)> {
+    allocation_probe::stop().to_vec()
+}
+
 #[pymodule]
 fn _rust(module: &Bound<'_, PyModule>) -> PyResult<()> {
     #[cfg(feature = "allocation-probe")]
@@ -67,28 +91,4 @@ fn _rust(module: &Bound<'_, PyModule>) -> PyResult<()> {
     module.add_function(wrap_pyfunction!(data::missing_mortality, module)?)?;
     module.add_function(wrap_pyfunction!(state::state_call, module)?)?;
     Ok(())
-}
-
-mod surface;
-
-mod crown_dispatch;
-
-mod effects;
-
-mod grid_session;
-
-mod tools;
-
-mod model;
-
-#[cfg(feature = "allocation-probe")]
-#[pyfunction]
-fn _allocation_start() {
-    allocation_probe::start();
-}
-
-#[cfg(feature = "allocation-probe")]
-#[pyfunction]
-fn _allocation_stop() -> Vec<(usize, usize, usize, usize)> {
-    allocation_probe::stop().to_vec()
 }

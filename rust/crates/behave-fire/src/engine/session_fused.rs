@@ -7,47 +7,6 @@ use crate::raster::{
 };
 
 impl GridSession {
-    fn f64_column(&self, field: Field) -> Result<PerCell<'_, f64>, BehaveError> {
-        let v = self.get(field)?.physical()?;
-        Ok(if v.len() == 1 {
-            PerCell::Scalar(v[0])
-        } else {
-            PerCell::Cells(v)
-        })
-    }
-    fn code_column(&self, field: Field) -> Result<PerCell<'_, i32>, BehaveError> {
-        let v = self.get(field)?.code()?;
-        Ok(if v.len() == 1 {
-            PerCell::Scalar(v[0])
-        } else {
-            PerCell::Cells(v)
-        })
-    }
-    fn flag_column(&self, field: Field) -> Result<PerCell<'_, bool>, BehaveError> {
-        let v = self.get(field)?.flag()?;
-        Ok(if v.len() == 1 {
-            PerCell::Scalar(v[0])
-        } else {
-            PerCell::Cells(v)
-        })
-    }
-    fn override_column(&self, field: Field) -> Result<Option<PerCell<'_, f64>>, BehaveError> {
-        self.slots[field as usize]
-            .persistent
-            .as_ref()
-            .map(|_| self.f64_column(field))
-            .transpose()
-    }
-    fn surface_tweaks(&self) -> Result<SurfaceTweakColumns<'_>, BehaveError> {
-        Ok(SurfaceTweakColumns {
-            reaction_intensity: self.override_column(Field::ReactionIntensity)?,
-            no_wind_no_slope_spread_rate: self.override_column(Field::NoWindNoSlopeSpreadRate)?,
-            midflame_wind_speed: self.override_column(Field::MidflameWindSpeed)?,
-            wind_phi: self.override_column(Field::WindPhi)?,
-            slope_phi: self.override_column(Field::SlopePhi)?,
-            spread_rate: self.override_column(Field::SpreadRate)?,
-        })
-    }
     fn borrowed_run(&self) -> Result<ModelRun<'_>, BehaveError> {
         let p = |field| self.f64_column(field);
         let tweaks = self.surface_tweaks()?;
@@ -151,6 +110,47 @@ impl GridSession {
                 },
             }),
         }
+    }
+    fn code_column(&self, field: Field) -> Result<PerCell<'_, i32>, BehaveError> {
+        let v = self.get(field)?.code()?;
+        Ok(if v.len() == 1 {
+            PerCell::Scalar(v[0])
+        } else {
+            PerCell::Cells(v)
+        })
+    }
+    fn f64_column(&self, field: Field) -> Result<PerCell<'_, f64>, BehaveError> {
+        let v = self.get(field)?.physical()?;
+        Ok(if v.len() == 1 {
+            PerCell::Scalar(v[0])
+        } else {
+            PerCell::Cells(v)
+        })
+    }
+    fn flag_column(&self, field: Field) -> Result<PerCell<'_, bool>, BehaveError> {
+        let v = self.get(field)?.flag()?;
+        Ok(if v.len() == 1 {
+            PerCell::Scalar(v[0])
+        } else {
+            PerCell::Cells(v)
+        })
+    }
+    fn override_column(&self, field: Field) -> Result<Option<PerCell<'_, f64>>, BehaveError> {
+        self.slots[field as usize]
+            .persistent
+            .as_ref()
+            .map(|_| self.f64_column(field))
+            .transpose()
+    }
+    fn surface_tweaks(&self) -> Result<SurfaceTweakColumns<'_>, BehaveError> {
+        Ok(SurfaceTweakColumns {
+            reaction_intensity: self.override_column(Field::ReactionIntensity)?,
+            no_wind_no_slope_spread_rate: self.override_column(Field::NoWindNoSlopeSpreadRate)?,
+            midflame_wind_speed: self.override_column(Field::MidflameWindSpeed)?,
+            wind_phi: self.override_column(Field::WindPhi)?,
+            slope_phi: self.override_column(Field::SlopePhi)?,
+            spread_rate: self.override_column(Field::SpreadRate)?,
+        })
     }
     /// Restart using the configured fused kernel when outputs/overrides permit it.
     /// Custom intermediate requests or arbitrary persistent fields use a fresh field DAG.

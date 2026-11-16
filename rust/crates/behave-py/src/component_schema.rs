@@ -15,11 +15,10 @@ fn column(name: &str, kind: FieldKind) -> Column {
         kind,
     }
 }
-fn physical<const N: usize>(values: [(&str, f64); N]) -> Vec<Column> {
-    values
-        .into_iter()
-        .map(|(name, _)| column(name, FieldKind::Physical))
-        .collect()
+fn fuelbed() -> Vec<Column> {
+    let mut result = physical(surface::FuelbedIntermediates::default().named_values());
+    result.push(column("is_defined", FieldKind::Flag));
+    result
 }
 fn names(values: &[&str]) -> Vec<Column> {
     values
@@ -40,10 +39,11 @@ fn particles() -> Vec<Column> {
     }
     result
 }
-fn fuelbed() -> Vec<Column> {
-    let mut result = physical(surface::FuelbedIntermediates::default().named_values());
-    result.push(column("is_defined", FieldKind::Flag));
-    result
+fn physical<const N: usize>(values: [(&str, f64); N]) -> Vec<Column> {
+    values
+        .into_iter()
+        .map(|(name, _)| column(name, FieldKind::Physical))
+        .collect()
 }
 fn prefix(mut fields: Vec<Column>, prefix: &str) -> Vec<Column> {
     for field in &mut fields {

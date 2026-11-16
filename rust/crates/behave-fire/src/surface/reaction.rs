@@ -54,13 +54,13 @@ macro_rules! retaining_reaction {
 }
 retaining_reaction!(f64);
 
-/// Calculate reaction intensity in BTU/ft²/min using all weighted fuelbed fields.
-pub fn calculate_reaction_intensity(ib: &FuelbedIntermediates) -> f64 {
-    ReactionCoefficients::new(ib).run_available(ib)
+/// Calculate heat per unit area in BTU/ft² from reaction intensity and residence minutes.
+pub fn calculate_heat_per_unit_area(reaction_intensity: f64, residence_time: f64) -> f64 {
+    reaction_intensity * residence_time
 }
 
-/// Calculate reaction using the availability policy of configured f64 models.
-pub(crate) fn calculate_reaction_intensity_available(ib: &FuelbedIntermediates) -> f64 {
+/// Calculate reaction intensity in BTU/ft²/min using all weighted fuelbed fields.
+pub fn calculate_reaction_intensity(ib: &FuelbedIntermediates) -> f64 {
     ReactionCoefficients::new(ib).run_available(ib)
 }
 
@@ -98,9 +98,9 @@ impl From<&FuelbedIntermediates> for ReactionInputs {
         }
     }
 }
-/// Evaluate only the declared reaction dependencies, with no invented fuelbed fields.
-pub(crate) fn reaction_from_inputs(inputs: &ReactionInputs) -> f64 {
-    ReactionCoefficients::from_inputs(inputs).run_inputs::<true>(inputs)
+/// Calculate reaction using the availability policy of configured f64 models.
+pub(crate) fn calculate_reaction_intensity_available(ib: &FuelbedIntermediates) -> f64 {
+    ReactionCoefficients::new(ib).run_available(ib)
 }
 
 /// Moisture-independent reaction coefficients, retaining left-to-right products.
@@ -113,10 +113,6 @@ pub(crate) struct ReactionCoefficients {
     silica_live: f64,
 }
 impl ReactionCoefficients {
-    /// Prepare moisture-independent coefficients from a complete fuelbed.
-    pub(crate) fn new(ib: &FuelbedIntermediates) -> Self {
-        Self::from_inputs(&ib.into())
-    }
     /// Preserve scalar equation order while preparing immutable physical terms.
     fn from_inputs(ib: &ReactionInputs) -> Self {
         let valid = ib.sigma > 1e-7 && ib.relative_packing_ratio > 0.0;
@@ -136,17 +132,6 @@ impl ReactionCoefficients {
             silica_dead: eta_s(ib.w_silica_dead),
             silica_live: eta_s(ib.w_silica_live),
         }
-    }
-    /// Apply cached coefficients with the public conditional-availability rules.
-    pub(crate) fn run(&self, ib: &FuelbedIntermediates) -> f64 {
-        self.run_selected::<true>(ib)
-    }
-    /// Retain cached finite coefficients without treating unknown guards as false.
-    pub(crate) fn run_available(&self, ib: &FuelbedIntermediates) -> f64 {
-        self.run_selected::<true>(ib)
-    }
-    fn run_selected<const STRICT: bool>(&self, ib: &FuelbedIntermediates) -> f64 {
-        self.run_inputs::<STRICT>(&ib.into())
     }
     fn run_inputs<const STRICT: bool>(&self, ib: &ReactionInputs) -> f64 {
         if STRICT {
@@ -187,12 +172,27 @@ impl ReactionCoefficients {
             0.0
         }
     }
+    fn run_selected<const STRICT: bool>(&self, ib: &FuelbedIntermediates) -> f64 {
+        self.run_inputs::<STRICT>(&ib.into())
+    }
+    /// Prepare moisture-independent coefficients from a complete fuelbed.
+    pub(crate) fn new(ib: &FuelbedIntermediates) -> Self {
+        Self::from_inputs(&ib.into())
+    }
+    /// Apply cached coefficients with the public conditional-availability rules.
+    pub(crate) fn run(&self, ib: &FuelbedIntermediates) -> f64 {
+        self.run_selected::<true>(ib)
+    }
+    /// Retain cached finite coefficients without treating unknown guards as false.
+    pub(crate) fn run_available(&self, ib: &FuelbedIntermediates) -> f64 {
+        self.run_selected::<true>(ib)
+    }
 }
 /// Return reaction intensity, normalized to f64 as in Python.
 pub fn calculate_reaction_intensity_output(reaction_intensity: f64) -> f64 {
     reaction_intensity
 }
-/// Calculate heat per unit area in BTU/ft² from reaction intensity and residence minutes.
-pub fn calculate_heat_per_unit_area(reaction_intensity: f64, residence_time: f64) -> f64 {
-    reaction_intensity * residence_time
+/// Evaluate only the declared reaction dependencies, with no invented fuelbed fields.
+pub(crate) fn reaction_from_inputs(inputs: &ReactionInputs) -> f64 {
+    ReactionCoefficients::from_inputs(inputs).run_inputs::<true>(inputs)
 }

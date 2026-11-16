@@ -82,23 +82,6 @@ macro_rules! retaining_geometry {
 }
 retaining_geometry!(f64);
 
-/// Preserve NumPy boolean addition (logical OR) for the fire-length helper's boolean-array inputs.
-pub fn calculate_fire_length_bool(forward_ros: bool, backing_ros: bool, elapsed_min: f64) -> f64 {
-    f64::from(u8::from(forward_ros || backing_ros)) * elapsed_min
-}
-/// Preserve NumPy boolean addition for boolean spread-rate inputs in flank spread.
-pub fn calculate_flanking_spread_rate_bool(
-    spread_rate: bool,
-    backing_spread_rate: bool,
-    lwr: f64,
-) -> f64 {
-    if lwr > 1e-7 {
-        f64::from(u8::from(spread_rate || backing_spread_rate)) / (2.0 * lwr)
-    } else {
-        0.0
-    }
-}
-
 /// Calculate maximum spread direction in degrees; north orientation includes aspect and 180°.
 pub fn calculate_direction_of_max_spread(
     x_component: f64,
@@ -126,7 +109,6 @@ pub fn calculate_direction_of_max_spread(
     }
     dir
 }
-
 /// Calculate area in square feet, using the Python surface ellipse or crown approximation.
 pub fn calculate_fire_area(
     forward_ros: f64,
@@ -152,6 +134,12 @@ pub fn calculate_fire_area(
         std::f64::consts::PI * a * b
     }
 }
+
+/// Preserve NumPy boolean addition (logical OR) for the fire-length helper's boolean-array inputs.
+pub fn calculate_fire_length_bool(forward_ros: bool, backing_ros: bool, elapsed_min: f64) -> f64 {
+    f64::from(u8::from(forward_ros || backing_ros)) * elapsed_min
+}
+
 /// Calculate perimeter in feet with the reference truncated Ramanujan series.
 pub fn calculate_fire_perimeter(
     forward_ros: f64,
@@ -204,6 +192,18 @@ pub fn calculate_fire_width(forward_ros: f64, backing_ros: f64, lwr: f64, elapse
 /// Calculate fireline intensity in BTU/ft/s, normalizing inputs to f64 like Python.
 pub fn calculate_fireline_intensity(spread_rate: f64, heat_per_unit_area: f64) -> f64 {
     spread_rate * heat_per_unit_area / 60.0
+}
+/// Preserve NumPy boolean addition for boolean spread-rate inputs in flank spread.
+pub fn calculate_flanking_spread_rate_bool(
+    spread_rate: bool,
+    backing_spread_rate: bool,
+    lwr: f64,
+) -> f64 {
+    if lwr > 1e-7 {
+        f64::from(u8::from(spread_rate || backing_spread_rate)) / (2.0 * lwr)
+    } else {
+        0.0
+    }
 }
 /// Calculate forward spread rate in ft/min, normalizing inputs to f64 like Python.
 pub fn calculate_forward_spread_rate(no_wind_no_slope_spread_rate: f64, rate_vector: f64) -> f64 {

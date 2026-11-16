@@ -72,10 +72,6 @@ fn indexed(values: &[f64], index: i64) -> f64 {
 }
 
 impl SlopeTool {
-    /// Create default state.
-    pub fn new() -> Self {
-        Self::default()
-    }
     /// Calculate seven directions while preserving the raw-input-as-feet quirk.
     pub fn calculate_horizontal_distance(
         &mut self,
@@ -192,5 +188,9 @@ impl SlopeTool {
         distance_units: LengthUnit,
     ) -> f64 {
         distance_units.from_base(self.slope_horizontal_distance_)
+    }
+    /// Create default state.
+    pub fn new() -> Self {
+        Self::default()
     }
 }

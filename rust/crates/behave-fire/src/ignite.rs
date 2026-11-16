@@ -1,11 +1,6 @@
 //! Fuel temperature and ignition probabilities from Python reference 7933789.
 use crate::math::{np_clip, np_max, np_min};
 
-/// Fuel temperature in Fahrenheit, including the reference shade adjustment.
-pub fn calculate_fuel_temperature(air_temp_f: f64, sun_shade_fraction: f64) -> f64 {
-    air_temp_f + (25.0 - 20.0 * sun_shade_fraction)
-}
-
 /// Calculate glowing-firebrand ignition probability.
 pub fn calculate_firebrand_ignition_probability(
     air_temp_f: f64,
@@ -19,6 +14,11 @@ pub fn calculate_firebrand_ignition_probability(
         + 640.0 * m;
     let x = 0.1 * (400.0 - np_min(hoi, 400.0));
     np_clip(0.000048 * np_max(x, 0.0).powf(4.3) / 50.0, 0.0, 1.0)
+}
+
+/// Fuel temperature in Fahrenheit, including the reference shade adjustment.
+pub fn calculate_fuel_temperature(air_temp_f: f64, sun_shade_fraction: f64) -> f64 {
+    air_temp_f + (25.0 - 20.0 * sun_shade_fraction)
 }
 
 /// Legacy lightning model, retained unchanged for compatibility only.

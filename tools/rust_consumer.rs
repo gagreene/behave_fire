@@ -4,22 +4,6 @@ use behave_fire::{
     FuelModels, ParallelError, SpeciesMasterTable,
 };
 
-fn run_cells(model: &BehaveRun, threads: usize) -> Result<Vec<f64>, ParallelError<BehaveError>> {
-    let fuels = [1, 14, 124, 4];
-    let chunks = map_chunks(fuels.len(), threads, |range| {
-        range
-            .map(|index| {
-                let surface = model.do_surface_run(&SurfacePlan::new(SurfaceOptions::default()), &SurfaceCell::new(fuels[index]), SurfaceTweaks::default());
-                let scorch = BehaveRun::calculate_scorch_height(surface.fireline_intensity, 5.0, 77.0);
-                Ok(model
-                    .calculate_crown_scorch_mortality(scorch, 80.0, 0.5, 12.0, 1)
-                    .probability_mortality)
-            })
-            .collect::<Result<Vec<_>, BehaveError>>()
-    })?;
-    Ok(chunks.into_iter().flatten().collect())
-}
-
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut fuels = FuelModels::default();
     assert!(!SpeciesMasterTable::default().records.is_empty());
@@ -39,4 +23,20 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
     println!("Standalone consumer passed: embedded species, default/custom fuels, surface, mortality, threads 0/1/2/4.");
     Ok(())
+}
+
+fn run_cells(model: &BehaveRun, threads: usize) -> Result<Vec<f64>, ParallelError<BehaveError>> {
+    let fuels = [1, 14, 124, 4];
+    let chunks = map_chunks(fuels.len(), threads, |range| {
+        range
+            .map(|index| {
+                let surface = model.do_surface_run(&SurfacePlan::new(SurfaceOptions::default()), &SurfaceCell::new(fuels[index]), SurfaceTweaks::default());
+                let scorch = BehaveRun::calculate_scorch_height(surface.fireline_intensity, 5.0, 77.0);
+                Ok(model
+                    .calculate_crown_scorch_mortality(scorch, 80.0, 0.5, 12.0, 1)
+                    .probability_mortality)
+            })
+            .collect::<Result<Vec<_>, BehaveError>>()
+    })?;
+    Ok(chunks.into_iter().flatten().collect())
 }

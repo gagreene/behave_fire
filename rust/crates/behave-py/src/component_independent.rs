@@ -6,6 +6,81 @@ use crate::{
 };
 use behave_fire::{crown, mortality, safety, vapor_pressure_deficit as vpd, ParallelError};
 
+fn crown_surface(
+    p: &PreparedArguments<'_>,
+    names: &[String],
+    output: &mut Columns,
+    threads: usize,
+) -> Result<(), ParallelError<String>> {
+    let particles = names.iter().any(|n| n.starts_with("p_crown."));
+    let fuelbed = names.iter().any(|n| n.starts_with("ib_crown."));
+    let surface = names.iter().any(|n| n.starts_with("crown_surface."));
+    let reaction = names.iter().any(|n| n == "ri_crown");
+    let spread = names.iter().any(|n| n == "crown_fire_spread_rate");
+    let length = names.iter().any(|n| n == "crown_length_to_width_ratio");
+    let weather = surface || spread || length;
+    output.fill(threads, |i, row| {
+        let fuel = crate::structures::fuel(p, i)?;
+        let full = if weather {
+            Some(crown::calculate_crown_surface_fire(
+                &crate::crown::input(p, i)?,
+                &fuel,
+                &p.crown_options(),
+                behave_fire::engine::SurfaceTweaks::default(),
+            ))
+        } else {
+            None
+        };
+        let (particle, bed, ri) = if let Some(full) = &full {
+            (full.p_crown, full.ib_crown, full.ri_crown)
+        } else {
+            let particle = behave_fire::surface::build_particle_arrays_from_prepared(
+                &fuel,
+                p.n(Field::M1h, i)?,
+                p.n(Field::M10h, i)?,
+                p.n(Field::M100h, i)?,
+                p.n(Field::Mlh, i)?,
+                p.n(Field::Mlw, i)?,
+            );
+            let bed = fuel.prepare_fuelbed_available(&particle);
+            let ri = fuel.reaction_intensity_available(&bed);
+            (particle, bed, ri)
+        };
+        if particles {
+            row.with_prefix("p_crown", |row| {
+                crate::structures::particles_output(row, particle)
+            });
+        }
+        if fuelbed {
+            row.with_prefix("ib_crown", |row| {
+                crate::structures::fuelbed_output(row, bed)
+            });
+        }
+        if let Some(full) = full {
+            if surface {
+                row.with_prefix("crown_surface", |row| {
+                    crate::structures::surface_output(row, full.crown_surface)
+                });
+            }
+            if reaction {
+                row.f64("ri_crown", ri);
+            }
+            if spread {
+                row.f64("crown_fire_spread_rate", full.crown_fire_spread_rate);
+            }
+            if length {
+                row.f64(
+                    "crown_length_to_width_ratio",
+                    full.crown_length_to_width_ratio,
+                );
+            }
+        } else if reaction {
+            row.f64("ri_crown", ri);
+        }
+        Ok(())
+    })
+}
+
 pub(crate) fn run(
     operation: Operation,
     p: &PreparedArguments<'_>,
@@ -211,80 +286,5 @@ pub(crate) fn run(
             Ok(())
         }),
         _ => unreachable!(),
-    })
-}
-
-fn crown_surface(
-    p: &PreparedArguments<'_>,
-    names: &[String],
-    output: &mut Columns,
-    threads: usize,
-) -> Result<(), ParallelError<String>> {
-    let particles = names.iter().any(|n| n.starts_with("p_crown."));
-    let fuelbed = names.iter().any(|n| n.starts_with("ib_crown."));
-    let surface = names.iter().any(|n| n.starts_with("crown_surface."));
-    let reaction = names.iter().any(|n| n == "ri_crown");
-    let spread = names.iter().any(|n| n == "crown_fire_spread_rate");
-    let length = names.iter().any(|n| n == "crown_length_to_width_ratio");
-    let weather = surface || spread || length;
-    output.fill(threads, |i, row| {
-        let fuel = crate::structures::fuel(p, i)?;
-        let full = if weather {
-            Some(crown::calculate_crown_surface_fire(
-                &crate::crown::input(p, i)?,
-                &fuel,
-                &p.crown_options(),
-                behave_fire::engine::SurfaceTweaks::default(),
-            ))
-        } else {
-            None
-        };
-        let (particle, bed, ri) = if let Some(full) = &full {
-            (full.p_crown, full.ib_crown, full.ri_crown)
-        } else {
-            let particle = behave_fire::surface::build_particle_arrays_from_prepared(
-                &fuel,
-                p.n(Field::M1h, i)?,
-                p.n(Field::M10h, i)?,
-                p.n(Field::M100h, i)?,
-                p.n(Field::Mlh, i)?,
-                p.n(Field::Mlw, i)?,
-            );
-            let bed = fuel.prepare_fuelbed_available(&particle);
-            let ri = fuel.reaction_intensity_available(&bed);
-            (particle, bed, ri)
-        };
-        if particles {
-            row.with_prefix("p_crown", |row| {
-                crate::structures::particles_output(row, particle)
-            });
-        }
-        if fuelbed {
-            row.with_prefix("ib_crown", |row| {
-                crate::structures::fuelbed_output(row, bed)
-            });
-        }
-        if let Some(full) = full {
-            if surface {
-                row.with_prefix("crown_surface", |row| {
-                    crate::structures::surface_output(row, full.crown_surface)
-                });
-            }
-            if reaction {
-                row.f64("ri_crown", ri);
-            }
-            if spread {
-                row.f64("crown_fire_spread_rate", full.crown_fire_spread_rate);
-            }
-            if length {
-                row.f64(
-                    "crown_length_to_width_ratio",
-                    full.crown_length_to_width_ratio,
-                );
-            }
-        } else if reaction {
-            row.f64("ri_crown", ri);
-        }
-        Ok(())
     })
 }

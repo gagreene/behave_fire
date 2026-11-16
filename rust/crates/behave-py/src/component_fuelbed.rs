@@ -11,6 +11,18 @@ use behave_fire::{
 fn field(name: &str) -> Result<Field, String> {
     Field::from_name(&format!("ib.{name}")).ok_or_else(|| format!("unknown fuelbed field {name}"))
 }
+fn value(field: Field, state: &mut CellState) -> Result<f64, String> {
+    if state.is_present(field) {
+        return state.physical(field).map_err(|e| e.to_string());
+    }
+    let result =
+        behave_fire::engine::evaluate_fuelbed_field(field, |dependency| value(dependency, state))
+            .ok_or_else(|| format!("unbound particle field {}", field.name()))??;
+    state
+        .set_physical(field, result)
+        .map_err(|e| e.to_string())?;
+    Ok(result)
+}
 fn visit(field: Field, inputs: &mut Vec<(Field, Input)>) -> Result<(), String> {
     if field.producer() == Some(Stage::Fuelbed) {
         for &dependency in field.dependencies() {
@@ -28,18 +40,6 @@ pub(crate) fn dependencies(names: &[String]) -> Result<Vec<(Field, Input)>, Stri
     for name in names {
         visit(field(name)?, &mut result)?;
     }
-    Ok(result)
-}
-fn value(field: Field, state: &mut CellState) -> Result<f64, String> {
-    if state.is_present(field) {
-        return state.physical(field).map_err(|e| e.to_string());
-    }
-    let result =
-        behave_fire::engine::evaluate_fuelbed_field(field, |dependency| value(dependency, state))
-            .ok_or_else(|| format!("unbound particle field {}", field.name()))??;
-    state
-        .set_physical(field, result)
-        .map_err(|e| e.to_string())?;
     Ok(result)
 }
 pub(crate) fn run(

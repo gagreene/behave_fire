@@ -11,6 +11,39 @@ use pyo3::prelude::*;
 use pyo3::types::PyDict;
 use std::collections::BTreeMap;
 
+/// Copy a retained column to Python, flattening only unsupported transport ranks.
+fn array<'py, T: Element + Copy>(
+    py: Python<'py>,
+    shape: &[usize],
+    values: &[T],
+) -> PyResult<Bound<'py, PyAny>> {
+    let count = shape.iter().product();
+    let values = if values.len() == 1 {
+        vec![values[0]; count]
+    } else {
+        values.to_vec()
+    };
+    // rust-numpy's ndarray conversion has a 32-axis ceiling. Transfer a flat
+    // owned array above that ceiling; the public wrapper restores logical axes.
+    let flat_shape = [count];
+    let numpy_shape = if shape.len() > 32 {
+        &flat_shape[..]
+    } else {
+        shape
+    };
+    Ok(ArrayD::from_shape_vec(IxDyn(numpy_shape), values)
+        .map_err(error)?
+        .into_pyarray(py)
+        .into_any())
+}
+/// Copy a typed caller column into native-owned session storage.
+fn column(field: Field, value: &Bound<'_, PyAny>) -> PyResult<ColumnValues> {
+    Ok(match field.kind() {
+        FieldKind::Physical => ColumnValues::Float64(model::array(value, field.name())?),
+        FieldKind::Code => ColumnValues::Int32(model::array(value, field.name())?),
+        FieldKind::Flag => ColumnValues::Bool(model::array(value, field.name())?),
+    })
+}
 /// Preserve a structural core error as a Python value error.
 fn error(e: impl std::fmt::Display) -> PyErr {
     PyValueError::new_err(e.to_string())
@@ -43,39 +76,6 @@ fn stage(name: &str) -> PyResult<Stage> {
         _ => Err(PyValueError::new_err(format!("unknown grid stage {name}"))),
     }
 }
-/// Copy a typed caller column into native-owned session storage.
-fn column(field: Field, value: &Bound<'_, PyAny>) -> PyResult<ColumnValues> {
-    Ok(match field.kind() {
-        FieldKind::Physical => ColumnValues::Float64(model::array(value, field.name())?),
-        FieldKind::Code => ColumnValues::Int32(model::array(value, field.name())?),
-        FieldKind::Flag => ColumnValues::Bool(model::array(value, field.name())?),
-    })
-}
-/// Copy a retained column to Python, flattening only unsupported transport ranks.
-fn array<'py, T: Element + Copy>(
-    py: Python<'py>,
-    shape: &[usize],
-    values: &[T],
-) -> PyResult<Bound<'py, PyAny>> {
-    let count = shape.iter().product();
-    let values = if values.len() == 1 {
-        vec![values[0]; count]
-    } else {
-        values.to_vec()
-    };
-    // rust-numpy's ndarray conversion has a 32-axis ceiling. Transfer a flat
-    // owned array above that ceiling; the public wrapper restores logical axes.
-    let flat_shape = [count];
-    let numpy_shape = if shape.len() > 32 {
-        &flat_shape[..]
-    } else {
-        shape
-    };
-    Ok(ArrayD::from_shape_vec(IxDyn(numpy_shape), values)
-        .map_err(error)?
-        .into_pyarray(py)
-        .into_any())
-}
 
 /// The complete independently owned core snapshot, guarded by PyO3's mutable borrow.
 #[pyclass(name = "GridSession", module = "behave_fire._rust")]
@@ -85,6 +85,30 @@ pub struct NativeGridSession {
 
 #[pymethods]
 impl NativeGridSession {
+    fn __reduce__(&self) -> PyResult<()> {
+        Err(PyTypeError::new_err(
+            "Grid sessions cannot be pickled; reconstruct from inputs.",
+        ))
+    }
+    fn clear(&mut self, name: &str, persistent: bool) -> PyResult<()> {
+        let f = field(name)?;
+        if persistent {
+            self.inner.clear_persistent(f)
+        } else {
+            self.inner.clear_injection(f)
+        }
+        .map_err(error)
+    }
+    fn get<'py>(&self, py: Python<'py>, name: &str) -> PyResult<Bound<'py, PyAny>> {
+        let f = field(name)?;
+        let view = self.inner.get(f).map_err(error)?;
+        let shape = self.inner.shape().dimensions();
+        match f.kind() {
+            FieldKind::Physical => array(py, shape, view.physical().map_err(error)?),
+            FieldKind::Code => array(py, shape, view.code().map_err(error)?),
+            FieldKind::Flag => array(py, shape, view.flag().map_err(error)?),
+        }
+    }
     #[new]
     #[pyo3(signature=(kind, inputs, controls, registry, shape, settings, outputs, keep, threads=1, fuelbed=None))]
     #[allow(clippy::too_many_arguments)]
@@ -199,30 +223,6 @@ impl NativeGridSession {
         )
         .map_err(error)?;
         Ok(Self { inner })
-    }
-    fn __reduce__(&self) -> PyResult<()> {
-        Err(PyTypeError::new_err(
-            "Grid sessions cannot be pickled; reconstruct from inputs.",
-        ))
-    }
-    fn clear(&mut self, name: &str, persistent: bool) -> PyResult<()> {
-        let f = field(name)?;
-        if persistent {
-            self.inner.clear_persistent(f)
-        } else {
-            self.inner.clear_injection(f)
-        }
-        .map_err(error)
-    }
-    fn get<'py>(&self, py: Python<'py>, name: &str) -> PyResult<Bound<'py, PyAny>> {
-        let f = field(name)?;
-        let view = self.inner.get(f).map_err(error)?;
-        let shape = self.inner.shape().dimensions();
-        match f.kind() {
-            FieldKind::Physical => array(py, shape, view.physical().map_err(error)?),
-            FieldKind::Code => array(py, shape, view.code().map_err(error)?),
-            FieldKind::Flag => array(py, shape, view.flag().map_err(error)?),
-        }
     }
     fn reset(&mut self) {
         self.inner.reset();

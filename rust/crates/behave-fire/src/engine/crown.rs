@@ -94,16 +94,6 @@ impl CrownPlan {
         &self.options
     }
 
-    /// Evaluate model-10 particles, fuelbed, reaction, and spread exactly once.
-    pub fn prepare_surface(
-        &self,
-        cell: &CrownCell,
-        fm10: &PreparedFuel,
-        tweaks: SurfaceTweaks,
-    ) -> CrownSurfaceResult {
-        crown::calculate_crown_surface_fire(cell, fm10, &self.options, tweaks)
-    }
-
     /// Prepare only model-10 particle, fuelbed, reaction, and Crown spread stages.
     pub fn prepare_spread(
         &self,
@@ -123,8 +113,18 @@ impl CrownPlan {
         crown::calculate_crown_spread_spatial(input, fm10, &self.options)
     }
 
-    /// Evaluate Crown from independent supplied Surface fields and typed overrides.
-    pub fn run_cell(
+    /// Evaluate model-10 particles, fuelbed, reaction, and spread exactly once.
+    pub fn prepare_surface(
+        &self,
+        cell: &CrownCell,
+        fm10: &PreparedFuel,
+        tweaks: SurfaceTweaks,
+    ) -> CrownSurfaceResult {
+        crown::calculate_crown_surface_fire(cell, fm10, &self.options, tweaks)
+    }
+
+    /// Evaluate the float64 model contract with dependency-aware unavailable values.
+    pub(crate) fn run_available_cell(
         &self,
         cell: &CrownCell,
         supplied: &SurfaceFireInputs<f64>,
@@ -134,8 +134,8 @@ impl CrownPlan {
         run_crown::<true>(self, cell, supplied, fm10, tweaks)
     }
 
-    /// Evaluate the float64 model contract with dependency-aware unavailable values.
-    pub(crate) fn run_available_cell(
+    /// Evaluate Crown from independent supplied Surface fields and typed overrides.
+    pub fn run_cell(
         &self,
         cell: &CrownCell,
         supplied: &SurfaceFireInputs<f64>,

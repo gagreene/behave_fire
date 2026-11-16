@@ -58,17 +58,23 @@ pub fn build_particle_arrays_from_prepared(
     p
 }
 
-/// Share dynamic herb transfer with field-level stages, without reading unrelated moisture.
-#[inline]
-pub(crate) fn transfer_herbaceous_load(loading: f64, dynamic: bool, moisture: f64) -> (f64, f64) {
-    if dynamic && moisture < 0.30 {
-        (loading, 0.)
-    } else if dynamic && (0.30..=1.20).contains(&moisture) {
-        let transferred = loading * (1.333 - 1.11 * moisture);
-        (transferred, loading - transferred)
-    } else {
-        (0., loading)
+/// Apply precomputed size bins without changing reduction or invalid-bin arithmetic.
+pub(crate) fn size_sorted_prepared(bins: &[usize; 5], fractions: &[f64; 5], net: &[f64; 5]) -> f64 {
+    let mut summed = [0.0; 5];
+    for i in 0..5 {
+        if bins[i] < 5 {
+            summed[bins[i]] += fractions[i];
+        }
     }
+    let mut result = 0.0;
+    for i in 0..5 {
+        let mut assigned = 0.0;
+        if bins[i] < 5 {
+            assigned += summed[bins[i]];
+        }
+        result += assigned * net[i];
+    }
+    result
 }
 
 /// Size-class weighted net loading (lb/ft²), retaining the Albini bin boundaries exactly.
@@ -146,21 +152,15 @@ impl SavrTerms {
     }
 }
 
-/// Apply precomputed size bins without changing reduction or invalid-bin arithmetic.
-pub(crate) fn size_sorted_prepared(bins: &[usize; 5], fractions: &[f64; 5], net: &[f64; 5]) -> f64 {
-    let mut summed = [0.0; 5];
-    for i in 0..5 {
-        if bins[i] < 5 {
-            summed[bins[i]] += fractions[i];
-        }
+/// Share dynamic herb transfer with field-level stages, without reading unrelated moisture.
+#[inline]
+pub(crate) fn transfer_herbaceous_load(loading: f64, dynamic: bool, moisture: f64) -> (f64, f64) {
+    if dynamic && moisture < 0.30 {
+        (loading, 0.)
+    } else if dynamic && (0.30..=1.20).contains(&moisture) {
+        let transferred = loading * (1.333 - 1.11 * moisture);
+        (transferred, loading - transferred)
+    } else {
+        (0., loading)
     }
-    let mut result = 0.0;
-    for i in 0..5 {
-        let mut assigned = 0.0;
-        if bins[i] < 5 {
-            assigned += summed[bins[i]];
-        }
-        result += assigned * net[i];
-    }
-    result
 }
