@@ -53,13 +53,13 @@ class SlopeTool(_NativeState):
         """
         return _state(self, 'slope_tool', 'calculate_slope_from_map_measurements', locals())
 
-    def get_number_of_horizontal_distances(self):
+    def get_centimeters_per_kilometer_at_index(self, index):
         """Execute the explicit native operation.
 
-
+        :param index: Input matching the public API.
         :return: Calculation result or updated receiver state.
         """
-        return _state(self, 'slope_tool', 'get_number_of_horizontal_distances', locals())
+        return _state(self, 'slope_tool', 'get_centimeters_per_kilometer_at_index', locals())
 
     def get_horizontal_distance_at_index(self, index, map_distance_units):
         """Execute the explicit native operation.
@@ -70,45 +70,37 @@ class SlopeTool(_NativeState):
         """
         return _state(self, 'slope_tool', 'get_horizontal_distance_at_index', locals())
 
-    def get_slope_from_map_measurements(self, slope_units):
+    def get_inches_per_mile_at_index(self, index):
         """Execute the explicit native operation.
 
-        :param slope_units: Input matching the public API.
+        :param index: Input matching the public API.
         :return: Calculation result or updated receiver state.
         """
-        return _state(self, 'slope_tool', 'get_slope_from_map_measurements', locals())
+        return _state(self, 'slope_tool', 'get_inches_per_mile_at_index', locals())
 
-    def get_slope_from_map_measurements_in_percent(self):
+    def get_kilometers_per_centimeter_at_index(self, index):
+        """Execute the explicit native operation.
+
+        :param index: Input matching the public API.
+        :return: Calculation result or updated receiver state.
+        """
+        return _state(self, 'slope_tool', 'get_kilometers_per_centimeter_at_index', locals())
+
+    def get_miles_per_inch_at_index(self, index):
+        """Execute the explicit native operation.
+
+        :param index: Input matching the public API.
+        :return: Calculation result or updated receiver state.
+        """
+        return _state(self, 'slope_tool', 'get_miles_per_inch_at_index', locals())
+
+    def get_number_of_horizontal_distances(self):
         """Execute the explicit native operation.
 
 
         :return: Calculation result or updated receiver state.
         """
-        return _state(self, 'slope_tool', 'get_slope_from_map_measurements_in_percent', locals())
-
-    def get_slope_from_map_measurements_in_degrees(self):
-        """Execute the explicit native operation.
-
-
-        :return: Calculation result or updated receiver state.
-        """
-        return _state(self, 'slope_tool', 'get_slope_from_map_measurements_in_degrees', locals())
-
-    def get_slope_horizontal_distance_from_map_measurements(self, distance_units):
-        """Execute the explicit native operation.
-
-        :param distance_units: Input matching the public API.
-        :return: Calculation result or updated receiver state.
-        """
-        return _state(self, 'slope_tool', 'get_slope_horizontal_distance_from_map_measurements', locals())
-
-    def get_slope_elevation_change_from_map_measurements(self, elevation_units):
-        """Execute the explicit native operation.
-
-        :param elevation_units: Input matching the public API.
-        :return: Calculation result or updated receiver state.
-        """
-        return _state(self, 'slope_tool', 'get_slope_elevation_change_from_map_measurements', locals())
+        return _state(self, 'slope_tool', 'get_number_of_horizontal_distances', locals())
 
     def get_number_of_representative_fractions(self):
         """Execute the explicit native operation.
@@ -126,34 +118,42 @@ class SlopeTool(_NativeState):
         """
         return _state(self, 'slope_tool', 'get_representative_fraction_at_index', locals())
 
-    def get_inches_per_mile_at_index(self, index):
+    def get_slope_elevation_change_from_map_measurements(self, elevation_units):
         """Execute the explicit native operation.
 
-        :param index: Input matching the public API.
+        :param elevation_units: Input matching the public API.
         :return: Calculation result or updated receiver state.
         """
-        return _state(self, 'slope_tool', 'get_inches_per_mile_at_index', locals())
+        return _state(self, 'slope_tool', 'get_slope_elevation_change_from_map_measurements', locals())
 
-    def get_miles_per_inch_at_index(self, index):
+    def get_slope_from_map_measurements(self, slope_units):
         """Execute the explicit native operation.
 
-        :param index: Input matching the public API.
+        :param slope_units: Input matching the public API.
         :return: Calculation result or updated receiver state.
         """
-        return _state(self, 'slope_tool', 'get_miles_per_inch_at_index', locals())
+        return _state(self, 'slope_tool', 'get_slope_from_map_measurements', locals())
 
-    def get_centimeters_per_kilometer_at_index(self, index):
+    def get_slope_from_map_measurements_in_degrees(self):
         """Execute the explicit native operation.
 
-        :param index: Input matching the public API.
+
         :return: Calculation result or updated receiver state.
         """
-        return _state(self, 'slope_tool', 'get_centimeters_per_kilometer_at_index', locals())
+        return _state(self, 'slope_tool', 'get_slope_from_map_measurements_in_degrees', locals())
 
-    def get_kilometers_per_centimeter_at_index(self, index):
+    def get_slope_from_map_measurements_in_percent(self):
         """Execute the explicit native operation.
 
-        :param index: Input matching the public API.
+
         :return: Calculation result or updated receiver state.
         """
-        return _state(self, 'slope_tool', 'get_kilometers_per_centimeter_at_index', locals())
+        return _state(self, 'slope_tool', 'get_slope_from_map_measurements_in_percent', locals())
+
+    def get_slope_horizontal_distance_from_map_measurements(self, distance_units):
+        """Execute the explicit native operation.
+
+        :param distance_units: Input matching the public API.
+        :return: Calculation result or updated receiver state.
+        """
+        return _state(self, 'slope_tool', 'get_slope_horizontal_distance_from_map_measurements', locals())

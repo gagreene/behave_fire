@@ -131,40 +131,6 @@ def build_mortality_lookup(species_master_table: Optional['SpeciesMasterTable'] 
 
 
 # ---------------------------------------------------------------------------
-# Scorch height
-# ---------------------------------------------------------------------------
-
-def calculate_scorch_height(
-        fireline_intensity_btu_ft_s: Union[float, np.ndarray],
-        midflame_wind_mph: Union[float, np.ndarray],
-        air_temp_f: Union[float, np.ndarray]
-) -> np.ndarray:
-    """
-    Vectorized scorch height (Van Wagner 1973 / Rothermel 1976).
-
-    :param fireline_intensity_btu_ft_s: Fireline intensity (*S) or scalar (BTU/ft/s).
-    :param midflame_wind_mph: Midflame wind speed (*S) or scalar (mph).
-    :param air_temp_f: Air temperature (*S) or scalar (°F).
-    :return: (*S) ndarray — scorch height (ft). Returns 0.0 where
-        ``fireline_intensity`` ≤ 0.
-    """
-    fi = np.asarray(fireline_intensity_btu_ft_s, dtype=float)
-    ws = np.asarray(midflame_wind_mph,           dtype=float)
-    t  = np.asarray(air_temp_f,                  dtype=float)
-
-    # Temperature differential between lethal scorch threshold (140°F) and air
-    denom     = 140.0 - t
-    safe_denom = np.where(np.abs(denom) > 1e-7, denom, 1.0)
-    safe_fi    = np.where(fi > 1e-7, fi, 1.0)
-
-    return np.where(
-        fi > 1e-7,
-        (63.0 / safe_denom) * (safe_fi ** 1.166667) / np.sqrt(safe_fi + ws ** 3),
-        0.0
-    )
-
-
-# ---------------------------------------------------------------------------
 # Crown scorch mortality
 # ---------------------------------------------------------------------------
 
@@ -231,4 +197,38 @@ def calculate_crown_scorch_mortality(
         'crown_volume_scorch':   cvs,
         'probability_mortality': np.clip(prob, 0.0, 1.0),
     }
+
+
+# ---------------------------------------------------------------------------
+# Scorch height
+# ---------------------------------------------------------------------------
+
+def calculate_scorch_height(
+        fireline_intensity_btu_ft_s: Union[float, np.ndarray],
+        midflame_wind_mph: Union[float, np.ndarray],
+        air_temp_f: Union[float, np.ndarray]
+) -> np.ndarray:
+    """
+    Vectorized scorch height (Van Wagner 1973 / Rothermel 1976).
+
+    :param fireline_intensity_btu_ft_s: Fireline intensity (*S) or scalar (BTU/ft/s).
+    :param midflame_wind_mph: Midflame wind speed (*S) or scalar (mph).
+    :param air_temp_f: Air temperature (*S) or scalar (°F).
+    :return: (*S) ndarray — scorch height (ft). Returns 0.0 where
+        ``fireline_intensity`` ≤ 0.
+    """
+    fi = np.asarray(fireline_intensity_btu_ft_s, dtype=float)
+    ws = np.asarray(midflame_wind_mph,           dtype=float)
+    t  = np.asarray(air_temp_f,                  dtype=float)
+
+    # Temperature differential between lethal scorch threshold (140°F) and air
+    denom     = 140.0 - t
+    safe_denom = np.where(np.abs(denom) > 1e-7, denom, 1.0)
+    safe_fi    = np.where(fi > 1e-7, fi, 1.0)
+
+    return np.where(
+        fi > 1e-7,
+        (63.0 / safe_denom) * (safe_fi ** 1.166667) / np.sqrt(safe_fi + ws ** 3),
+        0.0
+    )
 

@@ -82,6 +82,32 @@ print(f"Origin (UL): E={ORIGIN_E:.0f} m, N={ORIGIN_N:.0f} m  (EPSG:{EPSG})")
 TRANSFORM = from_origin(ORIGIN_E, ORIGIN_N, CELL_SIZE, CELL_SIZE)
 CRS_OBJ   = CRS.from_epsg(EPSG)
 
+def _r(arr):
+    """Return the array as a 2D (NROWS,NCOLS) grid — outputs are already this shape."""
+    return np.asarray(arr)
+
+def _save2d(arr, fname, desc=""):
+    path = os.path.join(RESULTS_DIR, fname)
+    a = np.asarray(arr).astype(np.float32)
+    if a.ndim != 2:
+        raise ValueError(f"{fname}: expected 2D array, got shape {a.shape}")
+    save_tif(a, path, dtype=np.float32)
+    print(f"  {fname:<55s}  min={np.nanmin(a):.3f}  max={np.nanmax(a):.3f}  {desc}")
+
+def make_moisture(base, elev_gain, sigma=6, noise_amp=0.01, lo=0.02, hi=0.50):
+    """Create a spatially smooth moisture grid.
+
+    :param base: Base moisture fraction at lowest elevation.
+    :param elev_gain: Additional moisture fraction added from low to high elevation.
+    :param sigma: Gaussian smoothing radius (cells) for spatial noise.
+    :param noise_amp: Amplitude of random spatial noise (fraction).
+    :param lo: Lower clip bound (fraction).
+    :param hi: Upper clip bound (fraction).
+    """
+    m = (base + elev_norm * elev_gain
+         + gaussian_filter(RNG.standard_normal((NROWS, NCOLS)), sigma=sigma) * noise_amp)
+    return np.clip(m, lo, hi).astype(np.float32)
+
 def save_tif(array: np.ndarray, path: str, nodata: float = -9999.0,
              dtype=None, descriptions: list[str] | None = None):
     """Write a 2-D (rows×cols) or 3-D (bands×rows×cols) ndarray to a GeoTIFF."""
@@ -105,6 +131,14 @@ def save_tif(array: np.ndarray, path: str, nodata: float = -9999.0,
             dst.write(arr[b].astype(dtype), b + 1)
             if descriptions and b < len(descriptions):
                 dst.update_tags(b + 1, description=descriptions[b])
+
+def stats(label, arr, unit):
+    a = np.asarray(arr).ravel()
+    print(f"  {label:<40s}  "
+          f"mean={np.nanmean(a):8.2f}  "
+          f"p50={np.nanpercentile(a,50):8.2f}  "
+          f"p90={np.nanpercentile(a,90):8.2f}  "
+          f"max={np.nanmax(a):8.2f}  [{unit}]")
 
 
 # ===========================================================================
@@ -265,20 +299,6 @@ print("\n[4/5] Generating weather inputs …")
 # --- Fuel moisture (spatially varying, fractions) ---
 # Mild elevation-moisture gradient + local random variation
 elev_norm = (elev - elev.min()) / (elev.max() - elev.min())   # 0–1
-
-def make_moisture(base, elev_gain, sigma=6, noise_amp=0.01, lo=0.02, hi=0.50):
-    """Create a spatially smooth moisture grid.
-
-    :param base: Base moisture fraction at lowest elevation.
-    :param elev_gain: Additional moisture fraction added from low to high elevation.
-    :param sigma: Gaussian smoothing radius (cells) for spatial noise.
-    :param noise_amp: Amplitude of random spatial noise (fraction).
-    :param lo: Lower clip bound (fraction).
-    :param hi: Upper clip bound (fraction).
-    """
-    m = (base + elev_norm * elev_gain
-         + gaussian_filter(RNG.standard_normal((NROWS, NCOLS)), sigma=sigma) * noise_amp)
-    return np.clip(m, lo, hi).astype(np.float32)
 
 
 m1h   = make_moisture(0.06, 0.04, sigma=8,  noise_amp=0.015)           # 1-hr  dead  ~6–10 %
@@ -490,14 +510,6 @@ print("  Fire size    : done")
 # ===========================================================================
 print("\nSaving output rasters …")
 
-def _save2d(arr, fname, desc=""):
-    path = os.path.join(RESULTS_DIR, fname)
-    a = np.asarray(arr).astype(np.float32)
-    if a.ndim != 2:
-        raise ValueError(f"{fname}: expected 2D array, got shape {a.shape}")
-    save_tif(a, path, dtype=np.float32)
-    print(f"  {fname:<55s}  min={np.nanmin(a):.3f}  max={np.nanmax(a):.3f}  {desc}")
-
 _save2d(surface['spread_rate'],                "surface_spread_rate_mpm.tif",     "m/min")
 _save2d(surface['backing_spread_rate'],        "surface_backing_ros_mpm.tif",     "m/min")
 _save2d(surface['flanking_spread_rate'],       "surface_flanking_ros_mpm.tif",    "m/min")
@@ -532,10 +544,6 @@ _save2d(fire_area_ha,                          "fire_area_60min_ha.tif",        
 # 7.  SUMMARY MAP  (12-panel figure, 3 rows × 4 cols)
 # ===========================================================================
 print("\nGenerating summary map …")
-
-def _r(arr):
-    """Return the array as a 2D (NROWS,NCOLS) grid — outputs are already this shape."""
-    return np.asarray(arr)
 
 # Discrete fire-type colormap — 4 values matching C++ FireType enum
 FIRE_TYPE_COLORS = {
@@ -627,14 +635,6 @@ print(f"  Saved -> {out_png}")
 print("\n" + "=" * 60)
 print("Landscape-wide fire behavior statistics")
 print("=" * 60)
-
-def stats(label, arr, unit):
-    a = np.asarray(arr).ravel()
-    print(f"  {label:<40s}  "
-          f"mean={np.nanmean(a):8.2f}  "
-          f"p50={np.nanpercentile(a,50):8.2f}  "
-          f"p90={np.nanpercentile(a,90):8.2f}  "
-          f"max={np.nanmax(a):8.2f}  [{unit}]")
 
 stats("Surface ROS",               surface['spread_rate'],           "m/min")
 stats("Backing ROS",               surface['backing_spread_rate'],   "m/min")

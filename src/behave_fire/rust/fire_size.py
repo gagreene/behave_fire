@@ -17,6 +17,30 @@ class FireSize(_NativeState):
         """
         return _state(self, 'fire_size', '__init__', locals())
 
+    def calculate_backing_spread_rate(self):
+        """Execute the explicit native operation.
+
+
+        :return: Calculation result or updated receiver state.
+        """
+        return _state(self, 'fire_size', 'calculate_backing_spread_rate', locals())
+
+    def calculate_crown_fire_length_to_width_ratio(self):
+        """Execute the explicit native operation.
+
+
+        :return: Calculation result or updated receiver state.
+        """
+        return _state(self, 'fire_size', 'calculate_crown_fire_length_to_width_ratio', locals())
+
+    def calculate_elliptical_dimensions(self):
+        """Execute the explicit native operation.
+
+
+        :return: Calculation result or updated receiver state.
+        """
+        return _state(self, 'fire_size', 'calculate_elliptical_dimensions', locals())
+
     def calculate_fire_basic_dimensions(
             self,
             is_crown,
@@ -36,22 +60,6 @@ class FireSize(_NativeState):
         """
         return _state(self, 'fire_size', 'calculate_fire_basic_dimensions', locals())
 
-    def calculate_surface_fire_length_to_width_ratio(self):
-        """Execute the explicit native operation.
-
-
-        :return: Calculation result or updated receiver state.
-        """
-        return _state(self, 'fire_size', 'calculate_surface_fire_length_to_width_ratio', locals())
-
-    def calculate_crown_fire_length_to_width_ratio(self):
-        """Execute the explicit native operation.
-
-
-        :return: Calculation result or updated receiver state.
-        """
-        return _state(self, 'fire_size', 'calculate_crown_fire_length_to_width_ratio', locals())
-
     def calculate_fire_eccentricity(self):
         """Execute the explicit native operation.
 
@@ -59,22 +67,6 @@ class FireSize(_NativeState):
         :return: Calculation result or updated receiver state.
         """
         return _state(self, 'fire_size', 'calculate_fire_eccentricity', locals())
-
-    def calculate_elliptical_dimensions(self):
-        """Execute the explicit native operation.
-
-
-        :return: Calculation result or updated receiver state.
-        """
-        return _state(self, 'fire_size', 'calculate_elliptical_dimensions', locals())
-
-    def calculate_backing_spread_rate(self):
-        """Execute the explicit native operation.
-
-
-        :return: Calculation result or updated receiver state.
-        """
-        return _state(self, 'fire_size', 'calculate_backing_spread_rate', locals())
 
     def calculate_flanking_spread_rate(self):
         """Execute the explicit native operation.
@@ -84,29 +76,13 @@ class FireSize(_NativeState):
         """
         return _state(self, 'fire_size', 'calculate_flanking_spread_rate', locals())
 
-    def get_fire_length_to_width_ratio(self):
+    def calculate_surface_fire_length_to_width_ratio(self):
         """Execute the explicit native operation.
 
 
         :return: Calculation result or updated receiver state.
         """
-        return _state(self, 'fire_size', 'get_fire_length_to_width_ratio', locals())
-
-    def get_eccentricity(self):
-        """Execute the explicit native operation.
-
-
-        :return: Calculation result or updated receiver state.
-        """
-        return _state(self, 'fire_size', 'get_eccentricity', locals())
-
-    def get_heading_to_backing_ratio(self):
-        """Execute the explicit native operation.
-
-
-        :return: Calculation result or updated receiver state.
-        """
-        return _state(self, 'fire_size', 'get_heading_to_backing_ratio', locals())
+        return _state(self, 'fire_size', 'calculate_surface_fire_length_to_width_ratio', locals())
 
     def get_backing_spread_rate(self, spread_rate_units):
         """Execute the explicit native operation.
@@ -116,13 +92,13 @@ class FireSize(_NativeState):
         """
         return _state(self, 'fire_size', 'get_backing_spread_rate', locals())
 
-    def get_flanking_spread_rate(self, spread_rate_units):
+    def get_eccentricity(self):
         """Execute the explicit native operation.
 
-        :param spread_rate_units: Input matching the public API.
+
         :return: Calculation result or updated receiver state.
         """
-        return _state(self, 'fire_size', 'get_flanking_spread_rate', locals())
+        return _state(self, 'fire_size', 'get_eccentricity', locals())
 
     def get_elliptical_a(self, length_units, elapsed_time, time_units):
         """Execute the explicit native operation.
@@ -154,6 +130,17 @@ class FireSize(_NativeState):
         """
         return _state(self, 'fire_size', 'get_elliptical_c', locals())
 
+    def get_fire_area(self, is_crown, area_units, elapsed_time, time_units):
+        """Execute the explicit native operation.
+
+        :param is_crown: Input matching the public API.
+        :param area_units: Input matching the public API.
+        :param elapsed_time: Input matching the public API.
+        :param time_units: Input matching the public API.
+        :return: Calculation result or updated receiver state.
+        """
+        return _state(self, 'fire_size', 'get_fire_area', locals())
+
     def get_fire_length(self, length_units, elapsed_time, time_units):
         """Execute the explicit native operation.
 
@@ -164,15 +151,13 @@ class FireSize(_NativeState):
         """
         return _state(self, 'fire_size', 'get_fire_length', locals())
 
-    def get_max_fire_width(self, length_units, elapsed_time, time_units):
+    def get_fire_length_to_width_ratio(self):
         """Execute the explicit native operation.
 
-        :param length_units: Input matching the public API.
-        :param elapsed_time: Input matching the public API.
-        :param time_units: Input matching the public API.
+
         :return: Calculation result or updated receiver state.
         """
-        return _state(self, 'fire_size', 'get_max_fire_width', locals())
+        return _state(self, 'fire_size', 'get_fire_length_to_width_ratio', locals())
 
     def get_fire_perimeter(self, is_crown, length_units, elapsed_time, time_units):
         """Execute the explicit native operation.
@@ -185,13 +170,28 @@ class FireSize(_NativeState):
         """
         return _state(self, 'fire_size', 'get_fire_perimeter', locals())
 
-    def get_fire_area(self, is_crown, area_units, elapsed_time, time_units):
+    def get_flanking_spread_rate(self, spread_rate_units):
         """Execute the explicit native operation.
 
-        :param is_crown: Input matching the public API.
-        :param area_units: Input matching the public API.
+        :param spread_rate_units: Input matching the public API.
+        :return: Calculation result or updated receiver state.
+        """
+        return _state(self, 'fire_size', 'get_flanking_spread_rate', locals())
+
+    def get_heading_to_backing_ratio(self):
+        """Execute the explicit native operation.
+
+
+        :return: Calculation result or updated receiver state.
+        """
+        return _state(self, 'fire_size', 'get_heading_to_backing_ratio', locals())
+
+    def get_max_fire_width(self, length_units, elapsed_time, time_units):
+        """Execute the explicit native operation.
+
+        :param length_units: Input matching the public API.
         :param elapsed_time: Input matching the public API.
         :param time_units: Input matching the public API.
         :return: Calculation result or updated receiver state.
         """
-        return _state(self, 'fire_size', 'get_fire_area', locals())
+        return _state(self, 'fire_size', 'get_max_fire_width', locals())

@@ -59,28 +59,6 @@ _CC_NEG,   _CC_POS   = 0.2, 0.9     # conditional prob given neg / pos charge
 _FREQ_NEG, _FREQ_POS = 0.723, 0.277  # historical frequency of neg / pos strikes
 
 
-def calculate_fuel_temperature(
-        air_temp_f: Union[float, np.ndarray],
-        sun_shade_fraction: Union[float, np.ndarray]
-) -> np.ndarray:
-    """
-    Fuel temperature adjustment (Rothermel 1983).
-
-    Fuel exposed to direct sun is warmer than air temperature; shaded fuel
-    approaches air temperature.  The adjustment ranges from +25°F (full sun)
-    to +5°F (full shade).
-
-    :param air_temp_f: Air temperature (°F) (*S) or scalar.
-    :param sun_shade_fraction: Shade fraction (0 = full sun, 1 = full shade)
-        (*S) or scalar.
-    :return: (*S) ndarray — fuel temperature (°F).
-    """
-    t = np.asarray(air_temp_f,         dtype=float)
-    s = np.asarray(sun_shade_fraction, dtype=float)
-    # Adjustment: +25°F at full sun, decreasing linearly to +5°F at full shade
-    return t + (25.0 - 20.0 * s)
-
-
 def calculate_firebrand_ignition_probability(
         air_temp_f: Union[float, np.ndarray],
         sun_shade_fraction: Union[float, np.ndarray],
@@ -116,6 +94,28 @@ def calculate_firebrand_ignition_probability(
         (0.000048 * np.power(np.maximum(x, 0.0), 4.3)) / 50.0,
         0.0, 1.0
     )
+
+
+def calculate_fuel_temperature(
+        air_temp_f: Union[float, np.ndarray],
+        sun_shade_fraction: Union[float, np.ndarray]
+) -> np.ndarray:
+    """
+    Fuel temperature adjustment (Rothermel 1983).
+
+    Fuel exposed to direct sun is warmer than air temperature; shaded fuel
+    approaches air temperature.  The adjustment ranges from +25°F (full sun)
+    to +5°F (full shade).
+
+    :param air_temp_f: Air temperature (°F) (*S) or scalar.
+    :param sun_shade_fraction: Shade fraction (0 = full sun, 1 = full shade)
+        (*S) or scalar.
+    :return: (*S) ndarray — fuel temperature (°F).
+    """
+    t = np.asarray(air_temp_f,         dtype=float)
+    s = np.asarray(sun_shade_fraction, dtype=float)
+    # Adjustment: +25°F at full sun, decreasing linearly to +5°F at full shade
+    return t + (25.0 - 20.0 * s)
 
 
 def calculate_lightning_ignition_probability(

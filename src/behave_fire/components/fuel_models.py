@@ -30,6 +30,12 @@ class FuelModels:
     Direct Python translation of C++ FuelModels class.
     """
 
+    def __contains__(self, fuel_model_number):
+        return fuel_model_number in self.fuel_models_
+
+    def __getitem__(self, fuel_model_number):
+        return self.fuel_models_[fuel_model_number]
+
     def __init__(self):
         self.fuel_models_ = {}
         self._initialize_standard_fuel_models()
@@ -454,23 +460,265 @@ class FuelModels:
         # 205–210 reserved
         for i in range(205, 211):
             reserved(i)
-        # 211–219 available for custom SB models
-        # 220–256 available for custom models
+
+    def clear_custom_fuel_model(self, fuel_model_number):
+        """Clear a custom (non-reserved) fuel model.  Mirrors C++ clearCustomFuelModel()."""
+        existing = self.fuel_models_.get(fuel_model_number)
+        if existing and existing.get('is_reserved', False):
+            return False
+        if fuel_model_number in self.fuel_models_:
+            del self.fuel_models_[fuel_model_number]
+        return True
 
     # ------------------------------------------------------------------
     def get(self, fuel_model_number):
         """Dictionary-like get; returns None if not found."""
         return self.fuel_models_.get(fuel_model_number)
 
+    # ------------------------------------------------------------------
+    # Getter methods matching C++ API
+    # ------------------------------------------------------------------
+    def get_fuel_code(self, fuel_model_number):
+        m = self.get(fuel_model_number)
+        return m['code'] if m else ''
+
+    def get_fuel_load_hundred_hour(self, fuel_model_number, loading_units=None):
+        """
+        Return 100-hr dead fuel load.
+
+        :param fuel_model_number: Fuel model number to look up.
+        :param loading_units: ``LoadingUnitsEnum`` int for output units.
+            ``None`` (default) returns the raw value in lb/ft² (base unit).
+        :return: 100-hr fuel load in ``loading_units``, or 0.0 if not found.
+        """
+        m = self.get(fuel_model_number)
+        if not m:
+            return 0.0
+        val = m.get('dead_100h', 0.0)
+        if loading_units is not None:
+            return LoadingUnits.fromBaseUnits(val, loading_units)
+        return val
+
+    def get_fuel_load_live_herbaceous(self, fuel_model_number, loading_units=None):
+        """
+        Return live herbaceous fuel load.
+
+        :param fuel_model_number: Fuel model number to look up.
+        :param loading_units: ``LoadingUnitsEnum`` int for output units.
+            ``None`` (default) returns the raw value in lb/ft² (base unit).
+        :return: Live herb fuel load in ``loading_units``, or 0.0 if not found.
+        """
+        m = self.get(fuel_model_number)
+        if not m:
+            return 0.0
+        val = m.get('live_herb', 0.0)
+        if loading_units is not None:
+            return LoadingUnits.fromBaseUnits(val, loading_units)
+        return val
+
+    def get_fuel_load_live_woody(self, fuel_model_number, loading_units=None):
+        """
+        Return live woody fuel load.
+
+        :param fuel_model_number: Fuel model number to look up.
+        :param loading_units: ``LoadingUnitsEnum`` int for output units.
+            ``None`` (default) returns the raw value in lb/ft² (base unit).
+        :return: Live woody fuel load in ``loading_units``, or 0.0 if not found.
+        """
+        m = self.get(fuel_model_number)
+        if not m:
+            return 0.0
+        val = m.get('live_woody', 0.0)
+        if loading_units is not None:
+            return LoadingUnits.fromBaseUnits(val, loading_units)
+        return val
+
+    def get_fuel_load_one_hour(self, fuel_model_number, loading_units=None):
+        """
+        Return 1-hr dead fuel load.
+
+        :param fuel_model_number: Fuel model number to look up.
+        :param loading_units: ``LoadingUnitsEnum`` int for output units.
+            ``None`` (default) returns the raw value in lb/ft² (base unit).
+        :return: 1-hr fuel load in ``loading_units``, or 0.0 if not found.
+        """
+        m = self.get(fuel_model_number)
+        if not m:
+            return 0.0
+        val = m.get('dead_1h', 0.0)
+        if loading_units is not None:
+            return LoadingUnits.fromBaseUnits(val, loading_units)
+        return val
+
+    def get_fuel_load_ten_hour(self, fuel_model_number, loading_units=None):
+        """
+        Return 10-hr dead fuel load.
+
+        :param fuel_model_number: Fuel model number to look up.
+        :param loading_units: ``LoadingUnitsEnum`` int for output units.
+            ``None`` (default) returns the raw value in lb/ft² (base unit).
+        :return: 10-hr fuel load in ``loading_units``, or 0.0 if not found.
+        """
+        m = self.get(fuel_model_number)
+        if not m:
+            return 0.0
+        val = m.get('dead_10h', 0.0)
+        if loading_units is not None:
+            return LoadingUnits.fromBaseUnits(val, loading_units)
+        return val
+
     def get_fuel_model(self, fuel_model_number):
         """Alias for get()."""
         return self.fuel_models_.get(fuel_model_number)
 
-    def __getitem__(self, fuel_model_number):
-        return self.fuel_models_[fuel_model_number]
+    def get_fuel_name(self, fuel_model_number):
+        m = self.get(fuel_model_number)
+        return m['name'] if m else ''
 
-    def __contains__(self, fuel_model_number):
-        return fuel_model_number in self.fuel_models_
+    def get_fuelbed_depth(self, fuel_model_number, length_units=None):
+        """
+        Return fuel bed depth.
+
+        :param fuel_model_number: Fuel model number to look up.
+        :param length_units: ``LengthUnitsEnum`` int for output units.
+            ``None`` (default) returns the raw value in feet (base unit).
+        :return: Fuel bed depth in ``length_units``, or 0.0 if not found.
+        """
+        m = self.get(fuel_model_number)
+        if not m:
+            return 0.0
+        val = m.get('fuel_bed_depth', 0.0)
+        if length_units is not None:
+            return LengthUnits.fromBaseUnits(val, length_units)
+        return val
+
+    def get_heat_of_combustion_dead(self, fuel_model_number, heat_units=None):
+        """
+        Return heat of combustion for dead fuel.
+
+        :param fuel_model_number: Fuel model number to look up.
+        :param heat_units: ``HeatOfCombustionUnitsEnum`` int for output units.
+            ``None`` (default) returns the raw value in BTU/lb (base unit).
+        :return: Heat of combustion in ``heat_units``, or 0.0 if not found.
+        """
+        m = self.get(fuel_model_number)
+        if not m:
+            return 0.0
+        val = m.get('heat_of_combustion_dead', 0.0)
+        if heat_units is not None:
+            return HeatOfCombustionUnits.fromBaseUnits(val, heat_units)
+        return val
+
+    def get_heat_of_combustion_live(self, fuel_model_number, heat_units=None):
+        """
+        Return heat of combustion for live fuel.
+
+        :param fuel_model_number: Fuel model number to look up.
+        :param heat_units: ``HeatOfCombustionUnitsEnum`` int for output units.
+            ``None`` (default) returns the raw value in BTU/lb (base unit).
+        :return: Heat of combustion in ``heat_units``, or 0.0 if not found.
+        """
+        m = self.get(fuel_model_number)
+        if not m:
+            return 0.0
+        val = m.get('heat_of_combustion_live', 0.0)
+        if heat_units is not None:
+            return HeatOfCombustionUnits.fromBaseUnits(val, heat_units)
+        return val
+
+    def get_is_dynamic(self, fuel_model_number):
+        m = self.get(fuel_model_number)
+        return m.get('is_dynamic', False) if m else False
+
+    def get_moisture_of_extinction_dead(self, fuel_model_number, moisture_units=None):
+        """
+        Return dead fuel moisture of extinction.
+
+        :param fuel_model_number: Fuel model number to look up.
+        :param moisture_units: ``FractionUnitsEnum`` int for output units.
+            ``None`` (default) returns the raw value as a fraction (base unit).
+        :return: Moisture of extinction in ``moisture_units``, or 0.0 if not found.
+        """
+        m = self.get(fuel_model_number)
+        if not m:
+            return 0.0
+        val = m.get('moisture_of_extinction_dead', 0.0)
+        if moisture_units is not None:
+            return FractionUnits.fromBaseUnits(val, moisture_units)
+        return val
+
+    def get_savr_live_herbaceous(self, fuel_model_number, savr_units=None):
+        """
+        Return live herbaceous fuel surface-area-to-volume ratio (SAVR).
+
+        :param fuel_model_number: Fuel model number to look up.
+        :param savr_units: ``SurfaceAreaToVolumeUnitsEnum`` int for output units.
+            ``None`` (default) returns the raw value in ft²/ft³ (base unit).
+        :return: Live herb SAVR in ``savr_units``, or 0.0 if not found.
+        """
+        m = self.get(fuel_model_number)
+        if not m:
+            return 0.0
+        val = m.get('savr_live_herb', 0.0)
+        if savr_units is not None:
+            return SurfaceAreaToVolumeUnits.fromBaseUnits(val, savr_units)
+        return val
+
+    def get_savr_live_woody(self, fuel_model_number, savr_units=None):
+        """
+        Return live woody fuel surface-area-to-volume ratio (SAVR).
+
+        :param fuel_model_number: Fuel model number to look up.
+        :param savr_units: ``SurfaceAreaToVolumeUnitsEnum`` int for output units.
+            ``None`` (default) returns the raw value in ft²/ft³ (base unit).
+        :return: Live woody SAVR in ``savr_units``, or 0.0 if not found.
+        """
+        m = self.get(fuel_model_number)
+        if not m:
+            return 0.0
+        val = m.get('savr_live_woody', 0.0)
+        if savr_units is not None:
+            return SurfaceAreaToVolumeUnits.fromBaseUnits(val, savr_units)
+        return val
+
+    def get_savr_one_hour(self, fuel_model_number, savr_units=None):
+        """
+        Return 1-hr dead fuel surface-area-to-volume ratio (SAVR).
+
+        :param fuel_model_number: Fuel model number to look up.
+        :param savr_units: ``SurfaceAreaToVolumeUnitsEnum`` int for output units.
+            ``None`` (default) returns the raw value in ft²/ft³ (base unit).
+        :return: 1-hr SAVR in ``savr_units``, or 0.0 if not found.
+        """
+        m = self.get(fuel_model_number)
+        if not m:
+            return 0.0
+        val = m.get('savr_1h', 0.0)
+        if savr_units is not None:
+            return SurfaceAreaToVolumeUnits.fromBaseUnits(val, savr_units)
+        return val
+
+    def is_all_fuel_load_zero(self, fuel_model_number):
+        m = self.get(fuel_model_number)
+        if not m:
+            return True
+        return not any(m.get(k, 0.0) for k in
+                       ('dead_1h', 'dead_10h', 'dead_100h', 'live_herb', 'live_woody'))
+
+    def is_fuel_model_defined(self, fuel_model_number):
+        """Test definition only within the official C++ fuel identifier range.
+
+        :param fuel_model_number: Fuel identifier to inspect.
+        :return: False outside 1..256, otherwise the stored definition flag.
+        """
+        if not 1 <= fuel_model_number <= 256:
+            return False
+        m = self.get(fuel_model_number)
+        return m.get('is_defined', False) if m else False
+
+    def is_fuel_model_reserved(self, fuel_model_number):
+        m = self.get(fuel_model_number)
+        return m.get('is_reserved', False) if m else False
 
     # ------------------------------------------------------------------
     def set_custom_fuel_model(self, fuel_model_number, code, name,
@@ -565,253 +813,5 @@ class FuelModels:
             'is_defined':  True,
         }
         return True
-
-    def clear_custom_fuel_model(self, fuel_model_number):
-        """Clear a custom (non-reserved) fuel model.  Mirrors C++ clearCustomFuelModel()."""
-        existing = self.fuel_models_.get(fuel_model_number)
-        if existing and existing.get('is_reserved', False):
-            return False
-        if fuel_model_number in self.fuel_models_:
-            del self.fuel_models_[fuel_model_number]
-        return True
-
-    # ------------------------------------------------------------------
-    # Getter methods matching C++ API
-    # ------------------------------------------------------------------
-    def get_fuel_code(self, fuel_model_number):
-        m = self.get(fuel_model_number)
-        return m['code'] if m else ''
-
-    def get_fuel_name(self, fuel_model_number):
-        m = self.get(fuel_model_number)
-        return m['name'] if m else ''
-
-    def get_fuelbed_depth(self, fuel_model_number, length_units=None):
-        """
-        Return fuel bed depth.
-
-        :param fuel_model_number: Fuel model number to look up.
-        :param length_units: ``LengthUnitsEnum`` int for output units.
-            ``None`` (default) returns the raw value in feet (base unit).
-        :return: Fuel bed depth in ``length_units``, or 0.0 if not found.
-        """
-        m = self.get(fuel_model_number)
-        if not m:
-            return 0.0
-        val = m.get('fuel_bed_depth', 0.0)
-        if length_units is not None:
-            return LengthUnits.fromBaseUnits(val, length_units)
-        return val
-
-    def get_moisture_of_extinction_dead(self, fuel_model_number, moisture_units=None):
-        """
-        Return dead fuel moisture of extinction.
-
-        :param fuel_model_number: Fuel model number to look up.
-        :param moisture_units: ``FractionUnitsEnum`` int for output units.
-            ``None`` (default) returns the raw value as a fraction (base unit).
-        :return: Moisture of extinction in ``moisture_units``, or 0.0 if not found.
-        """
-        m = self.get(fuel_model_number)
-        if not m:
-            return 0.0
-        val = m.get('moisture_of_extinction_dead', 0.0)
-        if moisture_units is not None:
-            return FractionUnits.fromBaseUnits(val, moisture_units)
-        return val
-
-    def get_heat_of_combustion_dead(self, fuel_model_number, heat_units=None):
-        """
-        Return heat of combustion for dead fuel.
-
-        :param fuel_model_number: Fuel model number to look up.
-        :param heat_units: ``HeatOfCombustionUnitsEnum`` int for output units.
-            ``None`` (default) returns the raw value in BTU/lb (base unit).
-        :return: Heat of combustion in ``heat_units``, or 0.0 if not found.
-        """
-        m = self.get(fuel_model_number)
-        if not m:
-            return 0.0
-        val = m.get('heat_of_combustion_dead', 0.0)
-        if heat_units is not None:
-            return HeatOfCombustionUnits.fromBaseUnits(val, heat_units)
-        return val
-
-    def get_heat_of_combustion_live(self, fuel_model_number, heat_units=None):
-        """
-        Return heat of combustion for live fuel.
-
-        :param fuel_model_number: Fuel model number to look up.
-        :param heat_units: ``HeatOfCombustionUnitsEnum`` int for output units.
-            ``None`` (default) returns the raw value in BTU/lb (base unit).
-        :return: Heat of combustion in ``heat_units``, or 0.0 if not found.
-        """
-        m = self.get(fuel_model_number)
-        if not m:
-            return 0.0
-        val = m.get('heat_of_combustion_live', 0.0)
-        if heat_units is not None:
-            return HeatOfCombustionUnits.fromBaseUnits(val, heat_units)
-        return val
-
-    def get_fuel_load_one_hour(self, fuel_model_number, loading_units=None):
-        """
-        Return 1-hr dead fuel load.
-
-        :param fuel_model_number: Fuel model number to look up.
-        :param loading_units: ``LoadingUnitsEnum`` int for output units.
-            ``None`` (default) returns the raw value in lb/ft² (base unit).
-        :return: 1-hr fuel load in ``loading_units``, or 0.0 if not found.
-        """
-        m = self.get(fuel_model_number)
-        if not m:
-            return 0.0
-        val = m.get('dead_1h', 0.0)
-        if loading_units is not None:
-            return LoadingUnits.fromBaseUnits(val, loading_units)
-        return val
-
-    def get_fuel_load_ten_hour(self, fuel_model_number, loading_units=None):
-        """
-        Return 10-hr dead fuel load.
-
-        :param fuel_model_number: Fuel model number to look up.
-        :param loading_units: ``LoadingUnitsEnum`` int for output units.
-            ``None`` (default) returns the raw value in lb/ft² (base unit).
-        :return: 10-hr fuel load in ``loading_units``, or 0.0 if not found.
-        """
-        m = self.get(fuel_model_number)
-        if not m:
-            return 0.0
-        val = m.get('dead_10h', 0.0)
-        if loading_units is not None:
-            return LoadingUnits.fromBaseUnits(val, loading_units)
-        return val
-
-    def get_fuel_load_hundred_hour(self, fuel_model_number, loading_units=None):
-        """
-        Return 100-hr dead fuel load.
-
-        :param fuel_model_number: Fuel model number to look up.
-        :param loading_units: ``LoadingUnitsEnum`` int for output units.
-            ``None`` (default) returns the raw value in lb/ft² (base unit).
-        :return: 100-hr fuel load in ``loading_units``, or 0.0 if not found.
-        """
-        m = self.get(fuel_model_number)
-        if not m:
-            return 0.0
-        val = m.get('dead_100h', 0.0)
-        if loading_units is not None:
-            return LoadingUnits.fromBaseUnits(val, loading_units)
-        return val
-
-    def get_fuel_load_live_herbaceous(self, fuel_model_number, loading_units=None):
-        """
-        Return live herbaceous fuel load.
-
-        :param fuel_model_number: Fuel model number to look up.
-        :param loading_units: ``LoadingUnitsEnum`` int for output units.
-            ``None`` (default) returns the raw value in lb/ft² (base unit).
-        :return: Live herb fuel load in ``loading_units``, or 0.0 if not found.
-        """
-        m = self.get(fuel_model_number)
-        if not m:
-            return 0.0
-        val = m.get('live_herb', 0.0)
-        if loading_units is not None:
-            return LoadingUnits.fromBaseUnits(val, loading_units)
-        return val
-
-    def get_fuel_load_live_woody(self, fuel_model_number, loading_units=None):
-        """
-        Return live woody fuel load.
-
-        :param fuel_model_number: Fuel model number to look up.
-        :param loading_units: ``LoadingUnitsEnum`` int for output units.
-            ``None`` (default) returns the raw value in lb/ft² (base unit).
-        :return: Live woody fuel load in ``loading_units``, or 0.0 if not found.
-        """
-        m = self.get(fuel_model_number)
-        if not m:
-            return 0.0
-        val = m.get('live_woody', 0.0)
-        if loading_units is not None:
-            return LoadingUnits.fromBaseUnits(val, loading_units)
-        return val
-
-    def get_savr_one_hour(self, fuel_model_number, savr_units=None):
-        """
-        Return 1-hr dead fuel surface-area-to-volume ratio (SAVR).
-
-        :param fuel_model_number: Fuel model number to look up.
-        :param savr_units: ``SurfaceAreaToVolumeUnitsEnum`` int for output units.
-            ``None`` (default) returns the raw value in ft²/ft³ (base unit).
-        :return: 1-hr SAVR in ``savr_units``, or 0.0 if not found.
-        """
-        m = self.get(fuel_model_number)
-        if not m:
-            return 0.0
-        val = m.get('savr_1h', 0.0)
-        if savr_units is not None:
-            return SurfaceAreaToVolumeUnits.fromBaseUnits(val, savr_units)
-        return val
-
-    def get_savr_live_herbaceous(self, fuel_model_number, savr_units=None):
-        """
-        Return live herbaceous fuel surface-area-to-volume ratio (SAVR).
-
-        :param fuel_model_number: Fuel model number to look up.
-        :param savr_units: ``SurfaceAreaToVolumeUnitsEnum`` int for output units.
-            ``None`` (default) returns the raw value in ft²/ft³ (base unit).
-        :return: Live herb SAVR in ``savr_units``, or 0.0 if not found.
-        """
-        m = self.get(fuel_model_number)
-        if not m:
-            return 0.0
-        val = m.get('savr_live_herb', 0.0)
-        if savr_units is not None:
-            return SurfaceAreaToVolumeUnits.fromBaseUnits(val, savr_units)
-        return val
-
-    def get_savr_live_woody(self, fuel_model_number, savr_units=None):
-        """
-        Return live woody fuel surface-area-to-volume ratio (SAVR).
-
-        :param fuel_model_number: Fuel model number to look up.
-        :param savr_units: ``SurfaceAreaToVolumeUnitsEnum`` int for output units.
-            ``None`` (default) returns the raw value in ft²/ft³ (base unit).
-        :return: Live woody SAVR in ``savr_units``, or 0.0 if not found.
-        """
-        m = self.get(fuel_model_number)
-        if not m:
-            return 0.0
-        val = m.get('savr_live_woody', 0.0)
-        if savr_units is not None:
-            return SurfaceAreaToVolumeUnits.fromBaseUnits(val, savr_units)
-        return val
-
-    def get_is_dynamic(self, fuel_model_number):
-        m = self.get(fuel_model_number)
-        return m.get('is_dynamic', False) if m else False
-
-    def is_fuel_model_defined(self, fuel_model_number):
-        """Test definition only within the official C++ fuel identifier range.
-
-        :param fuel_model_number: Fuel identifier to inspect.
-        :return: False outside 1..256, otherwise the stored definition flag.
-        """
-        if not 1 <= fuel_model_number <= 256:
-            return False
-        m = self.get(fuel_model_number)
-        return m.get('is_defined', False) if m else False
-
-    def is_fuel_model_reserved(self, fuel_model_number):
-        m = self.get(fuel_model_number)
-        return m.get('is_reserved', False) if m else False
-
-    def is_all_fuel_load_zero(self, fuel_model_number):
-        m = self.get(fuel_model_number)
-        if not m:
-            return True
-        return not any(m.get(k, 0.0) for k in
-                       ('dead_1h', 'dead_10h', 'dead_100h', 'live_herb', 'live_woody'))
+        # 211–219 available for custom SB models
+        # 220–256 available for custom models
