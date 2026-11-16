@@ -1,4 +1,4 @@
-"""Final review regressions enforce one numeric/availability policy across public APIs."""
+"""Numeric inputs and output availability follow one policy across public APIs."""
 import numpy as np
 import pytest
 

@@ -70,7 +70,7 @@
     }
   },
   "qualification": {
-    "activation_reason": "PR31 four technical review fixes requalified at unchanged caps by complete run 43752200280 at 8ba5085",
+    "activation_reason": "PR32 item-boundary and exemption ownership fixes qualified across both compilers and all seven native platforms; scientific sources and caps unchanged",
     "artifacts": {
       "tests/data/cpp_reference/surface/cases.jsonl": "266d08d8b82d65d950461c73e70b44c228ad7b54fbe99eb1d14ed8af6add66da",
       "tests/data/cpp_reference/surface/results.jsonl": "ae006838d93bbb9533df74340085110c479315cb8238a8ce488a68fe5e9e1b71",
@@ -78,7 +78,7 @@
       "tests/data/cpp_reference/surface_custom/results.jsonl": "04e96268466338364a350d53ac05b639f1a7758c78911aaee97da389c0f779a2"
     },
     "calibration_complete": true,
-    "ci_run_url": "https://github.com/gagreene/behave_fire/actions/runs/43752200280",
+    "ci_run_url": "https://github.com/gagreene/behave_fire/actions/runs/43930396278",
     "fields": {
       "fireline_intensity_btu_ft_s": {
         "atol": 1e-12,
@@ -113,7 +113,7 @@
     },
     "reports": {
       "cpp-GNU": {
-        "sha256": "25631d1d01ce66c7c2b624288696da69e1a62e7d6613c70523e3067e1fe13aa2",
+        "sha256": "ac2ad50827bca60cda335ecdb2cba67027081adb3ed9d5651eba5618368c890c",
         "summary": {
           "available": 722,
           "cases": 773,
@@ -122,7 +122,7 @@
         }
       },
       "cpp-MSVC": {
-        "sha256": "1e57aee5801d91683e10c4e31262f5496b37acac082cfb7ab0be4993af1b3bd3",
+        "sha256": "dec1e08d3331f2891d531fffa99a189c4840f7ff6a782016f25c7a08a161182d",
         "summary": {
           "available": 722,
           "cases": 773,
@@ -131,7 +131,7 @@
         }
       },
       "ports-linux-aarch64": {
-        "sha256": "217c61dcd6c172b9602acd14144f817d936affed198e4c75be769b61ac97b03f",
+        "sha256": "c2f849787728daa5dee7529452ec32c5b565c37a2620db27730d5fca983fd07a",
         "summary": {
           "cases_per_backend": 583,
           "fields_per_backend": 2915,
@@ -139,7 +139,7 @@
         }
       },
       "ports-linux-musl-x86_64": {
-        "sha256": "defac54c942a8080ebbf29f395d8530e1a4a5e1f685a3c93fd22a71e2e4c84e1",
+        "sha256": "d909a80cfe493ec1566ba907ea78be31ffe9633424e8d270855521e4125283c8",
         "summary": {
           "cases_per_backend": 583,
           "fields_per_backend": 2915,
@@ -147,7 +147,7 @@
         }
       },
       "ports-linux-x86_64": {
-        "sha256": "db20eda1a34a3f9349c3e3f7f124fe05afa8ba40ac245d9eeadb136c9e0784d5",
+        "sha256": "126cfe22b6ec90de2a21f86aac681ab40a4eaf812c2b81e59da794482df7a296",
         "summary": {
           "cases_per_backend": 583,
           "fields_per_backend": 2915,
@@ -155,7 +155,7 @@
         }
       },
       "ports-macos-arm64": {
-        "sha256": "95045229c3a21a848cec92a2593f538d6e28b885b31273cf97aa2b27ee512cf1",
+        "sha256": "781fdbf41134b281bb8021f2aaca2e405da01d3b29b81e0d02f712e27b8d4d88",
         "summary": {
           "cases_per_backend": 583,
           "fields_per_backend": 2915,
@@ -163,7 +163,7 @@
         }
       },
       "ports-macos-x86_64": {
-        "sha256": "1ee12c27e6bfd6cda7cd07b060261a1d023f80ce71e4bf1ef38f60b371d68d14",
+        "sha256": "b703d53face5812e7550d9004e6698b596ce0fd341b9750e5b6a0340b717834c",
         "summary": {
           "cases_per_backend": 583,
           "fields_per_backend": 2915,
@@ -171,7 +171,7 @@
         }
       },
       "ports-windows-arm64": {
-        "sha256": "f3988a2c8c2665eee3a353acdd91a91f7632d7da0c5918a3c0aa709207615433",
+        "sha256": "4e45f4449715bf5390a6ea704f578e36338c7b998cc749350187eaed0654ecaa",
         "summary": {
           "cases_per_backend": 583,
           "fields_per_backend": 2915,
@@ -179,7 +179,7 @@
         }
       },
       "ports-windows-x86_64": {
-        "sha256": "bac8b80c4bc207fa6bd72b2009f77dad6a53f9d5062359990ca231e1707dc490",
+        "sha256": "1e6f085657ba8a9d8595cd18be330932ddfdb3dfb5ac9fd5f66b48c2e9b40437",
         "summary": {
           "cases_per_backend": 583,
           "fields_per_backend": 2915,
@@ -188,14 +188,14 @@
       }
     },
     "schema_version": 1,
-    "source_commit": "8ba5085a636d4f8ebc6dbc5747dbe311c0a22b4b",
+    "source_commit": "b1a9517a6f4146cabf456f2e0a245a0c225b6831",
     "source_files": {
       ".github/workflows/ci.yml": "67d1bddfd5be308551353df9faa6afccd5e8e446045139b576fae515f7b26dab",
       ".github/workflows/crate-validation.yml": "970147b312a0719d1e63318b2f8b8f200479c5592e5e368cbfd2407893ac1f6d",
       ".github/workflows/release-crate.yml": "20ecaa481e1f6b5e73c1e5019da3ffe2db6de037529c2eb300f5c4a3adbfa2f3",
       ".github/workflows/release.yml": "8bcbc7c87a325d8505c88436e384d52d733a5d08b9dcc1b92b201b15c34dcfcd",
       ".github/workflows/wheel-validation.yml": "f14d3ce305d5c341351e5d1b17d14a2b28359d246376e130230c57c424cf8c0f",
-      "pyproject.toml": "e510a7aac3e9c0d79d9d8eeb9cb02d9b33a636b173b46ee91394bd30d0ad5148",
+      "pyproject.toml": "a88c31d49c645e22fd267cbb23660b1db255309f0932025ea4c68a6bfb652fcc",
       "rust/Cargo.lock": "d1d2a7bca8b52c78ef86466f0639b6c44a5b08d2a000a8af4dc3ee1da45535b2",
       "rust/Cargo.toml": "31b5c56d96a7293e4d1298577bf422438fee6521d9f89858e23ddefd36dc75ac",
       "rust/crates/behave-fire/Cargo.toml": "b1326b42c725b7d50dfe6834cbbf28fafc8648e39e0825aeb232d43ec2b323c6",
@@ -348,6 +348,7 @@
       "tools/check_core_f64.py": "6bb1a859277153ee4f8aa2d25afd77097538ceadb4066d61fc5607e79eb62cd9",
       "tools/check_cpp_driver.py": "4cebe80a4854f639f7a6fd727c71fa23558c271a2c314a86011f7e9bb1a5c967",
       "tools/check_crate_package.py": "b9ac32e996e46b75ded563df322954c66864d07955ce7a1c09a475cfcfb90281",
+      "tools/check_function_order.py": "4debea611e505cd19b49ed6123a31cb80886ff3d7ce6b44706bc31068ead0d9c",
       "tools/check_performance.py": "34fa57f516763374125f74a0d024226b76a4ad2944ffd178c3936fb827b5c8e3",
       "tools/check_public_serial_f64.py": "dcef3b190c3842b512066e539d0654759dc75cc8e7139883d291102e3e953213",
       "tools/check_rust_tables.py": "2aebc6fedbb1073bba8731d0c6eea9589806a751cc760a9fb958ed7d81042fec",
@@ -374,7 +375,7 @@
       "tools/smoke_test_wheel.py": "4912e36a4cadfe3573ef9a819bc4c62f20af4b4d97241477fbd14c06ea93e893",
       "tools/test_native_wheel_suite.py": "586893aaf673c9809c10e2e340690b29450929a81c1de9e5dae84896b044c675",
       "tools/test_wheel_install.py": "e791c5f24d73ac005998c691b05839ffea4ee619978a8472bfc02780abb36a42",
-      "uv.lock": "4046b69c76c38b6a5fd8dbb7f9176006fd90ca14f5eb20d0c260e346bd32ef7f"
+      "uv.lock": "c259b3a141f671cfa47424d8668c3b6cfe3a75a6ec086594a8f47e3aab970101"
     },
     "upstream_sha": "f3b2943e69abca942e795c5b1b45276f6338abb5"
   }

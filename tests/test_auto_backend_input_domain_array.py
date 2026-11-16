@@ -1,4 +1,4 @@
-"""Review regressions preserve Python's input domain when native execution is unavailable."""
+"""Backend routing preserves Python's input domain when native execution is unavailable."""
 import pickle
 import warnings
 

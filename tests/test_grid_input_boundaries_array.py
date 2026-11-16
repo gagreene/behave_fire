@@ -1,4 +1,4 @@
-"""Review regressions for staged raster structural inputs and public lifecycle controls."""
+"""Staged raster structural inputs and public lifecycle controls enforce their boundaries."""
 import numpy as np
 import pytest
 
