@@ -72,7 +72,7 @@ Numbers below match each review's numbered items.
 | PR23 | 3 | Clarified: the complex warning is once per process, at the first complex operation, across operations. It is separate from extension-unavailable warning state. |
 | PR23 | 4 | Fixed: only auto with a usable native preference creates the neutral registry snapshot. Forced-Rust metadata copy-hook and pickle cases pass. |
 | PR24 | 1 | Fixed: staged fuel identifiers use `normalize_identifier`; classification injection remains strictly integral. |
-| PR24 | 2 | Already fixed in the earlier PR26 correction, with persistent/transient invalid-mask and restoration regressions in `test_final_review_contract_array.py`. Those tests still pass. |
+| PR24 | 2 | Already fixed in the earlier PR26 correction, with persistent/transient invalid-mask and restoration regressions in `test_public_numeric_availability_array.py`. Those tests still pass. |
 | PR24 | 3 | Fixed: unknown supplied-bed fields rejected at both boundaries; omitted fuel IDs allowed with a supplied source. |
 | PR24 | 4 | Fixed: grid flags reject integers outside zero/one, before native calculation. |
 | PR24 | 5 | Fixed: high-rank inference and native export/getter both support logical axes above 32. |

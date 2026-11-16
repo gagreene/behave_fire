@@ -1,4 +1,4 @@
-"""Counterexamples from the independent Astra review of the declaration checker."""
+"""Function-order scope, directive ownership, and declaration identity regressions."""
 
 import importlib.util
 from pathlib import Path
@@ -8,7 +8,7 @@ import pytest
 
 def _checker():
     path = Path(__file__).resolve().parents[1] / 'tools/check_function_order.py'
-    spec = importlib.util.spec_from_file_location('astra_order', path)
+    spec = importlib.util.spec_from_file_location('function_order_scopes', path)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module
