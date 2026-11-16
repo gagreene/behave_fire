@@ -31,11 +31,6 @@ LABEL = re.compile(r'^\s*(?:#|//) ---- (.*) ----\s*$', re.M)
 EXEMPT = re.compile(r'(?:#|//)\s*order-exempt:\s*(\S.*)$')
 RUST_WHITESPACE = frozenset('\t\n\v\f\r \u0085\u200e\u200f\u2028\u2029')
 
-FN_RE = re.compile(r'^(?P<vis>pub(?:\([^)]*\))?\s+)?'
-                   r'(?:(?:const|async|unsafe|extern(?:\s+"[^"]*")?)\s+)*fn\s+(?P<name>\w+)')
-MOD_RE = re.compile(r'^(?:pub(?:\([^)]*\))?\s+)?mod\s+\w+\s*\{')
-
-
 def _python_comment_lines(source):
     """Extract real Python comment tokens, excluding all string contents.
 
@@ -54,6 +49,25 @@ def _python_comments(source):
     """
     return Counter(token.string for token in tokenize.generate_tokens(io.StringIO(source).readline)
                    if token.type == tokenize.COMMENT)
+
+
+def _python_duplicate_bindings(tree):
+    """Retain duplicate function binding order across compound statements sharing a namespace.
+
+    :param tree: Parsed Python module.
+    :return: Qualified duplicate names mapped to their declaration sequence.
+    """
+    bindings = {}
+    pending = [(tree, ())]
+    while pending:
+        node, scope = pending.pop()
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            bindings.setdefault((*scope, node.name), []).append(ast.dump(node, include_attributes=False))
+            continue
+        if isinstance(node, ast.ClassDef):
+            scope = (*scope, node.name)
+        pending.extend((child, scope) for child in reversed(list(ast.iter_child_nodes(node))))
+    return {name: values for name, values in bindings.items() if len(values) > 1}
 
 
 def _python_exemptions(tree, lines):
@@ -125,6 +139,35 @@ def _python_value(value):
     return type(value).__name__, repr(value)
 
 
+def _rust_header(tokens):
+    """Read declaration header tokens independently of line wrapping and comments.
+
+    :param tokens: Lexical tokens starting at the declaration.
+    :return: Tokens after visibility and qualifiers, and whether visibility is public.
+    """
+    tokens = [token for token in tokens if not token.startswith(('//', '/*'))]
+    index = 0
+    public = bool(tokens and tokens[0] == 'pub')
+    if public:
+        index = 1
+        if tokens[index:index + 1] == ['(']:
+            depth = 1
+            index += 1
+            while index < len(tokens) and depth:
+                depth += (tokens[index] == '(') - (tokens[index] == ')')
+                index += 1
+    while index < len(tokens):
+        if tokens[index] in ('const', 'async', 'unsafe'):
+            index += 1
+        elif tokens[index] == 'extern':
+            index += 1
+            if index < len(tokens) and tokens[index].startswith('"'):
+                index += 1
+        else:
+            break
+    return tokens[index:], public
+
+
 def _rust_identifier_end(text, start):
     """Retain identifier adjacency conservatively across Unicode database versions.
 
@@ -145,6 +188,40 @@ def _rust_identifier_end(text, start):
             break
         end += 1
     return end
+
+
+def _rust_scope_comments(text, spans, infos):
+    """Select real standalone line comments directly owned by one item scope.
+
+    :param text: Rust source text in the current scope.
+    :param spans: Direct item spans.
+    :param infos: Classified direct items.
+    :return: Source offsets and comment tokens outside attributes and nested bodies.
+    """
+    comments = []
+    for (start, _end), info in zip(spans, infos, strict=True):
+        depth = 0
+        for token, begin, _finish in _rust_token_spans(text[start:start + info[5]]):
+            begin += start
+            if not depth and token.startswith('//') and not text[text.rfind('\n', 0, begin) + 1:begin].strip():
+                comments.append((begin, token))
+            depth += (token in ('[', '(', '{')) - (token in (']', ')', '}'))
+    return comments
+
+
+def _rust_token_spans(text):
+    """Attach exact source positions to the shared Rust lexer tokens.
+
+    :param text: Rust source text.
+    :return: Token text, start, and end offsets in source order.
+    """
+    result = []
+    offset = 0
+    for token in _rust_tokens(text):
+        begin = text.index(token, offset)
+        offset = begin + len(token)
+        result.append((token, begin, offset))
+    return result
 
 
 def _rust_tokens(text, spacing=False):
@@ -182,7 +259,7 @@ def _rust_tokens(text, spacing=False):
         else:
             raw = re.match(r'(?:br|cr|r)(#*)"', text[i:])
             quoted = re.match(r'(?:b|c)?"', text[i:])
-            char = re.match(r"b?'(?:\\.|[^'\\])+'", text[i:])
+            char = re.match(r"b?'(?:\\(?:[^\r\nxu]|x[0-9a-fA-F]{2}|u\{[0-9a-fA-F_]+\})|[^'\\\r\n])'", text[i:])
             if raw:
                 close = '"' + raw.group(1)
                 end = text.find(close, i + raw.end())
@@ -248,12 +325,13 @@ def _rust_value(text):
         info = classify(chunk)
         if info[0] == 'fn':
             functions.setdefault(info[1], []).append(_rust_tokens(chunk, spacing=True))
-        elif info[1] and (re.match(r'(?:unsafe\s+)?impl\b', info[1]) or MOD_RE.match(info[1])):
+        elif info[1] and _rust_header(_rust_tokens(info[1]))[0][:1] in (['impl'], ['mod']):
             span = body_span(chunk)
             if span is None:
-                raise ValueError('Malformed Rust container')
-            other.append((_rust_tokens(chunk[:span[0]], spacing=True), _rust_value(chunk[span[0]:span[1]]),
-                          _rust_tokens(chunk[span[1]:], spacing=True)))
+                other.append(_rust_tokens(chunk, spacing=True))
+            else:
+                other.append((_rust_tokens(chunk[:span[0]], spacing=True), _rust_value(chunk[span[0]:span[1]]),
+                              _rust_tokens(chunk[span[1]:], spacing=True)))
         else:
             other.append(_rust_tokens(chunk, spacing=True))
     return other, sorted(functions.items())
@@ -276,50 +354,28 @@ def blocks_of(node):
 
 
 def body_span(chunk):
-    """Offsets of the text strictly inside the outermost braces of an item (first '{' to its matching '}').
+    """Find the declaration body after attributes, nested header groups, and generic arguments.
 
     :param chunk: One Rust item including attributes and trivia.
     :return: Computed scanner result or diagnostics appended to the supplied list.
     """
-    depth = 0
-    i = 0
-    n = len(chunk)
+    stack = []
+    angles = 0
     opening = None
-    while i < n:
-        c = chunk[i]
-        if chunk.startswith('//', i):
-            j = chunk.find('\n', i)
-            i = n if j < 0 else j + 1
+    for token, begin, end in _rust_token_spans(chunk):
+        if token.startswith(('//', '/*')):
             continue
-        if chunk.startswith('/*', i):
-            j = chunk.find('*/', i + 2)
-            i = n if j < 0 else j + 2
-            continue
-        m = re.match(r'(?:br|cr|r)(#*)"', chunk[i:])
-        if m and (i == 0 or not (chunk[i - 1].isalnum() or chunk[i - 1] == '_')):
-            close = '"' + m.group(1)
-            j = chunk.find(close, i + len(m.group(0)))
-            i = n if j < 0 else j + len(close)
-            continue
-        if c == '"':
-            i += 1
-            while i < n and chunk[i] != '"':
-                i += 2 if chunk[i] == '\\' else 1
-            i += 1
-            continue
-        if c == "'":
-            m = re.match(r"'(\\.[^']*|[^\\'])'", chunk[i:i + 12])
-            i += len(m.group(0)) if m else 1
-            continue
-        if c in '{':
-            if opening is None and depth == 0:
-                opening = i
-            depth += 1
-        elif c == '}':
-            depth -= 1
-            if depth == 0 and opening is not None:
-                return opening + 1, i
-        i += 1
+        if not stack and token in ('<', '<<', '>', '>>'):
+            angles = max(0, angles + (len(token) if token.startswith('<') else -len(token)))
+        if token in ('(', '[', '{'):
+            if token == '{' and not stack and not angles:
+                opening = end
+            stack.append(token)
+        elif token in (')', ']', '}'):
+            if not stack or stack.pop() != {')': '(', ']': '[', '}': '{'}[token]:
+                raise ValueError('unbalanced closing delimiter')
+            if not stack and opening is not None:
+                return opening, begin
     return None
 
 
@@ -420,7 +476,6 @@ def check_rust(path, problems, require_labels=True):
         check_rust_items(text[header.end():], path.as_posix(), problems, require_labels=require_labels)
     except ValueError as error:
         problems.append(f'{path.as_posix()}: malformed Rust: {error}')
-    labels_in_order(text, problems, path.as_posix())
 
 
 def check_rust_items(text, where, problems, require_labels=True):
@@ -435,8 +490,8 @@ def check_rust_items(text, where, problems, require_labels=True):
     spans = scan_items(text)
     infos = [classify(text[a:b]) for a, b in spans]
     fns = []
-    for (a, _b), info in zip(spans, infos, strict=True):
-        if info[0] == 'fn' and not rust_exempt(text[a:a + info[5]], info[6]):
+    for (a, b), info in zip(spans, infos, strict=True):
+        if info[0] == 'fn' and not rust_exempt(text, a, b, info[5]):
             fns.append((info[1], info[2], info[3], a + info[5]))
     helpers = [f for f in fns if not f[2]] if any(f[2] for f in fns) else fns
     keys = [sort_key(n, pub) for n, pub, _t, _a in helpers]
@@ -445,7 +500,7 @@ def check_rust_items(text, where, problems, require_labels=True):
     check_rust_test_section(text, spans, infos, fns, where, problems, require_labels=require_labels)
     for (a, b), info in zip(spans, infos, strict=True):
         code = info[1] or ''
-        if info[0] == 'other' and (re.match(r'(unsafe\s+)?impl\b', code) or MOD_RE.match(code)
+        if info[0] == 'other' and (_rust_header(_rust_tokens(code))[0][:1] in (['impl'], ['mod'])
                                    or any(x.startswith('#[cfg(') and 'test' in x for x in info[4])):
             span = body_span(text[a:b])
             if span:
@@ -467,9 +522,9 @@ def check_rust_test_section(text, spans, infos, fns, where, problems, require_la
     :param require_labels: Require test labels; helper placement is always checked.
     :return: Computed scanner result or diagnostics appended to the supplied list.
     """
-    labels = []
-    for (a, _b), info in zip(spans, infos, strict=True):
-        labels.extend(a + m.start() for m in LABEL.finditer(text[a:a + info[5]]))
+    comments = _rust_scope_comments(text, spans, infos)
+    labels = [offset for offset, comment in comments if LABEL.match(comment)]
+    labels_in_order('\n'.join(comment for _offset, comment in comments), problems, where)
     tests = [(name, a) for name, _pub, is_test, a in fns if is_test]
     for name, a in tests:
         if require_labels and not any(label < a for label in labels):
@@ -515,10 +570,11 @@ def classify(chunk):
             break
     if index == len(tokens):
         return 'other', None, False, False, attrs, len(chunk), ''
-    code = chunk[offset:].split('\n', 1)[0]
-    m = FN_RE.match(code)
-    if m:
-        return ('fn', m.group('name'), bool(m.group('vis')), any(a.startswith('#[test') for a in attrs), attrs,
+    code = chunk[offset:]
+    header, public = _rust_header(tokens[index:])
+    if len(header) >= 2 and header[0] == 'fn':
+        name = header[1].removeprefix('r#')
+        return ('fn', name, public, any(a.startswith('#[test') for a in attrs), attrs,
                 offset, code)
     return 'other', code, False, False, attrs, offset, code
 
@@ -582,6 +638,7 @@ def prove_reorder(before, after, suffix):
         before_tree, after_tree = ast.parse(before, type_comments=True), ast.parse(after, type_comments=True)
         left, right = _python_value(before_tree), _python_value(after_tree)
         same = (left == right and _python_comments(before) == _python_comments(after)
+                and _python_duplicate_bindings(before_tree) == _python_duplicate_bindings(after_tree)
                 and _python_exemptions(before_tree, before.splitlines())
                 == _python_exemptions(after_tree, after.splitlines()))
     elif suffix == '.rs':
@@ -647,14 +704,38 @@ def py_scopes(nodes, scope, is_test, out):
                 py_scopes(block, f'{scope} > {type(n).__name__.lower()}', is_test, out)
 
 
-def rust_exempt(trivia, code_line):
-    """Inspect rust exempt according to the function-order rule.
+def rust_exempt(text, start, end, code_offset):
+    """Bind real reasoned comments to this declaration, excluding strings and previous items.
 
-    :param trivia: Leading Rust comments and whitespace.
-    :param code_line: Rust declaration line.
-    :return: Computed scanner result or diagnostics appended to the supplied list.
+    :param text: Source text in the current scope.
+    :param start: Item start, including leading trivia.
+    :param end: Item end, excluding a following trailing comment.
+    :param code_offset: Declaration offset relative to the item start.
+    :return: Whether a directly attached comment exempts the declaration.
     """
-    return any(EXEMPT.search(line) for line in trivia.split('\n') + [code_line])
+    declaration = start + code_offset
+    line_end = text.find('\n', declaration)
+    line_end = len(text) if line_end < 0 else line_end
+    candidates = []
+    trailing_end = text.find('\n', end)
+    trailing_end = len(text) if trailing_end < 0 else trailing_end
+    for token, begin, finish in _rust_token_spans(text[start:trailing_end]):
+        begin += start
+        finish += start
+        if not token.startswith('//'):
+            continue
+        line_start = text.rfind('\n', 0, begin) + 1
+        if start <= begin < declaration and not text[line_start:begin].strip():
+            # Attributes can sit between the marker and its function, but unrelated blank lines cannot.
+            remainder = text[finish:declaration]
+            if '\n\n' not in remainder and not re.search(r'\n[ \t]+\n', remainder):
+                candidates.append(token)
+        elif declaration <= begin <= line_end and begin >= end:
+            if not text[end:begin].strip():
+                candidates.append(token)
+        elif declaration <= begin < min(end, line_end):
+            candidates.append(token)
+    return any(EXEMPT.search(comment) for comment in candidates)
 
 
 def scan_items(text):
@@ -666,92 +747,43 @@ def scan_items(text):
     :return: Computed scanner result or diagnostics appended to the supplied list.
     """
     items = []
-    n = len(text)
-    i = 0
     start = 0
-    depth = 0
+    stack = []
+    angles = 0
+    initializer = False
     item_has_code = False
-    while i < n:
-        c = text[i]
-        if text.startswith('//', i):
-            j = text.find('\n', i)
-            i = n if j < 0 else j + 1
+    tokens = _rust_token_spans(text)
+    for index, (token, _begin, end) in enumerate(tokens):
+        if token.startswith(('//', '/*')):
             continue
-        if text.startswith('/*', i):
-            level = 1
-            i += 2
-            while i < n and level:
-                if text.startswith('/*', i):
-                    level += 1
-                    i += 2
-                elif text.startswith('*/', i):
-                    level -= 1
-                    i += 2
-                else:
-                    i += 1
-            if level:
-                raise ValueError('unterminated block comment')
-            continue
-        m = re.match(r'(?:br|cr|r)(#*)"', text[i:])
-        if m and (i == 0 or not (text[i - 1].isalnum() or text[i - 1] == '_')):
-            close = '"' + m.group(1)
-            j = text.find(close, i + len(m.group(0)))
-            if j < 0:
-                raise ValueError('unterminated raw string')
-            i = j + len(close)
-            item_has_code = True
-            continue
-        if c == '"':
-            i += 1
-            while i < n and text[i] != '"':
-                i += 2 if text[i] == '\\' else 1
-            if i >= n:
-                raise ValueError('unterminated string')
-            i += 1
-            item_has_code = True
-            continue
-        if c == "'":
-            m = re.match(r"'(\\.[^']*|[^\\'])'", text[i:i + 12])
-            if m:
-                i += len(m.group(0))
-                item_has_code = True
-                continue
-            i += 1
-            continue
-        if c in '([{':
-            depth += 1
-            item_has_code = True
-        elif c in ')]}':
-            depth -= 1
-            if depth < 0:
+        if not stack and not initializer and token in ('<', '<<', '>', '>>'):
+            angles = max(0, angles + (len(token) if token.startswith('<') else -len(token)))
+        if not stack and not angles and token == '=':
+            initializer = True
+        if token in ('(', '[', '{'):
+            stack.append(token)
+        elif token in (')', ']', '}'):
+            if not stack or stack.pop() != {')': '(', ']': '[', '}': '{'}[token]:
                 raise ValueError('unbalanced closing delimiter')
-            if depth == 0 and c == '}':
-                k = i + 1
-                while k < n and text[k] in ' \t':
-                    k += 1
-                if k < n and text[k] == ';':
-                    i = k
-                    c = ';'
-                else:
-                    # end of a braced item; whatever follows on the line starts the next item
-                    items.append((start, i + 1))
-                    start = i + 1
+            if not stack and not angles and not initializer and token == '}':
+                if index + 1 == len(tokens) or tokens[index + 1][0] != ';':
+                    # End of a braced item; whatever follows on the line starts the next item.
+                    items.append((start, end))
+                    start = end
                     item_has_code = False
-                    i += 1
+                    initializer = False
                     continue
-        if c == ';' and depth == 0 and item_has_code:
-            i += 1
-            items.append((start, i))
-            start = i
+        if token == ';' and not stack and not angles and item_has_code:
+            items.append((start, end))
+            start = end
             item_has_code = False
+            initializer = False
             continue
-        if not c.isspace():
-            item_has_code = True
-        i += 1
-    if depth:
+        item_has_code = True
+    if stack:
         raise ValueError('unbalanced opening delimiter')
-    if start < n and text[start:].strip():
-        items.append((start, n))
+    if start < len(text) and text[start:].strip():
+        items.append((start, len(text)))
     return items
 
 
