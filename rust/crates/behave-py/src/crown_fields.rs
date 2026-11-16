@@ -42,31 +42,54 @@ pub(crate) struct Program<'a> {
     plan: CrownPlan,
 }
 impl<'a> Program<'a> {
-    pub(crate) fn new(
-        source: &'a BTreeMap<String, Vec<f64>>,
-        requested: &[F],
-        fuels: &'a PreparedFuels,
-        plan: CrownPlan,
-    ) -> PyResult<Self> {
-        let mut result = Self {
-            source,
-            nodes: Vec::new(),
-            compiled: [false; F::COUNT],
-            requested: requested.to_vec(),
-            fuels,
-            plan,
-        };
-        for &field in requested {
-            result.require(field)?;
-        }
-        Ok(result)
-    }
-
     fn inputs(&mut self, fields: &[F]) -> PyResult<()> {
         for &field in fields {
             self.require(field)?;
         }
         Ok(())
+    }
+
+    fn materialize(&self, values: &[f64; F::COUNT], code: i32) -> CrownResult {
+        let mut result = CrownResult::new();
+        for &field in &self.requested {
+            let value = values[field as usize];
+            match field {
+                F::CrownFireSpreadRate => result.crown_fire_spread_rate = value,
+                F::CrownLengthToWidthRatio => result.crown_length_to_width_ratio = value,
+                F::CrownFireHeatPerUnitArea => result.crown_fire_heat_per_unit_area = value,
+                F::CanopyHeatPerUnitArea => result.canopy_heat_per_unit_area = value,
+                F::CrownFireLineIntensity => result.crown_fire_line_intensity = value,
+                F::CrownFlameLength => result.crown_flame_length = value,
+                F::CrownCriticalSurfaceFireLineIntensity => {
+                    result.crown_critical_surface_fire_line_intensity = value
+                }
+                F::CrownCriticalFireSpreadRate => result.crown_critical_fire_spread_rate = value,
+                F::CrownFireTransitionRatio => result.crown_fire_transition_ratio = value,
+                F::CrownFireActiveRatio => result.crown_fire_active_ratio = value,
+                F::SurfaceFireCriticalSpreadRate => {
+                    result.surface_fire_critical_spread_rate = value
+                }
+                F::CrowningSurfaceFireSpreadRate => {
+                    result.crowning_surface_fire_spread_rate = value
+                }
+                F::CrownFractionBurned => result.crown_fraction_burned = value,
+                F::PassiveCrownFireSpreadRate => result.passive_crown_fire_spread_rate = value,
+                F::PassiveCrownFireHeatPerUnitArea => {
+                    result.passive_crown_fire_heat_per_unit_area = value
+                }
+                F::PassiveCrownFireLineIntensity => {
+                    result.passive_crown_fire_line_intensity = value
+                }
+                F::PassiveCrownFireFlameLength => result.passive_crown_fire_flame_length = value,
+                F::FinalSpreadRate => result.final_spread_rate = value,
+                F::FinalHeatPerUnitArea => result.final_heat_per_unit_area = value,
+                F::FinalFirelineIntensity => result.final_fireline_intensity = value,
+                F::FinalFlameLength => result.final_flame_length = value,
+                F::FireType => result.fire_type = code,
+                _ => unreachable!("validated Crown output"),
+            }
+        }
+        result
     }
 
     fn require(&mut self, field: F) -> PyResult<()> {
@@ -360,46 +383,23 @@ impl<'a> Program<'a> {
         self.materialize(&[f64::NAN; F::COUNT], -1)
     }
 
-    fn materialize(&self, values: &[f64; F::COUNT], code: i32) -> CrownResult {
-        let mut result = CrownResult::new();
-        for &field in &self.requested {
-            let value = values[field as usize];
-            match field {
-                F::CrownFireSpreadRate => result.crown_fire_spread_rate = value,
-                F::CrownLengthToWidthRatio => result.crown_length_to_width_ratio = value,
-                F::CrownFireHeatPerUnitArea => result.crown_fire_heat_per_unit_area = value,
-                F::CanopyHeatPerUnitArea => result.canopy_heat_per_unit_area = value,
-                F::CrownFireLineIntensity => result.crown_fire_line_intensity = value,
-                F::CrownFlameLength => result.crown_flame_length = value,
-                F::CrownCriticalSurfaceFireLineIntensity => {
-                    result.crown_critical_surface_fire_line_intensity = value
-                }
-                F::CrownCriticalFireSpreadRate => result.crown_critical_fire_spread_rate = value,
-                F::CrownFireTransitionRatio => result.crown_fire_transition_ratio = value,
-                F::CrownFireActiveRatio => result.crown_fire_active_ratio = value,
-                F::SurfaceFireCriticalSpreadRate => {
-                    result.surface_fire_critical_spread_rate = value
-                }
-                F::CrowningSurfaceFireSpreadRate => {
-                    result.crowning_surface_fire_spread_rate = value
-                }
-                F::CrownFractionBurned => result.crown_fraction_burned = value,
-                F::PassiveCrownFireSpreadRate => result.passive_crown_fire_spread_rate = value,
-                F::PassiveCrownFireHeatPerUnitArea => {
-                    result.passive_crown_fire_heat_per_unit_area = value
-                }
-                F::PassiveCrownFireLineIntensity => {
-                    result.passive_crown_fire_line_intensity = value
-                }
-                F::PassiveCrownFireFlameLength => result.passive_crown_fire_flame_length = value,
-                F::FinalSpreadRate => result.final_spread_rate = value,
-                F::FinalHeatPerUnitArea => result.final_heat_per_unit_area = value,
-                F::FinalFirelineIntensity => result.final_fireline_intensity = value,
-                F::FinalFlameLength => result.final_flame_length = value,
-                F::FireType => result.fire_type = code,
-                _ => unreachable!("validated Crown output"),
-            }
+    pub(crate) fn new(
+        source: &'a BTreeMap<String, Vec<f64>>,
+        requested: &[F],
+        fuels: &'a PreparedFuels,
+        plan: CrownPlan,
+    ) -> PyResult<Self> {
+        let mut result = Self {
+            source,
+            nodes: Vec::new(),
+            compiled: [false; F::COUNT],
+            requested: requested.to_vec(),
+            fuels,
+            plan,
+        };
+        for &field in requested {
+            result.require(field)?;
         }
-        result
+        Ok(result)
     }
 }

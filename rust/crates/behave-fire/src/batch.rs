@@ -10,19 +10,19 @@ trait ColumnElement: Copy {
     fn into_column(values: Vec<Self>) -> ColumnValues;
 }
 impl ColumnElement for f64 {
-    fn missing() -> Self {
-        f64::NAN
-    }
     fn into_column(values: Vec<Self>) -> ColumnValues {
         ColumnValues::Float64(values)
     }
+    fn missing() -> Self {
+        f64::NAN
+    }
 }
 impl ColumnElement for i32 {
-    fn missing() -> Self {
-        -1
-    }
     fn into_column(values: Vec<Self>) -> ColumnValues {
         ColumnValues::Int32(values)
+    }
+    fn missing() -> Self {
+        -1
     }
 }
 fn allocated<T: ColumnElement>(count: usize) -> Result<Vec<T>, BehaveError> {

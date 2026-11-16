@@ -2,27 +2,6 @@
 use super::{FuelbedIntermediates, Particles};
 use crate::math::np_max;
 
-/// Calculate all twenty Python fuelbed dictionary fields for one cell, in base units.
-pub fn calculate_fuelbed_intermediates(p: &Particles) -> FuelbedIntermediates {
-    calculate_fuelbed_with_terms(p, &super::SavrTerms::new(&p.savr_dead, &p.savr_live))
-}
-
-/// Evaluate moisture-dependent fuelbed terms with validated prepared SAVR invariants.
-pub(crate) fn calculate_fuelbed_with_terms(
-    p: &Particles,
-    terms: &super::SavrTerms,
-) -> FuelbedIntermediates {
-    calculate_fuelbed_selected::<true>(p, terms)
-}
-
-/// Share finite reductions while preserving unknown threshold conditions.
-pub(crate) fn calculate_fuelbed_available_with_terms(
-    p: &Particles,
-    terms: &super::SavrTerms,
-) -> FuelbedIntermediates {
-    calculate_fuelbed_selected::<true>(p, terms)
-}
-
 fn calculate_fuelbed_selected<const STRICT: bool>(
     p: &Particles,
     terms: &super::SavrTerms,
@@ -92,16 +71,76 @@ fn calculate_fuelbed_selected<const STRICT: bool>(
     }
 }
 
-/// Sum actual particle values in the existing weighted operation order.
+/// Calculate bulk density using actual load totals and the three-valued depth guard.
 #[inline]
-pub(crate) fn weighted_values(weights: &[f64; 5], values: &[f64; 5]) -> f64 {
-    (0..5).map(|n| weights[n] * values[n]).sum()
+pub(crate) fn bulk_from_loads<const STRICT: bool>(
+    dead: &[f64; 5],
+    live: &[f64; 5],
+    depth: f64,
+) -> f64 {
+    let total = dead.iter().sum::<f64>() + live.iter().sum::<f64>();
+    let safe = if depth > 1e-7 { depth } else { 1. };
+    if STRICT && depth.is_nan() {
+        f64::NAN
+    } else if depth > 1e-7 {
+        total / safe
+    } else {
+        0.
+    }
 }
 
-/// Apply the same constant separately to each weight, preserving summation order.
+/// Share finite reductions while preserving unknown threshold conditions.
+pub(crate) fn calculate_fuelbed_available_with_terms(
+    p: &Particles,
+    terms: &super::SavrTerms,
+) -> FuelbedIntermediates {
+    calculate_fuelbed_selected::<true>(p, terms)
+}
+
+/// Calculate all twenty Python fuelbed dictionary fields for one cell, in base units.
+pub fn calculate_fuelbed_intermediates(p: &Particles) -> FuelbedIntermediates {
+    calculate_fuelbed_with_terms(p, &super::SavrTerms::new(&p.savr_dead, &p.savr_live))
+}
+
+/// Evaluate moisture-dependent fuelbed terms with validated prepared SAVR invariants.
+pub(crate) fn calculate_fuelbed_with_terms(
+    p: &Particles,
+    terms: &super::SavrTerms,
+) -> FuelbedIntermediates {
+    calculate_fuelbed_selected::<true>(p, terms)
+}
+
+/// Resolve the dead area fraction without converting an unknown denominator to zero.
 #[inline]
-pub(crate) fn weighted_constant(weights: &[f64; 5], value: f64) -> f64 {
-    (0..5).map(|n| weights[n] * value).sum()
+pub(crate) fn dead_area_fraction<const STRICT: bool>(dead: f64, live: f64) -> f64 {
+    let total = dead + live;
+    let safe = if STRICT && total.is_nan() {
+        f64::NAN
+    } else if total > 1e-7 {
+        total
+    } else {
+        1.
+    };
+    if STRICT && total.is_nan() {
+        f64::NAN
+    } else if total > 1e-7 {
+        dead / safe
+    } else {
+        0.
+    }
+}
+
+/// Calculate one actual moisture/area side of the heat-sink sum.
+#[inline]
+pub(crate) fn heat_sink_side(
+    fraction: f64,
+    weights: &[f64; 5],
+    moisture: &[f64; 5],
+    exponent: &[f64; 5],
+) -> f64 {
+    (0..5)
+        .map(|n| fraction * weights[n] * (250. + 1116. * moisture[n]) * exponent[n])
+        .sum()
 }
 
 /// Resolve live extinction from actual fine-fuel totals and dead extinction.
@@ -138,22 +177,19 @@ pub(crate) fn live_extinction_from_fines<const STRICT: bool>(
     np_max(2.9 * ratio * (1. - moisture / safe_m) - 0.226, dead)
 }
 
-/// Calculate bulk density using actual load totals and the three-valued depth guard.
+/// Calculate characteristic SAVR from the actual, potentially injected mixture fractions.
 #[inline]
-pub(crate) fn bulk_from_loads<const STRICT: bool>(
-    dead: &[f64; 5],
-    live: &[f64; 5],
-    depth: f64,
+pub(crate) fn mixture_sigma(
+    dead: f64,
+    live: f64,
+    wd: &[f64; 5],
+    sd: &[f64; 5],
+    wl: &[f64; 5],
+    sl: &[f64; 5],
 ) -> f64 {
-    let total = dead.iter().sum::<f64>() + live.iter().sum::<f64>();
-    let safe = if depth > 1e-7 { depth } else { 1. };
-    if STRICT && depth.is_nan() {
-        f64::NAN
-    } else if depth > 1e-7 {
-        total / safe
-    } else {
-        0.
-    }
+    let dead_savr: f64 = (0..5).map(|n| wd[n] * sd[n]).sum();
+    let live_savr: f64 = (0..5).map(|n| wl[n] * sl[n]).sum();
+    dead * dead_savr + live * live_savr
 }
 
 /// Retain particle-by-particle packing division, rather than reordering it algebraically.
@@ -174,19 +210,6 @@ pub(crate) fn packing_from_loads<const STRICT: bool>(
     }
 }
 
-/// Calculate one actual moisture/area side of the heat-sink sum.
-#[inline]
-pub(crate) fn heat_sink_side(
-    fraction: f64,
-    weights: &[f64; 5],
-    moisture: &[f64; 5],
-    exponent: &[f64; 5],
-) -> f64 {
-    (0..5)
-        .map(|n| fraction * weights[n] * (250. + 1116. * moisture[n]) * exponent[n])
-        .sum()
-}
-
 /// Return exact area weights and their sum for one actual particle side.
 #[inline]
 pub(crate) fn particle_area_weights<const STRICT: bool>(
@@ -205,39 +228,16 @@ pub(crate) fn particle_area_weights<const STRICT: bool>(
     (std::array::from_fn(|n| area[n] / safe), total)
 }
 
-/// Resolve the dead area fraction without converting an unknown denominator to zero.
+/// Share the propagating-flux equation with field-level staged evaluation.
 #[inline]
-pub(crate) fn dead_area_fraction<const STRICT: bool>(dead: f64, live: f64) -> f64 {
-    let total = dead + live;
-    let safe = if STRICT && total.is_nan() {
+pub(crate) fn propagating_flux_from_sigma<const STRICT: bool>(sigma: f64, packing: f64) -> f64 {
+    if STRICT && sigma.is_nan() {
         f64::NAN
-    } else if total > 1e-7 {
-        total
+    } else if sigma > 1e-7 {
+        ((0.792 + 0.681 * sigma.sqrt()) * (packing + 0.1)).exp() / (192.0 + 0.2595 * sigma)
     } else {
-        1.
-    };
-    if STRICT && total.is_nan() {
-        f64::NAN
-    } else if total > 1e-7 {
-        dead / safe
-    } else {
-        0.
+        0.0
     }
-}
-
-/// Calculate characteristic SAVR from the actual, potentially injected mixture fractions.
-#[inline]
-pub(crate) fn mixture_sigma(
-    dead: f64,
-    live: f64,
-    wd: &[f64; 5],
-    sd: &[f64; 5],
-    wl: &[f64; 5],
-    sl: &[f64; 5],
-) -> f64 {
-    let dead_savr: f64 = (0..5).map(|n| wd[n] * sd[n]).sum();
-    let live_savr: f64 = (0..5).map(|n| wl[n] * sl[n]).sum();
-    dead * dead_savr + live * live_savr
 }
 
 /// Share the actual sigma/packing dependency without rebuilding unrelated fuelbed fields.
@@ -261,16 +261,16 @@ pub(crate) fn relative_packing_from_sigma<const STRICT: bool>(sigma: f64, packin
     }
 }
 
-/// Share the propagating-flux equation with field-level staged evaluation.
+/// Apply the same constant separately to each weight, preserving summation order.
 #[inline]
-pub(crate) fn propagating_flux_from_sigma<const STRICT: bool>(sigma: f64, packing: f64) -> f64 {
-    if STRICT && sigma.is_nan() {
-        f64::NAN
-    } else if sigma > 1e-7 {
-        ((0.792 + 0.681 * sigma.sqrt()) * (packing + 0.1)).exp() / (192.0 + 0.2595 * sigma)
-    } else {
-        0.0
-    }
+pub(crate) fn weighted_constant(weights: &[f64; 5], value: f64) -> f64 {
+    (0..5).map(|n| weights[n] * value).sum()
+}
+
+/// Sum actual particle values in the existing weighted operation order.
+#[inline]
+pub(crate) fn weighted_values(weights: &[f64; 5], values: &[f64; 5]) -> f64 {
+    (0..5).map(|n| weights[n] * values[n]).sum()
 }
 
 /// Static fuelbed coefficients; moisture-dependent fields are rebuilt for every cell.
@@ -288,17 +288,6 @@ pub(crate) struct PreparedFuelbed {
     exp_live: [f64; 5],
 }
 impl PreparedFuelbed {
-    /// Retain fast cached finite invariants; rebuild missing static thresholds strictly.
-    pub(crate) fn run_available(
-        &self,
-        p: &Particles,
-        terms: &super::SavrTerms,
-    ) -> FuelbedIntermediates {
-        if p.depth.is_nan() || self.template.sigma.is_nan() {
-            return calculate_fuelbed_available_with_terms(p, terms);
-        }
-        self.run(p)
-    }
     /// Prepare physical terms only after dynamic-transfer eligibility is checked.
     pub(crate) fn new(p: &Particles, terms: &super::SavrTerms) -> Self {
         let template = calculate_fuelbed_with_terms(p, terms);
@@ -322,7 +311,6 @@ impl PreparedFuelbed {
             exp_live: terms.exp_live138,
         }
     }
-
     /// Restore exactly the moisture-dependent reductions in their reference order.
     pub(crate) fn run(&self, p: &Particles) -> FuelbedIntermediates {
         let mut result = self.template;
@@ -362,5 +350,17 @@ impl PreparedFuelbed {
             .sum();
         result.heat_sink = (hs_dead + hs_live) * result.bulk_density;
         result
+    }
+
+    /// Retain fast cached finite invariants; rebuild missing static thresholds strictly.
+    pub(crate) fn run_available(
+        &self,
+        p: &Particles,
+        terms: &super::SavrTerms,
+    ) -> FuelbedIntermediates {
+        if p.depth.is_nan() || self.template.sigma.is_nan() {
+            return calculate_fuelbed_available_with_terms(p, terms);
+        }
+        self.run(p)
     }
 }

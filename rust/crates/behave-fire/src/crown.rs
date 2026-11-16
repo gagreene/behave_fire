@@ -290,40 +290,6 @@ numeric_stages!(f64);
 /// F64 availability rules shared by complete and restricted evaluation.
 pub mod available {
     use super::*;
-    /// Guard a critical denominator without converting missingness to zero.
-    pub fn ratio(numerator: f64, denominator: f64) -> f64 {
-        if denominator.is_nan() {
-            f64::NAN
-        } else if denominator > 1e-7 {
-            numerator / denominator
-        } else {
-            0.
-        }
-    }
-    /// Keep missing canopy density distinct from valid zero density.
-    pub fn critical_rate(density: f64) -> f64 {
-        if density.is_nan() {
-            f64::NAN
-        } else {
-            calculate_critical_crown_fire_spread_rate(density)
-        }
-    }
-    /// Keep missing Surface heat distinct from the finite zero threshold.
-    pub fn surface_critical(intensity: f64, heat: f64) -> f64 {
-        if heat.is_nan() {
-            f64::NAN
-        } else {
-            calculate_surface_fire_critical_spread_rate(intensity, heat)
-        }
-    }
-    /// Preserve the finite fraction threshold and unknown denominator.
-    pub fn fraction(surface: f64, critical: f64, crowning: f64) -> f64 {
-        if (crowning - critical).is_nan() {
-            f64::NAN
-        } else {
-            calculate_crown_fraction_burned(surface, critical, crowning)
-        }
-    }
     /// Classify only when both actual ratios are available.
     pub fn classify(transition: f64, active: f64) -> FireClassification {
         if transition.is_nan() || active.is_nan() {
@@ -337,12 +303,12 @@ pub mod available {
             classify_crown_fire_type(transition, active)
         }
     }
-    /// Preserve missing intensity rather than the finite nonpositive literal.
-    pub fn flame_length(intensity: f64) -> f64 {
-        if intensity.is_nan() {
+    /// Keep missing canopy density distinct from valid zero density.
+    pub fn critical_rate(density: f64) -> f64 {
+        if density.is_nan() {
             f64::NAN
         } else {
-            flame(intensity)
+            calculate_critical_crown_fire_spread_rate(density)
         }
     }
     /// Prepare actual model-10 moisture/fuel dependencies for fixed-WAF backsolve.
@@ -367,137 +333,39 @@ pub mod available {
         let wind = fuel.wind_terms();
         crowning_without_geometry(reaction, &bed, critical, wind.as_ref())
     }
-}
-
-/// Extract the three supplied base-unit surface fields used by crown calculations.
-pub fn get_surface_fire_inputs(s: &SurfaceResult) -> SurfaceFireInputs {
-    SurfaceFireInputs {
-        surface_ros: s.spread_rate,
-        surface_fli: s.fireline_intensity,
-        surface_hpua: s.heat_per_unit_area,
+    /// Preserve missing intensity rather than the finite nonpositive literal.
+    pub fn flame_length(intensity: f64) -> f64 {
+        if intensity.is_nan() {
+            f64::NAN
+        } else {
+            flame(intensity)
+        }
     }
-}
-/// Model-10 surface results and every source-equivalent intermediate record.
-#[derive(Clone, Debug, PartialEq)]
-#[non_exhaustive]
-pub struct CrownSurfaceResult {
-    /// Model-10 particles.
-    pub p_crown: Particles,
-    /// Model-10 fuelbed intermediates.
-    pub ib_crown: FuelbedIntermediates,
-    /// Reaction intensity BTU/ft²/min.
-    pub ri_crown: f64,
-    /// Model-10 surface results with WAF 0.4.
-    pub crown_surface: SurfaceResult,
-    /// Crown spread ft/min.
-    pub crown_fire_spread_rate: f64,
-    /// Crown length-to-width ratio.
-    pub crown_length_to_width_ratio: f64,
-}
-/// Prepare model-10 science once with WAF 0.4 and the supplied slope.
-pub fn calculate_crown_surface_fire(
-    input: &CrownCell,
-    fuel: &PreparedFuel,
-    options: &SurfaceOptions,
-    tweaks: SurfaceTweaks,
-) -> CrownSurfaceResult {
-    calculate_crown_surface_selected::<0, true>(
-        input,
-        fuel,
-        options,
-        tweaks,
-        fuel.wind_terms().as_ref(),
-    )
-}
-
-/// Minimal model-10 stages consumed by complete Crown calculations.
-#[derive(Clone, Copy, Debug, PartialEq)]
-pub struct CrownSpreadResult {
-    /// Prepared particles available for explicit stage inspection.
-    pub p_crown: Particles,
-    /// Complete fuelbed state used by spread and backsolve.
-    pub ib_crown: FuelbedIntermediates,
-    /// Reaction intensity in BTU/ft²/min.
-    pub ri_crown: f64,
-    /// Crown spread in ft/min.
-    pub crown_fire_spread_rate: f64,
-    /// Crown length-to-width ratio.
-    pub crown_length_to_width_ratio: f64,
-}
-
-/// Compute Crown's consumed model-10 fields without unrelated Surface finishing.
-pub fn calculate_crown_spread(
-    input: &CrownCell,
-    fuel: &PreparedFuel,
-    options: &SurfaceOptions,
-    tweaks: SurfaceTweaks,
-) -> CrownSpreadResult {
-    crown_spread_with_policy::<true>(input, fuel, options, tweaks, fuel.wind_terms().as_ref())
-}
-
-/// Compute model-10 spread under the f64 missing-data contract.
-pub(crate) fn calculate_crown_spread_available(
-    input: &CrownCell,
-    fuel: &PreparedFuel,
-    options: &SurfaceOptions,
-    tweaks: SurfaceTweaks,
-    wind: Option<&surface::PreparedWind>,
-) -> CrownSpreadResult {
-    crown_spread_with_policy::<true>(input, fuel, options, tweaks, wind)
-}
-fn crown_spread_with_policy<const STRICT: bool>(
-    input: &CrownCell,
-    fuel: &PreparedFuel,
-    options: &SurfaceOptions,
-    tweaks: SurfaceTweaks,
-    wind: Option<&surface::PreparedWind>,
-) -> CrownSpreadResult {
-    let result = calculate_crown_surface_selected::<2, STRICT>(input, fuel, options, tweaks, wind);
-    CrownSpreadResult {
-        p_crown: result.p_crown,
-        ib_crown: result.ib_crown,
-        ri_crown: result.ri_crown,
-        crown_fire_spread_rate: result.crown_fire_spread_rate,
-        crown_length_to_width_ratio: result.crown_length_to_width_ratio,
+    /// Preserve the finite fraction threshold and unknown denominator.
+    pub fn fraction(surface: f64, critical: f64, crowning: f64) -> f64 {
+        if (crowning - critical).is_nan() {
+            f64::NAN
+        } else {
+            calculate_crown_fraction_burned(surface, critical, crowning)
+        }
     }
-}
-/// Evaluate only real spatial/moisture dependencies under the fixed Crown WAF.
-pub(crate) fn calculate_crown_spread_spatial(
-    input: &crate::engine::CrownSpatial,
-    fuel: &PreparedFuel,
-    options: &SurfaceOptions,
-) -> CrownSpreadResult {
-    // Fixed FM10 configuration has no canopy-geometry dependency: WAF=0.4.
-    // SurfaceCell's remaining defaults are model configuration, never substitute
-    // caller values; this path does not read those unused geometry fields.
-    let x = SurfaceCell {
-        fuel_model_grid: 10,
-        m1h: input.m1h,
-        m10h: input.m10h,
-        m100h: input.m100h,
-        mlh: input.mlh,
-        mlw: input.mlw,
-        wind_speed: input.wind_speed,
-        wind_direction: input.wind_direction,
-        slope: input.slope,
-        aspect: input.aspect,
-        user_waf: Some(0.4),
-        ..SurfaceCell::default()
-    };
-    let wind = fuel.wind_terms();
-    let result = calculate_fm10_surface::<2, true>(
-        &x,
-        fuel,
-        options,
-        SurfaceTweaks::default(),
-        wind.as_ref(),
-    );
-    CrownSpreadResult {
-        p_crown: result.p_crown,
-        ib_crown: result.ib_crown,
-        ri_crown: result.ri_crown,
-        crown_fire_spread_rate: result.crown_fire_spread_rate,
-        crown_length_to_width_ratio: result.crown_length_to_width_ratio,
+    /// Guard a critical denominator without converting missingness to zero.
+    pub fn ratio(numerator: f64, denominator: f64) -> f64 {
+        if denominator.is_nan() {
+            f64::NAN
+        } else if denominator > 1e-7 {
+            numerator / denominator
+        } else {
+            0.
+        }
+    }
+    /// Keep missing Surface heat distinct from the finite zero threshold.
+    pub fn surface_critical(intensity: f64, heat: f64) -> f64 {
+        if heat.is_nan() {
+            f64::NAN
+        } else {
+            calculate_surface_fire_critical_spread_rate(intensity, heat)
+        }
     }
 }
 
@@ -526,7 +394,23 @@ fn calculate_crown_surface_selected<const FINISH: u8, const STRICT: bool>(
     };
     calculate_fm10_surface::<FINISH, STRICT>(&x, fuel, options, tweaks, wind)
 }
-
+/// Model-10 surface results and every source-equivalent intermediate record.
+#[derive(Clone, Debug, PartialEq)]
+#[non_exhaustive]
+pub struct CrownSurfaceResult {
+    /// Model-10 particles.
+    pub p_crown: Particles,
+    /// Model-10 fuelbed intermediates.
+    pub ib_crown: FuelbedIntermediates,
+    /// Reaction intensity BTU/ft²/min.
+    pub ri_crown: f64,
+    /// Model-10 surface results with WAF 0.4.
+    pub crown_surface: SurfaceResult,
+    /// Crown spread ft/min.
+    pub crown_fire_spread_rate: f64,
+    /// Crown length-to-width ratio.
+    pub crown_length_to_width_ratio: f64,
+}
 /// Share the model-10 equations for complete and dependency-restricted callers.
 fn calculate_fm10_surface<const FINISH: u8, const STRICT: bool>(
     x: &SurfaceCell,
@@ -576,35 +460,38 @@ fn calculate_fm10_surface<const FINISH: u8, const STRICT: bool>(
     }
 }
 
-/// Back-solve active-crown wind, then calculate model-10 surface spread on flat terrain.
-pub fn calculate_crowning_surface_fire_spread_rate(
-    ri_crown: f64,
-    ib_crown: &FuelbedIntermediates,
-    critical_crown_ros: f64,
-    _canopy_height: f64,
-) -> f64 {
-    crowning_surface_rate(ri_crown, ib_crown, critical_crown_ros / 3.34, None)
+/// Minimal model-10 stages consumed by complete Crown calculations.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct CrownSpreadResult {
+    /// Prepared particles available for explicit stage inspection.
+    pub p_crown: Particles,
+    /// Complete fuelbed state used by spread and backsolve.
+    pub ib_crown: FuelbedIntermediates,
+    /// Reaction intensity in BTU/ft²/min.
+    pub ri_crown: f64,
+    /// Crown spread in ft/min.
+    pub crown_fire_spread_rate: f64,
+    /// Crown length-to-width ratio.
+    pub crown_length_to_width_ratio: f64,
 }
 
-/// Reuse the same physical wind context for the backsolved Surface calculation.
-pub(crate) fn crowning_with_wind(
-    ri: f64,
-    bed: &FuelbedIntermediates,
-    critical: f64,
-    _height: f64,
+fn crown_spread_with_policy<const STRICT: bool>(
+    input: &CrownCell,
+    fuel: &PreparedFuel,
+    options: &SurfaceOptions,
+    tweaks: SurfaceTweaks,
     wind: Option<&surface::PreparedWind>,
-) -> f64 {
-    crowning_without_geometry(ri, bed, critical, wind)
+) -> CrownSpreadResult {
+    let result = calculate_crown_surface_selected::<2, STRICT>(input, fuel, options, tweaks, wind);
+    CrownSpreadResult {
+        p_crown: result.p_crown,
+        ib_crown: result.ib_crown,
+        ri_crown: result.ri_crown,
+        crown_fire_spread_rate: result.crown_fire_spread_rate,
+        crown_length_to_width_ratio: result.crown_length_to_width_ratio,
+    }
 }
-/// Fixed WAF is the entire wind-height configuration of this backsolve.
-fn crowning_without_geometry(
-    ri: f64,
-    bed: &FuelbedIntermediates,
-    critical: f64,
-    wind: Option<&surface::PreparedWind>,
-) -> f64 {
-    crowning_surface_rate(ri, bed, critical / 3.34, wind)
-}
+
 /// Calculate the crowning surface rate from a precision-normalized model-10 target rate.
 fn crowning_surface_rate(
     ri_crown: f64,
@@ -633,22 +520,101 @@ fn crowning_surface_rate(
         wind,
     )
 }
-
-/// Only the actual declared physical inputs of the fixed-WAF backsolve.
-pub(crate) struct CrowningInputs {
-    pub reaction: f64,
-    pub sigma: f64,
-    pub packing: f64,
-    pub relative_packing: f64,
-    pub flux: f64,
-    pub heat_sink: f64,
-    pub defined: bool,
-    pub target: f64,
-    pub wind_b: f64,
-    pub wind_c: f64,
-    pub wind_e: f64,
+/// Fixed WAF is the entire wind-height configuration of this backsolve.
+fn crowning_without_geometry(
+    ri: f64,
+    bed: &FuelbedIntermediates,
+    critical: f64,
+    wind: Option<&surface::PreparedWind>,
+) -> f64 {
+    crowning_surface_rate(ri, bed, critical / 3.34, wind)
+}
+/// Compute Crown's consumed model-10 fields without unrelated Surface finishing.
+pub fn calculate_crown_spread(
+    input: &CrownCell,
+    fuel: &PreparedFuel,
+    options: &SurfaceOptions,
+    tweaks: SurfaceTweaks,
+) -> CrownSpreadResult {
+    crown_spread_with_policy::<true>(input, fuel, options, tweaks, fuel.wind_terms().as_ref())
 }
 
+/// Compute model-10 spread under the f64 missing-data contract.
+pub(crate) fn calculate_crown_spread_available(
+    input: &CrownCell,
+    fuel: &PreparedFuel,
+    options: &SurfaceOptions,
+    tweaks: SurfaceTweaks,
+    wind: Option<&surface::PreparedWind>,
+) -> CrownSpreadResult {
+    crown_spread_with_policy::<true>(input, fuel, options, tweaks, wind)
+}
+
+/// Evaluate only real spatial/moisture dependencies under the fixed Crown WAF.
+pub(crate) fn calculate_crown_spread_spatial(
+    input: &crate::engine::CrownSpatial,
+    fuel: &PreparedFuel,
+    options: &SurfaceOptions,
+) -> CrownSpreadResult {
+    // Fixed FM10 configuration has no canopy-geometry dependency: WAF=0.4.
+    // SurfaceCell's remaining defaults are model configuration, never substitute
+    // caller values; this path does not read those unused geometry fields.
+    let x = SurfaceCell {
+        fuel_model_grid: 10,
+        m1h: input.m1h,
+        m10h: input.m10h,
+        m100h: input.m100h,
+        mlh: input.mlh,
+        mlw: input.mlw,
+        wind_speed: input.wind_speed,
+        wind_direction: input.wind_direction,
+        slope: input.slope,
+        aspect: input.aspect,
+        user_waf: Some(0.4),
+        ..SurfaceCell::default()
+    };
+    let wind = fuel.wind_terms();
+    let result = calculate_fm10_surface::<2, true>(
+        &x,
+        fuel,
+        options,
+        SurfaceTweaks::default(),
+        wind.as_ref(),
+    );
+    CrownSpreadResult {
+        p_crown: result.p_crown,
+        ib_crown: result.ib_crown,
+        ri_crown: result.ri_crown,
+        crown_fire_spread_rate: result.crown_fire_spread_rate,
+        crown_length_to_width_ratio: result.crown_length_to_width_ratio,
+    }
+}
+
+/// Prepare model-10 science once with WAF 0.4 and the supplied slope.
+pub fn calculate_crown_surface_fire(
+    input: &CrownCell,
+    fuel: &PreparedFuel,
+    options: &SurfaceOptions,
+    tweaks: SurfaceTweaks,
+) -> CrownSurfaceResult {
+    calculate_crown_surface_selected::<0, true>(
+        input,
+        fuel,
+        options,
+        tweaks,
+        fuel.wind_terms().as_ref(),
+    )
+}
+
+/// Back-solve active-crown wind, then calculate model-10 surface spread on flat terrain.
+pub fn calculate_crowning_surface_fire_spread_rate(
+    ri_crown: f64,
+    ib_crown: &FuelbedIntermediates,
+    critical_crown_ros: f64,
+    _canopy_height: f64,
+) -> f64 {
+    crowning_surface_rate(ri_crown, ib_crown, critical_crown_ros / 3.34, None)
+}
 /// Share backsolve equations with staged, potentially injected wind coefficients.
 pub(crate) fn crowning_from_inputs(
     v: &CrowningInputs,
@@ -697,6 +663,40 @@ pub(crate) fn crowning_from_inputs(
         surface::calculate_forward_spread_rate(r0, vector.rate_vector)
     } else {
         0.
+    }
+}
+/// Reuse the same physical wind context for the backsolved Surface calculation.
+pub(crate) fn crowning_with_wind(
+    ri: f64,
+    bed: &FuelbedIntermediates,
+    critical: f64,
+    _height: f64,
+    wind: Option<&surface::PreparedWind>,
+) -> f64 {
+    crowning_without_geometry(ri, bed, critical, wind)
+}
+
+/// Only the actual declared physical inputs of the fixed-WAF backsolve.
+pub(crate) struct CrowningInputs {
+    pub reaction: f64,
+    pub sigma: f64,
+    pub packing: f64,
+    pub relative_packing: f64,
+    pub flux: f64,
+    pub heat_sink: f64,
+    pub defined: bool,
+    pub target: f64,
+    pub wind_b: f64,
+    pub wind_c: f64,
+    pub wind_e: f64,
+}
+
+/// Extract the three supplied base-unit surface fields used by crown calculations.
+pub fn get_surface_fire_inputs(s: &SurfaceResult) -> SurfaceFireInputs {
+    SurfaceFireInputs {
+        surface_ros: s.spread_rate,
+        surface_fli: s.fireline_intensity,
+        surface_hpua: s.heat_per_unit_area,
     }
 }
 

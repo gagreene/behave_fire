@@ -22,6 +22,33 @@ enum Role {
     Mode,
 }
 
+fn column<'a, T: Copy>(
+    values: &'a [T],
+    shape: &GridShape,
+    name: &str,
+) -> Result<PerCell<'a, T>, String> {
+    let column = if values.len() == 1 {
+        PerCell::Scalar(values[0])
+    } else {
+        PerCell::Cells(values)
+    };
+    column.validate(shape, name).map_err(|e| e.to_string())?;
+    Ok(column)
+}
+
+fn resolve(name: &str, expected: Role) -> Result<Field, String> {
+    if name.starts_with('_') {
+        return Err(format!(
+            "retired numeric metadata is not a component input: {name}"
+        ));
+    }
+    let field = Field::from_name(name).ok_or_else(|| format!("unknown component input {name}"))?;
+    if role(field) != expected {
+        return Err(format!("wrong storage role for component input {name}"));
+    }
+    Ok(field)
+}
+
 fn role(field: Field) -> Role {
     match field {
         Field::FuelModelGrid
@@ -53,33 +80,6 @@ fn role(field: Field) -> Role {
     }
 }
 
-fn resolve(name: &str, expected: Role) -> Result<Field, String> {
-    if name.starts_with('_') {
-        return Err(format!(
-            "retired numeric metadata is not a component input: {name}"
-        ));
-    }
-    let field = Field::from_name(name).ok_or_else(|| format!("unknown component input {name}"))?;
-    if role(field) != expected {
-        return Err(format!("wrong storage role for component input {name}"));
-    }
-    Ok(field)
-}
-
-fn column<'a, T: Copy>(
-    values: &'a [T],
-    shape: &GridShape,
-    name: &str,
-) -> Result<PerCell<'a, T>, String> {
-    let column = if values.len() == 1 {
-        PerCell::Scalar(values[0])
-    } else {
-        PerCell::Cells(values)
-    };
-    column.validate(shape, name).map_err(|e| e.to_string())?;
-    Ok(column)
-}
-
 /// Dense, immutable views of validated scalar or per-cell primitive columns.
 pub(crate) struct Prepared<'a> {
     cells: usize,
@@ -95,6 +95,55 @@ pub(crate) struct Prepared<'a> {
 }
 
 impl<'a> Prepared<'a> {
+    fn read<T: Copy>(
+        &self,
+        field: Field,
+        row: usize,
+        column: Option<PerCell<'_, T>>,
+    ) -> Result<T, String> {
+        if row >= self.cells {
+            return Err(format!(
+                "component row {row} is outside {} cells",
+                self.cells
+            ));
+        }
+        column.and_then(|v| v.get(row).copied()).ok_or_else(|| {
+            format!(
+                "component input {} is unbound in this storage role",
+                field.name()
+            )
+        })
+    }
+    /// Read an exact integral control, including iteration limits above 2^53.
+    pub(crate) fn code(&self, field: Field, row: usize) -> Result<i64, String> {
+        self.read(field, row, self.codes[field as usize])
+    }
+    pub(crate) fn crown_options(&self) -> SurfaceOptions {
+        self.options
+    }
+    /// Read a boolean condition without reconstructing a numeric dtype or mask.
+    pub(crate) fn flag(&self, field: Field, row: usize) -> Result<bool, String> {
+        self.read(field, row, self.flags[field as usize])
+    }
+    /// Report structural presence without evaluating a row, including empty grids.
+    pub(crate) fn has(&self, field: Field) -> bool {
+        self.physical[field as usize].is_some()
+            || self.codes[field as usize].is_some()
+            || self.flags[field as usize].is_some()
+    }
+    pub(crate) fn height(&self) -> Result<WindHeight, String> {
+        Ok(self.options.wind_height)
+    }
+    pub(crate) fn humidity_units(&self, row: usize) -> Result<FractionUnit, String> {
+        self.humidity
+            .as_ref()
+            .map(|v| v.at(row))
+            .ok_or_else(|| "missing rh_units".into())
+    }
+    /// Read a physical component argument using the scalar evaluator convention.
+    pub(crate) fn n(&self, field: Field, row: usize) -> Result<f64, String> {
+        self.physical(field, row)
+    }
     /// Validate every role, extent, and bounded identifier before exposing row access.
     pub(crate) fn new(arguments: &'a Arguments, shape: &GridShape) -> Result<Self, String> {
         let mut result = Self {
@@ -153,69 +202,22 @@ impl<'a> Prepared<'a> {
             .transpose()?;
         Ok(result)
     }
-    /// Attach already interpreted scalar wind configuration.
-    pub(crate) fn with_options(mut self, options: SurfaceOptions) -> Self {
-        self.options = options;
-        self
-    }
-    /// Read a physical component argument using the scalar evaluator convention.
-    pub(crate) fn n(&self, field: Field, row: usize) -> Result<f64, String> {
-        self.physical(field, row)
-    }
     /// Borrow an optional actual physical operand; absent values remain absent.
     pub(crate) fn optional(&self, field: Field, row: usize) -> Option<f64> {
         self.physical[field as usize].and_then(|v| v.get(row).copied())
     }
-    /// Report structural presence without evaluating a row, including empty grids.
-    pub(crate) fn has(&self, field: Field) -> bool {
-        self.physical[field as usize].is_some()
-            || self.codes[field as usize].is_some()
-            || self.flags[field as usize].is_some()
+    pub(crate) fn orientation(&self) -> Result<WindOrientation, String> {
+        Ok(self.options.wind_orientation)
     }
-    pub(crate) fn speed_units(&self, row: usize) -> Result<SpeedUnit, String> {
-        Ok(self
-            .speed
-            .as_ref()
-            .map_or(SpeedUnit::FeetPerMinute, |v| v.at(row)))
-    }
-    pub(crate) fn slope_units(&self, row: usize) -> Result<SlopeUnit, String> {
-        Ok(self
-            .slope
-            .as_ref()
-            .map_or(SlopeUnit::Degrees, |v| v.at(row)))
-    }
-    pub(crate) fn temperature_units(&self, row: usize) -> Result<TemperatureUnit, String> {
-        self.temperature
-            .as_ref()
-            .map(|v| v.at(row))
-            .ok_or_else(|| "missing temp_units".into())
-    }
-    pub(crate) fn humidity_units(&self, row: usize) -> Result<FractionUnit, String> {
-        self.humidity
-            .as_ref()
-            .map(|v| v.at(row))
-            .ok_or_else(|| "missing rh_units".into())
+    /// Read a physical operand; identifiers and flags never pass through float64.
+    pub(crate) fn physical(&self, field: Field, row: usize) -> Result<f64, String> {
+        self.read(field, row, self.physical[field as usize])
     }
     pub(crate) fn pressure_units(&self, row: usize) -> Result<PressureUnit, String> {
         self.pressure
             .as_ref()
             .map(|v| v.at(row))
             .ok_or_else(|| "missing output_units".into())
-    }
-    pub(crate) fn orientation(&self) -> Result<WindOrientation, String> {
-        Ok(self.options.wind_orientation)
-    }
-    pub(crate) fn height(&self) -> Result<WindHeight, String> {
-        Ok(self.options.wind_height)
-    }
-    pub(crate) fn waf(&self) -> Result<WafMethod, String> {
-        Ok(self.options.waf_method)
-    }
-    pub(crate) fn surface_options(&self) -> Result<SurfaceOptions, String> {
-        Ok(self.options)
-    }
-    pub(crate) fn crown_options(&self) -> SurfaceOptions {
-        self.options
     }
     /// Check the actual prepared program's required fields without running a fake cell.
     pub(crate) fn require(&self, fields: &[Field]) -> Result<(), String> {
@@ -235,35 +237,33 @@ impl<'a> Prepared<'a> {
         }
         Ok(())
     }
-    fn read<T: Copy>(
-        &self,
-        field: Field,
-        row: usize,
-        column: Option<PerCell<'_, T>>,
-    ) -> Result<T, String> {
-        if row >= self.cells {
-            return Err(format!(
-                "component row {row} is outside {} cells",
-                self.cells
-            ));
-        }
-        column.and_then(|v| v.get(row).copied()).ok_or_else(|| {
-            format!(
-                "component input {} is unbound in this storage role",
-                field.name()
-            )
-        })
+    pub(crate) fn slope_units(&self, row: usize) -> Result<SlopeUnit, String> {
+        Ok(self
+            .slope
+            .as_ref()
+            .map_or(SlopeUnit::Degrees, |v| v.at(row)))
     }
-    /// Read a physical operand; identifiers and flags never pass through float64.
-    pub(crate) fn physical(&self, field: Field, row: usize) -> Result<f64, String> {
-        self.read(field, row, self.physical[field as usize])
+    pub(crate) fn speed_units(&self, row: usize) -> Result<SpeedUnit, String> {
+        Ok(self
+            .speed
+            .as_ref()
+            .map_or(SpeedUnit::FeetPerMinute, |v| v.at(row)))
     }
-    /// Read an exact integral control, including iteration limits above 2^53.
-    pub(crate) fn code(&self, field: Field, row: usize) -> Result<i64, String> {
-        self.read(field, row, self.codes[field as usize])
+    pub(crate) fn surface_options(&self) -> Result<SurfaceOptions, String> {
+        Ok(self.options)
     }
-    /// Read a boolean condition without reconstructing a numeric dtype or mask.
-    pub(crate) fn flag(&self, field: Field, row: usize) -> Result<bool, String> {
-        self.read(field, row, self.flags[field as usize])
+    pub(crate) fn temperature_units(&self, row: usize) -> Result<TemperatureUnit, String> {
+        self.temperature
+            .as_ref()
+            .map(|v| v.at(row))
+            .ok_or_else(|| "missing temp_units".into())
+    }
+    pub(crate) fn waf(&self) -> Result<WafMethod, String> {
+        Ok(self.options.waf_method)
+    }
+    /// Attach already interpreted scalar wind configuration.
+    pub(crate) fn with_options(mut self, options: SurfaceOptions) -> Self {
+        self.options = options;
+        self
     }
 }

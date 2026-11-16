@@ -47,39 +47,10 @@ impl Default for FireSize {
     }
 }
 impl FireSize {
-    /// Create default state.
-    pub fn new() -> Self {
-        Self::default()
-    }
     /// Calculate backing spread from the actual forward rate and eccentricity.
     pub fn calculate_backing_spread_rate(&mut self) {
         self.backing_spread_rate_ =
             self.forward_spread_rate_ * (1. - self.eccentricity_) / (1. + self.eccentricity_);
-    }
-    /// Convert inputs and update all basic fire dimensions in the reference order.
-    pub fn calculate_fire_basic_dimensions(
-        &mut self,
-        is_crown: bool,
-        effective_wind_speed: f64,
-        wind_speed_units: SpeedUnit,
-        forward_spread_rate: f64,
-        spread_rate_units: SpeedUnit,
-    ) {
-        self.forward_spread_rate_ = spread_rate_units.to_base(forward_spread_rate);
-        self.effective_wind_speed_ = if wind_speed_units == SpeedUnit::MilesPerHour {
-            effective_wind_speed
-        } else {
-            SpeedUnit::MilesPerHour.from_base(wind_speed_units.to_base(effective_wind_speed))
-        };
-        if is_crown {
-            self.calculate_crown_fire_length_to_width_ratio();
-        } else {
-            self.calculate_surface_fire_length_to_width_ratio();
-        }
-        self.calculate_fire_eccentricity();
-        self.calculate_backing_spread_rate();
-        self.calculate_flanking_spread_rate();
-        self.calculate_elliptical_dimensions();
     }
     /// Calculate crown length-to-width ratio from the current wind.
     pub fn calculate_crown_fire_length_to_width_ratio(&mut self) {
@@ -107,6 +78,31 @@ impl FireSize {
             self.heading_to_backing_ratio_ = 0.;
         }
         self.elliptical_c_ = self.elliptical_b_ - self.backing_spread_rate_;
+    }
+    /// Convert inputs and update all basic fire dimensions in the reference order.
+    pub fn calculate_fire_basic_dimensions(
+        &mut self,
+        is_crown: bool,
+        effective_wind_speed: f64,
+        wind_speed_units: SpeedUnit,
+        forward_spread_rate: f64,
+        spread_rate_units: SpeedUnit,
+    ) {
+        self.forward_spread_rate_ = spread_rate_units.to_base(forward_spread_rate);
+        self.effective_wind_speed_ = if wind_speed_units == SpeedUnit::MilesPerHour {
+            effective_wind_speed
+        } else {
+            SpeedUnit::MilesPerHour.from_base(wind_speed_units.to_base(effective_wind_speed))
+        };
+        if is_crown {
+            self.calculate_crown_fire_length_to_width_ratio();
+        } else {
+            self.calculate_surface_fire_length_to_width_ratio();
+        }
+        self.calculate_fire_eccentricity();
+        self.calculate_backing_spread_rate();
+        self.calculate_flanking_spread_rate();
+        self.calculate_elliptical_dimensions();
     }
     /// Calculate eccentricity from the current length-to-width ratio.
     pub fn calculate_fire_eccentricity(&mut self) {
@@ -208,5 +204,9 @@ impl FireSize {
     /// Return maximum width at the requested elapsed time.
     pub fn get_max_fire_width(&self, units: LengthUnit, elapsed: f64, time: TimeUnit) -> f64 {
         units.from_base(self.elliptical_a_ * time.to_base(elapsed) * 2.)
+    }
+    /// Create default state.
+    pub fn new() -> Self {
+        Self::default()
     }
 }

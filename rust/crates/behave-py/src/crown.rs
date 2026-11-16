@@ -9,6 +9,9 @@ use behave_fire::{
     crown::*,
     engine::{CrownCell, PreparedFuel},
 };
+pub fn fuel(a: &PreparedArguments<'_>, i: usize) -> Result<PreparedFuel, String> {
+    structures::fuel(a, i)
+}
 pub fn input(a: &PreparedArguments<'_>, i: usize) -> Result<CrownCell, String> {
     let mut r = CrownCell::default();
     r.m1h = a.optional(Field::M1h, i).unwrap_or(r.m1h);
@@ -37,9 +40,6 @@ pub fn input(a: &PreparedArguments<'_>, i: usize) -> Result<CrownCell, String> {
         .optional(Field::MoistureFoliar, i)
         .unwrap_or(r.moisture_foliar);
     Ok(r)
-}
-pub fn fuel(a: &PreparedArguments<'_>, i: usize) -> Result<PreparedFuel, String> {
-    structures::fuel(a, i)
 }
 pub fn surface_output(out: &mut RowWriter<'_, '_>, result: CrownSurfaceResult) {
     out.with_prefix("p_crown", |out| {

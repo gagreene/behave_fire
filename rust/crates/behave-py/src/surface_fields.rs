@@ -33,73 +33,6 @@ pub(crate) struct Program<'a> {
     options: SurfaceOptions,
 }
 impl<'a> Program<'a> {
-    pub(crate) fn new(
-        source: &'a BTreeMap<String, Vec<f64>>,
-        ids: PerCell<'a, i32>,
-        fields: &[F],
-        fuels: &'a PreparedFuels,
-        options: SurfaceOptions,
-    ) -> PyResult<Self> {
-        let col = |name| crate::model_f64::column(source, name);
-        let mut need_physics = false;
-        let mut need_wind = false;
-        for field in fields {
-            match field {
-                F::ReactionIntensity
-                | F::ResidenceTime
-                | F::HeatPerUnitArea
-                | F::NoWindNoSlopeSpreadRate => need_physics = true,
-                F::MidflameWindSpeed => need_wind = true,
-                _ => {
-                    return Err(PyValueError::new_err(format!(
-                        "restricted Surface evaluator not implemented for {}",
-                        field.name()
-                    )))
-                }
-            }
-        }
-        let physics = if need_physics {
-            Some(Physics {
-                moisture: [
-                    col("m1h")?,
-                    col("m10h")?,
-                    col("m100h")?,
-                    col("mlh")?,
-                    col("mlw")?,
-                ],
-            })
-        } else {
-            None
-        };
-        let wind = if need_wind {
-            Some(
-                if options.waf_method == WafMethod::UserInput && source.contains_key("user_waf") {
-                    Wind::User {
-                        speed: col("wind_speed")?,
-                        waf: col("user_waf")?,
-                    }
-                } else {
-                    Wind::Computed {
-                        speed: col("wind_speed")?,
-                        cover: col("canopy_cover")?,
-                        height: col("canopy_height")?,
-                        ratio: col("crown_ratio")?,
-                    }
-                },
-            )
-        } else {
-            None
-        };
-        Ok(Self {
-            requested: fields.to_vec(),
-            ids,
-            fuels,
-            physics,
-            wind,
-            options,
-        })
-    }
-
     pub(crate) fn evaluate(&self, index: usize) -> SurfaceResult {
         let id = *self.ids.get(index).expect("validated Surface ID");
         let fuel = self.fuels.for_grid(id);
@@ -190,5 +123,72 @@ impl<'a> Program<'a> {
             }
         }
         result
+    }
+
+    pub(crate) fn new(
+        source: &'a BTreeMap<String, Vec<f64>>,
+        ids: PerCell<'a, i32>,
+        fields: &[F],
+        fuels: &'a PreparedFuels,
+        options: SurfaceOptions,
+    ) -> PyResult<Self> {
+        let col = |name| crate::model_f64::column(source, name);
+        let mut need_physics = false;
+        let mut need_wind = false;
+        for field in fields {
+            match field {
+                F::ReactionIntensity
+                | F::ResidenceTime
+                | F::HeatPerUnitArea
+                | F::NoWindNoSlopeSpreadRate => need_physics = true,
+                F::MidflameWindSpeed => need_wind = true,
+                _ => {
+                    return Err(PyValueError::new_err(format!(
+                        "restricted Surface evaluator not implemented for {}",
+                        field.name()
+                    )))
+                }
+            }
+        }
+        let physics = if need_physics {
+            Some(Physics {
+                moisture: [
+                    col("m1h")?,
+                    col("m10h")?,
+                    col("m100h")?,
+                    col("mlh")?,
+                    col("mlw")?,
+                ],
+            })
+        } else {
+            None
+        };
+        let wind = if need_wind {
+            Some(
+                if options.waf_method == WafMethod::UserInput && source.contains_key("user_waf") {
+                    Wind::User {
+                        speed: col("wind_speed")?,
+                        waf: col("user_waf")?,
+                    }
+                } else {
+                    Wind::Computed {
+                        speed: col("wind_speed")?,
+                        cover: col("canopy_cover")?,
+                        height: col("canopy_height")?,
+                        ratio: col("crown_ratio")?,
+                    }
+                },
+            )
+        } else {
+            None
+        };
+        Ok(Self {
+            requested: fields.to_vec(),
+            ids,
+            fuels,
+            physics,
+            wind,
+            options,
+        })
     }
 }

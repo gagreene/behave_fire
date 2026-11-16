@@ -149,6 +149,13 @@ impl FuelModels {
         self.get(number).map_or("", |record| &record.code)
     }
 
+    /// Return hundred-hour dead loading, or zero if the slot is absent.
+    pub fn get_fuel_load_hundred_hour(&self, number: i32, units: Option<LoadingUnit>) -> f64 {
+        self.get(number).map_or(0.0, |record| {
+            units.map_or(record.dead_100h, |unit| unit.from_base(record.dead_100h))
+        })
+    }
+
     /// Return live herbaceous loading, or zero if the slot is absent.
     pub fn get_fuel_load_live_herbaceous(&self, number: i32, units: Option<LoadingUnit>) -> f64 {
         self.get(number).map_or(0.0, |record| {
@@ -160,13 +167,6 @@ impl FuelModels {
     pub fn get_fuel_load_live_woody(&self, number: i32, units: Option<LoadingUnit>) -> f64 {
         self.get(number).map_or(0.0, |record| {
             units.map_or(record.live_woody, |unit| unit.from_base(record.live_woody))
-        })
-    }
-
-    /// Return hundred-hour dead loading, or zero if the slot is absent.
-    pub fn get_fuel_load_hundred_hour(&self, number: i32, units: Option<LoadingUnit>) -> f64 {
-        self.get(number).map_or(0.0, |record| {
-            units.map_or(record.dead_100h, |unit| unit.from_base(record.dead_100h))
         })
     }
 

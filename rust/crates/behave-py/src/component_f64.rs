@@ -15,25 +15,6 @@ use pyo3::types::PyDict;
 use std::collections::BTreeMap;
 pub(crate) const OPERATIONS: &[Operation] = Operation::ALL;
 
-/// Return fixed particle dependency plans without evaluating scientific cells.
-#[pyfunction]
-pub fn component_dependencies() -> PyResult<BTreeMap<String, Vec<String>>> {
-    let schema = component_schema::schema(Operation::SurfaceCalculateFuelbedIntermediates);
-    let mut result = BTreeMap::new();
-    for field in schema {
-        let inputs = crate::component_fuelbed::dependencies(std::slice::from_ref(&field.name))
-            .map_err(PyValueError::new_err)?;
-        result.insert(
-            field.name,
-            inputs
-                .into_iter()
-                .map(|(_, field)| field.name().to_owned())
-                .collect(),
-        );
-    }
-    Ok(result)
-}
-
 /// Capture all operands before detached execution, with no mask or dtype decoder.
 #[pyfunction]
 #[pyo3(signature=(operation, physical, codes, flags, shape, threads=None, _owned_callback=None, settings=None, outputs=None))]
@@ -204,4 +185,23 @@ pub fn component_batch<'py>(
             .map(|(field, values)| (field.name, values)),
         &shape,
     )
+}
+
+/// Return fixed particle dependency plans without evaluating scientific cells.
+#[pyfunction]
+pub fn component_dependencies() -> PyResult<BTreeMap<String, Vec<String>>> {
+    let schema = component_schema::schema(Operation::SurfaceCalculateFuelbedIntermediates);
+    let mut result = BTreeMap::new();
+    for field in schema {
+        let inputs = crate::component_fuelbed::dependencies(std::slice::from_ref(&field.name))
+            .map_err(PyValueError::new_err)?;
+        result.insert(
+            field.name,
+            inputs
+                .into_iter()
+                .map(|(_, field)| field.name().to_owned())
+                .collect(),
+        );
+    }
+    Ok(result)
 }

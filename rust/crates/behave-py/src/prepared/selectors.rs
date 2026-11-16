@@ -6,6 +6,12 @@ pub(crate) enum Selected<T> {
     Cells(Vec<T>),
 }
 impl<T: Copy + TryFrom<i32, Error = InvalidUnit>> Selected<T> {
+    pub(crate) fn at(&self, row: usize) -> T {
+        match self {
+            Self::Uniform(value) => *value,
+            Self::Cells(values) => values[row],
+        }
+    }
     pub(crate) fn new(values: &[i64]) -> Result<Self, String> {
         let decode = |&value: &i64| {
             let code =
@@ -20,12 +26,6 @@ impl<T: Copy + TryFrom<i32, Error = InvalidUnit>> Selected<T> {
                 .map(decode)
                 .collect::<Result<Vec<_>, _>>()
                 .map(Self::Cells)
-        }
-    }
-    pub(crate) fn at(&self, row: usize) -> T {
-        match self {
-            Self::Uniform(value) => *value,
-            Self::Cells(values) => values[row],
         }
     }
 }

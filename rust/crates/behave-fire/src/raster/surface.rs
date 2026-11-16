@@ -21,15 +21,42 @@ pub struct SurfaceRaster<'a> {
 }
 
 impl<'a> SurfaceRaster<'a> {
+    fn run_range(
+        &self,
+        range: Range<usize>,
+        shape: GridShape,
+        plan: &SurfacePlan,
+        source: SurfaceSource<'_, '_>,
+        tweaks: &SurfaceTweakColumns<'_>,
+        threads: usize,
+    ) -> Result<SurfaceRasterOutput, ParallelError<BehaveError>> {
+        tweaks.validate(&self.shape).map_err(ParallelError::Work)?;
+        if let SurfaceSource::Fuelbeds(columns) = source {
+            columns.validate(&self.shape).map_err(ParallelError::Work)?;
+        }
+        let start = range.start;
+        let mut output = SurfaceRasterOutput::run_with(shape, threads, |offset| {
+            let index = start + offset;
+            if !self.inputs.valid(index) {
+                return Ok::<_, BehaveError>(crate::engine::missing::surface());
+            }
+            let overrides = tweaks.cell(index);
+            Ok(match source {
+                SurfaceSource::Fuelbeds(columns) => {
+                    plan.run_from_fuelbed(&self.inputs.cell(index), &columns.cell(index), overrides)
+                }
+                SurfaceSource::Fuels(fuels) => self
+                    .evaluate_cell(index, plan, fuels, overrides)
+                    .expect("validated raster index"),
+            })
+        })?;
+        output.validity = validity(self.inputs.validity, range)?;
+        Ok(output)
+    }
+
     /// Borrow the validated inputs when creating an independently owned session.
     pub fn columns(&self) -> &SurfaceColumns<'a> {
         &self.inputs
-    }
-
-    /// Validate every provided column once, before allocation or worker execution.
-    pub fn new(shape: GridShape, inputs: SurfaceColumns<'a>) -> Result<Self, BehaveError> {
-        inputs.validate(&shape)?;
-        Ok(Self { shape, inputs })
     }
 
     /// Evaluate one checked cell into caller-managed output storage.
@@ -57,9 +84,10 @@ impl<'a> SurfaceRaster<'a> {
         (index < self.shape.len() && self.inputs.valid(index)).then(|| self.inputs.cell(index))
     }
 
-    /// Borrow the checked logical dimensions.
-    pub fn shape(&self) -> &GridShape {
-        &self.shape
+    /// Validate every provided column once, before allocation or worker execution.
+    pub fn new(shape: GridShape, inputs: SurfaceColumns<'a>) -> Result<Self, BehaveError> {
+        inputs.validate(&shape)?;
+        Ok(Self { shape, inputs })
     }
 
     /// Run prepared fuel records and scalar/per-cell overrides into owned columns.
@@ -120,36 +148,8 @@ impl<'a> SurfaceRaster<'a> {
         )
     }
 
-    fn run_range(
-        &self,
-        range: Range<usize>,
-        shape: GridShape,
-        plan: &SurfacePlan,
-        source: SurfaceSource<'_, '_>,
-        tweaks: &SurfaceTweakColumns<'_>,
-        threads: usize,
-    ) -> Result<SurfaceRasterOutput, ParallelError<BehaveError>> {
-        tweaks.validate(&self.shape).map_err(ParallelError::Work)?;
-        if let SurfaceSource::Fuelbeds(columns) = source {
-            columns.validate(&self.shape).map_err(ParallelError::Work)?;
-        }
-        let start = range.start;
-        let mut output = SurfaceRasterOutput::run_with(shape, threads, |offset| {
-            let index = start + offset;
-            if !self.inputs.valid(index) {
-                return Ok::<_, BehaveError>(crate::engine::missing::surface());
-            }
-            let overrides = tweaks.cell(index);
-            Ok(match source {
-                SurfaceSource::Fuelbeds(columns) => {
-                    plan.run_from_fuelbed(&self.inputs.cell(index), &columns.cell(index), overrides)
-                }
-                SurfaceSource::Fuels(fuels) => self
-                    .evaluate_cell(index, plan, fuels, overrides)
-                    .expect("validated raster index"),
-            })
-        })?;
-        output.validity = validity(self.inputs.validity, range)?;
-        Ok(output)
+    /// Borrow the checked logical dimensions.
+    pub fn shape(&self) -> &GridShape {
+        &self.shape
     }
 }

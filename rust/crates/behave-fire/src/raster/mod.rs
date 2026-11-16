@@ -14,8 +14,15 @@ pub use surface::SurfaceRaster;
 use crate::{BehaveError, GridShape, ParallelError, PerCell};
 use std::ops::Range;
 
-pub(crate) fn value<T: Copy>(column: &PerCell<'_, T>, index: usize) -> T {
-    *column.get(index).expect("validated row-major column")
+pub(crate) fn tile_shape(range: &Range<usize>, len: usize) -> Result<GridShape, BehaveError> {
+    if range.start > range.end || range.end > len {
+        return Err(BehaveError::InvalidRange {
+            start: range.start,
+            end: range.end,
+            len,
+        });
+    }
+    GridShape::new(vec![range.len()])
 }
 
 pub(crate) fn validate_optional<T>(
@@ -27,17 +34,6 @@ pub(crate) fn validate_optional<T>(
         column.validate(shape, name)?;
     }
     Ok(())
-}
-
-pub(crate) fn tile_shape(range: &Range<usize>, len: usize) -> Result<GridShape, BehaveError> {
-    if range.start > range.end || range.end > len {
-        return Err(BehaveError::InvalidRange {
-            start: range.start,
-            end: range.end,
-            len,
-        });
-    }
-    GridShape::new(vec![range.len()])
 }
 
 pub(crate) fn validity(
@@ -53,4 +49,8 @@ pub(crate) fn validity(
         .map_err(|error| ParallelError::Allocation(error.to_string()))?;
     values.extend(range.map(|index| value(&column, index)));
     Ok(Some(values))
+}
+
+pub(crate) fn value<T: Copy>(column: &PerCell<'_, T>, index: usize) -> T {
+    *column.get(index).expect("validated row-major column")
 }

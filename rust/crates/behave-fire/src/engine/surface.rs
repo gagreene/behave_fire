@@ -93,35 +93,6 @@ impl SurfacePlan {
         fuel.prepare_fuelbed_available(&particles)
     }
 
-    /// Evaluate a cell with explicit stage overrides and no per-cell ownership.
-    pub fn run_cell(
-        &self,
-        cell: &SurfaceCell,
-        fuel: &PreparedFuel,
-        tweaks: SurfaceTweaks,
-    ) -> SurfaceResult {
-        self.run_available_cell(cell, fuel, tweaks)
-    }
-
-    /// Resume from supplied fuelbed state without rebuilding or replacing it.
-    pub fn run_from_fuelbed(
-        &self,
-        cell: &SurfaceCell,
-        fuelbed: &FuelbedIntermediates,
-        tweaks: SurfaceTweaks,
-    ) -> SurfaceResult {
-        self.run_selected_from_fuelbed::<0>(cell, fuelbed, tweaks)
-    }
-
-    /// Evaluate only the stages consumed by the native caller.
-    pub(crate) fn run_selected_from_fuelbed<const FINISH: u8>(
-        &self,
-        cell: &SurfaceCell,
-        fuelbed: &FuelbedIntermediates,
-        tweaks: SurfaceTweaks,
-    ) -> SurfaceResult {
-        self.run_available_from_fuelbed::<FINISH>(cell, fuelbed, tweaks)
-    }
     /// Evaluate the availability-aware model contract with cached physical fuel data.
     pub(crate) fn run_available_cell(
         &self,
@@ -146,6 +117,55 @@ impl SurfacePlan {
             fuel.wind_terms().as_ref(),
         )
     }
+
+    /// Resume an availability-aware run from supplied fuelbed state.
+    pub(crate) fn run_available_from_fuelbed<const FINISH: u8>(
+        &self,
+        cell: &SurfaceCell,
+        fuelbed: &FuelbedIntermediates,
+        tweaks: SurfaceTweaks,
+    ) -> SurfaceResult {
+        let reaction = tweaks
+            .reaction_intensity
+            .unwrap_or_else(|| surface::calculate_reaction_intensity_available(fuelbed));
+        run_selected_stages::<FINISH, true>(
+            reaction,
+            0.9 * reaction,
+            fuelbed,
+            cell,
+            &self.options,
+            tweaks,
+            None,
+        )
+    }
+
+    /// Evaluate a cell with explicit stage overrides and no per-cell ownership.
+    pub fn run_cell(
+        &self,
+        cell: &SurfaceCell,
+        fuel: &PreparedFuel,
+        tweaks: SurfaceTweaks,
+    ) -> SurfaceResult {
+        self.run_available_cell(cell, fuel, tweaks)
+    }
+    /// Resume from supplied fuelbed state without rebuilding or replacing it.
+    pub fn run_from_fuelbed(
+        &self,
+        cell: &SurfaceCell,
+        fuelbed: &FuelbedIntermediates,
+        tweaks: SurfaceTweaks,
+    ) -> SurfaceResult {
+        self.run_selected_from_fuelbed::<0>(cell, fuelbed, tweaks)
+    }
+    /// Evaluate only the stages consumed by the native caller.
+    pub(crate) fn run_selected_from_fuelbed<const FINISH: u8>(
+        &self,
+        cell: &SurfaceCell,
+        fuelbed: &FuelbedIntermediates,
+        tweaks: SurfaceTweaks,
+    ) -> SurfaceResult {
+        self.run_available_from_fuelbed::<FINISH>(cell, fuelbed, tweaks)
+    }
     /// Reuse an explicit wind context under the selected reaction and availability policy.
     pub(crate) fn run_with_wind<const FINISH: u8, const STRICT: bool>(
         &self,
@@ -169,26 +189,6 @@ impl SurfacePlan {
             &self.options,
             tweaks,
             wind,
-        )
-    }
-    /// Resume an availability-aware run from supplied fuelbed state.
-    pub(crate) fn run_available_from_fuelbed<const FINISH: u8>(
-        &self,
-        cell: &SurfaceCell,
-        fuelbed: &FuelbedIntermediates,
-        tweaks: SurfaceTweaks,
-    ) -> SurfaceResult {
-        let reaction = tweaks
-            .reaction_intensity
-            .unwrap_or_else(|| surface::calculate_reaction_intensity_available(fuelbed));
-        run_selected_stages::<FINISH, true>(
-            reaction,
-            0.9 * reaction,
-            fuelbed,
-            cell,
-            &self.options,
-            tweaks,
-            None,
         )
     }
 }

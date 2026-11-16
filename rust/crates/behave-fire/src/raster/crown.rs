@@ -13,15 +13,30 @@ pub struct CrownRaster<'a> {
 }
 
 impl<'a> CrownRaster<'a> {
+    fn run_range(
+        &self,
+        range: Range<usize>,
+        shape: GridShape,
+        plan: &CrownPlan,
+        fuels: &PreparedFuels,
+        tweaks: &CrownTweakColumns<'_>,
+        threads: usize,
+    ) -> Result<CrownRasterOutput, ParallelError<BehaveError>> {
+        tweaks.validate(&self.shape).map_err(ParallelError::Work)?;
+        let start = range.start;
+        let mut output = CrownRasterOutput::run_with(shape, threads, |offset| {
+            Ok::<_, BehaveError>(
+                self.evaluate_cell(start + offset, plan, fuels, tweaks.cell(start + offset))
+                    .expect("validated raster index"),
+            )
+        })?;
+        output.validity = validity(self.inputs.validity, range)?;
+        Ok(output)
+    }
+
     /// Borrow the validated inputs when creating an independently owned session.
     pub fn columns(&self) -> &CrownColumns<'a> {
         &self.inputs
-    }
-
-    /// Validate all column lengths before any native calculation or worker launch.
-    pub fn new(shape: GridShape, inputs: CrownColumns<'a>) -> Result<Self, BehaveError> {
-        inputs.validate(&shape)?;
-        Ok(Self { shape, inputs })
     }
 
     /// Evaluate one checked cell into caller-managed output storage.
@@ -55,17 +70,10 @@ impl<'a> CrownRaster<'a> {
     pub fn input_cell(&self, index: usize) -> Option<CrownCell> {
         (index < self.shape.len() && self.inputs.valid(index)).then(|| self.inputs.cell(index))
     }
-    /// Read independent supplied Surface quantities at a validated cell.
-    pub(crate) fn supplied_surface(
-        &self,
-        index: usize,
-    ) -> Option<crate::crown::SurfaceFireInputs<f64>> {
-        (index < self.shape.len() && self.inputs.valid(index)).then(|| self.inputs.surface(index))
-    }
-
-    /// Borrow the checked logical dimensions.
-    pub fn shape(&self) -> &GridShape {
-        &self.shape
+    /// Validate all column lengths before any native calculation or worker launch.
+    pub fn new(shape: GridShape, inputs: CrownColumns<'a>) -> Result<Self, BehaveError> {
+        inputs.validate(&shape)?;
+        Ok(Self { shape, inputs })
     }
 
     /// Compute a raster using independent Surface fields and Crown override columns.
@@ -99,24 +107,16 @@ impl<'a> CrownRaster<'a> {
         self.run_range(range, shape, plan, fuels, tweaks, threads)
     }
 
-    fn run_range(
+    /// Borrow the checked logical dimensions.
+    pub fn shape(&self) -> &GridShape {
+        &self.shape
+    }
+
+    /// Read independent supplied Surface quantities at a validated cell.
+    pub(crate) fn supplied_surface(
         &self,
-        range: Range<usize>,
-        shape: GridShape,
-        plan: &CrownPlan,
-        fuels: &PreparedFuels,
-        tweaks: &CrownTweakColumns<'_>,
-        threads: usize,
-    ) -> Result<CrownRasterOutput, ParallelError<BehaveError>> {
-        tweaks.validate(&self.shape).map_err(ParallelError::Work)?;
-        let start = range.start;
-        let mut output = CrownRasterOutput::run_with(shape, threads, |offset| {
-            Ok::<_, BehaveError>(
-                self.evaluate_cell(start + offset, plan, fuels, tweaks.cell(start + offset))
-                    .expect("validated raster index"),
-            )
-        })?;
-        output.validity = validity(self.inputs.validity, range)?;
-        Ok(output)
+        index: usize,
+    ) -> Option<crate::crown::SurfaceFireInputs<f64>> {
+        (index < self.shape.len() && self.inputs.valid(index)).then(|| self.inputs.surface(index))
     }
 }

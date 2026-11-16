@@ -33,6 +33,44 @@ pub(crate) fn checked_shape(shape: Vec<usize>) -> PyResult<GridShape> {
     GridShape::new(shape).map_err(|e| PyValueError::new_err(e.to_string()))
 }
 impl<'a> ReadyGroup<'a> {
+    pub(crate) fn execute(&self, threads: usize) -> Result<ModelBatch, String> {
+        let valid = |index| {
+            self.validity
+                .map_or(true, |v| *v.get(index).expect("validated validity"))
+        };
+        match &self.program {
+            Program::Crown(program) => CrownBatch::run_with_request_observed(
+                self.shape.clone(),
+                &self.request,
+                threads,
+                |i| {
+                    Ok::<_, Infallible>(if valid(i) {
+                        Observer.observe(RunPhase::Kernel, || program.evaluate(i))
+                    } else {
+                        program.missing()
+                    })
+                },
+                &Observer,
+            )
+            .map(ModelBatch::Crown)
+            .map_err(|e| e.to_string()),
+            Program::Surface(program) => SurfaceBatch::run_with_request_observed(
+                self.shape.clone(),
+                &self.request,
+                threads,
+                |i| {
+                    Ok::<_, Infallible>(if valid(i) {
+                        Observer.observe(RunPhase::Kernel, || program.evaluate(i))
+                    } else {
+                        program.missing()
+                    })
+                },
+                &Observer,
+            )
+            .map(ModelBatch::Surface)
+            .map_err(|e| e.to_string()),
+        }
+    }
     pub(crate) fn new(
         kind: &str,
         names: &[String],
@@ -92,44 +130,6 @@ impl<'a> ReadyGroup<'a> {
             program,
             validity,
         })
-    }
-    pub(crate) fn execute(&self, threads: usize) -> Result<ModelBatch, String> {
-        let valid = |index| {
-            self.validity
-                .map_or(true, |v| *v.get(index).expect("validated validity"))
-        };
-        match &self.program {
-            Program::Crown(program) => CrownBatch::run_with_request_observed(
-                self.shape.clone(),
-                &self.request,
-                threads,
-                |i| {
-                    Ok::<_, Infallible>(if valid(i) {
-                        Observer.observe(RunPhase::Kernel, || program.evaluate(i))
-                    } else {
-                        program.missing()
-                    })
-                },
-                &Observer,
-            )
-            .map(ModelBatch::Crown)
-            .map_err(|e| e.to_string()),
-            Program::Surface(program) => SurfaceBatch::run_with_request_observed(
-                self.shape.clone(),
-                &self.request,
-                threads,
-                |i| {
-                    Ok::<_, Infallible>(if valid(i) {
-                        Observer.observe(RunPhase::Kernel, || program.evaluate(i))
-                    } else {
-                        program.missing()
-                    })
-                },
-                &Observer,
-            )
-            .map(ModelBatch::Surface)
-            .map_err(|e| e.to_string()),
-        }
     }
 }
 

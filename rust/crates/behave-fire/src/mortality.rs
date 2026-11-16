@@ -49,17 +49,23 @@ pub fn build_mortality_lookup(
     coefficients
 }
 
-/// Return one diagnostic per uncovered species record, preserving record order.
-pub fn missing_coefficient_equations(table: &SpeciesMasterTable) -> Vec<(&str, i32)> {
-    table
-        .records
-        .iter()
-        .filter_map(|r| {
-            let eq = r.mortality_equation_number;
-            (eq > 0 && !(1..=20).contains(&eq) && !(100..=109).contains(&eq))
-                .then_some((r.species_code.as_str(), eq))
-        })
-        .collect()
+/// Calculate scorch fractions from their three actual tree and scorch inputs.
+pub fn calculate_crown_scorch_fractions(
+    scorch_height_ft: f64,
+    tree_height_ft: f64,
+    crown_ratio: f64,
+) -> (f64, f64) {
+    let crown_length = crown_ratio * tree_height_ft;
+    let crown_base = tree_height_ft - crown_length;
+    let cls = if crown_length.is_nan() {
+        f64::NAN
+    } else if crown_length > 1e-7 {
+        np_clip((scorch_height_ft - crown_base) / crown_length, 0.0, 1.0)
+    } else {
+        0.0
+    };
+    let cvs = cls.powi(2) * (3.0 - 2.0 * cls);
+    (cls, cvs)
 }
 
 /// Per-cell crown scorch and mortality fractions.
@@ -102,25 +108,6 @@ pub fn calculate_crown_scorch_mortality(
     )
 }
 
-/// Calculate scorch fractions from their three actual tree and scorch inputs.
-pub fn calculate_crown_scorch_fractions(
-    scorch_height_ft: f64,
-    tree_height_ft: f64,
-    crown_ratio: f64,
-) -> (f64, f64) {
-    let crown_length = crown_ratio * tree_height_ft;
-    let crown_base = tree_height_ft - crown_length;
-    let cls = if crown_length.is_nan() {
-        f64::NAN
-    } else if crown_length > 1e-7 {
-        np_clip((scorch_height_ft - crown_base) / crown_length, 0.0, 1.0)
-    } else {
-        0.0
-    };
-    let cvs = cls.powi(2) * (3.0 - 2.0 * cls);
-    (cls, cvs)
-}
-
 /// Calculate mortality from an actual selected coefficient row.
 /// A zero coefficient triple suppresses mortality; equation numbers add no gate.
 pub fn calculate_crown_scorch_mortality_with_coefficients(
@@ -145,6 +132,7 @@ pub fn calculate_crown_scorch_mortality_with_coefficients(
         probability_mortality: np_clip(probability, 0.0, 1.0),
     }
 }
+
 /// Calculate scorch height in feet with the reference near-zero denominator rule.
 pub fn calculate_scorch_height(
     fireline_intensity_btu_ft_s: f64,
@@ -167,4 +155,16 @@ pub fn calculate_scorch_height(
     } else {
         0.0
     }
+}
+/// Return one diagnostic per uncovered species record, preserving record order.
+pub fn missing_coefficient_equations(table: &SpeciesMasterTable) -> Vec<(&str, i32)> {
+    table
+        .records
+        .iter()
+        .filter_map(|r| {
+            let eq = r.mortality_equation_number;
+            (eq > 0 && !(1..=20).contains(&eq) && !(100..=109).contains(&eq))
+                .then_some((r.species_code.as_str(), eq))
+        })
+        .collect()
 }

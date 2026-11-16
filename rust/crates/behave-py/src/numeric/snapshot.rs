@@ -7,6 +7,9 @@ pub(crate) struct PhysicalSnapshot {
     values: Vec<f64>,
 }
 impl PhysicalSnapshot {
+    pub(crate) fn into_values(self) -> Vec<f64> {
+        self.values
+    }
     pub(crate) fn new(shape: GridShape, values: Vec<f64>) -> Result<Self, BoundaryError> {
         shape.validate_len("physical input", values.len())?;
         Ok(Self { shape, values })
@@ -16,9 +19,6 @@ impl PhysicalSnapshot {
     }
     pub(crate) fn values(&self) -> &[f64] {
         &self.values
-    }
-    pub(crate) fn into_values(self) -> Vec<f64> {
-        self.values
     }
 }
 
@@ -42,6 +42,12 @@ pub(crate) struct ControlSnapshot {
     values: ControlValues,
 }
 impl ControlSnapshot {
+    pub(crate) fn flags(&self) -> Option<&[bool]> {
+        match &self.values {
+            ControlValues::Flags(values) => Some(values),
+            _ => None,
+        }
+    }
     pub(crate) fn new(
         role: InputRole,
         shape: GridShape,
@@ -83,12 +89,6 @@ impl ControlSnapshot {
     pub(crate) fn unsigned(&self) -> Option<&[u64]> {
         match &self.values {
             ControlValues::Unsigned(values) => Some(values),
-            _ => None,
-        }
-    }
-    pub(crate) fn flags(&self) -> Option<&[bool]> {
-        match &self.values {
-            ControlValues::Flags(values) => Some(values),
             _ => None,
         }
     }

@@ -1,13 +1,6 @@
 //! Shared field-level fuelbed science for sessions and component dependency groups.
 use super::Field;
 
-fn five<E>(read: &mut impl FnMut(Field) -> Result<f64, E>, start: Field) -> Result<[f64; 5], E> {
-    let mut result = [0.; 5];
-    for (index, value) in result.iter_mut().enumerate() {
-        *value = read(Field::ALL[start as usize + index])?;
-    }
-    Ok(result)
-}
 fn area<E>(
     read: &mut impl FnMut(Field) -> Result<f64, E>,
     dead: bool,
@@ -30,6 +23,13 @@ fn area<E>(
     )?;
     let (weights, total) = crate::surface::particle_area_weights::<true>(&load, &savr);
     Ok((total, weights))
+}
+fn five<E>(read: &mut impl FnMut(Field) -> Result<f64, E>, start: Field) -> Result<[f64; 5], E> {
+    let mut result = [0.; 5];
+    for (index, value) in result.iter_mut().enumerate() {
+        *value = read(Field::ALL[start as usize + index])?;
+    }
+    Ok(result)
 }
 
 /// Evaluate one physical fuelbed field from actual input or injected dependency values.

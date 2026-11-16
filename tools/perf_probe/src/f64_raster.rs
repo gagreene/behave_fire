@@ -13,20 +13,6 @@ use behave_fire::raster::{
 use behave_fire::{GridShape, PerCell};
 use std::io::Write;
 
-pub(super) fn supplied(case: &Case<'_>, typed: bool, missing: bool) -> SurfaceFireInputs<f64> {
-    if !typed {
-        return case.supplied;
-    }
-    let mut result = case.typed;
-    if missing && case.missing_ros {
-        result.surface_ros = f64::NAN;
-    }
-    if missing && case.missing_hpua {
-        result.surface_hpua = f64::NAN;
-    }
-    result
-}
-
 // These expected NoData overlays follow the reviewed truth table, independently
 // of the new engine's availability implementation. Finite values use old scalar
 // f64 science on the actual widened storage values, never the new raster result.
@@ -282,4 +268,18 @@ pub(super) fn run(
             |output| validate(args, cases, fuels, output),
         )
     }
+}
+
+pub(super) fn supplied(case: &Case<'_>, typed: bool, missing: bool) -> SurfaceFireInputs<f64> {
+    if !typed {
+        return case.supplied;
+    }
+    let mut result = case.typed;
+    if missing && case.missing_ros {
+        result.surface_ros = f64::NAN;
+    }
+    if missing && case.missing_hpua {
+        result.surface_hpua = f64::NAN;
+    }
+    result
 }
