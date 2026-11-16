@@ -1,5 +1,27 @@
 use behave_fire::{map_chunks, ParallelError};
 use std::sync::atomic::{AtomicUsize, Ordering};
+// Numerical fixture comparison only; production export retains typed columns.
+fn comparison_columns(
+    columns: Vec<(&'static str, behave_fire::output::ColumnValues)>,
+) -> Vec<(&'static str, Vec<f64>)> {
+    use behave_fire::output::ColumnValues;
+    columns
+        .into_iter()
+        .map(|(name, values)| {
+            (
+                name,
+                match values {
+                    ColumnValues::Float64(values) => values,
+                    ColumnValues::Int32(values) => values.into_iter().map(f64::from).collect(),
+                    ColumnValues::Bool(values) => values
+                        .into_iter()
+                        .map(|value| f64::from(u8::from(value)))
+                        .collect(),
+                },
+            )
+        })
+        .collect()
+}
 #[test]
 fn joins_all_workers_before_returning_an_error() {
     let finished = AtomicUsize::new(0);
@@ -79,6 +101,7 @@ fn surface_batches_match_scalar_cells_bit_for_bit() {
         }
     }
 }
+
 #[test]
 fn crown_batches_match_scalar_and_columns_transfer_without_copying() {
     use behave_fire::batch::{CrownBatch, SurfaceBatch};
@@ -169,7 +192,6 @@ fn crown_batches_match_scalar_and_columns_transfer_without_copying() {
         .iter()
         .all(|(_, values)| values.is_empty()));
 }
-
 #[test]
 fn requested_workers_execute_on_distinct_native_threads() {
     use std::sync::{Barrier, Mutex};
@@ -193,6 +215,7 @@ fn allocation_failures_are_returned_before_work_starts() {
     assert!(matches!(result, Err(ParallelError::Allocation(_))));
     assert_eq!(calls.load(Ordering::SeqCst), 0);
 }
+
 #[test]
 fn standalone_batch_validation_retains_structured_core_errors() {
     use behave_fire::{engine::SurfaceCell, BehaveError, GridShape, PerCell};
@@ -206,27 +229,4 @@ fn standalone_batch_validation_retains_structured_core_errors() {
             ..
         })
     ));
-}
-
-// Numerical fixture comparison only; production export retains typed columns.
-fn comparison_columns(
-    columns: Vec<(&'static str, behave_fire::output::ColumnValues)>,
-) -> Vec<(&'static str, Vec<f64>)> {
-    use behave_fire::output::ColumnValues;
-    columns
-        .into_iter()
-        .map(|(name, values)| {
-            (
-                name,
-                match values {
-                    ColumnValues::Float64(values) => values,
-                    ColumnValues::Int32(values) => values.into_iter().map(f64::from).collect(),
-                    ColumnValues::Bool(values) => values
-                        .into_iter()
-                        .map(|value| f64::from(u8::from(value)))
-                        .collect(),
-                },
-            )
-        })
-        .collect()
 }
