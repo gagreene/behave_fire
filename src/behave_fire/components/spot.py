@@ -20,6 +20,51 @@ import numpy as np
 from typing import Union
 
 
+def calculate_spotting_from_burning_pile(
+        flame_height_ft: Union[float, np.ndarray],
+        wind_mph: Union[float, np.ndarray],
+        cover_height_ft: Union[float, np.ndarray]
+) -> np.ndarray:
+    """
+    Flat-terrain spotting distance from a burning pile (Albini 1979).
+
+    :param flame_height_ft: Flame height of the pile (ft) (*S) or scalar.
+    :param wind_mph: 20-ft open wind speed (mph) (*S) or scalar.
+    :param cover_height_ft: Vegetation/cover height downwind (ft) (*S) or scalar.
+    :return: (*S) ndarray — spotting distance (ft). Returns 0.0 where
+        wind speed or flame height are ≤ 0.
+    """
+    fh = np.asarray(flame_height_ft, dtype=float)
+    ws = np.asarray(wind_mph,        dtype=float)
+    ch = np.asarray(cover_height_ft, dtype=float)
+
+    active  = (ws > 1e-7) & (fh > 1e-7)
+    safe_fh = np.where(fh > 1e-7, fh, 1.0)
+    safe_ws = np.where(ws > 1e-7, ws, 1.0)
+
+    # Firebrand height from burning pile
+    fb_ht = np.where(active, 1.055 * np.sqrt(safe_fh * safe_ws), 0.0)
+
+    # Critical cover height must be at least the effective cover height
+    safe_fb    = np.where(fb_ht > 1e-7, fb_ht, 1.0)
+    crit_cover = np.where(
+        fb_ht > 1e-7,
+        np.maximum(ch, 2.2 * (safe_fb ** 0.337) - 4.0),
+        0.0
+    )
+    safe_cc = np.where(crit_cover > 1e-7, crit_cover, 1.0)
+    drift   = 0.000278 * ws * (safe_fb ** 0.643)
+    dist_mi = np.where(
+        crit_cover > 1e-7,
+        0.000718 * ws * np.sqrt(safe_cc) *
+        (0.362 + np.sqrt(safe_fb / safe_cc) / 2.0 * np.log(safe_fb / safe_cc))
+        + drift,
+        0.0
+    )
+    # Convert miles to feet
+    return dist_mi * 5280.0
+
+
 def calculate_spotting_from_surface_fire(
         flame_length_ft: Union[float, np.ndarray],
         wind_mph: Union[float, np.ndarray],
@@ -47,51 +92,6 @@ def calculate_spotting_from_surface_fire(
     byrams = (safe_fl / 0.45) ** (1.0 / 0.46)
     val    = f * byrams
     fb_ht  = np.where(active & (val > 1e-7), 1.055 * np.sqrt(val), 0.0)
-
-    # Critical cover height must be at least the effective cover height
-    safe_fb    = np.where(fb_ht > 1e-7, fb_ht, 1.0)
-    crit_cover = np.where(
-        fb_ht > 1e-7,
-        np.maximum(ch, 2.2 * (safe_fb ** 0.337) - 4.0),
-        0.0
-    )
-    safe_cc = np.where(crit_cover > 1e-7, crit_cover, 1.0)
-    drift   = 0.000278 * ws * (safe_fb ** 0.643)
-    dist_mi = np.where(
-        crit_cover > 1e-7,
-        0.000718 * ws * np.sqrt(safe_cc) *
-        (0.362 + np.sqrt(safe_fb / safe_cc) / 2.0 * np.log(safe_fb / safe_cc))
-        + drift,
-        0.0
-    )
-    # Convert miles to feet
-    return dist_mi * 5280.0
-
-
-def calculate_spotting_from_burning_pile(
-        flame_height_ft: Union[float, np.ndarray],
-        wind_mph: Union[float, np.ndarray],
-        cover_height_ft: Union[float, np.ndarray]
-) -> np.ndarray:
-    """
-    Flat-terrain spotting distance from a burning pile (Albini 1979).
-
-    :param flame_height_ft: Flame height of the pile (ft) (*S) or scalar.
-    :param wind_mph: 20-ft open wind speed (mph) (*S) or scalar.
-    :param cover_height_ft: Vegetation/cover height downwind (ft) (*S) or scalar.
-    :return: (*S) ndarray — spotting distance (ft). Returns 0.0 where
-        wind speed or flame height are ≤ 0.
-    """
-    fh = np.asarray(flame_height_ft, dtype=float)
-    ws = np.asarray(wind_mph,        dtype=float)
-    ch = np.asarray(cover_height_ft, dtype=float)
-
-    active  = (ws > 1e-7) & (fh > 1e-7)
-    safe_fh = np.where(fh > 1e-7, fh, 1.0)
-    safe_ws = np.where(ws > 1e-7, ws, 1.0)
-
-    # Firebrand height from burning pile
-    fb_ht = np.where(active, 1.055 * np.sqrt(safe_fh * safe_ws), 0.0)
 
     # Critical cover height must be at least the effective cover height
     safe_fb    = np.where(fb_ht > 1e-7, fb_ht, 1.0)

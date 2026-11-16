@@ -249,16 +249,6 @@ class AreaUnits:
         SquareKilometers = 5
 
     @staticmethod
-    def toBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
-        """Execute the explicit native operation.
-
-        :param value: Input matching the public API.
-        :param units: Input matching the public API.
-        :return: Calculation result or updated receiver state.
-        """
-        return _call('units.Area.to_base', locals())
-
-    @staticmethod
     def fromBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
         """Execute the explicit native operation.
 
@@ -268,12 +258,6 @@ class AreaUnits:
         """
         return _call('units.Area.from_base', locals())
 
-class BasalAreaUnits:
-
-    class BasalAreaUnitsEnum:
-        SquareFeetPerAcre = 0
-        SquareMetersPerHectare = 1
-
     @staticmethod
     def toBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
         """Execute the explicit native operation.
@@ -282,7 +266,13 @@ class BasalAreaUnits:
         :param units: Input matching the public API.
         :return: Calculation result or updated receiver state.
         """
-        return _call('units.BasalArea.to_base', locals())
+        return _call('units.Area.to_base', locals())
+
+class BasalAreaUnits:
+
+    class BasalAreaUnitsEnum:
+        SquareFeetPerAcre = 0
+        SquareMetersPerHectare = 1
 
     @staticmethod
     def fromBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
@@ -293,6 +283,16 @@ class BasalAreaUnits:
         :return: Calculation result or updated receiver state.
         """
         return _call('units.BasalArea.from_base', locals())
+
+    @staticmethod
+    def toBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+        """Execute the explicit native operation.
+
+        :param value: Input matching the public API.
+        :param units: Input matching the public API.
+        :return: Calculation result or updated receiver state.
+        """
+        return _call('units.BasalArea.to_base', locals())
 
 class LengthUnits:
 
@@ -307,16 +307,6 @@ class LengthUnits:
         Kilometers = 7
 
     @staticmethod
-    def toBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
-        """Execute the explicit native operation.
-
-        :param value: Input matching the public API.
-        :param units: Input matching the public API.
-        :return: Calculation result or updated receiver state.
-        """
-        return _call('units.Length.to_base', locals())
-
-    @staticmethod
     def fromBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
         """Execute the explicit native operation.
 
@@ -325,6 +315,16 @@ class LengthUnits:
         :return: Calculation result or updated receiver state.
         """
         return _call('units.Length.from_base', locals())
+
+    @staticmethod
+    def toBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+        """Execute the explicit native operation.
+
+        :param value: Input matching the public API.
+        :param units: Input matching the public API.
+        :return: Calculation result or updated receiver state.
+        """
+        return _call('units.Length.to_base', locals())
 
 class LoadingUnits:
 
@@ -335,16 +335,6 @@ class LoadingUnits:
         KilogramsPerSquareMeter = 3
 
     @staticmethod
-    def toBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
-        """Execute the explicit native operation.
-
-        :param value: Input matching the public API.
-        :param units: Input matching the public API.
-        :return: Calculation result or updated receiver state.
-        """
-        return _call('units.Loading.to_base', locals())
-
-    @staticmethod
     def fromBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
         """Execute the explicit native operation.
 
@@ -353,6 +343,16 @@ class LoadingUnits:
         :return: Calculation result or updated receiver state.
         """
         return _call('units.Loading.from_base', locals())
+
+    @staticmethod
+    def toBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+        """Execute the explicit native operation.
+
+        :param value: Input matching the public API.
+        :param units: Input matching the public API.
+        :return: Calculation result or updated receiver state.
+        """
+        return _call('units.Loading.to_base', locals())
 
 class PressureUnits:
 
@@ -368,16 +368,6 @@ class PressureUnits:
         PoundPerSquareInch = 8
 
     @staticmethod
-    def toBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
-        """Execute the explicit native operation.
-
-        :param value: Input matching the public API.
-        :param units: Input matching the public API.
-        :return: Calculation result or updated receiver state.
-        """
-        return _call('units.Pressure.to_base', locals())
-
-    @staticmethod
     def fromBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
         """Execute the explicit native operation.
 
@@ -386,6 +376,16 @@ class PressureUnits:
         :return: Calculation result or updated receiver state.
         """
         return _call('units.Pressure.from_base', locals())
+
+    @staticmethod
+    def toBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+        """Execute the explicit native operation.
+
+        :param value: Input matching the public API.
+        :param units: Input matching the public API.
+        :return: Calculation result or updated receiver state.
+        """
+        return _call('units.Pressure.to_base', locals())
 
 class SurfaceAreaToVolumeUnits:
 
@@ -396,16 +396,6 @@ class SurfaceAreaToVolumeUnits:
         SquareCentimetersOverCubicCentimeters = 3
 
     @staticmethod
-    def toBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
-        """Execute the explicit native operation.
-
-        :param value: Input matching the public API.
-        :param units: Input matching the public API.
-        :return: Calculation result or updated receiver state.
-        """
-        return _call('units.SurfaceAreaToVolume.to_base', locals())
-
-    @staticmethod
     def fromBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
         """Execute the explicit native operation.
 
@@ -414,6 +404,16 @@ class SurfaceAreaToVolumeUnits:
         :return: Calculation result or updated receiver state.
         """
         return _call('units.SurfaceAreaToVolume.from_base', locals())
+
+    @staticmethod
+    def toBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+        """Execute the explicit native operation.
+
+        :param value: Input matching the public API.
+        :param units: Input matching the public API.
+        :return: Calculation result or updated receiver state.
+        """
+        return _call('units.SurfaceAreaToVolume.to_base', locals())
 
 class SpeedUnits:
 
@@ -427,16 +427,6 @@ class SpeedUnits:
         KilometersPerHour = 6
 
     @staticmethod
-    def toBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
-        """Execute the explicit native operation.
-
-        :param value: Input matching the public API.
-        :param units: Input matching the public API.
-        :return: Calculation result or updated receiver state.
-        """
-        return _call('units.Speed.to_base', locals())
-
-    @staticmethod
     def fromBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
         """Execute the explicit native operation.
 
@@ -446,12 +436,6 @@ class SpeedUnits:
         """
         return _call('units.Speed.from_base', locals())
 
-class FractionUnits:
-
-    class FractionUnitsEnum:
-        Fraction = 0
-        Percent = 1
-
     @staticmethod
     def toBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
         """Execute the explicit native operation.
@@ -460,7 +444,13 @@ class FractionUnits:
         :param units: Input matching the public API.
         :return: Calculation result or updated receiver state.
         """
-        return _call('units.Fraction.to_base', locals())
+        return _call('units.Speed.to_base', locals())
+
+class FractionUnits:
+
+    class FractionUnitsEnum:
+        Fraction = 0
+        Percent = 1
 
     @staticmethod
     def fromBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
@@ -472,12 +462,6 @@ class FractionUnits:
         """
         return _call('units.Fraction.from_base', locals())
 
-class SlopeUnits:
-
-    class SlopeUnitsEnum:
-        Degrees = 0
-        Percent = 1
-
     @staticmethod
     def toBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
         """Execute the explicit native operation.
@@ -486,7 +470,13 @@ class SlopeUnits:
         :param units: Input matching the public API.
         :return: Calculation result or updated receiver state.
         """
-        return _call('units.Slope.to_base', locals())
+        return _call('units.Fraction.to_base', locals())
+
+class SlopeUnits:
+
+    class SlopeUnitsEnum:
+        Degrees = 0
+        Percent = 1
 
     @staticmethod
     def fromBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
@@ -498,12 +488,6 @@ class SlopeUnits:
         """
         return _call('units.Slope.from_base', locals())
 
-class DensityUnits:
-
-    class DensityUnitsEnum:
-        PoundsPerCubicFoot = 0
-        KilogramsPerCubicMeter = 1
-
     @staticmethod
     def toBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
         """Execute the explicit native operation.
@@ -512,7 +496,13 @@ class DensityUnits:
         :param units: Input matching the public API.
         :return: Calculation result or updated receiver state.
         """
-        return _call('units.Density.to_base', locals())
+        return _call('units.Slope.to_base', locals())
+
+class DensityUnits:
+
+    class DensityUnitsEnum:
+        PoundsPerCubicFoot = 0
+        KilogramsPerCubicMeter = 1
 
     @staticmethod
     def fromBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
@@ -524,12 +514,6 @@ class DensityUnits:
         """
         return _call('units.Density.from_base', locals())
 
-class HeatOfCombustionUnits:
-
-    class HeatOfCombustionUnitsEnum:
-        BtusPerPound = 0
-        KilojoulesPerKilogram = 1
-
     @staticmethod
     def toBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
         """Execute the explicit native operation.
@@ -538,7 +522,13 @@ class HeatOfCombustionUnits:
         :param units: Input matching the public API.
         :return: Calculation result or updated receiver state.
         """
-        return _call('units.HeatOfCombustion.to_base', locals())
+        return _call('units.Density.to_base', locals())
+
+class HeatOfCombustionUnits:
+
+    class HeatOfCombustionUnitsEnum:
+        BtusPerPound = 0
+        KilojoulesPerKilogram = 1
 
     @staticmethod
     def fromBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
@@ -550,12 +540,6 @@ class HeatOfCombustionUnits:
         """
         return _call('units.HeatOfCombustion.from_base', locals())
 
-class HeatSinkUnits:
-
-    class HeatSinkUnitsEnum:
-        BtusPerCubicFoot = 0
-        KilojoulesPerCubicMeter = 1
-
     @staticmethod
     def toBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
         """Execute the explicit native operation.
@@ -564,7 +548,13 @@ class HeatSinkUnits:
         :param units: Input matching the public API.
         :return: Calculation result or updated receiver state.
         """
-        return _call('units.HeatSink.to_base', locals())
+        return _call('units.HeatOfCombustion.to_base', locals())
+
+class HeatSinkUnits:
+
+    class HeatSinkUnitsEnum:
+        BtusPerCubicFoot = 0
+        KilojoulesPerCubicMeter = 1
 
     @staticmethod
     def fromBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
@@ -576,13 +566,6 @@ class HeatSinkUnits:
         """
         return _call('units.HeatSink.from_base', locals())
 
-class HeatPerUnitAreaUnits:
-
-    class HeatPerUnitAreaUnitsEnum:
-        BtusPerSquareFoot = 0
-        KilojoulesPerSquareMeter = 1
-        KilowattSecondsPerSquareMeter = 2
-
     @staticmethod
     def toBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
         """Execute the explicit native operation.
@@ -591,7 +574,14 @@ class HeatPerUnitAreaUnits:
         :param units: Input matching the public API.
         :return: Calculation result or updated receiver state.
         """
-        return _call('units.HeatPerUnitArea.to_base', locals())
+        return _call('units.HeatSink.to_base', locals())
+
+class HeatPerUnitAreaUnits:
+
+    class HeatPerUnitAreaUnitsEnum:
+        BtusPerSquareFoot = 0
+        KilojoulesPerSquareMeter = 1
+        KilowattSecondsPerSquareMeter = 2
 
     @staticmethod
     def fromBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
@@ -603,15 +593,6 @@ class HeatPerUnitAreaUnits:
         """
         return _call('units.HeatPerUnitArea.from_base', locals())
 
-class HeatSourceAndReactionIntensityUnits:
-
-    class HeatSourceAndReactionIntensityUnitsEnum:
-        BtusPerSquareFootPerMinute = 0
-        BtusPerSquareFootPerSecond = 1
-        KilojoulesPerSquareMeterPerSecond = 2
-        KilojoulesPerSquareMeterPerMinute = 3
-        KilowattsPerSquareMeter = 4
-
     @staticmethod
     def toBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
         """Execute the explicit native operation.
@@ -620,7 +601,16 @@ class HeatSourceAndReactionIntensityUnits:
         :param units: Input matching the public API.
         :return: Calculation result or updated receiver state.
         """
-        return _call('units.HeatSourceAndReactionIntensity.to_base', locals())
+        return _call('units.HeatPerUnitArea.to_base', locals())
+
+class HeatSourceAndReactionIntensityUnits:
+
+    class HeatSourceAndReactionIntensityUnitsEnum:
+        BtusPerSquareFootPerMinute = 0
+        BtusPerSquareFootPerSecond = 1
+        KilojoulesPerSquareMeterPerSecond = 2
+        KilojoulesPerSquareMeterPerMinute = 3
+        KilowattsPerSquareMeter = 4
 
     @staticmethod
     def fromBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
@@ -632,15 +622,6 @@ class HeatSourceAndReactionIntensityUnits:
         """
         return _call('units.HeatSourceAndReactionIntensity.from_base', locals())
 
-class FirelineIntensityUnits:
-
-    class FirelineIntensityUnitsEnum:
-        BtusPerFootPerSecond = 0
-        BtusPerFootPerMinute = 1
-        KilojoulesPerMeterPerSecond = 2
-        KilojoulesPerMeterPerMinute = 3
-        KilowattsPerMeter = 4
-
     @staticmethod
     def toBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
         """Execute the explicit native operation.
@@ -649,7 +630,16 @@ class FirelineIntensityUnits:
         :param units: Input matching the public API.
         :return: Calculation result or updated receiver state.
         """
-        return _call('units.FirelineIntensity.to_base', locals())
+        return _call('units.HeatSourceAndReactionIntensity.to_base', locals())
+
+class FirelineIntensityUnits:
+
+    class FirelineIntensityUnitsEnum:
+        BtusPerFootPerSecond = 0
+        BtusPerFootPerMinute = 1
+        KilojoulesPerMeterPerSecond = 2
+        KilojoulesPerMeterPerMinute = 3
+        KilowattsPerMeter = 4
 
     @staticmethod
     def fromBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
@@ -661,13 +651,6 @@ class FirelineIntensityUnits:
         """
         return _call('units.FirelineIntensity.from_base', locals())
 
-class TemperatureUnits:
-
-    class TemperatureUnitsEnum:
-        Fahrenheit = 0
-        Celsius = 1
-        Kelvin = 2
-
     @staticmethod
     def toBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
         """Execute the explicit native operation.
@@ -676,7 +659,14 @@ class TemperatureUnits:
         :param units: Input matching the public API.
         :return: Calculation result or updated receiver state.
         """
-        return _call('units.Temperature.to_base', locals())
+        return _call('units.FirelineIntensity.to_base', locals())
+
+class TemperatureUnits:
+
+    class TemperatureUnitsEnum:
+        Fahrenheit = 0
+        Celsius = 1
+        Kelvin = 2
 
     @staticmethod
     def fromBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
@@ -688,6 +678,16 @@ class TemperatureUnits:
         """
         return _call('units.Temperature.from_base', locals())
 
+    @staticmethod
+    def toBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+        """Execute the explicit native operation.
+
+        :param value: Input matching the public API.
+        :param units: Input matching the public API.
+        :return: Calculation result or updated receiver state.
+        """
+        return _call('units.Temperature.to_base', locals())
+
 class TimeUnits:
 
     class TimeUnitsEnum:
@@ -698,16 +698,6 @@ class TimeUnits:
         Years = 4
 
     @staticmethod
-    def toBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
-        """Execute the explicit native operation.
-
-        :param value: Input matching the public API.
-        :param units: Input matching the public API.
-        :return: Calculation result or updated receiver state.
-        """
-        return _call('units.Time.to_base', locals())
-
-    @staticmethod
     def fromBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
         """Execute the explicit native operation.
 
@@ -716,3 +706,13 @@ class TimeUnits:
         :return: Calculation result or updated receiver state.
         """
         return _call('units.Time.from_base', locals())
+
+    @staticmethod
+    def toBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+        """Execute the explicit native operation.
+
+        :param value: Input matching the public API.
+        :param units: Input matching the public API.
+        :return: Calculation result or updated receiver state.
+        """
+        return _call('units.Time.to_base', locals())

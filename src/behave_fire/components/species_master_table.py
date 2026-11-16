@@ -84,6 +84,10 @@ class SpeciesMasterTableRecord:
         self.equation_type = equation_type
         self.crown_damage_equation_code = crown_damage_equation_code
     
+    def __repr__(self):
+        """Return string representation of the record"""
+        return f"SpeciesMasterTableRecord(code={self.species_code}, name={self.common_name}, type={self.equation_type})"
+    
     def get_gacc_availability(self, gacc):
         """
         Check if species is available in a specific GACC region.
@@ -106,10 +110,6 @@ class SpeciesMasterTableRecord:
             GACC.Southwest: self.southwest,
         }
         return gacc_map.get(gacc, False)
-    
-    def __repr__(self):
-        """Return string representation of the record"""
-        return f"SpeciesMasterTableRecord(code={self.species_code}, name={self.common_name}, type={self.equation_type})"
 
 
 class SpeciesMasterTable:
@@ -119,6 +119,159 @@ class SpeciesMasterTable:
         """Initialize the species master table."""
         self.records = []
         self.initialize_master_table()
+    
+    def add_species_record(self, record):
+        """
+        Add a new species master table record.
+        
+        Args:
+            record: SpeciesMasterTableRecord to add
+        """
+        if isinstance(record, SpeciesMasterTableRecord):
+            self.records.append(record)
+    
+    def contains_species_code(self, species_code):
+        """
+        Check if a species code exists in the table.
+        
+        Args:
+            species_code: Species code to check (case-insensitive)
+            
+        Returns:
+            True if the species code is found, False otherwise
+        """
+        return self.get_species_table_index_from_species_code(species_code) >= 0
+    
+    def get_all_records(self):
+        """
+        Get all species records.
+        
+        Returns:
+            List of all SpeciesMasterTableRecord objects
+        """
+        return self.records
+    
+    def get_number_of_records(self):
+        """
+        Get the total number of species records in the table.
+        
+        Returns:
+            Number of records in the table
+        """
+        return len(self.records)
+    
+    def get_species_record(self, species_code):
+        """
+        Get the first species record matching the given species code.
+        
+        Args:
+            species_code: Species code to search for (case-insensitive)
+            
+        Returns:
+            SpeciesMasterTableRecord if found, None otherwise
+        """
+        index = self.get_species_table_index_from_species_code(species_code)
+        if index >= 0:
+            return self.records[index]
+        return None
+    
+    def get_species_record_at_index(self, index):
+        """
+        Get the species record at the given index.
+        
+        Args:
+            index: Index into the records list
+            
+        Returns:
+            SpeciesMasterTableRecord at the index, or None if index is out of bounds
+        """
+        if 0 <= index < len(self.records):
+            return self.records[index]
+        return None
+    
+    def get_species_record_by_code_and_type(self, species_code, equation_type):
+        """
+        Get a species record matching the given species code and equation type.
+        
+        Args:
+            species_code: Species code to search for (case-insensitive)
+            equation_type: EquationType to match
+            
+        Returns:
+            SpeciesMasterTableRecord if found, None otherwise
+        """
+        index = self.get_species_table_index_from_species_code_and_equation_type(species_code, equation_type)
+        if index >= 0:
+            return self.records[index]
+        return None
+    
+    def get_species_records_for_gacc_region(self, gacc):
+        """
+        Get all species records available in a specific GACC region.
+        
+        Args:
+            gacc: GACC region (enum value)
+            
+        Returns:
+            List of SpeciesMasterTableRecord objects available in the region
+        """
+        return [record for record in self.records if record.get_gacc_availability(gacc)]
+    
+    def get_species_records_for_gacc_region_and_equation_type(self, gacc, equation_type):
+        """
+        Get all species records available in a specific GACC region with a specific equation type.
+        
+        Args:
+            gacc: GACC region (enum value)
+            equation_type: EquationType to match
+            
+        Returns:
+            List of SpeciesMasterTableRecord objects matching the criteria
+        """
+        return [record for record in self.records 
+                if record.get_gacc_availability(gacc) and record.equation_type == equation_type]
+    
+    def get_species_table_index_from_species_code(self, species_code):
+        """
+        Get the table index of a species by species code.
+        
+        Args:
+            species_code: Species code to search for (case-insensitive)
+            
+        Returns:
+            Index of the species in the records list, or -1 if not found
+        """
+        species_code_upper = species_code.upper()
+        
+        for i, record in enumerate(self.records):
+            if record.species_code == "":
+                break
+            if record.species_code.upper() == species_code_upper:
+                return i
+        
+        return -1
+    
+    def get_species_table_index_from_species_code_and_equation_type(self, species_code, equation_type):
+        """
+        Get the table index of a species by species code and equation type.
+        
+        Args:
+            species_code: Species code to search for (case-insensitive)
+            equation_type: EquationType to match
+            
+        Returns:
+            Index of the species in the records list, or -1 if not found
+        """
+        species_code_upper = species_code.upper()
+        
+        for i, record in enumerate(self.records):
+            if record.species_code == "":
+                break
+            if (record.species_code.upper() == species_code_upper and 
+                record.equation_type == equation_type):
+                return i
+        
+        return -1
     
     def initialize_master_table(self):
         """Initialize the master table with all species records from the database."""
@@ -209,103 +362,6 @@ class SpeciesMasterTable:
         )
         self.records.append(record)
     
-    def get_species_record(self, species_code):
-        """
-        Get the first species record matching the given species code.
-        
-        Args:
-            species_code: Species code to search for (case-insensitive)
-            
-        Returns:
-            SpeciesMasterTableRecord if found, None otherwise
-        """
-        index = self.get_species_table_index_from_species_code(species_code)
-        if index >= 0:
-            return self.records[index]
-        return None
-    
-    def get_species_record_by_code_and_type(self, species_code, equation_type):
-        """
-        Get a species record matching the given species code and equation type.
-        
-        Args:
-            species_code: Species code to search for (case-insensitive)
-            equation_type: EquationType to match
-            
-        Returns:
-            SpeciesMasterTableRecord if found, None otherwise
-        """
-        index = self.get_species_table_index_from_species_code_and_equation_type(species_code, equation_type)
-        if index >= 0:
-            return self.records[index]
-        return None
-    
-    def get_species_record_at_index(self, index):
-        """
-        Get the species record at the given index.
-        
-        Args:
-            index: Index into the records list
-            
-        Returns:
-            SpeciesMasterTableRecord at the index, or None if index is out of bounds
-        """
-        if 0 <= index < len(self.records):
-            return self.records[index]
-        return None
-    
-    def get_species_table_index_from_species_code(self, species_code):
-        """
-        Get the table index of a species by species code.
-        
-        Args:
-            species_code: Species code to search for (case-insensitive)
-            
-        Returns:
-            Index of the species in the records list, or -1 if not found
-        """
-        species_code_upper = species_code.upper()
-        
-        for i, record in enumerate(self.records):
-            if record.species_code == "":
-                break
-            if record.species_code.upper() == species_code_upper:
-                return i
-        
-        return -1
-    
-    def get_species_table_index_from_species_code_and_equation_type(self, species_code, equation_type):
-        """
-        Get the table index of a species by species code and equation type.
-        
-        Args:
-            species_code: Species code to search for (case-insensitive)
-            equation_type: EquationType to match
-            
-        Returns:
-            Index of the species in the records list, or -1 if not found
-        """
-        species_code_upper = species_code.upper()
-        
-        for i, record in enumerate(self.records):
-            if record.species_code == "":
-                break
-            if (record.species_code.upper() == species_code_upper and 
-                record.equation_type == equation_type):
-                return i
-        
-        return -1
-    
-    def add_species_record(self, record):
-        """
-        Add a new species master table record.
-        
-        Args:
-            record: SpeciesMasterTableRecord to add
-        """
-        if isinstance(record, SpeciesMasterTableRecord):
-            self.records.append(record)
-    
     def remove_species_record(self, species_code):
         """
         Remove a species master table record by species code.
@@ -321,61 +377,5 @@ class SpeciesMasterTable:
             del self.records[index]
             return True
         return False
-    
-    def get_all_records(self):
-        """
-        Get all species records.
-        
-        Returns:
-            List of all SpeciesMasterTableRecord objects
-        """
-        return self.records
-    
-    def get_species_records_for_gacc_region(self, gacc):
-        """
-        Get all species records available in a specific GACC region.
-        
-        Args:
-            gacc: GACC region (enum value)
-            
-        Returns:
-            List of SpeciesMasterTableRecord objects available in the region
-        """
-        return [record for record in self.records if record.get_gacc_availability(gacc)]
-    
-    def get_species_records_for_gacc_region_and_equation_type(self, gacc, equation_type):
-        """
-        Get all species records available in a specific GACC region with a specific equation type.
-        
-        Args:
-            gacc: GACC region (enum value)
-            equation_type: EquationType to match
-            
-        Returns:
-            List of SpeciesMasterTableRecord objects matching the criteria
-        """
-        return [record for record in self.records 
-                if record.get_gacc_availability(gacc) and record.equation_type == equation_type]
-    
-    def get_number_of_records(self):
-        """
-        Get the total number of species records in the table.
-        
-        Returns:
-            Number of records in the table
-        """
-        return len(self.records)
-    
-    def contains_species_code(self, species_code):
-        """
-        Check if a species code exists in the table.
-        
-        Args:
-            species_code: Species code to check (case-insensitive)
-            
-        Returns:
-            True if the species code is found, False otherwise
-        """
-        return self.get_species_table_index_from_species_code(species_code) >= 0
 
 

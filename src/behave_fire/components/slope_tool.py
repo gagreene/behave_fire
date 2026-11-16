@@ -114,9 +114,11 @@ class SlopeTool:
             # Store as degrees (base unit for SlopeUnits)
             self.slope_from_map_measurements_ = math.atan(slope_in_percent) * 180.0 / math.pi
 
-    def get_number_of_horizontal_distances(self):
-        """Return number of horizontal distance values."""
-        return len(self.horizontal_distances_)
+    def get_centimeters_per_kilometer_at_index(self, index):
+        """Get centimeters per kilometer at index."""
+        if 0 <= index < len(self.centimeters_per_kilometer_):
+            return self.centimeters_per_kilometer_[index]
+        return -1.0
 
     def get_horizontal_distance_at_index(self, index, map_distance_units):
         """
@@ -133,37 +135,37 @@ class SlopeTool:
             return LengthUnits.fromBaseUnits(self.horizontal_distances_[index], map_distance_units)
         return -1.0
 
-    def get_slope_from_map_measurements(self, slope_units):
-        """
-        Get slope from map measurements in requested units.
+    def get_inches_per_mile_at_index(self, index):
+        """Get inches per mile at index."""
+        if 0 <= index < len(self.inches_per_mile_):
+            return self.inches_per_mile_[index]
+        return -1.0
 
-        Args:
-            slope_units: SlopeUnitsEnum
+    def get_kilometers_per_centimeter_at_index(self, index):
+        """Get kilometers per centimeter at index."""
+        if 0 <= index < len(self.kilometers_per_centimeter_):
+            return self.kilometers_per_centimeter_[index]
+        return -1.0
 
-        Returns:
-            Slope in requested units.
-        """
-        return SlopeUnits.fromBaseUnits(self.slope_from_map_measurements_, slope_units)
+    def get_miles_per_inch_at_index(self, index):
+        """Get miles per inch at index."""
+        if 0 <= index < len(self.miles_per_inch_):
+            return self.miles_per_inch_[index]
+        return -1.0
 
-    def get_slope_from_map_measurements_in_percent(self):
-        """Get slope from map measurements in percent."""
-        return SlopeUnits.fromBaseUnits(self.slope_from_map_measurements_, SlopeUnits.SlopeUnitsEnum.Percent)
+    def get_number_of_horizontal_distances(self):
+        """Return number of horizontal distance values."""
+        return len(self.horizontal_distances_)
 
-    def get_slope_from_map_measurements_in_degrees(self):
-        """Get slope from map measurements in degrees."""
-        return SlopeUnits.fromBaseUnits(self.slope_from_map_measurements_, SlopeUnits.SlopeUnitsEnum.Degrees)
+    def get_number_of_representative_fractions(self):
+        """Return number of representative fractions in table."""
+        return len(self.representative_fractions_)
 
-    def get_slope_horizontal_distance_from_map_measurements(self, distance_units):
-        """
-        Get slope horizontal distance from map measurements.
-
-        Args:
-            distance_units: LengthUnitsEnum
-
-        Returns:
-            Horizontal distance in requested units.
-        """
-        return LengthUnits.fromBaseUnits(self.slope_horizontal_distance_, distance_units)
+    def get_representative_fraction_at_index(self, index):
+        """Get representative fraction at index."""
+        if 0 <= index < len(self.representative_fractions_):
+            return self.representative_fractions_[index]
+        return -1
 
     def get_slope_elevation_change_from_map_measurements(self, elevation_units):
         """
@@ -177,38 +179,36 @@ class SlopeTool:
         """
         return LengthUnits.fromBaseUnits(self.slope_elevation_change_, elevation_units)
 
-    def get_number_of_representative_fractions(self):
-        """Return number of representative fractions in table."""
-        return len(self.representative_fractions_)
+    def get_slope_from_map_measurements(self, slope_units):
+        """
+        Get slope from map measurements in requested units.
 
-    def get_representative_fraction_at_index(self, index):
-        """Get representative fraction at index."""
-        if 0 <= index < len(self.representative_fractions_):
-            return self.representative_fractions_[index]
-        return -1
+        Args:
+            slope_units: SlopeUnitsEnum
 
-    def get_inches_per_mile_at_index(self, index):
-        """Get inches per mile at index."""
-        if 0 <= index < len(self.inches_per_mile_):
-            return self.inches_per_mile_[index]
-        return -1.0
+        Returns:
+            Slope in requested units.
+        """
+        return SlopeUnits.fromBaseUnits(self.slope_from_map_measurements_, slope_units)
 
-    def get_miles_per_inch_at_index(self, index):
-        """Get miles per inch at index."""
-        if 0 <= index < len(self.miles_per_inch_):
-            return self.miles_per_inch_[index]
-        return -1.0
+    def get_slope_from_map_measurements_in_degrees(self):
+        """Get slope from map measurements in degrees."""
+        return SlopeUnits.fromBaseUnits(self.slope_from_map_measurements_, SlopeUnits.SlopeUnitsEnum.Degrees)
 
-    def get_centimeters_per_kilometer_at_index(self, index):
-        """Get centimeters per kilometer at index."""
-        if 0 <= index < len(self.centimeters_per_kilometer_):
-            return self.centimeters_per_kilometer_[index]
-        return -1.0
+    def get_slope_from_map_measurements_in_percent(self):
+        """Get slope from map measurements in percent."""
+        return SlopeUnits.fromBaseUnits(self.slope_from_map_measurements_, SlopeUnits.SlopeUnitsEnum.Percent)
 
-    def get_kilometers_per_centimeter_at_index(self, index):
-        """Get kilometers per centimeter at index."""
-        if 0 <= index < len(self.kilometers_per_centimeter_):
-            return self.kilometers_per_centimeter_[index]
-        return -1.0
+    def get_slope_horizontal_distance_from_map_measurements(self, distance_units):
+        """
+        Get slope horizontal distance from map measurements.
+
+        Args:
+            distance_units: LengthUnitsEnum
+
+        Returns:
+            Horizontal distance in requested units.
+        """
+        return LengthUnits.fromBaseUnits(self.slope_horizontal_distance_, distance_units)
 
 
