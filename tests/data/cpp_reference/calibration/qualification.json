@@ -1,5 +1,5 @@
 {
-  "activation_reason": "Reviewed safe non-annotation Python lint cleanup qualified across both compilers and all seven native platforms; numerical inputs, outputs, defaults, and caps unchanged",
+  "activation_reason": "Reviewed annotation syntax migration qualified across both compilers and all seven native platforms; scientific inputs, outputs, defaults, and caps unchanged",
   "artifacts": {
     "tests/data/cpp_reference/surface/cases.jsonl": "266d08d8b82d65d950461c73e70b44c228ad7b54fbe99eb1d14ed8af6add66da",
     "tests/data/cpp_reference/surface/results.jsonl": "ae006838d93bbb9533df74340085110c479315cb8238a8ce488a68fe5e9e1b71",
@@ -7,7 +7,7 @@
     "tests/data/cpp_reference/surface_custom/results.jsonl": "04e96268466338364a350d53ac05b639f1a7758c78911aaee97da389c0f779a2"
   },
   "calibration_complete": true,
-  "ci_run_url": "https://github.com/gagreene/behave_fire/actions/runs/43999450425",
+  "ci_run_url": "https://github.com/gagreene/behave_fire/actions/runs/44014360512",
   "fields": {
     "fireline_intensity_btu_ft_s": {
       "atol": 1e-12,
@@ -42,7 +42,7 @@
   },
   "reports": {
     "cpp-GNU": {
-      "sha256": "a6a8988bbe6f9bbfd9495d969184bc1d4682ee1afb2c0a1ec7f57336aefe6ba0",
+      "sha256": "e414d832ca5fa3ce6bb9ff205a6a26672794aef9e6795de40e17a95d3f1e7e1d",
       "summary": {
         "available": 722,
         "cases": 773,
@@ -51,7 +51,7 @@
       }
     },
     "cpp-MSVC": {
-      "sha256": "d982a5c47c9a08809973e864620126fcf594233f379c48899ef1ca4653d2aa7c",
+      "sha256": "de50774b238e3f654fca3cd02e51c05d86a435a338b4b8cc0492697326c38869",
       "summary": {
         "available": 722,
         "cases": 773,
@@ -60,7 +60,7 @@
       }
     },
     "ports-linux-aarch64": {
-      "sha256": "1167a72bbb1480bf5995e1c881094b6d42212073e77d126fe6e157a3f80d1743",
+      "sha256": "7f120ff8880903ba13e45da32996aa43d03dddad35743579a16925fd276a141c",
       "summary": {
         "cases_per_backend": 583,
         "fields_per_backend": 2915,
@@ -68,7 +68,7 @@
       }
     },
     "ports-linux-musl-x86_64": {
-      "sha256": "fedf71508da680e1d09284f31f3754dcc6a985ca0bd6e8eaab6e7a3a7a95a319",
+      "sha256": "133d3c50372d609e54c8eb8d9c7f087eb7cb210a25de3880b5e5c3c4e8aaa62c",
       "summary": {
         "cases_per_backend": 583,
         "fields_per_backend": 2915,
@@ -76,7 +76,7 @@
       }
     },
     "ports-linux-x86_64": {
-      "sha256": "59b7c63cb1ab532d66dd102608f94be63e74c990ed791d63383252f16b5b2da9",
+      "sha256": "bb02d756869dc5914ae00cf82d17419baedaa6be31244daeabd99fe014a33b6d",
       "summary": {
         "cases_per_backend": 583,
         "fields_per_backend": 2915,
@@ -84,7 +84,7 @@
       }
     },
     "ports-macos-arm64": {
-      "sha256": "3c666c8f59c1d5cafb9070016a20392c0f58df8df2ece7b7875feabac8551b87",
+      "sha256": "f46befe416238ed352fd44a2612085a8d161b7d62d81ec1adbb906dce2303df1",
       "summary": {
         "cases_per_backend": 583,
         "fields_per_backend": 2915,
@@ -92,7 +92,7 @@
       }
     },
     "ports-macos-x86_64": {
-      "sha256": "19f6d45a145375b887651fb94c36dc5253790ba2de14f15970d43ecb000e8f42",
+      "sha256": "e39ccb210126fa40e918de74a5d586b9d9e7cad3d76a102d4cdf7911c1118f04",
       "summary": {
         "cases_per_backend": 583,
         "fields_per_backend": 2915,
@@ -100,7 +100,7 @@
       }
     },
     "ports-windows-arm64": {
-      "sha256": "bea62833c364a66b7f4f3ac05e3582592967080f5046ce0e3c62a5750c996c06",
+      "sha256": "c89ec60c86c5c05991f2010bbf374f3dac1f7fcada439ac3c3bf0e15de0c80c0",
       "summary": {
         "cases_per_backend": 583,
         "fields_per_backend": 2915,
@@ -108,7 +108,7 @@
       }
     },
     "ports-windows-x86_64": {
-      "sha256": "21b2b45ec20c66546d228c465c9d0ed777946f57caf5f46664d0ffcc5f914eda",
+      "sha256": "e0f9cdaa0063a8776d8fb8917e450660274600d0a3e0ab65fd8ba6fbe3b72662",
       "summary": {
         "cases_per_backend": 583,
         "fields_per_backend": 2915,
@@ -117,7 +117,7 @@
     }
   },
   "schema_version": 1,
-  "source_commit": "9979aa89f18a3abe7f4e75e551a9c5b7cf9054da",
+  "source_commit": "3c69acfb1ae7f65e245836500116b24a16fd9f02",
   "source_files": {
     ".github/workflows/ci.yml": "67d1bddfd5be308551353df9faa6afccd5e8e446045139b576fae515f7b26dab",
     ".github/workflows/crate-validation.yml": "970147b312a0719d1e63318b2f8b8f200479c5592e5e368cbfd2407893ac1f6d",
@@ -226,23 +226,23 @@
     "src/behave_fire/_backend_contract.py": "ccc58a4574071f898fb2c10c6f3579ab556f49dece220192b0ff39806f94fb0e",
     "src/behave_fire/_ownership.py": "6c87e51715f8dbbd4f4b9381c09652d4cb054f6ff25e0060810dd69408769a62",
     "src/behave_fire/_version.py": "8bd405e831a020680c228ba54e12ab1f0039c7cab283fd290cf275103325a8dc",
-    "src/behave_fire/auto.py": "9f4ba1209d6035db9a592511b3340caa52b69c5fd6f4bc292a59d6ef0f89515c",
-    "src/behave_fire/behave.py": "311cec0330ba5425cfe436cf66034bb10607625e634073c8f6b63c20b46a454c",
+    "src/behave_fire/auto.py": "7d6d758958d3c16fd58228b3c83552f53f1f9dd58c6c88f6175575f197523028",
+    "src/behave_fire/behave.py": "79c22180267de2d7b38417155b7b8d121bd546ca62ed197de0322ba0204d630a",
     "src/behave_fire/components/__init__.py": "6ca168e0df02cacae936946d295377763a1e6b0c5c8d0b8f6cde70056a3fe26a",
-    "src/behave_fire/components/behave_units.py": "a2e690d8ef6b7d0b7e19ece24238cd560b466725bf838603ca3f1b731f28aed1",
-    "src/behave_fire/components/crown.py": "a70e0d6257c8d4fab6041e6f1d172b83da9fec64b7a0c2acf6582cdb553bd6d2",
-    "src/behave_fire/components/fine_dead_fuel_moisture_tool.py": "7a3dc6bfc6548d016c0dcef353257a9565bd831da4676024e6ba4c8fef26bdf5",
+    "src/behave_fire/components/behave_units.py": "c02bd36a8e10bdd9e7d876f20303f9f8458ef6d4f89df334199fd1c8e2492728",
+    "src/behave_fire/components/crown.py": "a904542e0247a0553eff971020116e8fcfd5a7d89d7cbaade92bae194e239e77",
+    "src/behave_fire/components/fine_dead_fuel_moisture_tool.py": "0e9b4e584ceeef07d99360be49c1b30fac0239232739ef274249bc93fe321248",
     "src/behave_fire/components/fire_size.py": "689c80ccc34dedc9422a9748cf159da468af7170a5e649e4fdee54b2de37abf3",
     "src/behave_fire/components/fuel_models.py": "06af862b6642c24a1baf4eeea0e938f450603b3f3768f5e898392fe2406768a3",
     "src/behave_fire/components/fuel_models_array.py": "7f1d824b5bbd1990d67c7c195cc6922930a5fdf5b847b7c7a8df58c0701f7024",
-    "src/behave_fire/components/ignite.py": "e742f3201bd8b466b0a276c012b96fd1365f351bb79019d6574fae9017a4151d",
-    "src/behave_fire/components/mortality.py": "a541d5ff1f3bd4184354d49bfdce56509047c88e587c071064552503bb578c9b",
-    "src/behave_fire/components/safety.py": "3d5888783b3264f27c79d0db2e14cfc85a8369858286efd320a0c3d3f8689119",
+    "src/behave_fire/components/ignite.py": "0dc333cf498dcb43a5f2a34f95f0ffc0e32b987596aa94bf66e3c6bfae2913e9",
+    "src/behave_fire/components/mortality.py": "b822f5e353be9ddff453af5b88734cec5912311fd4c1239873437e17edcce029",
+    "src/behave_fire/components/safety.py": "7c7f9d071dc911900e539330919959f11a35dfb3c8ca00befdaa6bdca74fd6ec",
     "src/behave_fire/components/slope_tool.py": "4cd39b1941e95e2f2300c89796fdd3bf7d33b8997706a950913757074b654124",
     "src/behave_fire/components/species_master_table.py": "bdc07fbead26669cab4c8e0e13d53945103ffb61db536d695663db631e864cd0",
-    "src/behave_fire/components/spot.py": "f4aa5d803cae4a1bf6317a0a1f9d012ed388ae50b96fa0de472dd734a46bf8c4",
-    "src/behave_fire/components/surface.py": "576eb017f9c5c0133aa6f43b49149723380f45805cc1f6b5b7f5fbfaf923128d",
-    "src/behave_fire/components/vapor_pressure_deficit_calculator.py": "85d44c43b6b824b67ae3fd3c3299ed5c4531e4b09e9b611dad9acf2a66460352",
+    "src/behave_fire/components/spot.py": "80e14b01e22b031dc31915cca069b617f3e4b2bd20ed5d86472ec0a512748635",
+    "src/behave_fire/components/surface.py": "8c37cb75e007b1dc20a7a51d6894aca4bfb6b2abd6069e2ba62f89341283645c",
+    "src/behave_fire/components/vapor_pressure_deficit_calculator.py": "d581dcf2be40b452282953bb7de55de01f27cbcb0379b87299adcd5fe9a462a1",
     "src/behave_fire/python/__init__.py": "b1c1635539c739ba00a19f8b3fb674125cd81feadddc9d3e3e7a3f9f00c01ecb",
     "src/behave_fire/rust/__init__.py": "c04db52049f811596507572b8b0c4f0931851295cd0cde7052c73bcd4bca58ec",
     "src/behave_fire/rust/_bridge.py": "aa4c1660d71ab4332fea2f5a9bc88698d0143d48805f44a07a142bb8cded9dbc",
@@ -252,22 +252,22 @@
     "src/behave_fire/rust/_numeric.py": "b30dc744b0c83cabe29705d802dd85bbd630a9cf8d433dd02817259f597d5ab0",
     "src/behave_fire/rust/_serialization.py": "6c0dc4d74df9282cba813a49769d319e653631c81ad69d2f1e3e4e15b35bf33a",
     "src/behave_fire/rust/_threads.py": "5de3ceebb78ba16af43252c53794c56ff8cb3a6b0d6cb3c6723e558881ad6542",
-    "src/behave_fire/rust/behave_units.py": "8ea9be77aa78fbcfb873ed68706c6f5eff5fe72e296e74a7ca217fb626ace550",
-    "src/behave_fire/rust/core.py": "af9831110ef2a7c97a580d7694f1fb2c8c9651db87a75c4b34e4fe916c870e47",
-    "src/behave_fire/rust/crown.py": "14ec165a2b7f662b05a5e26ac84e84709ce848ff0ce220bbea09d54120cba3b0",
-    "src/behave_fire/rust/fine_dead_fuel_moisture_tool.py": "dd6b01fdb01e962f7606355decb4104b5ecb828622e81806b269456b3f5174fb",
+    "src/behave_fire/rust/behave_units.py": "ed1d64981e2ce33c1606ad50b7cdd9de8de52de00fe0c6388a10f26cf1331e8f",
+    "src/behave_fire/rust/core.py": "de9bfd6ad9be204f1747de0d78e12b20c93534ada05fb163a37c64a0d2cede99",
+    "src/behave_fire/rust/crown.py": "1c7485777325326c2b14503f996cdfaa877fa3a2f2ee12522e06b68d650c75bf",
+    "src/behave_fire/rust/fine_dead_fuel_moisture_tool.py": "6a9fd635149f5cbb49c6ea83b1e1d20e4582b59da8d750e587286566f1244bbd",
     "src/behave_fire/rust/fire_size.py": "a19e03f2b51346c4094a8ef19ac193dc87b06066ed84034cf2f67a8387209bf1",
     "src/behave_fire/rust/fuel_models.py": "7367303c7f0ccdd558606818126fe9bd465087596be820d9abb35072f792670c",
     "src/behave_fire/rust/fuel_models_array.py": "8bb41c3722bede3f4357b0d31abb0e7ee874ecf309a78890c1088a202f052fe2",
     "src/behave_fire/rust/grid.py": "4bcbea4ddeb1331b1c9ce557c149d3b68b5a588ee64a534e47e712e08a2f9381",
-    "src/behave_fire/rust/ignite.py": "82763f4ebdb856c2f2ea0b9ba4247066c0b11ec317089564bc532d8d93c2db82",
-    "src/behave_fire/rust/mortality.py": "581c7328d83468c6bf6626a9f21885b225d6998f1c417ecb6b7b138504e48103",
-    "src/behave_fire/rust/safety.py": "05e77ce7198ffd94e740e0d9c865b09fc7f59d4a243cf29c4fa6ca56529004a4",
+    "src/behave_fire/rust/ignite.py": "22c88ae057cd1d4951dd9f621641aa1dbdb1e498f9acb7e221b2f3f8ec9bad23",
+    "src/behave_fire/rust/mortality.py": "297534fd51144b25dea47f3d58dbb89f32914dd8950f8b4b62c4a2b07cbcc3b5",
+    "src/behave_fire/rust/safety.py": "1503e27559ea6cc12ad597643052ada17eb56e4f8835fcf23a70c7f2028f2422",
     "src/behave_fire/rust/slope_tool.py": "dd831c5467fd93f6755b4573b5c736f143991ceaf4f4b8c315a1c1ab30540508",
     "src/behave_fire/rust/species_master_table.py": "934c8812412ecc66db2567f1f2c54f56540b554c6a6eb45228922f4f39c0e8f4",
-    "src/behave_fire/rust/spot.py": "7bc7e83490aea113b8931ad6590cf874e6dace7f79899ac4a7ac5bc5198d0526",
-    "src/behave_fire/rust/surface.py": "f8744d285606308009d1b8f0bc7b9966d184b79c00061cf6eb91323f4b12057a",
-    "src/behave_fire/rust/vapor_pressure_deficit_calculator.py": "868b91b2d16c10364c85d198955af02a93a83ff6a7f443f9f2f9bafe59e5ddf4",
+    "src/behave_fire/rust/spot.py": "2000f1ba505ec62cb2b0d0f47cee4d8bbb7e81a055e7540715420d91a50fde6a",
+    "src/behave_fire/rust/surface.py": "40f667c2e2c14ed01c2c0ad0af381c58383b62aeba338ac811501d61a794cab1",
+    "src/behave_fire/rust/vapor_pressure_deficit_calculator.py": "7594410095a1734f1de484dba234f134a4725ba5f369bd2c32d3446a1f09aadf",
     "tools/assemble_allocation_evidence.py": "e171d1b4de994b77fce99b8c81e0ccb4a9e0742b7d32b0affb9310a50ad6281c",
     "tools/benchmark_backends.py": "819f020135dd8b15e812a44d4f8faf68e6f31cdcd1cd30f9d3481238ae550600",
     "tools/benchmark_component_families.py": "82fcf137fc96ba0209710d691c44ff66d2f4023dca685c96351170d82e33d53c",
