@@ -21,7 +21,6 @@ Index ranges (mirror FineDeadFuelMoistureTool):
     time_i     : 0–5   (6 time-of-day classes)
 """
 
-from typing import Union
 
 import numpy as np
 

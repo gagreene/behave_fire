@@ -2,7 +2,12 @@
 
 import numpy as np
 import pytest
-from parity_support import ROOT
+
+from parity_support import ROOT as ROOT
+
+# Keep bootstrap setup before imports that require tools on sys.path.
+# isort: split
+
 from float64_model_reference import model_reference
 from performance_cases import assert_outputs
 
@@ -12,7 +17,7 @@ pytestmark = pytest.mark.rust
 @pytest.mark.parametrize('masked',[False,True])
 def test_full_crown_preserves_supplied_surface_field_precision(masked):
     from behave_fire.components import crown as reference
-    from behave_fire.rust import FuelModels,crown,fuel_models_array
+    from behave_fire.rust import FuelModels, crown, fuel_models_array
 
     surface={name:np.array([value],dtype=np.float32) for name,value in [('spread_rate',1.),('fireline_intensity',100.),('heat_per_unit_area',1000.)]}
     if masked:

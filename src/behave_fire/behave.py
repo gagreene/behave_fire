@@ -41,7 +41,6 @@ Notes
   shape-(1,1) arrays, not Python scalars.
 """
 
-from typing import Optional, Union
 
 import numpy as np
 

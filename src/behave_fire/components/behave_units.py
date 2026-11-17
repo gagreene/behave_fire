@@ -24,7 +24,6 @@ Base units (same as scalar module):
   Time              → Minutes             (0)
 """
 
-from typing import Union
 
 import numpy as np
 

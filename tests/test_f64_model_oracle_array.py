@@ -1,12 +1,12 @@
 """The independent API4 oracle widens inputs and applies reviewed missing rules."""
 import numpy as np
-import pytest
-from parity_support import ROOT
+
+from parity_support import ROOT as ROOT
 
 
 def test_missing_density_cannot_classify_as_valid_surface_fire():
-    from float64_model_reference import apply_crown_rules
     from behave_fire.python import BehaveRun, FuelModels
+    from float64_model_reference import apply_crown_rules
     from performance_cases import build_inputs
 
     inputs = build_inputs(2, 'uniform')
@@ -21,8 +21,8 @@ def test_missing_density_cannot_classify_as_valid_surface_fire():
 
 
 def test_missing_heat_preserves_crown_spread_and_classification():
-    from float64_model_reference import apply_crown_rules
     from behave_fire.python import BehaveRun, FuelModels
+    from float64_model_reference import apply_crown_rules
     from performance_cases import build_inputs
 
     inputs = build_inputs(3, 'uniform')

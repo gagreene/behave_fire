@@ -5,7 +5,6 @@ import importlib
 import importlib.util
 import threading
 import warnings
-from typing import Optional, Union
 
 import numpy as np
 

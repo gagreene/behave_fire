@@ -7,7 +7,7 @@ import numpy as np
 import pytest
 
 from behave_fire import BehaveBackendWarning, BehaveRun, FuelModels
-from parity_support import ROOT
+from parity_support import ROOT as ROOT
 
 pytestmark = pytest.mark.rust
 

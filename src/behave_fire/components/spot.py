@@ -16,7 +16,6 @@ calculate_spotting_from_torching_trees(dbh_in, height_ft, count,
     → (*S) ndarray — spotting distance (ft)
 """
 
-from typing import Union
 
 import numpy as np
 

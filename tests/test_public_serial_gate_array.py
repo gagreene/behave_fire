@@ -2,7 +2,8 @@
 from copy import deepcopy
 
 import pytest
-from parity_support import ROOT
+
+from parity_support import ROOT as ROOT
 
 
 def _report():

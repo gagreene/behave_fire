@@ -1,7 +1,8 @@
 """Public gates include dtype-neutral masks and an additional mixed layout."""
 import numpy as np
 import pytest
-from parity_support import ROOT
+
+from parity_support import ROOT as ROOT
 
 
 @pytest.mark.rust
@@ -11,6 +12,7 @@ from parity_support import ROOT
                                      'masked-crown', 'masked-false-crown', 'typed-crown-c'])
 def test_gate_layouts_validate_every_native_output(cells, dataset, operation):
     from types import SimpleNamespace
+
     from benchmark_backends import _validation_worker
 
     record = _validation_worker(SimpleNamespace(operation=operation, dataset=dataset,
@@ -23,7 +25,7 @@ def test_gate_layouts_validate_every_native_output(cells, dataset, operation):
 @pytest.mark.parametrize('operation', ['masked-crown', 'masked-false-crown', 'typed-crown-c'])
 def test_public_layouts_are_distinct(operation):
     from behave_fire.python import BehaveRun, FuelModels
-    from performance_cases import supplied_surface, build_inputs
+    from performance_cases import build_inputs, supplied_surface
 
     inputs = build_inputs(16, 'uniform')
     values = supplied_surface(inputs, operation, BehaveRun(FuelModels()))

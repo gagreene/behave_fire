@@ -1,8 +1,6 @@
 """Explicit native vapor_pressure_deficit_calculator adapters."""
 from __future__ import annotations
 
-from typing import Union
-
 import numpy as np
 
 from ._bridge import _call

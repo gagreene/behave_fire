@@ -2,7 +2,12 @@
 
 import numpy as np
 import pytest
-from parity_support import ROOT
+
+from parity_support import ROOT as ROOT
+
+# Keep bootstrap setup before imports that require tools on sys.path.
+# isort: split
+
 from float64_model_reference import model_reference
 
 pytestmark = pytest.mark.rust
@@ -20,9 +25,11 @@ def _inputs(count=16):
 @pytest.mark.parametrize("storage", ["plain", "strided", "readonly"])
 @pytest.mark.parametrize("varying_units", [False, True])
 def test_fused_nonbase_units_preserve_reference_outputs(route, storage, varying_units):
-    from behave_fire.python import BehaveRun as PythonRun, FuelModels
+    from behave_fire.python import BehaveRun as PythonRun
+    from behave_fire.python import FuelModels
     from behave_fire.rust import BehaveRun
-    from parity_support import assert_result, encode_value
+    from parity_support import assert_result as assert_result
+    from parity_support import encode_value as encode_value
 
     arguments = _inputs(2)
     arguments.update(moisture_units=1, slope_units=1,
@@ -50,7 +57,8 @@ def test_fused_nonbase_units_preserve_reference_outputs(route, storage, varying_
     assert_result(actual, encode_value(expected))
 @pytest.mark.parametrize("route", ["surface", "crown"])
 def test_parallel_pipeline_profiles_direct_output_without_concatenation(monkeypatch, route):
-    from behave_fire.python import BehaveRun as PythonRun, FuelModels
+    from behave_fire.python import BehaveRun as PythonRun
+    from behave_fire.python import FuelModels
     from behave_fire.rust import BehaveRun, _bridge
 
     arguments = _inputs(10000)
@@ -77,7 +85,8 @@ def test_parallel_pipeline_profiles_direct_output_without_concatenation(monkeypa
 
 @pytest.mark.parametrize("route", ["surface", "crown"])
 def test_public_model_uses_one_native_compute_call(monkeypatch, route):
-    from behave_fire.python import BehaveRun as PythonRun, FuelModels
+    from behave_fire.python import BehaveRun as PythonRun
+    from behave_fire.python import FuelModels
     from behave_fire.rust import BehaveRun, _bridge
 
     arguments = _inputs()
@@ -100,7 +109,8 @@ def test_public_model_uses_one_native_compute_call(monkeypatch, route):
         assert calls == ['crown']
 @pytest.mark.parametrize("route", ["surface", "crown"])
 def test_registry_is_sent_once_as_numeric_rows(monkeypatch, route):
-    from behave_fire.python import BehaveRun as PythonRun, FuelModels
+    from behave_fire.python import BehaveRun as PythonRun
+    from behave_fire.python import FuelModels
     from behave_fire.rust import BehaveRun, _bridge
 
     arguments = _inputs()
@@ -127,9 +137,11 @@ def test_registry_is_sent_once_as_numeric_rows(monkeypatch, route):
 @pytest.mark.parametrize("empty", [False, True])
 @pytest.mark.parametrize("explicit_ratio", [False, True])
 def test_user_waf_discards_validated_canopy_selector_shapes(empty, explicit_ratio):
-    from behave_fire.python import BehaveRun as PythonRun, FuelModels
+    from behave_fire.python import BehaveRun as PythonRun
+    from behave_fire.python import FuelModels
     from behave_fire.rust import BehaveRun
-    from parity_support import assert_result, encode_value
+    from parity_support import assert_result as assert_result
+    from parity_support import encode_value as encode_value
 
     arguments = _inputs(2)
     arguments.update(waf_method="UserInput", user_waf=.4,

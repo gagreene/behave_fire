@@ -11,21 +11,20 @@ import argparse
 import contextlib
 import ctypes
 import hashlib
-from importlib.machinery import EXTENSION_SUFFIXES
 import io
 import json
 import os
-from pathlib import Path
 import platform
-import statistics
 import subprocess
 import sys
 import threading
 import time
+from importlib import import_module
+from importlib.machinery import EXTENSION_SUFFIXES
+from pathlib import Path
 
 from performance_cases import OPERATIONS, assert_outputs, build_inputs, paired_schedule, supplied_surface
 from performance_contract import input_identity, requested_outputs, save_outputs
-
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
@@ -162,7 +161,8 @@ def _model_call(arguments, backend, *, normalize_reference=False):
     import numpy as np
     if normalize_reference and backend != 'python':
         raise ValueError('Only the independent Python correctness oracle can normalize reference inputs')
-    from behave_fire.python import BehaveRun as PythonRun, FuelModels
+    from behave_fire.python import BehaveRun as PythonRun
+    from behave_fire.python import FuelModels
     inputs = build_inputs(arguments.cells, arguments.dataset, arguments.seed)
     if backend == "rust":
         from behave_fire.rust import BehaveRun
@@ -390,8 +390,9 @@ def _worker(arguments):
     :return: Legacy first-call keys, repeated observations, and exact provenance.
     """
     import_started = time.perf_counter()
-    import numpy as np
-    from behave_fire.python import BehaveRun as PythonRun
+    # Load both dependencies inside this measured import interval.
+    import_module("numpy")
+    import_module("behave_fire.python")
     if arguments.backend == "rust":
         from behave_fire.rust import _bridge
     import_seconds = time.perf_counter() - import_started
