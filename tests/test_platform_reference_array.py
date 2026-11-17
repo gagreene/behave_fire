@@ -1,14 +1,13 @@
 """Regression tests for the exact non-finite int32 fixture portability boundary."""
 
-from copy import deepcopy
 import importlib.util
 import json
-from pathlib import Path
 import sys
+from copy import deepcopy
+from pathlib import Path
 
 import numpy as np
 import pytest
-
 
 ROOT = next(parent for parent in Path(__file__).resolve().parents if (parent / "pytest.ini").is_file())
 DRAFT = Path(__file__).resolve().parents[1]
@@ -80,8 +79,9 @@ def test_canonical_export_keeps_original_golden_after_arm_cast(monkeypatch, doma
 @pytest.mark.parametrize("domain,name", SPECS)
 @pytest.mark.rust
 def test_compare_reports_frozen_diagnostic_and_retains_live_gate(monkeypatch, tmp_path, capsys, domain, name):
-    from behave_fire import rust
     from importlib import import_module
+
+    from behave_fire import rust
 
     spec = importlib.util.spec_from_file_location("platform_test_compare", DRAFT / "tools/compare_backends.py")
     compare = importlib.util.module_from_spec(spec)
@@ -175,8 +175,9 @@ def test_policy_excludes_other_inputs_and_cases(monkeypatch, domain, name):
 @pytest.mark.parametrize("domain,name", SPECS)
 @pytest.mark.rust
 def test_run_case_rejects_frozen_native_output_and_accepts_live_python(monkeypatch, domain, name):
-    from behave_fire import rust
     from importlib import import_module
+
+    from behave_fire import rust
 
     support = _support()
     frozen = _case(domain, name)

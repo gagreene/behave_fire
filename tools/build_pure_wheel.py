@@ -3,7 +3,6 @@
 import argparse
 import copy
 import json
-from pathlib import Path
 import re
 import shutil
 import subprocess
@@ -11,6 +10,7 @@ import sys
 import tempfile
 import tomllib
 import zipfile
+from pathlib import Path
 
 _COMPILED = {".so", ".pyd", ".dylib", ".pdb"}
 

@@ -1,7 +1,16 @@
 """Uniform float64 physical contract and first-boundary typed input roles."""
 import numpy as np
 
-from ._numeric import _validate_value, normalize_control, normalize_flag, normalize_fuel_identifier, normalize_identifier, normalize_physical, normalize_selector
+from ._numeric import (
+    _validate_value,
+    normalize_control,
+    normalize_flag,
+    normalize_fuel_identifier,
+    normalize_identifier,
+    normalize_physical,
+    normalize_selector,
+)
+
 
 def _physical_record(value):
     """Own nested scientific records with separate exact definition flags.

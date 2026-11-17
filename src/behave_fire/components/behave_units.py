@@ -24,8 +24,9 @@ Base units (same as scalar module):
   Time              → Minutes             (0)
 """
 
-import numpy as np
 from typing import Union
+
+import numpy as np
 
 # ---------------------------------------------------------------------------
 # Speed  (base = FeetPerMinute = 0)

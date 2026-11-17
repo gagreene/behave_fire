@@ -1,14 +1,13 @@
 """Validate the committed hybrid C++ coverage inventory without a C++ checkout."""
 
 import argparse
-from collections import Counter
 import hashlib
 import json
-from pathlib import Path
 import re
 import subprocess
 import sys
-
+from collections import Counter
+from pathlib import Path
 
 CPP_SHA = "f3b2943e69abca942e795c5b1b45276f6338abb5"
 PUBLIC_IDENTITY_SHA256 = "213febf45cf781f69925699f2017a357a7d35cbb826e64ca2aed62e71c879442"

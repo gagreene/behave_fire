@@ -3,9 +3,9 @@
 import hashlib
 import json
 import os
-from pathlib import Path
 import platform
 import warnings
+from pathlib import Path
 
 import numpy as np
 

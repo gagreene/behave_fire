@@ -5,11 +5,11 @@ import gzip
 import hashlib
 import json
 import math
-from pathlib import Path
 import random
 import re
 import struct
 import subprocess
+from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 PIN = "f3b2943e69abca942e795c5b1b45276f6338abb5"
@@ -395,6 +395,7 @@ def compare_backends(root, report_dir):
     :return: Summary of exact and nonexact observations; no parity verdict.
     """
     import numpy as np
+
     from behave_fire import BehaveRun
     from behave_fire.components.fuel_models import FuelModels
 

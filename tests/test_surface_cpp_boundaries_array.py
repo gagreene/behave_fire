@@ -1,7 +1,7 @@
 """Regressions for the owner-approved Surface boundaries in pinned Behave C++."""
 
-from importlib import import_module
 import json
+from importlib import import_module
 from pathlib import Path
 
 import numpy as np

@@ -1,8 +1,9 @@
 """Native registry metadata backed by standalone Rust tables."""
+from enum import IntEnum
+
 from ._bridge import _native
 from ._serialization import NativeState as _NativeState
-import copy
-from enum import IntEnum
+
 
 class GACC(IntEnum):
     """Geographic Area Coordination Centers"""

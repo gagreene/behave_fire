@@ -1,17 +1,16 @@
 """Explicit percent-unit controls must not silently repair numbered C++ records."""
 
-from copy import deepcopy
 import json
-from pathlib import Path
 import sys
+from copy import deepcopy
+from pathlib import Path
 
 import pytest
 
-
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'tools'))
-import cpp_reference as reference
 import cpp_controls as controls
+import cpp_reference as reference
 
 
 def _case():

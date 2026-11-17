@@ -5,19 +5,46 @@ The registry is snapshotted at construction; calculations use standalone Rust sc
 The keyword-only ``threads`` request bounds per-call native workers and is serialized.
 """
 from __future__ import annotations
-from ._bridge import _call, _unit_code, _validate_threads
-from ._threads import _threaded_method, _threaded_static
-from ._serialization import NativeState as _NativeState
-from ._numeric import _validate_value, normalize_fuel_identifier, normalize_physical, normalize_selector
+
+from typing import Optional, Union
+
 import numpy as np
-from typing import Union, Optional
+
+from ._bridge import _call, _validate_threads
+from ._numeric import _validate_value, normalize_fuel_identifier, normalize_physical, normalize_selector
+from ._serialization import NativeState as _NativeState
+from ._threads import _threaded_method, _threaded_static
+from .behave_units import (
+    area_from_base,
+    fireline_intensity_from_base,
+    fireline_intensity_to_base,
+    fraction_from_base,
+    fraction_to_base,
+    hpua_from_base,
+    length_from_base,
+    length_to_base,
+    reaction_intensity_from_base,
+    speed_from_base,
+    speed_to_base,
+    temp_to_base,
+    time_from_base,
+    time_to_base,
+)
 from .fuel_models import FuelModels
 from .fuel_models_array import build_fuel_lookup_arrays
-from .surface import build_particle_arrays, calculate_fuelbed_intermediates, calculate_reaction_intensity, run_surface_fire, calculate_fire_area, calculate_fire_perimeter, calculate_fire_length, calculate_fire_width
-from .crown import run_crown_fire
-from .mortality import calculate_scorch_height, build_mortality_lookup, calculate_crown_scorch_mortality
-from .spot import calculate_spotting_from_surface_fire, calculate_spotting_from_burning_pile, calculate_spotting_from_torching_trees
-from .behave_units import fireline_intensity_to_base, fireline_intensity_from_base, speed_to_base, speed_from_base, slope_to_base, length_to_base, length_from_base, area_from_base, time_to_base, time_from_base, temp_to_base, hpua_from_base, reaction_intensity_from_base, fraction_to_base, fraction_from_base, density_to_base
+from .mortality import build_mortality_lookup, calculate_crown_scorch_mortality, calculate_scorch_height
+from .spot import (
+    calculate_spotting_from_burning_pile,
+    calculate_spotting_from_surface_fire,
+    calculate_spotting_from_torching_trees,
+)
+from .surface import (
+    calculate_fire_area,
+    calculate_fire_length,
+    calculate_fire_perimeter,
+    calculate_fire_width,
+)
+
 _SURFACE_KEY_CONVERTERS = {'spread_rate': (speed_from_base, 0), 'backing_spread_rate': (speed_from_base, 0), 'flanking_spread_rate': (speed_from_base, 0), 'no_wind_no_slope_spread_rate': (speed_from_base, 0), 'midflame_wind_speed': (speed_from_base, 0), 'effective_wind_speed': (speed_from_base, 5), 'flame_length': (length_from_base, 0), 'fireline_intensity': (fireline_intensity_from_base, 0), 'heat_per_unit_area': (hpua_from_base, 0), 'reaction_intensity': (reaction_intensity_from_base, 0), 'residence_time': (time_from_base, 0), 'fire_length_to_width_ratio': None, 'eccentricity': None, 'direction_of_max_spread': None}
 _CROWN_KEY_CONVERTERS = {'crown_fire_spread_rate': (speed_from_base, 0), 'crown_critical_fire_spread_rate': (speed_from_base, 0), 'crown_flame_length': (length_from_base, 0), 'crown_fire_line_intensity': (fireline_intensity_from_base, 0), 'crown_critical_surface_fire_line_intensity': (fireline_intensity_from_base, 0), 'crown_fire_heat_per_unit_area': (hpua_from_base, 0), 'canopy_heat_per_unit_area': (hpua_from_base, 0), 'surface_fire_critical_spread_rate': (speed_from_base, 0), 'crowning_surface_fire_spread_rate': (speed_from_base, 0), 'passive_crown_fire_spread_rate': (speed_from_base, 0), 'passive_crown_fire_heat_per_unit_area': (hpua_from_base, 0), 'passive_crown_fire_line_intensity': (fireline_intensity_from_base, 0), 'passive_crown_fire_flame_length': (length_from_base, 0), 'final_spread_rate': (speed_from_base, 0), 'final_fireline_intensity': (fireline_intensity_from_base, 0), 'final_heat_per_unit_area': (hpua_from_base, 0), 'final_flame_length': (length_from_base, 0), 'crown_fire_transition_ratio': None, 'crown_fire_active_ratio': None, 'crown_length_to_width_ratio': None, 'fire_type': None, 'crown_fraction_burned': None}
 _MORTALITY_KEY_CONVERTERS = {'crown_length_scorch': (fraction_from_base, 0), 'crown_volume_scorch': (fraction_from_base, 0), 'probability_mortality': (fraction_from_base, 0)}

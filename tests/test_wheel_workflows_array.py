@@ -1,8 +1,8 @@
 """Validate required certification rows through the workflow matrix data."""
 
+import unittest
 from itertools import product
 from pathlib import Path
-import unittest
 
 import yaml
 

@@ -9,10 +9,10 @@ from typing import Optional, Union
 
 import numpy as np
 
-from .behave import BehaveRun as PythonBehaveRun
-from ._backend_contract import BINDING_API_VERSION, REQUIRED_CAPABILITIES
-from .components.fuel_models import FuelModels
 from ._auto_routing import capture_call, choose_backend, snapshot_registry
+from ._backend_contract import BINDING_API_VERSION, REQUIRED_CAPABILITIES
+from .behave import BehaveRun as PythonBehaveRun
+from .components.fuel_models import FuelModels
 
 _API_VERSION = BINDING_API_VERSION
 _INSTALL = "Rust backend unavailable; install a compatible native behave-fire wheel or rebuild the extension."

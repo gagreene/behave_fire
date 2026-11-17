@@ -57,8 +57,8 @@ def test_shape_groups_compute_independent_shapes_including_empty_groups():
 
 
 def test_typed_controls_do_not_round_through_float64():
-    from behave_fire.rust._numeric import normalize_control, normalize_selector
     from behave_fire.rust._bridge import _unit_code
+    from behave_fire.rust._numeric import normalize_control, normalize_selector
 
     source=np.array([(1<<53)+1],dtype=np.int64)
     result=normalize_control(source,np.int64)

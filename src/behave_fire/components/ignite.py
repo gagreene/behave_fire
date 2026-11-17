@@ -37,9 +37,9 @@ Charge types:
 """
 
 import warnings
+from typing import Union
 
 import numpy as np
-from typing import Union
 
 # Lightning coefficient table — shape (8, 4): [a_pos, b_pos, a_neg, b_neg]
 # Each row corresponds to one of the 8 fuel bed types (index 0–7).

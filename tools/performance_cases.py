@@ -2,7 +2,6 @@
 
 import random
 
-
 OPERATIONS = ("surface", "crown", "typed-crown", "typed-crown-b", "masked-crown",
               "masked-false-crown", "typed-crown-c")
 

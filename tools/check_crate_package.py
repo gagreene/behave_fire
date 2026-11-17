@@ -2,11 +2,11 @@
 
 import argparse
 import json
-from pathlib import Path, PurePosixPath
 import posixpath
 import re
 import tarfile
 import tomllib
+from pathlib import Path, PurePosixPath
 
 MAX_COMPRESSED_BYTES = 5 * 1024 * 1024
 REQUIRED_FILES = frozenset({

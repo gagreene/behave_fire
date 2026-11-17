@@ -31,9 +31,10 @@ def test_pressure_unit_boolean_index_keeps_its_reference_axes():
 
 def test_reaction_accepts_only_the_fields_it_reads():
     import json
-    from parity_support import ROOT,decode
+
     from behave_fire.components import surface as reference
     from behave_fire.rust import surface
+    from parity_support import ROOT, decode
 
     cases=json.loads((ROOT/'tests/data/rust_port/surface.json').read_text())['cases']
     values=decode(next(case for case in cases if case['id']=='calculate_reaction_intensity/baseline')['inputs'])['ib']
@@ -46,9 +47,10 @@ def test_reaction_accepts_only_the_fields_it_reads():
 
 def test_reaction_ignores_unrelated_dictionary_arrays():
     import json
-    from parity_support import ROOT,decode
+
     from behave_fire.components import surface as reference
     from behave_fire.rust import surface
+    from parity_support import ROOT, decode
 
     cases=json.loads((ROOT/'tests/data/rust_port/surface.json').read_text())['cases']
     values=decode(next(case for case in cases if case['id']=='calculate_reaction_intensity/baseline')['inputs'])['ib']
@@ -72,8 +74,9 @@ def test_safety_separation_survives_empty_personnel_array():
 
 
 def test_surface_intermediates_keep_their_own_grid_shape():
-    from behave_fire.python import BehaveRun as PythonRun,FuelModels as PythonFuels
-    from behave_fire.rust import BehaveRun,FuelModels
+    from behave_fire.python import BehaveRun as PythonRun
+    from behave_fire.python import FuelModels as PythonFuels
+    from behave_fire.rust import BehaveRun, FuelModels
 
     inputs=dict(fuel_model_grid=np.array([124,124]),m1h=np.full(2,.06),m10h=np.full(2,.07),m100h=np.full(2,.08),mlh=np.full(2,.6),mlw=np.full(2,.9),wind_speed=np.ones((3,1)),wind_speed_units=5,wind_direction=0.,wind_orientation_mode='RelativeToUpslope',slope=10.)
     expected=PythonRun(PythonFuels()).do_surface_run(**inputs)

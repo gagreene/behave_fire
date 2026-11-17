@@ -9,7 +9,7 @@ import operator
 import numpy as np
 
 from ._bridge import _native
-from ._model_api4 import _buffer, _FIELDS, _registry, _settings
+from ._model_api4 import _FIELDS, _buffer, _registry, _settings
 from ._numeric import broadcast_shape, normalize_control, normalize_fuel_identifier, normalize_physical
 from .fuel_models import FuelModels
 from .fuel_models_array import build_fuel_lookup_arrays

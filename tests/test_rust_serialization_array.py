@@ -2,8 +2,8 @@
 
 import copy
 import pickle
-from pathlib import Path
 import sys
+from pathlib import Path
 from types import SimpleNamespace
 
 import numpy as np
@@ -22,6 +22,7 @@ def _instance(name):
 def _spawn_roundtrip(payload, queue, extension_path, namespace_path):
     import importlib.util
     from importlib.machinery import ExtensionFileLoader
+
     import behave_fire
     try:
         behave_fire.__path__.insert(0,namespace_path)
@@ -38,6 +39,7 @@ def _spawn_roundtrip(payload, queue, extension_path, namespace_path):
 def test_fresh_process_native_unpickle_without_extension_raises(tmp_path):
     import os
     import subprocess
+
     from behave_fire import rust
     from parity_support import ROOT
     payload=tmp_path/'native-model.pickle'
@@ -79,7 +81,7 @@ def test_native_copy_aliases_and_deepcopy_are_reference_compatible():
 
 
 def test_native_model_pickle_preserves_cached_snapshot():
-    from behave_fire.rust import BehaveRun,FuelModels
+    from behave_fire.rust import BehaveRun, FuelModels
     registry=FuelModels()
     model=BehaveRun(registry,threads=3)
     registry.fuel_models_[1]['fuel_bed_depth']=99.
@@ -93,7 +95,8 @@ def test_native_model_survives_windows_spawn_without_rebuilding_snapshot(tmp_pat
     import json
     import os
     import subprocess
-    from behave_fire import _rust,rust
+
+    from behave_fire import _rust, rust
     from parity_support import ROOT
     model=rust.BehaveRun(rust.FuelModels(),threads=3)
     model._fuel_models.fuel_models_[1]['fuel_bed_depth']=99.

@@ -3,9 +3,9 @@
 import argparse
 import json
 import math
-from pathlib import Path
 import random
 import statistics
+from pathlib import Path
 
 from assemble_allocation_evidence import assemble
 

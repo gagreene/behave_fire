@@ -9,7 +9,6 @@ import hashlib
 import json
 from pathlib import Path
 
-
 ROOT = Path(__file__).resolve().parents[1]
 PIN = "f3b2943e69abca942e795c5b1b45276f6338abb5"
 INPUTS = {

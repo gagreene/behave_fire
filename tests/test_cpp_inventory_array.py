@@ -1,13 +1,13 @@
 """Check the offline public API inventory and its fail-closed coverage contracts."""
 
-from copy import deepcopy
 import hashlib
 import importlib.util
 import json
-from pathlib import Path
 import shutil
 import subprocess
 import sys
+from copy import deepcopy
+from pathlib import Path
 
 import pytest
 

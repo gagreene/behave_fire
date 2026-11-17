@@ -5,7 +5,6 @@ import pytest
 
 from behave_fire import python as python_backend
 
-
 pytestmark = pytest.mark.rust
 INVALID_IDS = [-100, -1, 0, 257, 261, 999, np.iinfo(np.int32).max, np.nan, np.inf, -np.inf]
 BACKENDS = ['python', 'rust']

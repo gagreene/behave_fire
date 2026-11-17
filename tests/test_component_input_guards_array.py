@@ -8,8 +8,6 @@ from behave_fire.components.fuel_models_array import build_fuel_lookup_arrays
 from behave_fire.rust import crown, surface
 
 
-
-
 @pytest.mark.parametrize('value', [np.nan, np.ma.array([1], mask=[True])])
 def test_public_final_selection_rejects_missing_flags(value):
     with pytest.raises((TypeError, ValueError)):

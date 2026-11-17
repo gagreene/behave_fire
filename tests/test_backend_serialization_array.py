@@ -2,11 +2,11 @@
 
 import copy
 import os
-from pathlib import Path
 import pickle
 import subprocess
 import sys
 import textwrap
+from pathlib import Path
 
 import numpy as np
 import pytest

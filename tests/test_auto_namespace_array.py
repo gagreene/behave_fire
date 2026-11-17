@@ -1,8 +1,8 @@
 """Automatic component calls share the model preflight and truthful routing policy."""
 import importlib
 import inspect
-from types import SimpleNamespace
 import warnings
+from types import SimpleNamespace
 
 import numpy as np
 import pytest

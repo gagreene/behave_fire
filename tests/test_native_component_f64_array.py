@@ -118,7 +118,8 @@ def test_fuelbed_characteristics_keep_shape_when_only_heat_inputs_are_empty():
 
 
 def test_independent_component_outputs_survive_empty_unrelated_inputs():
-    from behave_fire.rust import crown, mortality, safety, vapor_pressure_deficit_calculator as vpd
+    from behave_fire.rust import crown, mortality, safety
+    from behave_fire.rust import vapor_pressure_deficit_calculator as vpd
 
     heat = crown.calculate_crown_heat_and_intensity(np.empty(0), 5., 3., 30., 0.02)
     assert heat['canopy_heat_per_unit_area'].size == 1
@@ -163,7 +164,8 @@ def test_mortality_missing_threshold_conditions_are_not_zero_defaults():
 def test_primitive_geometry_and_lookup_routes_do_not_enter_the_legacy_payload_decoder():
     from behave_fire import _rust
     from behave_fire.components.fine_dead_fuel_moisture_tool import calculate_fine_dead_fuel_moisture as reference
-    from behave_fire.rust import crown, fine_dead_fuel_moisture_tool as fdfm, surface
+    from behave_fire.rust import crown, surface
+    from behave_fire.rust import fine_dead_fuel_moisture_tool as fdfm
 
     assert not hasattr(_rust, 'batch')
     assert surface.calculate_eccentricity(np.array([2.], np.float32)).dtype == np.float64

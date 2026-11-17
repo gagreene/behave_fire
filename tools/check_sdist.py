@@ -3,10 +3,10 @@
 import argparse
 import hashlib
 import json
-from pathlib import Path, PurePosixPath
 import subprocess
 import tarfile
 import zipfile
+from pathlib import Path, PurePosixPath
 
 REQUIRED = {
     "pyproject.toml", "README.md", "LICENSE", "NOTICE", "LICENSES/NumPy-BSD-3-Clause.txt",

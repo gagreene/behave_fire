@@ -1,9 +1,13 @@
 """Explicit native ignite adapters."""
 from __future__ import annotations
-from typing import Union, Optional
+
 import warnings
+from typing import Union
+
 import numpy as np
-from ._bridge import _call, _native
+
+from ._bridge import _call
+
 
 def calculate_firebrand_ignition_probability(
         air_temp_f: Union[float, np.ndarray],

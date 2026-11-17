@@ -23,8 +23,9 @@ Crown scorch B-coefficients are from Ryan & Reinhardt (1988) / Reinhardt & Ryan
 CROWN_SCORCH_TABLE (see implementation note below).
 """
 
+from typing import TYPE_CHECKING, Optional, Union
+
 import numpy as np
-from typing import Union, Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from .species_master_table import SpeciesMasterTable

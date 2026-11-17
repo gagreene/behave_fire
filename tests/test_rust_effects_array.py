@@ -23,6 +23,7 @@ def test_missing_species_equation_warning():
 
 def test_noncanonical_lightning_charge_uses_unknown_branch():
     import numpy as np
+
     from behave_fire.components import ignite as reference
     from behave_fire.rust import ignite
 

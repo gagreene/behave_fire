@@ -1,8 +1,11 @@
 """Structural array normalization for explicit native calculations."""
 from importlib import import_module
+
 import numpy as np
+
 from .._backend_contract import BINDING_API_VERSION
 from ._threads import _THREADS
+
 try:
     _native = import_module('behave_fire._rust')
 except ImportError as error:
@@ -18,10 +21,10 @@ _FUEL_KEYS = {'depth': 'fuel_bed_depth', 'moe_dead': 'moisture_of_extinction_dea
 _UNIT_COUNTS = {'Area': 6, 'Length': 8, 'Loading': 4, 'Pressure': 9, 'SurfaceAreaToVolume': 4, 'Speed': 7, 'Density': 2, 'HeatPerUnitArea': 3, 'HeatSourceAndReactionIntensity': 5, 'FirelineIntensity': 5, 'Time': 5}
 _EMPTY_KEYS = {'calculate_safety_zone': ('separation_distance', 'radius', 'area'), 'calculate_crown_scorch_mortality': ('crown_length_scorch', 'crown_volume_scorch', 'probability_mortality'), 'calculate_vpd': ('vpd', 'actual_vp', 'saturated_vp'), 'calculate_surface_rate_vector': ('x_component', 'y_component', 'rate_vector'), 'calculate_surface_wind_coefficients': ('safe_sigma', 'wind_c', 'wind_b', 'wind_e')}
 _EMPTY_KEYS['run_surface_fire'] = ('spread_rate', 'backing_spread_rate', 'flanking_spread_rate', 'flame_length', 'fireline_intensity', 'heat_per_unit_area', 'effective_wind_speed', 'fire_length_to_width_ratio', 'eccentricity', 'direction_of_max_spread', 'residence_time', 'reaction_intensity', 'midflame_wind_speed', 'no_wind_no_slope_spread_rate')
-_EMPTY_KEYS['build_particle_arrays'] = ('hoc_dead', 'hoc_live', 'depth', 'moe_dead', 'is_defined') + tuple((f'{key}.{j}' for key in _PARTICLES for j in range(5)))
+_EMPTY_KEYS['build_particle_arrays'] = ('hoc_dead', 'hoc_live', 'depth', 'moe_dead', 'is_defined') + tuple(f'{key}.{j}' for key in _PARTICLES for j in range(5))
 _EMPTY_KEYS['calculate_fuelbed_intermediates'] = ('sigma', 'bulk_density', 'packing_ratio', 'relative_packing_ratio', 'heat_sink', 'propagating_flux', 'w_heat_dead', 'w_heat_live', 'w_silica_dead', 'w_silica_live', 'w_moist_dead', 'w_moist_live', 'wfl_dead', 'wfl_live', 'moe_dead', 'moe_live', 'frac_dead', 'frac_live', 'depth', 'is_defined')
 _EMPTY_KEYS.update({'assign_final_crown_fire_behavior': ('final_spread_rate', 'final_heat_per_unit_area', 'final_fireline_intensity', 'final_flame_length'), 'calculate_crown_fire_ratios': ('crown_fire_transition_ratio', 'crown_fire_active_ratio'), 'calculate_crown_heat_and_intensity': ('crown_fuel_load', 'canopy_heat_per_unit_area', 'crown_fire_heat_per_unit_area', 'crown_fire_line_intensity', 'crown_flame_length'), 'calculate_passive_crown_fire_behavior': ('passive_crown_fire_spread_rate', 'passive_crown_fire_heat_per_unit_area', 'passive_crown_fire_line_intensity', 'passive_crown_fire_flame_length'), 'classify_crown_fire_type': ('fire_type', 'is_surface_fire', 'is_passive_crown', 'is_active_crown'), 'run_crown_fire': ('crown_fire_spread_rate', 'crown_critical_fire_spread_rate', 'crown_flame_length', 'crown_fire_line_intensity', 'crown_critical_surface_fire_line_intensity', 'crown_fire_heat_per_unit_area', 'canopy_heat_per_unit_area', 'crown_fire_transition_ratio', 'crown_fire_active_ratio', 'crown_length_to_width_ratio', 'fire_type', 'surface_fire_critical_spread_rate', 'crowning_surface_fire_spread_rate', 'crown_fraction_burned', 'passive_crown_fire_spread_rate', 'passive_crown_fire_heat_per_unit_area', 'passive_crown_fire_line_intensity', 'passive_crown_fire_flame_length', 'final_spread_rate', 'final_heat_per_unit_area', 'final_fireline_intensity', 'final_flame_length')})
-_EMPTY_KEYS['calculate_crown_surface_fire'] = tuple(('p_crown.' + key for key in _EMPTY_KEYS['build_particle_arrays'])) + tuple(('ib_crown.' + key for key in _EMPTY_KEYS['calculate_fuelbed_intermediates'])) + tuple(('crown_surface.' + key for key in _EMPTY_KEYS['run_surface_fire'])) + ('ri_crown', 'crown_fire_spread_rate', 'crown_length_to_width_ratio')
+_EMPTY_KEYS['calculate_crown_surface_fire'] = tuple('p_crown.' + key for key in _EMPTY_KEYS['build_particle_arrays']) + tuple('ib_crown.' + key for key in _EMPTY_KEYS['calculate_fuelbed_intermediates']) + tuple('crown_surface.' + key for key in _EMPTY_KEYS['run_surface_fire']) + ('ri_crown', 'crown_fire_spread_rate', 'crown_length_to_width_ratio')
 
 
 def _call(operation, arguments):
@@ -153,7 +156,7 @@ def _restore_shape(value, shape):
     """
     if value.shape == shape:
         return value
-    selectors = (0,) * (value.ndim - len(shape)) + tuple((slice(0, 1) if size == 1 else slice(None) for size in shape))
+    selectors = (0,) * (value.ndim - len(shape)) + tuple(slice(0, 1) if size == 1 else slice(None) for size in shape)
     return np.array(value[selectors], copy=True).reshape(shape)
 
 

@@ -41,92 +41,93 @@ Notes
   shape-(1,1) arrays, not Python scalars.
 """
 
+from typing import Optional, Union
+
 import numpy as np
-from typing import Union, Optional
 
 try:
-    from .components.fuel_models import FuelModels
-    from .components.fuel_models_array import _fuel_model_indices, build_fuel_lookup_arrays
-    from .components.surface import (
-        build_particle_arrays,
-        calculate_fuelbed_intermediates,
-        calculate_reaction_intensity,
-        run_surface_fire,
-        calculate_fire_area,
-        calculate_fire_perimeter,
-        calculate_fire_length,
-        calculate_fire_width,
+    from .components.behave_units import (
+        area_from_base,
+        density_to_base,
+        fireline_intensity_from_base,
+        fireline_intensity_to_base,
+        fraction_from_base,
+        fraction_to_base,
+        hpua_from_base,
+        length_from_base,
+        length_to_base,
+        reaction_intensity_from_base,
+        slope_to_base,
+        speed_from_base,
+        speed_to_base,
+        temp_to_base,
+        time_from_base,
+        time_to_base,
     )
     from .components.crown import run_crown_fire
+    from .components.fuel_models import FuelModels
+    from .components.fuel_models_array import _fuel_model_indices, build_fuel_lookup_arrays
     from .components.mortality import (
-        calculate_scorch_height,
         build_mortality_lookup,
         calculate_crown_scorch_mortality,
+        calculate_scorch_height,
     )
     from .components.spot import (
-        calculate_spotting_from_surface_fire,
         calculate_spotting_from_burning_pile,
+        calculate_spotting_from_surface_fire,
         calculate_spotting_from_torching_trees,
     )
-    from .components.behave_units import (
-        fireline_intensity_to_base,
-        fireline_intensity_from_base,
-        speed_to_base,
-        speed_from_base,
-        slope_to_base,
-        length_to_base,
-        length_from_base,
-        area_from_base,
-        time_to_base,
-        time_from_base,
-        temp_to_base,
-        hpua_from_base,
-        reaction_intensity_from_base,
-        fraction_to_base,
-        fraction_from_base,
-        density_to_base,
-    )
-except ImportError:
-    from components.fuel_models import FuelModels
-    from components.fuel_models_array import _fuel_model_indices, build_fuel_lookup_arrays
-    from components.surface import (
+    from .components.surface import (
         build_particle_arrays,
+        calculate_fire_area,
+        calculate_fire_length,
+        calculate_fire_perimeter,
+        calculate_fire_width,
         calculate_fuelbed_intermediates,
         calculate_reaction_intensity,
         run_surface_fire,
-        calculate_fire_area,
-        calculate_fire_perimeter,
-        calculate_fire_length,
-        calculate_fire_width,
+    )
+except ImportError:
+    from components.behave_units import (
+        area_from_base,
+        density_to_base,
+        fireline_intensity_from_base,
+        fireline_intensity_to_base,
+        fraction_from_base,
+        fraction_to_base,
+        hpua_from_base,
+        length_from_base,
+        length_to_base,
+        reaction_intensity_from_base,
+        slope_to_base,
+        speed_from_base,
+        speed_to_base,
+        temp_to_base,
+        time_from_base,
+        time_to_base,
     )
     from components.crown import run_crown_fire
+    from components.fuel_models import FuelModels
+    from components.fuel_models_array import _fuel_model_indices, build_fuel_lookup_arrays
     from components.mortality import (
-        calculate_scorch_height,
         build_mortality_lookup,
         calculate_crown_scorch_mortality,
+        calculate_scorch_height,
     )
     from components.spot import (
-        calculate_spotting_from_surface_fire,
         calculate_spotting_from_burning_pile,
+        calculate_spotting_from_surface_fire,
         calculate_spotting_from_torching_trees,
     )
-    from components.behave_units import (
-        fireline_intensity_to_base,
-        fireline_intensity_from_base,
-        speed_to_base,
-        speed_from_base,
-        slope_to_base,
-        length_to_base,
-        length_from_base,
-        area_from_base,
-        time_to_base,
-        time_from_base,
-        temp_to_base,
-        hpua_from_base,
-        reaction_intensity_from_base,
-        fraction_to_base,
-        fraction_from_base,
-        density_to_base,
+    from components.surface import (
+        build_particle_arrays,
+        calculate_fire_area,
+        calculate_fire_length,
+        calculate_fire_perimeter,
+        calculate_fire_width,
+        calculate_fuelbed_intermediates,
+        calculate_reaction_intensity,
+        run_surface_fire,
     )
 
 

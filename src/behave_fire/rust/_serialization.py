@@ -3,6 +3,7 @@ from importlib import import_module
 
 from .._backend_contract import BINDING_API_VERSION
 
+
 def _require_extension():
     """Require the compatible native ABI when restoring an explicit native object.
 

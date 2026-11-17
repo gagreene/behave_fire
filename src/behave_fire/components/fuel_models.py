@@ -14,13 +14,19 @@ Metric model moisture-of-extinction percentages are stored as fractions here.
 
 try:
     from .behave_units import (
-        LengthUnits, FractionUnits, HeatOfCombustionUnits,
-        LoadingUnits, SurfaceAreaToVolumeUnits,
+        FractionUnits,
+        HeatOfCombustionUnits,
+        LengthUnits,
+        LoadingUnits,
+        SurfaceAreaToVolumeUnits,
     )
 except ImportError:
     from behave_units import (
-        LengthUnits, FractionUnits, HeatOfCombustionUnits,
-        LoadingUnits, SurfaceAreaToVolumeUnits,
+        FractionUnits,
+        HeatOfCombustionUnits,
+        LengthUnits,
+        LoadingUnits,
+        SurfaceAreaToVolumeUnits,
     )
 
 

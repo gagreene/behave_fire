@@ -7,7 +7,8 @@ from parity_support import assert_result, encode_value
 
 pytestmark = pytest.mark.rust
 native = pytest.importorskip("behave_fire.rust", exc_type=ImportError)
-from behave_fire.python import BehaveRun as PythonRun, FuelModels as PythonFuels
+from behave_fire.python import BehaveRun as PythonRun
+from behave_fire.python import FuelModels as PythonFuels
 from behave_fire.rust import _bridge
 
 

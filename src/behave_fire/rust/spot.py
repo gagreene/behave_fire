@@ -1,9 +1,12 @@
 """Explicit native spot adapters."""
 from __future__ import annotations
-from typing import Union, Optional
-import warnings
+
+from typing import Union
+
 import numpy as np
-from ._bridge import _call, _native
+
+from ._bridge import _call
+
 
 def calculate_spotting_from_burning_pile(
         flame_height_ft: Union[float, np.ndarray],

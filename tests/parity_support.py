@@ -1,10 +1,10 @@
 """Frozen explicit-reference oracle decoding and strict comparison."""
 
-from importlib import import_module
 import json
-from pathlib import Path
 import sys
 import warnings
+from importlib import import_module
+from pathlib import Path
 
 import numpy as np
 import pytest
@@ -14,8 +14,6 @@ TOOLS = Path(__file__).resolve().parents[1] / "tools"
 sys.path.insert(0, str(TOOLS))
 from export_rust_reference import contracts_match, encode_value
 from rust_reference_platform import acceptance_output
-
-
 
 
 def _assert_floating(actual, expected, single=False):
@@ -45,10 +43,11 @@ def _assert_native_error(operation, arguments, category):
 def _float64_case(case, operation, arguments):
     """Keep historical Python evidence separate from the new native model contract."""
     import builtins
-    from float64_model_reference import model_reference
-    from performance_cases import assert_outputs
+
     from behave_fire import python as python_backend
     from behave_fire.python import BehaveRun, FuelModels
+    from float64_model_reference import model_reference
+    from performance_cases import assert_outputs
 
     name = case['entry_point'].rsplit('.', 1)[1]
     if '.BehaveRun.' in case['entry_point']:

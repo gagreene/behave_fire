@@ -4,13 +4,12 @@ import copy
 import importlib.util
 import json
 import os
-from pathlib import Path
 import subprocess
 import sys
+from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
-
 
 TOOLS = Path(__file__).resolve().parents[1] / "tools"
 OPERATIONS = ("surface", "crown", "typed-crown", "typed-crown-b")
@@ -72,7 +71,8 @@ def _evidence():
             report["allocations"].append({"dataset": dataset, "operation": operation,
                                           "kernel_per_cell": 0, "encoder_per_cell": 0,
                                           "source_hash": "a" * 64, "extension_hash": "b" * 64})
-    from test_allocation_evidence_array import _evidence as allocation_fixture, _updated
+    from test_allocation_evidence_array import _evidence as allocation_fixture
+    from test_allocation_evidence_array import _updated
     envelope = allocation_fixture()
     prototype = copy.deepcopy(envelope["raw"])
     envelope["raw"] = []
@@ -205,6 +205,7 @@ def test_incomplete_or_unstable_samples_cannot_pass(problem):
 
 def test_mixed_case_layouts_are_distinct_and_reproducible():
     import numpy as np
+
     from behave_fire.python import BehaveRun, FuelModels
 
     cases = _tool("performance_cases")

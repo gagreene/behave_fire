@@ -1,9 +1,9 @@
 """Collect new evidence without granting stale-source acceptance or requiring native Python runs."""
 
-from pathlib import Path
 import shutil
 import subprocess
 import sys
+from pathlib import Path
 
 import pytest
 

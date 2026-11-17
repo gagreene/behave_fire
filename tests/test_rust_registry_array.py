@@ -19,8 +19,8 @@ def test_native_facade_constructor():
 
 
 def test_public_inventory_routes_exist():
-    import importlib
     import json
+
     from parity_support import ROOT
 
     entries = json.loads((ROOT / "tests/data/rust_api_inventory.json").read_text())["entries"]
@@ -48,7 +48,8 @@ def test_registry_round_trip_has_no_aliases():
 
 
 def test_registry_snapshots_all_fuel_slots():
-    from behave_fire.python import BehaveRun as PythonRun, FuelModels as PythonFuels
+    from behave_fire.python import BehaveRun as PythonRun
+    from behave_fire.python import FuelModels as PythonFuels
     from behave_fire.rust import BehaveRun, FuelModels
 
     original = PythonFuels()

@@ -2,6 +2,7 @@
 from ._bridge import _state
 from ._serialization import NativeState as _NativeState
 
+
 class SlopeTool(_NativeState):
     """SlopeTool calculates slope from map measurements and horizontal distances.
     Mirrors C++ SlopeTool.

@@ -1,11 +1,12 @@
 """Primitive f64 ownership, coercion, layouts, and validation boundaries."""
 import numpy as np
 import pytest
+
 pytestmark = pytest.mark.rust
 
 def test_model_calculations_never_call_reference(monkeypatch):
     import inspect
-    from behave_fire import components
+
     from behave_fire.rust import BehaveRun, FuelModels
 
     def forbidden(*args, **kwargs):

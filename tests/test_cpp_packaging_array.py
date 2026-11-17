@@ -1,13 +1,13 @@
 """Keep optional C++ reference sources and their notices outside distributions."""
 
-import importlib.util
 import hashlib
+import importlib.util
 import io
 import json
-from pathlib import Path
 import tarfile
 import tomllib
 import zipfile
+from pathlib import Path
 
 import pytest
 

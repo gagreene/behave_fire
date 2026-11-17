@@ -15,7 +15,9 @@ Usage
     depth_grid = lut['depth'][fuel_model_grid]   # shape matches fuel_model_grid
 """
 import numpy as np
+
 from .fuel_models import FuelModels
+
 _MAX_FM = 256
 
 def build_fuel_lookup_arrays(fuel_models: FuelModels) -> dict:

@@ -8,13 +8,12 @@ encoded inputs, outputs, warnings, cast fingerprints, and frozen diagnostics.
 import argparse
 import importlib.util
 import json
-from pathlib import Path
 import platform
 import sys
 import warnings
+from pathlib import Path
 
 import numpy as np
-
 
 ROOT = next(parent for parent in Path(__file__).resolve().parents if (parent / "pytest.ini").is_file())
 sys.path.insert(0, str(ROOT / "src"))

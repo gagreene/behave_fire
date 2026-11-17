@@ -50,7 +50,7 @@ def test_surface_model_maps_identifier_overflow_to_undefined_before_integer_conv
 
 
 def test_surface_model_normalizes_each_physical_operand_only_once(monkeypatch):
-    from behave_fire.rust import core, _model_api4
+    from behave_fire.rust import _model_api4, core
 
     model = BehaveRun(FuelModels())
     calls = []

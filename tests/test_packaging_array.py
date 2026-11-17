@@ -1,8 +1,8 @@
 """Packaging contract tests independent of the original checkout."""
 import importlib.util
-from pathlib import Path
 import tempfile
 import unittest
+from pathlib import Path
 
 TOOLS = Path(__file__).parents[1] / "tools"
 
@@ -45,6 +45,7 @@ class PackagingTests(unittest.TestCase):
 
     def test_numpy_markers_cover_exact_conditional_floor(self):
         import tomllib
+
         from packaging.markers import default_environment
         from packaging.requirements import Requirement
         project = tomllib.loads((TOOLS.parent / "pyproject.toml").read_text())["project"]

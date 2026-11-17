@@ -4,8 +4,8 @@ import ctypes
 import ctypes.util
 import hashlib
 import json
-from pathlib import Path
 import platform
+from pathlib import Path
 
 import numpy as np
 

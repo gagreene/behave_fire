@@ -16,18 +16,29 @@ Python reference implementation or the native Rust extension (backend="auto",
 behave_fire.rust. The explicit Python compatibility class remains in behave.py.
 """
 
+from ._version import get_version as _get_version
 from .auto import BehaveBackendWarning, BehaveRun, available_backends, get_backend
+from .components.behave_units import (
+    AreaUnits,
+    BasalAreaUnits,
+    DensityUnits,
+    FirelineIntensityUnits,
+    FractionUnits,
+    HeatOfCombustionUnits,
+    HeatPerUnitAreaUnits,
+    HeatSinkUnits,
+    HeatSourceAndReactionIntensityUnits,
+    LengthUnits,
+    LoadingUnits,
+    PressureUnits,
+    SlopeUnits,
+    SpeedUnits,
+    SurfaceAreaToVolumeUnits,
+    TemperatureUnits,
+    TimeUnits,
+)
 from .components.fuel_models import FuelModels
 from .components.species_master_table import SpeciesMasterTable
-from .components.behave_units import (
-    AreaUnits, BasalAreaUnits, LengthUnits, LoadingUnits, PressureUnits,
-    SurfaceAreaToVolumeUnits, SpeedUnits, FractionUnits, SlopeUnits,
-    DensityUnits, HeatOfCombustionUnits, HeatSinkUnits, HeatPerUnitAreaUnits,
-    HeatSourceAndReactionIntensityUnits, FirelineIntensityUnits,
-    TemperatureUnits, TimeUnits,
-)
-
-from ._version import get_version as _get_version
 
 __version__ = _get_version()
 __author__ = "Behave Development Team"

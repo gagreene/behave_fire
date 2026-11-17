@@ -1,10 +1,10 @@
 """Fresh-process contracts for automatic backend selection."""
 
 import os
-from pathlib import Path
 import subprocess
 import sys
 import textwrap
+from pathlib import Path
 
 import pytest
 
@@ -231,6 +231,7 @@ def test_stale_api_two_extension_is_rejected():
 
 def test_static_capability_contract_matches_tracked_inventory():
     import json
+
     from behave_fire._backend_contract import BINDING_API_VERSION, REQUIRED_CAPABILITIES
 
     inventory = json.loads((Path(__file__).parent / "data/rust_api_inventory.json").read_text(encoding="utf-8"))

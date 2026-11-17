@@ -8,9 +8,8 @@ import argparse
 import hashlib
 import importlib.util
 import json
-from pathlib import Path
 import sys
-
+from pathlib import Path
 
 sys.dont_write_bytecode = True
 SOURCE_REVISION = "7933789f00470c6bbfbe942dc22bdd7f74e192f9"
