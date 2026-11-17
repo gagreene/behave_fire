@@ -18,6 +18,7 @@ from decimal import ROUND_HALF_UP, Decimal
 from pathlib import Path
 
 import numpy as np
+import pytest
 
 # Locate the source package relative to this file, independent of the working directory.
 if str(Path(__file__).resolve().parents[1] / 'src') not in sys.path:
@@ -125,7 +126,6 @@ _TI = _TestInfo()
 # pytest fixture — provides the shared TestInfo to every test_ function
 # ---------------------------------------------------------------------------
 
-import pytest  # noqa: E402  (import after module-level code is intentional)
 
 source_dir = Path(__file__).resolve().parents[1] / "src"
 
