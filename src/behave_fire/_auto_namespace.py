@@ -1,7 +1,7 @@
 """Signature-preserving automatic component routing without native error replay."""
-from functools import wraps
 import importlib
 import inspect
+from functools import wraps
 from types import ModuleType
 
 from ._auto_routing import capture_call, choose_backend

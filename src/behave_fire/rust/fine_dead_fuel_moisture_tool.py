@@ -1,9 +1,12 @@
 """Explicit native fine_dead_fuel_moisture_tool adapters."""
 from __future__ import annotations
-from typing import Union, Optional
-import warnings
+
+from typing import Union
+
 import numpy as np
-from ._bridge import _call, _native
+
+from ._bridge import _call
+
 
 def calculate_fine_dead_fuel_moisture(
         dry_bulb_i: Union[int, np.ndarray],

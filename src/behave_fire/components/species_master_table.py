@@ -3,6 +3,7 @@
 
 from enum import IntEnum
 
+
 # Enums for geographic regions
 class GACC(IntEnum):
     """Geographic Area Coordination Centers"""
@@ -33,12 +34,12 @@ class CrownDamageEquationCode(IntEnum):
 
 class SpeciesMasterTableRecord:
     """Record structure for a single species in the master table"""
-    
-    def __init__(self, species_code="", scientific_name="", common_name="", 
-                 mortality_equation_number=-1, bark_equation_number=-1, 
-                 crown_coefficient_code=0, alaska=False, california=False, 
+
+    def __init__(self, species_code="", scientific_name="", common_name="",
+                 mortality_equation_number=-1, bark_equation_number=-1,
+                 crown_coefficient_code=0, alaska=False, california=False,
                  eastern_area=False, great_basin=False, northern_rockies=False,
-                 northwest=False, rocky_mountain=False, southern_area=False, 
+                 northwest=False, rocky_mountain=False, southern_area=False,
                  southwest=False, equation_type=EquationType.NotSet,
                  crown_damage_equation_code=CrownDamageEquationCode.NotSet):
         """
@@ -69,7 +70,7 @@ class SpeciesMasterTableRecord:
         self.mortality_equation_number = mortality_equation_number
         self.bark_equation_number = bark_equation_number
         self.crown_coefficient_code = crown_coefficient_code
-        
+
         # GACC region availability flags
         self.alaska = alaska
         self.california = california
@@ -80,14 +81,14 @@ class SpeciesMasterTableRecord:
         self.rocky_mountain = rocky_mountain
         self.southern_area = southern_area
         self.southwest = southwest
-        
+
         self.equation_type = equation_type
         self.crown_damage_equation_code = crown_damage_equation_code
-    
+
     def __repr__(self):
         """Return string representation of the record"""
         return f"SpeciesMasterTableRecord(code={self.species_code}, name={self.common_name}, type={self.equation_type})"
-    
+
     def get_gacc_availability(self, gacc):
         """
         Check if species is available in a specific GACC region.
@@ -114,12 +115,12 @@ class SpeciesMasterTableRecord:
 
 class SpeciesMasterTable:
     """Master table containing all species records for Behave fire behavior model"""
-    
+
     def __init__(self):
         """Initialize the species master table."""
         self.records = []
         self.initialize_master_table()
-    
+
     def add_species_record(self, record):
         """
         Add a new species master table record.
@@ -129,7 +130,7 @@ class SpeciesMasterTable:
         """
         if isinstance(record, SpeciesMasterTableRecord):
             self.records.append(record)
-    
+
     def contains_species_code(self, species_code):
         """
         Check if a species code exists in the table.
@@ -141,7 +142,7 @@ class SpeciesMasterTable:
             True if the species code is found, False otherwise
         """
         return self.get_species_table_index_from_species_code(species_code) >= 0
-    
+
     def get_all_records(self):
         """
         Get all species records.
@@ -150,7 +151,7 @@ class SpeciesMasterTable:
             List of all SpeciesMasterTableRecord objects
         """
         return self.records
-    
+
     def get_number_of_records(self):
         """
         Get the total number of species records in the table.
@@ -159,7 +160,7 @@ class SpeciesMasterTable:
             Number of records in the table
         """
         return len(self.records)
-    
+
     def get_species_record(self, species_code):
         """
         Get the first species record matching the given species code.
@@ -174,7 +175,7 @@ class SpeciesMasterTable:
         if index >= 0:
             return self.records[index]
         return None
-    
+
     def get_species_record_at_index(self, index):
         """
         Get the species record at the given index.
@@ -188,7 +189,7 @@ class SpeciesMasterTable:
         if 0 <= index < len(self.records):
             return self.records[index]
         return None
-    
+
     def get_species_record_by_code_and_type(self, species_code, equation_type):
         """
         Get a species record matching the given species code and equation type.
@@ -204,7 +205,7 @@ class SpeciesMasterTable:
         if index >= 0:
             return self.records[index]
         return None
-    
+
     def get_species_records_for_gacc_region(self, gacc):
         """
         Get all species records available in a specific GACC region.
@@ -216,7 +217,7 @@ class SpeciesMasterTable:
             List of SpeciesMasterTableRecord objects available in the region
         """
         return [record for record in self.records if record.get_gacc_availability(gacc)]
-    
+
     def get_species_records_for_gacc_region_and_equation_type(self, gacc, equation_type):
         """
         Get all species records available in a specific GACC region with a specific equation type.
@@ -228,9 +229,9 @@ class SpeciesMasterTable:
         Returns:
             List of SpeciesMasterTableRecord objects matching the criteria
         """
-        return [record for record in self.records 
+        return [record for record in self.records
                 if record.get_gacc_availability(gacc) and record.equation_type == equation_type]
-    
+
     def get_species_table_index_from_species_code(self, species_code):
         """
         Get the table index of a species by species code.
@@ -242,15 +243,15 @@ class SpeciesMasterTable:
             Index of the species in the records list, or -1 if not found
         """
         species_code_upper = species_code.upper()
-        
+
         for i, record in enumerate(self.records):
             if record.species_code == "":
                 break
             if record.species_code.upper() == species_code_upper:
                 return i
-        
+
         return -1
-    
+
     def get_species_table_index_from_species_code_and_equation_type(self, species_code, equation_type):
         """
         Get the table index of a species by species code and equation type.
@@ -263,26 +264,26 @@ class SpeciesMasterTable:
             Index of the species in the records list, or -1 if not found
         """
         species_code_upper = species_code.upper()
-        
+
         for i, record in enumerate(self.records):
             if record.species_code == "":
                 break
-            if (record.species_code.upper() == species_code_upper and 
+            if (record.species_code.upper() == species_code_upper and
                 record.equation_type == equation_type):
                 return i
-        
+
         return -1
-    
+
     def initialize_master_table(self):
         """Initialize the master table with all species records from the database."""
         # Clear existing records
         self.records = []
-        
+
         # Insert all species records from the Behave database
         # Format: (species_code, scientific_name, common_name, mort_eq, bark_eq, crown_coeff,
         #          alaska, california, eastern_area, great_basin, northern_rockies, northwest,
         #          rocky_mountain, southern_area, southwest, equation_type, crown_damage_code)
-        
+
         species_data = [
             ("ABAM", "Abies amabilis", "Pacific silver fir", 1, 26, 1, True, False, False, False, False, True, False, False, False, EquationType.CrownScorch, CrownDamageEquationCode.NotSet),
             ("ABBA", "Abies balsamea", "balsam fir", 1, 10, 2, False, False, True, False, False, False, False, False, False, EquationType.CrownScorch, CrownDamageEquationCode.NotSet),
@@ -309,12 +310,12 @@ class SpeciesMasterTable:
             ("PIAL", "Pinus albicaulis", "whitebark pine", 1, 39, 11, False, False, False, True, True, True, False, False, False, EquationType.CrownScorch, CrownDamageEquationCode.NotSet),
             ("PIBA", "Pinus balfouriana", "foxtail pine", 1, 39, 15, False, True, False, False, False, False, False, False, False, EquationType.CrownScorch, CrownDamageEquationCode.NotSet),
         ]
-        
+
         # Insert each species record
         for data in species_data:
             self.insert_record(*data)
-    
-    def insert_record(self, species_code, scientific_name, common_name, 
+
+    def insert_record(self, species_code, scientific_name, common_name,
                      mortality_equation, bark_equation, crown_coefficient_code,
                      alaska, california, eastern_area, great_basin, northern_rockies,
                      northwest, rocky_mountain, southern_area, southwest,
@@ -361,7 +362,7 @@ class SpeciesMasterTable:
             crown_damage_equation_code=crown_damage_equation_code
         )
         self.records.append(record)
-    
+
     def remove_species_record(self, species_code):
         """
         Remove a species master table record by species code.

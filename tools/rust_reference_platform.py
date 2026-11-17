@@ -6,14 +6,13 @@ different int32 conversion activates a live Python acceptance oracle. All other
 cases retain the frozen oracle, and no scientific tolerance changes here.
 """
 
-from copy import deepcopy
 import hashlib
-from importlib import import_module
 import json
 import warnings
+from copy import deepcopy
+from importlib import import_module
 
 import numpy as np
-
 
 # Exact original inputs prevent this rule from spreading to other scenarios.
 _CASES = {

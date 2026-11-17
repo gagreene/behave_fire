@@ -1,10 +1,8 @@
 """Run project selection and dependency-install checks in fresh external venvs."""
 
 import argparse
-from email.parser import BytesParser
 import json
 import os
-from pathlib import Path
 import platform
 import shutil
 import subprocess
@@ -12,6 +10,8 @@ import sys
 import tempfile
 import venv
 import zipfile
+from email.parser import BytesParser
+from pathlib import Path
 
 
 def _run(command, cwd, log=None):

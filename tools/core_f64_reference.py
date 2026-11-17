@@ -1,7 +1,7 @@
 """Independent Python f64 science plus the reviewed missing-data truth rules."""
 import hashlib
-from pathlib import Path
 import sys
+from pathlib import Path
 
 import numpy as np
 

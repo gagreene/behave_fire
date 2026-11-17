@@ -21,8 +21,9 @@ Index ranges (mirror FineDeadFuelMoistureTool):
     time_i     : 0–5   (6 time-of-day classes)
 """
 
-import numpy as np
 from typing import Union
+
+import numpy as np
 
 # ---------------------------------------------------------------------------
 # Lookup tables (inlined from the original FineDeadFuelMoistureTool class).

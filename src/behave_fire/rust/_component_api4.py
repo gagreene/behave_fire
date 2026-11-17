@@ -1,7 +1,7 @@
 """Owned primitive component transport with structural record and shape handling."""
 import numpy as np
-from ..components.fuel_models_array import _fuel_model_indices
 
+from ..components.fuel_models_array import _fuel_model_indices
 from ._bridge import _native
 from ._model_api4 import _buffer
 from ._numeric import broadcast_shape

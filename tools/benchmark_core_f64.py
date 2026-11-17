@@ -5,15 +5,15 @@ and binary exports are outside native timings. Final requested output storage is
 inside native timings. This campaign cannot certify public Rust backend speed.
 """
 import argparse
-from datetime import datetime, timezone
 import hashlib
 import json
 import os
-from pathlib import Path
 import platform
 import random
 import subprocess
 import sys
+from datetime import UTC, datetime
+from pathlib import Path
 from types import SimpleNamespace
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -165,7 +165,7 @@ def main():
     pairs, warm_calls = (7, 5) if arguments.phase == 'confirmation' else (3, 4)
     report = dict(identity, schema_version=1, contract_version=4, phase=arguments.phase,
                   scope='f64-raster-core-with-storage',
-                  started_utc=datetime.now(timezone.utc).isoformat(),
+                  started_utc=datetime.now(UTC).isoformat(),
                   release_profile='Cargo default release; opt-level=3, no count-alloc feature',
                   exclusions=['input construction', 'normalization', 'shape validation',
                               'correctness checking', 'binary export'],
@@ -205,7 +205,7 @@ def main():
             raise ValueError('Frozen source, binary, or environment changed at campaign end')
     except Exception as error:
         report['errors'].append(f'{type(error).__name__}: {error}')
-    report['finished_utc'] = datetime.now(timezone.utc).isoformat()
+    report['finished_utc'] = datetime.now(UTC).isoformat()
     report['assessment'] = check_core_screen(report)
     _save(report, arguments.output)
     print(json.dumps(report['assessment'], indent=2), flush=True)

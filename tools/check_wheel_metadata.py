@@ -1,10 +1,10 @@
 """Require native and pure distributions to expose identical project metadata."""
 
 import argparse
-from email.parser import BytesParser
-from pathlib import Path
 import re
 import zipfile
+from email.parser import BytesParser
+from pathlib import Path
 
 from packaging.requirements import Requirement
 from packaging.utils import parse_sdist_filename, parse_wheel_filename

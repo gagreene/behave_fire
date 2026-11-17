@@ -11,10 +11,10 @@ import importlib.util
 import itertools
 import json
 import os
-from pathlib import Path
 import shutil
 import subprocess
 import sys
+from pathlib import Path
 from types import SimpleNamespace
 
 from assemble_allocation_evidence import _hash

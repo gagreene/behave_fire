@@ -1,9 +1,12 @@
 """Explicit native safety adapters."""
 from __future__ import annotations
-from typing import Union, Optional
-import warnings
+
+from typing import Union
+
 import numpy as np
-from ._bridge import _call, _native
+
+from ._bridge import _call
+
 
 def calculate_safety_zone(
         flame_height_ft: Union[float, np.ndarray],

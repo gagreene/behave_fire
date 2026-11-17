@@ -6,7 +6,14 @@ descriptors, and the complete per-operation contract manifest are ready.
 import numpy as np
 
 from ._bridge import _native
-from ._numeric import broadcast_shape, normalize_control, normalize_fuel_identifier, normalize_physical, normalize_selector, plan_shapes
+from ._numeric import (
+    broadcast_shape,
+    normalize_control,
+    normalize_fuel_identifier,
+    normalize_physical,
+    normalize_selector,
+    plan_shapes,
+)
 
 _SHARED = ('m1h', 'm10h', 'm100h', 'mlh', 'mlw', 'wind_speed', 'wind_direction', 'slope', 'aspect')
 _FIELDS = {

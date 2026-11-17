@@ -3,11 +3,11 @@
 import argparse
 import json
 import os
-from pathlib import Path
 import re
 import shutil
 import struct
 import subprocess
+from pathlib import Path
 
 import cpp_controls as controls
 import cpp_reference as reference

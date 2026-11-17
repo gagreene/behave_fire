@@ -1,9 +1,9 @@
 """Expose installed metadata, with a binding-manifest fallback for source checkouts."""
 
-from importlib.metadata import PackageNotFoundError, distribution
-from pathlib import Path
 import re
 import tomllib
+from importlib.metadata import PackageNotFoundError, distribution
+from pathlib import Path
 
 
 def get_version():

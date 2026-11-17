@@ -1,9 +1,12 @@
 """Explicit native crown adapters."""
 from __future__ import annotations
-from typing import Union, Optional
-import warnings
+
+from typing import Union
+
 import numpy as np
-from ._bridge import _call, _native
+
+from ._bridge import _call
+
 
 def assign_final_crown_fire_behavior(
         is_surface_fire: Union[bool, np.ndarray],

@@ -25,6 +25,7 @@ def _artifact(row, root):
     :return: None; raises on a missing, altered, incomplete, or unequal artifact.
     """
     import numpy as np
+
     from performance_cases import assert_outputs
 
     descriptor = row['output_artifact']

@@ -2,10 +2,10 @@
 
 import argparse
 import json
-from pathlib import Path
 import random
 import sys
 import warnings
+from pathlib import Path
 
 import numpy as np
 

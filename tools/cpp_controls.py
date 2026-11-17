@@ -1,15 +1,14 @@
 """Explicit Percent-unit Surface controls and conditional calibration measurements."""
 
 import argparse
-import hashlib
 import importlib
 import json
 import math
-from pathlib import Path
 import platform
 import struct
 import subprocess
 import sys
+from pathlib import Path
 
 import cpp_reference as reference
 
@@ -56,6 +55,7 @@ def _port(case, backend, runners):
     :return: Five finite scalar outputs in the declared C++ comparison units.
     """
     import numpy as np
+
     from behave_fire import BehaveRun
 
     reference._validate_case(case)

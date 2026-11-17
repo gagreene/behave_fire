@@ -2,11 +2,11 @@
 
 import importlib.util
 import json
-from pathlib import Path
 import pickle
-from copy import copy, deepcopy
 import subprocess
 import sys
+from copy import copy, deepcopy
+from pathlib import Path
 
 import numpy as np
 import pytest
@@ -15,7 +15,6 @@ from behave_fire.behave import BehaveRun
 from behave_fire.components.fuel_models import FuelModels
 from behave_fire.components.species_master_table import SpeciesMasterTable, SpeciesMasterTableRecord
 from behave_fire.components.surface import calculate_eccentricity
-
 
 ROOT = Path(__file__).resolve().parents[1]
 

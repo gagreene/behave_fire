@@ -1,8 +1,12 @@
 """Native unit converters with the historical enum namespaces."""
 from __future__ import annotations
-from typing import Union, Optional
+
+from typing import Union
+
 import numpy as np
+
 from ._bridge import _call
+
 
 def area_from_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
     """Execute the explicit native operation.

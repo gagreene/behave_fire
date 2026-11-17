@@ -1,14 +1,14 @@
 """Run one bounded, frozen public serial screen or seven-new-pair confirmation."""
 import argparse
-from datetime import datetime, timezone
 import hashlib
 import json
 import os
-from pathlib import Path
 import platform
 import random
 import subprocess
 import sys
+from datetime import UTC, datetime
+from pathlib import Path
 from types import SimpleNamespace
 
 from benchmark_backends import _provenance
@@ -125,7 +125,7 @@ def main():
         validate_confirmation(screen, identity)
     pairs, warm = (7, 5) if args.phase == 'confirmation' else (3, 4)
     report = dict(identity, schema_version=1, contract_version=4, scope='public-serial-f64', phase=args.phase,
-        started_utc=datetime.now(timezone.utc).isoformat(), cases=[], diagnostics=[], errors=[],
+        started_utc=datetime.now(UTC).isoformat(), cases=[], diagnostics=[], errors=[],
         included=['public wrapper normalization', 'native copies', 'science', 'final encoding', 'NumPy transfer'],
         excluded=['imports', 'construction', 'input recipe generation', 'correctness validation', 'profiling'])
     if args.screen is not None:
@@ -160,7 +160,7 @@ def main():
                             print(f'{dataset}/{operation}/{cells} block={block} {backend}', flush=True)
     except Exception as error:
         report['errors'].append(f'{type(error).__name__}: {error}')
-    report['finished_utc'] = datetime.now(timezone.utc).isoformat()
+    report['finished_utc'] = datetime.now(UTC).isoformat()
     report['assessment'] = check_public_screen(report)
     _save(report, args.output)
     print(json.dumps(report['assessment'], indent=2), flush=True)

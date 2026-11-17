@@ -2,8 +2,8 @@
 import argparse
 import json
 import math
-from pathlib import Path
 import statistics
+from pathlib import Path
 
 from check_performance import _bootstrap
 

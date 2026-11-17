@@ -23,8 +23,7 @@ def _assert_result(actual, expected):
 
 @pytest.fixture
 def _usable_native(monkeypatch):
-    from behave_fire import auto
-    from behave_fire import rust
+    from behave_fire import auto, rust
     from behave_fire._backend_contract import REQUIRED_CAPABILITIES
 
     assert REQUIRED_CAPABILITIES.issubset(native.__capabilities__)
@@ -116,6 +115,7 @@ def test_incomplete_real_extension_remains_explicit_only(monkeypatch):
 
 def test_native_namespace_registry_routes(_usable_native, monkeypatch):
     import importlib
+
     from behave_fire import BehaveRun, FuelModels, available_backends, get_backend
 
     rust = get_backend("rust")

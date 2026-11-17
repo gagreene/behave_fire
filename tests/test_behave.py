@@ -14,47 +14,51 @@ Run from the repository root:
 """
 
 import sys
+from decimal import ROUND_HALF_UP, Decimal
 from pathlib import Path
+
 import numpy as np
-from decimal import Decimal, ROUND_HALF_UP
 
 # Locate the source package relative to this file, independent of the working directory.
 source_dir = Path(__file__).resolve().parents[1] / "src"
 if str(source_dir) not in sys.path:
     sys.path.insert(0, str(source_dir))
 
-from behave_fire.components.fuel_models import FuelModels
-from behave_fire.components.species_master_table import SpeciesMasterTable
-from behave_fire.components.behave_units import (
-    AreaUnits, LengthUnits, FractionUnits, SpeedUnits, SlopeUnits,
-    FirelineIntensityUnits, TemperatureUnits, HeatPerUnitAreaUnits,
-)
 # Keep this legacy harness on the explicit Python reference; native parity is
 # exercised by the required-Rust pytest suite.
 from behave_fire.behave import BehaveRun
-from behave_fire.components.surface import (
-    calculate_fire_area, calculate_fire_perimeter,
-    calculate_fire_length, calculate_fire_width,
-)
-from behave_fire.components.crown import run_crown_fire
-from behave_fire.components.mortality import (
-    calculate_scorch_height, build_mortality_lookup,
-    calculate_crown_scorch_mortality,
-)
-from behave_fire.components.ignite import (
-    calculate_firebrand_ignition_probability,
-    calculate_lightning_ignition_probability,
-)
-from behave_fire.components.safety import calculate_safety_zone
-from behave_fire.components.spot import (
-    calculate_spotting_from_surface_fire,
-    calculate_spotting_from_burning_pile,
+from behave_fire.components.behave_units import (
+    FirelineIntensityUnits,
+    SpeedUnits,
+    TemperatureUnits,
 )
 from behave_fire.components.fine_dead_fuel_moisture_tool import (
     calculate_fine_dead_fuel_moisture,
 )
-from behave_fire.components.vapor_pressure_deficit_calculator import calculate_vpd
+from behave_fire.components.fuel_models import FuelModels
 from behave_fire.components.fuel_models_array import build_fuel_lookup_arrays
+from behave_fire.components.ignite import (
+    calculate_firebrand_ignition_probability,
+    calculate_lightning_ignition_probability,
+)
+from behave_fire.components.mortality import (
+    build_mortality_lookup,
+    calculate_crown_scorch_mortality,
+    calculate_scorch_height,
+)
+from behave_fire.components.safety import calculate_safety_zone
+from behave_fire.components.species_master_table import SpeciesMasterTable
+from behave_fire.components.spot import (
+    calculate_spotting_from_burning_pile,
+    calculate_spotting_from_surface_fire,
+)
+from behave_fire.components.surface import (
+    calculate_fire_area,
+    calculate_fire_length,
+    calculate_fire_perimeter,
+    calculate_fire_width,
+)
+from behave_fire.components.vapor_pressure_deficit_calculator import calculate_vpd
 
 # ---------------------------------------------------------------------------
 # Shared tolerance and helpers — identical to test_behave.py
@@ -620,7 +624,7 @@ def test_scorch_height(ti):
            round_to_six(sh1), 7.617325, ERROR_TOLERANCE)
 
     # Case 2: 55 BTU/ft/s, 300 ft/min -> 300/88 mph, 70 degF  -> expected 9.923720 ft
-    from behave_fire.components.behave_units import speed_to_base, speed_from_base
+    from behave_fire.components.behave_units import speed_from_base
     ws_mph = speed_from_base(300.0, 5).item()  # fpm -> mph = 300/88
     sh2 = calculate_scorch_height(
         fireline_intensity_btu_ft_s=np.array([55.0]),
@@ -1247,8 +1251,8 @@ def test_scalar_inputs(ti):
 
     # --- Spot: scalar vs array ---
     from behave_fire.components.spot import (
-        calculate_spotting_from_surface_fire,
         calculate_spotting_from_burning_pile,
+        calculate_spotting_from_surface_fire,
     )
     sp_arr = calculate_spotting_from_surface_fire(
         flame_length_ft=np.array([15.811421]),
@@ -1305,8 +1309,8 @@ def test_scalar_inputs(ti):
 
     # --- Fire size helpers: scalar vs array ---
     from behave_fire.components.surface import (
-        calculate_fire_area, calculate_fire_perimeter,
-        calculate_fire_length, calculate_fire_width,
+        calculate_fire_area,
+        calculate_fire_perimeter,
     )
     fros, bros, lwr = 9.763838, 3.207761, 1.158917
     elapsed = 60.0
@@ -1376,7 +1380,7 @@ def test_crown_explicit_si_units(ti):
 
     # Imperial reference uses exact ft/lb values via the same unit functions the
     # SI path calls internally — ensures bit-identical physical inputs.
-    from behave_fire.components.behave_units import length_to_base, density_to_base
+    from behave_fire.components.behave_units import density_to_base, length_to_base
     _CBH_FT  = float(length_to_base(1.829, 4))   # 1.829 m → ft
     _CH_FT   = float(length_to_base(9.144, 4))   # 9.144 m → ft
     _CBD_PCF = float(density_to_base(0.481, 1))  # 0.481 kg/m³ → lb/ft³

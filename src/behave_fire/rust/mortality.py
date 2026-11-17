@@ -1,10 +1,14 @@
 """Explicit native mortality adapters."""
 from __future__ import annotations
-from typing import Union, Optional
+
 import warnings
+from typing import Optional, Union
+
 import numpy as np
+
 from ._bridge import _call, _native
 from .species_master_table import SpeciesMasterTable
+
 
 def build_mortality_lookup(species_master_table: Optional['SpeciesMasterTable']=None) -> np.ndarray:
     """Dispatch to the standalone native implementation.

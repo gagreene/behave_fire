@@ -24,8 +24,8 @@ Output GeoTIFFs → src/examples/results/
 PNG summary map  → src/examples/results/fire_behavior_summary.png
 """
 
-import sys
 import os
+import sys
 
 # ---------------------------------------------------------------------------
 # Path setup — allow running as a plain script OR via pytest/import
@@ -35,15 +35,16 @@ _SRC  = os.path.abspath(os.path.join(_HERE, ".."))
 if _SRC not in sys.path:
     sys.path.insert(0, _SRC)
 
-import numpy as np
-from scipy.ndimage import gaussian_filter
-import rasterio
-from rasterio.transform import from_origin
-from rasterio.crs import CRS
 import matplotlib
+import numpy as np
+import rasterio
+from rasterio.crs import CRS
+from rasterio.transform import from_origin
+from scipy.ndimage import gaussian_filter
+
 matplotlib.use("Agg")                 # non-interactive backend for script use
-import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
+import matplotlib.pyplot as plt
 from matplotlib.patches import Patch
 
 from behave_fire.behave import BehaveRun

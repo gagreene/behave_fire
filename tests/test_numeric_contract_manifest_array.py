@@ -19,7 +19,8 @@ def test_manifest_covers_each_operation_with_one_float64_contract():
 
 
 def test_stateless_physical_values_widen_and_missing_controls_raise():
-    from behave_fire.rust import spot, vapor_pressure_deficit_calculator as vpd
+    from behave_fire.rust import spot
+    from behave_fire.rust import vapor_pressure_deficit_calculator as vpd
 
     actual = spot.calculate_spotting_from_burning_pile(np.array([2.], np.float32), 5., 20.)
     assert actual.dtype == np.float64

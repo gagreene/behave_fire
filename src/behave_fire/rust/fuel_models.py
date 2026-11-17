@@ -10,10 +10,12 @@ Metric model moisture-of-extinction percentages are stored as fractions here.
   - savr_1h, savr_live_herb, savr_live_woody : ftÂ²/ftÂ³
   - is_dynamic, is_reserved, is_defined : bool
 """
+import copy
+
 from ._bridge import _native
 from ._serialization import NativeState as _NativeState
-import copy
-from .behave_units import LengthUnits, FractionUnits, HeatOfCombustionUnits, LoadingUnits, SurfaceAreaToVolumeUnits
+from .behave_units import FractionUnits, HeatOfCombustionUnits, LengthUnits, LoadingUnits, SurfaceAreaToVolumeUnits
+
 
 class FuelModels(_NativeState):
     """FuelModels manages all fuel model data including standard NFFL models and custom models.
@@ -321,7 +323,7 @@ class FuelModels(_NativeState):
         m = self.get(fuel_model_number)
         if not m:
             return True
-        return not any((m.get(k, 0.0) for k in ('dead_1h', 'dead_10h', 'dead_100h', 'live_herb', 'live_woody')))
+        return not any(m.get(k, 0.0) for k in ('dead_1h', 'dead_10h', 'dead_100h', 'live_herb', 'live_woody'))
 
     def is_fuel_model_defined(self, fuel_model_number):
         """Execute the explicit native operation.

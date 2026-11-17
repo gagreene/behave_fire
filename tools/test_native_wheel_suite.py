@@ -1,13 +1,11 @@
 """Run the checkout's complete regression suite against a compatible built wheel."""
 
 import argparse
-from contextlib import contextmanager
 import hashlib
 import importlib
 import importlib.util
 import json
 import os
-from pathlib import Path, PurePosixPath
 import platform
 import re
 import subprocess
@@ -15,6 +13,8 @@ import sys
 import tempfile
 import venv
 import zipfile
+from contextlib import contextmanager
+from pathlib import Path, PurePosixPath
 
 
 def _environment_command():

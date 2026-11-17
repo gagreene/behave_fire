@@ -1,11 +1,11 @@
 """Own original call values and select only verified complex Python counterparts."""
-from dataclasses import dataclass
 import copy
 import inspect
+from dataclasses import dataclass
 
 import numpy as np
-from ._ownership import _owned_inputs
 
+from ._ownership import _owned_inputs
 
 # Entries are parameter/layout proofs, never a catch-and-retry permission.
 # Further operations enter this table only with complete, nonzero-imaginary tests.

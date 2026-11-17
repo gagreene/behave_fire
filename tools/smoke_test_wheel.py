@@ -5,11 +5,11 @@ import importlib
 import importlib.metadata
 import importlib.util
 import json
-from pathlib import Path
 import platform
 import sys
 import sysconfig
 import warnings
+from pathlib import Path
 
 
 def _compare(actual, expected):

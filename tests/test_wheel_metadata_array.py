@@ -1,11 +1,11 @@
 """Check wheel metadata using real ZIP archives at the tool boundary."""
 
-from pathlib import Path
 import subprocess
 import sys
 import tempfile
 import unittest
 import zipfile
+from pathlib import Path
 
 ROOT = Path(__file__).parents[1]
 # These synthetic archives deliberately do not depend on the package's real version.

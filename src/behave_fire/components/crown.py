@@ -19,9 +19,11 @@ Key design points
     - Active             -> crown ROS/HPUA/FLI/FL
 """
 
-import numpy as np
-from .fuel_models_array import _fuel_model_indices
 from typing import Union
+
+import numpy as np
+
+from .fuel_models_array import _fuel_model_indices
 
 # ---------------------------------------------------------------------------
 # FM10 physical constants - pre-computed from the fuel model, used to

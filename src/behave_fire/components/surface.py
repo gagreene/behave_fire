@@ -41,9 +41,11 @@ Notes on units
     - canopy_*:    canopy_cover & crown_ratio as fraction (0–1); heights in feet
 """
 
-import numpy as np
-from .fuel_models_array import _fuel_model_indices
 from typing import Union
+
+import numpy as np
+
+from .fuel_models_array import _fuel_model_indices
 
 # ---------------------------------------------------------------------------
 # V3 — Particle array construction
@@ -55,9 +57,9 @@ from typing import Union
 
 def _load_surface_unit_converters():
     try:
-        from .behave_units import speed_to_base, speed_from_base, slope_to_base
+        from .behave_units import slope_to_base, speed_from_base, speed_to_base
     except ImportError:
-        from behave_units import speed_to_base, speed_from_base, slope_to_base
+        from behave_units import slope_to_base, speed_from_base, speed_to_base
     return speed_to_base, speed_from_base, slope_to_base
 
 def _mask_surface_result(

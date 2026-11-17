@@ -1,6 +1,6 @@
 """The cheap core gate must reject incomplete or misleading speed evidence."""
-import sys
 import importlib.util
+import sys
 from pathlib import Path
 
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'tools'))

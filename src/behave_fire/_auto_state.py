@@ -1,8 +1,8 @@
 """Value-only FireSize migration for verified complex state operations."""
 import copy
-from functools import wraps
 import importlib
 import inspect
+from functools import wraps
 
 from ._auto_routing import _complex_sites
 

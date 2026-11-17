@@ -101,6 +101,7 @@ def test_real_complex_real_calls_report_actual_backend_without_replaying_rust(de
 
 def test_selected_python_failure_propagates_without_native_replay(delegates, monkeypatch):
     from functools import wraps
+
     from behave_fire.behave import BehaveRun as PythonRun
 
     original = PythonRun.do_crown_run

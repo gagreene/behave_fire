@@ -1,9 +1,9 @@
 """Require current-host Python parity for every frozen integer direction input."""
 
 import json
-from pathlib import Path
 import sys
 import warnings
+from pathlib import Path
 
 import numpy as np
 import pytest

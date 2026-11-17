@@ -4,6 +4,7 @@ from enum import IntEnum
 from itertools import zip_longest
 
 import numpy as np
+
 from .._ownership import _OWNER
 
 

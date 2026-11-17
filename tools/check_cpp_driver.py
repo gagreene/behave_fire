@@ -2,8 +2,8 @@
 
 import argparse
 import json
-from pathlib import Path
 import subprocess
+from pathlib import Path
 
 from cpp_reference import PIN, ROOT, _digest, _document, _prepared_build, _text_digest, _unique_object, load_reference
 

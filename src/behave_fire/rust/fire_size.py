@@ -2,6 +2,7 @@
 from ._bridge import _state
 from ._serialization import NativeState as _NativeState
 
+
 class FireSize(_NativeState):
     """FireSize component for calculating various properties related to fire size.
 

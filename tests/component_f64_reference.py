@@ -46,7 +46,6 @@ def normalize(arguments):
 
 def reference(function, arguments):
     """Evaluate Python on the actual widened inputs, then apply reviewed missing rules."""
-    from behave_fire.components import crown
 
     args = normalize(arguments)
     result = function(**args)

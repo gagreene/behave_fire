@@ -1,8 +1,8 @@
 """Automatic preflight and native stages reuse one backend-neutral snapshot."""
 import os
-from pathlib import Path
 import subprocess
 import sys
+from pathlib import Path
 
 import numpy as np
 

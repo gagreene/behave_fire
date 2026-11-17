@@ -7,19 +7,18 @@ action; ``--check`` only reads fixtures and reports drift. The exporter imports
 
 import argparse
 import ast
-from copy import deepcopy
-from enum import Enum
 import hashlib
 import importlib
 import inspect
 import json
 import math
-from pathlib import Path
 import sys
 import warnings
+from copy import deepcopy
+from enum import Enum
+from pathlib import Path
 
 import numpy as np
-
 
 ROOT = next(parent for parent in Path(__file__).resolve().parents if (parent / "pytest.ini").is_file())
 SOURCE = ROOT / "src" / "behave_fire"
@@ -28,18 +27,15 @@ if str(ROOT / "src") not in sys.path:
     sys.path.insert(0, str(ROOT / "src"))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from rust_reference_platform import canonical_case
-
 from behave_fire.behave import BehaveRun
-from behave_fire.components import behave_units, crown, surface
-from behave_fire.components import fine_dead_fuel_moisture_tool, ignite, mortality
+from behave_fire.components import behave_units, crown, fine_dead_fuel_moisture_tool, ignite, mortality, surface
+from behave_fire.components.fire_size import FireSize
 from behave_fire.components.fuel_models import FuelModels
 from behave_fire.components.fuel_models_array import build_fuel_lookup_arrays
 from behave_fire.components.mortality import build_mortality_lookup
-from behave_fire.components.fire_size import FireSize
 from behave_fire.components.slope_tool import SlopeTool
-from behave_fire.components.species_master_table import SpeciesMasterTable
-from behave_fire.components.species_master_table import SpeciesMasterTableRecord
+from behave_fire.components.species_master_table import SpeciesMasterTable, SpeciesMasterTableRecord
+from rust_reference_platform import canonical_case
 
 
 def _arguments(function, values):

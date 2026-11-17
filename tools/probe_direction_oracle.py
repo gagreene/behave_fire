@@ -42,8 +42,8 @@ def main():
         atan2f.argtypes = [ctypes.c_float, ctypes.c_float]
         atan2f.restype = ctypes.c_float
     try:
-        from behave_fire.rust import surface as native
         from behave_fire import _rust
+        from behave_fire.rust import surface as native
         report["native_extension"] = _rust.__file__
         report["native_physical_dtype"] = "float64"
     except ImportError:
