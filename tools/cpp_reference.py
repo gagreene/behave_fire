@@ -145,7 +145,8 @@ def _json(path, value):
     :return: None; writes UTF-8 with finite JSON numbers.
     """
     Path(path).parent.mkdir(parents=True, exist_ok=True)
-    Path(path).write_text(json.dumps(value, indent=2, sort_keys=True, allow_nan=False) + "\n", encoding="utf-8", newline="\n")
+    Path(path).write_text(json.dumps(value, indent=2, sort_keys=True, allow_nan=False) + "\n", encoding="utf-8",
+        newline="\n")
 
 
 def _prepared_build(root):
@@ -206,7 +207,8 @@ def _rows(path):
     """
     rows = [json.loads(line, object_pairs_hook=_unique_object, parse_constant=_reject_constant)
             for line in Path(path).read_text(encoding="utf-8").splitlines()]
-    if not rows or any(not isinstance(row, dict) or not isinstance(row.get("id"), str) or not row["id"] for row in rows):
+    if not rows or any(not isinstance(row, dict) or not isinstance(row.get("id"), str) or not row["id"] for row in rows
+    ):
         raise ValueError("Empty dataset or invalid case identity")
     if len({row["id"] for row in rows}) != len(rows):
         raise ValueError("Duplicate case ID")
@@ -300,7 +302,8 @@ def _validate_case(case):
             raise ValueError("Invalid user WAF")
     elif "user_waf" in case:
         raise ValueError("Unused user WAF")
-    if "session" in case and (not isinstance(case["session"], str) or not re.fullmatch(r"[A-Za-z0-9_.-]{1,32}", case["session"])):
+    if "session" in case and (not isinstance(case["session"], str) or not re.fullmatch(r"[A-Za-z0-9_.-]{1,32}", case[
+        "session"])):
         raise ValueError("Invalid state sequence identity")
 
 
@@ -315,9 +318,11 @@ def _validate_matrix(cases, results, matrix):
     expected = {(model, height, orientation, method, factor)
                 for model in (1, 4, 124) for height in ("TwentyFoot", "TenMeter")
                 for orientation in ("North", "Upslope")
-                for method, factor in (("CrownRatio", None), ("UserInput", 0.0), ("UserInput", 0.4), ("UserInput", 1.0))}
+                for method, factor in (("CrownRatio", None), ("UserInput", 0.0), ("UserInput", 0.4), ("UserInput", 1.0))
+    }
     observed = {(case["fuel_model"], case.get("wind_height", "TwentyFoot"), case.get("wind_orientation", "North"),
-                 case.get("waf_method", "CrownRatio"), case.get("user_waf")) for case in cases if "-mode-" in case["id"]}
+                 case.get("waf_method", "CrownRatio"), case.get("user_waf")) for case in cases if "-mode-" in case["id"]
+    }
     if observed != expected or matrix["measured_mode_cases"] != len(expected) or not matrix["excluded_cpp_controls"]:
         raise ValueError("Incomplete supported Surface mode matrix")
     by_id = {row["id"]: row for row in results}
@@ -354,7 +359,8 @@ def assert_matches_cpp(actual, expected, policy):
             raise ValueError("Invalid approved tolerance")
         if not all(type(v) in (int, float) and math.isfinite(v) for v in (actual[field], expected[field])):
             raise ValueError("Finite output classification cannot compare nonfinite values")
-        if actual[field] == expected[field] == 0 and math.copysign(1, actual[field]) != math.copysign(1, expected[field]):
+        if actual[field] == expected[field] == 0 and math.copysign(1, actual[field]) != math.copysign(1, expected[field]
+        ):
             raise AssertionError(f"{field}: signed-zero mismatch")
         if not math.isclose(actual[field], expected[field], rel_tol=relative, abs_tol=absolute):
             raise AssertionError(f"{field}: port={actual[field]!r}, C++={expected[field]!r}")
@@ -417,7 +423,8 @@ def compare_backends(root, report_dir):
                          "wind_direction", "slope", "aspect", "canopy_cover", "canopy_height", "crown_ratio")}
             arguments.update(fuel_model_grid=case["fuel_model"], wind_speed_units=5, slope_units=1,
                              moisture_units=1, canopy_cover_units=1, crown_ratio_units=0,
-                             wind_orientation_mode="RelativeToNorth" if case.get("wind_orientation", "North") == "North" else "RelativeToUpslope",
+                             wind_orientation_mode="RelativeToNorth" if case.get("wind_orientation", "North")
+                == "North" else "RelativeToUpslope",
                              wind_height_mode=case.get("wind_height", "TwentyFoot"),
                              waf_method="UserInput" if case.get("waf_method") == "UserInput" else "UseCrownRatio",
                              user_waf=case.get("user_waf"), out_units={"spread_rate": 1})
@@ -475,7 +482,8 @@ def generate_reference(root, driver, attestation, reason):
     cases, profiles = _cases()
     directory.mkdir(parents=True, exist_ok=True)
     inputs = directory / "cases.jsonl"
-    inputs.write_text("".join(json.dumps(case, sort_keys=True, allow_nan=False) + "\n" for case in cases), encoding="utf-8", newline="\n")
+    inputs.write_text("".join(json.dumps(case, sort_keys=True, allow_nan=False) + "\n" for case in cases),
+        encoding="utf-8", newline="\n")
     output = directory / "results.jsonl"
     subprocess.run([str(driver), str(inputs), str(output)], check=True)
     results = _rows(output)
@@ -489,7 +497,8 @@ def generate_reference(root, driver, attestation, reason):
                     result_count=len(results), available=sum(r["status"] == "ok" for r in results),
                     seed=20261113, generation_reason=reason, oracle="pinned C++ external preparation capsule",
                     submodule_checkout_used=False, build_inputs=receipt, fields=list(FIELDS),
-                    prepared_overlay_sha256={p.name: _text_digest(p) for p in (root / "reference/behave_cpp_overlay").glob("*") if p.is_file()},
+                    prepared_overlay_sha256={p.name: _text_digest(p) for p in (root / "reference/behave_cpp_overlay"
+                    ).glob("*") if p.is_file()},
                     controls=dict(wind_orientation="North", wind_height="TwentyFoot", waf_method="CrownRatio"),
                     non_goals=["special fuels", "two fuel models", "scientific parity approval"],
                     input_units=dict(moistures="percent", wind="mph", slope="percent", canopy_cover="percent",
@@ -534,7 +543,8 @@ def load_reference(root=ROOT, *, measurement=False):
             available += 1
             if set(result) != {"id", "status", "upstream_entries", "geometry_entries", "output"}:
                 raise ValueError("Unexpected scientific result schema")
-            if type(result["upstream_entries"]) is not int or result["upstream_entries"] != 1 or result["geometry_entries"] != 1:
+            if type(result["upstream_entries"]) is not int or result["upstream_entries"] != 1 or result[
+                "geometry_entries"] != 1:
                 raise ValueError("Scientific output lacks the executed calculation")
             if set(result["output"]) != set(FIELDS) or not all(
                     type(v) in (int, float) and math.isfinite(v) for v in result["output"].values()):
@@ -549,7 +559,8 @@ def load_reference(root=ROOT, *, measurement=False):
     if available == 0 or available != manifest["available"]:
         raise ValueError("No executable observations or availability drift")
     profiles = _document(directory / "surface/profiles.json")
-    if set(profiles) != {case["id"] for case in cases} or not all(isinstance(value, str) and value for value in profiles.values()):
+    if set(profiles) != {case["id"] for case in cases} or not all(isinstance(value, str) and value
+        for value in profiles.values()):
         raise ValueError("Incomplete profile identities")
     _validate_matrix(cases, results, _document(directory / "surface/applicability.json"))
     policy = _document(directory / "tolerance-policy.json")
@@ -611,7 +622,9 @@ def main(argv=None):
         print(json.dumps(compare_backends(args.root, args.compare), indent=2))
     elif args.check:
         data = load_reference(args.root)
-        print(f"C++ observation integrity passed: {len(data['cases'])} cases; parity approval={data['policy']['approved']}")
+        print(
+            f"C++ observation integrity passed: {len(data['cases'])} cases; "
+            f"parity approval={data['policy']['approved']}")
     else:
         parser.error("Select --generate, --check, --compare, --sync-hashes, or --verify-live")
     return 0
@@ -629,7 +642,8 @@ def require_live_checkout(root=ROOT):
     sha = subprocess.check_output(["git", "-C", str(path), "rev-parse", "HEAD"], text=True).strip()
     if sha != PIN:
         raise ValueError("C++ dependency pin mismatch")
-    dirty = subprocess.check_output(["git", "-C", str(path), "status", "--porcelain", "--untracked-files=all"], text=True)
+    dirty = subprocess.check_output(["git", "-C", str(path), "status", "--porcelain", "--untracked-files=all"],
+        text=True)
     if _untrusted_changes(dirty):
         raise ValueError("Modified C++ dependency is not a trusted live oracle")
     manifest = _document(Path(root) / "tests/data/cpp_reference/surface/manifest.json")

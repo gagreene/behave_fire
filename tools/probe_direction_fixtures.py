@@ -42,7 +42,8 @@ def _encode(value):
     """
     array = np.asanyarray(value)
     values = np.ma.getdata(array).reshape(-1)
-    return {"values": [float(item) if np.isfinite(item) else "nan" if np.isnan(item) else "+inf" if item > 0 else "-inf" for item in values],
+    return {"values": [float(item) if np.isfinite(item) else "nan" if np.isnan(item) else "+inf" if item > 0
+        else "-inf" for item in values],
             "masks": np.ma.getmaskarray(array).reshape(-1).tolist(),
             "dtype": str(array.dtype), "masked_array": bool(np.ma.isMaskedArray(value)),
             "scalar_array": array.ndim == 0, "numpy_scalar": isinstance(value, np.generic),
@@ -82,8 +83,10 @@ def main():
         if case["normalize_half_loop"]:
             for key in ("x_component", "y_component"):
                 value = inputs[key]
-                inputs[key] = value.astype(np.float32) if isinstance(value, (np.ndarray, np.generic)) else np.float32(value)
-        identity = {key: case[key] for key in ("name", "inputs", "options", "normalize_half_loop", "original_loop_dtype")}
+                inputs[key] = value.astype(np.float32) if isinstance(value, (np.ndarray, np.generic)) else np.float32(
+                    value)
+        identity = {key: case[key] for key in ("name", "inputs", "options", "normalize_half_loop", "original_loop_dtype"
+        )}
         serialized = json.dumps(identity, sort_keys=True, separators=(",", ":"))
         result = {"index": index, "identity": identity,
                   "identity_sha256": hashlib.sha256(serialized.encode()).hexdigest()}

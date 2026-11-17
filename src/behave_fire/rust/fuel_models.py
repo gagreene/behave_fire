@@ -426,7 +426,13 @@ class FuelModels(_NativeState):
         savr_one_hour = SurfaceAreaToVolumeUnits.toBaseUnits(savr_one_hour, savr_units)
         savr_live_herbaceous = SurfaceAreaToVolumeUnits.toBaseUnits(savr_live_herbaceous, savr_units)
         savr_live_woody = SurfaceAreaToVolumeUnits.toBaseUnits(savr_live_woody, savr_units)
-        self.fuel_models_[fuel_model_number] = {'code': code[:3], 'name': name, 'fuel_bed_depth': fuel_bed_depth, 'moisture_of_extinction_dead': moisture_of_extinction_dead, 'heat_of_combustion_dead': heat_of_combustion_dead, 'heat_of_combustion_live': heat_of_combustion_live, 'dead_1h': fuel_load_one_hour, 'dead_10h': fuel_load_ten_hour, 'dead_100h': fuel_load_hundred_hour, 'live_herb': fuel_load_live_herbaceous, 'live_woody': fuel_load_live_woody, 'savr_1h': savr_one_hour, 'savr_live_herb': savr_live_herbaceous, 'savr_live_woody': savr_live_woody, 'is_dynamic': is_dynamic, 'is_reserved': False, 'is_defined': True}
+        self.fuel_models_[fuel_model_number] = {'code': code[:3], 'name': name, 'fuel_bed_depth': fuel_bed_depth,
+            'moisture_of_extinction_dead': moisture_of_extinction_dead,
+            'heat_of_combustion_dead': heat_of_combustion_dead, 'heat_of_combustion_live': heat_of_combustion_live,
+            'dead_1h': fuel_load_one_hour, 'dead_10h': fuel_load_ten_hour, 'dead_100h': fuel_load_hundred_hour,
+            'live_herb': fuel_load_live_herbaceous, 'live_woody': fuel_load_live_woody, 'savr_1h': savr_one_hour,
+            'savr_live_herb': savr_live_herbaceous, 'savr_live_woody': savr_live_woody, 'is_dynamic': is_dynamic,
+            'is_reserved': False, 'is_defined': True}
         return True
 
     def to_python(self):

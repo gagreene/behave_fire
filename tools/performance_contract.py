@@ -153,7 +153,8 @@ def requested_outputs(operation):
     :param operation: Surface, Crown, or one of the two original mixed-input recipes.
     :return: Sorted unique output names, including Crown classification.
     """
-    if operation not in ('surface', 'crown', 'typed-crown', 'typed-crown-b', 'masked-crown', 'masked-false-crown', 'typed-crown-c'):
+    if operation not in ('surface', 'crown', 'typed-crown', 'typed-crown-b', 'masked-crown', 'masked-false-crown',
+        'typed-crown-c'):
         raise ValueError('Unknown final acceptance operation')
     return sorted(_SURFACE if operation == 'surface' else _CROWN)
 

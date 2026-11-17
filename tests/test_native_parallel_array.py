@@ -51,7 +51,8 @@ def test_broadcast_crown_preserves_independent_field_shapes(width, independent):
             assert actual[field].dtype == expected[field].dtype, field
             assert np.ma.isMaskedArray(actual[field]) == np.ma.isMaskedArray(expected[field]), field
             np.testing.assert_array_equal(np.ma.getmaskarray(actual[field]), np.ma.getmaskarray(expected[field]))
-            np.testing.assert_allclose(np.ma.getdata(actual[field]), np.ma.getdata(expected[field]), rtol=1e-9, atol=1e-12, err_msg=field)
+            np.testing.assert_allclose(np.ma.getdata(actual[field]), np.ma.getdata(expected[field]), rtol=1e-9,
+                atol=1e-12, err_msg=field)
 
 
 def test_copy_callback_exception_propagates_before_workers():
@@ -77,7 +78,8 @@ def test_crown_three_axis_dependencies_preserve_typed_fields(width):
     inputs["slope"] = 12.0
     surface = dict(spread_rate=np.array([[[2.0]]], np.float32),
                    fireline_intensity=np.full((1, 1, 4), 200, np.uint16),
-                   heat_per_unit_area=np.ma.array(np.full((2, 1, 1), 1000.0), mask=np.array([False, True]).reshape(2, 1, 1)))
+                   heat_per_unit_area=np.ma.array(np.full((2, 1, 1), 1000.0), mask=np.array([False, True]).reshape(2, 1,
+                       1)))
     canopy = dict(canopy_base_height=np.full((1, 1, 4), 4.0), canopy_height=30.0,
                   canopy_bulk_density=np.full((1, 1, 4), .01), moisture_foliar=100.0)
     expected = model_reference(PythonRun(PythonFuels()).do_crown_run,
@@ -89,7 +91,8 @@ def test_crown_three_axis_dependencies_preserve_typed_fields(width):
             assert actual[field].dtype == expected[field].dtype, field
             assert np.ma.isMaskedArray(actual[field]) == np.ma.isMaskedArray(expected[field]), field
             np.testing.assert_array_equal(np.ma.getmaskarray(actual[field]), np.ma.getmaskarray(expected[field]))
-            np.testing.assert_allclose(np.ma.getdata(actual[field]), np.ma.getdata(expected[field]), rtol=1e-9, atol=1e-12, err_msg=field)
+            np.testing.assert_allclose(np.ma.getdata(actual[field]), np.ma.getdata(expected[field]), rtol=1e-9,
+                atol=1e-12, err_msg=field)
 
 
 def test_detached_progress_without_a_python_callback():
@@ -159,7 +162,8 @@ def test_empty_crown_groups_share_the_pre_detach_input_snapshot(monkeypatch):
         assert actual[field].shape == expected[field].shape, field
         assert actual[field].dtype == expected[field].dtype, field
         np.testing.assert_array_equal(np.ma.getmaskarray(actual[field]), np.ma.getmaskarray(expected[field]))
-        np.testing.assert_allclose(np.ma.getdata(actual[field]), np.ma.getdata(expected[field]), rtol=1e-9, atol=1e-12, err_msg=field)
+        np.testing.assert_allclose(np.ma.getdata(actual[field]), np.ma.getdata(expected[field]), rtol=1e-9, atol=1e-12,
+            err_msg=field)
 
 
 @pytest.mark.parametrize("shape", [(0,), (1,), (7,), (2, 3), (2, 1, 3), (2048,)])
@@ -353,7 +357,8 @@ def test_typed_supplied_crown_outputs_are_thread_independent():
                 assert actual[field].dtype == expected[field].dtype
                 assert actual[field].shape == expected[field].shape
                 np.testing.assert_array_equal(np.ma.getmaskarray(actual[field]), np.ma.getmaskarray(expected[field]))
-                np.testing.assert_array_equal(np.ma.getdata(actual[field]).view(np.uint8), np.ma.getdata(expected[field]).view(np.uint8))
+                np.testing.assert_array_equal(np.ma.getdata(actual[field]).view(np.uint8), np.ma.getdata(expected[field]
+                ).view(np.uint8))
 
 
 def test_unbound_instance_calls_honor_receiver_threads(monkeypatch):

@@ -22,7 +22,8 @@ ROOT = Path(__file__).resolve().parents[1]
 def _decode_value(value):
     if isinstance(value, dict):
         if "dtype" in value and "shape" in value and "values" in value:
-            return np.array([_decode_value(item) for item in value["values"]], dtype=value["dtype"]).reshape(value["shape"])
+            return np.array([_decode_value(item) for item in value["values"]], dtype=value["dtype"]).reshape(value[
+                "shape"])
         return {key: _decode_value(item) for key, item in value.items()}
     if isinstance(value, list):
         return [_decode_value(item) for item in value]
@@ -109,7 +110,8 @@ def test_export_inventory_covers_facade_and_standalone_routes():
         assert entries[name]["rust_core"]
         assert entries[name]["binding_route"]
     assert entries["behave_fire.behave.BehaveRun"]["aliases"] == ["behave_fire.BehaveRun"]
-    assert entries["behave_fire.components.surface.calculate_eccentricity"]["rust_core"] == "surface::calculate_eccentricity"
+    assert entries["behave_fire.components.surface.calculate_eccentricity"]["rust_core"
+    ] == "surface::calculate_eccentricity"
 
 
 def test_export_inventory_signatures_preserve_source_annotations_and_defaults():
@@ -165,7 +167,8 @@ def test_export_registry_receivers_replay_custom_clear_and_species_insert():
     assert clear["receiver_before"]["base"] == {"reference": "fuels:standard_records"}
     fuels = FuelModels()
     fuels.fuel_models_ = {slot["number"]: deepcopy(slot["record"])
-                         for slot in documents["tests/data/rust_port/fuels.json"]["slots"] if slot["record"] is not None}
+                         for slot in documents["tests/data/rust_port/fuels.json"]["slots"] if slot["record"] is not None
+    }
     for change in clear["receiver_before"]["overrides"]:
         fuels.fuel_models_[change["number"]] = _decode_value(change["record"])
     for number in clear["receiver_before"]["removed"]:
@@ -273,7 +276,8 @@ def test_reference_documents_are_deterministic_and_match_reviewed_fixtures():
     assert first == second
     for name, document in first.items():
         expected = json.loads((ROOT / name).read_text(encoding="utf-8"))
-        assert exporter.contracts_match(document, expected), f"{name}: {exporter.first_contract_difference(document, expected)}"
+        assert exporter.contracts_match(document, expected
+        ), f"{name}: {exporter.first_contract_difference(document, expected)}"
         assert document["provenance"]["python_reference_sha"] == "7933789f00470c6bbfbe942dc22bdd7f74e192f9"
 
 

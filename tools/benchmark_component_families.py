@@ -47,10 +47,12 @@ def _cases(count):
     coefficients = r.mortality.build_mortality_lookup()
     cases = {
         'surface.geometry': lambda: r.surface.calculate_eccentricity(f32),
-        'surface.direction': lambda: r.surface.calculate_direction_of_max_spread(f32, f32 * 0.5, f32 * 2., 'RelativeToUpslope', 0.),
+        'surface.direction': lambda: r.surface.calculate_direction_of_max_spread(f32, f32 * 0.5, f32 * 2.,
+            'RelativeToUpslope', 0.),
         'crown.component': lambda: r.crown.calculate_crown_heat_and_intensity(1000., values * 5., 3., 30., 0.02),
         'units': lambda: r.behave_units.LengthUnits.toBaseUnits(values, 1),
-        'mortality': lambda: r.mortality.calculate_crown_scorch_mortality(values * 20., 80., 0.5, 12., indices + 1, coefficients),
+        'mortality': lambda: r.mortality.calculate_crown_scorch_mortality(values * 20., 80., 0.5, 12., indices + 1,
+            coefficients),
         'vpd': lambda: r.vapor_pressure_deficit_calculator.calculate_vpd(values + 25., 0, 0.4, 0),
         'fdfm': lambda: r.fine_dead_fuel_moisture_tool.calculate_fine_dead_fuel_moisture(indices, 0, 0, 0, 0, 0, 0, 0),
         'ignite': lambda: r.ignite.calculate_firebrand_ignition_probability(values + 70., 0.5, 0.06),
@@ -119,18 +121,27 @@ if __name__ == '__main__':
             for sample in range(3):
                 selected = str(Path(args.site).resolve())
                 env = dict(os.environ, PYTHONPATH=selected, BEHAVE_PROBE_SITE=selected)
-                record = json.loads(subprocess.check_output([sys.executable, __file__, '--worker', str(cells)], text=True, env=env))
+                record = json.loads(subprocess.check_output([sys.executable, __file__, '--worker', str(cells)],
+                    text=True, env=env))
                 record.update(sample=sample, profile=False)
                 observations.append(record)
-                Path(args.output).write_text(json.dumps(dict(status='partial', observations=observations), indent=2) + '\n', encoding='utf-8')
+                Path(args.output).write_text(json.dumps(dict(status='partial', observations=observations), indent=2)
+                    + '\n', encoding='utf-8')
                 print(f'timed cells={cells} sample={sample} families={len(record["rows"])}', flush=True)
             selected = str(Path(args.probe_site).resolve())
             env = dict(os.environ, PYTHONPATH=selected, BEHAVE_PROBE_SITE=selected)
-            record = json.loads(subprocess.check_output([sys.executable, __file__, '--worker', str(cells), '--profile'], text=True, env=env))
+            record = json.loads(subprocess.check_output([sys.executable, __file__, '--worker', str(cells), '--profile'],
+                text=True, env=env))
             record.update(profile=True)
             observations.append(record)
-            Path(args.output).write_text(json.dumps(dict(status='partial', observations=observations), indent=2) + '\n', encoding='utf-8')
+            Path(args.output).write_text(json.dumps(dict(status='partial', observations=observations), indent=2) + '\n',
+                encoding='utf-8')
             print(f'profile cells={cells} families={len(record["rows"])}', flush=True)
-        report = dict(protocol='Three fresh timed processes per size; first plus three warm calls. Separate allocation-only process per size. Serial workers. Scalar-only state tools at one cell; vector geometry also measured.',
+        report = dict(
+            protocol=(
+                'Three fresh timed processes per size; first plus three warm calls. Separate allocation-only '
+                'process per size. Serial workers. Scalar-only state tools at one cell; vector geometry also '
+                'measured.'
+            ),
                       observations=observations)
         Path(args.output).write_text(json.dumps(report, indent=2, allow_nan=False) + '\n', encoding='utf-8')

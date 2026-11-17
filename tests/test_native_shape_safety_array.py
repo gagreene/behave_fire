@@ -17,94 +17,99 @@ _MAX_ELEMENTS = np.iinfo(np.intp).max // np.dtype(np.float64).itemsize
 def _probe_shape(shape, valid, layout='', integer=False, subclass=''):
     from behave_fire import _rust, rust
 
-    script = '''
-import importlib.util
-from importlib.machinery import ExtensionFileLoader
-import json
-import sys
-import behave_fire
-behave_fire.__path__.insert(0, sys.argv[2])
-spec = importlib.util.spec_from_file_location('behave_fire._rust', sys.argv[1], loader=ExtensionFileLoader('behave_fire._rust', sys.argv[1]))
-native = importlib.util.module_from_spec(spec)
-sys.modules[spec.name] = native
-spec.loader.exec_module(native)
-import numpy as np
-from behave_fire.components import surface as reference
-shape = tuple(json.loads(sys.argv[3]))
-valid = sys.argv[4] == 'True'
-layout = sys.argv[5]
-integer = sys.argv[6] == 'True'
-subclass = sys.argv[7]
-calls = []
-class UntrustedRavel(np.ndarray):
-    def ravel(self, *args, **kwargs):
-        calls.append('ravel')
-        return self if subclass == 'self' else 'malformed flatten result'
-if valid:
-    if layout:
-        values = (np.arange(6, dtype=np.int64 if integer else np.float64) + 2).reshape(shape)
-        if layout == 'reverse':
-            values = values[::-1]
-        elif layout == 'fortran':
-            values = np.asfortranarray(values)
-        else:
-            values.setflags(write=False)
-    else:
-        values = np.full(shape, 2., dtype=np.float64)
-    expected = reference.calculate_eccentricity(values)
-else:
-    try:
-        np.empty(shape, dtype=np.float64)
-    except ValueError:
-        pass
-    else:
-        raise AssertionError('NumPy accepted a shape classified as invalid')
-    values = np.empty(0, dtype=np.float64) if 0 in shape else np.array([2.])
-try:
-    integers = None
-    if integer:
-        bits = values.view(np.uint64)
-        if subclass:
-            bits = bits.view(UntrustedRavel)
-        integers = {'fire_length_to_width_ratio': ('int64', bits)}
-    elif subclass:
-        values = values.view(UntrustedRavel)
-    if subclass:
-        from behave_fire.rust import surface
-        result = {'': surface.calculate_eccentricity(values.astype(np.float64) if integer else values)}
-    else:
-        result = native.component_batch('surface.calculate_eccentricity', {'fire_length_to_width_ratio': values.astype(np.float64) if integer else values}, {}, {}, shape)
-except ValueError:
-    if valid:
-        raise
-except BaseException as error:
-    raise AssertionError('non-ValueError shape failure: ' + type(error).__name__) from error
-else:
-    if not valid:
-        raise AssertionError('native accepted an invalid NumPy shape')
-    assert calls == [], 'native invoked the overridable ndarray.ravel method'
-    actual = result['']
-    assert actual.shape == expected.shape == shape
-    assert actual.dtype == expected.dtype
-    assert not np.shares_memory(actual, values)
-    if len(shape) > 32:
-        assert actual.base is not None
-    del result, values, integers
-    import gc
-    gc.collect()
-    np.testing.assert_array_equal(actual, expected)
-    if actual.size:
-        index = (0,) * len(shape)
-        original = expected[index]
-        actual[index] = -7.
-        assert expected[index] == original
-print('shape contract passed')
-'''
+    script = (
+        '\n'
+        'import importlib.util\n'
+        'from importlib.machinery import ExtensionFileLoader\n'
+        'import json\n'
+        'import sys\n'
+        'import behave_fire\n'
+        'behave_fire.__path__.insert(0, sys.argv[2])\n'
+        "spec = importlib.util.spec_from_file_location('behave_fire._rust', sys.argv[1], "
+        "loader=ExtensionFileLoader('behave_fire._rust', sys.argv[1]))\n"
+        'native = importlib.util.module_from_spec(spec)\n'
+        'sys.modules[spec.name] = native\n'
+        'spec.loader.exec_module(native)\n'
+        'import numpy as np\n'
+        'from behave_fire.components import surface as reference\n'
+        'shape = tuple(json.loads(sys.argv[3]))\n'
+        "valid = sys.argv[4] == 'True'\n"
+        'layout = sys.argv[5]\n'
+        "integer = sys.argv[6] == 'True'\n"
+        'subclass = sys.argv[7]\n'
+        'calls = []\n'
+        'class UntrustedRavel(np.ndarray):\n'
+        '    def ravel(self, *args, **kwargs):\n'
+        "        calls.append('ravel')\n"
+        "        return self if subclass == 'self' else 'malformed flatten result'\n"
+        'if valid:\n'
+        '    if layout:\n'
+        '        values = (np.arange(6, dtype=np.int64 if integer else np.float64) + 2).reshape(shape)\n'
+        "        if layout == 'reverse':\n"
+        '            values = values[::-1]\n'
+        "        elif layout == 'fortran':\n"
+        '            values = np.asfortranarray(values)\n'
+        '        else:\n'
+        '            values.setflags(write=False)\n'
+        '    else:\n'
+        '        values = np.full(shape, 2., dtype=np.float64)\n'
+        '    expected = reference.calculate_eccentricity(values)\n'
+        'else:\n'
+        '    try:\n'
+        '        np.empty(shape, dtype=np.float64)\n'
+        '    except ValueError:\n'
+        '        pass\n'
+        '    else:\n'
+        "        raise AssertionError('NumPy accepted a shape classified as invalid')\n"
+        '    values = np.empty(0, dtype=np.float64) if 0 in shape else np.array([2.])\n'
+        'try:\n'
+        '    integers = None\n'
+        '    if integer:\n'
+        '        bits = values.view(np.uint64)\n'
+        '        if subclass:\n'
+        '            bits = bits.view(UntrustedRavel)\n'
+        "        integers = {'fire_length_to_width_ratio': ('int64', bits)}\n"
+        '    elif subclass:\n'
+        '        values = values.view(UntrustedRavel)\n'
+        '    if subclass:\n'
+        '        from behave_fire.rust import surface\n'
+        "        result = {'': surface.calculate_eccentricity(values.astype(np.float64) if integer else "
+        'values)}\n'
+        '    else:\n'
+        "        result = native.component_batch('surface.calculate_eccentricity', "
+        "{'fire_length_to_width_ratio': values.astype(np.float64) if integer else values}, {}, {}, shape)\n"
+        'except ValueError:\n'
+        '    if valid:\n'
+        '        raise\n'
+        'except BaseException as error:\n'
+        "    raise AssertionError('non-ValueError shape failure: ' + type(error).__name__) from error\n"
+        'else:\n'
+        '    if not valid:\n'
+        "        raise AssertionError('native accepted an invalid NumPy shape')\n"
+        "    assert calls == [], 'native invoked the overridable ndarray.ravel method'\n"
+        "    actual = result['']\n"
+        '    assert actual.shape == expected.shape == shape\n'
+        '    assert actual.dtype == expected.dtype\n'
+        '    assert not np.shares_memory(actual, values)\n'
+        '    if len(shape) > 32:\n'
+        '        assert actual.base is not None\n'
+        '    del result, values, integers\n'
+        '    import gc\n'
+        '    gc.collect()\n'
+        '    np.testing.assert_array_equal(actual, expected)\n'
+        '    if actual.size:\n'
+        '        index = (0,) * len(shape)\n'
+        '        original = expected[index]\n'
+        '        actual[index] = -7.\n'
+        '        assert expected[index] == original\n'
+        "print('shape contract passed')\n"
+    )
     environment = os.environ.copy()
     root = next(parent for parent in Path(__file__).resolve().parents if (parent/'pytest.ini').is_file())
     environment['PYTHONPATH'] = str(root/'src')
     completed = subprocess.run(
-        [sys.executable, '-c', script, _rust.__file__, str(Path(rust.__file__).parent.parent), json.dumps(shape), str(valid), layout, str(integer), subclass],
+        [sys.executable, '-c', script, _rust.__file__, str(Path(rust.__file__).parent.parent), json.dumps(shape), str(
+            valid), layout, str(integer), subclass],
         capture_output=True, text=True, env=environment, timeout=30,
     )
     assert completed.returncode == 0, f'exit={completed.returncode}\n{completed.stdout}\n{completed.stderr}'

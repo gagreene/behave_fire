@@ -95,7 +95,8 @@ def test_nan_injection_invalidates_only_heat_descendants():
     grid = CrownGrid(_crown_inputs(), shape=(3,), keep=('reaction_intensity',))
     grid.set_code('fire_type', 1)
     grid.run_remaining()
-    reaction, rate, ratio = grid.get('reaction_intensity'), grid.get('final_spread_rate'), grid.get('crown_length_to_width_ratio')
+    reaction, rate, ratio = grid.get('reaction_intensity'), grid.get('final_spread_rate'), grid.get(
+        'crown_length_to_width_ratio')
     grid.set('canopy_heat_per_unit_area', np.nan)
     np.testing.assert_array_equal(grid.get('reaction_intensity'), reaction)
     np.testing.assert_array_equal(grid.get('crown_length_to_width_ratio'), ratio)

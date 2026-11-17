@@ -105,7 +105,10 @@ class SpeciesMasterTableRecord(_NativeState):
         :param gacc: Input matching the public API.
         :return: Calculation result or updated receiver state.
         """
-        gacc_map = {GACC.Alaska: self.alaska, GACC.California: self.california, GACC.EasternArea: self.eastern_area, GACC.GreatBasin: self.great_basin, GACC.NorthernRockies: self.northern_rockies, GACC.Northwest: self.northwest, GACC.RockyMountain: self.rocky_mountain, GACC.SouthernArea: self.southern_area, GACC.Southwest: self.southwest}
+        gacc_map = {GACC.Alaska: self.alaska, GACC.California: self.california, GACC.EasternArea: self.eastern_area,
+            GACC.GreatBasin: self.great_basin, GACC.NorthernRockies: self.northern_rockies,
+            GACC.Northwest: self.northwest, GACC.RockyMountain: self.rocky_mountain,
+            GACC.SouthernArea: self.southern_area, GACC.Southwest: self.southwest}
         return gacc_map.get(gacc, False)
 
 class SpeciesMasterTable(_NativeState):
@@ -201,7 +204,8 @@ class SpeciesMasterTable(_NativeState):
         :param equation_type: Input matching the public API.
         :return: Calculation result or updated receiver state.
         """
-        return [record for record in self.records if record.get_gacc_availability(gacc) and record.equation_type == equation_type]
+        return [record for record in self.records if record.get_gacc_availability(gacc) and record.equation_type
+            == equation_type]
 
     def get_species_table_index_from_species_code(self, species_code):
         """Get the table index of a species by species code.
@@ -242,7 +246,9 @@ class SpeciesMasterTable(_NativeState):
 
         :return: Calculation result or updated receiver state.
         """
-        self.records = [SpeciesMasterTableRecord(**dict(row, equation_type=EquationType(row['equation_type']), crown_damage_equation_code=CrownDamageEquationCode(row['crown_damage_equation_code']))) for row in _native.defaults('species')]
+        self.records = [SpeciesMasterTableRecord(**dict(row, equation_type=EquationType(row['equation_type']),
+            crown_damage_equation_code=CrownDamageEquationCode(row['crown_damage_equation_code'])))
+            for row in _native.defaults('species')]
 
     def insert_record(
             self,
@@ -285,7 +291,12 @@ class SpeciesMasterTable(_NativeState):
         :param crown_damage_equation_code: Input matching the public API.
         :return: Calculation result or updated receiver state.
         """
-        record = SpeciesMasterTableRecord(species_code=species_code, scientific_name=scientific_name, common_name=common_name, mortality_equation_number=mortality_equation, bark_equation_number=bark_equation, crown_coefficient_code=crown_coefficient_code, alaska=alaska, california=california, eastern_area=eastern_area, great_basin=great_basin, northern_rockies=northern_rockies, northwest=northwest, rocky_mountain=rocky_mountain, southern_area=southern_area, southwest=southwest, equation_type=equation_type, crown_damage_equation_code=crown_damage_equation_code)
+        record = SpeciesMasterTableRecord(species_code=species_code, scientific_name=scientific_name,
+            common_name=common_name, mortality_equation_number=mortality_equation, bark_equation_number=bark_equation,
+            crown_coefficient_code=crown_coefficient_code, alaska=alaska, california=california,
+            eastern_area=eastern_area, great_basin=great_basin, northern_rockies=northern_rockies, northwest=northwest,
+            rocky_mountain=rocky_mountain, southern_area=southern_area, southwest=southwest,
+            equation_type=equation_type, crown_damage_equation_code=crown_damage_equation_code)
         self.records.append(record)
 
     def remove_species_record(self, species_code):

@@ -63,8 +63,11 @@ class AutoFireSize:
             bound = inspect.signature(target).bind(*args, **kwargs)
             sites = _complex_sites(vars(self._delegate), 'state') + _complex_sites(bound.arguments, 'arguments')
             if self._backend == 'rust' and sites:
-                if name not in _SUPPORTED or bound.arguments or any(layout not in ('scalar', 'array', 'masked') for _, layout in sites):
-                    raise TypeError(f'Automatic complex state support is not verified for FireSize.{name}; select Python explicitly.')
+                if name not in _SUPPORTED or bound.arguments or any(layout not in ('scalar', 'array', 'masked') for _,
+                    layout in sites):
+                    raise TypeError(
+                        f'Automatic complex state support is not verified for FireSize.{name}; '
+                        'select Python explicitly.')
                 from .auto import _warn_complex
                 from .components.fire_size import FireSize
 
@@ -90,7 +93,8 @@ class AutoFireSize:
 
         object.__setattr__(self, '_delegate', FireSize())
         object.__setattr__(self, '_backend', 'rust')
-        object.__setattr__(self, '_status', self._namespace_status if self._namespace_status is not None else {'backend': 'rust'})
+        object.__setattr__(self, '_status', self._namespace_status if self._namespace_status is not None else {
+            'backend': 'rust'})
 
     def __reduce__(self):
         """Serialize complete values and the pinned backend without pointers.

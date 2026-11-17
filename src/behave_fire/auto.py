@@ -240,7 +240,8 @@ class BehaveRun:
         call = capture_call('model.' + operation, getattr(PythonBehaveRun, operation), args, kwargs)
         if self._requested_backend == 'rust':
             if call.complex_sites:
-                raise TypeError('The explicit Rust backend accepts real physical inputs; select Python for complex data.')
+                raise TypeError(
+                    'The explicit Rust backend accepts real physical inputs; select Python for complex data.')
             selected = 'rust'
         else:
             selected = choose_backend(call, self._preferred_backend)

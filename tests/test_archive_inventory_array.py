@@ -71,8 +71,12 @@ class ArchiveTests(unittest.TestCase):
             (root / "rust/crates/behave-py").mkdir(parents=True)
             (root / "rust/crates/behave-py/Cargo.toml").write_text('[package]\nversion="1.0.0-beta.2"\n')
             (root / "src/example/_version.py").write_bytes((ROOT / "src/behave_fire/_version.py").read_bytes())
-            (root / "src/example/__init__.py").write_text('from ._version import get_version\n__version__=get_version()\n')
-            source = f'import sys; sys.path.insert(0,{str(root / "src")!r}); import example; assert example.__version__ == "1.0.0b2"'
+            (root / "src/example/__init__.py").write_text(
+                'from ._version import get_version\n__version__=get_version()\n')
+            source = (
+                f'import sys; sys.path.insert(0,{str(root / "src")!r}); '
+                'import example; assert example.__version__ == "1.0.0b2"'
+            )
             # Conflicting installed metadata must not mask this source checkout.
             installed = root / "unrelated/behave_fire-9.9.9.dist-info"
             installed.mkdir(parents=True)

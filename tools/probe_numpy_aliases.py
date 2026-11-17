@@ -33,7 +33,8 @@ def _evaluate(name, left, right):
         elif name == "ordinary_select_left":
             result = np.where(True, left, right)
         else:
-            operation = {"add": operator.add, "multiply": operator.mul, "power": operator.pow, "minimum": np.minimum}[name]
+            operation = {"add": operator.add, "multiply": operator.mul, "power": operator.pow, "minimum": np.minimum}[
+                name]
             result = operation(left, right)
         return _describe(result)
     except Exception as error:

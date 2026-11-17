@@ -48,5 +48,9 @@ def calculate_lightning_ignition_probability(
     :param charge_type: Input matching the reference API.
     :return: Owned native calculation result.
     """
-    warnings.warn('Lightning ignition probability is deprecated: upstream Behave removed this model because its scientific basis is no longer considered reliable. Retained for compatibility only.', DeprecationWarning, stacklevel=2)
+    warnings.warn(
+        (
+            'Lightning ignition probability is deprecated: upstream Behave removed this model because its '
+            'scientific basis is no longer considered reliable. Retained for compatibility only.'
+        ), DeprecationWarning, stacklevel=2)
     return _call('ignite.calculate_lightning_ignition_probability', locals())

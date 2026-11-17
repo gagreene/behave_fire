@@ -82,4 +82,6 @@ def build_fuel_lookup_arrays(fuel_models: FuelModels) -> dict:
         savr_lw[n] = m['savr_live_woody']
         is_dynamic[n] = bool(m['is_dynamic'])
         is_defined[n] = True
-    return {'depth': depth, 'moe_dead': moe_dead, 'hoc_dead': hoc_dead, 'hoc_live': hoc_live, 'dead_1h': dead_1h, 'dead_10h': dead_10h, 'dead_100h': dead_100h, 'live_herb': live_herb, 'live_woody': live_woody, 'savr_1h': savr_1h, 'savr_lh': savr_lh, 'savr_lw': savr_lw, 'is_dynamic': is_dynamic, 'is_defined': is_defined}
+    return {'depth': depth, 'moe_dead': moe_dead, 'hoc_dead': hoc_dead, 'hoc_live': hoc_live, 'dead_1h': dead_1h,
+        'dead_10h': dead_10h, 'dead_100h': dead_100h, 'live_herb': live_herb, 'live_woody': live_woody,
+        'savr_1h': savr_1h, 'savr_lh': savr_lh, 'savr_lw': savr_lw, 'is_dynamic': is_dynamic, 'is_defined': is_defined}

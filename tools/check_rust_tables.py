@@ -63,33 +63,45 @@ def _outputs(root):
     fuel_module = _load_component(root, "fuel_models")
     species_module = _load_component(root, "species_master_table")
     moisture = _load_component(root, "fine_dead_fuel_moisture_tool")
-    header = f"// Generated from explicit Python reference {SOURCE_REVISION}.\n// Regenerate with tools/check_rust_tables.py; do not edit by hand.\n"
+    header = (
+        f"// Generated from explicit Python reference {SOURCE_REVISION}.\n"
+        "// Regenerate with tools/check_rust_tables.py; do not edit by hand.\n"
+    )
     fuels = fuel_module.FuelModels().fuel_models_
     species = species_module.SpeciesMasterTable().records
     result = {}
-    fuel_lines = [header, "#[rustfmt::skip]", "fn standard_fuel_models() -> std::collections::BTreeMap<i32, FuelModel> {", "    ["]
+    fuel_lines = [header, "#[rustfmt::skip]",
+        "fn standard_fuel_models() -> std::collections::BTreeMap<i32, FuelModel> {", "    ["]
     fuel_fixture = []
     for number, record in sorted(fuels.items()):
         fields = [f"{key}: {_literal(record[key])}" for key in ("code", "name", *FUEL_NUMBERS, *FUEL_FLAGS)]
         fuel_lines.append(f"        ({number}, FuelModel {{ " + ", ".join(fields) + " }),")
-        fuel_fixture.append("\t".join([str(number), record["code"], record["name"], *[repr(float(record[key])) for key in FUEL_NUMBERS], *[str(record[key]).lower() for key in FUEL_FLAGS]]))
+        fuel_fixture.append("\t".join([str(number), record["code"], record["name"], *[repr(float(record[key]))
+            for key in FUEL_NUMBERS], *[str(record[key]).lower() for key in FUEL_FLAGS]]))
     fuel_lines.extend(["    ].into_iter().collect()", "}", ""])
     result["src/generated/fuel_models.rs"] = "\n".join(fuel_lines)
     species_lines = [header, "#[rustfmt::skip]", "fn standard_species() -> Vec<SpeciesRecord> {", "    vec!["]
     species_fixture = []
     for record in species:
-        fields = [f"{key}: {_literal(getattr(record, key))}" for key in ("species_code", "scientific_name", "common_name")]
-        fields.extend(f"{key}: {getattr(record, key)}" for key in ("mortality_equation_number", "bark_equation_number", "crown_coefficient_code"))
+        fields = [f"{key}: {_literal(getattr(record, key))}" for key in ("species_code", "scientific_name",
+            "common_name")]
+        fields.extend(f"{key}: {getattr(record, key)}" for key in ("mortality_equation_number", "bark_equation_number",
+            "crown_coefficient_code"))
         fields.extend(f"{key}: {_literal(getattr(record, key))}" for key in REGIONS)
-        fields.extend([f"equation_type: EquationType::{record.equation_type.name}", f"crown_damage_equation_code: CrownDamageEquationCode::{record.crown_damage_equation_code.name}"])
+        fields.extend([f"equation_type: EquationType::{record.equation_type.name}",
+            f"crown_damage_equation_code: CrownDamageEquationCode::{record.crown_damage_equation_code.name}"])
         species_lines.append("        SpeciesRecord { " + ", ".join(fields) + " },")
-        species_fixture.append("\t".join([record.species_code, record.scientific_name, record.common_name, str(record.mortality_equation_number), str(record.bark_equation_number), str(record.crown_coefficient_code), *[str(getattr(record, key)).lower() for key in REGIONS], str(int(record.equation_type)), str(int(record.crown_damage_equation_code))]))
+        species_fixture.append("\t".join([record.species_code, record.scientific_name, record.common_name, str(
+            record.mortality_equation_number), str(record.bark_equation_number), str(record.crown_coefficient_code), *[
+                str(getattr(record, key)).lower() for key in REGIONS], str(int(record.equation_type)), str(int(
+                    record.crown_damage_equation_code))]))
     species_lines.extend(["    ]", "}", ""])
     result["src/generated/species.rs"] = "\n".join(species_lines)
     moisture_lines = [header]
     moisture_fixture = []
     for name, table in [("REF", moisture._REF), ("CORR", moisture._CORR)]:
-        moisture_lines.extend([f"/// Complete {name} moisture lookup table from the explicit Python reference.", "#[rustfmt::skip]", f"pub const {name}: [[f64; {table.shape[1]}]; {table.shape[0]}] = ["])
+        moisture_lines.extend([f"/// Complete {name} moisture lookup table from the explicit Python reference.",
+            "#[rustfmt::skip]", f"pub const {name}: [[f64; {table.shape[1]}]; {table.shape[0]}] = ["])
         for i, row in enumerate(table):
             moisture_lines.append("    [" + ", ".join(_literal(float(value)) for value in row) + "],")
             moisture_fixture.extend(f"{name}\t{i}\t{j}\t{float(value)!r}" for j, value in enumerate(row))
@@ -99,8 +111,11 @@ def _outputs(root):
     result["tests/data/species.tsv"] = "\n".join(species_fixture) + "\n"
     result["tests/data/moisture.tsv"] = "\n".join(moisture_fixture) + "\n"
     names = ["behave_units", "fuel_models", "species_master_table", "fine_dead_fuel_moisture_tool"]
-    hashes = {name: hashlib.sha256((root / "src" / "behave_fire" / "components" / f"{name}.py").read_bytes().replace(b"\r\n", b"\n")).hexdigest() for name in names}
-    result["tests/data/tables_metadata.json"] = json.dumps({"reference_revision": SOURCE_REVISION, "source_sha256_lf": hashes, "fuel_records": len(fuels), "species_records": len(species), "moisture_cells": sum(table.size for table in (moisture._REF, moisture._CORR))}, indent=2, sort_keys=True) + "\n"
+    hashes = {name: hashlib.sha256((root / "src" / "behave_fire" / "components" / f"{name}.py").read_bytes().replace(
+        b"\r\n", b"\n")).hexdigest() for name in names}
+    result["tests/data/tables_metadata.json"] = json.dumps({"reference_revision": SOURCE_REVISION,
+        "source_sha256_lf": hashes, "fuel_records": len(fuels), "species_records": len(species), "moisture_cells": sum(
+            table.size for table in (moisture._REF, moisture._CORR))}, indent=2, sort_keys=True) + "\n"
     return result
 
 

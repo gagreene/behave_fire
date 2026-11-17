@@ -189,7 +189,8 @@ def test_run_case_rejects_frozen_native_output_and_accepts_live_python(monkeypat
     monkeypatch.setattr(module, function, lambda **arguments: support.decode(frozen["output"]))
     with pytest.raises(AssertionError):
         support.run_case(frozen)
-    monkeypatch.setattr(module, function, original if domain in ('crown', 'ignite', 'fine_dead_fuel_moisture_tool') else reference)
+    monkeypatch.setattr(module, function, original if domain in ('crown', 'ignite', 'fine_dead_fuel_moisture_tool')
+        else reference)
     support.run_case(frozen)
 
 

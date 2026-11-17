@@ -587,7 +587,10 @@ def build_inventory():
                     if inspect.isfunction(value) or inspect.isclass(value):
                         add(value, f"{canonical}.{member}", domain, "method")
     return _envelope({"entries": sorted(entries, key=lambda entry: entry["python_name"]),
-                      "coverage_note": "Destinations are planned, not claims of native implementation. Numerical scenarios are separate from registry/state contracts."})
+                      "coverage_note": (
+                          'Destinations are planned, not claims of native implementation. Numerical scenarios '
+                          'are separate from registry/state contracts.'
+                      )})
 
 
 def contracts_match(actual, expected, calculated=False, dtype="float64"):
@@ -605,7 +608,8 @@ def contracts_match(actual, expected, calculated=False, dtype="float64"):
         if actual.keys() != expected.keys():
             return False
         dtype = expected.get("dtype", dtype)
-        computed_fields = ("output", "state_before", "state_after", "p", "ib", "ib_crown", "ri", "ri_crown", "surface_results")
+        computed_fields = ("output", "state_before", "state_after", "p", "ib", "ib_crown", "ri", "ri_crown",
+            "surface_results")
         return all(contracts_match(actual[key], value, calculated or key in computed_fields, dtype)
                    for key, value in expected.items())
     if isinstance(expected, list):
@@ -678,7 +682,8 @@ def first_contract_difference(
         if actual.keys() != expected.keys():
             return f"{path}: actual keys={sorted(actual)}, expected keys={sorted(expected)}"
         dtype = expected.get("dtype", dtype)
-        computed_fields = ("output", "state_before", "state_after", "p", "ib", "ib_crown", "ri", "ri_crown", "surface_results")
+        computed_fields = ("output", "state_before", "state_after", "p", "ib", "ib_crown", "ri", "ri_crown",
+            "surface_results")
         for key in sorted(expected):
             difference = first_contract_difference(
                 actual[key], expected[key], calculated or key in computed_fields, dtype, f"{path}.{key}")

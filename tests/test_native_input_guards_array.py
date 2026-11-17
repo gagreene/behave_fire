@@ -43,7 +43,8 @@ def _forbid_native(*args, **kwargs):
 
 
 @pytest.mark.parametrize("scalar_type", [_CustomFloat, _CustomInt, _CustomNumpyFloat, _CustomNumpyInt])
-@pytest.mark.parametrize("container", [lambda value: value, lambda value: [value], lambda value: (value,)], ids=["scalar", "list", "tuple"])
+@pytest.mark.parametrize("container", [lambda value: value, lambda value: [value], lambda value: (value,)], ids=[
+    "scalar", "list", "tuple"])
 def test_crown_input_coercion_rejects_custom_numeric_conversion(scalar_type, container):
     from behave_fire.components import crown as reference
     from behave_fire.rust import crown
@@ -56,7 +57,8 @@ def test_crown_input_coercion_rejects_custom_numeric_conversion(scalar_type, con
 
 
 @pytest.mark.parametrize("scalar_type", [_CustomFloat, _CustomInt, _CustomNumpyFloat, _CustomNumpyInt])
-@pytest.mark.parametrize("container", [lambda value: value, lambda value: [value], lambda value: (value,)], ids=["scalar", "list", "tuple"])
+@pytest.mark.parametrize("container", [lambda value: value, lambda value: [value], lambda value: (value,)], ids=[
+    "scalar", "list", "tuple"])
 def test_custom_raw_scalars_are_rejected_before_native_execution(
         monkeypatch,
         scalar_type,

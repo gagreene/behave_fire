@@ -36,7 +36,8 @@ def test_manual_cpp_calibration_uses_both_compilers_and_only_manual_submodules()
             for step in ordinary.get('steps', []):
                 if step.get('uses') == 'actions/checkout@v4':
                     assert step.get('with', {}).get('submodules', 'false') == 'false'
-    assert workflow['jobs']['wheel-validation']['with']['cpp_calibration'] == "${{ github.event_name == 'workflow_dispatch' }}"
+    assert workflow['jobs']['wheel-validation']['with']['cpp_calibration'
+    ] == "${{ github.event_name == 'workflow_dispatch' }}"
 
 
 def test_maturin_action_uses_only_one_compatibility_setting():
@@ -90,13 +91,32 @@ def test_previous_fallback_hosts_require_native_choice():
         assert "--expect-choice rust" in install
 
 
+def test_wheels_require_the_quick_style_gate():
+    workflow = yaml.load((ROOT / '.github/workflows/ci.yml').read_text(), Loader=yaml.BaseLoader)
+    jobs = workflow['jobs']
+    assert 'style' in jobs, 'Dirty Python/order/Rust style must fail quick and release CI'
+    style = jobs['style']
+    assert style['if'] == jobs['python-only']['if'], 'Style must run in the quick tier and reusable CI'
+    assert 'style' in jobs['wheel-validation']['needs'], 'Wheels must wait for successful style checks'
+    assert style.get('continue-on-error', 'false') == 'false'
+    commands = [step['run'] for step in style['steps'] if 'run' in step]
+    assert any('python -m ruff check src tests tools' in command for command in commands)
+    assert any('python tools/check_function_order.py' in command for command in commands)
+    assert any('cargo fmt --manifest-path rust/Cargo.toml --all -- --check' in command for command in commands)
+    assert any('cargo clippy --manifest-path rust/Cargo.toml' in command and '-D warnings' in command
+               for command in commands)
+    assert all(step.get('continue-on-error', 'false') == 'false' for step in style['steps'])
+    assert not any(token in command for command in commands for token in ('--ignore', '--extend-exclude', '|| true'))
+
+
 class WorkflowTests(unittest.TestCase):
     def test_all_requested_certification_rows_remain_required(self):
         workflow = yaml.load((ROOT / ".github/workflows/wheel-validation.yml").read_text(), Loader=yaml.BaseLoader)
         jobs = workflow["jobs"]
         native = jobs["test-native-platforms"]["strategy"]["matrix"]
         rows = {(target["artifact"], python) for target, python in product(native["platform"], native["python"])}
-        expected = set(product(("linux-x86_64", "linux-aarch64", "macos-x86_64", "macos-arm64", "windows-x86_64"), ("3.11", "3.12", "3.13", "3.14")))
+        expected = set(product(("linux-x86_64", "linux-aarch64", "macos-x86_64", "macos-arm64", "windows-x86_64"), (
+            "3.11", "3.12", "3.13", "3.14")))
         self.assertEqual(rows, expected)
         alpine = jobs["test-alpine-platform"]["strategy"]["matrix"]
         self.assertEqual({row["python"] for row in alpine["include"]}, {"3.11", "3.12", "3.13", "3.14"})

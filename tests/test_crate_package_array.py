@@ -59,7 +59,9 @@ def test_complete_archive_passes(tmp_path):
     assert report["compressed_bytes"] < 5 * 1024 * 1024
 
 
-@pytest.mark.parametrize("source", [b'include_str!("../../outside.json")', b'include!(concat!(env!("OUT_DIR"), "/generated.rs"))', b'include_str !("../../outside.json")', b'include_bytes \n !("../../outside.bin")'])
+@pytest.mark.parametrize("source", [b'include_str!("../../outside.json")',
+    b'include!(concat!(env!("OUT_DIR"), "/generated.rs"))', b'include_str !("../../outside.json")',
+    b'include_bytes \n !("../../outside.bin")'])
 def test_external_or_generated_includes_fail(tmp_path, source):
     path = _archive(tmp_path, {"src/lib.rs": source})
     with pytest.raises(ValueError, match="include"):
@@ -78,9 +80,11 @@ def test_missing_svml_license_fails(tmp_path):
         CHECKER.inspect_crate(path)
 
 
-@pytest.mark.parametrize("extra", [b'[dependencies]\npyo3="0.27"\n', b'[build-dependencies]\ncc="1"\n', b'[target."cfg(windows)".dependencies]\nlibc="0.2"\n'])
+@pytest.mark.parametrize("extra", [b'[dependencies]\npyo3="0.27"\n', b'[build-dependencies]\ncc="1"\n',
+    b'[target."cfg(windows)".dependencies]\nlibc="0.2"\n'])
 def test_runtime_and_build_dependencies_fail(tmp_path, extra):
-    path = _archive(tmp_path, {"Cargo.toml": b'[package]\nname="behave-fire"\nversion="0.1.0"\nlicense="MIT AND BSD-3-Clause"\n' + extra})
+    path = _archive(tmp_path, {
+        "Cargo.toml": b'[package]\nname="behave-fire"\nversion="0.1.0"\nlicense="MIT AND BSD-3-Clause"\n' + extra})
     with pytest.raises(ValueError, match="dependenc"):
         CHECKER.inspect_crate(path)
 

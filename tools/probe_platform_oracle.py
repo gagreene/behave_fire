@@ -43,7 +43,8 @@ def main(argv=None):
     :return: Zero; observed mismatches remain diagnostic JSON fields.
     """
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--native", action="store_true", help="Also execute native calls in an environment with an installed extension")
+    parser.add_argument("--native", action="store_true",
+        help="Also execute native calls in an environment with an installed extension")
     options = parser.parse_args(argv)
     exporter = _exporter()
     report = {"host": {"machine": platform.machine(), "platform": platform.platform(),
@@ -80,7 +81,8 @@ def main(argv=None):
             from behave_fire import rust
             native = exporter._case(getattr(getattr(rust, domain), name), values, current["id"])
             record["native"] = native
-            record["native_matches_python"] = exporter.contracts_match(native.get("output"), current.get("output"), True)
+            record["native_matches_python"] = exporter.contracts_match(native.get("output"), current.get("output"), True
+            )
             record["native_matches_frozen"] = exporter.contracts_match(native.get("output"), frozen.get("output"), True)
             record["native_exception_matches_python"] = native.get("exception") == current.get("exception")
             record["native_warnings_match_python"] = native["warnings"] == current["warnings"]

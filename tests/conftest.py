@@ -6,7 +6,8 @@ import pytest
 
 
 def pytest_addoption(parser):
-    parser.addoption("--require-rust", action="store_true", default=False, help="Require the native extension and binding API version 4.")
+    parser.addoption("--require-rust", action="store_true", default=False,
+        help="Require the native extension and binding API version 4.")
 
 
 def pytest_collection_modifyitems(config, items):

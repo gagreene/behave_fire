@@ -90,7 +90,8 @@ def inspect_crate(path):
     with tarfile.open(path, "r:gz") as archive:
         for entry in archive:
             parts = entry.name.rstrip("/").split("/")
-            if entry.name.startswith("/") or "\\" in entry.name or any(not part or part in ("..", ".") or ":" in part for part in parts):
+            if entry.name.startswith("/") or "\\" in entry.name or any(not part or part in ("..", ".") or ":" in part
+                for part in parts):
                 raise ValueError(f"unsafe archive path: {entry.name}")
             if len(parts) < 2 or not parts[0]:
                 raise ValueError(f"missing package directory in archive path: {entry.name}")

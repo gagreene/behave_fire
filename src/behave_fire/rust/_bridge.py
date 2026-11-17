@@ -14,17 +14,49 @@ if getattr(_native, '__binding_api_version__', None) != BINDING_API_VERSION:
     raise ImportError('Rust backend has an incompatible binding API; rebuild or reinstall behave-fire.')
 _PARTICLES = ('load_dead', 'load_live', 'savr_dead', 'savr_live', 'moisture_dead', 'moisture_live')
 _PARTICLE_FIELDS = _PARTICLES + ('hoc_dead', 'hoc_live', 'depth', 'moe_dead', 'is_defined')
-_REACTION_FIELDS = ('sigma', 'relative_packing_ratio', 'w_moist_dead', 'w_moist_live', 'moe_dead', 'moe_live', 'w_silica_dead', 'w_silica_live', 'wfl_dead', 'wfl_live', 'w_heat_dead', 'w_heat_live')
-_SPREAD_FIELDS = ('sigma', 'relative_packing_ratio', 'propagating_flux', 'heat_sink', 'depth', 'packing_ratio', 'is_defined')
-_LOOKUP_FIELDS = ('depth', 'moe_dead', 'hoc_dead', 'hoc_live', 'dead_1h', 'dead_10h', 'dead_100h', 'live_herb', 'live_woody', 'savr_1h', 'savr_lh', 'savr_lw', 'is_dynamic', 'is_defined')
-_FUEL_KEYS = {'depth': 'fuel_bed_depth', 'moe_dead': 'moisture_of_extinction_dead', 'hoc_dead': 'heat_of_combustion_dead', 'hoc_live': 'heat_of_combustion_live', 'savr_lh': 'savr_live_herb', 'savr_lw': 'savr_live_woody'}
-_UNIT_COUNTS = {'Area': 6, 'Length': 8, 'Loading': 4, 'Pressure': 9, 'SurfaceAreaToVolume': 4, 'Speed': 7, 'Density': 2, 'HeatPerUnitArea': 3, 'HeatSourceAndReactionIntensity': 5, 'FirelineIntensity': 5, 'Time': 5}
-_EMPTY_KEYS = {'calculate_safety_zone': ('separation_distance', 'radius', 'area'), 'calculate_crown_scorch_mortality': ('crown_length_scorch', 'crown_volume_scorch', 'probability_mortality'), 'calculate_vpd': ('vpd', 'actual_vp', 'saturated_vp'), 'calculate_surface_rate_vector': ('x_component', 'y_component', 'rate_vector'), 'calculate_surface_wind_coefficients': ('safe_sigma', 'wind_c', 'wind_b', 'wind_e')}
-_EMPTY_KEYS['run_surface_fire'] = ('spread_rate', 'backing_spread_rate', 'flanking_spread_rate', 'flame_length', 'fireline_intensity', 'heat_per_unit_area', 'effective_wind_speed', 'fire_length_to_width_ratio', 'eccentricity', 'direction_of_max_spread', 'residence_time', 'reaction_intensity', 'midflame_wind_speed', 'no_wind_no_slope_spread_rate')
-_EMPTY_KEYS['build_particle_arrays'] = ('hoc_dead', 'hoc_live', 'depth', 'moe_dead', 'is_defined') + tuple(f'{key}.{j}' for key in _PARTICLES for j in range(5))
-_EMPTY_KEYS['calculate_fuelbed_intermediates'] = ('sigma', 'bulk_density', 'packing_ratio', 'relative_packing_ratio', 'heat_sink', 'propagating_flux', 'w_heat_dead', 'w_heat_live', 'w_silica_dead', 'w_silica_live', 'w_moist_dead', 'w_moist_live', 'wfl_dead', 'wfl_live', 'moe_dead', 'moe_live', 'frac_dead', 'frac_live', 'depth', 'is_defined')
-_EMPTY_KEYS.update({'assign_final_crown_fire_behavior': ('final_spread_rate', 'final_heat_per_unit_area', 'final_fireline_intensity', 'final_flame_length'), 'calculate_crown_fire_ratios': ('crown_fire_transition_ratio', 'crown_fire_active_ratio'), 'calculate_crown_heat_and_intensity': ('crown_fuel_load', 'canopy_heat_per_unit_area', 'crown_fire_heat_per_unit_area', 'crown_fire_line_intensity', 'crown_flame_length'), 'calculate_passive_crown_fire_behavior': ('passive_crown_fire_spread_rate', 'passive_crown_fire_heat_per_unit_area', 'passive_crown_fire_line_intensity', 'passive_crown_fire_flame_length'), 'classify_crown_fire_type': ('fire_type', 'is_surface_fire', 'is_passive_crown', 'is_active_crown'), 'run_crown_fire': ('crown_fire_spread_rate', 'crown_critical_fire_spread_rate', 'crown_flame_length', 'crown_fire_line_intensity', 'crown_critical_surface_fire_line_intensity', 'crown_fire_heat_per_unit_area', 'canopy_heat_per_unit_area', 'crown_fire_transition_ratio', 'crown_fire_active_ratio', 'crown_length_to_width_ratio', 'fire_type', 'surface_fire_critical_spread_rate', 'crowning_surface_fire_spread_rate', 'crown_fraction_burned', 'passive_crown_fire_spread_rate', 'passive_crown_fire_heat_per_unit_area', 'passive_crown_fire_line_intensity', 'passive_crown_fire_flame_length', 'final_spread_rate', 'final_heat_per_unit_area', 'final_fireline_intensity', 'final_flame_length')})
-_EMPTY_KEYS['calculate_crown_surface_fire'] = tuple('p_crown.' + key for key in _EMPTY_KEYS['build_particle_arrays']) + tuple('ib_crown.' + key for key in _EMPTY_KEYS['calculate_fuelbed_intermediates']) + tuple('crown_surface.' + key for key in _EMPTY_KEYS['run_surface_fire']) + ('ri_crown', 'crown_fire_spread_rate', 'crown_length_to_width_ratio')
+_REACTION_FIELDS = ('sigma', 'relative_packing_ratio', 'w_moist_dead', 'w_moist_live', 'moe_dead', 'moe_live',
+    'w_silica_dead', 'w_silica_live', 'wfl_dead', 'wfl_live', 'w_heat_dead', 'w_heat_live')
+_SPREAD_FIELDS = ('sigma', 'relative_packing_ratio', 'propagating_flux', 'heat_sink', 'depth', 'packing_ratio',
+    'is_defined')
+_LOOKUP_FIELDS = ('depth', 'moe_dead', 'hoc_dead', 'hoc_live', 'dead_1h', 'dead_10h', 'dead_100h', 'live_herb',
+    'live_woody', 'savr_1h', 'savr_lh', 'savr_lw', 'is_dynamic', 'is_defined')
+_FUEL_KEYS = {'depth': 'fuel_bed_depth', 'moe_dead': 'moisture_of_extinction_dead',
+    'hoc_dead': 'heat_of_combustion_dead', 'hoc_live': 'heat_of_combustion_live', 'savr_lh': 'savr_live_herb',
+    'savr_lw': 'savr_live_woody'}
+_UNIT_COUNTS = {'Area': 6, 'Length': 8, 'Loading': 4, 'Pressure': 9, 'SurfaceAreaToVolume': 4, 'Speed': 7, 'Density': 2,
+    'HeatPerUnitArea': 3, 'HeatSourceAndReactionIntensity': 5, 'FirelineIntensity': 5, 'Time': 5}
+_EMPTY_KEYS = {'calculate_safety_zone': ('separation_distance', 'radius', 'area'), 'calculate_crown_scorch_mortality': (
+    'crown_length_scorch', 'crown_volume_scorch', 'probability_mortality'), 'calculate_vpd': ('vpd', 'actual_vp',
+        'saturated_vp'), 'calculate_surface_rate_vector': ('x_component', 'y_component', 'rate_vector'),
+    'calculate_surface_wind_coefficients': ('safe_sigma', 'wind_c', 'wind_b', 'wind_e')}
+_EMPTY_KEYS['run_surface_fire'] = ('spread_rate', 'backing_spread_rate', 'flanking_spread_rate', 'flame_length',
+    'fireline_intensity', 'heat_per_unit_area', 'effective_wind_speed', 'fire_length_to_width_ratio', 'eccentricity',
+    'direction_of_max_spread', 'residence_time', 'reaction_intensity', 'midflame_wind_speed',
+    'no_wind_no_slope_spread_rate')
+_EMPTY_KEYS['build_particle_arrays'] = ('hoc_dead', 'hoc_live', 'depth', 'moe_dead', 'is_defined') + tuple(f'{key}.{j}'
+    for key in _PARTICLES for j in range(5))
+_EMPTY_KEYS['calculate_fuelbed_intermediates'] = ('sigma', 'bulk_density', 'packing_ratio', 'relative_packing_ratio',
+    'heat_sink', 'propagating_flux', 'w_heat_dead', 'w_heat_live', 'w_silica_dead', 'w_silica_live', 'w_moist_dead',
+    'w_moist_live', 'wfl_dead', 'wfl_live', 'moe_dead', 'moe_live', 'frac_dead', 'frac_live', 'depth', 'is_defined')
+_EMPTY_KEYS.update({'assign_final_crown_fire_behavior': ('final_spread_rate', 'final_heat_per_unit_area',
+    'final_fireline_intensity', 'final_flame_length'), 'calculate_crown_fire_ratios': ('crown_fire_transition_ratio',
+        'crown_fire_active_ratio'), 'calculate_crown_heat_and_intensity': ('crown_fuel_load',
+            'canopy_heat_per_unit_area', 'crown_fire_heat_per_unit_area', 'crown_fire_line_intensity',
+            'crown_flame_length'), 'calculate_passive_crown_fire_behavior': ('passive_crown_fire_spread_rate',
+                'passive_crown_fire_heat_per_unit_area', 'passive_crown_fire_line_intensity',
+                'passive_crown_fire_flame_length'), 'classify_crown_fire_type': ('fire_type', 'is_surface_fire',
+                    'is_passive_crown', 'is_active_crown'), 'run_crown_fire': ('crown_fire_spread_rate',
+                        'crown_critical_fire_spread_rate', 'crown_flame_length', 'crown_fire_line_intensity',
+                        'crown_critical_surface_fire_line_intensity', 'crown_fire_heat_per_unit_area',
+                        'canopy_heat_per_unit_area', 'crown_fire_transition_ratio', 'crown_fire_active_ratio',
+                        'crown_length_to_width_ratio', 'fire_type', 'surface_fire_critical_spread_rate',
+                        'crowning_surface_fire_spread_rate', 'crown_fraction_burned', 'passive_crown_fire_spread_rate',
+                        'passive_crown_fire_heat_per_unit_area', 'passive_crown_fire_line_intensity',
+                        'passive_crown_fire_flame_length', 'final_spread_rate', 'final_heat_per_unit_area',
+                        'final_fireline_intensity', 'final_flame_length')})
+_EMPTY_KEYS['calculate_crown_surface_fire'] = tuple('p_crown.' + key for key in _EMPTY_KEYS['build_particle_arrays']
+) + tuple('ib_crown.' + key for key in _EMPTY_KEYS['calculate_fuelbed_intermediates']) + tuple('crown_surface.' + key
+    for key in _EMPTY_KEYS['run_surface_fire']) + ('ri_crown', 'crown_fire_spread_rate', 'crown_length_to_width_ratio')
 
 
 def _call(operation, arguments):
@@ -81,7 +113,8 @@ def _crown_dependencies(wind_orientation_mode):
     :return: Output names mapped to original public input names; no numerical work occurs.
     """
     fuel = ('fuel_model_grid',)
-    spread = fuel + ('wind_speed', 'wind_direction', 'slope') + (('aspect',) if 'north' in wind_orientation_mode.lower() else ())
+    spread = fuel + ('wind_speed', 'wind_direction', 'slope') + (('aspect',) if 'north' in wind_orientation_mode.lower(
+        ) else ())
     canopy_heat = ('canopy_base_height', 'canopy_height', 'canopy_bulk_density')
     critical_intensity = ('canopy_base_height', 'moisture_foliar')
     critical_spread = ('canopy_bulk_density',)
@@ -135,15 +168,28 @@ def _real_coercion(operation, parameter):
     if parameter.endswith(('_grid', '_i')):
         return np.int32
     module, name = operation.split('.', 1)
-    if module in ('units', 'safety', 'spot', 'ignite', 'vapor_pressure_deficit_calculator', 'fine_dead_fuel_moisture_tool'):
+    if module in ('units', 'safety', 'spot', 'ignite', 'vapor_pressure_deficit_calculator',
+        'fine_dead_fuel_moisture_tool'):
         return np.float64
     if module == 'mortality':
         return None if parameter.startswith('coefficients.') else np.float64
     if module == 'crown':
-        if name in ('coerce_crown_fire_inputs', 'run_crown_fire', 'calculate_crown_surface_fire') and (not parameter.startswith(('surface_results.', 'model.'))):
+        if name in ('coerce_crown_fire_inputs', 'run_crown_fire', 'calculate_crown_surface_fire') and (
+            not parameter.startswith(('surface_results.', 'model.'))):
             return np.float64
         return None
-    normalized = {'build_particle_arrays': ('m1h', 'm10h', 'm100h', 'mlh', 'mlw'), 'calculate_direction_of_max_spread': ('aspect',), 'calculate_fire_area': ('forward_ros', 'backing_ros', 'lwr'), 'calculate_fire_perimeter': ('forward_ros', 'backing_ros', 'lwr'), 'calculate_fire_width': ('forward_ros', 'backing_ros', 'lwr'), 'calculate_fireline_intensity': ('spread_rate', 'heat_per_unit_area'), 'calculate_forward_spread_rate': ('no_wind_no_slope_spread_rate', 'rate_vector'), 'calculate_heat_per_unit_area': ('reaction_intensity', 'residence_time'), 'calculate_midflame_wind_speed': ('waf', 'twenty_foot_wind_speed'), 'calculate_reaction_intensity_output': ('reaction_intensity',), 'calculate_slope_phi': ('slope',), 'calculate_surface_rate_vector': ('wind_direction', 'aspect'), 'calculate_surface_wind_adjustment_factor': ('canopy_cover', 'canopy_height', 'crown_ratio', 'depth', 'user_waf'), 'calculate_twenty_foot_wind_speed': ('wind_speed',), 'calculate_wind_adjustment_factor': ('canopy_cover', 'canopy_height', 'crown_ratio', 'depth'), 'run_surface_fire': ('wind_speed', 'wind_direction', 'slope', 'aspect', 'canopy_cover', 'canopy_height', 'crown_ratio', 'user_waf', 'ib.depth')}
+    normalized = {'build_particle_arrays': ('m1h', 'm10h', 'm100h', 'mlh', 'mlw'),
+        'calculate_direction_of_max_spread': ('aspect',), 'calculate_fire_area': ('forward_ros', 'backing_ros', 'lwr'),
+        'calculate_fire_perimeter': ('forward_ros', 'backing_ros', 'lwr'), 'calculate_fire_width': ('forward_ros',
+            'backing_ros', 'lwr'), 'calculate_fireline_intensity': ('spread_rate', 'heat_per_unit_area'),
+        'calculate_forward_spread_rate': ('no_wind_no_slope_spread_rate', 'rate_vector'),
+        'calculate_heat_per_unit_area': ('reaction_intensity', 'residence_time'), 'calculate_midflame_wind_speed': (
+            'waf', 'twenty_foot_wind_speed'), 'calculate_reaction_intensity_output': ('reaction_intensity',),
+        'calculate_slope_phi': ('slope',), 'calculate_surface_rate_vector': ('wind_direction', 'aspect'),
+        'calculate_surface_wind_adjustment_factor': ('canopy_cover', 'canopy_height', 'crown_ratio', 'depth', 'user_waf'
+        ), 'calculate_twenty_foot_wind_speed': ('wind_speed',), 'calculate_wind_adjustment_factor': ('canopy_cover',
+            'canopy_height', 'crown_ratio', 'depth'), 'run_surface_fire': ('wind_speed', 'wind_direction', 'slope',
+                'aspect', 'canopy_cover', 'canopy_height', 'crown_ratio', 'user_waf', 'ib.depth')}
     return np.float64 if parameter in normalized.get(name, ()) else None
 
 
@@ -209,7 +255,8 @@ def _state(instance, domain, method, arguments):
         arguments[name] = column.item()
     state = {}
     for name, value in dict(vars(instance)).items():
-        column = normalize_control(value, np.int32) if name == 'representative_fractions_' else normalize_physical(value)
+        column = normalize_control(value, np.int32) if name == 'representative_fractions_' else normalize_physical(value
+        )
         state[name] = column.tolist() if column.ndim else column.item()
     updated, result, error = _native.state_call(domain, method, state, arguments)
     vars(instance).update(updated)

@@ -19,12 +19,31 @@ concurrency:
   group: ci-${{ (github.event.action == 'edited' && !github.event.changes.base) && github.run_id || github.event.pull_request.number || (github.ref == 'refs/heads/pre_release' && github.ref) || github.run_id }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' || github.ref == 'refs/heads/pre_release' }}
 
-# Tiers: a pull request that does not target master runs the quick tier (fmt, Clippy, Rust core tests,
+# Tiers: a pull request that does not target master runs the quick tier (Python style/order, fmt,
+# Clippy, Rust core tests,
 # the table check, and one Python and one native job). Everything else (pull requests into master, pushes,
 # workflow_call from release.yml, and workflow_dispatch) runs the full tier. The pull_request trigger
 # includes the edited type so that changing a pull request's base branch re-evaluates the tier. An edit
 # that does not change the base branch (title or description) skips every job.
 jobs:
+  style:
+    if: ${{ !(github.event.action == 'edited' && !github.event.changes.base) }}
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      - uses: astral-sh/setup-uv@v6
+      - run: uv sync --locked --no-install-project --extra test --extra dev
+      - run: uv run --no-sync python -m ruff check src tests tools
+      - run: uv run --no-sync python tools/check_function_order.py
+      - run: cargo fmt --manifest-path rust/Cargo.toml --all -- --check
+      - run: cargo clippy --manifest-path rust/Cargo.toml --workspace --all-targets --locked -- -D warnings
+
   rust:
     if: ${{ !(github.event.action == 'edited' && !github.event.changes.base) }}
     runs-on: ${{ matrix.os }}
@@ -165,7 +184,7 @@ jobs:
           if-no-files-found: warn
 
   wheel-validation:
-    needs: [rust, msrv, python-only, native-pytest, crate-validation]
+    needs: [style, rust, msrv, python-only, native-pytest, crate-validation]
     uses: ./.github/workflows/wheel-validation.yml
     if: ${{ !(github.event_name == 'pull_request' && github.base_ref != 'master') && !(github.event.action == 'edited' && !github.event.changes.base) }}
     with:

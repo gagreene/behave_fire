@@ -76,7 +76,8 @@ def check_archive(path, expected=()):
         members = {}
         for member in archive.getmembers():
             parts = PurePosixPath(member.name).parts
-            if not parts or PurePosixPath(member.name).is_absolute() or ".." in parts or member.issym() or member.islnk():
+            if not parts or PurePosixPath(member.name).is_absolute() or ".." in parts or member.issym() or member.islnk(
+                ):
                 raise ValueError(f"unsafe archive member: {member.name}")
             name = "/".join(parts[1:])
             _check_reference_payload(name)
@@ -85,7 +86,8 @@ def check_archive(path, expected=()):
                     raise ValueError(f"duplicate archive member: {name}")
                 names.add(name)
                 members[name] = member
-            if any(item in parts for item in (".git", "target", "__pycache__", ".superpowers")) or name.endswith((".pyd", ".so", ".pyc", ".pdb")):
+            if any(item in parts for item in (".git", "target", "__pycache__", ".superpowers")) or name.endswith((
+                ".pyd", ".so", ".pyc", ".pdb")):
                 raise ValueError(f"build leftover in source distribution: {name}")
         _check_cpp_inputs(archive, members)
     missing = (REQUIRED | set(expected)) - names
@@ -107,8 +109,10 @@ def check_tracked(root):
     tracked = set(result.stdout.split("\0"))
     inputs = set(REQUIRED)
     for crate in ("behave-fire", "behave-py"):
-        inputs.update(path.relative_to(root).as_posix() for path in (root / f"rust/crates/{crate}").rglob("*") if path.is_file() and "target" not in path.parts and path.suffix not in {".pyc", ".crate"})
-    inputs.update(path.relative_to(root).as_posix() for path in (root / "src/behave_fire").rglob("*") if path.is_file() and "__pycache__" not in path.parts and path.suffix.lower() not in {".pyc", ".pyd", ".so", ".dylib", ".pdb"})
+        inputs.update(path.relative_to(root).as_posix() for path in (root / f"rust/crates/{crate}").rglob("*")
+            if path.is_file() and "target" not in path.parts and path.suffix not in {".pyc", ".crate"})
+    inputs.update(path.relative_to(root).as_posix() for path in (root / "src/behave_fire").rglob("*") if path.is_file()
+        and "__pycache__" not in path.parts and path.suffix.lower() not in {".pyc", ".pyd", ".so", ".dylib", ".pdb"})
     missing = inputs - tracked
     if missing:
         raise ValueError(f"sdist requires tracked inputs: {sorted(missing)}")

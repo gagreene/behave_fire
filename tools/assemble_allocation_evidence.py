@@ -18,7 +18,8 @@ def _hash(value):
     :param value: JSON-compatible record.
     :return: SHA-256 digest of the canonical record.
     """
-    return hashlib.sha256(json.dumps(value, sort_keys=True, separators=(",", ":"), allow_nan=False).encode()).hexdigest()
+    return hashlib.sha256(json.dumps(value, sort_keys=True, separators=(",", ":"), allow_nan=False).encode()).hexdigest(
+        )
 
 
 def _manifest(evidence):
@@ -53,7 +54,8 @@ def _manifest(evidence):
         if not isinstance(build.get("build_environment"), dict):
             raise ValueError("Missing build environment")
         features = build.get("features")
-        if not isinstance(features, list) or any(not isinstance(f, str) for f in features) or len(set(features)) != len(features):
+        if not isinstance(features, list) or any(not isinstance(f, str) for f in features) or len(set(features)) != len(
+            features):
             raise ValueError("Invalid feature inventory")
     for field in ("source_hash", "source_files", "compiler", "target", "profile", "build_environment"):
         if timed[field] != instrumented[field]:

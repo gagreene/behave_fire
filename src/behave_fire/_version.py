@@ -25,4 +25,5 @@ def get_version():
     if not match:
         raise ValueError(f"unsupported Cargo version: {cargo}")
     release, label, number, local = match.groups()
-    return release + ({"alpha": "a", "beta": "b", "rc": "rc"}[label] + number if label else "") + ("+" + local if local else "")
+    return release + ({"alpha": "a", "beta": "b", "rc": "rc"}[label] + number if label else "") + ("+" + local if local
+        else "")

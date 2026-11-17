@@ -87,9 +87,11 @@ def test_facade_crown_owns_nested_surface_and_output_units(monkeypatch):
 
 @pytest.mark.parametrize("method, inputs, mutated", [
     ("calculate_scorch_height", dict(fireline_intensity=np.array([100.]), fireline_intensity_units=0,
-       midflame_wind_speed=np.array([5.]), wind_speed_units=5, air_temperature=np.array([80.]), temperature_units=0), "air_temperature"),
+       midflame_wind_speed=np.array([5.]), wind_speed_units=5, air_temperature=np.array([80.]), temperature_units=0),
+        "air_temperature"),
     ("calculate_spotting_from_surface_fire", dict(flame_length=np.array([4.]), flame_length_units=0,
-       wind_speed=np.array([5.]), wind_speed_units=5, cover_height=np.array([20.]), cover_height_units=0), "cover_height"),
+       wind_speed=np.array([5.]), wind_speed_units=5, cover_height=np.array([20.]), cover_height_units=0),
+        "cover_height"),
     ("calculate_fire_width", dict(forward_ros=np.array([4.]), backing_ros=np.array([2.]), ros_units=0,
        lwr=np.array([2.]), elapsed_time=1., elapsed_time_units=0), "lwr"),
 ])

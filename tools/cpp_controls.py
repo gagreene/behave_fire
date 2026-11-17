@@ -77,7 +77,8 @@ def _port(case, backend, runners):
                 raise ValueError("Public custom registration failed")
         runners[key] = BehaveRun(fuels, backend=backend)
     values = {name: case[name] for name in ("m1h", "m10h", "m100h", "mlh", "mlw", "wind_speed",
-                                          "wind_direction", "slope", "aspect", "canopy_cover", "canopy_height", "crown_ratio")}
+                                          "wind_direction", "slope", "aspect", "canopy_cover", "canopy_height",
+        "crown_ratio")}
     values.update(fuel_model_grid=reference.CONTROL_MODEL if custom else case["fuel_model"],
                   wind_speed_units=5, slope_units=1, moisture_units=1, canopy_cover_units=1,
                   crown_ratio_units=0, wind_height_mode=case.get("wind_height", "TwentyFoot"),
@@ -171,7 +172,8 @@ def generate(root, driver, receipt, output, reason):
     build = reference._document(receipt)
     if (not reason.strip() or build["upstream_sha"] != reference.PIN
             or build["driver_sha256"] != reference._digest(driver)
-            or build["driver_source_sha256_lf"] != reference._text_digest(root / "reference/behave_cpp_overlay/driver.cpp")):
+            or build["driver_source_sha256_lf"] != reference._text_digest(root
+                / "reference/behave_cpp_overlay/driver.cpp")):
         raise ValueError("Untrusted control build")
     if output.exists():
         raise ValueError("Refusing to overwrite control observations")
@@ -184,7 +186,8 @@ def generate(root, driver, receipt, output, reason):
     inputs = output / "cases.jsonl"
     inputs.write_text("".join(json.dumps(case, sort_keys=True, allow_nan=False) + "\n" for case in cases),
                       encoding="utf-8", newline="\n")
-    subprocess.run([str(driver.resolve()), str(inputs.resolve()), str((output / "results.jsonl").resolve())], check=True)
+    subprocess.run([str(driver.resolve()), str(inputs.resolve()), str((output / "results.jsonl").resolve())], check=True
+    )
     results = reference._rows(output / "results.jsonl")
     _validate_results(cases, results)
     manifest = dict(schema_version=1, dataset="surface_custom", upstream_sha=reference.PIN,
@@ -214,7 +217,8 @@ def load(root, source_cases):
             or manifest["source_models"] != sorted(reference.MOE_PERCENT_CONTROLS)
             or manifest["registered_model"] != reference.CONTROL_MODEL or manifest["moisture_units"] != "Percent"
             or manifest["build"] != reference._prepared_build(root)
-            or manifest["source_cases_sha256"] != reference._digest(root / "tests/data/cpp_reference/surface/cases.jsonl")
+            or manifest["source_cases_sha256"] != reference._digest(root
+                / "tests/data/cpp_reference/surface/cases.jsonl")
             or cases != reference._custom_cases(source_cases)):
         raise ValueError("Custom-control scope or source inputs changed")
     for name in ("cases.jsonl", "results.jsonl"):
@@ -287,7 +291,8 @@ def measure_ports(root, report, backends=("python", "rust"), expected_platform=N
         for case, expected in zip(controls["cases"], controls["results"], strict=False):
             actual = _port(case, backend, runners)
             original = _port(numbered[case["id"].removeprefix("custom-")], backend, runners)
-            if any(struct.pack("!d", actual[field]) != struct.pack("!d", original[field]) for field in reference.FIELDS):
+            if any(struct.pack("!d", actual[field]) != struct.pack("!d", original[field]) for field in reference.FIELDS
+            ):
                 raise AssertionError(f"{backend}/{case['id']}: numbered/custom definition differs")
             source_id = case["id"].removeprefix("custom-")
             documented.append(dict(backend=backend, id=source_id, control=case["id"],

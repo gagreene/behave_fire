@@ -18,6 +18,7 @@ from decimal import ROUND_HALF_UP, Decimal
 from pathlib import Path
 
 import numpy as np
+import pytest
 
 # Locate the source package relative to this file, independent of the working directory.
 if str(Path(__file__).resolve().parents[1] / 'src') not in sys.path:
@@ -89,32 +90,6 @@ class _TestInfo:
         return self.num_failed == 0
 
 
-def are_close(observed, expected, epsilon):
-    return abs(observed - expected) < epsilon
-
-
-def round_to_six(value):
-    d = Decimal(str(value))
-    return float(d.quantize(Decimal('0.000001'), rounding=ROUND_HALF_UP))
-
-
-def report(ti, name, observed, expected, epsilon=ERROR_TOLERANCE):
-    ti.num_total_tests += 1
-    if are_close(float(observed), float(expected), epsilon):
-        print(f"{name}")
-        print(f"{GREEN}[PASSED]{RESET}\n")
-        ti.num_passed += 1
-    else:
-        msg = (f"{name}  "
-               f"observed={observed}  expected={expected}  tolerance={epsilon}")
-        print(f"{RED}{msg}{RESET}\n")
-        ti.num_failed += 1
-        # Also fail the enclosing pytest test so pytest's own pass/fail
-        # counts stay in sync with the custom counters.
-        if _UNDER_PYTEST:
-            pytest.fail(msg, pytrace=False)
-
-
 # Module-level TestInfo singleton used by the pytest fixture below.
 # When running under pytest each test_ function receives this via the `ti`
 # fixture; when running directly via __main__ run_all_tests() passes it
@@ -125,28 +100,11 @@ _TI = _TestInfo()
 # pytest fixture — provides the shared TestInfo to every test_ function
 # ---------------------------------------------------------------------------
 
-import pytest  # noqa: E402  (import after module-level code is intentional)
 
 source_dir = Path(__file__).resolve().parents[1] / "src"
 
 # True when executed under pytest (set before any test runs).
 _UNDER_PYTEST = False
-
-
-@pytest.fixture(autouse=True, scope="session")
-def _mark_pytest_session():
-    """Mark that we are running under pytest and print the summary at the end."""
-    global _UNDER_PYTEST
-    _UNDER_PYTEST = True
-    yield
-    # --- session teardown: print the accumulated pass/fail summary ---
-    _TI.print_summary()
-
-
-@pytest.fixture
-def ti():
-    """Provide the shared _TestInfo accumulator to each test function."""
-    return _TI
 
 
 # ---------------------------------------------------------------------------
@@ -176,6 +134,17 @@ _CR50 = np.array([[0.50]])   # 50% as fraction (crown_ratio_units=0 Fraction def
 _MPH = SpeedUnits.SpeedUnitsEnum.MilesPerHour
 
 
+@pytest.fixture(autouse=True, scope="session")
+def _mark_pytest_session():
+    """Mark that we are running under pytest and print the summary at the end."""
+    global _UNDER_PYTEST
+    _UNDER_PYTEST = True
+    yield
+    # --- session teardown: print the accumulated pass/fail summary ---
+    _TI.print_summary()
+
+
+
 def _surface_run_upslope():
     """Run the standard GS4 upslope scenario, return results dict."""
     return _RUNNER.do_surface_run(
@@ -189,6 +158,79 @@ def _surface_run_upslope():
         canopy_height=_CH30,
         crown_ratio=_CR50,
     )
+
+
+
+def are_close(observed, expected, epsilon):
+    return abs(observed - expected) < epsilon
+
+
+
+def report(ti, name, observed, expected, epsilon=ERROR_TOLERANCE):
+    ti.num_total_tests += 1
+    if are_close(float(observed), float(expected), epsilon):
+        print(f"{name}")
+        print(f"{GREEN}[PASSED]{RESET}\n")
+        ti.num_passed += 1
+    else:
+        msg = (f"{name}  "
+               f"observed={observed}  expected={expected}  tolerance={epsilon}")
+        print(f"{RED}{msg}{RESET}\n")
+        ti.num_failed += 1
+        # Also fail the enclosing pytest test so pytest's own pass/fail
+        # counts stay in sync with the custom counters.
+        if _UNDER_PYTEST:
+            pytest.fail(msg, pytrace=False)
+
+
+
+def round_to_six(value):
+    d = Decimal(str(value))
+    return float(d.quantize(Decimal('0.000001'), rounding=ROUND_HALF_UP))
+
+
+
+def run_all_tests():
+    print("\n" + "=" * 70)
+    print("BEHAVE MODULES — TEST SUITE")
+    print("=" * 70)
+
+    ti = _TI
+
+    test_surface_scalar_parity(ti)
+    test_surface_north_oriented(ti)
+    test_surface_fm4_canopy(ti)
+    test_surface_non_burnable(ti)
+    test_surface_no_data_cell(ti)
+    test_surface_shape_preservation(ti)
+    test_surface_heterogeneous_fuels(ti)
+    test_surface_mixed_grid(ti)
+    test_surface_unit_conversion(ti)
+    test_fire_size(ti)
+    test_crown_fire(ti)
+    test_scorch_height(ti)
+    test_crown_scorch_mortality(ti)
+    test_ignite(ti)
+    test_safety_zone(ti)
+    test_spot(ti)
+    test_fine_dead_fuel_moisture(ti)
+    test_vpd(ti)
+    test_facade_completeness(ti)
+    test_all_fuel_models_no_nan(ti)
+    test_scalar_inputs(ti)
+    test_surface_explicit_si_units(ti)
+    test_crown_explicit_si_units(ti)
+    test_mortality_explicit_si_units(ti)
+
+    return ti.print_summary()
+
+
+
+@pytest.fixture
+def ti():
+    """Provide the shared _TestInfo accumulator to each test function."""
+    return _TI
+
 
 
 # ---------------------------------------------------------------------------
@@ -1479,41 +1521,6 @@ def test_mortality_explicit_si_units(ti):
 # ---------------------------------------------------------------------------
 # main
 # ---------------------------------------------------------------------------
-
-def run_all_tests():
-    print("\n" + "=" * 70)
-    print("BEHAVE MODULES — TEST SUITE")
-    print("=" * 70)
-
-    ti = _TI
-
-    test_surface_scalar_parity(ti)
-    test_surface_north_oriented(ti)
-    test_surface_fm4_canopy(ti)
-    test_surface_non_burnable(ti)
-    test_surface_no_data_cell(ti)
-    test_surface_shape_preservation(ti)
-    test_surface_heterogeneous_fuels(ti)
-    test_surface_mixed_grid(ti)
-    test_surface_unit_conversion(ti)
-    test_fire_size(ti)
-    test_crown_fire(ti)
-    test_scorch_height(ti)
-    test_crown_scorch_mortality(ti)
-    test_ignite(ti)
-    test_safety_zone(ti)
-    test_spot(ti)
-    test_fine_dead_fuel_moisture(ti)
-    test_vpd(ti)
-    test_facade_completeness(ti)
-    test_all_fuel_models_no_nan(ti)
-    test_scalar_inputs(ti)
-    test_surface_explicit_si_units(ti)
-    test_crown_explicit_si_units(ti)
-    test_mortality_explicit_si_units(ti)
-
-    return ti.print_summary()
-
 
 if __name__ == "__main__":
     try:

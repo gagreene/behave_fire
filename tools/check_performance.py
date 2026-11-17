@@ -29,7 +29,8 @@ def _allocation_errors(report, requirements, identity):
                 errors.append(f"{dataset}/{operation}: require one native allocation report")
                 continue
             row = matches[0]
-            if requirements.get('binding_api_version') == 4 and row.get('evidence', {}).get('manifest', {}).get('binding_api_version') != 4:
+            if requirements.get('binding_api_version') == 4 and row.get('evidence', {}).get('manifest', {}).get(
+                'binding_api_version') != 4:
                 errors.append(f'{dataset}/{operation}: allocation manifest must identify binding API 4')
             if (row.get("source_hash"), row.get("extension_hash")) != identity:
                 errors.append(f"{dataset}/{operation}: allocation provenance mismatch")
@@ -292,7 +293,8 @@ def main():
     parser.add_argument("--results", type=Path, required=True)
     parser.add_argument("--requirements", type=Path, default=Path(__file__).with_name("performance_requirements.json"))
     parser.add_argument("--baseline-source-hash", help="Independently recorded pre-optimization source SHA-256")
-    parser.add_argument("--baseline-extension-hash", help="Independently recorded pre-optimization native-binary SHA-256")
+    parser.add_argument("--baseline-extension-hash",
+        help="Independently recorded pre-optimization native-binary SHA-256")
     args = parser.parse_args()
     try:
         requirements = json.loads(args.requirements.read_text(encoding="utf-8"))

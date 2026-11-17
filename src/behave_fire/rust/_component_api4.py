@@ -11,9 +11,12 @@ _CODE_FIELDS = {'units', 'wind_speed_units', 'slope_units', 'temp_units', 'rh_un
 _FLAG_FIELDS = {'is_crown', 'is_surface_fire', 'is_passive_crown', 'is_active_crown'}
 _RATIO_FIELDS = {'crown_fire_transition_ratio': ('surface_fli', 'critical_surface_fli'),
                  'crown_fire_active_ratio': ('crown_ros', 'critical_crown_ros')}
-_FINAL_FIELDS = {'final_spread_rate': ('is_surface_fire', 'is_passive_crown', 'surface_ros', 'passive_ros', 'crown_ros'),
-                 'final_heat_per_unit_area': ('is_surface_fire', 'is_passive_crown', 'surface_hpua', 'passive_hpua', 'crown_hpua'),
-                 'final_fireline_intensity': ('is_surface_fire', 'is_passive_crown', 'surface_fli', 'passive_fli', 'crown_fli'),
+_FINAL_FIELDS = {'final_spread_rate': ('is_surface_fire', 'is_passive_crown', 'surface_ros', 'passive_ros', 'crown_ros'
+),
+                 'final_heat_per_unit_area': ('is_surface_fire', 'is_passive_crown', 'surface_hpua', 'passive_hpua',
+                     'crown_hpua'),
+                 'final_fireline_intensity': ('is_surface_fire', 'is_passive_crown', 'surface_fli', 'passive_fli',
+                     'crown_fli'),
                  'final_flame_length': ('is_surface_fire', 'is_passive_crown', 'surface_fli', 'passive_fl', 'crown_fl')}
 
 
@@ -27,7 +30,8 @@ def _flatten(operation, operands):
     from ._bridge import _FUEL_KEYS, _LOOKUP_FIELDS, _PARTICLES, _REACTION_FIELDS, _SPREAD_FIELDS
 
     arguments = dict(operands)
-    settings = {name: str(arguments.pop(name)) for name in ('wind_orientation_mode', 'wind_height_mode', 'waf_method') if name in arguments}
+    settings = {name: str(arguments.pop(name)) for name in ('wind_orientation_mode', 'wind_height_mode', 'waf_method')
+        if name in arguments}
     if 'lut' in arguments:
         lookup = arguments.pop('lut')
         if operation == 'surface.build_particle_arrays':
@@ -65,7 +69,8 @@ def _flatten(operation, operands):
             flat[name] = np.asarray(value)
             continue
         for field, column in value.items():
-            if name == 'ib' and field not in (_REACTION_FIELDS if operation == 'surface.calculate_reaction_intensity' else _SPREAD_FIELDS):
+            if name == 'ib' and field not in (_REACTION_FIELDS if operation == 'surface.calculate_reaction_intensity'
+                else _SPREAD_FIELDS):
                 continue
             if name == 'p' and field in _PARTICLES:
                 if column.ndim < 1 or column.shape[0] != 5:
@@ -75,7 +80,8 @@ def _flatten(operation, operands):
             else:
                 flat[f'{name}.{field}'] = np.asarray(column)
     if 'north' not in settings.get('wind_orientation_mode', '').lower() and operation.rsplit('.', 1)[1] in (
-            'calculate_direction_of_max_spread', 'calculate_surface_rate_vector', 'run_surface_fire', 'calculate_crown_surface_fire'):
+            'calculate_direction_of_max_spread', 'calculate_surface_rate_vector', 'run_surface_fire',
+        'calculate_crown_surface_fire'):
         flat.pop('aspect', None)
     if settings.get('waf_method', '').replace('_', '').lower() == 'userinput' and 'user_waf' in flat:
         for field in ('canopy_cover', 'canopy_height', 'crown_ratio'):
@@ -152,16 +158,19 @@ def execute_component(operation, arguments, *, threads=1):
     if operation == 'crown.calculate_crown_surface_fire':
         from ._bridge import _EMPTY_KEYS
 
-        fuel = {key: value for key, value in flat.items() if key.startswith('model.') or key in ('m1h', 'm10h', 'm100h', 'mlh', 'mlw')}
+        fuel = {key: value for key, value in flat.items() if key.startswith('model.') or key in ('m1h', 'm10h', 'm100h',
+            'mlh', 'mlw')}
         fuel_shape = broadcast_shape(*(value.shape for value in fuel.values()))
         weather_shape = broadcast_shape(*(value.shape for value in flat.values()))
         if fuel_shape != weather_shape:
-            fuel_outputs = [name for name in _EMPTY_KEYS['calculate_crown_surface_fire'] if name.startswith(('p_crown.', 'ib_crown.')) or name == 'ri_crown']
+            fuel_outputs = [name for name in _EMPTY_KEYS['calculate_crown_surface_fire'] if name.startswith(('p_crown.',
+                'ib_crown.')) or name == 'ri_crown']
             weather_outputs = [name for name in _EMPTY_KEYS['calculate_crown_surface_fire'] if name not in fuel_outputs]
             result = _invoke(operation, fuel, settings, threads, fuel_outputs)
             result.update(_invoke(operation, flat, settings, threads, weather_outputs))
             for prefix in ('p_crown', 'ib_crown', 'crown_surface'):
-                result[prefix] = {key[len(prefix) + 1:]: result.pop(key) for key in list(result) if key.startswith(prefix + '.')}
+                result[prefix] = {key[len(prefix) + 1:]: result.pop(key) for key in list(result) if key.startswith(
+                    prefix + '.')}
             for field in _PARTICLES:
                 result['p_crown'][field] = np.stack([result['p_crown'].pop(f'{field}.{i}') for i in range(5)])
             return result
@@ -174,13 +183,17 @@ def execute_component(operation, arguments, *, threads=1):
         return result
     name = operation.rsplit('.', 1)[1]
     independent = {
-        'calculate_crown_scorch_mortality': {'crown_length_scorch': ('scorch_height_ft', 'tree_height_ft', 'crown_ratio'),
-                                           'crown_volume_scorch': ('scorch_height_ft', 'tree_height_ft', 'crown_ratio')},
+        'calculate_crown_scorch_mortality': {'crown_length_scorch': ('scorch_height_ft', 'tree_height_ft', 'crown_ratio'
+        ),
+                                           'crown_volume_scorch': ('scorch_height_ft', 'tree_height_ft', 'crown_ratio')
+        },
         'calculate_safety_zone': {'separation_distance': ('flame_height_ft',)},
         'calculate_vpd': {'saturated_vp': ('temperature', 'temp_units', 'output_units')},
-        'calculate_crown_heat_and_intensity': {'crown_fuel_load': ('canopy_base_height', 'canopy_height', 'canopy_bulk_density'),
+        'calculate_crown_heat_and_intensity': {'crown_fuel_load': ('canopy_base_height', 'canopy_height',
+            'canopy_bulk_density'),
             'canopy_heat_per_unit_area': ('canopy_base_height', 'canopy_height', 'canopy_bulk_density'),
-            'crown_fire_heat_per_unit_area': ('surface_hpua', 'canopy_base_height', 'canopy_height', 'canopy_bulk_density')},
+            'crown_fire_heat_per_unit_area': ('surface_hpua', 'canopy_base_height', 'canopy_height',
+                'canopy_bulk_density')},
         'calculate_passive_crown_fire_behavior': {'passive_crown_fire_spread_rate': ('surface_ros', 'crown_ros', 'cfb'),
             'passive_crown_fire_heat_per_unit_area': ('surface_hpua', 'canopy_hpua', 'cfb')},
     }
@@ -206,7 +219,8 @@ def execute_component(operation, arguments, *, threads=1):
             result[field] = np.stack([result.pop(f'{field}.{i}') for i in range(5)])
     if name == 'calculate_crown_surface_fire':
         for prefix in ('p_crown', 'ib_crown', 'crown_surface'):
-            result[prefix] = {key[len(prefix) + 1:]: result.pop(key) for key in list(result) if key.startswith(prefix + '.')}
+            result[prefix] = {key[len(prefix) + 1:]: result.pop(key) for key in list(result) if key.startswith(prefix
+                + '.')}
         for field in _PARTICLES:
             result['p_crown'][field] = np.stack([result['p_crown'].pop(f'{field}.{i}') for i in range(5)])
     return result[''] if '' in result else result

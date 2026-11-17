@@ -898,7 +898,10 @@ class HeatSourceAndReactionIntensityUnits:
 
     @staticmethod
     def fromBaseUnits(value: float | np.ndarray, units: int) -> np.ndarray:
-        """Convert reaction intensity from BTU/ft²/min to requested units. Delegates to ``reaction_intensity_from_base()``."""
+        """
+        Convert reaction intensity from BTU/ft²/min to requested units. Delegates to
+        ``reaction_intensity_from_base()``.
+        """
         return reaction_intensity_from_base(value, units)
 
     @staticmethod
@@ -916,7 +919,10 @@ class FirelineIntensityUnits:
 
     @staticmethod
     def fromBaseUnits(value: float | np.ndarray, units: int) -> np.ndarray:
-        """Convert fireline intensity from BTU/ft/s to requested units. Delegates to ``fireline_intensity_from_base()``."""
+        """
+        Convert fireline intensity from BTU/ft/s to requested units. Delegates to
+        ``fireline_intensity_from_base()``.
+        """
         return fireline_intensity_from_base(value, units)
 
     @staticmethod

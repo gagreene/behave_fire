@@ -61,8 +61,10 @@ def main():
             case["libm_angles"] = _describe(np.array([atan2f(float(yf[0]), float(xf[0]))], dtype=np.float32))
         for orientation in ("RelativeToUpslope", "RelativeToNorth"):
             reference_x, reference_y = (xf, yf) if normalize else (x, y)
-            original = reference.calculate_direction_of_max_spread(reference_x, reference_y, np.ones(1), orientation, 95.0)
-            expected = reference.calculate_direction_of_max_spread(x.astype(np.float64), y.astype(np.float64), np.ones(1), orientation, 95.0)
+            original = reference.calculate_direction_of_max_spread(reference_x, reference_y, np.ones(1), orientation,
+                95.0)
+            expected = reference.calculate_direction_of_max_spread(x.astype(np.float64), y.astype(np.float64), np.ones(1
+            ), orientation, 95.0)
             case[orientation] = {"python": _describe(original), "python_widened": _describe(expected)}
             if native is not None:
                 actual = native.calculate_direction_of_max_spread(x, y, np.ones(1), orientation, 95.0)

@@ -71,7 +71,8 @@ def check_public_screen(report):
                 if row.get('numpy') != report.get('environment', {}).get('numpy'):
                     errors.append(f'{key}: changed NumPy timing baseline')
                 values = [row.get('first_seconds')] + row.get('warm_seconds', [])
-                if len(values) != warm + 1 or any(type(v) not in (int, float) or not math.isfinite(v) or v <= 0 for v in values):
+                if len(values) != warm + 1 or any(type(v) not in (int, float) or not math.isfinite(v) or v <= 0
+                    for v in values):
                     errors.append(f'{key}: invalid first/warm durations')
             samples[backend] = rows
         if len(errors) != start:

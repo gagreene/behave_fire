@@ -120,7 +120,8 @@ def test_native_automatic_restore_in_fresh_process_never_reselects(_native_model
             assert requests and set(requests) == {3}
         assert auto._PROBE_RESULT is None
     ''')
-    result = subprocess.run([sys.executable, "-c", source, str(payload), extension], env=_environment(), capture_output=True, text=True, timeout=60)
+    result = subprocess.run([sys.executable, "-c", source, str(payload), extension], env=_environment(),
+        capture_output=True, text=True, timeout=60)
     assert result.returncode == 0, result.stdout + result.stderr
     assert result.stderr == ""
 
@@ -129,36 +130,40 @@ def test_native_automatic_windows_spawn_preserves_snapshot(_native_model, tmp_pa
     payload = tmp_path / "auto-native-spawn.pickle"
     payload.write_bytes(pickle.dumps(_native_model))
     script = tmp_path / "spawn_native_dispatch.py"
-    script.write_text(textwrap.dedent('''
-        import multiprocessing as mp
-        from pathlib import Path
-        import pickle
-        import sys
-
-        def inspect_model(payload, queue):
-            try:
-                model = pickle.loads(Path(payload).read_bytes())
-                queue.put((model.backend_in_use, model._threads, model._delegate.threads,
-                           float(model._delegate._lut["depth"][1]), model._delegate._fuel_models.fuel_models_[1]["fuel_bed_depth"]))
-            except BaseException as error:
-                queue.put((type(error).__name__, str(error)))
-
-        if __name__ == "__main__":
-            context = mp.get_context("spawn")
-            queue = context.Queue()
-            process = context.Process(target=inspect_model, args=(sys.argv[1], queue))
-            process.start()
-            try:
-                result = queue.get(timeout=30)
-                process.join(timeout=30)
-                assert process.exitcode == 0, process.exitcode
-                assert result == ("rust", 3, 3, 1., 777.), result
-            finally:
-                if process.is_alive():
-                    process.terminate()
-                    process.join(timeout=10)
-                queue.close()
-    '''), encoding="utf-8")
-    result = subprocess.run([sys.executable, str(script), str(payload)], env=_environment(), capture_output=True, text=True, timeout=60)
+    script.write_text(textwrap.dedent(
+        '\n'
+        '        import multiprocessing as mp\n'
+        '        from pathlib import Path\n'
+        '        import pickle\n'
+        '        import sys\n'
+        '\n'
+        '        def inspect_model(payload, queue):\n'
+        '            try:\n'
+        '                model = pickle.loads(Path(payload).read_bytes())\n'
+        '                queue.put((model.backend_in_use, model._threads, model._delegate.threads,\n'
+        '                           float(model._delegate._lut["depth"][1]), '
+        'model._delegate._fuel_models.fuel_models_[1]["fuel_bed_depth"]))\n'
+        '            except BaseException as error:\n'
+        '                queue.put((type(error).__name__, str(error)))\n'
+        '\n'
+        '        if __name__ == "__main__":\n'
+        '            context = mp.get_context("spawn")\n'
+        '            queue = context.Queue()\n'
+        '            process = context.Process(target=inspect_model, args=(sys.argv[1], queue))\n'
+        '            process.start()\n'
+        '            try:\n'
+        '                result = queue.get(timeout=30)\n'
+        '                process.join(timeout=30)\n'
+        '                assert process.exitcode == 0, process.exitcode\n'
+        '                assert result == ("rust", 3, 3, 1., 777.), result\n'
+        '            finally:\n'
+        '                if process.is_alive():\n'
+        '                    process.terminate()\n'
+        '                    process.join(timeout=10)\n'
+        '                queue.close()\n'
+        '    '
+    ), encoding="utf-8")
+    result = subprocess.run([sys.executable, str(script), str(payload)], env=_environment(), capture_output=True,
+        text=True, timeout=60)
     assert result.returncode == 0, result.stdout + result.stderr
     assert result.stderr == ""

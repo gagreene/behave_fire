@@ -44,7 +44,8 @@ def _metrics(actual, expected, summary):
         summary["maximum_absolute_error"] = max(summary["maximum_absolute_error"], float(np.max(absolute)))
         nonzero = right[finite] != 0
         if np.any(nonzero):
-            summary["maximum_relative_error"] = max(summary["maximum_relative_error"], float(np.max(absolute[nonzero] / np.abs(right[finite][nonzero]))))
+            summary["maximum_relative_error"] = max(summary["maximum_relative_error"], float(np.max(absolute[nonzero]
+                / np.abs(right[finite][nonzero]))))
 
 
 def _observe_result(summary, original_assertion):
@@ -83,10 +84,17 @@ def main(argv=None):
             if case.get("policy", "acceptance") == "acceptance":
                 scenarios.append((path.stem, case))
     random.Random(arguments.seed).shuffle(scenarios)
-    report = {"seed": arguments.seed, "oracle": "Frozen reference cases with float16/internal-half widening; four exact reviewed invalid-int32-cast inputs use live explicit Python only when the host cast differs; frozen cast differences remain diagnostics", "domains": {}, "failures": [], "platform_cast_diagnostics": []}
+    report = {"seed": arguments.seed,
+        "oracle": (
+            'Frozen reference cases with float16/internal-half widening; four exact reviewed '
+            'invalid-int32-cast inputs use live explicit Python only when the host cast differs; frozen cast '
+            'differences remain diagnostics'
+        ), "domains": {}, "failures": [], "platform_cast_diagnostics": []}
     original_assertion = parity_support.assert_result
     for domain, case in scenarios:
-        summary = report["domains"].setdefault(domain, dict(scenarios=0, passed=0, array_fields=0, missing_fields=0, dtype_differences=0, shape_differences=0, mask_differences=0, maximum_absolute_error=0.0, maximum_relative_error=0.0))
+        summary = report["domains"].setdefault(domain, dict(scenarios=0, passed=0, array_fields=0, missing_fields=0,
+            dtype_differences=0, shape_differences=0, mask_differences=0, maximum_absolute_error=0.0,
+            maximum_relative_error=0.0))
         summary["scenarios"] += 1
 
 
@@ -99,7 +107,8 @@ def main(argv=None):
                 report["platform_cast_diagnostics"].append({
                     "domain": domain, "scenario": case["id"],
                     "frozen_output": case["output"], "current_python_output": current,
-                    "original_cast_replay_matches_frozen": parity_support.contracts_match(original_cast, case["output"], True),
+                    "original_cast_replay_matches_frozen": parity_support.contracts_match(original_cast, case["output"],
+                        True),
                     "current_python_matches_frozen": parity_support.contracts_match(current, case["output"], True),
                 })
             with warnings.catch_warnings(), np.errstate(all="ignore"):
@@ -107,7 +116,8 @@ def main(argv=None):
                 parity_support.run_case(case)
             summary["passed"] += 1
         except Exception as error:
-            report["failures"].append({"domain": domain, "scenario": case["id"], "error": f"{type(error).__name__}: {error}"})
+            report["failures"].append({"domain": domain, "scenario": case["id"],
+                "error": f"{type(error).__name__}: {error}"})
         finally:
             parity_support.assert_result = original_assertion
     text = json.dumps(report, indent=2, sort_keys=True, allow_nan=False) + "\n"

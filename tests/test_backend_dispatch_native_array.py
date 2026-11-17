@@ -56,20 +56,29 @@ def test_all_eleven_instance_methods_enter_native_and_keep_signatures(_usable_na
 
     monkeypatch.setattr(native, 'model_batch', record_model)
     surface_inputs = dict(fuel_model_grid=np.array([1, 2, 10]), m1h=np.full(3, .06), m10h=np.full(3, .07),
-                          m100h=np.full(3, .08), mlh=np.full(3, .6), mlw=np.full(3, .9), wind_speed=np.full(3, 8.), wind_speed_units=0,
-                          wind_direction=np.full(3, 35.), wind_orientation_mode="RelativeToUpslope", slope=np.full(3, 12.))
+                          m100h=np.full(3, .08), mlh=np.full(3, .6), mlw=np.full(3, .9), wind_speed=np.full(3, 8.),
+        wind_speed_units=0,
+                          wind_direction=np.full(3, 35.), wind_orientation_mode="RelativeToUpslope", slope=np.full(3,
+                              12.))
     expected_surface = reference.do_surface_run(**surface_inputs)
     cases = {
-        "calculate_crown_scorch_mortality": ((np.array([10., 20., 30.]), 50., .5, 12., 1), {}, "mortality.calculate_crown_scorch_mortality"),
+        "calculate_crown_scorch_mortality": ((np.array([10., 20., 30.]), 50., .5, 12., 1), {},
+            "mortality.calculate_crown_scorch_mortality"),
         "calculate_fire_area": ((np.array([1., 2., 3.]), .5, 0, 2., 3., 0), {}, "surface.calculate_fire_area"),
         "calculate_fire_length": ((np.array([1., 2., 3.]), .5, 0, 3., 0), {}, "surface.calculate_fire_length"),
-        "calculate_fire_perimeter": ((np.array([1., 2., 3.]), .5, 0, 2., 3., 0), {}, "surface.calculate_fire_perimeter"),
+        "calculate_fire_perimeter": ((np.array([1., 2., 3.]), .5, 0, 2., 3., 0), {}, "surface.calculate_fire_perimeter"
+        ),
         "calculate_fire_width": ((np.array([1., 2., 3.]), .5, 0, 2., 3., 0), {}, "surface.calculate_fire_width"),
-        "calculate_scorch_height": ((np.array([100., 200., 300.]), 0, 5., 5, 80., 0), {}, "mortality.calculate_scorch_height"),
-        "calculate_spotting_from_burning_pile": ((np.array([2., 3., 4.]), 0, 10., 5, 20., 0), {}, "spot.calculate_spotting_from_burning_pile"),
-        "calculate_spotting_from_surface_fire": ((np.array([2., 3., 4.]), 0, 10., 5, 20., 0), {}, "spot.calculate_spotting_from_surface_fire"),
-        "calculate_spotting_from_torching_trees": ((np.array([10., 12., 14.]), 1, 50., 0, 2, 10., 5, 20., 0), {}, "spot.calculate_spotting_from_torching_trees"),
-        "do_crown_run": ((), dict(surface_inputs, surface_results=expected_surface, canopy_base_height=4., canopy_height=30., canopy_bulk_density=.01), "crown.run_crown_fire"),
+        "calculate_scorch_height": ((np.array([100., 200., 300.]), 0, 5., 5, 80., 0), {},
+            "mortality.calculate_scorch_height"),
+        "calculate_spotting_from_burning_pile": ((np.array([2., 3., 4.]), 0, 10., 5, 20., 0), {},
+            "spot.calculate_spotting_from_burning_pile"),
+        "calculate_spotting_from_surface_fire": ((np.array([2., 3., 4.]), 0, 10., 5, 20., 0), {},
+            "spot.calculate_spotting_from_surface_fire"),
+        "calculate_spotting_from_torching_trees": ((np.array([10., 12., 14.]), 1, 50., 0, 2, 10., 5, 20., 0), {},
+            "spot.calculate_spotting_from_torching_trees"),
+        "do_crown_run": ((), dict(surface_inputs, surface_results=expected_surface, canopy_base_height=4.,
+            canopy_height=30., canopy_bulk_density=.01), "crown.run_crown_fire"),
         "do_surface_run": ((), surface_inputs, "model.run_surface"),
     }
     assert len(cases) == 11
@@ -123,12 +132,15 @@ def test_native_namespace_registry_routes(_usable_native, monkeypatch):
     automatic = get_backend()
     assert automatic.preferred_backend == automatic.backend_in_use == 'rust'
     assert available_backends() == ["python", "rust"]
-    names = ("behave_units", "crown", "fine_dead_fuel_moisture_tool", "fire_size", "fuel_models", "fuel_models_array", "ignite", "mortality", "safety", "slope_tool", "species_master_table", "spot", "surface", "vapor_pressure_deficit_calculator")
+    names = ("behave_units", "crown", "fine_dead_fuel_moisture_tool", "fire_size", "fuel_models", "fuel_models_array",
+        "ignite", "mortality", "safety", "slope_tool", "species_master_table", "spot", "surface",
+        "vapor_pressure_deficit_calculator")
     for name in names:
         assert getattr(rust, name) is importlib.import_module("behave_fire.rust." + name)
     assert rust.RustBehaveRun is rust.BehaveRun
     assert rust.RustFuelModels is rust.FuelModels
-    for name, module in (("FuelModels", "fuel_models"), ("SpeciesMasterTable", "species_master_table"), ("SpeciesMasterTableRecord", "species_master_table"), ("FireSize", "fire_size"), ("SlopeTool", "slope_tool")):
+    for name, module in (("FuelModels", "fuel_models"), ("SpeciesMasterTable", "species_master_table"), (
+        "SpeciesMasterTableRecord", "species_master_table"), ("FireSize", "fire_size"), ("SlopeTool", "slope_tool")):
         assert getattr(rust, name) is getattr(getattr(rust, module), name)
     original_defaults, original_batch = native.defaults, native.component_batch
     calls = []

@@ -26,7 +26,8 @@ def _compare(actual, expected):
             _compare(actual[key], expected[key])
     else:
         np.testing.assert_array_equal(np.ma.getmaskarray(actual), np.ma.getmaskarray(expected))
-        np.testing.assert_allclose(np.ma.getdata(actual), np.ma.getdata(expected), rtol=1e-9, atol=1e-12, equal_nan=True)
+        np.testing.assert_allclose(np.ma.getdata(actual), np.ma.getdata(expected), rtol=1e-9, atol=1e-12, equal_nan=True
+        )
 
 
 def _direction(selected, reference, normalize_half_loop):
@@ -41,7 +42,8 @@ def _direction(selected, reference, normalize_half_loop):
     x = np.array([-1], dtype=np.int8)
     y = np.array([False], dtype=np.bool_) if normalize_half_loop else np.array([65534], dtype=np.uint16)
     reference_x, reference_y = x.astype(np.float64), y.astype(np.float64)
-    expected = reference.calculate_direction_of_max_spread(reference_x, reference_y, np.ones(1), "RelativeToNorth", 95.0)
+    expected = reference.calculate_direction_of_max_spread(reference_x, reference_y, np.ones(1), "RelativeToNorth", 95.0
+    )
     actual = selected.calculate_direction_of_max_spread(x, y, np.ones(1), "RelativeToNorth", 95.0)
     assert actual.dtype == expected.dtype == np.float64
     assert actual.shape == expected.shape == (1,)
@@ -60,7 +62,8 @@ def _direction_reversed(selected, reference):
     x = np.full(7, -1., dtype=np.float32)[::-1]
     y = np.full(7, np.finfo(np.float32).max, dtype=np.float32)[::-1]
     rate = np.ones(7)
-    expected = reference.calculate_direction_of_max_spread(x.astype(np.float64), y.astype(np.float64), rate, "RelativeToNorth", 95.)
+    expected = reference.calculate_direction_of_max_spread(x.astype(np.float64), y.astype(np.float64), rate,
+        "RelativeToNorth", 95.)
     actual = selected.calculate_direction_of_max_spread(x, y, rate, "RelativeToNorth", 95.)
     assert actual.dtype == expected.dtype == np.float64
     assert actual.shape == expected.shape == (7,)
@@ -129,9 +132,12 @@ def _surface(model, grid):
     :return: Complete surface output dictionary.
     """
     import numpy as np
-    return model.do_surface_run(fuel_model_grid=grid, m1h=np.full(grid.shape, .06), m10h=np.full(grid.shape, .07), m100h=np.full(grid.shape, .08), mlh=np.full(grid.shape, .60), mlw=np.full(grid.shape, .90),
-                                wind_speed=5., wind_speed_units=5, wind_direction=0., wind_orientation_mode="RelativeToUpslope",
-                                slope=np.degrees(np.arctan(.3)), slope_units=0, aspect=0., canopy_cover=.5, canopy_height=30., crown_ratio=.5)
+    return model.do_surface_run(fuel_model_grid=grid, m1h=np.full(grid.shape, .06), m10h=np.full(grid.shape, .07),
+        m100h=np.full(grid.shape, .08), mlh=np.full(grid.shape, .60), mlw=np.full(grid.shape, .90),
+                                wind_speed=5., wind_speed_units=5, wind_direction=0.,
+        wind_orientation_mode="RelativeToUpslope",
+                                slope=np.degrees(np.arctan(.3)), slope_units=0, aspect=0., canopy_cover=.5,
+        canopy_height=30., crown_ratio=.5)
 
 
 def main():
@@ -173,7 +179,8 @@ def main():
         assert spec is not None
     else:
         assert spec is None
-        for action in (lambda: bf.BehaveRun(bf.FuelModels(), backend="rust"), lambda: bf.get_backend("rust"), lambda: importlib.import_module("behave_fire.rust")):
+        for action in (lambda: bf.BehaveRun(bf.FuelModels(), backend="rust"), lambda: bf.get_backend("rust"),
+            lambda: importlib.import_module("behave_fire.rust")):
             try:
                 action()
             except ImportError as error:
@@ -205,7 +212,8 @@ def main():
         ("vapor_pressure_deficit_calculator", "calculate_vpd", (25., 1, .5, 0, True)),
         ("crown", "calculate_crown_fire_ratios", (np.ones(2), np.ones(3), 2., 4.)),
     ):
-        _compare(getattr(getattr(selected, module), function)(*values), getattr(getattr(python, module), function)(*values))
+        _compare(getattr(getattr(selected, module), function)(*values), getattr(getattr(python, module), function)(
+            *values))
     with warnings.catch_warnings(record=True) as caught:
         warnings.simplefilter("always")
         selected.ignite.calculate_lightning_ignition_probability(6, .2, 1., .5)
@@ -216,7 +224,8 @@ def main():
         pass
     else:
         raise AssertionError("invalid backend accepted")
-    identity = {"machine": platform.machine(), "platform": platform.platform(), "libc": platform.libc_ver(), "sysconfig": sysconfig.get_platform()}
+    identity = {"machine": platform.machine(), "platform": platform.platform(), "libc": platform.libc_ver(),
+        "sysconfig": sysconfig.get_platform()}
     if arguments.identity == "windows-arm64":
         from pip._vendor.packaging.tags import sys_tags
         assert platform.system() == "Windows" and platform.machine() == "ARM64", identity

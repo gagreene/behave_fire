@@ -20,9 +20,11 @@ _CASES = {
         ("fuel_model_grid", "3f331e79f09ed9b17d0d8f0c9d82d0d3e4b0e6c9d28077d68d256aee5cdc6648"),
     ("behave_fire.components.crown.coerce_crown_fire_inputs", "coerce_crown_fire_inputs/positive-infinity"):
         ("fuel_model_grid", "ab21341a73d4a5e5a61f398bcd8903bde7d8d73f50b928442e329291cc8841a1"),
-    ("behave_fire.components.ignite.calculate_lightning_ignition_probability", "calculate_lightning_ignition_probability/positive-infinity"):
+    ("behave_fire.components.ignite.calculate_lightning_ignition_probability",
+        "calculate_lightning_ignition_probability/positive-infinity"):
         ("fuel_bed_type_grid", "2de549fdc61817dc2a173778d824d54e210c6b7df807d10559b897da59a6a6c1"),
-    ("behave_fire.components.fine_dead_fuel_moisture_tool.calculate_fine_dead_fuel_moisture", "calculate_fine_dead_fuel_moisture/nan"):
+    ("behave_fire.components.fine_dead_fuel_moisture_tool.calculate_fine_dead_fuel_moisture",
+        "calculate_fine_dead_fuel_moisture/nan"):
         ("dry_bulb_i", "24b5e4057fd4e0fa804783d5b5742c38a20fe659f7961058c019d5e6413afed0"),
 }
 

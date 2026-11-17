@@ -16,8 +16,12 @@ def build_mortality_lookup(species_master_table: SpeciesMasterTable | None=None)
     :return: Owned native calculation result.
     """
     if species_master_table is not None:
-        for code, equation in _native.missing_mortality([(record.species_code, record.mortality_equation_number) for record in species_master_table.records]):
-            warnings.warn(f"SpeciesMasterTable species '{code}' references mortality equation {equation} which has no B-coefficients in the hardcoded tables. Probability of mortality will be 0 for cells assigned this equation number.", UserWarning, stacklevel=2)
+        for code, equation in _native.missing_mortality([(record.species_code, record.mortality_equation_number)
+            for record in species_master_table.records]):
+            warnings.warn(
+                f"SpeciesMasterTable species '{code}' references mortality equation {equation} "
+                "which has no B-coefficients in the hardcoded tables. Probability of mortality "
+                "will be 0 for cells assigned this equation number.", UserWarning, stacklevel=2)
     return _call('mortality.build_mortality_lookup', locals())
 
 def calculate_crown_scorch_mortality(

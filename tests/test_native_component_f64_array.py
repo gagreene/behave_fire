@@ -194,7 +194,8 @@ def test_primitive_snapshots_own_physical_and_flag_operands_before_callbacks():
         flag[:] = False
 
     result = _rust.component_batch('surface.calculate_fire_area',
-        {name: np.array([value]) for name, value in dict(forward_ros=2., backing_ros=1., lwr=2., elapsed_min=1.).items()},
+        {name: np.array([value]) for name, value in dict(forward_ros=2., backing_ros=1., lwr=2., elapsed_min=1.).items()
+        },
         {}, {'is_crown': flag}, [1], _owned_callback=mutate_flag)
     np.testing.assert_allclose(result[''], [np.pi * 0.5])
     empty = _rust.component_batch('surface.calculate_eccentricity',
@@ -210,7 +211,8 @@ def test_surface_geometry_widens_inputs_and_keeps_missing_threshold_operands_mis
     actual = native.calculate_eccentricity(values)
     assert actual.dtype == np.float64
     np.testing.assert_allclose(actual, reference.calculate_eccentricity(values.astype(np.float64)), rtol=2e-15)
-    flame = native.calculate_flame_length(np.ma.array([np.nan, 0., -1., 1., 2.], mask=[False, False, False, False, True]))
+    flame = native.calculate_flame_length(np.ma.array([np.nan, 0., -1., 1., 2.], mask=[False, False, False, False, True]
+    ))
     assert type(flame) is np.ndarray and flame.dtype == np.float64
     np.testing.assert_allclose(flame, [np.nan, 0., 0., 0.45, np.nan], equal_nan=True)
     assert np.isnan(native.calculate_fire_length_to_width_ratio(np.nan)).all()
