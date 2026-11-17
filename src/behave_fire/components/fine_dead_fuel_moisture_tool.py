@@ -80,14 +80,14 @@ _CORR = np.array([
 
 
 def calculate_fine_dead_fuel_moisture(
-        dry_bulb_i: Union[int, np.ndarray],
-        rh_i: Union[int, np.ndarray],
-        slope_i: Union[int, np.ndarray],
-        aspect_i: Union[int, np.ndarray],
-        shading_i: Union[int, np.ndarray],
-        month_i: Union[int, np.ndarray],
-        elev_i: Union[int, np.ndarray],
-        time_i: Union[int, np.ndarray]
+        dry_bulb_i: int | np.ndarray,
+        rh_i: int | np.ndarray,
+        slope_i: int | np.ndarray,
+        aspect_i: int | np.ndarray,
+        shading_i: int | np.ndarray,
+        month_i: int | np.ndarray,
+        elev_i: int | np.ndarray,
+        time_i: int | np.ndarray
 ) -> np.ndarray:
     """
     Vectorized 1-hr fine dead fuel moisture table lookup.

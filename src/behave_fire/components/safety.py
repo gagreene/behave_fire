@@ -17,11 +17,11 @@ import numpy as np
 
 
 def calculate_safety_zone(
-        flame_height_ft: Union[float, np.ndarray],
-        number_of_personnel: Union[int, float, np.ndarray],
-        area_per_person_sqft: Union[float, np.ndarray],
-        number_of_equipment: Union[int, float, np.ndarray],
-        area_per_equipment_sqft: Union[float, np.ndarray]
+        flame_height_ft: float | np.ndarray,
+        number_of_personnel: int | float | np.ndarray,
+        area_per_person_sqft: float | np.ndarray,
+        number_of_equipment: int | float | np.ndarray,
+        area_per_equipment_sqft: float | np.ndarray
 ) -> dict:
     """
     Calculate safety zone dimensions for firefighter deployment.

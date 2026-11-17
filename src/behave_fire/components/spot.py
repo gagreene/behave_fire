@@ -22,9 +22,9 @@ import numpy as np
 
 
 def calculate_spotting_from_burning_pile(
-        flame_height_ft: Union[float, np.ndarray],
-        wind_mph: Union[float, np.ndarray],
-        cover_height_ft: Union[float, np.ndarray]
+        flame_height_ft: float | np.ndarray,
+        wind_mph: float | np.ndarray,
+        cover_height_ft: float | np.ndarray
 ) -> np.ndarray:
     """
     Flat-terrain spotting distance from a burning pile (Albini 1979).
@@ -67,9 +67,9 @@ def calculate_spotting_from_burning_pile(
 
 
 def calculate_spotting_from_surface_fire(
-        flame_length_ft: Union[float, np.ndarray],
-        wind_mph: Union[float, np.ndarray],
-        cover_height_ft: Union[float, np.ndarray]
+        flame_length_ft: float | np.ndarray,
+        wind_mph: float | np.ndarray,
+        cover_height_ft: float | np.ndarray
 ) -> np.ndarray:
     """
     Flat-terrain spotting distance from a surface fire (Albini 1979).
@@ -115,11 +115,11 @@ def calculate_spotting_from_surface_fire(
 
 
 def calculate_spotting_from_torching_trees(
-        dbh_in: Union[float, np.ndarray],
-        height_ft: Union[float, np.ndarray],
-        count: Union[int, float, np.ndarray],
-        wind_mph: Union[float, np.ndarray],
-        cover_height_ft: Union[float, np.ndarray]
+        dbh_in: float | np.ndarray,
+        height_ft: float | np.ndarray,
+        count: int | float | np.ndarray,
+        wind_mph: float | np.ndarray,
+        cover_height_ft: float | np.ndarray
 ) -> np.ndarray:
     """
     Flat-terrain spotting distance from torching trees (Albini 1979).

@@ -236,7 +236,7 @@ _TIME_FROM_MIN = np.array([
 ])
 
 
-def area_from_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+def area_from_base(value: float | np.ndarray, units: int) -> np.ndarray:
     """
     Convert area from square feet to the requested units.
 
@@ -250,7 +250,7 @@ def area_from_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
     return arr * _AREA_FROM_SQFT[units]
 
 
-def area_to_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+def area_to_base(value: float | np.ndarray, units: int) -> np.ndarray:
     """
     Convert area to square feet (base unit).
 
@@ -264,7 +264,7 @@ def area_to_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
     return arr * _AREA_TO_SQFT[units]
 
 
-def density_from_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+def density_from_base(value: float | np.ndarray, units: int) -> np.ndarray:
     """
     Convert density from lb/ft³ to the requested units.
 
@@ -278,7 +278,7 @@ def density_from_base(value: Union[float, np.ndarray], units: int) -> np.ndarray
     return arr * _DENSITY_FROM_BASE[units]
 
 
-def density_to_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+def density_to_base(value: float | np.ndarray, units: int) -> np.ndarray:
     """
     Convert density to lb/ft³ (base unit).
 
@@ -293,7 +293,7 @@ def density_to_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
     return arr * _DENSITY_TO_BASE[units]
 
 
-def fireline_intensity_from_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+def fireline_intensity_from_base(value: float | np.ndarray, units: int) -> np.ndarray:
     """
     Convert fireline intensity from BTU/ft/s to the requested units.
 
@@ -307,7 +307,7 @@ def fireline_intensity_from_base(value: Union[float, np.ndarray], units: int) ->
     return arr * _FLI_FROM_BASE[units]
 
 
-def fireline_intensity_to_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+def fireline_intensity_to_base(value: float | np.ndarray, units: int) -> np.ndarray:
     """
     Convert fireline intensity to BTU/ft/s (base unit).
 
@@ -322,7 +322,7 @@ def fireline_intensity_to_base(value: Union[float, np.ndarray], units: int) -> n
     return arr * _FLI_TO_BASE[units]
 
 
-def fraction_from_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+def fraction_from_base(value: float | np.ndarray, units: int) -> np.ndarray:
     """
     Convert fraction (0–1) to the requested units.
 
@@ -340,7 +340,7 @@ def fraction_from_base(value: Union[float, np.ndarray], units: int) -> np.ndarra
 # Fraction / Percentage  (base = Fraction = 0)
 # ---------------------------------------------------------------------------
 
-def fraction_to_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+def fraction_to_base(value: float | np.ndarray, units: int) -> np.ndarray:
     """
     Convert fraction or percent to fraction (base unit, 0–1).
 
@@ -356,7 +356,7 @@ def fraction_to_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
     return arr / 100.0
 
 
-def hpua_from_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+def hpua_from_base(value: float | np.ndarray, units: int) -> np.ndarray:
     """
     Convert heat per unit area from BTU/ft² to the requested units.
 
@@ -370,7 +370,7 @@ def hpua_from_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
     return arr * _HPUA_FROM_BASE[units]
 
 
-def hpua_to_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+def hpua_to_base(value: float | np.ndarray, units: int) -> np.ndarray:
     """
     Convert heat per unit area to BTU/ft² (base unit).
 
@@ -385,7 +385,7 @@ def hpua_to_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
     return arr * _HPUA_TO_BASE[units]
 
 
-def length_from_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+def length_from_base(value: float | np.ndarray, units: int) -> np.ndarray:
     """
     Convert length from feet to the requested units.
 
@@ -399,7 +399,7 @@ def length_from_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
     return arr * _LENGTH_FROM_FT[units]
 
 
-def length_to_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+def length_to_base(value: float | np.ndarray, units: int) -> np.ndarray:
     """
     Convert length to feet (base unit).
 
@@ -413,7 +413,7 @@ def length_to_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
     return arr * _LENGTH_TO_FT[units]
 
 
-def loading_from_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+def loading_from_base(value: float | np.ndarray, units: int) -> np.ndarray:
     """
     Convert fuel loading from lb/ft² to the requested units.
 
@@ -427,7 +427,7 @@ def loading_from_base(value: Union[float, np.ndarray], units: int) -> np.ndarray
     return arr * _LOAD_FROM_BASE[units]
 
 
-def loading_to_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+def loading_to_base(value: float | np.ndarray, units: int) -> np.ndarray:
     """
     Convert fuel loading to lb/ft² (base unit).
 
@@ -442,7 +442,7 @@ def loading_to_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
     return arr * _LOAD_TO_BASE[units]
 
 
-def pressure_from_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+def pressure_from_base(value: float | np.ndarray, units: int) -> np.ndarray:
     """
     Convert pressure from Pascals to the requested units.
 
@@ -456,7 +456,7 @@ def pressure_from_base(value: Union[float, np.ndarray], units: int) -> np.ndarra
     return arr * _PRESSURE_FROM_PA[units]
 
 
-def pressure_to_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+def pressure_to_base(value: float | np.ndarray, units: int) -> np.ndarray:
     """
     Convert pressure to Pascals (base unit).
 
@@ -470,7 +470,7 @@ def pressure_to_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
     return arr * _PRESSURE_TO_PA[units]
 
 
-def reaction_intensity_from_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+def reaction_intensity_from_base(value: float | np.ndarray, units: int) -> np.ndarray:
     """
     Convert reaction intensity from BTU/ft²/min to the requested units.
 
@@ -485,7 +485,7 @@ def reaction_intensity_from_base(value: Union[float, np.ndarray], units: int) ->
     return arr * _RI_FROM_BASE[units]
 
 
-def reaction_intensity_to_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+def reaction_intensity_to_base(value: float | np.ndarray, units: int) -> np.ndarray:
     """
     Convert reaction intensity to BTU/ft²/min (base unit).
 
@@ -500,7 +500,7 @@ def reaction_intensity_to_base(value: Union[float, np.ndarray], units: int) -> n
     return arr * _RI_TO_BASE[units]
 
 
-def slope_from_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+def slope_from_base(value: float | np.ndarray, units: int) -> np.ndarray:
     """
     Convert slope from degrees to the requested units.
 
@@ -518,7 +518,7 @@ def slope_from_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
 # Slope  (base = Degrees = 0)
 # ---------------------------------------------------------------------------
 
-def slope_to_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+def slope_to_base(value: float | np.ndarray, units: int) -> np.ndarray:
     """
     Convert slope to degrees (base unit).
 
@@ -533,7 +533,7 @@ def slope_to_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
     return np.degrees(np.arctan(arr / 100.0))
 
 
-def speed_from_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+def speed_from_base(value: float | np.ndarray, units: int) -> np.ndarray:
     """
     Convert speed from ft/min to the requested units.
 
@@ -547,7 +547,7 @@ def speed_from_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
     return arr * _SPEED_FROM_FPM[units]
 
 
-def speed_to_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+def speed_to_base(value: float | np.ndarray, units: int) -> np.ndarray:
     """
     Convert speed to ft/min (base unit).
 
@@ -561,7 +561,7 @@ def speed_to_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
     return arr * _SPEED_TO_FPM[units]
 
 
-def temp_from_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+def temp_from_base(value: float | np.ndarray, units: int) -> np.ndarray:
     """
     Convert temperature from °F to the requested units.
 
@@ -583,7 +583,7 @@ def temp_from_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
 # Temperature  (base = Fahrenheit = 0)
 # ---------------------------------------------------------------------------
 
-def temp_to_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+def temp_to_base(value: float | np.ndarray, units: int) -> np.ndarray:
     """
     Convert temperature to °F (base unit).
 
@@ -601,7 +601,7 @@ def temp_to_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
     return arr
 
 
-def time_from_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+def time_from_base(value: float | np.ndarray, units: int) -> np.ndarray:
     """
     Convert time from minutes to the requested units.
 
@@ -615,7 +615,7 @@ def time_from_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
     return arr * _TIME_FROM_MIN[units]
 
 
-def time_to_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+def time_to_base(value: float | np.ndarray, units: int) -> np.ndarray:
     """
     Convert time to minutes (base unit).
 
@@ -644,12 +644,12 @@ class AreaUnits:
         SquareKilometers = 5
 
     @staticmethod
-    def fromBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+    def fromBaseUnits(value: float | np.ndarray, units: int) -> np.ndarray:
         """Convert area from square feet to requested units. Delegates to ``area_from_base()``."""
         return area_from_base(value, units)
 
     @staticmethod
-    def toBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+    def toBaseUnits(value: float | np.ndarray, units: int) -> np.ndarray:
         """Convert area to square feet (base unit). Delegates to ``area_to_base()``."""
         return area_to_base(value, units)
 
@@ -659,7 +659,7 @@ class BasalAreaUnits:
         SquareMetersPerHectare = 1
 
     @staticmethod
-    def fromBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+    def fromBaseUnits(value: float | np.ndarray, units: int) -> np.ndarray:
         """Convert basal area from ft²/acre to requested units."""
         arr = np.asarray(value, dtype=float)
         if units == 0:
@@ -667,7 +667,7 @@ class BasalAreaUnits:
         return arr / 4.35889
 
     @staticmethod
-    def toBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+    def toBaseUnits(value: float | np.ndarray, units: int) -> np.ndarray:
         """Convert basal area to ft²/acre (base unit, units=0 pass-through)."""
         arr = np.asarray(value, dtype=float)
         if units == 0:
@@ -687,12 +687,12 @@ class LengthUnits:
         Kilometers = 7
 
     @staticmethod
-    def fromBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+    def fromBaseUnits(value: float | np.ndarray, units: int) -> np.ndarray:
         """Convert length from feet to requested units. Delegates to ``length_from_base()``."""
         return length_from_base(value, units)
 
     @staticmethod
-    def toBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+    def toBaseUnits(value: float | np.ndarray, units: int) -> np.ndarray:
         """Convert length to feet (base unit). Delegates to ``length_to_base()``."""
         return length_to_base(value, units)
 
@@ -704,12 +704,12 @@ class LoadingUnits:
         KilogramsPerSquareMeter = 3
 
     @staticmethod
-    def fromBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+    def fromBaseUnits(value: float | np.ndarray, units: int) -> np.ndarray:
         """Convert fuel loading from lb/ft² to requested units. Delegates to ``loading_from_base()``."""
         return loading_from_base(value, units)
 
     @staticmethod
-    def toBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+    def toBaseUnits(value: float | np.ndarray, units: int) -> np.ndarray:
         """Convert fuel loading to lb/ft² (base unit). Delegates to ``loading_to_base()``."""
         return loading_to_base(value, units)
 
@@ -726,12 +726,12 @@ class PressureUnits:
         PoundPerSquareInch = 8
 
     @staticmethod
-    def fromBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+    def fromBaseUnits(value: float | np.ndarray, units: int) -> np.ndarray:
         """Convert pressure from Pascals to requested units. Delegates to ``pressure_from_base()``."""
         return pressure_from_base(value, units)
 
     @staticmethod
-    def toBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+    def toBaseUnits(value: float | np.ndarray, units: int) -> np.ndarray:
         """Convert pressure to Pascals (base unit). Delegates to ``pressure_to_base()``."""
         return pressure_to_base(value, units)
 
@@ -747,7 +747,7 @@ class SurfaceAreaToVolumeUnits:
     _FROM_BASE = [1.0 / factor for factor in _TO_BASE]
 
     @staticmethod
-    def fromBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+    def fromBaseUnits(value: float | np.ndarray, units: int) -> np.ndarray:
         """Convert SAVR from ft²/ft³ to requested units."""
         arr = np.asarray(value, dtype=float)
         if units == 0:
@@ -755,7 +755,7 @@ class SurfaceAreaToVolumeUnits:
         return arr * SurfaceAreaToVolumeUnits._FROM_BASE[units]
 
     @staticmethod
-    def toBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+    def toBaseUnits(value: float | np.ndarray, units: int) -> np.ndarray:
         """Convert SAVR to ft²/ft³ (base unit)."""
         arr = np.asarray(value, dtype=float)
         if units == 0:
@@ -773,12 +773,12 @@ class SpeedUnits:
         KilometersPerHour = 6
 
     @staticmethod
-    def fromBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+    def fromBaseUnits(value: float | np.ndarray, units: int) -> np.ndarray:
         """Convert speed from ft/min to requested units. Delegates to ``speed_from_base()``."""
         return speed_from_base(value, units)
 
     @staticmethod
-    def toBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+    def toBaseUnits(value: float | np.ndarray, units: int) -> np.ndarray:
         """Convert speed to ft/min (base unit). Delegates to ``speed_to_base()``."""
         return speed_to_base(value, units)
 
@@ -788,12 +788,12 @@ class FractionUnits:
         Percent = 1
 
     @staticmethod
-    def fromBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+    def fromBaseUnits(value: float | np.ndarray, units: int) -> np.ndarray:
         """Convert fraction to requested units. Delegates to ``fraction_from_base()``."""
         return fraction_from_base(value, units)
 
     @staticmethod
-    def toBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+    def toBaseUnits(value: float | np.ndarray, units: int) -> np.ndarray:
         """Convert fraction/percent to fraction (base unit). Delegates to ``fraction_to_base()``."""
         return fraction_to_base(value, units)
 
@@ -803,12 +803,12 @@ class SlopeUnits:
         Percent = 1
 
     @staticmethod
-    def fromBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+    def fromBaseUnits(value: float | np.ndarray, units: int) -> np.ndarray:
         """Convert slope from degrees to requested units. Delegates to ``slope_from_base()``."""
         return slope_from_base(value, units)
 
     @staticmethod
-    def toBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+    def toBaseUnits(value: float | np.ndarray, units: int) -> np.ndarray:
         """Convert slope to degrees (base unit). Delegates to ``slope_to_base()``."""
         return slope_to_base(value, units)
 
@@ -818,12 +818,12 @@ class DensityUnits:
         KilogramsPerCubicMeter = 1
 
     @staticmethod
-    def fromBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+    def fromBaseUnits(value: float | np.ndarray, units: int) -> np.ndarray:
         """Convert density from lb/ft³ to requested units. Delegates to ``density_from_base()``."""
         return density_from_base(value, units)
 
     @staticmethod
-    def toBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+    def toBaseUnits(value: float | np.ndarray, units: int) -> np.ndarray:
         """Convert density to lb/ft³ (base unit). Delegates to ``density_to_base()``."""
         return density_to_base(value, units)
 
@@ -833,7 +833,7 @@ class HeatOfCombustionUnits:
         KilojoulesPerKilogram = 1
 
     @staticmethod
-    def fromBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+    def fromBaseUnits(value: float | np.ndarray, units: int) -> np.ndarray:
         """Convert heat of combustion from BTU/lb to requested units."""
         arr = np.asarray(value, dtype=float)
         if units == 0:
@@ -842,7 +842,7 @@ class HeatOfCombustionUnits:
         return arr * 2.32779
 
     @staticmethod
-    def toBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+    def toBaseUnits(value: float | np.ndarray, units: int) -> np.ndarray:
         """Convert heat of combustion to BTU/lb (base unit)."""
         arr = np.asarray(value, dtype=float)
         if units == 0:
@@ -857,7 +857,7 @@ class HeatSinkUnits:
         KilojoulesPerCubicMeter = 1
 
     @staticmethod
-    def fromBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+    def fromBaseUnits(value: float | np.ndarray, units: int) -> np.ndarray:
         """Convert heat sink from BTU/ft³ to requested units."""
         arr = np.asarray(value, dtype=float)
         if units == 0:
@@ -865,7 +865,7 @@ class HeatSinkUnits:
         return arr / 0.026839
 
     @staticmethod
-    def toBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+    def toBaseUnits(value: float | np.ndarray, units: int) -> np.ndarray:
         """Convert heat sink to BTU/ft³ (base unit)."""
         arr = np.asarray(value, dtype=float)
         if units == 0:
@@ -880,12 +880,12 @@ class HeatPerUnitAreaUnits:
         KilowattSecondsPerSquareMeter = 2
 
     @staticmethod
-    def fromBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+    def fromBaseUnits(value: float | np.ndarray, units: int) -> np.ndarray:
         """Convert heat per unit area from BTU/ft² to requested units. Delegates to ``hpua_from_base()``."""
         return hpua_from_base(value, units)
 
     @staticmethod
-    def toBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+    def toBaseUnits(value: float | np.ndarray, units: int) -> np.ndarray:
         """Convert heat per unit area to BTU/ft² (base unit). Delegates to ``hpua_to_base()``."""
         return hpua_to_base(value, units)
 
@@ -898,12 +898,12 @@ class HeatSourceAndReactionIntensityUnits:
         KilowattsPerSquareMeter = 4
 
     @staticmethod
-    def fromBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+    def fromBaseUnits(value: float | np.ndarray, units: int) -> np.ndarray:
         """Convert reaction intensity from BTU/ft²/min to requested units. Delegates to ``reaction_intensity_from_base()``."""
         return reaction_intensity_from_base(value, units)
 
     @staticmethod
-    def toBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+    def toBaseUnits(value: float | np.ndarray, units: int) -> np.ndarray:
         """Convert reaction intensity to BTU/ft²/min (base unit). Delegates to ``reaction_intensity_to_base()``."""
         return reaction_intensity_to_base(value, units)
 
@@ -916,12 +916,12 @@ class FirelineIntensityUnits:
         KilowattsPerMeter = 4
 
     @staticmethod
-    def fromBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+    def fromBaseUnits(value: float | np.ndarray, units: int) -> np.ndarray:
         """Convert fireline intensity from BTU/ft/s to requested units. Delegates to ``fireline_intensity_from_base()``."""
         return fireline_intensity_from_base(value, units)
 
     @staticmethod
-    def toBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+    def toBaseUnits(value: float | np.ndarray, units: int) -> np.ndarray:
         """Convert fireline intensity to BTU/ft/s (base unit). Delegates to ``fireline_intensity_to_base()``."""
         return fireline_intensity_to_base(value, units)
 
@@ -932,12 +932,12 @@ class TemperatureUnits:
         Kelvin = 2
 
     @staticmethod
-    def fromBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+    def fromBaseUnits(value: float | np.ndarray, units: int) -> np.ndarray:
         """Convert temperature from °F to requested units. Delegates to ``temp_from_base()``."""
         return temp_from_base(value, units)
 
     @staticmethod
-    def toBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+    def toBaseUnits(value: float | np.ndarray, units: int) -> np.ndarray:
         """Convert temperature to °F (base unit). Delegates to ``temp_to_base()``."""
         return temp_to_base(value, units)
 
@@ -950,12 +950,12 @@ class TimeUnits:
         Years = 4
 
     @staticmethod
-    def fromBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+    def fromBaseUnits(value: float | np.ndarray, units: int) -> np.ndarray:
         """Convert time from minutes to requested units. Delegates to ``time_from_base()``."""
         return time_from_base(value, units)
 
     @staticmethod
-    def toBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+    def toBaseUnits(value: float | np.ndarray, units: int) -> np.ndarray:
         """Convert time to minutes (base unit). Delegates to ``time_to_base()``."""
         return time_to_base(value, units)
 

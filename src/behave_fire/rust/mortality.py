@@ -10,7 +10,7 @@ from ._bridge import _call, _native
 from .species_master_table import SpeciesMasterTable
 
 
-def build_mortality_lookup(species_master_table: Optional['SpeciesMasterTable']=None) -> np.ndarray:
+def build_mortality_lookup(species_master_table: SpeciesMasterTable | None=None) -> np.ndarray:
     """Dispatch to the standalone native implementation.
 
     :param species_master_table: Input matching the reference API.
@@ -22,11 +22,11 @@ def build_mortality_lookup(species_master_table: Optional['SpeciesMasterTable']=
     return _call('mortality.build_mortality_lookup', locals())
 
 def calculate_crown_scorch_mortality(
-        scorch_height_ft: Union[float, np.ndarray],
-        tree_height_ft: Union[float, np.ndarray],
-        crown_ratio: Union[float, np.ndarray],
-        dbh_inches: Union[float, np.ndarray],
-        equation_number_grid: Union[int, np.ndarray],
+        scorch_height_ft: float | np.ndarray,
+        tree_height_ft: float | np.ndarray,
+        crown_ratio: float | np.ndarray,
+        dbh_inches: float | np.ndarray,
+        equation_number_grid: int | np.ndarray,
         coeffs: np.ndarray,
 ) -> dict:
     """Dispatch to the standalone native implementation.
@@ -42,9 +42,9 @@ def calculate_crown_scorch_mortality(
     return _call('mortality.calculate_crown_scorch_mortality', locals())
 
 def calculate_scorch_height(
-        fireline_intensity_btu_ft_s: Union[float, np.ndarray],
-        midflame_wind_mph: Union[float, np.ndarray],
-        air_temp_f: Union[float, np.ndarray],
+        fireline_intensity_btu_ft_s: float | np.ndarray,
+        midflame_wind_mph: float | np.ndarray,
+        air_temp_f: float | np.ndarray,
 ) -> np.ndarray:
     """Dispatch to the standalone native implementation.
 
