@@ -18,7 +18,8 @@ def test_model_calculations_never_call_reference(monkeypatch):
             if inspect.isfunction(value) and not name.startswith("_"):
                 monkeypatch.setattr(module,name,forbidden)
     model = BehaveRun(FuelModels())
-    inputs = dict(fuel_model_grid=np.array([124]),m1h=np.array([.06]),m10h=np.array([.07]),m100h=np.array([.08]),mlh=np.array([.6]),mlw=np.array([.9]),wind_speed=5.,wind_speed_units=5,wind_direction=0.,wind_orientation_mode="RelativeToUpslope",slope=10.)
+    inputs = dict(fuel_model_grid=np.array([124]),m1h=np.array([.06]),m10h=np.array([.07]),m100h=np.array([.08]),
+        mlh=np.array([.6]),mlw=np.array([.9]),wind_speed=5.,wind_speed_units=5,wind_direction=0.,wind_orientation_mode="RelativeToUpslope",slope=10.)
     result = model.do_surface_run(**inputs)
     crown = model.do_crown_run(result, **inputs)
     assert result["spread_rate"][0] > 0
@@ -88,7 +89,8 @@ def test_native_strided_array_ownership(layout):
     from behave_fire.rust import surface
 
     original = np.arange(24.0).reshape(4, 6) + 1
-    values = {"fortran": np.asfortranarray(original), "reverse": original[::-1, ::-1], "slice": original[::2, 1::2], "broadcast": np.broadcast_to(original[0], (4, 6)), "readonly": original.copy()}[layout]
+    values = {"fortran": np.asfortranarray(original), "reverse": original[::-1, ::-1], "slice": original[::2, 1::2],
+        "broadcast": np.broadcast_to(original[0], (4, 6)), "readonly": original.copy()}[layout]
     if layout == "readonly":
         values.setflags(write=False)
     before = values.copy()

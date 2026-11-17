@@ -90,7 +90,8 @@ def test_upslope_direction_ignores_aspect_shape():
     from behave_fire.components import surface as reference
     from behave_fire.rust import surface
 
-    inputs=dict(x_component=np.ones(2), y_component=np.ones(2), rate_vector=np.ones(2),wind_orientation_mode="RelativeToUpslope",aspect=np.ones(3))
+    inputs=dict(x_component=np.ones(2), y_component=np.ones(2), rate_vector=np.ones(2),
+        wind_orientation_mode="RelativeToUpslope",aspect=np.ones(3))
     expected=reference.calculate_direction_of_max_spread(**inputs)
     actual=surface.calculate_direction_of_max_spread(**inputs)
     assert actual.shape==expected.shape

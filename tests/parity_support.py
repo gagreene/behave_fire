@@ -175,7 +175,8 @@ def cases(*domains):
     result = []
     for domain in domains:
         document = json.loads((ROOT / "tests/data/rust_port" / (domain + ".json")).read_text(encoding="utf-8"))
-        result.extend(pytest.param(case, id=domain + ":" + case["id"]) for case in document["cases"] if case.get("policy", "acceptance") == "acceptance")
+        result.extend(pytest.param(case, id=domain + ":" + case["id"]) for case in document["cases"] if case.get(
+            "policy", "acceptance") == "acceptance")
     return result
 
 
@@ -221,7 +222,8 @@ def registry_state(state):
     if state["registry"] == "SpeciesMasterTable":
         instance = SpeciesMasterTable()
         standard = instance.records
-        instance.records = [standard[item["reference_index"]] if "reference_index" in item else SpeciesMasterTableRecord(**decode(item["record"])) for item in state["records"]]
+        instance.records = [standard[item["reference_index"]] if "reference_index" in item
+            else SpeciesMasterTableRecord(**decode(item["record"])) for item in state["records"]]
         return instance
     return SpeciesMasterTableRecord(**decode(state["record"]))
 
@@ -229,7 +231,8 @@ def registry_state(state):
 
 
 def run_case(case):
-    route = case["entry_point"].replace("behave_fire.components", "behave_fire.rust").replace("behave_fire.behave", "behave_fire.rust.core")
+    route = case["entry_point"].replace("behave_fire.components", "behave_fire.rust").replace("behave_fire.behave",
+        "behave_fire.rust.core")
     module, function = route.rsplit(".", 1)
     instance = None
     if "receiver_before" in case:
@@ -250,7 +253,8 @@ def run_case(case):
             operation = getattr(operation, part)
     arguments = decode(case["inputs"])
     entry = case['entry_point']
-    stateless = any(f'.{family}.' in entry for family in ('behave_units', 'ignite', 'safety', 'spot', 'vapor_pressure_deficit_calculator', 'surface', 'crown', 'fine_dead_fuel_moisture_tool'))
+    stateless = any(f'.{family}.' in entry for family in ('behave_units', 'ignite', 'safety', 'spot',
+        'vapor_pressure_deficit_calculator', 'surface', 'crown', 'fine_dead_fuel_moisture_tool'))
     stateless = stateless or ('.mortality.calculate_' in entry)
     if stateless or '.BehaveRun.' in entry or entry.rsplit('.', 1)[1] in ('run_crown_fire', 'coerce_crown_fire_inputs'):
         _float64_case(case, operation, arguments)

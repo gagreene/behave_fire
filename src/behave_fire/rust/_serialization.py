@@ -12,9 +12,13 @@ def _require_extension():
     try:
         extension = import_module('behave_fire._rust')
     except Exception as error:
-        raise ImportError(f'Cannot restore a Rust behave-fire object; install a compatible native wheel or rebuild the extension. {error}') from error
+        raise ImportError(
+            'Cannot restore a Rust behave-fire object; install a compatible native wheel '
+            f'or rebuild the extension. {error}') from error
     if getattr(extension, '__binding_api_version__', None) != BINDING_API_VERSION:
-        raise ImportError(f'Cannot restore a Rust behave-fire object: binding API version {BINDING_API_VERSION} is required. Rebuild or reinstall the native extension.')
+        raise ImportError(
+            f'Cannot restore a Rust behave-fire object: binding API version {BINDING_API_VERSION} '
+            'is required. Rebuild or reinstall the native extension.')
 
 class NativeState:
     """Preserve numerical snapshots without pointers, pools, or backend reselection."""
@@ -24,7 +28,8 @@ class NativeState:
 
         :return: Backend/API identifiers and the object's current value/array state.
         """
-        return {'schema_version': 1, 'binding_api_version': BINDING_API_VERSION, 'backend': 'rust', 'values': dict(vars(self))}
+        return {'schema_version': 1, 'binding_api_version': BINDING_API_VERSION, 'backend': 'rust', 'values': dict(vars(
+            self))}
 
     def __setstate__(self, state):
         """Restore the recorded native state without rebuilding cached lookup arrays.

@@ -370,7 +370,8 @@ class FuelModels:
             5500*savr_m_to_ft, 8000*savr_m_to_ft, 4500*savr_m_to_ft, True)
         rec(168, "M-F", "Deciduous or Conifer Litter, Shrub and Fern Understory (Dynamic)",
             0.3*meters_to_feet, 0.35, 19500*kj_kg_to_btu_lb, 19500*kj_kg_to_btu_lb,
-            4.5*tonnes_ha_to_lb_ft2, 1.5*tonnes_ha_to_lb_ft2, 0.5*tonnes_ha_to_lb_ft2, 2.35*tonnes_ha_to_lb_ft2, 0.48*tonnes_ha_to_lb_ft2,
+            4.5*tonnes_ha_to_lb_ft2, 1.5*tonnes_ha_to_lb_ft2, 0.5*tonnes_ha_to_lb_ft2, 2.35*tonnes_ha_to_lb_ft2, 0.48
+            *tonnes_ha_to_lb_ft2,
             6000*savr_m_to_ft, 8000*savr_m_to_ft, 4500*savr_m_to_ft, True)
         rec(169, "M-CAD", "Deciduous Litter, Shrub Understory (Static)",
             0.63*meters_to_feet, 0.30, 20000*kj_kg_to_btu_lb, 20000*kj_kg_to_btu_lb,
@@ -789,8 +790,10 @@ class FuelModels:
         # --- Convert all inputs to internal base units before storage ---
         fuel_bed_depth             = LengthUnits.toBaseUnits(fuel_bed_depth, length_units)
         moisture_of_extinction_dead = FractionUnits.toBaseUnits(moisture_of_extinction_dead, moisture_units)
-        heat_of_combustion_dead    = HeatOfCombustionUnits.toBaseUnits(heat_of_combustion_dead, heat_of_combustion_units)
-        heat_of_combustion_live    = HeatOfCombustionUnits.toBaseUnits(heat_of_combustion_live, heat_of_combustion_units)
+        heat_of_combustion_dead    = HeatOfCombustionUnits.toBaseUnits(heat_of_combustion_dead, heat_of_combustion_units
+        )
+        heat_of_combustion_live    = HeatOfCombustionUnits.toBaseUnits(heat_of_combustion_live, heat_of_combustion_units
+        )
         fuel_load_one_hour         = LoadingUnits.toBaseUnits(fuel_load_one_hour,         loading_units)
         fuel_load_ten_hour         = LoadingUnits.toBaseUnits(fuel_load_ten_hour,         loading_units)
         fuel_load_hundred_hour     = LoadingUnits.toBaseUnits(fuel_load_hundred_hour,     loading_units)

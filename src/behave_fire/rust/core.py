@@ -43,9 +43,26 @@ from .surface import (
     calculate_fire_width,
 )
 
-_SURFACE_KEY_CONVERTERS = {'spread_rate': (speed_from_base, 0), 'backing_spread_rate': (speed_from_base, 0), 'flanking_spread_rate': (speed_from_base, 0), 'no_wind_no_slope_spread_rate': (speed_from_base, 0), 'midflame_wind_speed': (speed_from_base, 0), 'effective_wind_speed': (speed_from_base, 5), 'flame_length': (length_from_base, 0), 'fireline_intensity': (fireline_intensity_from_base, 0), 'heat_per_unit_area': (hpua_from_base, 0), 'reaction_intensity': (reaction_intensity_from_base, 0), 'residence_time': (time_from_base, 0), 'fire_length_to_width_ratio': None, 'eccentricity': None, 'direction_of_max_spread': None}
-_CROWN_KEY_CONVERTERS = {'crown_fire_spread_rate': (speed_from_base, 0), 'crown_critical_fire_spread_rate': (speed_from_base, 0), 'crown_flame_length': (length_from_base, 0), 'crown_fire_line_intensity': (fireline_intensity_from_base, 0), 'crown_critical_surface_fire_line_intensity': (fireline_intensity_from_base, 0), 'crown_fire_heat_per_unit_area': (hpua_from_base, 0), 'canopy_heat_per_unit_area': (hpua_from_base, 0), 'surface_fire_critical_spread_rate': (speed_from_base, 0), 'crowning_surface_fire_spread_rate': (speed_from_base, 0), 'passive_crown_fire_spread_rate': (speed_from_base, 0), 'passive_crown_fire_heat_per_unit_area': (hpua_from_base, 0), 'passive_crown_fire_line_intensity': (fireline_intensity_from_base, 0), 'passive_crown_fire_flame_length': (length_from_base, 0), 'final_spread_rate': (speed_from_base, 0), 'final_fireline_intensity': (fireline_intensity_from_base, 0), 'final_heat_per_unit_area': (hpua_from_base, 0), 'final_flame_length': (length_from_base, 0), 'crown_fire_transition_ratio': None, 'crown_fire_active_ratio': None, 'crown_length_to_width_ratio': None, 'fire_type': None, 'crown_fraction_burned': None}
-_MORTALITY_KEY_CONVERTERS = {'crown_length_scorch': (fraction_from_base, 0), 'crown_volume_scorch': (fraction_from_base, 0), 'probability_mortality': (fraction_from_base, 0)}
+_SURFACE_KEY_CONVERTERS = {'spread_rate': (speed_from_base, 0), 'backing_spread_rate': (speed_from_base, 0),
+    'flanking_spread_rate': (speed_from_base, 0), 'no_wind_no_slope_spread_rate': (speed_from_base, 0),
+    'midflame_wind_speed': (speed_from_base, 0), 'effective_wind_speed': (speed_from_base, 5), 'flame_length': (
+        length_from_base, 0), 'fireline_intensity': (fireline_intensity_from_base, 0), 'heat_per_unit_area': (
+            hpua_from_base, 0), 'reaction_intensity': (reaction_intensity_from_base, 0), 'residence_time': (
+                time_from_base, 0), 'fire_length_to_width_ratio': None, 'eccentricity': None,
+    'direction_of_max_spread': None}
+_CROWN_KEY_CONVERTERS = {'crown_fire_spread_rate': (speed_from_base, 0), 'crown_critical_fire_spread_rate': (
+    speed_from_base, 0), 'crown_flame_length': (length_from_base, 0), 'crown_fire_line_intensity': (
+        fireline_intensity_from_base, 0), 'crown_critical_surface_fire_line_intensity': (fireline_intensity_from_base, 0
+        ), 'crown_fire_heat_per_unit_area': (hpua_from_base, 0), 'canopy_heat_per_unit_area': (hpua_from_base, 0),
+    'surface_fire_critical_spread_rate': (speed_from_base, 0), 'crowning_surface_fire_spread_rate': (speed_from_base, 0
+    ), 'passive_crown_fire_spread_rate': (speed_from_base, 0), 'passive_crown_fire_heat_per_unit_area': (hpua_from_base,
+        0), 'passive_crown_fire_line_intensity': (fireline_intensity_from_base, 0), 'passive_crown_fire_flame_length': (
+            length_from_base, 0), 'final_spread_rate': (speed_from_base, 0), 'final_fireline_intensity': (
+                fireline_intensity_from_base, 0), 'final_heat_per_unit_area': (hpua_from_base, 0),
+    'final_flame_length': (length_from_base, 0), 'crown_fire_transition_ratio': None, 'crown_fire_active_ratio': None,
+    'crown_length_to_width_ratio': None, 'fire_type': None, 'crown_fraction_burned': None}
+_MORTALITY_KEY_CONVERTERS = {'crown_length_scorch': (fraction_from_base, 0), 'crown_volume_scorch': (fraction_from_base,
+    0), 'probability_mortality': (fraction_from_base, 0)}
 
 def _apply_out_units(results: dict, out_units: dict, converters: dict) -> dict:
     """Convert each key in *results* whose converter is registered in *converters*
@@ -174,7 +191,9 @@ class BehaveRun(_NativeState):
         tree_ht_ft = length_to_base(normalize_physical(tree_height), tree_height_units)
         cr_frac = fraction_to_base(normalize_physical(crown_ratio), crown_ratio_units)
         dbh_in = length_from_base(length_to_base(normalize_physical(dbh), dbh_units), 1)
-        results = calculate_crown_scorch_mortality(scorch_height_ft=scorch_ft, tree_height_ft=tree_ht_ft, crown_ratio=cr_frac, dbh_inches=dbh_in, equation_number_grid=equation_number_grid, coeffs=self._mortality_coeffs)
+        results = calculate_crown_scorch_mortality(scorch_height_ft=scorch_ft, tree_height_ft=tree_ht_ft,
+            crown_ratio=cr_frac, dbh_inches=dbh_in, equation_number_grid=equation_number_grid,
+            coeffs=self._mortality_coeffs)
         return _apply_out_units(results, out_units or {}, _MORTALITY_KEY_CONVERTERS)
 
     @_threaded_static
@@ -218,7 +237,8 @@ class BehaveRun(_NativeState):
         fros_fpm = speed_to_base(value=forward_ros, units=ros_units)
         bros_fpm = speed_to_base(value=backing_ros, units=ros_units)
         elapsed_min = float(time_to_base(value=elapsed_time, units=elapsed_time_units))
-        result = calculate_fire_area(forward_ros=fros_fpm, backing_ros=bros_fpm, lwr=lwr, elapsed_min=elapsed_min, is_crown=is_crown)
+        result = calculate_fire_area(forward_ros=fros_fpm, backing_ros=bros_fpm, lwr=lwr, elapsed_min=elapsed_min,
+            is_crown=is_crown)
         return area_from_base(value=result, units=out_units)
 
     @_threaded_static
@@ -303,7 +323,8 @@ class BehaveRun(_NativeState):
         fros_fpm = speed_to_base(value=forward_ros, units=ros_units)
         bros_fpm = speed_to_base(value=backing_ros, units=ros_units)
         elapsed_min = float(time_to_base(value=elapsed_time, units=elapsed_time_units))
-        result = calculate_fire_perimeter(forward_ros=fros_fpm, backing_ros=bros_fpm, lwr=lwr, elapsed_min=elapsed_min, is_crown=is_crown)
+        result = calculate_fire_perimeter(forward_ros=fros_fpm, backing_ros=bros_fpm, lwr=lwr, elapsed_min=elapsed_min,
+            is_crown=is_crown)
         return length_from_base(value=result, units=out_units)
 
     @_threaded_static
@@ -518,7 +539,8 @@ class BehaveRun(_NativeState):
         ht_ft = length_to_base(value=height, units=height_units)
         ws_mph = speed_from_base(value=speed_to_base(value=wind_speed, units=wind_speed_units), units=5)
         ch_ft = length_to_base(value=cover_height, units=cover_height_units)
-        result = calculate_spotting_from_torching_trees(dbh_in=dbh_in, height_ft=ht_ft, count=count, wind_mph=ws_mph, cover_height_ft=ch_ft)
+        result = calculate_spotting_from_torching_trees(dbh_in=dbh_in, height_ft=ht_ft, count=count, wind_mph=ws_mph,
+            cover_height_ft=ch_ft)
         return length_from_base(value=result, units=out_units)
 
     @_threaded_method
@@ -720,10 +742,17 @@ class BehaveRun(_NativeState):
         m100h = _prepare_base('m100h', 'Fraction', m100h, moisture_units, conversions)
         mlh = _prepare_base('mlh', 'Fraction', mlh, moisture_units, conversions)
         mlw = _prepare_base('mlw', 'Fraction', mlw, moisture_units, conversions)
-        cbh_ft = _prepare_base('canopy_base_height', 'Length', canopy_base_height, canopy_base_height_units, conversions)
+        cbh_ft = _prepare_base('canopy_base_height', 'Length', canopy_base_height, canopy_base_height_units, conversions
+        )
         ch_ft = _prepare_base('canopy_height', 'Length', canopy_height, canopy_height_units, conversions)
-        cbd_pcf = _prepare_base('canopy_bulk_density', 'Density', canopy_bulk_density, canopy_bulk_density_units, conversions)
-        results = _call('crown.run_crown_fire', dict(surface_results=surface_results, lut=self._lut, fuel_model_grid=fuel_model_grid, m1h=m1h, m10h=m10h, m100h=m100h, mlh=mlh, mlw=mlw, wind_speed=wind_speed_fpm, wind_speed_units=0, wind_direction=wind_direction, wind_orientation_mode=wind_orientation_mode, slope=slope_deg, slope_units=0, aspect=aspect, canopy_base_height=cbh_ft, canopy_height=ch_ft, canopy_bulk_density=cbd_pcf, moisture_foliar=moisture_foliar, _pipeline={'conversions': conversions}))
+        cbd_pcf = _prepare_base('canopy_bulk_density', 'Density', canopy_bulk_density, canopy_bulk_density_units,
+            conversions)
+        results = _call('crown.run_crown_fire', dict(surface_results=surface_results, lut=self._lut,
+            fuel_model_grid=fuel_model_grid, m1h=m1h, m10h=m10h, m100h=m100h, mlh=mlh, mlw=mlw,
+            wind_speed=wind_speed_fpm, wind_speed_units=0, wind_direction=wind_direction,
+            wind_orientation_mode=wind_orientation_mode, slope=slope_deg, slope_units=0, aspect=aspect,
+            canopy_base_height=cbh_ft, canopy_height=ch_ft, canopy_bulk_density=cbd_pcf,
+            moisture_foliar=moisture_foliar, _pipeline={'conversions': conversions}))
         return _apply_out_units(results, out_units or {}, _CROWN_KEY_CONVERTERS)
 
     @_threaded_method
@@ -811,21 +840,21 @@ class BehaveRun(_NativeState):
 
             **Convertible keys and their defaults:**
 
-            ============================================  ================================
-            Key                                           Default (enum class · value)
-            ============================================  ================================
-            ``spread_rate``                               SpeedUnitsEnum.FeetPerMinute · 0
-            ``backing_spread_rate``                       SpeedUnitsEnum.FeetPerMinute · 0
-            ``flanking_spread_rate``                      SpeedUnitsEnum.FeetPerMinute · 0
-            ``no_wind_no_slope_spread_rate``              SpeedUnitsEnum.FeetPerMinute · 0
-            ``midflame_wind_speed``                       SpeedUnitsEnum.FeetPerMinute · 0
-            ``effective_wind_speed``                      SpeedUnitsEnum.MilesPerHour · 5
-            ``flame_length``                              LengthUnitsEnum.Feet · 0
-            ``fireline_intensity``                        FirelineIntensityUnitsEnum.BtusPerFootPerSecond · 0
-            ``heat_per_unit_area``                        HeatPerUnitAreaUnitsEnum.BtusPerSquareFoot · 0
-            ``reaction_intensity``                        HeatSourceAndReactionIntensityUnitsEnum.BtusPerSquareFootPerMinute · 0
-            ``residence_time``                            TimeUnitsEnum.Minutes · 0
-            ============================================  ================================
+            ====================================  ======================================================================
+            Key                                   Default (enum class · value)
+            ====================================  ======================================================================
+            ``spread_rate``                       SpeedUnitsEnum.FeetPerMinute · 0
+            ``backing_spread_rate``               SpeedUnitsEnum.FeetPerMinute · 0
+            ``flanking_spread_rate``              SpeedUnitsEnum.FeetPerMinute · 0
+            ``no_wind_no_slope_spread_rate``      SpeedUnitsEnum.FeetPerMinute · 0
+            ``midflame_wind_speed``               SpeedUnitsEnum.FeetPerMinute · 0
+            ``effective_wind_speed``              SpeedUnitsEnum.MilesPerHour · 5
+            ``flame_length``                      LengthUnitsEnum.Feet · 0
+            ``fireline_intensity``                FirelineIntensityUnitsEnum.BtusPerFootPerSecond · 0
+            ``heat_per_unit_area``                HeatPerUnitAreaUnitsEnum.BtusPerSquareFoot · 0
+            ``reaction_intensity``                HeatSourceAndReactionIntensityUnitsEnum.BtusPerSquareFootPerMinute · 0
+            ``residence_time``                    TimeUnitsEnum.Minutes · 0
+            ====================================  ======================================================================
 
             **SpeedUnitsEnum options** (``spread_rate``, ``backing_spread_rate``,
             ``flanking_spread_rate``, ``no_wind_no_slope_spread_rate``,
@@ -906,7 +935,8 @@ class BehaveRun(_NativeState):
         aspect = _raw_physical(aspect)
         canopy_cover = _prepare_base('canopy_cover', 'Fraction', canopy_cover, canopy_cover_units, conversions)
         canopy_height_ft = _prepare_base('canopy_height', 'Length', canopy_height, canopy_height_units, conversions)
-        canopy_base_height_ft = _prepare_base('canopy_base_height', 'Length', canopy_base_height, canopy_base_height_units, conversions)
+        canopy_base_height_ft = _prepare_base('canopy_base_height', 'Length', canopy_base_height,
+            canopy_base_height_units, conversions)
         derive_ratio = crown_ratio_units is None
         if derive_ratio:
             crown_ratio = None
@@ -914,7 +944,12 @@ class BehaveRun(_NativeState):
             crown_ratio = _prepare_base('crown_ratio', 'Fraction', crown_ratio, crown_ratio_units, conversions)
         wind_speed_fpm = _prepare_base('wind_speed', 'Speed', wind_speed, wind_speed_units, conversions)
         slope_deg = _prepare_base('slope', 'Slope', slope, slope_units, conversions)
-        arguments = dict(lut=self._lut, fuel_model_grid=fuel_model_grid, m1h=m1h, m10h=m10h, m100h=m100h, mlh=mlh, mlw=mlw, wind_speed=wind_speed_fpm, wind_speed_units=0, wind_direction=wind_direction, wind_orientation_mode=wind_orientation_mode, slope=slope_deg, slope_units=0, aspect=aspect, canopy_cover=canopy_cover, canopy_height=canopy_height_ft, crown_ratio=crown_ratio, wind_height_mode=wind_height_mode, waf_method=waf_method, user_waf=user_waf, _pipeline={'conversions': conversions, 'derive': derive_ratio})
+        arguments = dict(lut=self._lut, fuel_model_grid=fuel_model_grid, m1h=m1h, m10h=m10h, m100h=m100h, mlh=mlh,
+            mlw=mlw, wind_speed=wind_speed_fpm, wind_speed_units=0, wind_direction=wind_direction,
+            wind_orientation_mode=wind_orientation_mode, slope=slope_deg, slope_units=0, aspect=aspect,
+            canopy_cover=canopy_cover, canopy_height=canopy_height_ft, crown_ratio=crown_ratio,
+            wind_height_mode=wind_height_mode, waf_method=waf_method, user_waf=user_waf, _pipeline={
+                'conversions': conversions, 'derive': derive_ratio})
         if derive_ratio:
             arguments['canopy_base_height'] = canopy_base_height_ft
         results = _call('model.run_surface', arguments)

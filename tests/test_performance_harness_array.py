@@ -334,7 +334,8 @@ def test_requirements_pin_owner_approved_thresholds():
     assert document["operations"] == list(OPERATIONS)
 
 
-@pytest.mark.parametrize("problem", ["missing_declaration", "empty_declaration", "blank_declaration", "wrong_declaration",
+@pytest.mark.parametrize("problem", ["missing_declaration", "empty_declaration", "blank_declaration",
+    "wrong_declaration",
                                      "missing_source", "missing_binary", "blank_source", "blank_binary",
                                      "mixed_source", "mixed_binary", "wrong_source", "wrong_binary"])
 def test_scalar_baseline_rejects_missing_mixed_or_unrelated_builds(problem):

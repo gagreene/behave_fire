@@ -41,7 +41,8 @@ def build(root, output):
         stage = Path(temporary) / "source"
         stage_project(root, stage)
         subprocess.run([sys.executable, "-m", "build", "--wheel", "--outdir", str(output), str(stage)], check=True)
-    version = python_version(tomllib.loads((root / "rust/crates/behave-py/Cargo.toml").read_text())["package"]["version"])
+    version = python_version(tomllib.loads((root / "rust/crates/behave-py/Cargo.toml").read_text())["package"]["version"
+    ])
     wheel = output / f"behave_fire-{version}-py3-none-any.whl"
     with zipfile.ZipFile(wheel) as archive:
         for name in archive.namelist():
@@ -72,7 +73,8 @@ def python_version(cargo_version):
     if not match:
         raise ValueError(f"unsupported Cargo version: {cargo_version}")
     release, label, number, local = match.groups()
-    return release + ({"alpha": "a", "beta": "b", "rc": "rc"}[label] + number if label else "") + ("+" + local if local else "")
+    return release + ({"alpha": "a", "beta": "b", "rc": "rc"}[label] + number if label else "") + ("+" + local if local
+        else "")
 
 
 def stage_project(root, stage):
@@ -90,14 +92,18 @@ def stage_project(root, stage):
     metadata.pop("dynamic", None)
     cargo = tomllib.loads((root / "rust/crates/behave-py/Cargo.toml").read_text(encoding="utf-8"))
     metadata["version"] = python_version(cargo["package"]["version"])
-    shutil.copytree(source, stage / "src/behave_fire", ignore=shutil.ignore_patterns("__pycache__", "*.pyc", "*.egg-info", "build", "dist"))
+    shutil.copytree(source, stage / "src/behave_fire", ignore=shutil.ignore_patterns("__pycache__", "*.pyc",
+        "*.egg-info", "build", "dist"))
     readme = metadata["readme"]
     files = [readme if isinstance(readme, str) else readme["file"], *metadata["license-files"]]
     for name in files:
         destination = stage / name
         destination.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(root / name, destination)
-    text = '[build-system]\nrequires = ["setuptools>=77.0.3", "wheel"]\nbuild-backend = "setuptools.build_meta"\n\n[project]\n'
+    text = (
+        '[build-system]\nrequires = ["setuptools>=77.0.3", "wheel"]\nbuild-backend = '
+        '"setuptools.build_meta"\n\n[project]\n'
+    )
     text += "\n".join(json.dumps(key) + " = " + _toml_value(value) for key, value in metadata.items())
     text += '\n\n[tool.setuptools.packages.find]\nwhere = ["src"]\n'
     (stage / "pyproject.toml").write_text(text + "\n", encoding="utf-8")

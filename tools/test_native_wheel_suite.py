@@ -159,7 +159,8 @@ def main():
     reports = arguments.report_dir.resolve()
     reports.mkdir(parents=True, exist_ok=True)
     wheel = _select_native_wheel(arguments.wheels.resolve().glob("*.whl"), {str(tag) for tag in sys_tags()})
-    floor = "2.3.3" if sys.version_info >= (3, 14) or (platform.system() == "Windows" and platform.machine() == "ARM64") else "2.1.3"
+    floor = "2.3.3" if sys.version_info >= (3, 14) or (platform.system() == "Windows" and platform.machine() == "ARM64"
+    ) else "2.1.3"
     environment = dict(os.environ, PYTHONPATH=str(root / "src"), PYTHONDONTWRITEBYTECODE="1",
                        PIP_NO_INPUT="1", PIP_DISABLE_PIP_VERSION_CHECK="1")
     with tempfile.TemporaryDirectory(prefix="behave-full-suite-") as temporary:

@@ -139,7 +139,9 @@ def _worker(args):
         requests, byte_count, calls, workers = counters[index]
         scopes[name] = ({"requests": requests, "bytes": byte_count, "calls": calls, "workers": workers,
                          "definition": name + "-loop-v1"} if calls else None)
-    path = args.manifest.parent/'outputs'/f'{args.dataset}-{args.operation}-{args.cells}-{args.workers}-{args.repeat}.npz'
+    path = (
+        args.manifest.parent/'outputs'/f'{args.dataset}-{args.operation}-{args.cells}-{args.workers}-{args.repeat}.npz'
+    )
     fields = requested_outputs(args.operation)
     return {**call.evidence, 'fields': fields, 'compared_fields': fields, 'output_fields': len(fields),
             'independent_python': True, 'correctness_contract': 'f64-nan-v1',
@@ -188,12 +190,15 @@ def main():
         extension = _build(target, output / name, instrumented)
         binaries[name] = extension
         identity = _child(["--extension", extension, "--identity"])
-        if identity["allocation_probe"] != instrumented or identity['binding_api_version'] != 4 or _inventory() != before:
+        if identity["allocation_probe"] != instrumented or identity['binding_api_version'] != 4 or _inventory(
+            ) != before:
             raise RuntimeError("Build feature mismatch or source changed during builds")
-        builds[name] = {'binding_api_version': identity['binding_api_version'], "source_hash": identity["source_hash"], "extension_hash": identity["extension_hash"],
+        builds[name] = {'binding_api_version': identity['binding_api_version'], "source_hash": identity["source_hash"],
+            "extension_hash": identity["extension_hash"],
                         "source_files": before, "compiler": compiler, "target": target_name, "profile": "release",
                         "features": ["allocation-probe"] if instrumented else [],
-                        "build_environment": {k: v for k, v in os.environ.items() if k in ("RUSTFLAGS", "CARGO_ENCODED_RUSTFLAGS", "CARGO_BUILD_TARGET",
+                        "build_environment": {k: v for k, v in os.environ.items() if k in ("RUSTFLAGS",
+                            "CARGO_ENCODED_RUSTFLAGS", "CARGO_BUILD_TARGET",
                             "CARGO_PROFILE_RELEASE_LTO", "CARGO_PROFILE_RELEASE_CODEGEN_UNITS",
                             "CARGO_PROFILE_RELEASE_OPT_LEVEL", "CARGO_PROFILE_RELEASE_DEBUG",
                             "RUSTC", "RUSTC_WRAPPER", "RUSTC_WORKSPACE_WRAPPER")}}

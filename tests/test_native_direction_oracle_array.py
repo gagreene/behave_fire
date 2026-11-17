@@ -24,7 +24,8 @@ pytestmark = pytest.mark.rust
 
 def _cases():
     path = ROOT / "rust/crates/behave-fire/tests/data/integer_direction.json"
-    return [pytest.param(case, id=f"direction-{index}") for index, case in enumerate(json.loads(path.read_text(encoding="utf-8")))]
+    return [pytest.param(case, id=f"direction-{index}") for index, case in enumerate(json.loads(path.read_text(
+        encoding="utf-8")))]
 
 
 @pytest.mark.parametrize("case", _cases())
@@ -57,4 +58,5 @@ def test_direction_fixtures_match_current_host_python(case):
     np.testing.assert_array_equal(np.isnan(np.ma.getdata(actual)), np.isnan(np.ma.getdata(expected)))
     np.testing.assert_array_equal(np.isposinf(np.ma.getdata(actual)), np.isposinf(np.ma.getdata(expected)))
     np.testing.assert_array_equal(np.isneginf(np.ma.getdata(actual)), np.isneginf(np.ma.getdata(expected)))
-    np.testing.assert_allclose(np.ma.getdata(actual), np.ma.getdata(expected), rtol=1e-6 if expected.dtype == np.float32 else 1e-9, atol=1e-7 if expected.dtype == np.float32 else 1e-12)
+    np.testing.assert_allclose(np.ma.getdata(actual), np.ma.getdata(expected), rtol=1e-6 if expected.dtype
+        == np.float32 else 1e-9, atol=1e-7 if expected.dtype == np.float32 else 1e-12)

@@ -52,7 +52,8 @@ def test_reducing_the_required_matrix_cannot_activate_a_partial_record(tmp_path)
                   overlay_sha256=reference._prepared_build(root)['prepared_overlay_sha256'],
                   source_commit='0' * 40, ci_run_url='https://github.com/gagreene/behave_fire/actions/runs/1',
                   reports={
-                      'cpp-MSVC': dict(sha256='1' * 64, summary=dict(cases=773, available=722, fields=3610, unavailable=51)),
+                      'cpp-MSVC': dict(sha256='1' * 64, summary=dict(cases=773, available=722, fields=3610,
+                          unavailable=51)),
                       'ports-windows-x86_64': dict(sha256='2' * 64, summary=dict(cases_per_backend=583,
                           fields_per_backend=2915, paired_cases_per_backend=139))})
     with pytest.raises(ValueError, match='calibration'):

@@ -397,3 +397,9 @@ def test_case_insensitive_alphabetical_order_is_accepted(tmp_path):
             pass
         ''')
     assert code == 0
+
+
+def test_the_repository_passes_its_own_checker():
+    root = TOOL.parents[1]
+    paths = [str(root / name) for name in ('src', 'tools', 'tests', 'rust/crates')]
+    assert checker.main(paths) == 0

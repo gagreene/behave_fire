@@ -45,7 +45,8 @@ def test_compiler_observation_validation_does_not_require_previous_source_qualif
                     custom_upstream_trap_exit=86, custom_geometry_trap_exit=87,
                     custom_duplicate_ids_rejected=True, custom_state_sequence_checked=True)
     report = dict(kind='cpp', observations=[dict(id=row['id'], actual=row) for row in rows], protocol=protocol)
-    assert cpp_calibrate._validate_observations(root, report) == dict(cases=773, available=722, fields=3610, unavailable=51)
+    assert cpp_calibrate._validate_observations(root, report) == dict(cases=773, available=722, fields=3610,
+        unavailable=51)
     with pytest.raises(ValueError, match='source'):
         reference.load_reference(root)
 

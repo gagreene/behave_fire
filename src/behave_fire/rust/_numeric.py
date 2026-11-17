@@ -133,7 +133,8 @@ def normalize_physical(value):
     _validate_value(value)
     plain_sequence = type(value) in (list, tuple) and all(
         type(item) in (bool, int, float) or isinstance(item, np.generic) for item in value)
-    if type(value) is np.ndarray or type(value) in (bool, int, float) or isinstance(value, np.generic) or plain_sequence:
+    if type(value) is np.ndarray or type(value) in (bool, int, float) or isinstance(value, np.generic
+    ) or plain_sequence:
         owner = _OWNER.get()
         if (owner is not None and owner.owns_storage(value) and value.dtype == np.float64
                 and value.flags.c_contiguous and value.flags.aligned):

@@ -13,13 +13,15 @@ TOOLS = Path(__file__).resolve().parents[1] / "tools"
 
 
 def _digest(value):
-    return hashlib.sha256(json.dumps(value, sort_keys=True, separators=(",", ":"), allow_nan=False).encode()).hexdigest()
+    return hashlib.sha256(json.dumps(value, sort_keys=True, separators=(",", ":"), allow_nan=False).encode()).hexdigest(
+        )
 
 
 def _evidence():
     build = {"source_hash": "a" * 64, "extension_hash": "b" * 64,
              "source_files": {"rust/crates/behave-fire/src/lib.rs": "c" * 64},
-             "compiler": "rustc test", "target": "test-target", "profile": "release", "features": [], "build_environment": {}}
+             "compiler": "rustc test", "target": "test-target", "profile": "release", "features": [],
+        "build_environment": {}}
     instrumented = copy.deepcopy(build)
     instrumented.update(extension_hash="d" * 64, features=["allocation-probe"])
     manifest = {"schema_version": 1, "timed": build, "instrumented": instrumented,
@@ -33,7 +35,8 @@ def _evidence():
                              "instrumented_extension_hash": "d" * 64,
                              "instrumented_source_hash": "a" * 64,
                              "manifest_sha256": _digest(manifest), "passed": True,
-                             "scopes": {name: {"requests": 0, "bytes": 0, "calls": cells, "workers": 1 if cells == 1000 else workers,
+                             "scopes": {name: {"requests": 0, "bytes": 0, "calls": cells, "workers": 1 if cells == 1000
+                                 else workers,
                                                "definition": name + "-loop-v1"}
                                         for name in ("kernel", "encoder")},
                              "outside_scopes": {"requests": 30, "bytes": 10000}})

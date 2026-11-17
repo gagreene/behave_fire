@@ -1041,21 +1041,21 @@ class BehaveRun:
 
             **Convertible keys and their defaults:**
 
-            ============================================  ================================
-            Key                                           Default (enum class · value)
-            ============================================  ================================
-            ``spread_rate``                               SpeedUnitsEnum.FeetPerMinute · 0
-            ``backing_spread_rate``                       SpeedUnitsEnum.FeetPerMinute · 0
-            ``flanking_spread_rate``                      SpeedUnitsEnum.FeetPerMinute · 0
-            ``no_wind_no_slope_spread_rate``              SpeedUnitsEnum.FeetPerMinute · 0
-            ``midflame_wind_speed``                       SpeedUnitsEnum.FeetPerMinute · 0
-            ``effective_wind_speed``                      SpeedUnitsEnum.MilesPerHour · 5
-            ``flame_length``                              LengthUnitsEnum.Feet · 0
-            ``fireline_intensity``                        FirelineIntensityUnitsEnum.BtusPerFootPerSecond · 0
-            ``heat_per_unit_area``                        HeatPerUnitAreaUnitsEnum.BtusPerSquareFoot · 0
-            ``reaction_intensity``                        HeatSourceAndReactionIntensityUnitsEnum.BtusPerSquareFootPerMinute · 0
-            ``residence_time``                            TimeUnitsEnum.Minutes · 0
-            ============================================  ================================
+            ====================================  ======================================================================
+            Key                                   Default (enum class · value)
+            ====================================  ======================================================================
+            ``spread_rate``                       SpeedUnitsEnum.FeetPerMinute · 0
+            ``backing_spread_rate``               SpeedUnitsEnum.FeetPerMinute · 0
+            ``flanking_spread_rate``              SpeedUnitsEnum.FeetPerMinute · 0
+            ``no_wind_no_slope_spread_rate``      SpeedUnitsEnum.FeetPerMinute · 0
+            ``midflame_wind_speed``               SpeedUnitsEnum.FeetPerMinute · 0
+            ``effective_wind_speed``              SpeedUnitsEnum.MilesPerHour · 5
+            ``flame_length``                      LengthUnitsEnum.Feet · 0
+            ``fireline_intensity``                FirelineIntensityUnitsEnum.BtusPerFootPerSecond · 0
+            ``heat_per_unit_area``                HeatPerUnitAreaUnitsEnum.BtusPerSquareFoot · 0
+            ``reaction_intensity``                HeatSourceAndReactionIntensityUnitsEnum.BtusPerSquareFootPerMinute · 0
+            ``residence_time``                    TimeUnitsEnum.Minutes · 0
+            ====================================  ======================================================================
 
             **SpeedUnitsEnum options** (``spread_rate``, ``backing_spread_rate``,
             ``flanking_spread_rate``, ``no_wind_no_slope_spread_rate``,
@@ -1135,8 +1135,10 @@ class BehaveRun:
         wind_direction = np.atleast_1d(np.asarray(wind_direction, dtype=float))
         aspect         = np.atleast_1d(np.asarray(aspect,         dtype=float))
         canopy_cover   = fraction_to_base(np.atleast_1d(np.asarray(canopy_cover,  dtype=float)), canopy_cover_units)
-        canopy_height_ft      = length_to_base(np.atleast_1d(np.asarray(canopy_height,      dtype=float)), canopy_height_units)
-        canopy_base_height_ft = length_to_base(np.atleast_1d(np.asarray(canopy_base_height, dtype=float)), canopy_base_height_units)
+        canopy_height_ft      = length_to_base(np.atleast_1d(np.asarray(canopy_height,      dtype=float)),
+            canopy_height_units)
+        canopy_base_height_ft = length_to_base(np.atleast_1d(np.asarray(canopy_base_height, dtype=float)),
+            canopy_base_height_units)
         if crown_ratio_units is None:
             _safe_ht   = np.where(canopy_height_ft > 0, canopy_height_ft, 1.0)
             crown_ratio = np.clip((canopy_height_ft - canopy_base_height_ft) / _safe_ht, 0.0, 1.0)

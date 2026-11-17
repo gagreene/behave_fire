@@ -434,7 +434,8 @@ def _worker(arguments):
         sampler.join()
     first_samples = calls[0]
     sums = {key: sum(sample.get(key, 0) for sample in first_samples)
-            for key in ("owned_copy_seconds", "detached_seconds", 'kernel_seconds', 'encoder_seconds', "concatenate_seconds",
+            for key in ("owned_copy_seconds", "detached_seconds", 'kernel_seconds', 'encoder_seconds',
+                "concatenate_seconds",
                         "numpy_transfer_seconds", "appended_bytes")} if arguments.profile else None
     native_total = sum(sample["native_boundary_total_seconds"] for sample in first_samples)
     record = dict(kind="timing", backend=arguments.backend, threads=arguments.threads,

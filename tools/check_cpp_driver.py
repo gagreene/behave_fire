@@ -48,7 +48,8 @@ def _check_custom(driver, directory, data, root):
     duplicate = directory / "custom-duplicate-inputs.jsonl"
     duplicate.write_text((json.dumps(base) + "\n") * 2, encoding="utf-8")
     rows = _read_lines(_run(driver, directory, "custom-duplicate", duplicate, None, 0))
-    if len(rows) != 2 or rows[0] != fresh[base["id"]] or rows[1].get("error") != "duplicate_id" or rows[1]["upstream_entries"] != 0:
+    if len(rows) != 2 or rows[0] != fresh[base["id"]] or rows[1].get("error") != "duplicate_id" or rows[1][
+        "upstream_entries"] != 0:
         raise ValueError("Duplicate custom case reached upstream twice")
     other = next(case for case in cases if case["fuel_model"] == 151)
     skipped = next(

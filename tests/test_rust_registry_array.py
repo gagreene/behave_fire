@@ -60,7 +60,9 @@ def test_registry_snapshots_all_fuel_slots():
     original.fuel_models_[1]["fuel_bed_depth"] = 90
     native.fuel_models_[1]["fuel_bed_depth"] = 80
     shape = (263,)
-    inputs = dict(fuel_model_grid=np.arange(-1,262), m1h=np.full(shape,.06), m10h=np.full(shape,.07), m100h=np.full(shape,.08), mlh=np.full(shape,.6), mlw=np.full(shape,.9), wind_speed=5., wind_speed_units=5, wind_direction=0., wind_orientation_mode="RelativeToUpslope", slope=10.)
+    inputs = dict(fuel_model_grid=np.arange(-1,262), m1h=np.full(shape,.06), m10h=np.full(shape,.07), m100h=np.full(
+        shape,.08), mlh=np.full(shape,.6), mlw=np.full(shape,.9), wind_speed=5., wind_speed_units=5, wind_direction=0.,
+        wind_orientation_mode="RelativeToUpslope", slope=10.)
     expected = expected_runner.do_surface_run(**inputs)
     actual = actual_runner.do_surface_run(**inputs)
     assert actual.keys() == expected.keys()

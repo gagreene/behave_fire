@@ -22,9 +22,12 @@ def _report():
                 rows=[]
                 for block in range(3):
                     for backend,seconds in (('python',10.),('core-rust',1.)):
-                        rows.append(dict(block=block,backend=backend,first_seconds=seconds,warm_seconds=[seconds]*4,profile=False,source_hash='a'*64,binary_hash='b'*64 if backend=='core-rust' else None,python_timing_original_inputs=True))
+                        rows.append(dict(block=block,backend=backend,first_seconds=seconds,warm_seconds=[seconds]*4,
+                            profile=False,source_hash='a'*64,binary_hash='b'*64 if backend=='core-rust' else None,
+                            python_timing_original_inputs=True))
                 cases.append(dict(dataset=dataset,cells=cells,operation=operation,records=rows,validation=dict(complete=True,independent_python=True,truth_contract='f64-nan-v1',all_fields=True,typed_codes=True)))
-    return dict(schema_version=1,contract_version=4,phase='screen',scope='f64-raster-core-with-storage',source_hash='a'*64,binary_hash='b'*64,cases=cases,errors=[])
+    return dict(schema_version=1,contract_version=4,phase='screen',scope='f64-raster-core-with-storage',source_hash='a'
+        *64,binary_hash='b'*64,cases=cases,errors=[])
 
 
 def test_complete_core_proof_is_explicitly_not_public_speed_certification():

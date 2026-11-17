@@ -65,7 +65,8 @@ def test_control_schema_requires_both_mode_and_quantity():
 
 def test_controls_preserve_source_inputs_and_cover_every_affected_model():
     """Every affected scenario gets one distinct control with original weather intact."""
-    cases = [json.loads(line) for line in (ROOT / 'tests/data/cpp_reference/surface/cases.jsonl').read_text().splitlines()]
+    cases = [json.loads(line) for line in (ROOT / 'tests/data/cpp_reference/surface/cases.jsonl').read_text(
+        ).splitlines()]
     before = deepcopy(cases)
     controls = reference._custom_cases(cases)
     assert cases == before

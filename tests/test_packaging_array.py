@@ -18,7 +18,8 @@ class PackagingTests(unittest.TestCase):
     def test_license_payloads_have_canonical_line_endings(self):
         root = TOOLS.parent
         for base in (root, root / "rust/crates/behave-fire"):
-            for name in ("LICENSE", "NOTICE", "LICENSES/NumPy-BSD-3-Clause.txt", "LICENSES/Intel-SVML-BSD-3-Clause.txt"):
+            for name in ("LICENSE", "NOTICE", "LICENSES/NumPy-BSD-3-Clause.txt", "LICENSES/Intel-SVML-BSD-3-Clause.txt"
+            ):
                 with self.subTest(path=base / name):
                     self.assertNotIn(b"\r", (base / name).read_bytes())
 
@@ -56,8 +57,10 @@ class PackagingTests(unittest.TestCase):
             ("3.14", "ARM64", "Windows", [">=2.3.3"]),
             ("3.14", "x86_64", "Linux", [">=2.3.3"]),
         ):
-            environment = dict(default_environment(), python_version=python, python_full_version=python+".0", platform_machine=machine, platform_system=system)
-            actual = [str(r.specifier) for text in project["dependencies"] if (r := Requirement(text)).marker.evaluate(environment)]
+            environment = dict(default_environment(), python_version=python, python_full_version=python+".0",
+                platform_machine=machine, platform_system=system)
+            actual = [str(r.specifier) for text in project["dependencies"] if (r := Requirement(text)).marker.evaluate(
+                environment)]
             self.assertEqual(actual, expected)
 
     def test_pure_configuration_preserves_metadata_and_notices(self):
@@ -70,7 +73,8 @@ class PackagingTests(unittest.TestCase):
             (root / "rust/crates/behave-py").mkdir(parents=True)
             (root / "rust/crates/behave-py/Cargo.toml").write_text('[package]\nversion="1.0.0-beta.2"\n')
             (root / "pyproject.toml").write_bytes((TOOLS.parent / "pyproject.toml").read_bytes())
-            for file in ("README.md", "LICENSE", "NOTICE", "LICENSES/NumPy-BSD-3-Clause.txt", "LICENSES/Intel-SVML-BSD-3-Clause.txt"):
+            for file in ("README.md", "LICENSE", "NOTICE", "LICENSES/NumPy-BSD-3-Clause.txt",
+                "LICENSES/Intel-SVML-BSD-3-Clause.txt"):
                 (root / file).parent.mkdir(parents=True, exist_ok=True)
                 (root / file).write_text("test notice")
             stage = root / "stage"

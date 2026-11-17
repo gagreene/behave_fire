@@ -141,7 +141,8 @@ def test_skipped_cells_require_independent_validity_and_initialized_outputs(tmp_
     row = dict(dataset='uniform', operation='surface', cells=3, binding_api_version=4,
                actual_backend='rust', input_sha256='c'*64, requested_outputs=fields, fields=fields,
                compared_fields=fields, output_fields=len(fields), correctness_contract='f64-nan-v1',
-               independent_python=True, eligible_cells=2, eligibility={'kind': 'explicit', 'validity': [True, False, True]},
+               independent_python=True, eligible_cells=2, eligibility={'kind': 'explicit', 'validity': [True, False,
+                   True]},
                output_artifact=contract.save_outputs(tmp_path/'skip.npz', outputs, outputs, root=tmp_path))
     errors = contract.contract_errors({'records': [], 'validations': [row]}, {'binding_api_version': 4}, tmp_path)
     assert bool(errors) is not initialized

@@ -8,7 +8,8 @@ import pytest
 
 
 def _cases():
-    spec = importlib.util.spec_from_file_location("diagnostic_cases", Path(__file__).resolve().parents[1] / "tools/performance_cases.py")
+    spec = importlib.util.spec_from_file_location("diagnostic_cases", Path(__file__).resolve().parents[1]
+        / "tools/performance_cases.py")
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module

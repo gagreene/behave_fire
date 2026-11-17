@@ -25,7 +25,8 @@ def _inventory():
 def _snapshot_inventory(tmp_path):
     inventory = _inventory()
     source = ROOT / 'tests/data/cpp_reference'
-    evidence = [{'file': 'surface/' + name, 'sha256': hashlib.sha256((source / 'surface' / name).read_bytes()).hexdigest()}
+    evidence = [{'file': 'surface/' + name, 'sha256': hashlib.sha256((source / 'surface' / name).read_bytes()
+    ).hexdigest()}
                 for name in ('cases.jsonl', 'results.jsonl', 'manifest.json')]
     route = next(row for row in inventory['routes'] if row['route_id'] == 'surface_single')
     route.update(executable_now=True, dataset='surface', execution_evidence=evidence)

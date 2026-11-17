@@ -24,7 +24,8 @@ def _capture_corpora():
             continue
         source = path.read_bytes()
         document = json.loads(source)
-        cases = document if isinstance(document, list) else document.get('cases', []) if isinstance(document, dict) else []
+        cases = document if isinstance(document, list) else document.get('cases', []) if isinstance(document, dict
+        ) else []
         for index, case in enumerate(cases):
             if not isinstance(case, dict) or (case.get('name') != 'calculate_direction_of_max_spread'
                     and case.get('entry_point') != 'behave_fire.components.surface.calculate_direction_of_max_spread'):
@@ -33,7 +34,8 @@ def _capture_corpora():
             if case.get('normalize_half_loop'):
                 for key in ('x_component', 'y_component'):
                     value = arguments[key]
-                    arguments[key] = value.astype(np.float32) if isinstance(value, (np.ndarray, np.generic)) else np.float32(value)
+                    arguments[key] = value.astype(np.float32) if isinstance(value, (np.ndarray, np.generic)
+                    ) else np.float32(value)
             row = {'fixture': path.name, 'fixture_sha256': hashlib.sha256(source).hexdigest(),
                    'case_index': index, 'original_case': case}
             with np.errstate(all='ignore'):
@@ -41,7 +43,8 @@ def _capture_corpora():
                     value = reference.calculate_direction_of_max_spread(**arguments, **case.get('options', {}))
                     array = np.asanyarray(value)
                     row['output'] = {'dtype': str(array.dtype), 'shape': array.shape,
-                                     'values': [float(v) if np.isfinite(v) else 'nan' if np.isnan(v) else '+inf' if v > 0 else '-inf'
+                                     'values': [float(v) if np.isfinite(v) else 'nan' if np.isnan(v) else '+inf' if v
+                                         > 0 else '-inf'
                                                 for v in np.ma.getdata(array).reshape(-1)],
                                      'masks': np.ma.getmaskarray(array).reshape(-1).tolist(),
                                      'masked_array': bool(np.ma.isMaskedArray(value)),
@@ -92,7 +95,8 @@ def _describe(value):
     """
     array = np.asanyarray(value)
     return {'dtype': str(array.dtype), 'shape': array.shape, 'strides': array.strides,
-            'aligned': bool(array.flags.aligned), 'C': bool(array.flags.c_contiguous), 'F': bool(array.flags.f_contiguous)}
+            'aligned': bool(array.flags.aligned), 'C': bool(array.flags.c_contiguous), 'F': bool(
+                array.flags.f_contiguous)}
 
 
 def _record(name, x, y, atan2f):
@@ -117,17 +121,21 @@ def _record(name, x, y, atan2f):
             [atan2f(float(vy), float(vx)) for vx, vy in zip(bx.flat, by.flat, strict=False)],
             dtype=np.float32,
         ).reshape(bx.shape)
-        expected_direction = reference.calculate_direction_of_max_spread(np.asarray(x, dtype=np.float64), np.asarray(y, dtype=np.float64), np.ones(bx.shape), 'RelativeToNorth', 95.)
+        expected_direction = reference.calculate_direction_of_max_spread(np.asarray(x, dtype=np.float64), np.asarray(y,
+            dtype=np.float64), np.ones(bx.shape), 'RelativeToNorth', 95.)
         native_direction = native.calculate_direction_of_max_spread(x, y, np.ones(bx.shape), 'RelativeToNorth', 95.)
     mask = ~(np.isnan(actual) | np.isnan(scalar) | np.isnan(contiguous))
-    actual_bits, scalar_bits, vector_bits = [np.asarray(value).view(np.uint32) for value in (actual, scalar, contiguous)]
+    actual_bits, scalar_bits, vector_bits = [np.asarray(value).view(np.uint32) for value in (actual, scalar, contiguous)
+    ]
     difference = mask & ((actual_bits != scalar_bits) | (actual_bits != vector_bits))
     positions = np.flatnonzero(difference)[:12]
-    result = {'name': name, 'native_physical_dtype': 'float64', 'x': _describe(x), 'y': _describe(y), 'normalized_x': _describe(nx),
+    result = {'name': name, 'native_physical_dtype': 'float64', 'x': _describe(x), 'y': _describe(y),
+        'normalized_x': _describe(nx),
               'normalized_y': _describe(ny), 'out': _describe(actual),
               'numpy_equals_libm': bool(np.array_equal(actual_bits[mask], scalar_bits[mask])),
               'numpy_equals_contiguous': bool(np.array_equal(actual_bits[mask], vector_bits[mask])),
-              'native_strict_pass': bool(np.allclose(native_direction, expected_direction, rtol=1e-9, atol=1e-12, equal_nan=True)),
+              'native_strict_pass': bool(np.allclose(native_direction, expected_direction, rtol=1e-9, atol=1e-12,
+                  equal_nan=True)),
               'witnesses': [{'index': int(i), 'x': float(bx.flat[i]), 'y': float(by.flat[i]),
                              'numpy': hex(int(actual_bits.flat[i])), 'libm': hex(int(scalar_bits.flat[i])),
                              'contiguous': hex(int(vector_bits.flat[i]))} for i in positions]}

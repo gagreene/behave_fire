@@ -135,7 +135,8 @@ def test_missing_tolerance_classification_is_rejected(tmp_path):
 
 def test_numeric_comparator_requires_exact_boolean_approval_and_finite_values():
     actual = dict.fromkeys(reference.FIELDS, 1.0)
-    policy = dict(approved="yes", fields={field: dict(kind="relative_absolute", rtol=0, atol=0) for field in reference.FIELDS})
+    policy = dict(approved="yes", fields={field: dict(kind="relative_absolute", rtol=0, atol=0)
+        for field in reference.FIELDS})
     with pytest.raises(reference.UnapprovedCppPolicy):
         reference.assert_matches_cpp(actual, actual, policy)
     policy["approved"] = True
@@ -163,7 +164,8 @@ def test_signed_zero_comparison_is_explicit():
     actual = dict.fromkeys(reference.FIELDS, 0.0)
     expected = dict(actual)
     expected[reference.FIELDS[0]] = -0.0
-    policy = dict(approved=True, fields={field: dict(kind="relative_absolute", rtol=0, atol=0) for field in reference.FIELDS})
+    policy = dict(approved=True, fields={field: dict(kind="relative_absolute", rtol=0, atol=0)
+        for field in reference.FIELDS})
     with pytest.raises(AssertionError, match="signed-zero"):
         reference.assert_matches_cpp(actual, expected, policy)
 

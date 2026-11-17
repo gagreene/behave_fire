@@ -45,7 +45,8 @@ def test_confirmation_reassesses_screen_and_rejects_changed_identity(problem):
     from benchmark_public_serial_f64 import validate_confirmation
 
     screen = _report()
-    identity = {name: deepcopy(screen[name]) for name in ('source_hash', 'extension_hash', 'harness_hash', 'environment')}
+    identity = {name: deepcopy(screen[name]) for name in ('source_hash', 'extension_hash', 'harness_hash', 'environment'
+    )}
     screen['assessment'] = {'passed': True}
     if problem == 'failed':
         screen['cases'][0]['validation']['passed'] = False

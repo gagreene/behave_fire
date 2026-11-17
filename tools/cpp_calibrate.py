@@ -25,7 +25,8 @@ def _compiler_environment():
             raise ValueError("CMake and an existing GNU C++ compiler are required")
         generator = ["-G", "Ninja"] if shutil.which("ninja") else []
         return cmake, generator, ["-DCMAKE_CXX_COMPILER=" + compiler], environment
-    installer = Path(environment.get("ProgramFiles(x86)", "C:/Program Files (x86)")) / "Microsoft Visual Studio/Installer/vswhere.exe"
+    installer = Path(environment.get("ProgramFiles(x86)", "C:/Program Files (x86)")
+    ) / "Microsoft Visual Studio/Installer/vswhere.exe"
     installation = subprocess.check_output([str(installer), "-latest", "-products", "*", "-requires",
                                             "Microsoft.VisualStudio.Component.VC.Tools.x86.x64",
                                             "-property", "installationPath"], text=True).strip()
@@ -45,7 +46,8 @@ def _compiler_environment():
         environment.pop(key, None)
     cmake = installation / "Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/bin/cmake.exe"
     ninja = installation / "Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe"
-    return str(cmake), ["-G", "Ninja", "-DCMAKE_MAKE_PROGRAM=" + str(ninja)], ["-DCMAKE_CXX_COMPILER=cl.exe"], environment
+    return str(cmake), ["-G", "Ninja", "-DCMAKE_MAKE_PROGRAM=" + str(ninja)], ["-DCMAKE_CXX_COMPILER=cl.exe"
+    ], environment
 
 def _context(root):
     """Record the tested source and CI identity without treating it as numerical proof.
@@ -233,7 +235,8 @@ def build_driver(root, directory, expected_compiler=None):
     cmake, generator, compiler, environment = _compiler_environment()
     build = directory / "build"
     _run([cmake, "-S", root / "reference/behave_cpp_overlay", "-B", build, *generator, *compiler,
-          "-DCMAKE_BUILD_TYPE=Release", "-DCMAKE_CXX_FLAGS=", "-DINCLUDE_EXRATE=ON"], directory, "configure", environment)
+          "-DCMAKE_BUILD_TYPE=Release", "-DCMAKE_CXX_FLAGS=", "-DINCLUDE_EXRATE=ON"], directory, "configure",
+        environment)
     _run([cmake, "--build", build, "--target", "behave_ref_driver", "--parallel", "4"],
          directory, "build", environment)
     metadata = list((build / "CMakeFiles").glob("*/CMakeCXXCompiler.cmake"))
@@ -332,7 +335,8 @@ def validate_evidence(root, paths):
     records, commits, runs = {}, set(), set()
     for path in paths:
         report = reference._document(path)
-        key = ("cpp-" + report.get("compiler", {}).get("id", "")) if report.get("kind") == "cpp" else "ports-" + report.get("platform_key", "")
+        key = ("cpp-" + report.get("compiler", {}).get("id", "")) if report.get("kind"
+        ) == "cpp" else "ports-" + report.get("platform_key", "")
         if (key not in required or key in records or report.get("passed") is not True
                 or report.get("parity_approved") is not False or report.get("upstream_sha") != reference.PIN
                 or report.get("artifacts") != controls._artifacts(root)
@@ -341,7 +345,8 @@ def validate_evidence(root, paths):
                 or report.get("source_files") != _sources(root)
                 or report.get("evidence_origin") != "github_actions" or report.get("ci_event") != "workflow_dispatch"
                 or not re.fullmatch(r"[0-9a-f]{40}", report.get("source_commit", ""))
-                or not re.fullmatch(r"https://github.com/gagreene/behave_fire/actions/runs/[0-9]+", report.get("ci_run_url", ""))):
+                or not re.fullmatch(r"https://github.com/gagreene/behave_fire/actions/runs/[0-9]+", report.get(
+                    "ci_run_url", ""))):
             raise ValueError("Untrusted or incomplete calibration identity")
         summary = _validate_observations(root, report)
         records[key] = dict(sha256=reference._digest(path), summary=summary)
@@ -371,7 +376,8 @@ def validate_qualification(root, record):
             or record.get("overlay_sha256") != reference._prepared_build(root)["prepared_overlay_sha256"]
             or set(record.get("reports", {})) != required
             or not re.fullmatch(r"[0-9a-f]{40}", record.get("source_commit", ""))
-            or not re.fullmatch(r"https://github.com/gagreene/behave_fire/actions/runs/[0-9]+", record.get("ci_run_url", ""))):
+            or not re.fullmatch(r"https://github.com/gagreene/behave_fire/actions/runs/[0-9]+", record.get("ci_run_url",
+                ""))):
         raise ValueError("Incomplete or stale calibration qualification")
     for key, report in record["reports"].items():
         expected = dict(cases=773, available=722, fields=3610, unavailable=51) if key.startswith("cpp-") else dict(

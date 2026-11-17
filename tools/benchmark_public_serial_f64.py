@@ -176,7 +176,8 @@ def validate_confirmation(screen, identity):
     """
     if screen.get('phase') != 'screen' or not check_public_screen(screen)['passed']:
         raise ValueError('Confirmation requires an independently reassessed passing screen')
-    if any(screen.get(key) != identity.get(key) for key in ('source_hash', 'extension_hash', 'harness_hash', 'environment')):
+    if any(screen.get(key) != identity.get(key) for key in ('source_hash', 'extension_hash', 'harness_hash',
+        'environment')):
         raise ValueError('Confirmation must preserve source, binary, harness, Python, NumPy, and host')
 
 

@@ -116,27 +116,32 @@ def test_state_rejects_unknown_version_or_backend():
 
 def test_windows_spawn_transfers_python_snapshot(tmp_path):
     script = tmp_path / "spawn_dispatch.py"
-    script.write_text(textwrap.dedent('''
-        import multiprocessing as mp
-        import numpy as np
-        from behave_fire import BehaveRun, FuelModels
-
-        def inspect_model(model, queue):
-            queue.put((model.backend_in_use, model._threads, float(model._delegate._lut["depth"][1]), model._delegate._fuel_models.fuel_models_[1]["fuel_bed_depth"]))
-
-        if __name__ == "__main__":
-            registry = FuelModels()
-            model = BehaveRun(registry, backend="python", threads=3)
-            before = float(model._delegate._lut["depth"][1])
-            registry.fuel_models_[1]["fuel_bed_depth"] = 777.0
-            context = mp.get_context("spawn")
-            queue = context.Queue()
-            process = context.Process(target=inspect_model, args=(model, queue))
-            process.start()
-            result = queue.get(timeout=30)
-            process.join(timeout=30)
-            assert process.exitcode == 0
-            assert result == ("python", 3, before, 777.0)
-    '''), encoding="utf-8")
-    result = subprocess.run([sys.executable, str(script)], env=_environment(), capture_output=True, text=True, timeout=60)
+    script.write_text(textwrap.dedent(
+        '\n'
+        '        import multiprocessing as mp\n'
+        '        import numpy as np\n'
+        '        from behave_fire import BehaveRun, FuelModels\n'
+        '\n'
+        '        def inspect_model(model, queue):\n'
+        '            queue.put((model.backend_in_use, model._threads, '
+        'float(model._delegate._lut["depth"][1]), '
+        'model._delegate._fuel_models.fuel_models_[1]["fuel_bed_depth"]))\n'
+        '\n'
+        '        if __name__ == "__main__":\n'
+        '            registry = FuelModels()\n'
+        '            model = BehaveRun(registry, backend="python", threads=3)\n'
+        '            before = float(model._delegate._lut["depth"][1])\n'
+        '            registry.fuel_models_[1]["fuel_bed_depth"] = 777.0\n'
+        '            context = mp.get_context("spawn")\n'
+        '            queue = context.Queue()\n'
+        '            process = context.Process(target=inspect_model, args=(model, queue))\n'
+        '            process.start()\n'
+        '            result = queue.get(timeout=30)\n'
+        '            process.join(timeout=30)\n'
+        '            assert process.exitcode == 0\n'
+        '            assert result == ("python", 3, before, 777.0)\n'
+        '    '
+    ), encoding="utf-8")
+    result = subprocess.run([sys.executable, str(script)], env=_environment(), capture_output=True, text=True,
+        timeout=60)
     assert result.returncode == 0, result.stdout + result.stderr

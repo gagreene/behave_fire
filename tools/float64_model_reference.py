@@ -64,9 +64,12 @@ def apply_crown_rules(outputs, supplied, *, density=None):
         surface_flame = np.where(np.isnan(supplied['fireline_intensity']), np.nan,
             np.where(supplied['fireline_intensity'] > 0., .2 * supplied['fireline_intensity'] ** (2. / 3.), 0.))
     for name, surface, passive_value, active_value in [
-        ('final_spread_rate', supplied['spread_rate'], result['passive_crown_fire_spread_rate'], result['crown_fire_spread_rate']),
-        ('final_heat_per_unit_area', supplied['heat_per_unit_area'], result['passive_crown_fire_heat_per_unit_area'], result['crown_fire_heat_per_unit_area']),
-        ('final_fireline_intensity', supplied['fireline_intensity'], result['passive_crown_fire_line_intensity'], result['crown_fire_line_intensity']),
+        ('final_spread_rate', supplied['spread_rate'], result['passive_crown_fire_spread_rate'], result[
+            'crown_fire_spread_rate']),
+        ('final_heat_per_unit_area', supplied['heat_per_unit_area'], result['passive_crown_fire_heat_per_unit_area'],
+            result['crown_fire_heat_per_unit_area']),
+        ('final_fireline_intensity', supplied['fireline_intensity'], result['passive_crown_fire_line_intensity'],
+            result['crown_fire_line_intensity']),
         ('final_flame_length', surface_flame, result['passive_crown_fire_flame_length'], result['crown_flame_length']),
     ]:
         result[name] = np.where(code < 0, np.nan, np.where(np.isin(code, [0, 2]), surface,

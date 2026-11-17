@@ -53,7 +53,8 @@ def test_prepared_conversions_match_reference_for_all_unit_classes(class_name, d
     if np.ma.isMaskedArray(expected):
         np.testing.assert_equal(actual.fill_value, expected.fill_value)
     left, right = np.ma.getdata(actual), np.ma.getdata(expected)
-    np.testing.assert_allclose(left, right, rtol=1e-6 if right.dtype == np.float32 else 1e-9, atol=1e-7 if right.dtype == np.float32 else 1e-12, equal_nan=True)
+    np.testing.assert_allclose(left, right, rtol=1e-6 if right.dtype == np.float32 else 1e-9, atol=1e-7 if right.dtype
+        == np.float32 else 1e-12, equal_nan=True)
     zero = (left == 0) & (right == 0)
     np.testing.assert_array_equal(np.signbit(left[zero]), np.signbit(right[zero]))
 @pytest.mark.parametrize("class_name", CLASSES)
@@ -82,6 +83,7 @@ def test_prepared_native_unit_loop_preserves_varying_selectors_and_threads():
     expected = np.array([LengthUnits.toBaseUnits(value, int(code)).item()
                          for value, code in zip(values, selectors, strict=False)])
     for threads in (1, 4):
-        actual = _rust.component_batch("units.Length.to_base", {"value": values}, {"units": selectors.astype(np.int64)}, {},
+        actual = _rust.component_batch("units.Length.to_base", {"value": values}, {"units": selectors.astype(np.int64)},
+            {},
                              values.shape, threads=threads)[""]
         np.testing.assert_allclose(actual, expected, rtol=1e-9, atol=1e-12)

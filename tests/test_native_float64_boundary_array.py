@@ -50,7 +50,8 @@ def test_shape_groups_compute_independent_shapes_including_empty_groups():
     inputs=dict(surface=np.ones(2),crown=np.ones(3),critical_surface=np.asarray(2.),critical_crown=np.asarray(4.))
     groups=plan_shapes(inputs,{'transition':('surface','critical_surface'),'active':('crown','critical_crown')})
     assert {group.outputs:group.shape for group in groups}=={('transition',):(2,),('active',):(3,)}
-    groups=plan_shapes({'flame':np.asarray(5.),'people':np.empty(0)}, {'separation':('flame',),'area':('flame','people')})
+    groups=plan_shapes({'flame':np.asarray(5.),'people':np.empty(0)}, {'separation':('flame',),'area':('flame','people')
+    })
     assert {group.outputs:group.shape for group in groups}=={('separation',):(),('area',):(0,)}
     groups=plan_shapes({'fuel':np.ones(2),'wind':np.ones((3,1))},{'reaction':('fuel',),'spread':('fuel','wind')})
     assert {group.outputs:group.shape for group in groups}=={('reaction',):(2,),('spread',):(3,2)}
