@@ -1,5 +1,7 @@
 """Public calculations must use one snapshot across all detached stages."""
 
+from importlib import import_module as _import_module
+
 import numpy as np
 import pytest
 
@@ -7,9 +9,9 @@ from parity_support import assert_result, encode_value
 
 pytestmark = pytest.mark.rust
 native = pytest.importorskip("behave_fire.rust", exc_type=ImportError)
-from behave_fire.python import BehaveRun as PythonRun
-from behave_fire.python import FuelModels as PythonFuels
-from behave_fire.rust import _bridge
+PythonRun = _import_module('behave_fire.python').BehaveRun
+PythonFuels = _import_module('behave_fire.python').FuelModels
+_bridge = _import_module('behave_fire.rust')._bridge
 
 
 def _mutate_after_first_copy(monkeypatch, mutate):

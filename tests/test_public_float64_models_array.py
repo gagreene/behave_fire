@@ -1,9 +1,12 @@
 """Migrated public models use one primitive float64 compute boundary."""
+from importlib import import_module as _import_module
+
 import numpy as np
 import pytest
 
 native = pytest.importorskip('behave_fire._rust', exc_type=ImportError)
-from behave_fire.rust import BehaveRun, FuelModels
+BehaveRun = _import_module('behave_fire.rust').BehaveRun
+FuelModels = _import_module('behave_fire.rust').FuelModels
 
 pytestmark = pytest.mark.rust
 

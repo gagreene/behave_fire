@@ -10,9 +10,10 @@ import pytest
 
 from test_cpp_reference_array import _snapshot
 
-ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT / 'tools'))
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'tools'))
 import cpp_reference as reference
+
+ROOT = Path(__file__).resolve().parents[1]
 
 
 def test_active_policy_requires_complete_calibration_metadata(tmp_path):

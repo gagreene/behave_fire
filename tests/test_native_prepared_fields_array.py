@@ -80,7 +80,7 @@ def test_prepared_native_unit_loop_preserves_varying_selectors_and_threads():
     values = np.linspace(-3.0, 13.0, 10000)
     selectors = (np.arange(values.size) % 8).astype(np.float64)
     expected = np.array([LengthUnits.toBaseUnits(value, int(code)).item()
-                         for value, code in zip(values, selectors)])
+                         for value, code in zip(values, selectors, strict=False)])
     for threads in (1, 4):
         actual = _rust.component_batch("units.Length.to_base", {"value": values}, {"units": selectors.astype(np.int64)}, {},
                              values.shape, threads=threads)[""]

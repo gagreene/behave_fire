@@ -8,11 +8,11 @@ from pathlib import Path
 
 import pytest
 
-pytestmark = pytest.mark.cpp_reference
-
-ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT / "tools"))
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'tools'))
 import cpp_reference as reference
+
+pytestmark = pytest.mark.cpp_reference
+ROOT = Path(__file__).resolve().parents[1]
 
 
 def _rewrite(root, relative, value):

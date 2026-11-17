@@ -1,10 +1,12 @@
 """The direct model boundary owns primitive columns and calls the configured core."""
+from importlib import import_module as _import_module
+
 import numpy as np
 import pytest
 
 native = pytest.importorskip('behave_fire._rust', exc_type=ImportError)
-from behave_fire.components.fuel_models import FuelModels
-from behave_fire.components.fuel_models_array import build_fuel_lookup_arrays
+FuelModels = _import_module('behave_fire.components.fuel_models').FuelModels
+build_fuel_lookup_arrays = _import_module('behave_fire.components.fuel_models_array').build_fuel_lookup_arrays
 
 pytestmark = pytest.mark.rust
 

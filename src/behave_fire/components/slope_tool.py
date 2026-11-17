@@ -67,7 +67,7 @@ class SlopeTool:
 
         # Replicate C++ behavior: groundDistanceInFeet = toBase(input, units)
         # but groundDistanceInInches = fromBase(raw_input, Inches)  [C++ treats raw as feet]
-        ground_distance_in_feet = LengthUnits.toBaseUnits(calculated_map_distance, distance_units)
+        _ground_distance_in_feet = LengthUnits.toBaseUnits(calculated_map_distance, distance_units)
         # C++ line: fromBaseUnits(calulatedMapDistance, Inches) — uses RAW input treated as feet
         ground_distance_in_inches = LengthUnits.fromBaseUnits(
             calculated_map_distance, LengthUnits.LengthUnitsEnum.Inches)

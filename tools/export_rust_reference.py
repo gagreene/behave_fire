@@ -20,11 +20,16 @@ from pathlib import Path
 
 import numpy as np
 
-ROOT = next(parent for parent in Path(__file__).resolve().parents if (parent / "pytest.ini").is_file())
-SOURCE = ROOT / "src" / "behave_fire"
-REFERENCE_SHA = "7933789f00470c6bbfbe942dc22bdd7f74e192f9"
-if str(ROOT / "src") not in sys.path:
-    sys.path.insert(0, str(ROOT / "src"))
+if str(
+    next(parent for parent in Path(__file__).resolve().parents if (parent / 'pytest.ini').is_file()) / 'src'
+) not in sys.path:
+    sys.path.insert(
+        0,
+        str(
+            next(parent for parent in Path(__file__).resolve().parents if (parent / 'pytest.ini').is_file())
+            / 'src'
+        ),
+    )
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from behave_fire.behave import BehaveRun
@@ -36,6 +41,10 @@ from behave_fire.components.mortality import build_mortality_lookup
 from behave_fire.components.slope_tool import SlopeTool
 from behave_fire.components.species_master_table import SpeciesMasterTable, SpeciesMasterTableRecord
 from rust_reference_platform import canonical_case
+
+ROOT = next(parent for parent in Path(__file__).resolve().parents if (parent / "pytest.ini").is_file())
+SOURCE = ROOT / "src" / "behave_fire"
+REFERENCE_SHA = "7933789f00470c6bbfbe942dc22bdd7f74e192f9"
 
 
 def _arguments(function, values):
@@ -601,7 +610,7 @@ def contracts_match(actual, expected, calculated=False, dtype="float64"):
                    for key, value in expected.items())
     if isinstance(expected, list):
         return len(actual) == len(expected) and all(
-            contracts_match(left, right, calculated, dtype) for left, right in zip(actual, expected))
+            contracts_match(left, right, calculated, dtype) for left, right in zip(actual, expected, strict=False))
     if isinstance(expected, float) and actual == expected == 0.:
         return math.copysign(1., actual) == math.copysign(1., expected)
     if calculated and isinstance(expected, float):
@@ -678,7 +687,7 @@ def first_contract_difference(
     elif type(actual) is type(expected) and isinstance(expected, list):
         if len(actual) != len(expected):
             return f"{path}: actual length={len(actual)}, expected length={len(expected)}"
-        for index, (left, right) in enumerate(zip(actual, expected)):
+        for index, (left, right) in enumerate(zip(actual, expected, strict=False)):
             difference = first_contract_difference(left, right, calculated, dtype, f"{path}[{index}]")
             if difference is not None:
                 return difference

@@ -31,7 +31,8 @@ def test_normalization_rejects_opaque_and_complex_values_before_float_cast():
         pass
 
     for value in ([1+2j],np.array([1+0j]),np.ma.array([1+2j]),np.array([1.],dtype=object),CustomFloat(1.)):
-        with pytest.raises(TypeError):normalize_physical(value)
+        with pytest.raises(TypeError):
+            normalize_physical(value)
 
 
 @pytest.mark.parametrize('kind', ['Fraction', 'Pressure'])
@@ -53,7 +54,8 @@ def test_shape_groups_compute_independent_shapes_including_empty_groups():
     assert {group.outputs:group.shape for group in groups}=={('separation',):(),('area',):(0,)}
     groups=plan_shapes({'fuel':np.ones(2),'wind':np.ones((3,1))},{'reaction':('fuel',),'spread':('fuel','wind')})
     assert {group.outputs:group.shape for group in groups}=={('reaction',):(2,),('spread',):(3,2)}
-    with pytest.raises(KeyError):plan_shapes(inputs,{'bad':('undeclared',)})
+    with pytest.raises(KeyError):
+        plan_shapes(inputs,{'bad':('undeclared',)})
 
 
 def test_typed_controls_do_not_round_through_float64():
@@ -64,9 +66,12 @@ def test_typed_controls_do_not_round_through_float64():
     result=normalize_control(source,np.int64)
     assert result.dtype==np.int64 and int(result[0])==(1<<53)+1
     assert not np.shares_memory(source,result)
-    with pytest.raises(OverflowError):normalize_control(source,np.int32)
-    with pytest.raises(ValueError):normalize_control(np.ma.array([1],mask=[True]),np.int32)
-    with pytest.raises(TypeError):normalize_control(np.array([1.5]),np.int64)
+    with pytest.raises(OverflowError):
+        normalize_control(source,np.int32)
+    with pytest.raises(ValueError):
+        normalize_control(np.ma.array([1],mask=[True]),np.int32)
+    with pytest.raises(TypeError):
+        normalize_control(np.array([1.5]),np.int64)
     expected=np.asarray(_unit_code('Pressure',True),dtype=np.int32)
     actual=normalize_selector('Pressure',True)
     np.testing.assert_array_equal(actual,expected)

@@ -40,7 +40,7 @@ def test_compact_layouts_preserve_all_values_masks_and_types(layout, storage):
              "exact-integer": (np.uint64, np.float32, np.float64)}[layout]
     surface = {}
     for index, (field, dtype) in enumerate(zip(
-            ("spread_rate", "fireline_intensity", "heat_per_unit_area"), types)):
+            ("spread_rate", "fireline_intensity", "heat_per_unit_area"), types, strict=False)):
         data = values.copy() if np.issubdtype(dtype, np.floating) else np.arange(8)
         if layout == "exact-integer" and index == 0:
             data = np.array([0, 1, (1 << 53) + 1, (1 << 63) + 7, (1 << 64) - 1, 2, 3, 4], np.uint64)

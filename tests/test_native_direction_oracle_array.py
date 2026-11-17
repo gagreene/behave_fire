@@ -8,9 +8,16 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-ROOT = next(parent for parent in Path(__file__).resolve().parents if (parent / "pytest.ini").is_file())
-sys.path.insert(0, str(ROOT / "tools"))
+sys.path.insert(
+    0,
+    str(
+        next(parent for parent in Path(__file__).resolve().parents if (parent / 'pytest.ini').is_file())
+        / 'tools'
+    ),
+)
 from probe_direction_fixtures import _decode, _encode
+
+ROOT = next(parent for parent in Path(__file__).resolve().parents if (parent / "pytest.ini").is_file())
 
 pytestmark = pytest.mark.rust
 

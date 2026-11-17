@@ -51,7 +51,10 @@ def _check_custom(driver, directory, data, root):
     if len(rows) != 2 or rows[0] != fresh[base["id"]] or rows[1].get("error") != "duplicate_id" or rows[1]["upstream_entries"] != 0:
         raise ValueError("Duplicate custom case reached upstream twice")
     other = next(case for case in cases if case["fuel_model"] == 151)
-    skipped = next(case for case, result in zip(data["cases"], data["results"]) if result["status"] == "unavailable")
+    skipped = next(
+        case for case, result in zip(data["cases"], data["results"], strict=False)
+        if result["status"] == "unavailable"
+    )
     sequence = [dict(base, id="custom-state-A1", session="percent-state"),
                 dict(other, id="custom-state-B", session="percent-state"),
                 dict(skipped, id="custom-state-unavailable", session="percent-state"),
@@ -126,7 +129,7 @@ def check_driver(driver, directory, root=ROOT, build_receipt=None, exact_replay=
     _run(driver, directory, "upstream-positive-trap", cases, "--forbid-upstream", 86)
     if b"UPSTREAM_ENTRY_BLOCKED" not in (directory / "upstream-positive-trap.stderr").read_bytes():
         raise ValueError("Upstream trap was not active")
-    unavailable = [case for case, result in zip(data["cases"], data["results"])
+    unavailable = [case for case, result in zip(data["cases"], data["results"], strict=False)
                    if result["status"] == "unavailable" or case["fuel_model"] in (0, 91, 255)]
     unavailable_path = directory / "undefined-input.jsonl"
     unavailable_path.write_text("".join(json.dumps(row) + "\n" for row in unavailable), encoding="utf-8")
@@ -148,7 +151,7 @@ def check_driver(driver, directory, root=ROOT, build_receipt=None, exact_replay=
         actual_rows = _read_lines(repeated)
         if [row["id"] for row in actual_rows] != [row["id"] for row in data["results"]]:
             raise ValueError("Compiler replay case identities changed")
-        for actual_row, expected_row in zip(actual_rows, data["results"]):
+        for actual_row, expected_row in zip(actual_rows, data["results"], strict=False):
             if set(actual_row) != set(expected_row) or any(actual_row[key] != expected_row[key]
                                                          for key in expected_row if key != "output"):
                 raise ValueError("Compiler replay execution contract changed")

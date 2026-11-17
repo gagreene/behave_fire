@@ -1,8 +1,9 @@
 """Frozen surface-stage parity."""
 import pytest
 
-pytestmark = pytest.mark.rust
 from parity_support import cases, run_case
+
+pytestmark = pytest.mark.rust
 
 
 @pytest.mark.parametrize("case", cases("surface", "behave"))

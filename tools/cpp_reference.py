@@ -410,7 +410,7 @@ def compare_backends(root, report_dir):
                                 worst_absolute_case=None, worst_relative_case=None,
                                 worst_relative_cpp=None, worst_relative_port=None,
                                 zero_reference_nonzero_port=0) for field in FIELDS}
-        for case, reference in zip(data["cases"], data["results"]):
+        for case, reference in zip(data["cases"], data["results"], strict=False):
             if reference["status"] != "ok" and "session" not in case:
                 continue
             arguments = {name: case[name] for name in ("m1h", "m10h", "m100h", "mlh", "mlw", "wind_speed",
@@ -528,7 +528,7 @@ def load_reference(root=ROOT, *, measurement=False):
     if [r["id"] for r in cases] != [r["id"] for r in results]:
         raise ValueError("Case/result identity mismatch")
     available = 0
-    for case, result in zip(cases, results):
+    for case, result in zip(cases, results, strict=False):
         _validate_case(case)
         if result["status"] == "ok":
             available += 1

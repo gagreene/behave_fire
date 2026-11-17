@@ -7,10 +7,11 @@ from pathlib import Path
 
 import pytest
 
-ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT / 'tools'))
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'tools'))
 import cpp_controls as controls
 import cpp_reference as reference
+
+ROOT = Path(__file__).resolve().parents[1]
 
 
 def _case():

@@ -130,7 +130,7 @@ def _validate_observations(root, report):
                 or report.get("binding_api_version") != 4
                 or not re.fullmatch(r"[0-9a-f]{64}", report.get("extension_sha256", ""))):
             raise ValueError("Inconsistent native calibration platform")
-        expected = {case["id"]: row["output"] for case, row in zip(data["cases"], data["results"])
+        expected = {case["id"]: row["output"] for case, row in zip(data["cases"], data["results"], strict=False)
                     if row["status"] == "ok" and case["fuel_model"] not in reference.MOE_PERCENT_CONTROLS}
         expected.update({row["id"]: row["output"] for row in data["controls"]["results"]})
         required = {(backend, identity) for backend in ("python", "rust") for identity in expected}

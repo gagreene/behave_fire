@@ -133,7 +133,7 @@ def test_rust_only_grids_are_accessible_through_auto_without_complex_replay():
     with pytest.raises(TypeError, match='real numeric'):
         namespace.SurfaceGrid(dict(_surface_inputs(), m1h=0.05 + 1j))
     with pytest.raises(ImportError, match='Rust-only'):
-        AutoNamespace('python').SurfaceGrid
+        _ = AutoNamespace('python').SurfaceGrid
 
 
 @pytest.mark.parametrize('kind,inputs', [(SurfaceGrid, _surface_inputs), (CrownGrid, _crown_inputs)])

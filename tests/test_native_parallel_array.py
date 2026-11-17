@@ -1,5 +1,6 @@
 """Focused native worker-count and ownership contracts."""
 import threading
+from importlib import import_module as _import_module
 
 import numpy as np
 import pytest
@@ -7,13 +8,12 @@ import pytest
 pytestmark = pytest.mark.rust
 _native = pytest.importorskip("behave_fire.rust", exc_type=ImportError)
 BehaveRun, FuelModels = _native.BehaveRun, _native.FuelModels
-from behave_fire.rust import _bridge
-from parity_support import ROOT as ROOT
+_bridge = _import_module('behave_fire.rust')._bridge
+ROOT = _import_module('parity_support').ROOT
 
 # Keep bootstrap setup before imports that require tools on sys.path.
-# isort: split
 
-from float64_model_reference import model_reference
+model_reference = _import_module('float64_model_reference').model_reference
 
 
 def _surface_inputs(shape):
@@ -186,7 +186,7 @@ def test_fused_surface_and_crown_threads_match_python(shape):
         if serial is None:
             serial = (surface, crown)
         else:
-            for actual, expected in zip((surface, crown), serial):
+            for actual, expected in zip((surface, crown), serial, strict=False):
                 for key in actual:
                     np.testing.assert_array_equal(actual[key].view(np.uint8), expected[key].view(np.uint8))
 
