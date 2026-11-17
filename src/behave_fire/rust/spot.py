@@ -9,9 +9,9 @@ from ._bridge import _call
 
 
 def calculate_spotting_from_burning_pile(
-        flame_height_ft: Union[float, np.ndarray],
-        wind_mph: Union[float, np.ndarray],
-        cover_height_ft: Union[float, np.ndarray],
+        flame_height_ft: float | np.ndarray,
+        wind_mph: float | np.ndarray,
+        cover_height_ft: float | np.ndarray,
 ) -> np.ndarray:
     """Dispatch to the standalone native implementation.
 
@@ -23,9 +23,9 @@ def calculate_spotting_from_burning_pile(
     return _call('spot.calculate_spotting_from_burning_pile', locals())
 
 def calculate_spotting_from_surface_fire(
-        flame_length_ft: Union[float, np.ndarray],
-        wind_mph: Union[float, np.ndarray],
-        cover_height_ft: Union[float, np.ndarray],
+        flame_length_ft: float | np.ndarray,
+        wind_mph: float | np.ndarray,
+        cover_height_ft: float | np.ndarray,
 ) -> np.ndarray:
     """Dispatch to the standalone native implementation.
 
@@ -37,11 +37,11 @@ def calculate_spotting_from_surface_fire(
     return _call('spot.calculate_spotting_from_surface_fire', locals())
 
 def calculate_spotting_from_torching_trees(
-        dbh_in: Union[float, np.ndarray],
-        height_ft: Union[float, np.ndarray],
-        count: Union[int, float, np.ndarray],
-        wind_mph: Union[float, np.ndarray],
-        cover_height_ft: Union[float, np.ndarray],
+        dbh_in: float | np.ndarray,
+        height_ft: float | np.ndarray,
+        count: int | float | np.ndarray,
+        wind_mph: float | np.ndarray,
+        cover_height_ft: float | np.ndarray,
 ) -> np.ndarray:
     """Dispatch to the standalone native implementation.
 

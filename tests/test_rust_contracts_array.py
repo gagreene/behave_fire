@@ -115,12 +115,12 @@ def test_export_inventory_covers_facade_and_standalone_routes():
 def test_export_inventory_signatures_preserve_source_annotations_and_defaults():
     entries = {entry["python_name"]: entry for entry in _exporter().build_inventory()["entries"]}
     assert entries["behave_fire.components.behave_units.speed_to_base"]["signature"] == (
-        "(value: Union[float, np.ndarray], units: int) -> np.ndarray")
+        "(value: float | np.ndarray, units: int) -> np.ndarray")
     for name in ("CrownDamageEquationCode", "EquationType", "GACC"):
         assert entries[f"behave_fire.components.species_master_table.{name}"]["signature"] == "(value)"
     assert entries["behave_fire.components.fuel_models.FuelModels.get_fuelbed_depth"]["signature"] == (
         "(self, fuel_model_number, length_units=None)")
-    assert "moisture_foliar: Union[float, np.ndarray]=100.0" in entries[
+    assert "moisture_foliar: float | np.ndarray=100.0" in entries[
         "behave_fire.components.crown.coerce_crown_fire_inputs"]["signature"]
     assert "equation_type=EquationType.NotSet" in entries[
         "behave_fire.components.species_master_table.SpeciesMasterTableRecord"]["signature"]

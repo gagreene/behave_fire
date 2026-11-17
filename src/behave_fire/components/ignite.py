@@ -60,9 +60,9 @@ _FREQ_NEG, _FREQ_POS = 0.723, 0.277  # historical frequency of neg / pos strikes
 
 
 def calculate_firebrand_ignition_probability(
-        air_temp_f: Union[float, np.ndarray],
-        sun_shade_fraction: Union[float, np.ndarray],
-        moisture_1h_fraction: Union[float, np.ndarray]
+        air_temp_f: float | np.ndarray,
+        sun_shade_fraction: float | np.ndarray,
+        moisture_1h_fraction: float | np.ndarray
 ) -> np.ndarray:
     """
     Probability of ignition from a glowing firebrand (Rothermel & Rinehart 1983).
@@ -97,8 +97,8 @@ def calculate_firebrand_ignition_probability(
 
 
 def calculate_fuel_temperature(
-        air_temp_f: Union[float, np.ndarray],
-        sun_shade_fraction: Union[float, np.ndarray]
+        air_temp_f: float | np.ndarray,
+        sun_shade_fraction: float | np.ndarray
 ) -> np.ndarray:
     """
     Fuel temperature adjustment (Rothermel 1983).
@@ -119,9 +119,9 @@ def calculate_fuel_temperature(
 
 
 def calculate_lightning_ignition_probability(
-        fuel_bed_type_grid: Union[int, np.ndarray],
-        moisture_100h_fraction: Union[float, np.ndarray],
-        duff_depth_inches: Union[float, np.ndarray],
+        fuel_bed_type_grid: int | np.ndarray,
+        moisture_100h_fraction: float | np.ndarray,
+        duff_depth_inches: float | np.ndarray,
         charge_type: int
 ) -> np.ndarray:
     """

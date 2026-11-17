@@ -10,12 +10,12 @@ from ._bridge import _call
 
 def build_particle_arrays(
         lut: dict,
-        fuel_model_grid: Union[int, np.ndarray],
-        m1h: Union[float, np.ndarray],
-        m10h: Union[float, np.ndarray],
-        m100h: Union[float, np.ndarray],
-        mlh: Union[float, np.ndarray],
-        mlw: Union[float, np.ndarray],
+        fuel_model_grid: int | np.ndarray,
+        m1h: float | np.ndarray,
+        m10h: float | np.ndarray,
+        m100h: float | np.ndarray,
+        mlh: float | np.ndarray,
+        mlw: float | np.ndarray,
 ) -> dict:
     """Dispatch to the standalone native implementation.
 
@@ -31,8 +31,8 @@ def build_particle_arrays(
     return _call('surface.build_particle_arrays', locals())
 
 def calculate_backing_spread_rate(
-        spread_rate: Union[float, np.ndarray],
-        eccentricity: Union[float, np.ndarray],
+        spread_rate: float | np.ndarray,
+        eccentricity: float | np.ndarray,
 ) -> np.ndarray:
     """Dispatch to the standalone native implementation.
 
@@ -43,11 +43,11 @@ def calculate_backing_spread_rate(
     return _call('surface.calculate_backing_spread_rate', locals())
 
 def calculate_direction_of_max_spread(
-        x_component: Union[float, np.ndarray],
-        y_component: Union[float, np.ndarray],
-        rate_vector: Union[float, np.ndarray],
+        x_component: float | np.ndarray,
+        y_component: float | np.ndarray,
+        rate_vector: float | np.ndarray,
         wind_orientation_mode: str,
-        aspect: Union[float, np.ndarray]=0.0,
+        aspect: float | np.ndarray=0.0,
 ) -> np.ndarray:
     """Dispatch to the standalone native implementation.
 
@@ -60,7 +60,7 @@ def calculate_direction_of_max_spread(
     """
     return _call('surface.calculate_direction_of_max_spread', locals())
 
-def calculate_eccentricity(fire_length_to_width_ratio: Union[float, np.ndarray]) -> np.ndarray:
+def calculate_eccentricity(fire_length_to_width_ratio: float | np.ndarray) -> np.ndarray:
     """Dispatch to the standalone native implementation.
 
     :param fire_length_to_width_ratio: Input matching the reference API.
@@ -69,12 +69,12 @@ def calculate_eccentricity(fire_length_to_width_ratio: Union[float, np.ndarray])
     return _call('surface.calculate_eccentricity', locals())
 
 def calculate_effective_wind_speed(
-        spread_rate: Union[float, np.ndarray],
-        no_wind_no_slope_spread_rate: Union[float, np.ndarray],
-        wind_b: Union[float, np.ndarray],
-        wind_c: Union[float, np.ndarray],
-        relative_packing_ratio: Union[float, np.ndarray],
-        wind_e: Union[float, np.ndarray],
+        spread_rate: float | np.ndarray,
+        no_wind_no_slope_spread_rate: float | np.ndarray,
+        wind_b: float | np.ndarray,
+        wind_c: float | np.ndarray,
+        relative_packing_ratio: float | np.ndarray,
+        wind_e: float | np.ndarray,
 ) -> np.ndarray:
     """Dispatch to the standalone native implementation.
 
@@ -89,9 +89,9 @@ def calculate_effective_wind_speed(
     return _call('surface.calculate_effective_wind_speed', locals())
 
 def calculate_fire_area(
-        forward_ros: Union[float, np.ndarray],
-        backing_ros: Union[float, np.ndarray],
-        lwr: Union[float, np.ndarray],
+        forward_ros: float | np.ndarray,
+        backing_ros: float | np.ndarray,
+        lwr: float | np.ndarray,
         elapsed_min: float,
         is_crown: bool=False,
 ) -> np.ndarray:
@@ -107,8 +107,8 @@ def calculate_fire_area(
     return _call('surface.calculate_fire_area', locals())
 
 def calculate_fire_length(
-        forward_ros: Union[float, np.ndarray],
-        backing_ros: Union[float, np.ndarray],
+        forward_ros: float | np.ndarray,
+        backing_ros: float | np.ndarray,
         elapsed_min: float,
 ) -> np.ndarray:
     """Dispatch to the standalone native implementation.
@@ -121,7 +121,7 @@ def calculate_fire_length(
     return _call('surface.calculate_fire_length', locals())
 
 def calculate_fire_length_to_width_ratio(
-        effective_wind_speed: Union[float, np.ndarray],
+        effective_wind_speed: float | np.ndarray,
 ) -> np.ndarray:
     """Dispatch to the standalone native implementation.
 
@@ -131,9 +131,9 @@ def calculate_fire_length_to_width_ratio(
     return _call('surface.calculate_fire_length_to_width_ratio', locals())
 
 def calculate_fire_perimeter(
-        forward_ros: Union[float, np.ndarray],
-        backing_ros: Union[float, np.ndarray],
-        lwr: Union[float, np.ndarray],
+        forward_ros: float | np.ndarray,
+        backing_ros: float | np.ndarray,
+        lwr: float | np.ndarray,
         elapsed_min: float,
         is_crown: bool=False,
 ) -> np.ndarray:
@@ -149,9 +149,9 @@ def calculate_fire_perimeter(
     return _call('surface.calculate_fire_perimeter', locals())
 
 def calculate_fire_width(
-        forward_ros: Union[float, np.ndarray],
-        backing_ros: Union[float, np.ndarray],
-        lwr: Union[float, np.ndarray],
+        forward_ros: float | np.ndarray,
+        backing_ros: float | np.ndarray,
+        lwr: float | np.ndarray,
         elapsed_min: float,
 ) -> np.ndarray:
     """Dispatch to the standalone native implementation.
@@ -165,8 +165,8 @@ def calculate_fire_width(
     return _call('surface.calculate_fire_width', locals())
 
 def calculate_fireline_intensity(
-        spread_rate: Union[float, np.ndarray],
-        heat_per_unit_area: Union[float, np.ndarray],
+        spread_rate: float | np.ndarray,
+        heat_per_unit_area: float | np.ndarray,
 ) -> np.ndarray:
     """Dispatch to the standalone native implementation.
 
@@ -176,7 +176,7 @@ def calculate_fireline_intensity(
     """
     return _call('surface.calculate_fireline_intensity', locals())
 
-def calculate_flame_length(fireline_intensity: Union[float, np.ndarray]) -> np.ndarray:
+def calculate_flame_length(fireline_intensity: float | np.ndarray) -> np.ndarray:
     """Dispatch to the standalone native implementation.
 
     :param fireline_intensity: Input matching the reference API.
@@ -185,9 +185,9 @@ def calculate_flame_length(fireline_intensity: Union[float, np.ndarray]) -> np.n
     return _call('surface.calculate_flame_length', locals())
 
 def calculate_flanking_spread_rate(
-        spread_rate: Union[float, np.ndarray],
-        backing_spread_rate: Union[float, np.ndarray],
-        fire_length_to_width_ratio: Union[float, np.ndarray],
+        spread_rate: float | np.ndarray,
+        backing_spread_rate: float | np.ndarray,
+        fire_length_to_width_ratio: float | np.ndarray,
 ) -> np.ndarray:
     """Dispatch to the standalone native implementation.
 
@@ -199,8 +199,8 @@ def calculate_flanking_spread_rate(
     return _call('surface.calculate_flanking_spread_rate', locals())
 
 def calculate_forward_spread_rate(
-        no_wind_no_slope_spread_rate: Union[float, np.ndarray],
-        rate_vector: Union[float, np.ndarray],
+        no_wind_no_slope_spread_rate: float | np.ndarray,
+        rate_vector: float | np.ndarray,
 ) -> np.ndarray:
     """Dispatch to the standalone native implementation.
 
@@ -219,8 +219,8 @@ def calculate_fuelbed_intermediates(p: dict) -> dict:
     return _call('surface.calculate_fuelbed_intermediates', locals())
 
 def calculate_heat_per_unit_area(
-        reaction_intensity: Union[float, np.ndarray],
-        residence_time: Union[float, np.ndarray],
+        reaction_intensity: float | np.ndarray,
+        residence_time: float | np.ndarray,
 ) -> np.ndarray:
     """Dispatch to the standalone native implementation.
 
@@ -231,8 +231,8 @@ def calculate_heat_per_unit_area(
     return _call('surface.calculate_heat_per_unit_area', locals())
 
 def calculate_midflame_wind_speed(
-        waf: Union[float, np.ndarray],
-        twenty_foot_wind_speed: Union[float, np.ndarray],
+        waf: float | np.ndarray,
+        twenty_foot_wind_speed: float | np.ndarray,
 ) -> np.ndarray:
     """Dispatch to the standalone native implementation.
 
@@ -243,9 +243,9 @@ def calculate_midflame_wind_speed(
     return _call('surface.calculate_midflame_wind_speed', locals())
 
 def calculate_no_wind_no_slope_spread_rate(
-        ri: Union[float, np.ndarray],
-        propagating_flux: Union[float, np.ndarray],
-        heat_sink: Union[float, np.ndarray],
+        ri: float | np.ndarray,
+        propagating_flux: float | np.ndarray,
+        heat_sink: float | np.ndarray,
 ) -> np.ndarray:
     """Dispatch to the standalone native implementation.
 
@@ -264,7 +264,7 @@ def calculate_reaction_intensity(ib: dict) -> np.ndarray:
     """
     return _call('surface.calculate_reaction_intensity', locals())
 
-def calculate_reaction_intensity_output(reaction_intensity: Union[float, np.ndarray]) -> np.ndarray:
+def calculate_reaction_intensity_output(reaction_intensity: float | np.ndarray) -> np.ndarray:
     """Dispatch to the standalone native implementation.
 
     :param reaction_intensity: Input matching the reference API.
@@ -272,7 +272,7 @@ def calculate_reaction_intensity_output(reaction_intensity: Union[float, np.ndar
     """
     return _call('surface.calculate_reaction_intensity_output', locals())
 
-def calculate_residence_time(sigma: Union[float, np.ndarray]) -> np.ndarray:
+def calculate_residence_time(sigma: float | np.ndarray) -> np.ndarray:
     """Dispatch to the standalone native implementation.
 
     :param sigma: Input matching the reference API.
@@ -281,10 +281,10 @@ def calculate_residence_time(sigma: Union[float, np.ndarray]) -> np.ndarray:
     return _call('surface.calculate_residence_time', locals())
 
 def calculate_slope_phi(
-        slope: Union[float, np.ndarray],
+        slope: float | np.ndarray,
         slope_units: int,
-        packing_ratio: Union[float, np.ndarray],
-        reaction_intensity: Union[float, np.ndarray],
+        packing_ratio: float | np.ndarray,
+        reaction_intensity: float | np.ndarray,
 ) -> np.ndarray:
     """Dispatch to the standalone native implementation.
 
@@ -297,12 +297,12 @@ def calculate_slope_phi(
     return _call('surface.calculate_slope_phi', locals())
 
 def calculate_surface_rate_vector(
-        no_wind_no_slope_spread_rate: Union[float, np.ndarray],
-        wind_phi: Union[float, np.ndarray],
-        slope_phi: Union[float, np.ndarray],
-        wind_direction: Union[float, np.ndarray],
+        no_wind_no_slope_spread_rate: float | np.ndarray,
+        wind_phi: float | np.ndarray,
+        slope_phi: float | np.ndarray,
+        wind_direction: float | np.ndarray,
         wind_orientation_mode: str,
-        aspect: Union[float, np.ndarray]=0.0,
+        aspect: float | np.ndarray=0.0,
 ) -> dict:
     """Dispatch to the standalone native implementation.
 
@@ -317,12 +317,12 @@ def calculate_surface_rate_vector(
     return _call('surface.calculate_surface_rate_vector', locals())
 
 def calculate_surface_wind_adjustment_factor(
-        canopy_cover: Union[float, np.ndarray],
-        canopy_height: Union[float, np.ndarray],
-        crown_ratio: Union[float, np.ndarray],
-        depth: Union[float, np.ndarray],
+        canopy_cover: float | np.ndarray,
+        canopy_height: float | np.ndarray,
+        crown_ratio: float | np.ndarray,
+        depth: float | np.ndarray,
         waf_method: str='UseCrownRatio',
-        user_waf: Union[float, np.ndarray, None]=None,
+        user_waf: float | np.ndarray | None=None,
 ) -> np.ndarray:
     """Dispatch to the standalone native implementation.
 
@@ -336,7 +336,7 @@ def calculate_surface_wind_adjustment_factor(
     """
     return _call('surface.calculate_surface_wind_adjustment_factor', locals())
 
-def calculate_surface_wind_coefficients(sigma: Union[float, np.ndarray]) -> dict:
+def calculate_surface_wind_coefficients(sigma: float | np.ndarray) -> dict:
     """Dispatch to the standalone native implementation.
 
     :param sigma: Input matching the reference API.
@@ -345,7 +345,7 @@ def calculate_surface_wind_coefficients(sigma: Union[float, np.ndarray]) -> dict
     return _call('surface.calculate_surface_wind_coefficients', locals())
 
 def calculate_twenty_foot_wind_speed(
-        wind_speed: Union[float, np.ndarray],
+        wind_speed: float | np.ndarray,
         wind_speed_units: int,
         wind_height_mode: str='TwentyFoot',
 ) -> np.ndarray:
@@ -359,10 +359,10 @@ def calculate_twenty_foot_wind_speed(
     return _call('surface.calculate_twenty_foot_wind_speed', locals())
 
 def calculate_wind_adjustment_factor(
-        canopy_cover: Union[float, np.ndarray],
-        canopy_height: Union[float, np.ndarray],
-        crown_ratio: Union[float, np.ndarray],
-        depth: Union[float, np.ndarray],
+        canopy_cover: float | np.ndarray,
+        canopy_height: float | np.ndarray,
+        crown_ratio: float | np.ndarray,
+        depth: float | np.ndarray,
 ) -> np.ndarray:
     """Dispatch to the standalone native implementation.
 
@@ -375,12 +375,12 @@ def calculate_wind_adjustment_factor(
     return _call('surface.calculate_wind_adjustment_factor', locals())
 
 def calculate_wind_phi(
-        sigma: Union[float, np.ndarray],
-        midflame_wind_speed: Union[float, np.ndarray],
-        wind_b: Union[float, np.ndarray],
-        wind_c: Union[float, np.ndarray],
-        relative_packing_ratio: Union[float, np.ndarray],
-        wind_e: Union[float, np.ndarray],
+        sigma: float | np.ndarray,
+        midflame_wind_speed: float | np.ndarray,
+        wind_b: float | np.ndarray,
+        wind_c: float | np.ndarray,
+        relative_packing_ratio: float | np.ndarray,
+        wind_e: float | np.ndarray,
 ) -> np.ndarray:
     """Dispatch to the standalone native implementation.
 
@@ -395,21 +395,21 @@ def calculate_wind_phi(
     return _call('surface.calculate_wind_phi', locals())
 
 def run_surface_fire(
-        ri: Union[float, np.ndarray],
+        ri: float | np.ndarray,
         ib: dict,
-        wind_speed: Union[float, np.ndarray],
+        wind_speed: float | np.ndarray,
         wind_speed_units: int,
-        wind_direction: Union[float, np.ndarray],
+        wind_direction: float | np.ndarray,
         wind_orientation_mode: str,
-        slope: Union[float, np.ndarray],
+        slope: float | np.ndarray,
         slope_units: int=0,
-        aspect: Union[float, np.ndarray]=0.0,
-        canopy_cover: Union[float, np.ndarray]=0.0,
-        canopy_height: Union[float, np.ndarray]=0.0,
-        crown_ratio: Union[float, np.ndarray]=0.0,
+        aspect: float | np.ndarray=0.0,
+        canopy_cover: float | np.ndarray=0.0,
+        canopy_height: float | np.ndarray=0.0,
+        crown_ratio: float | np.ndarray=0.0,
         wind_height_mode: str='TwentyFoot',
         waf_method: str='UseCrownRatio',
-        user_waf: Union[float, np.ndarray, None]=None,
+        user_waf: float | np.ndarray | None=None,
 ) -> dict:
     """Dispatch to the standalone native implementation.
 

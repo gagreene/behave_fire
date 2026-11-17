@@ -10,9 +10,9 @@ from ._bridge import _call
 
 
 def calculate_firebrand_ignition_probability(
-        air_temp_f: Union[float, np.ndarray],
-        sun_shade_fraction: Union[float, np.ndarray],
-        moisture_1h_fraction: Union[float, np.ndarray],
+        air_temp_f: float | np.ndarray,
+        sun_shade_fraction: float | np.ndarray,
+        moisture_1h_fraction: float | np.ndarray,
 ) -> np.ndarray:
     """Dispatch to the standalone native implementation.
 
@@ -24,8 +24,8 @@ def calculate_firebrand_ignition_probability(
     return _call('ignite.calculate_firebrand_ignition_probability', locals())
 
 def calculate_fuel_temperature(
-        air_temp_f: Union[float, np.ndarray],
-        sun_shade_fraction: Union[float, np.ndarray],
+        air_temp_f: float | np.ndarray,
+        sun_shade_fraction: float | np.ndarray,
 ) -> np.ndarray:
     """Dispatch to the standalone native implementation.
 
@@ -36,9 +36,9 @@ def calculate_fuel_temperature(
     return _call('ignite.calculate_fuel_temperature', locals())
 
 def calculate_lightning_ignition_probability(
-        fuel_bed_type_grid: Union[int, np.ndarray],
-        moisture_100h_fraction: Union[float, np.ndarray],
-        duff_depth_inches: Union[float, np.ndarray],
+        fuel_bed_type_grid: int | np.ndarray,
+        moisture_100h_fraction: float | np.ndarray,
+        duff_depth_inches: float | np.ndarray,
         charge_type: int,
 ) -> np.ndarray:
     """Dispatch to the standalone native implementation.

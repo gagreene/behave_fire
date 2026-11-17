@@ -63,9 +63,9 @@ def _load_surface_unit_converters():
     return speed_to_base, speed_from_base, slope_to_base
 
 def _mask_surface_result(
-        value: Union[float, np.ndarray],
-        is_defined: Union[bool, np.ndarray],
-        fill_value: Union[float, np.ndarray] = 0.0,
+        value: float | np.ndarray,
+        is_defined: bool | np.ndarray,
+        fill_value: float | np.ndarray = 0.0,
 ) -> np.ndarray:
     """Mask undefined fuel model cells in a surface output array."""
     value_arr = np.asarray(value, dtype=float)
@@ -126,12 +126,12 @@ def _size_sorted_wfl(
 
 def build_particle_arrays(
         lut: dict,
-        fuel_model_grid: Union[int, np.ndarray],
-        m1h: Union[float, np.ndarray],
-        m10h: Union[float, np.ndarray],
-        m100h: Union[float, np.ndarray],
-        mlh: Union[float, np.ndarray],
-        mlw: Union[float, np.ndarray]
+        fuel_model_grid: int | np.ndarray,
+        m1h: float | np.ndarray,
+        m10h: float | np.ndarray,
+        m100h: float | np.ndarray,
+        mlh: float | np.ndarray,
+        mlw: float | np.ndarray
 ) -> dict:
     """
     Build (5, *S)-shaped particle arrays from fuel lookup tables and moisture grids.
@@ -233,8 +233,8 @@ def build_particle_arrays(
     }
 
 def calculate_backing_spread_rate(
-        spread_rate: Union[float, np.ndarray],
-        eccentricity: Union[float, np.ndarray],
+        spread_rate: float | np.ndarray,
+        eccentricity: float | np.ndarray,
 ) -> np.ndarray:
     """Calculate the backing spread rate (ft/min)."""
     safe_ecc_denom = 1.0 + eccentricity
@@ -245,11 +245,11 @@ def calculate_backing_spread_rate(
     )
 
 def calculate_direction_of_max_spread(
-        x_component: Union[float, np.ndarray],
-        y_component: Union[float, np.ndarray],
-        rate_vector: Union[float, np.ndarray],
+        x_component: float | np.ndarray,
+        y_component: float | np.ndarray,
+        rate_vector: float | np.ndarray,
         wind_orientation_mode: str,
-        aspect: Union[float, np.ndarray] = 0.0,
+        aspect: float | np.ndarray = 0.0,
 ) -> np.ndarray:
     """Calculate direction of maximum spread (degrees)."""
     aspect = np.asarray(aspect, dtype=float)
@@ -261,7 +261,7 @@ def calculate_direction_of_max_spread(
     return dir_deg
 
 def calculate_eccentricity(
-        fire_length_to_width_ratio: Union[float, np.ndarray],
+        fire_length_to_width_ratio: float | np.ndarray,
 ) -> np.ndarray:
     """Calculate ellipse eccentricity from the fire length-to-width ratio."""
     x_ecc = fire_length_to_width_ratio ** 2 - 1.0
@@ -272,12 +272,12 @@ def calculate_eccentricity(
     )
 
 def calculate_effective_wind_speed(
-        spread_rate: Union[float, np.ndarray],
-        no_wind_no_slope_spread_rate: Union[float, np.ndarray],
-        wind_b: Union[float, np.ndarray],
-        wind_c: Union[float, np.ndarray],
-        relative_packing_ratio: Union[float, np.ndarray],
-        wind_e: Union[float, np.ndarray],
+        spread_rate: float | np.ndarray,
+        no_wind_no_slope_spread_rate: float | np.ndarray,
+        wind_b: float | np.ndarray,
+        wind_c: float | np.ndarray,
+        relative_packing_ratio: float | np.ndarray,
+        wind_e: float | np.ndarray,
 ) -> np.ndarray:
     """Calculate effective wind speed without suppressing tiny positive spread.
 
@@ -312,9 +312,9 @@ def calculate_effective_wind_speed(
 # ---------------------------------------------------------------------------
 
 def calculate_fire_area(
-        forward_ros: Union[float, np.ndarray],
-        backing_ros: Union[float, np.ndarray],
-        lwr: Union[float, np.ndarray],
+        forward_ros: float | np.ndarray,
+        backing_ros: float | np.ndarray,
+        lwr: float | np.ndarray,
         elapsed_min: float,
         is_crown: bool = False
 ) -> np.ndarray:
@@ -345,8 +345,8 @@ def calculate_fire_area(
         return np.pi * ell_a * ell_b
 
 def calculate_fire_length(
-        forward_ros: Union[float, np.ndarray],
-        backing_ros: Union[float, np.ndarray],
+        forward_ros: float | np.ndarray,
+        backing_ros: float | np.ndarray,
         elapsed_min: float
 ) -> np.ndarray:
     """
@@ -360,7 +360,7 @@ def calculate_fire_length(
     return (np.asarray(forward_ros) + np.asarray(backing_ros)) * elapsed_min
 
 def calculate_fire_length_to_width_ratio(
-        effective_wind_speed: Union[float, np.ndarray],
+        effective_wind_speed: float | np.ndarray,
 ) -> np.ndarray:
     """Calculate the surface fire length-to-width ratio."""
     return np.where(
@@ -374,9 +374,9 @@ def calculate_fire_length_to_width_ratio(
     )
 
 def calculate_fire_perimeter(
-        forward_ros: Union[float, np.ndarray],
-        backing_ros: Union[float, np.ndarray],
-        lwr: Union[float, np.ndarray],
+        forward_ros: float | np.ndarray,
+        backing_ros: float | np.ndarray,
+        lwr: float | np.ndarray,
         elapsed_min: float,
         is_crown: bool = False
 ) -> np.ndarray:
@@ -414,9 +414,9 @@ def calculate_fire_perimeter(
         )
 
 def calculate_fire_width(
-        forward_ros: Union[float, np.ndarray],
-        backing_ros: Union[float, np.ndarray],
-        lwr: Union[float, np.ndarray],
+        forward_ros: float | np.ndarray,
+        backing_ros: float | np.ndarray,
+        lwr: float | np.ndarray,
         elapsed_min: float
 ) -> np.ndarray:
     """
@@ -436,14 +436,14 @@ def calculate_fire_width(
     return np.where(lwr > 1e-7, length / safe_lwr, 0.0)
 
 def calculate_fireline_intensity(
-        spread_rate: Union[float, np.ndarray],
-        heat_per_unit_area: Union[float, np.ndarray],
+        spread_rate: float | np.ndarray,
+        heat_per_unit_area: float | np.ndarray,
 ) -> np.ndarray:
     """Calculate fireline intensity (BTU/ft/s)."""
     return np.asarray(spread_rate, dtype=float) * np.asarray(heat_per_unit_area, dtype=float) / 60.0
 
 def calculate_flame_length(
-        fireline_intensity: Union[float, np.ndarray],
+        fireline_intensity: float | np.ndarray,
 ) -> np.ndarray:
     """Calculate flame length using the C++ small-intensity cutoff.
 
@@ -454,9 +454,9 @@ def calculate_flame_length(
     return np.where(fireline_intensity >= 1e-7, 0.45 * (safe_fli ** 0.46), 0.0)
 
 def calculate_flanking_spread_rate(
-        spread_rate: Union[float, np.ndarray],
-        backing_spread_rate: Union[float, np.ndarray],
-        fire_length_to_width_ratio: Union[float, np.ndarray],
+        spread_rate: float | np.ndarray,
+        backing_spread_rate: float | np.ndarray,
+        fire_length_to_width_ratio: float | np.ndarray,
 ) -> np.ndarray:
     """Calculate the flanking spread rate (ft/min)."""
     safe_lwr = np.where(fire_length_to_width_ratio > 1e-7, fire_length_to_width_ratio, 1.0)
@@ -467,8 +467,8 @@ def calculate_flanking_spread_rate(
     )
 
 def calculate_forward_spread_rate(
-        no_wind_no_slope_spread_rate: Union[float, np.ndarray],
-        rate_vector: Union[float, np.ndarray],
+        no_wind_no_slope_spread_rate: float | np.ndarray,
+        rate_vector: float | np.ndarray,
 ) -> np.ndarray:
     """Calculate the forward surface spread rate (ft/min)."""
     return np.asarray(no_wind_no_slope_spread_rate, dtype=float) + np.asarray(rate_vector, dtype=float)
@@ -647,23 +647,23 @@ def calculate_fuelbed_intermediates(p: dict) -> dict:
     }
 
 def calculate_heat_per_unit_area(
-        reaction_intensity: Union[float, np.ndarray],
-        residence_time: Union[float, np.ndarray],
+        reaction_intensity: float | np.ndarray,
+        residence_time: float | np.ndarray,
 ) -> np.ndarray:
     """Calculate heat per unit area (BTU/ft^2)."""
     return np.asarray(reaction_intensity, dtype=float) * np.asarray(residence_time, dtype=float)
 
 def calculate_midflame_wind_speed(
-        waf: Union[float, np.ndarray],
-        twenty_foot_wind_speed: Union[float, np.ndarray],
+        waf: float | np.ndarray,
+        twenty_foot_wind_speed: float | np.ndarray,
 ) -> np.ndarray:
     """Calculate the midflame wind speed (ft/min)."""
     return np.asarray(waf, dtype=float) * np.asarray(twenty_foot_wind_speed, dtype=float)
 
 def calculate_no_wind_no_slope_spread_rate(
-        ri: Union[float, np.ndarray],
-        propagating_flux: Union[float, np.ndarray],
-        heat_sink: Union[float, np.ndarray],
+        ri: float | np.ndarray,
+        propagating_flux: float | np.ndarray,
+        heat_sink: float | np.ndarray,
 ) -> np.ndarray:
     """Calculate the no-wind, no-slope spread rate (ft/min)."""
     safe_hs = np.where(heat_sink > 1e-7, heat_sink, 1.0)
@@ -723,23 +723,23 @@ def calculate_reaction_intensity(ib: dict) -> np.ndarray:
     return np.where(valid, ri_dead + ri_live, 0.0)
 
 def calculate_reaction_intensity_output(
-        reaction_intensity: Union[float, np.ndarray],
+        reaction_intensity: float | np.ndarray,
 ) -> np.ndarray:
     """Return reaction intensity as a named surface output."""
     return np.asarray(reaction_intensity, dtype=float)
 
 def calculate_residence_time(
-        sigma: Union[float, np.ndarray],
+        sigma: float | np.ndarray,
 ) -> np.ndarray:
     """Calculate residence time (min)."""
     safe_sigma = np.where(sigma > 1e-7, sigma, 1.0)
     return np.where(sigma > 1e-7, 384.0 / safe_sigma, 0.0)
 
 def calculate_slope_phi(
-        slope: Union[float, np.ndarray],
+        slope: float | np.ndarray,
         slope_units: int,
-        packing_ratio: Union[float, np.ndarray],
-        reaction_intensity: Union[float, np.ndarray],
+        packing_ratio: float | np.ndarray,
+        reaction_intensity: float | np.ndarray,
 ) -> np.ndarray:
     """Calculate the slope phi factor."""
     _, _, slope_to_base = _load_surface_unit_converters()
@@ -754,12 +754,12 @@ def calculate_slope_phi(
     return np.minimum(phi_s, 0.9 * reaction_intensity)
 
 def calculate_surface_rate_vector(
-        no_wind_no_slope_spread_rate: Union[float, np.ndarray],
-        wind_phi: Union[float, np.ndarray],
-        slope_phi: Union[float, np.ndarray],
-        wind_direction: Union[float, np.ndarray],
+        no_wind_no_slope_spread_rate: float | np.ndarray,
+        wind_phi: float | np.ndarray,
+        slope_phi: float | np.ndarray,
+        wind_direction: float | np.ndarray,
         wind_orientation_mode: str,
-        aspect: Union[float, np.ndarray] = 0.0,
+        aspect: float | np.ndarray = 0.0,
 ) -> dict:
     """Calculate the x/y spread vector components and resultant rate vector."""
     wind_direction = np.asarray(wind_direction, dtype=float)
@@ -781,12 +781,12 @@ def calculate_surface_rate_vector(
     }
 
 def calculate_surface_wind_adjustment_factor(
-        canopy_cover: Union[float, np.ndarray],
-        canopy_height: Union[float, np.ndarray],
-        crown_ratio: Union[float, np.ndarray],
-        depth: Union[float, np.ndarray],
+        canopy_cover: float | np.ndarray,
+        canopy_height: float | np.ndarray,
+        crown_ratio: float | np.ndarray,
+        depth: float | np.ndarray,
         waf_method: str = 'UseCrownRatio',
-        user_waf: Union[float, np.ndarray, None] = None,
+        user_waf: float | np.ndarray | None = None,
 ) -> np.ndarray:
     """Calculate the wind adjustment factor used to derive midflame wind speed."""
     if str(waf_method).lower().replace('_', '') == 'userinput' and user_waf is not None:
@@ -794,7 +794,7 @@ def calculate_surface_wind_adjustment_factor(
     return calculate_wind_adjustment_factor(canopy_cover, canopy_height, crown_ratio, depth)
 
 def calculate_surface_wind_coefficients(
-        sigma: Union[float, np.ndarray],
+        sigma: float | np.ndarray,
 ) -> dict:
     """Calculate Albini/Rothermel wind coefficients from sigma."""
     safe_sigma = np.where(sigma > 1e-7, sigma, 1.0)
@@ -806,7 +806,7 @@ def calculate_surface_wind_coefficients(
     }
 
 def calculate_twenty_foot_wind_speed(
-        wind_speed: Union[float, np.ndarray],
+        wind_speed: float | np.ndarray,
         wind_speed_units: int,
         wind_height_mode: str = 'TwentyFoot',
 ) -> np.ndarray:
@@ -822,10 +822,10 @@ def calculate_twenty_foot_wind_speed(
 # ---------------------------------------------------------------------------
 
 def calculate_wind_adjustment_factor(
-        canopy_cover: Union[float, np.ndarray],
-        canopy_height: Union[float, np.ndarray],
-        crown_ratio: Union[float, np.ndarray],
-        depth: Union[float, np.ndarray]
+        canopy_cover: float | np.ndarray,
+        canopy_height: float | np.ndarray,
+        crown_ratio: float | np.ndarray,
+        depth: float | np.ndarray
 ) -> np.ndarray:
     """
     Compute the wind adjustment factor (WAF) for midflame wind speed.
@@ -868,12 +868,12 @@ def calculate_wind_adjustment_factor(
     return np.where(no_canopy, waf_open, waf_canopy)
 
 def calculate_wind_phi(
-        sigma: Union[float, np.ndarray],
-        midflame_wind_speed: Union[float, np.ndarray],
-        wind_b: Union[float, np.ndarray],
-        wind_c: Union[float, np.ndarray],
-        relative_packing_ratio: Union[float, np.ndarray],
-        wind_e: Union[float, np.ndarray],
+        sigma: float | np.ndarray,
+        midflame_wind_speed: float | np.ndarray,
+        wind_b: float | np.ndarray,
+        wind_c: float | np.ndarray,
+        relative_packing_ratio: float | np.ndarray,
+        wind_e: float | np.ndarray,
 ) -> np.ndarray:
     """Calculate the wind phi factor."""
     safe_rpr = np.where(relative_packing_ratio > 1e-7, relative_packing_ratio, 1.0)
@@ -884,21 +884,21 @@ def calculate_wind_phi(
     )
 
 def run_surface_fire(
-        ri: Union[float, np.ndarray],
+        ri: float | np.ndarray,
         ib: dict,
-        wind_speed: Union[float, np.ndarray],
+        wind_speed: float | np.ndarray,
         wind_speed_units: int,
-        wind_direction: Union[float, np.ndarray],
+        wind_direction: float | np.ndarray,
         wind_orientation_mode: str,
-        slope: Union[float, np.ndarray],
+        slope: float | np.ndarray,
         slope_units: int = 0,
-        aspect: Union[float, np.ndarray] = 0.0,
-        canopy_cover: Union[float, np.ndarray] = 0.0,
-        canopy_height: Union[float, np.ndarray] = 0.0,
-        crown_ratio: Union[float, np.ndarray] = 0.0,
+        aspect: float | np.ndarray = 0.0,
+        canopy_cover: float | np.ndarray = 0.0,
+        canopy_height: float | np.ndarray = 0.0,
+        crown_ratio: float | np.ndarray = 0.0,
         wind_height_mode: str = 'TwentyFoot',
         waf_method: str = 'UseCrownRatio',
-        user_waf: Union[float, np.ndarray, None] = None
+        user_waf: float | np.ndarray | None = None
 ) -> dict:
     """
     Compute fire spread rate, fire shape, and intensity from reaction intensity

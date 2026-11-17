@@ -8,7 +8,7 @@ import numpy as np
 from ._bridge import _call
 
 
-def area_from_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+def area_from_base(value: float | np.ndarray, units: int) -> np.ndarray:
     """Execute the explicit native operation.
 
     :param value: Input matching the public API.
@@ -17,7 +17,7 @@ def area_from_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
     """
     return _call('units.Area.from_base', locals())
 
-def area_to_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+def area_to_base(value: float | np.ndarray, units: int) -> np.ndarray:
     """Execute the explicit native operation.
 
     :param value: Input matching the public API.
@@ -26,7 +26,7 @@ def area_to_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
     """
     return _call('units.Area.to_base', locals())
 
-def density_from_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+def density_from_base(value: float | np.ndarray, units: int) -> np.ndarray:
     """Execute the explicit native operation.
 
     :param value: Input matching the public API.
@@ -35,7 +35,7 @@ def density_from_base(value: Union[float, np.ndarray], units: int) -> np.ndarray
     """
     return _call('units.Density.from_base', locals())
 
-def density_to_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+def density_to_base(value: float | np.ndarray, units: int) -> np.ndarray:
     """Execute the explicit native operation.
 
     :param value: Input matching the public API.
@@ -44,7 +44,7 @@ def density_to_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
     """
     return _call('units.Density.to_base', locals())
 
-def fireline_intensity_from_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+def fireline_intensity_from_base(value: float | np.ndarray, units: int) -> np.ndarray:
     """Execute the explicit native operation.
 
     :param value: Input matching the public API.
@@ -53,7 +53,7 @@ def fireline_intensity_from_base(value: Union[float, np.ndarray], units: int) ->
     """
     return _call('units.FirelineIntensity.from_base', locals())
 
-def fireline_intensity_to_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+def fireline_intensity_to_base(value: float | np.ndarray, units: int) -> np.ndarray:
     """Execute the explicit native operation.
 
     :param value: Input matching the public API.
@@ -62,7 +62,7 @@ def fireline_intensity_to_base(value: Union[float, np.ndarray], units: int) -> n
     """
     return _call('units.FirelineIntensity.to_base', locals())
 
-def fraction_from_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+def fraction_from_base(value: float | np.ndarray, units: int) -> np.ndarray:
     """Execute the explicit native operation.
 
     :param value: Input matching the public API.
@@ -71,7 +71,7 @@ def fraction_from_base(value: Union[float, np.ndarray], units: int) -> np.ndarra
     """
     return _call('units.Fraction.from_base', locals())
 
-def fraction_to_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+def fraction_to_base(value: float | np.ndarray, units: int) -> np.ndarray:
     """Execute the explicit native operation.
 
     :param value: Input matching the public API.
@@ -80,7 +80,7 @@ def fraction_to_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
     """
     return _call('units.Fraction.to_base', locals())
 
-def hpua_from_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+def hpua_from_base(value: float | np.ndarray, units: int) -> np.ndarray:
     """Execute the explicit native operation.
 
     :param value: Input matching the public API.
@@ -89,7 +89,7 @@ def hpua_from_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
     """
     return _call('units.HeatPerUnitArea.from_base', locals())
 
-def hpua_to_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+def hpua_to_base(value: float | np.ndarray, units: int) -> np.ndarray:
     """Execute the explicit native operation.
 
     :param value: Input matching the public API.
@@ -98,7 +98,7 @@ def hpua_to_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
     """
     return _call('units.HeatPerUnitArea.to_base', locals())
 
-def length_from_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+def length_from_base(value: float | np.ndarray, units: int) -> np.ndarray:
     """Execute the explicit native operation.
 
     :param value: Input matching the public API.
@@ -107,7 +107,7 @@ def length_from_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
     """
     return _call('units.Length.from_base', locals())
 
-def length_to_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+def length_to_base(value: float | np.ndarray, units: int) -> np.ndarray:
     """Execute the explicit native operation.
 
     :param value: Input matching the public API.
@@ -116,7 +116,7 @@ def length_to_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
     """
     return _call('units.Length.to_base', locals())
 
-def loading_from_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+def loading_from_base(value: float | np.ndarray, units: int) -> np.ndarray:
     """Execute the explicit native operation.
 
     :param value: Input matching the public API.
@@ -125,7 +125,7 @@ def loading_from_base(value: Union[float, np.ndarray], units: int) -> np.ndarray
     """
     return _call('units.Loading.from_base', locals())
 
-def loading_to_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+def loading_to_base(value: float | np.ndarray, units: int) -> np.ndarray:
     """Execute the explicit native operation.
 
     :param value: Input matching the public API.
@@ -134,7 +134,7 @@ def loading_to_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
     """
     return _call('units.Loading.to_base', locals())
 
-def pressure_from_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+def pressure_from_base(value: float | np.ndarray, units: int) -> np.ndarray:
     """Execute the explicit native operation.
 
     :param value: Input matching the public API.
@@ -143,7 +143,7 @@ def pressure_from_base(value: Union[float, np.ndarray], units: int) -> np.ndarra
     """
     return _call('units.Pressure.from_base', locals())
 
-def pressure_to_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+def pressure_to_base(value: float | np.ndarray, units: int) -> np.ndarray:
     """Execute the explicit native operation.
 
     :param value: Input matching the public API.
@@ -152,7 +152,7 @@ def pressure_to_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
     """
     return _call('units.Pressure.to_base', locals())
 
-def reaction_intensity_from_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+def reaction_intensity_from_base(value: float | np.ndarray, units: int) -> np.ndarray:
     """Execute the explicit native operation.
 
     :param value: Input matching the public API.
@@ -161,7 +161,7 @@ def reaction_intensity_from_base(value: Union[float, np.ndarray], units: int) ->
     """
     return _call('units.HeatSourceAndReactionIntensity.from_base', locals())
 
-def reaction_intensity_to_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+def reaction_intensity_to_base(value: float | np.ndarray, units: int) -> np.ndarray:
     """Execute the explicit native operation.
 
     :param value: Input matching the public API.
@@ -170,7 +170,7 @@ def reaction_intensity_to_base(value: Union[float, np.ndarray], units: int) -> n
     """
     return _call('units.HeatSourceAndReactionIntensity.to_base', locals())
 
-def slope_from_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+def slope_from_base(value: float | np.ndarray, units: int) -> np.ndarray:
     """Execute the explicit native operation.
 
     :param value: Input matching the public API.
@@ -179,7 +179,7 @@ def slope_from_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
     """
     return _call('units.Slope.from_base', locals())
 
-def slope_to_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+def slope_to_base(value: float | np.ndarray, units: int) -> np.ndarray:
     """Execute the explicit native operation.
 
     :param value: Input matching the public API.
@@ -188,7 +188,7 @@ def slope_to_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
     """
     return _call('units.Slope.to_base', locals())
 
-def speed_from_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+def speed_from_base(value: float | np.ndarray, units: int) -> np.ndarray:
     """Execute the explicit native operation.
 
     :param value: Input matching the public API.
@@ -197,7 +197,7 @@ def speed_from_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
     """
     return _call('units.Speed.from_base', locals())
 
-def speed_to_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+def speed_to_base(value: float | np.ndarray, units: int) -> np.ndarray:
     """Execute the explicit native operation.
 
     :param value: Input matching the public API.
@@ -206,7 +206,7 @@ def speed_to_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
     """
     return _call('units.Speed.to_base', locals())
 
-def temp_from_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+def temp_from_base(value: float | np.ndarray, units: int) -> np.ndarray:
     """Execute the explicit native operation.
 
     :param value: Input matching the public API.
@@ -215,7 +215,7 @@ def temp_from_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
     """
     return _call('units.Temperature.from_base', locals())
 
-def temp_to_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+def temp_to_base(value: float | np.ndarray, units: int) -> np.ndarray:
     """Execute the explicit native operation.
 
     :param value: Input matching the public API.
@@ -224,7 +224,7 @@ def temp_to_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
     """
     return _call('units.Temperature.to_base', locals())
 
-def time_from_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+def time_from_base(value: float | np.ndarray, units: int) -> np.ndarray:
     """Execute the explicit native operation.
 
     :param value: Input matching the public API.
@@ -233,7 +233,7 @@ def time_from_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
     """
     return _call('units.Time.from_base', locals())
 
-def time_to_base(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+def time_to_base(value: float | np.ndarray, units: int) -> np.ndarray:
     """Execute the explicit native operation.
 
     :param value: Input matching the public API.
@@ -253,7 +253,7 @@ class AreaUnits:
         SquareKilometers = 5
 
     @staticmethod
-    def fromBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+    def fromBaseUnits(value: float | np.ndarray, units: int) -> np.ndarray:
         """Execute the explicit native operation.
 
         :param value: Input matching the public API.
@@ -263,7 +263,7 @@ class AreaUnits:
         return _call('units.Area.from_base', locals())
 
     @staticmethod
-    def toBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+    def toBaseUnits(value: float | np.ndarray, units: int) -> np.ndarray:
         """Execute the explicit native operation.
 
         :param value: Input matching the public API.
@@ -279,7 +279,7 @@ class BasalAreaUnits:
         SquareMetersPerHectare = 1
 
     @staticmethod
-    def fromBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+    def fromBaseUnits(value: float | np.ndarray, units: int) -> np.ndarray:
         """Execute the explicit native operation.
 
         :param value: Input matching the public API.
@@ -289,7 +289,7 @@ class BasalAreaUnits:
         return _call('units.BasalArea.from_base', locals())
 
     @staticmethod
-    def toBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+    def toBaseUnits(value: float | np.ndarray, units: int) -> np.ndarray:
         """Execute the explicit native operation.
 
         :param value: Input matching the public API.
@@ -311,7 +311,7 @@ class LengthUnits:
         Kilometers = 7
 
     @staticmethod
-    def fromBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+    def fromBaseUnits(value: float | np.ndarray, units: int) -> np.ndarray:
         """Execute the explicit native operation.
 
         :param value: Input matching the public API.
@@ -321,7 +321,7 @@ class LengthUnits:
         return _call('units.Length.from_base', locals())
 
     @staticmethod
-    def toBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+    def toBaseUnits(value: float | np.ndarray, units: int) -> np.ndarray:
         """Execute the explicit native operation.
 
         :param value: Input matching the public API.
@@ -339,7 +339,7 @@ class LoadingUnits:
         KilogramsPerSquareMeter = 3
 
     @staticmethod
-    def fromBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+    def fromBaseUnits(value: float | np.ndarray, units: int) -> np.ndarray:
         """Execute the explicit native operation.
 
         :param value: Input matching the public API.
@@ -349,7 +349,7 @@ class LoadingUnits:
         return _call('units.Loading.from_base', locals())
 
     @staticmethod
-    def toBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+    def toBaseUnits(value: float | np.ndarray, units: int) -> np.ndarray:
         """Execute the explicit native operation.
 
         :param value: Input matching the public API.
@@ -372,7 +372,7 @@ class PressureUnits:
         PoundPerSquareInch = 8
 
     @staticmethod
-    def fromBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+    def fromBaseUnits(value: float | np.ndarray, units: int) -> np.ndarray:
         """Execute the explicit native operation.
 
         :param value: Input matching the public API.
@@ -382,7 +382,7 @@ class PressureUnits:
         return _call('units.Pressure.from_base', locals())
 
     @staticmethod
-    def toBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+    def toBaseUnits(value: float | np.ndarray, units: int) -> np.ndarray:
         """Execute the explicit native operation.
 
         :param value: Input matching the public API.
@@ -400,7 +400,7 @@ class SurfaceAreaToVolumeUnits:
         SquareCentimetersOverCubicCentimeters = 3
 
     @staticmethod
-    def fromBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+    def fromBaseUnits(value: float | np.ndarray, units: int) -> np.ndarray:
         """Execute the explicit native operation.
 
         :param value: Input matching the public API.
@@ -410,7 +410,7 @@ class SurfaceAreaToVolumeUnits:
         return _call('units.SurfaceAreaToVolume.from_base', locals())
 
     @staticmethod
-    def toBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+    def toBaseUnits(value: float | np.ndarray, units: int) -> np.ndarray:
         """Execute the explicit native operation.
 
         :param value: Input matching the public API.
@@ -431,7 +431,7 @@ class SpeedUnits:
         KilometersPerHour = 6
 
     @staticmethod
-    def fromBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+    def fromBaseUnits(value: float | np.ndarray, units: int) -> np.ndarray:
         """Execute the explicit native operation.
 
         :param value: Input matching the public API.
@@ -441,7 +441,7 @@ class SpeedUnits:
         return _call('units.Speed.from_base', locals())
 
     @staticmethod
-    def toBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+    def toBaseUnits(value: float | np.ndarray, units: int) -> np.ndarray:
         """Execute the explicit native operation.
 
         :param value: Input matching the public API.
@@ -457,7 +457,7 @@ class FractionUnits:
         Percent = 1
 
     @staticmethod
-    def fromBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+    def fromBaseUnits(value: float | np.ndarray, units: int) -> np.ndarray:
         """Execute the explicit native operation.
 
         :param value: Input matching the public API.
@@ -467,7 +467,7 @@ class FractionUnits:
         return _call('units.Fraction.from_base', locals())
 
     @staticmethod
-    def toBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+    def toBaseUnits(value: float | np.ndarray, units: int) -> np.ndarray:
         """Execute the explicit native operation.
 
         :param value: Input matching the public API.
@@ -483,7 +483,7 @@ class SlopeUnits:
         Percent = 1
 
     @staticmethod
-    def fromBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+    def fromBaseUnits(value: float | np.ndarray, units: int) -> np.ndarray:
         """Execute the explicit native operation.
 
         :param value: Input matching the public API.
@@ -493,7 +493,7 @@ class SlopeUnits:
         return _call('units.Slope.from_base', locals())
 
     @staticmethod
-    def toBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+    def toBaseUnits(value: float | np.ndarray, units: int) -> np.ndarray:
         """Execute the explicit native operation.
 
         :param value: Input matching the public API.
@@ -509,7 +509,7 @@ class DensityUnits:
         KilogramsPerCubicMeter = 1
 
     @staticmethod
-    def fromBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+    def fromBaseUnits(value: float | np.ndarray, units: int) -> np.ndarray:
         """Execute the explicit native operation.
 
         :param value: Input matching the public API.
@@ -519,7 +519,7 @@ class DensityUnits:
         return _call('units.Density.from_base', locals())
 
     @staticmethod
-    def toBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+    def toBaseUnits(value: float | np.ndarray, units: int) -> np.ndarray:
         """Execute the explicit native operation.
 
         :param value: Input matching the public API.
@@ -535,7 +535,7 @@ class HeatOfCombustionUnits:
         KilojoulesPerKilogram = 1
 
     @staticmethod
-    def fromBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+    def fromBaseUnits(value: float | np.ndarray, units: int) -> np.ndarray:
         """Execute the explicit native operation.
 
         :param value: Input matching the public API.
@@ -545,7 +545,7 @@ class HeatOfCombustionUnits:
         return _call('units.HeatOfCombustion.from_base', locals())
 
     @staticmethod
-    def toBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+    def toBaseUnits(value: float | np.ndarray, units: int) -> np.ndarray:
         """Execute the explicit native operation.
 
         :param value: Input matching the public API.
@@ -561,7 +561,7 @@ class HeatSinkUnits:
         KilojoulesPerCubicMeter = 1
 
     @staticmethod
-    def fromBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+    def fromBaseUnits(value: float | np.ndarray, units: int) -> np.ndarray:
         """Execute the explicit native operation.
 
         :param value: Input matching the public API.
@@ -571,7 +571,7 @@ class HeatSinkUnits:
         return _call('units.HeatSink.from_base', locals())
 
     @staticmethod
-    def toBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+    def toBaseUnits(value: float | np.ndarray, units: int) -> np.ndarray:
         """Execute the explicit native operation.
 
         :param value: Input matching the public API.
@@ -588,7 +588,7 @@ class HeatPerUnitAreaUnits:
         KilowattSecondsPerSquareMeter = 2
 
     @staticmethod
-    def fromBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+    def fromBaseUnits(value: float | np.ndarray, units: int) -> np.ndarray:
         """Execute the explicit native operation.
 
         :param value: Input matching the public API.
@@ -598,7 +598,7 @@ class HeatPerUnitAreaUnits:
         return _call('units.HeatPerUnitArea.from_base', locals())
 
     @staticmethod
-    def toBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+    def toBaseUnits(value: float | np.ndarray, units: int) -> np.ndarray:
         """Execute the explicit native operation.
 
         :param value: Input matching the public API.
@@ -617,7 +617,7 @@ class HeatSourceAndReactionIntensityUnits:
         KilowattsPerSquareMeter = 4
 
     @staticmethod
-    def fromBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+    def fromBaseUnits(value: float | np.ndarray, units: int) -> np.ndarray:
         """Execute the explicit native operation.
 
         :param value: Input matching the public API.
@@ -627,7 +627,7 @@ class HeatSourceAndReactionIntensityUnits:
         return _call('units.HeatSourceAndReactionIntensity.from_base', locals())
 
     @staticmethod
-    def toBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+    def toBaseUnits(value: float | np.ndarray, units: int) -> np.ndarray:
         """Execute the explicit native operation.
 
         :param value: Input matching the public API.
@@ -646,7 +646,7 @@ class FirelineIntensityUnits:
         KilowattsPerMeter = 4
 
     @staticmethod
-    def fromBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+    def fromBaseUnits(value: float | np.ndarray, units: int) -> np.ndarray:
         """Execute the explicit native operation.
 
         :param value: Input matching the public API.
@@ -656,7 +656,7 @@ class FirelineIntensityUnits:
         return _call('units.FirelineIntensity.from_base', locals())
 
     @staticmethod
-    def toBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+    def toBaseUnits(value: float | np.ndarray, units: int) -> np.ndarray:
         """Execute the explicit native operation.
 
         :param value: Input matching the public API.
@@ -673,7 +673,7 @@ class TemperatureUnits:
         Kelvin = 2
 
     @staticmethod
-    def fromBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+    def fromBaseUnits(value: float | np.ndarray, units: int) -> np.ndarray:
         """Execute the explicit native operation.
 
         :param value: Input matching the public API.
@@ -683,7 +683,7 @@ class TemperatureUnits:
         return _call('units.Temperature.from_base', locals())
 
     @staticmethod
-    def toBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+    def toBaseUnits(value: float | np.ndarray, units: int) -> np.ndarray:
         """Execute the explicit native operation.
 
         :param value: Input matching the public API.
@@ -702,7 +702,7 @@ class TimeUnits:
         Years = 4
 
     @staticmethod
-    def fromBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+    def fromBaseUnits(value: float | np.ndarray, units: int) -> np.ndarray:
         """Execute the explicit native operation.
 
         :param value: Input matching the public API.
@@ -712,7 +712,7 @@ class TimeUnits:
         return _call('units.Time.from_base', locals())
 
     @staticmethod
-    def toBaseUnits(value: Union[float, np.ndarray], units: int) -> np.ndarray:
+    def toBaseUnits(value: float | np.ndarray, units: int) -> np.ndarray:
         """Execute the explicit native operation.
 
         :param value: Input matching the public API.

@@ -23,9 +23,9 @@ import numpy as np
 
 
 def calculate_vpd(
-        temperature: Union[float, np.ndarray],
+        temperature: float | np.ndarray,
         temp_units: int,
-        relative_humidity: Union[float, np.ndarray],
+        relative_humidity: float | np.ndarray,
         rh_units: int,
         output_units: int = 0
 ) -> dict:
