@@ -9,11 +9,12 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-ROOT = next(parent for parent in Path(__file__).resolve().parents if (parent / "pytest.ini").is_file())
-TOOLS = Path(__file__).resolve().parents[1] / "tools"
-sys.path.insert(0, str(TOOLS))
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'tools'))
 from export_rust_reference import contracts_match, encode_value
 from rust_reference_platform import acceptance_output
+
+ROOT = next(parent for parent in Path(__file__).resolve().parents if (parent / "pytest.ini").is_file())
+TOOLS = Path(__file__).resolve().parents[1] / "tools"
 
 
 def _assert_floating(actual, expected, single=False):
@@ -128,7 +129,7 @@ def assert_result(actual, expected):
         _assert_floating(actual, expected)
     elif isinstance(expected, list):
         assert len(actual) == len(expected)
-        for left, right in zip(actual, expected):
+        for left, right in zip(actual, expected, strict=False):
             assert_result(left, right)
     elif isinstance(expected, dict) and "dtype" not in expected:
         assert isinstance(actual, dict)
@@ -150,7 +151,7 @@ def assert_result(actual, expected):
         if wanted.dtype == object:
             # Read the encoded entries directly: float coercion loses integers
             # above 2**53 and obscures the boxed bool/integer distinction.
-            for left, right in zip(actual_data.ravel(), expected["values"]):
+            for left, right in zip(actual_data.ravel(), expected["values"], strict=False):
                 payload = decode(right)
                 if isinstance(payload, np.ndarray) and payload.ndim == 0:
                     payload = payload[()]

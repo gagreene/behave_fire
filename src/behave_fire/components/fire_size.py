@@ -14,7 +14,7 @@ except ImportError:
 class FireSize:
     """
     FireSize component for calculating various properties related to fire size.
-    
+
     Uses elliptical fire model to calculate fire dimensions, perimeter, and area
     based on forward and backing spread rates, wind speed, and elapsed time.
     """
@@ -85,7 +85,7 @@ class FireSize:
                                        forward_spread_rate, spread_rate_units):
         """
         Calculate all basic fire dimensions.
-        
+
         Args:
             is_crown: Boolean - True for crown fire, False for surface fire
             effective_wind_speed: Wind speed value
@@ -153,10 +153,10 @@ class FireSize:
     def get_backing_spread_rate(self, spread_rate_units):
         """
         Get backing spread rate with unit conversion.
-        
+
         Args:
             spread_rate_units: SpeedUnits enum for desired output
-            
+
         Returns:
             Backing spread rate in requested units
         """
@@ -169,12 +169,12 @@ class FireSize:
     def get_elliptical_a(self, length_units, elapsed_time, time_units):
         """
         Get elliptical semi-minor axis (fire width).
-        
+
         Args:
             length_units: LengthUnits enum for desired output
             elapsed_time: Elapsed time value
             time_units: TimeUnits enum for elapsed time
-            
+
         Returns:
             Elliptical a in requested units
         """
@@ -184,12 +184,12 @@ class FireSize:
     def get_elliptical_b(self, length_units, elapsed_time, time_units):
         """
         Get elliptical semi-major axis (fire length).
-        
+
         Args:
             length_units: LengthUnits enum for desired output
             elapsed_time: Elapsed time value
             time_units: TimeUnits enum for elapsed time
-            
+
         Returns:
             Elliptical b in requested units
         """
@@ -199,12 +199,12 @@ class FireSize:
     def get_elliptical_c(self, length_units, elapsed_time, time_units):
         """
         Get distance from ellipse center to focus.
-        
+
         Args:
             length_units: LengthUnits enum for desired output
             elapsed_time: Elapsed time value
             time_units: TimeUnits enum for elapsed time
-            
+
         Returns:
             Elliptical c in requested units
         """
@@ -215,13 +215,13 @@ class FireSize:
         """
         Get fire area.
         Uses different equations for crown vs surface fires.
-        
+
         Args:
             is_crown: Boolean - True for crown fire
             area_units: AreaUnits enum for desired output
             elapsed_time: Elapsed time value
             time_units: TimeUnits enum for elapsed time
-            
+
         Returns:
             Fire area in requested units
         """
@@ -251,12 +251,12 @@ class FireSize:
         """
         Get total fire length (head to tail).
         Fire length = 2 × elliptical_b
-        
+
         Args:
             length_units: LengthUnits enum for desired output
             elapsed_time: Elapsed time value
             time_units: TimeUnits enum for elapsed time
-            
+
         Returns:
             Fire length in requested units
         """
@@ -272,13 +272,13 @@ class FireSize:
         """
         Get fire perimeter.
         Uses different equations for crown vs surface fires.
-        
+
         Args:
             is_crown: Boolean - True for crown fire
             length_units: LengthUnits enum for desired output
             elapsed_time: Elapsed time value
             time_units: TimeUnits enum for elapsed time
-            
+
         Returns:
             Fire perimeter in requested units
         """
@@ -310,10 +310,10 @@ class FireSize:
     def get_flanking_spread_rate(self, spread_rate_units):
         """
         Get flanking spread rate with unit conversion.
-        
+
         Args:
             spread_rate_units: SpeedUnits enum for desired output
-            
+
         Returns:
             Flanking spread rate in requested units
         """
@@ -327,12 +327,12 @@ class FireSize:
         """
         Get maximum fire width (perpendicular to spread direction).
         Max width = 2 × elliptical_a
-        
+
         Args:
             length_units: LengthUnits enum for desired output
             elapsed_time: Elapsed time value
             time_units: TimeUnits enum for elapsed time
-            
+
         Returns:
             Maximum fire width in requested units
         """

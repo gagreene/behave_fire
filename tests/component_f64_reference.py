@@ -50,7 +50,13 @@ def reference(function, arguments):
     args = normalize(arguments)
     result = function(**args)
     name = function.__name__
-    nan = lambda value: np.isnan(np.asarray(value, dtype=np.float64))
+    def nan(value):
+        """Return the missing-value mask after widening.
+
+        :param value: Scalar or array input.
+        :return: Boolean mask for float64 NaN values.
+        """
+        return np.isnan(np.asarray(value, dtype=np.float64))
     scalar_conditions = {
         'calculate_eccentricity': 'fire_length_to_width_ratio',
         'calculate_fire_length_to_width_ratio': 'effective_wind_speed',

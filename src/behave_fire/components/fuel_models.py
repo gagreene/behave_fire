@@ -162,7 +162,8 @@ class FuelModels:
             1.0, 0.10, 8000, 8000,
             0, 0, 0, 0, 0, 1500, 1500, 1500, False)
         # 94–95 reserved then given records
-        reserved(94); reserved(95)
+        reserved(94)
+        reserved(95)
         rec(94, "NB4", "Future standard non-burnable [94]",
             1.0, 0.10, 8000, 8000,
             0, 0, 0, 0, 0, 1500, 1500, 1500, False)

@@ -2,8 +2,9 @@
 import numpy as np
 import pytest
 
-pytestmark = pytest.mark.rust
 from parity_support import cases, run_case
+
+pytestmark = pytest.mark.rust
 
 
 @pytest.mark.parametrize("height,base,expected", [(10,2,.8),(0,-1,1),(-1,2,0),(np.nan,1,np.nan),(10,np.nan,np.nan)])

@@ -26,14 +26,13 @@ PNG summary map  → src/examples/results/fire_behavior_summary.png
 
 import os
 import sys
+from importlib import import_module as _import_module
 
 # ---------------------------------------------------------------------------
 # Path setup — allow running as a plain script OR via pytest/import
 # ---------------------------------------------------------------------------
-_HERE = os.path.dirname(os.path.abspath(__file__))
-_SRC  = os.path.abspath(os.path.join(_HERE, ".."))
-if _SRC not in sys.path:
-    sys.path.insert(0, _SRC)
+if os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')) not in sys.path:
+    sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')))
 
 import matplotlib
 import numpy as np
@@ -42,13 +41,16 @@ from rasterio.crs import CRS
 from rasterio.transform import from_origin
 from scipy.ndimage import gaussian_filter
 
-matplotlib.use("Agg")                 # non-interactive backend for script use
-import matplotlib.colors as mcolors
-import matplotlib.pyplot as plt
-from matplotlib.patches import Patch
+_HERE = os.path.dirname(os.path.abspath(__file__))
+_SRC  = os.path.abspath(os.path.join(_HERE, ".."))
 
-from behave_fire.behave import BehaveRun
-from behave_fire.components.fuel_models import FuelModels
+matplotlib.use("Agg")                 # non-interactive backend for script use
+mcolors = _import_module('matplotlib.colors')
+plt = _import_module('matplotlib.pyplot')
+Patch = _import_module('matplotlib.patches').Patch
+
+BehaveRun = _import_module('behave_fire.behave').BehaveRun
+FuelModels = _import_module('behave_fire.components.fuel_models').FuelModels
 
 # ---------------------------------------------------------------------------
 # Directories
@@ -234,7 +236,7 @@ save_tif(fuel_grid, os.path.join(DATA_DIR, "fuel_models.tif"), dtype=np.int32, n
 
 unique_fm, counts = np.unique(fuel_grid, return_counts=True)
 print("  Fuel model distribution (model : cells):")
-for fm, n in zip(unique_fm, counts):
+for fm, n in zip(unique_fm, counts, strict=False):
     pct = n / fuel_grid.size * 100
     print(f"    {fm:4d} : {n:6d} cells  ({pct:.1f} %)")
 

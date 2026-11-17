@@ -16,12 +16,13 @@ from datetime import UTC, datetime
 from pathlib import Path
 from types import SimpleNamespace
 
-ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT / 'tools'))
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'tools'))
 
 from benchmark_backends import _provenance
 from check_core_f64 import check_core_screen
 from core_f64_reference import validate_export
+
+ROOT = Path(__file__).resolve().parents[1]
 
 
 def _identity(probe, seed):

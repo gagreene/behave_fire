@@ -1,8 +1,9 @@
 """Frozen effect-function parity."""
 import pytest
 
-pytestmark = pytest.mark.rust
 from parity_support import cases, run_case
+
+pytestmark = pytest.mark.rust
 
 
 @pytest.mark.parametrize("case", cases("safety", "spot", "ignite", "mortality", "boundaries"))

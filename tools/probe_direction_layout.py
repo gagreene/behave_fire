@@ -113,7 +113,10 @@ def _record(name, x, y, atan2f):
         actual = np.asarray(np.arctan2(ny, nx))
         bx, by = np.broadcast_arrays(np.asarray(nx, dtype=np.float32), np.asarray(ny, dtype=np.float32))
         contiguous = np.arctan2(np.array(by, order='C', copy=True), np.array(bx, order='C', copy=True))
-        scalar = np.array([atan2f(float(vy), float(vx)) for vx, vy in zip(bx.flat, by.flat)], dtype=np.float32).reshape(bx.shape)
+        scalar = np.array(
+            [atan2f(float(vy), float(vx)) for vx, vy in zip(bx.flat, by.flat, strict=False)],
+            dtype=np.float32,
+        ).reshape(bx.shape)
         expected_direction = reference.calculate_direction_of_max_spread(np.asarray(x, dtype=np.float64), np.asarray(y, dtype=np.float64), np.ones(bx.shape), 'RelativeToNorth', 95.)
         native_direction = native.calculate_direction_of_max_spread(x, y, np.ones(bx.shape), 'RelativeToNorth', 95.)
     mask = ~(np.isnan(actual) | np.isnan(scalar) | np.isnan(contiguous))

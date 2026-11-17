@@ -9,9 +9,10 @@ import pytest
 
 from test_cpp_reference_array import _snapshot
 
-ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT / 'tools'))
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'tools'))
 import cpp_reference as reference
+
+ROOT = Path(__file__).resolve().parents[1]
 
 pytestmark = pytest.mark.cpp_reference
 

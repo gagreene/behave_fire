@@ -86,7 +86,10 @@ def _port(case, backend, runners):
                   else "UseCrownRatio", user_waf=case.get("user_waf"), out_units={"spread_rate": 1})
     output = runners[key].do_surface_run(**values)
     names = ("fireline_intensity", "flame_length", "heat_per_unit_area", "fire_length_to_width_ratio", "spread_rate")
-    result = {field: float(np.asarray(output[name]).reshape(-1)[0]) for field, name in zip(reference.FIELDS, names)}
+    result = {
+        field: float(np.asarray(output[name]).reshape(-1)[0])
+        for field, name in zip(reference.FIELDS, names, strict=False)
+    }
     if not all(math.isfinite(value) for value in result.values()):
         raise ValueError("Nonfinite port control output")
     return result
@@ -274,14 +277,14 @@ def measure_ports(root, report, backends=("python", "rust"), expected_platform=N
     records, counts, runners, documented = [], {}, {}, []
     for backend in backends:
         total, paired = 0, 0
-        for case, expected in zip(data["cases"], data["results"]):
+        for case, expected in zip(data["cases"], data["results"], strict=False):
             if expected["status"] != "ok" or case["fuel_model"] in reference.MOE_PERCENT_CONTROLS:
                 continue
             actual = _port(case, backend, runners)
             differences = check_values(actual, expected["output"], fields)
             records.append(dict(backend=backend, id=case["id"], actual=actual, differences=differences))
             total += 1
-        for case, expected in zip(controls["cases"], controls["results"]):
+        for case, expected in zip(controls["cases"], controls["results"], strict=False):
             actual = _port(case, backend, runners)
             original = _port(numbered[case["id"].removeprefix("custom-")], backend, runners)
             if any(struct.pack("!d", actual[field]) != struct.pack("!d", original[field]) for field in reference.FIELDS):

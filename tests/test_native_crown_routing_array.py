@@ -1,4 +1,6 @@
 """Crown fused routing preserves normalized controls and typed supplied inputs."""
+from importlib import import_module as _import_module
+
 import numpy as np
 import pytest
 
@@ -14,7 +16,8 @@ from performance_cases import assert_outputs
 
 pytestmark = pytest.mark.rust
 _native = pytest.importorskip("behave_fire.rust", exc_type=ImportError)
-from behave_fire.rust import BehaveRun, _bridge
+BehaveRun = _import_module('behave_fire.rust').BehaveRun
+_bridge = _import_module('behave_fire.rust')._bridge
 
 
 def _inputs():

@@ -9,7 +9,8 @@ sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'tools'))
 def _checker():
     path=Path(__file__).resolve().parents[1]/'tools/check_core_f64.py'
     spec=importlib.util.spec_from_file_location('check_core_f64',path)
-    module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module)
+    module=importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
     return module
 
 
@@ -37,8 +38,10 @@ def test_duplicate_or_missing_process_blocks_cannot_pass():
     for change in ('duplicate','missing'):
         report=_report()
         rows=report['cases'][0]['records']
-        if change=='duplicate':rows[2]['block']=rows[0]['block']
-        else:rows.pop()
+        if change=='duplicate':
+            rows[2]['block']=rows[0]['block']
+        else:
+            rows.pop()
         assert not _checker().check_core_screen(report)['passed']
 
 
@@ -54,11 +57,16 @@ def test_normalized_python_timing_and_partial_output_validation_fail():
     for problem in ('oracle','partial','self-reference','wrong-contract','typed-code'):
         report=_report()
         case=report['cases'][0]
-        if problem=='oracle':case['records'][0]['python_timing_original_inputs']=False
-        elif problem=='partial':case['validation']['all_fields']=False
-        elif problem=='self-reference':case['validation']['independent_python']=False
-        elif problem=='wrong-contract':case['validation']['truth_contract']='old-masked'
-        else:case['validation']['typed_codes']=False
+        if problem=='oracle':
+            case['records'][0]['python_timing_original_inputs']=False
+        elif problem=='partial':
+            case['validation']['all_fields']=False
+        elif problem=='self-reference':
+            case['validation']['independent_python']=False
+        elif problem=='wrong-contract':
+            case['validation']['truth_contract']='old-masked'
+        else:
+            case['validation']['typed_codes']=False
         assert not _checker().check_core_screen(report)['passed']
 
 
@@ -66,7 +74,9 @@ def test_one_failing_common_crown_case_blocks_all_other_successes():
     report=_report()
     case=next(c for c in report['cases'] if (c['dataset'],c['cells'],c['operation'])==('heterogeneous',100000,'crown'))
     for row in case['records']:
-        if row['backend']=='core-rust':row['first_seconds']=6.;row['warm_seconds']=[6.]*4
+        if row['backend']=='core-rust':
+            row['first_seconds']=6.
+            row['warm_seconds']=[6.]*4
     result=_checker().check_core_screen(report)
     assert not result['passed']
     assert any('heterogeneous/crown/100000' in error for error in result['errors'])

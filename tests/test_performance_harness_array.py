@@ -198,7 +198,7 @@ def test_incomplete_or_unstable_samples_cannot_pass(problem):
     elif problem in ("nan", "zero"):
         rows[0]["first_seconds"] = float("nan") if problem == "nan" else 0.0
     else:
-        for row, seconds in zip(rows, [3.0, 3.0, 3.0, 5.0, 6.0, 6.0, 6.0]):
+        for row, seconds in zip(rows, [3.0, 3.0, 3.0, 5.0, 6.0, 6.0, 6.0], strict=False):
             row["first_seconds"] = seconds
     assert not checker.check_report(report, requirements)["passed"]
 

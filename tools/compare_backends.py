@@ -5,6 +5,7 @@ import json
 import random
 import sys
 import warnings
+from importlib import import_module as _import_module
 from pathlib import Path
 
 import numpy as np
@@ -12,7 +13,7 @@ import numpy as np
 ROOT = next(parent for parent in Path(__file__).resolve().parents if (parent / "pytest.ini").is_file())
 SUPPORT = Path(__file__).resolve().parents[1] / "tests"
 sys.path[:0] = [str(ROOT / "src"), str(SUPPORT)]
-import parity_support
+parity_support = _import_module('parity_support')
 
 
 def _metrics(actual, expected, summary):
@@ -46,6 +47,26 @@ def _metrics(actual, expected, summary):
             summary["maximum_relative_error"] = max(summary["maximum_relative_error"], float(np.max(absolute[nonzero] / np.abs(right[finite][nonzero]))))
 
 
+def _observe_result(summary, original_assertion):
+    """Bind one scenario's metrics without capturing a changing loop name.
+
+    :param summary: Mutable metrics for this scenario's domain.
+    :param original_assertion: Original strict comparison callback.
+    :return: Two-argument callback recording metrics before comparison.
+    """
+    def observed(actual, expected):
+        """Record this scenario's metrics before its ordinary strict assertion.
+
+        :param actual: Native result.
+        :param expected: Frozen Python result.
+        :return: None if the result agrees; otherwise raise AssertionError.
+        """
+        _metrics(actual, expected, summary)
+        original_assertion(actual, expected)
+
+    return observed
+
+
 def main(argv=None):
     """Run every acceptance fixture without rewriting its oracle.
 
@@ -68,17 +89,8 @@ def main(argv=None):
         summary = report["domains"].setdefault(domain, dict(scenarios=0, passed=0, array_fields=0, missing_fields=0, dtype_differences=0, shape_differences=0, mask_differences=0, maximum_absolute_error=0.0, maximum_relative_error=0.0))
         summary["scenarios"] += 1
 
-        def observed(actual, expected):
-            """Record this scenario's metrics before its ordinary strict assertion.
 
-            :param actual: Native result.
-            :param expected: Frozen Python result.
-            :return: None if the result agrees; otherwise raise AssertionError.
-            """
-            _metrics(actual, expected, summary)
-            original_assertion(actual, expected)
-
-        parity_support.assert_result = observed
+        parity_support.assert_result = _observe_result(summary, original_assertion)
         try:
             from rust_reference_platform import reference_outputs
             outputs = reference_outputs(case, parity_support.encode_value)

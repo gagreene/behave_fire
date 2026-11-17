@@ -20,9 +20,8 @@ from pathlib import Path
 import numpy as np
 
 # Locate the source package relative to this file, independent of the working directory.
-source_dir = Path(__file__).resolve().parents[1] / "src"
-if str(source_dir) not in sys.path:
-    sys.path.insert(0, str(source_dir))
+if str(Path(__file__).resolve().parents[1] / 'src') not in sys.path:
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'src'))
 
 # Keep this legacy harness on the explicit Python reference; native parity is
 # exercised by the required-Rust pytest suite.
@@ -127,6 +126,8 @@ _TI = _TestInfo()
 # ---------------------------------------------------------------------------
 
 import pytest  # noqa: E402  (import after module-level code is intentional)
+
+source_dir = Path(__file__).resolve().parents[1] / "src"
 
 # True when executed under pytest (set before any test runs).
 _UNDER_PYTEST = False
@@ -495,7 +496,7 @@ def test_fire_size(ti):
     area_sqft = calculate_fire_area(
         forward_ros=fros, backing_ros=bros, lwr=lwr, elapsed_min=elapsed_min,
     )
-    area_acres = float(area_sqft) / 43560.002160576107
+    _area_acres = float(area_sqft) / 43560.002160576107
 
     perim_ft = float(calculate_fire_perimeter(
         forward_ros=fros, backing_ros=bros, lwr=lwr, elapsed_min=elapsed_min,
@@ -1204,24 +1205,24 @@ def test_scalar_inputs(ti):
         calculate_firebrand_ignition_probability,
         calculate_lightning_ignition_probability,
     )
-    fb_arr = calculate_firebrand_ignition_probability(
+    _fb_arr = calculate_firebrand_ignition_probability(
         air_temp_f=np.array([80.0]),
         sun_shade_fraction=np.array([0.50]),
         moisture_1h_fraction=np.array([0.06]),
     )
-    fb_scl = calculate_firebrand_ignition_probability(
+    _fb_scl = calculate_firebrand_ignition_probability(
         air_temp_f=80.0,
         sun_shade_fraction=0.50,
         moisture_1h_fraction=0.06,
     )
 
-    lig_arr = calculate_lightning_ignition_probability(
+    _lig_arr = calculate_lightning_ignition_probability(
         fuel_bed_type_grid=np.array([5]),
         moisture_100h_fraction=np.array([0.08]),
         duff_depth_inches=np.array([6.0]),
         charge_type=2,
     )
-    lig_scl = calculate_lightning_ignition_probability(
+    _lig_scl = calculate_lightning_ignition_probability(
         fuel_bed_type_grid=5,
         moisture_100h_fraction=0.08,
         duff_depth_inches=6.0,
@@ -1254,23 +1255,23 @@ def test_scalar_inputs(ti):
         calculate_spotting_from_burning_pile,
         calculate_spotting_from_surface_fire,
     )
-    sp_arr = calculate_spotting_from_surface_fire(
+    _sp_arr = calculate_spotting_from_surface_fire(
         flame_length_ft=np.array([15.811421]),
         wind_mph=np.array([5.0]),
         cover_height_ft=np.array([30.0]),
     )
-    sp_scl = calculate_spotting_from_surface_fire(
+    _sp_scl = calculate_spotting_from_surface_fire(
         flame_length_ft=15.811421,
         wind_mph=5.0,
         cover_height_ft=30.0,
     )
 
-    pile_arr = calculate_spotting_from_burning_pile(
+    _pile_arr = calculate_spotting_from_burning_pile(
         flame_height_ft=np.array([20.0]),
         wind_mph=np.array([15.0]),
         cover_height_ft=np.array([30.0]),
     )
-    pile_scl = calculate_spotting_from_burning_pile(
+    _pile_scl = calculate_spotting_from_burning_pile(
         flame_height_ft=20.0,
         wind_mph=15.0,
         cover_height_ft=30.0,
@@ -1314,19 +1315,19 @@ def test_scalar_inputs(ti):
     )
     fros, bros, lwr = 9.763838, 3.207761, 1.158917
     elapsed = 60.0
-    fa_arr = calculate_fire_area(
+    _fa_arr = calculate_fire_area(
         forward_ros=np.array([fros]), backing_ros=np.array([bros]),
         lwr=np.array([lwr]), elapsed_min=np.array([elapsed]),
     )
-    fa_scl = calculate_fire_area(
+    _fa_scl = calculate_fire_area(
         forward_ros=fros, backing_ros=bros, lwr=lwr, elapsed_min=elapsed,
     )
 
-    fp_arr = calculate_fire_perimeter(
+    _fp_arr = calculate_fire_perimeter(
         forward_ros=np.array([fros]), backing_ros=np.array([bros]),
         lwr=np.array([lwr]), elapsed_min=np.array([elapsed]),
     )
-    fp_scl = calculate_fire_perimeter(
+    _fp_scl = calculate_fire_perimeter(
         forward_ros=fros, backing_ros=bros, lwr=lwr, elapsed_min=elapsed,
     )
 
