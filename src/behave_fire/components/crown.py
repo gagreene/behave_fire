@@ -19,7 +19,6 @@ Key design points
     - Active             -> crown ROS/HPUA/FLI/FL
 """
 
-from typing import Union
 
 import numpy as np
 

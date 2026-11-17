@@ -17,7 +17,6 @@ Unit enums (scalar integers, same values as behave_units.py):
                    (PressureUnitsEnum from behave_units.py)
 """
 
-from typing import Union
 
 import numpy as np
 

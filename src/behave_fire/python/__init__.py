@@ -1,22 +1,21 @@
 """The unchanged Python reference, without native extension discovery."""
-from ..behave import BehaveRun
-from ..components import (
-    behave_units,
-    crown,
-    fine_dead_fuel_moisture_tool,
-    fire_size,
-    fuel_models,
-    fuel_models_array,
-    ignite,
-    mortality,
-    safety,
-    slope_tool,
-    species_master_table,
-    spot,
-    surface,
-    vapor_pressure_deficit_calculator,
-)
-from ..components.fire_size import FireSize
-from ..components.fuel_models import FuelModels
-from ..components.slope_tool import SlopeTool
-from ..components.species_master_table import SpeciesMasterTable, SpeciesMasterTableRecord
+from ..behave import BehaveRun as BehaveRun
+from ..components import behave_units as behave_units
+from ..components import crown as crown
+from ..components import fine_dead_fuel_moisture_tool as fine_dead_fuel_moisture_tool
+from ..components import fire_size as fire_size
+from ..components import fuel_models as fuel_models
+from ..components import fuel_models_array as fuel_models_array
+from ..components import ignite as ignite
+from ..components import mortality as mortality
+from ..components import safety as safety
+from ..components import slope_tool as slope_tool
+from ..components import species_master_table as species_master_table
+from ..components import spot as spot
+from ..components import surface as surface
+from ..components import vapor_pressure_deficit_calculator as vapor_pressure_deficit_calculator
+from ..components.fire_size import FireSize as FireSize
+from ..components.fuel_models import FuelModels as FuelModels
+from ..components.slope_tool import SlopeTool as SlopeTool
+from ..components.species_master_table import SpeciesMasterTable as SpeciesMasterTable
+from ..components.species_master_table import SpeciesMasterTableRecord as SpeciesMasterTableRecord

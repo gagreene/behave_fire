@@ -1,8 +1,6 @@
 """Explicit native fine_dead_fuel_moisture_tool adapters."""
 from __future__ import annotations
 
-from typing import Union
-
 import numpy as np
 
 from ._bridge import _call

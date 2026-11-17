@@ -23,7 +23,7 @@ Crown scorch B-coefficients are from Ryan & Reinhardt (1988) / Reinhardt & Ryan
 CROWN_SCORCH_TABLE (see implementation note below).
 """
 
-from typing import TYPE_CHECKING, Optional, Union
+from typing import TYPE_CHECKING, Optional
 
 import numpy as np
 

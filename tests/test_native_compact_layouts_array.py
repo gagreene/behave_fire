@@ -3,7 +3,12 @@
 import numpy as np
 import pytest
 
-from parity_support import assert_result, encode_value
+from parity_support import assert_result as assert_result
+from parity_support import encode_value as encode_value
+
+# Keep bootstrap setup before imports that require tools on sys.path.
+# isort: split
+
 from float64_model_reference import model_reference
 from performance_cases import assert_outputs
 
@@ -22,7 +27,8 @@ def _inputs():
 @pytest.mark.parametrize("layout", ["a", "b", "third", "exact-integer"])
 @pytest.mark.parametrize("storage", ["plain", "strided", "readonly", "endian"])
 def test_compact_layouts_preserve_all_values_masks_and_types(layout, storage):
-    from behave_fire.python import BehaveRun as PythonRun, FuelModels
+    from behave_fire.python import BehaveRun as PythonRun
+    from behave_fire.python import FuelModels
     from behave_fire.rust import BehaveRun
 
     near = np.float32(1e-7)

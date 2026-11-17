@@ -11,7 +11,6 @@ Reference: Butler & Cohen 1998 — separation distance = 4 × flame height.
 The safety zone radius adds a core area for personnel and equipment.
 """
 
-from typing import Union
 
 import numpy as np
 

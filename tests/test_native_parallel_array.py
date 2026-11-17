@@ -8,7 +8,11 @@ pytestmark = pytest.mark.rust
 _native = pytest.importorskip("behave_fire.rust", exc_type=ImportError)
 BehaveRun, FuelModels = _native.BehaveRun, _native.FuelModels
 from behave_fire.rust import _bridge
-from parity_support import ROOT
+from parity_support import ROOT as ROOT
+
+# Keep bootstrap setup before imports that require tools on sys.path.
+# isort: split
+
 from float64_model_reference import model_reference
 
 
@@ -24,7 +28,8 @@ def _surface_inputs(shape):
 @pytest.mark.parametrize("width", [0, 3])
 @pytest.mark.parametrize("independent", [False, True])
 def test_broadcast_crown_preserves_independent_field_shapes(width, independent):
-    from behave_fire.python import BehaveRun as PythonRun, FuelModels as PythonFuels
+    from behave_fire.python import BehaveRun as PythonRun
+    from behave_fire.python import FuelModels as PythonFuels
 
     inputs = _surface_inputs((2, 1))
     inputs["wind_speed"] = np.full((1, width), 8.0)
@@ -63,7 +68,8 @@ def test_copy_callback_exception_propagates_before_workers():
 
 @pytest.mark.parametrize("width", [0, 3])
 def test_crown_three_axis_dependencies_preserve_typed_fields(width):
-    from behave_fire.python import BehaveRun as PythonRun, FuelModels as PythonFuels
+    from behave_fire.python import BehaveRun as PythonRun
+    from behave_fire.python import FuelModels as PythonFuels
 
     inputs = _surface_inputs((2, 1, 1))
     inputs["wind_speed"] = np.full((1, width, 1), 8.0)
@@ -119,7 +125,8 @@ def test_detached_progress_without_a_python_callback():
 
 
 def test_empty_crown_groups_share_the_pre_detach_input_snapshot(monkeypatch):
-    from behave_fire.python import BehaveRun as PythonRun, FuelModels as PythonFuels
+    from behave_fire.python import BehaveRun as PythonRun
+    from behave_fire.python import FuelModels as PythonFuels
 
     inputs = _surface_inputs((2, 1))
     inputs["wind_speed"] = np.empty((1, 0))
@@ -157,7 +164,8 @@ def test_empty_crown_groups_share_the_pre_detach_input_snapshot(monkeypatch):
 
 @pytest.mark.parametrize("shape", [(0,), (1,), (7,), (2, 3), (2, 1, 3), (2048,)])
 def test_fused_surface_and_crown_threads_match_python(shape):
-    from behave_fire.python import BehaveRun as PythonRun, FuelModels as PythonFuels
+    from behave_fire.python import BehaveRun as PythonRun
+    from behave_fire.python import FuelModels as PythonFuels
 
     inputs = _surface_inputs(shape)
     reference = PythonRun(PythonFuels())
@@ -279,7 +287,8 @@ def test_owned_inputs_are_copied_before_callback_mutation():
 
 @pytest.mark.parametrize("shape", [(2,), (2, 3), (2, 1, 3)])
 def test_scalar_moisture_shape_errors_match_python(shape):
-    from behave_fire.python import BehaveRun as PythonRun, FuelModels as PythonFuels
+    from behave_fire.python import BehaveRun as PythonRun
+    from behave_fire.python import FuelModels as PythonFuels
 
     inputs = _surface_inputs(shape)
     for field in ("m1h", "m10h", "m100h", "mlh", "mlw"):
@@ -291,6 +300,7 @@ def test_scalar_moisture_shape_errors_match_python(shape):
 
 def test_scoped_threads_restore_after_errors_and_concurrent_instances(monkeypatch):
     from concurrent.futures import ThreadPoolExecutor
+
     from behave_fire.rust._threads import _THREADS
 
     original = _bridge._native.component_batch

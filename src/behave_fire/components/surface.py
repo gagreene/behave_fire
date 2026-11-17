@@ -41,7 +41,6 @@ Notes on units
     - canopy_*:    canopy_cover & crown_ratio as fraction (0–1); heights in feet
 """
 
-from typing import Union
 
 import numpy as np
 

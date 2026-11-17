@@ -6,8 +6,6 @@ The keyword-only ``threads`` request bounds per-call native workers and is seria
 """
 from __future__ import annotations
 
-from typing import Optional, Union
-
 import numpy as np
 
 from ._bridge import _call, _validate_threads

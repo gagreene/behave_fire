@@ -1,8 +1,6 @@
 """Explicit native spot adapters."""
 from __future__ import annotations
 
-from typing import Union
-
 import numpy as np
 
 from ._bridge import _call
