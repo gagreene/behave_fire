@@ -10,6 +10,29 @@ use behave_fire::raster::{
 };
 use behave_fire::{BehaveError, FuelModels, GridShape, ParallelError, PerCell};
 
+// Numerical fixture comparison only; production export retains typed columns.
+fn comparison_columns(
+    columns: Vec<(&'static str, behave_fire::output::ColumnValues)>,
+) -> Vec<(&'static str, Vec<f64>)> {
+    use behave_fire::output::ColumnValues;
+    columns
+        .into_iter()
+        .map(|(name, values)| {
+            (
+                name,
+                match values {
+                    ColumnValues::Float64(values) => values,
+                    ColumnValues::Int32(values) => values.into_iter().map(f64::from).collect(),
+                    ColumnValues::Bool(values) => values
+                        .into_iter()
+                        .map(|value| f64::from(u8::from(value)))
+                        .collect(),
+                },
+            )
+        })
+        .collect()
+}
+
 #[test]
 fn crown_validity_empty_shapes_and_bad_columns_keep_their_contracts() {
     let shape = GridShape::new(vec![2, 1]).unwrap();
@@ -325,27 +348,4 @@ fn irregular_tiles_retain_order_and_reject_invalid_ranges() {
             Err(ParallelError::Work(BehaveError::InvalidRange { .. }))
         ));
     }
-}
-
-// Numerical fixture comparison only; production export retains typed columns.
-fn comparison_columns(
-    columns: Vec<(&'static str, behave_fire::output::ColumnValues)>,
-) -> Vec<(&'static str, Vec<f64>)> {
-    use behave_fire::output::ColumnValues;
-    columns
-        .into_iter()
-        .map(|(name, values)| {
-            (
-                name,
-                match values {
-                    ColumnValues::Float64(values) => values,
-                    ColumnValues::Int32(values) => values.into_iter().map(f64::from).collect(),
-                    ColumnValues::Bool(values) => values
-                        .into_iter()
-                        .map(|value| f64::from(u8::from(value)))
-                        .collect(),
-                },
-            )
-        })
-        .collect()
 }

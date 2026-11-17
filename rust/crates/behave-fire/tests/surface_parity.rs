@@ -6,6 +6,14 @@ mod fixture;
 use behave_fire::engine::{PreparedFuel, SurfaceCell, SurfacePlan, SurfaceTweaks};
 use behave_fire::surface;
 
+fn all_single(v: &Value) -> bool {
+    if let Some(d) = v.get("dtype").and_then(Value::as_str) {
+        d == "float32" || d == "bool"
+    } else {
+        v.as_object().map_or(true, |o| o.values().all(all_single))
+    }
+}
+
 /// Use reviewed effective-wind and flame-cutoff values for four historical cases.
 fn approved_boundary_output(case: &serde_json::Value) -> std::borrow::Cow<'_, serde_json::Value> {
     let id = case["id"].as_str().unwrap();
@@ -54,11 +62,6 @@ fn approved_boundary_output(case: &serde_json::Value) -> std::borrow::Cow<'_, se
     std::borrow::Cow::Owned(output)
 }
 
-#[test]
-fn backing_rate_preserves_ellipse_ratio() {
-    assert_eq!(surface::calculate_backing_spread_rate(12.0, 0.5), 4.0);
-}
-
 use behave_fire::{
     fuel_models::FuelModels,
     surface::*,
@@ -66,10 +69,154 @@ use behave_fire::{
 };
 use serde_json::Value;
 
+fn boolval(i: &Value, k: &str, n: usize) -> bool {
+    i[k].as_bool().unwrap_or_else(|| {
+        let a = i[k]["values"].as_array().unwrap();
+        a[n % a.len()]
+            .as_bool()
+            .unwrap_or_else(|| number(&a[n % a.len()]) != 0.0)
+    })
+}
+
+fn check(a: f64, b: f64, ctx: &str, tol: f64) {
+    if a == 0.0 && b == 0.0 {
+        assert_eq!(
+            a.is_sign_negative(),
+            b.is_sign_negative(),
+            "zero sign {ctx}"
+        );
+    }
+    if b.is_nan() {
+        assert!(a.is_nan(), "{ctx}: {a} != NaN")
+    } else if b.is_infinite() {
+        assert_eq!(a, b, "{ctx}")
+    } else {
+        assert!(
+            (a - b).abs() <= 1e-12 + tol * b.abs(),
+            "{ctx}: {a:.17e} != {b:.17e}"
+        );
+    }
+}
+
+fn f(i: &Value, k: &str, n: usize) -> f64 {
+    value(&i[k], n)
+}
+
+// Original Python evidence remains unchanged. This legacy source-stage oracle
+// covers finite f64 inputs; normalized lower-precision inputs and dependency-aware
+// NoData are covered by f64_helpers, float64_missing, and public binding suites.
+fn finite_f64_inputs(value: &Value) -> bool {
+    match value {
+        Value::Object(values) => {
+            if let Some(dtype) = values.get("dtype").and_then(Value::as_str) {
+                if matches!(
+                    dtype,
+                    "float16" | "float32" | "complex64" | "complex128" | "object"
+                ) {
+                    return false;
+                }
+            }
+            values.values().all(finite_f64_inputs)
+        }
+        Value::Array(values) => values.iter().all(finite_f64_inputs),
+        Value::String(v) => !matches!(
+            v.as_str(),
+            "nan" | "NaN" | "inf" | "-inf" | "Infinity" | "-Infinity"
+        ),
+        _ => true,
+    }
+}
+
+fn ib(i: &Value, n: usize) -> FuelbedIntermediates {
+    let mut x = FuelbedIntermediates::new();
+    x.sigma = f(i, "sigma", n);
+    x.bulk_density = f(i, "bulk_density", n);
+    x.packing_ratio = f(i, "packing_ratio", n);
+    x.relative_packing_ratio = f(i, "relative_packing_ratio", n);
+    x.heat_sink = f(i, "heat_sink", n);
+    x.propagating_flux = f(i, "propagating_flux", n);
+    x.w_heat_dead = f(i, "w_heat_dead", n);
+    x.w_heat_live = f(i, "w_heat_live", n);
+    x.w_silica_dead = f(i, "w_silica_dead", n);
+    x.w_silica_live = f(i, "w_silica_live", n);
+    x.w_moist_dead = f(i, "w_moist_dead", n);
+    x.w_moist_live = f(i, "w_moist_live", n);
+    x.wfl_dead = f(i, "wfl_dead", n);
+    x.wfl_live = f(i, "wfl_live", n);
+    x.moe_dead = f(i, "moe_dead", n);
+    x.moe_live = f(i, "moe_live", n);
+    x.frac_dead = f(i, "frac_dead", n);
+    x.frac_live = f(i, "frac_live", n);
+    x.depth = f(i, "depth", n);
+    x.is_defined = boolval(i, "is_defined", n);
+    x
+}
+
+fn input(i: &Value, n: usize) -> SurfaceCell {
+    fixture::surface_cell(i, n)
+}
+fn number(v: &Value) -> f64 {
+    if let Some(x) = v.get("float") {
+        return number(x);
+    }
+    if let Some(x) = v.as_f64() {
+        x
+    } else if let Some(x) = v.as_bool() {
+        if x {
+            1.0
+        } else {
+            0.0
+        }
+    } else {
+        match v
+            .as_str()
+            .unwrap_or_else(|| panic!("expected numeric value: {v}"))
+        {
+            "NaN" | "nan" => f64::NAN,
+            "Infinity" | "inf" | "+inf" => f64::INFINITY,
+            "-Infinity" | "-inf" => f64::NEG_INFINITY,
+            x => panic!("{x}"),
+        }
+    }
+}
 fn number_value(value: &Value) -> f64 {
     fixture::number(value, 0)
 }
-
+fn particles(i: &Value, n: usize) -> Particles {
+    let array = |k: &str| {
+        let a = i[k]["values"].as_array().unwrap();
+        let cells = a.len() / 5;
+        std::array::from_fn(|p| number(&a[p * cells + n % cells]))
+    };
+    let mut x = Particles::new();
+    x.load_dead = array("load_dead");
+    x.load_live = array("load_live");
+    x.savr_dead = array("savr_dead");
+    x.savr_live = array("savr_live");
+    x.moisture_dead = array("moisture_dead");
+    x.moisture_live = array("moisture_live");
+    x.hoc_dead = f(i, "hoc_dead", n);
+    x.hoc_live = f(i, "hoc_live", n);
+    x.depth = f(i, "depth", n);
+    x.moe_dead = f(i, "moe_dead", n);
+    x.is_defined = boolval(i, "is_defined", n);
+    x
+}
+fn string<'a>(i: &'a Value, k: &str, default: &'a str) -> &'a str {
+    i[k].as_str().unwrap_or(default)
+}
+fn value(v: &Value, n: usize) -> f64 {
+    if v.is_number() || v.is_string() {
+        number(v)
+    } else {
+        let a = v["values"].as_array().unwrap();
+        number(&a[n % a.len()])
+    }
+}
+#[test]
+fn backing_rate_preserves_ellipse_ratio() {
+    assert_eq!(surface::calculate_backing_spread_rate(12.0, 0.5), 4.0);
+}
 #[test]
 fn raw_fuel_rows_preserve_undefined_properties_and_dynamic_transfer() {
     let mut fuel = behave_fire::fuel_models::FuelModel::default();
@@ -130,7 +277,6 @@ fn raw_fuel_rows_preserve_undefined_properties_and_dynamic_transfer() {
     assert_eq!(static_row.load_dead[3], 0.0);
     assert_eq!(static_row.load_live[0], 0.2);
 }
-
 #[test]
 fn raw_default_rows_match_grid_particle_path() {
     let fuels = FuelModels::default();
@@ -156,7 +302,6 @@ fn raw_default_rows_match_grid_particle_path() {
         }
     }
 }
-
 #[test]
 fn oracle_json_preserves_nextafter_one_boundaries() {
     let next: f64 = serde_json::from_str("1.0000000000000002").unwrap();
@@ -286,126 +431,6 @@ fn composed_pipeline_all_grid_models_and_custom_science_match_python() {
             );
         }
     }
-}
-
-fn number(v: &Value) -> f64 {
-    if let Some(x) = v.get("float") {
-        return number(x);
-    }
-    if let Some(x) = v.as_f64() {
-        x
-    } else if let Some(x) = v.as_bool() {
-        if x {
-            1.0
-        } else {
-            0.0
-        }
-    } else {
-        match v
-            .as_str()
-            .unwrap_or_else(|| panic!("expected numeric value: {v}"))
-        {
-            "NaN" | "nan" => f64::NAN,
-            "Infinity" | "inf" | "+inf" => f64::INFINITY,
-            "-Infinity" | "-inf" => f64::NEG_INFINITY,
-            x => panic!("{x}"),
-        }
-    }
-}
-fn value(v: &Value, n: usize) -> f64 {
-    if v.is_number() || v.is_string() {
-        number(v)
-    } else {
-        let a = v["values"].as_array().unwrap();
-        number(&a[n % a.len()])
-    }
-}
-fn f(i: &Value, k: &str, n: usize) -> f64 {
-    value(&i[k], n)
-}
-fn string<'a>(i: &'a Value, k: &str, default: &'a str) -> &'a str {
-    i[k].as_str().unwrap_or(default)
-}
-fn boolval(i: &Value, k: &str, n: usize) -> bool {
-    i[k].as_bool().unwrap_or_else(|| {
-        let a = i[k]["values"].as_array().unwrap();
-        a[n % a.len()]
-            .as_bool()
-            .unwrap_or_else(|| number(&a[n % a.len()]) != 0.0)
-    })
-}
-fn all_single(v: &Value) -> bool {
-    if let Some(d) = v.get("dtype").and_then(Value::as_str) {
-        d == "float32" || d == "bool"
-    } else {
-        v.as_object().map_or(true, |o| o.values().all(all_single))
-    }
-}
-fn check(a: f64, b: f64, ctx: &str, tol: f64) {
-    if a == 0.0 && b == 0.0 {
-        assert_eq!(
-            a.is_sign_negative(),
-            b.is_sign_negative(),
-            "zero sign {ctx}"
-        );
-    }
-    if b.is_nan() {
-        assert!(a.is_nan(), "{ctx}: {a} != NaN")
-    } else if b.is_infinite() {
-        assert_eq!(a, b, "{ctx}")
-    } else {
-        assert!(
-            (a - b).abs() <= 1e-12 + tol * b.abs(),
-            "{ctx}: {a:.17e} != {b:.17e}"
-        );
-    }
-}
-fn ib(i: &Value, n: usize) -> FuelbedIntermediates {
-    let mut x = FuelbedIntermediates::new();
-    x.sigma = f(i, "sigma", n);
-    x.bulk_density = f(i, "bulk_density", n);
-    x.packing_ratio = f(i, "packing_ratio", n);
-    x.relative_packing_ratio = f(i, "relative_packing_ratio", n);
-    x.heat_sink = f(i, "heat_sink", n);
-    x.propagating_flux = f(i, "propagating_flux", n);
-    x.w_heat_dead = f(i, "w_heat_dead", n);
-    x.w_heat_live = f(i, "w_heat_live", n);
-    x.w_silica_dead = f(i, "w_silica_dead", n);
-    x.w_silica_live = f(i, "w_silica_live", n);
-    x.w_moist_dead = f(i, "w_moist_dead", n);
-    x.w_moist_live = f(i, "w_moist_live", n);
-    x.wfl_dead = f(i, "wfl_dead", n);
-    x.wfl_live = f(i, "wfl_live", n);
-    x.moe_dead = f(i, "moe_dead", n);
-    x.moe_live = f(i, "moe_live", n);
-    x.frac_dead = f(i, "frac_dead", n);
-    x.frac_live = f(i, "frac_live", n);
-    x.depth = f(i, "depth", n);
-    x.is_defined = boolval(i, "is_defined", n);
-    x
-}
-fn particles(i: &Value, n: usize) -> Particles {
-    let array = |k: &str| {
-        let a = i[k]["values"].as_array().unwrap();
-        let cells = a.len() / 5;
-        std::array::from_fn(|p| number(&a[p * cells + n % cells]))
-    };
-    let mut x = Particles::new();
-    x.load_dead = array("load_dead");
-    x.load_live = array("load_live");
-    x.savr_dead = array("savr_dead");
-    x.savr_live = array("savr_live");
-    x.moisture_dead = array("moisture_dead");
-    x.moisture_live = array("moisture_live");
-    x.hoc_dead = f(i, "hoc_dead", n);
-    x.hoc_live = f(i, "hoc_live", n);
-    x.depth = f(i, "depth", n);
-    x.moe_dead = f(i, "moe_dead", n);
-    x.is_defined = boolval(i, "is_defined", n);
-    x
-}
-fn input(i: &Value, n: usize) -> SurfaceCell {
-    fixture::surface_cell(i, n)
 }
 
 #[test]
@@ -823,29 +848,4 @@ fn every_public_stage_matches_explicit_python_oracle() {
         "{compared} scalar oracle cells across {} public surface stages",
         stages.len()
     );
-}
-
-// Original Python evidence remains unchanged. This legacy source-stage oracle
-// covers finite f64 inputs; normalized lower-precision inputs and dependency-aware
-// NoData are covered by f64_helpers, float64_missing, and public binding suites.
-fn finite_f64_inputs(value: &Value) -> bool {
-    match value {
-        Value::Object(values) => {
-            if let Some(dtype) = values.get("dtype").and_then(Value::as_str) {
-                if matches!(
-                    dtype,
-                    "float16" | "float32" | "complex64" | "complex128" | "object"
-                ) {
-                    return false;
-                }
-            }
-            values.values().all(finite_f64_inputs)
-        }
-        Value::Array(values) => values.iter().all(finite_f64_inputs),
-        Value::String(v) => !matches!(
-            v.as_str(),
-            "nan" | "NaN" | "inf" | "-inf" | "Infinity" | "-Infinity"
-        ),
-        _ => true,
-    }
 }

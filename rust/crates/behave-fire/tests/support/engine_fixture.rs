@@ -11,6 +11,34 @@ use behave_fire::surface::{FuelbedIntermediates, SurfaceResult};
 use behave_fire::units::{SlopeUnit, SpeedUnit};
 use serde_json::Value;
 
+pub fn crown_cell(values: &Value, index: usize) -> CrownCell {
+    let surface = surface_cell(values, index);
+    let mut cell = CrownCell::default();
+    cell.m1h = surface.m1h;
+    cell.m10h = surface.m10h;
+    cell.m100h = surface.m100h;
+    cell.mlh = surface.mlh;
+    cell.mlw = surface.mlw;
+    cell.wind_speed = surface.wind_speed;
+    cell.wind_direction = surface.wind_direction;
+    cell.slope = surface.slope;
+    cell.aspect = surface.aspect;
+    cell.canopy_base_height = optional(values, "canopy_base_height", index, 0.0);
+    cell.canopy_height = optional(values, "canopy_height", index, 0.0);
+    cell.canopy_bulk_density = optional(values, "canopy_bulk_density", index, 0.0);
+    cell.moisture_foliar = optional(values, "moisture_foliar", index, 100.0);
+    cell
+}
+
+pub fn height(value: &str) -> WindHeight {
+    let value = value.to_ascii_lowercase();
+    if value.contains("10") || value.contains("ten") {
+        WindHeight::TenMetre
+    } else {
+        WindHeight::TwentyFoot
+    }
+}
+
 pub fn number(value: &Value, index: usize) -> f64 {
     if let Some(values) = value.get("values").and_then(Value::as_array) {
         return number(&values[index % values.len()], 0);
@@ -50,35 +78,6 @@ pub fn orientation(value: &str) -> WindOrientation {
     }
 }
 
-pub fn height(value: &str) -> WindHeight {
-    let value = value.to_ascii_lowercase();
-    if value.contains("10") || value.contains("ten") {
-        WindHeight::TenMetre
-    } else {
-        WindHeight::TwentyFoot
-    }
-}
-
-pub fn waf(value: &str) -> WafMethod {
-    if value.replace('_', "").eq_ignore_ascii_case("userinput") {
-        WafMethod::UserInput
-    } else {
-        WafMethod::CrownRatio
-    }
-}
-
-pub fn surface_options(values: &Value) -> SurfaceOptions {
-    SurfaceOptions {
-        wind_orientation: orientation(
-            values["wind_orientation_mode"]
-                .as_str()
-                .unwrap_or("RelativeToUpslope"),
-        ),
-        wind_height: height(values["wind_height_mode"].as_str().unwrap_or("TwentyFoot")),
-        waf_method: waf(values["waf_method"].as_str().unwrap_or("UseCrownRatio")),
-    }
-}
-
 pub fn surface_cell(values: &Value, index: usize) -> SurfaceCell {
     let mut cell = SurfaceCell::new(optional(values, "fuel_model_grid", index, 1.0) as i32);
     cell.m1h = optional(values, "m1h", index, cell.m1h);
@@ -109,23 +108,16 @@ pub fn surface_cell(values: &Value, index: usize) -> SurfaceCell {
     cell
 }
 
-pub fn crown_cell(values: &Value, index: usize) -> CrownCell {
-    let surface = surface_cell(values, index);
-    let mut cell = CrownCell::default();
-    cell.m1h = surface.m1h;
-    cell.m10h = surface.m10h;
-    cell.m100h = surface.m100h;
-    cell.mlh = surface.mlh;
-    cell.mlw = surface.mlw;
-    cell.wind_speed = surface.wind_speed;
-    cell.wind_direction = surface.wind_direction;
-    cell.slope = surface.slope;
-    cell.aspect = surface.aspect;
-    cell.canopy_base_height = optional(values, "canopy_base_height", index, 0.0);
-    cell.canopy_height = optional(values, "canopy_height", index, 0.0);
-    cell.canopy_bulk_density = optional(values, "canopy_bulk_density", index, 0.0);
-    cell.moisture_foliar = optional(values, "moisture_foliar", index, 100.0);
-    cell
+pub fn surface_options(values: &Value) -> SurfaceOptions {
+    SurfaceOptions {
+        wind_orientation: orientation(
+            values["wind_orientation_mode"]
+                .as_str()
+                .unwrap_or("RelativeToUpslope"),
+        ),
+        wind_height: height(values["wind_height_mode"].as_str().unwrap_or("TwentyFoot")),
+        waf_method: waf(values["waf_method"].as_str().unwrap_or("UseCrownRatio")),
+    }
 }
 
 pub fn surface_values(values: &Value, index: usize) -> SurfaceFireInputs<f64> {
@@ -161,4 +153,12 @@ pub fn surface_with_reaction(
         ));
     }
     SurfacePlan::new(options).run_from_fuelbed(cell, fuelbed, tweaks)
+}
+
+pub fn waf(value: &str) -> WafMethod {
+    if value.replace('_', "").eq_ignore_ascii_case("userinput") {
+        WafMethod::UserInput
+    } else {
+        WafMethod::CrownRatio
+    }
 }

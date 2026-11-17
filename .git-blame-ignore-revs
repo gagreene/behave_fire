@@ -1,2 +1,5 @@
 # Python production declaration-only reorder (PR33).
 116676ad7fd40b56328e9e682fc87a86026bb815
+
+# Rust production declaration-only reorder (PR34).
+69d7d5a07e453322e71d3ff571c45ca15ccfc8ce

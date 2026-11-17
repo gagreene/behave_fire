@@ -117,87 +117,6 @@ fn comparison_gate(policy: &Value, observations: &[Value]) -> Result<(), ReviewR
     Ok(())
 }
 
-#[test]
-fn cpp_surface_observations_follow_the_qualified_policy() {
-    verify_manifest();
-    let cases = parse_rows(include_str!("data/cpp_reference/surface/cases.jsonl"));
-    let results = parse_rows(include_str!("data/cpp_reference/surface/results.jsonl"));
-    let policy: Value = serde_json::from_str(include_str!(
-        "data/cpp_reference/surface/tolerance-policy.json"
-    ))
-    .unwrap();
-    assert_eq!(policy["conditional_owner_approval"], true);
-    let expected_fields: BTreeSet<_> = FIELDS.into_iter().collect();
-    let policy_fields: BTreeSet<_> = policy["fields"]
-        .as_object()
-        .unwrap()
-        .keys()
-        .map(String::as_str)
-        .collect();
-    assert_eq!(policy_fields, expected_fields);
-    for field in FIELDS {
-        assert_eq!(policy["fields"][field]["kind"], "relative_absolute");
-        assert_eq!(policy["fields"][field]["rtol"].as_f64(), Some(1e-12));
-        assert_eq!(policy["fields"][field]["atol"].as_f64(), Some(1e-12));
-    }
-    assert!(!cases.is_empty());
-    assert_eq!(
-        cases.keys().collect::<Vec<_>>(),
-        results.keys().collect::<Vec<_>>()
-    );
-    let fuels = FuelModels::default();
-    let mut observations = Vec::new();
-    let mut unavailable = 0;
-    for (id, case) in &cases {
-        let golden = &results[id];
-        match golden["status"].as_str().unwrap() {
-            "ok" => {
-                assert_eq!(golden["upstream_entries"], 1);
-                assert_eq!(golden["geometry_entries"], 1);
-                let fields: BTreeSet<_> = golden["output"]
-                    .as_object()
-                    .unwrap()
-                    .keys()
-                    .map(String::as_str)
-                    .collect();
-                assert_eq!(fields, expected_fields, "case {id}");
-                observations.extend(compare_core_to_cpp(case, golden, &fuels));
-            }
-            "unavailable" => {
-                assert_eq!(golden["finding"], "F-013");
-                assert!(
-                    golden.get("output").is_none(),
-                    "unavailable golden has outputs"
-                );
-                unavailable += 1;
-            }
-            status => panic!("unsupported C++ status for {id}: {status}"),
-        }
-    }
-    assert_eq!(
-        observations.len(),
-        (cases.len() - unavailable) * FIELDS.len()
-    );
-    for observation in &observations {
-        println!("CPP_SURFACE_RAW {observation}");
-    }
-    if policy["approved"].as_bool() == Some(true) {
-        assert_eq!(comparison_gate(&policy, &observations), Ok(()));
-    } else {
-        assert_eq!(
-            comparison_gate(&policy, &observations),
-            Err(ReviewRequired::RequiresOwnerReview)
-        );
-    }
-    println!(
-        "CPP_SURFACE_POLICY cases={} observations={} unavailable={} qualified={}",
-        cases.len(),
-        observations.len(),
-        unavailable,
-        policy["approved"],
-    );
-}
-
 fn number(record: &Value, key: &str) -> f64 {
     record[key]
         .as_f64()
@@ -219,39 +138,6 @@ fn parse_rows(source: &str) -> BTreeMap<String, Value> {
     rows
 }
 
-#[test]
-fn pending_policy_cannot_certify_even_exact_values() {
-    let observations = [json!({"cpp": "1", "rust": "1", "exact_bits": true})];
-    assert_eq!(
-        comparison_gate(&json!({"approved": false}), &observations),
-        Err(ReviewRequired::RequiresOwnerReview),
-    );
-    assert_eq!(
-        comparison_gate(&json!({"approved": true}), &observations),
-        Err(ReviewRequired::MissingCalibration),
-    );
-}
-
-#[test]
-fn sha256_matches_standard_vectors_and_detects_fixture_mutation() {
-    assert_eq!(
-        sha256(b""),
-        "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-    );
-    assert_eq!(
-        sha256(b"abc"),
-        "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
-    );
-    assert_eq!(
-        sha256(b"abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq"),
-        "248d6a61d20638b8e5c026930c3e6039a33ce45964ff2167f6ecedd419db06c1",
-    );
-    let fixture = include_bytes!("data/cpp_reference/surface/results.jsonl");
-    let mut mutated = fixture.to_vec();
-    mutated[0] ^= 1;
-    assert_ne!(sha256(fixture), sha256(&mutated));
-}
-
 fn surface_cell(case: &Value) -> SurfaceCell {
     SurfaceCell {
         fuel_model_grid: i32::try_from(case["fuel_model"].as_i64().unwrap()).unwrap(),
@@ -268,68 +154,6 @@ fn surface_cell(case: &Value) -> SurfaceCell {
         canopy_height: number(case, "canopy_height"),
         crown_ratio: number(case, "crown_ratio"),
         user_waf: case.get("user_waf").map(|value| value.as_f64().unwrap()),
-    }
-}
-
-#[test]
-fn surface_controls_preserve_defaults_and_honor_optional_modes() {
-    let defaults = surface_options(&json!({}));
-    assert_eq!(defaults.wind_orientation, WindOrientation::North);
-    assert_eq!(defaults.wind_height, WindHeight::TwentyFoot);
-    assert_eq!(defaults.waf_method, WafMethod::CrownRatio);
-    let source = include_str!("data/cpp_reference/surface/cases.jsonl");
-    let mut case: Value = serde_json::from_str(source.lines().next().unwrap()).unwrap();
-    assert_eq!(surface_cell(&case).user_waf, None);
-    case["moisture_mode"] = json!("BySizeClass");
-    for (height, expected_height) in [
-        ("TwentyFoot", WindHeight::TwentyFoot),
-        ("TenMeter", WindHeight::TenMetre),
-    ] {
-        for (orientation, expected_orientation) in [
-            ("North", WindOrientation::North),
-            ("Upslope", WindOrientation::Upslope),
-        ] {
-            case["wind_height"] = json!(height);
-            case["wind_orientation"] = json!(orientation);
-            for (method, user_waf) in [
-                ("CrownRatio", None),
-                ("UserInput", Some(0.0)),
-                ("UserInput", Some(0.4)),
-                ("UserInput", Some(1.0)),
-            ] {
-                case["waf_method"] = json!(method);
-                if let Some(value) = user_waf {
-                    case["user_waf"] = json!(value);
-                } else {
-                    case.as_object_mut().unwrap().remove("user_waf");
-                }
-                let actual = surface_options(&case);
-                assert_eq!(actual.wind_height, expected_height);
-                assert_eq!(actual.wind_orientation, expected_orientation);
-                assert_eq!(
-                    actual.waf_method,
-                    if method == "UserInput" {
-                        WafMethod::UserInput
-                    } else {
-                        WafMethod::CrownRatio
-                    }
-                );
-                assert_eq!(surface_cell(&case).user_waf, user_waf);
-            }
-        }
-    }
-}
-
-#[test]
-fn surface_controls_reject_unregistered_modes() {
-    for case in [
-        json!({"wind_height": "unsupported"}),
-        json!({"wind_orientation": "unsupported"}),
-        json!({"waf_method": "unsupported"}),
-        json!({"moisture_mode": "AllAggregate"}),
-        json!({"wind_height": 20}),
-    ] {
-        assert!(std::panic::catch_unwind(|| surface_options(&case)).is_err());
     }
 }
 
@@ -419,5 +243,181 @@ fn verify_manifest() {
             sha256(payload),
             "crate-local fixture hash mismatch: {name}"
         );
+    }
+}
+
+#[test]
+fn cpp_surface_observations_follow_the_qualified_policy() {
+    verify_manifest();
+    let cases = parse_rows(include_str!("data/cpp_reference/surface/cases.jsonl"));
+    let results = parse_rows(include_str!("data/cpp_reference/surface/results.jsonl"));
+    let policy: Value = serde_json::from_str(include_str!(
+        "data/cpp_reference/surface/tolerance-policy.json"
+    ))
+    .unwrap();
+    assert_eq!(policy["conditional_owner_approval"], true);
+    let expected_fields: BTreeSet<_> = FIELDS.into_iter().collect();
+    let policy_fields: BTreeSet<_> = policy["fields"]
+        .as_object()
+        .unwrap()
+        .keys()
+        .map(String::as_str)
+        .collect();
+    assert_eq!(policy_fields, expected_fields);
+    for field in FIELDS {
+        assert_eq!(policy["fields"][field]["kind"], "relative_absolute");
+        assert_eq!(policy["fields"][field]["rtol"].as_f64(), Some(1e-12));
+        assert_eq!(policy["fields"][field]["atol"].as_f64(), Some(1e-12));
+    }
+    assert!(!cases.is_empty());
+    assert_eq!(
+        cases.keys().collect::<Vec<_>>(),
+        results.keys().collect::<Vec<_>>()
+    );
+    let fuels = FuelModels::default();
+    let mut observations = Vec::new();
+    let mut unavailable = 0;
+    for (id, case) in &cases {
+        let golden = &results[id];
+        match golden["status"].as_str().unwrap() {
+            "ok" => {
+                assert_eq!(golden["upstream_entries"], 1);
+                assert_eq!(golden["geometry_entries"], 1);
+                let fields: BTreeSet<_> = golden["output"]
+                    .as_object()
+                    .unwrap()
+                    .keys()
+                    .map(String::as_str)
+                    .collect();
+                assert_eq!(fields, expected_fields, "case {id}");
+                observations.extend(compare_core_to_cpp(case, golden, &fuels));
+            }
+            "unavailable" => {
+                assert_eq!(golden["finding"], "F-013");
+                assert!(
+                    golden.get("output").is_none(),
+                    "unavailable golden has outputs"
+                );
+                unavailable += 1;
+            }
+            status => panic!("unsupported C++ status for {id}: {status}"),
+        }
+    }
+    assert_eq!(
+        observations.len(),
+        (cases.len() - unavailable) * FIELDS.len()
+    );
+    for observation in &observations {
+        println!("CPP_SURFACE_RAW {observation}");
+    }
+    if policy["approved"].as_bool() == Some(true) {
+        assert_eq!(comparison_gate(&policy, &observations), Ok(()));
+    } else {
+        assert_eq!(
+            comparison_gate(&policy, &observations),
+            Err(ReviewRequired::RequiresOwnerReview)
+        );
+    }
+    println!(
+        "CPP_SURFACE_POLICY cases={} observations={} unavailable={} qualified={}",
+        cases.len(),
+        observations.len(),
+        unavailable,
+        policy["approved"],
+    );
+}
+
+#[test]
+fn pending_policy_cannot_certify_even_exact_values() {
+    let observations = [json!({"cpp": "1", "rust": "1", "exact_bits": true})];
+    assert_eq!(
+        comparison_gate(&json!({"approved": false}), &observations),
+        Err(ReviewRequired::RequiresOwnerReview),
+    );
+    assert_eq!(
+        comparison_gate(&json!({"approved": true}), &observations),
+        Err(ReviewRequired::MissingCalibration),
+    );
+}
+
+#[test]
+fn sha256_matches_standard_vectors_and_detects_fixture_mutation() {
+    assert_eq!(
+        sha256(b""),
+        "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    );
+    assert_eq!(
+        sha256(b"abc"),
+        "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+    );
+    assert_eq!(
+        sha256(b"abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq"),
+        "248d6a61d20638b8e5c026930c3e6039a33ce45964ff2167f6ecedd419db06c1",
+    );
+    let fixture = include_bytes!("data/cpp_reference/surface/results.jsonl");
+    let mut mutated = fixture.to_vec();
+    mutated[0] ^= 1;
+    assert_ne!(sha256(fixture), sha256(&mutated));
+}
+
+#[test]
+fn surface_controls_preserve_defaults_and_honor_optional_modes() {
+    let defaults = surface_options(&json!({}));
+    assert_eq!(defaults.wind_orientation, WindOrientation::North);
+    assert_eq!(defaults.wind_height, WindHeight::TwentyFoot);
+    assert_eq!(defaults.waf_method, WafMethod::CrownRatio);
+    let source = include_str!("data/cpp_reference/surface/cases.jsonl");
+    let mut case: Value = serde_json::from_str(source.lines().next().unwrap()).unwrap();
+    assert_eq!(surface_cell(&case).user_waf, None);
+    case["moisture_mode"] = json!("BySizeClass");
+    for (height, expected_height) in [
+        ("TwentyFoot", WindHeight::TwentyFoot),
+        ("TenMeter", WindHeight::TenMetre),
+    ] {
+        for (orientation, expected_orientation) in [
+            ("North", WindOrientation::North),
+            ("Upslope", WindOrientation::Upslope),
+        ] {
+            case["wind_height"] = json!(height);
+            case["wind_orientation"] = json!(orientation);
+            for (method, user_waf) in [
+                ("CrownRatio", None),
+                ("UserInput", Some(0.0)),
+                ("UserInput", Some(0.4)),
+                ("UserInput", Some(1.0)),
+            ] {
+                case["waf_method"] = json!(method);
+                if let Some(value) = user_waf {
+                    case["user_waf"] = json!(value);
+                } else {
+                    case.as_object_mut().unwrap().remove("user_waf");
+                }
+                let actual = surface_options(&case);
+                assert_eq!(actual.wind_height, expected_height);
+                assert_eq!(actual.wind_orientation, expected_orientation);
+                assert_eq!(
+                    actual.waf_method,
+                    if method == "UserInput" {
+                        WafMethod::UserInput
+                    } else {
+                        WafMethod::CrownRatio
+                    }
+                );
+                assert_eq!(surface_cell(&case).user_waf, user_waf);
+            }
+        }
+    }
+}
+
+#[test]
+fn surface_controls_reject_unregistered_modes() {
+    for case in [
+        json!({"wind_height": "unsupported"}),
+        json!({"wind_orientation": "unsupported"}),
+        json!({"waf_method": "unsupported"}),
+        json!({"moisture_mode": "AllAggregate"}),
+        json!({"wind_height": 20}),
+    ] {
+        assert!(std::panic::catch_unwind(|| surface_options(&case)).is_err());
     }
 }

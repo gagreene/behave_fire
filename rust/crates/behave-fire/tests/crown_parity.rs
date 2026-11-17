@@ -16,6 +16,156 @@ use behave_fire::{
 };
 use serde_json::Value;
 
+fn cells(v: &Value) -> usize {
+    if let Some(a) = v["values"].as_array() {
+        return a.len();
+    }
+    if v.get("crown_surface").is_some() {
+        return cells(&v["crown_fire_spread_rate"]);
+    }
+    if v.is_array() {
+        return 0;
+    }
+    v.as_object()
+        .map(|o| o.values().map(cells).max().unwrap_or(1))
+        .unwrap_or(1)
+}
+
+fn check(actual: f64, expected: &Value, n: usize, ctx: &str) {
+    let target = value(expected, n);
+    if actual == 0.0 && target == 0.0 {
+        assert_eq!(
+            actual.is_sign_negative(),
+            target.is_sign_negative(),
+            "zero sign {ctx}"
+        );
+    }
+    let tolerance = if expected["dtype"] == "float32" {
+        1e-6
+    } else {
+        1e-9
+    };
+    assert!(
+        if target.is_nan() {
+            actual.is_nan()
+        } else if target.is_infinite() {
+            actual == target
+        } else {
+            (actual - target).abs() <= 1e-12 + tolerance * target.abs()
+        },
+        "{ctx}/{n}: actual {actual:?}, expected {target:?}"
+    );
+}
+
+fn f(i: &Value, k: &str, n: usize) -> f64 {
+    value(&i[k], n)
+}
+// Original Python evidence remains unchanged. This legacy source-stage oracle
+// covers finite f64 inputs; normalized lower-precision inputs and dependency-aware
+// NoData are covered by f64_helpers, float64_missing, and public binding suites.
+fn finite_f64_inputs(value: &Value) -> bool {
+    match value {
+        Value::Object(values) => {
+            if let Some(dtype) = values.get("dtype").and_then(Value::as_str) {
+                if matches!(
+                    dtype,
+                    "float16" | "float32" | "complex64" | "complex128" | "object"
+                ) {
+                    return false;
+                }
+            }
+            values.values().all(finite_f64_inputs)
+        }
+        Value::Array(values) => values.iter().all(finite_f64_inputs),
+        Value::String(v) => !matches!(
+            v.as_str(),
+            "nan" | "NaN" | "inf" | "-inf" | "Infinity" | "-Infinity"
+        ),
+        _ => true,
+    }
+}
+fn ib(i: &Value, n: usize) -> FuelbedIntermediates {
+    let mut x = FuelbedIntermediates::default();
+    macro_rules! fields{($($key:ident),+)=>{$(x.$key=f(i,stringify!($key),n);)+}}
+    fields!(
+        sigma,
+        bulk_density,
+        packing_ratio,
+        relative_packing_ratio,
+        heat_sink,
+        propagating_flux,
+        w_heat_dead,
+        w_heat_live,
+        w_silica_dead,
+        w_silica_live,
+        w_moist_dead,
+        w_moist_live,
+        wfl_dead,
+        wfl_live,
+        moe_dead,
+        moe_live,
+        frac_dead,
+        frac_live,
+        depth
+    );
+    x.is_defined = value(&i["is_defined"], n) != 0.0;
+    x
+}
+fn input(i: &Value, n: usize) -> CrownCell {
+    fixture::crown_cell(i, n)
+}
+fn number(v: &Value) -> f64 {
+    if let Some(x) = v.get("float") {
+        return number(x);
+    }
+    if let Some(x) = v.as_f64() {
+        return x;
+    }
+    if let Some(x) = v.as_bool() {
+        return if x { 1.0 } else { 0.0 };
+    }
+    match v.as_str().unwrap_or_else(|| panic!("numeric value {v}")) {
+        "NaN" | "nan" => f64::NAN,
+        "Infinity" | "inf" | "+inf" => f64::INFINITY,
+        "-Infinity" | "-inf" => f64::NEG_INFINITY,
+        x => panic!("number {x}"),
+    }
+}
+fn optional(i: &Value, k: &str, n: usize, default: f64) -> f64 {
+    if i.get(k).is_some() {
+        f(i, k, n)
+    } else {
+        default
+    }
+}
+fn surface(i: &Value, n: usize) -> SurfaceResult {
+    let mut x = SurfaceResult::default();
+    x.spread_rate = f(i, "spread_rate", n);
+    x.fireline_intensity = f(i, "fireline_intensity", n);
+    x.heat_per_unit_area = f(i, "heat_per_unit_area", n);
+    x
+}
+fn truth(v: &Value, n: usize) -> bool {
+    if let Some(a) = v["values"].as_array() {
+        return truth(&a[n % a.len()], 0);
+    }
+    if let Some(s) = v.as_str() {
+        return !s.is_empty();
+    }
+    if v.is_null() {
+        return false;
+    }
+    number(v) != 0.0
+}
+
+fn value(v: &Value, n: usize) -> f64 {
+    if let Some(a) = v["values"].as_array() {
+        number(&a[n % a.len()])
+    } else {
+        number(v)
+    }
+}
+
 #[test]
 fn classification_equal_ratios_are_active() {
     assert_eq!(crown::classify_crown_fire_type(1.0, 1.0).fire_type, 3);
@@ -30,7 +180,6 @@ fn classification_equal_ratios_are_active() {
         }
     }
 }
-
 #[test]
 fn python_slope_passthrough_and_changed_or_undefined_model_ten_match() {
     let cases: Value =
@@ -76,93 +225,6 @@ fn python_slope_passthrough_and_changed_or_undefined_model_ten_match() {
         "Undefined model-10 surface outputs retain their reference mask"
     );
 }
-
-fn number(v: &Value) -> f64 {
-    if let Some(x) = v.get("float") {
-        return number(x);
-    }
-    if let Some(x) = v.as_f64() {
-        return x;
-    }
-    if let Some(x) = v.as_bool() {
-        return if x { 1.0 } else { 0.0 };
-    }
-    match v.as_str().unwrap_or_else(|| panic!("numeric value {v}")) {
-        "NaN" | "nan" => f64::NAN,
-        "Infinity" | "inf" | "+inf" => f64::INFINITY,
-        "-Infinity" | "-inf" => f64::NEG_INFINITY,
-        x => panic!("number {x}"),
-    }
-}
-fn value(v: &Value, n: usize) -> f64 {
-    if let Some(a) = v["values"].as_array() {
-        number(&a[n % a.len()])
-    } else {
-        number(v)
-    }
-}
-fn f(i: &Value, k: &str, n: usize) -> f64 {
-    value(&i[k], n)
-}
-fn optional(i: &Value, k: &str, n: usize, default: f64) -> f64 {
-    if i.get(k).is_some() {
-        f(i, k, n)
-    } else {
-        default
-    }
-}
-fn input(i: &Value, n: usize) -> CrownCell {
-    fixture::crown_cell(i, n)
-}
-fn surface(i: &Value, n: usize) -> SurfaceResult {
-    let mut x = SurfaceResult::default();
-    x.spread_rate = f(i, "spread_rate", n);
-    x.fireline_intensity = f(i, "fireline_intensity", n);
-    x.heat_per_unit_area = f(i, "heat_per_unit_area", n);
-    x
-}
-fn ib(i: &Value, n: usize) -> FuelbedIntermediates {
-    let mut x = FuelbedIntermediates::default();
-    macro_rules! fields{($($key:ident),+)=>{$(x.$key=f(i,stringify!($key),n);)+}}
-    fields!(
-        sigma,
-        bulk_density,
-        packing_ratio,
-        relative_packing_ratio,
-        heat_sink,
-        propagating_flux,
-        w_heat_dead,
-        w_heat_live,
-        w_silica_dead,
-        w_silica_live,
-        w_moist_dead,
-        w_moist_live,
-        wfl_dead,
-        wfl_live,
-        moe_dead,
-        moe_live,
-        frac_dead,
-        frac_live,
-        depth
-    );
-    x.is_defined = value(&i["is_defined"], n) != 0.0;
-    x
-}
-fn cells(v: &Value) -> usize {
-    if let Some(a) = v["values"].as_array() {
-        return a.len();
-    }
-    if v.get("crown_surface").is_some() {
-        return cells(&v["crown_fire_spread_rate"]);
-    }
-    if v.is_array() {
-        return 0;
-    }
-    v.as_object()
-        .map(|o| o.values().map(cells).max().unwrap_or(1))
-        .unwrap_or(1)
-}
-
 #[test]
 fn composed_default_custom_fuels_and_canopy_units_match_python_facade() {
     use behave_fire::{
@@ -305,43 +367,6 @@ fn supplied_surface_and_live_model_ten_table_are_used() {
     assert_eq!(overridden.crown_fire_transition_ratio, 0.0);
     assert_eq!(overridden.final_spread_rate, supplied.surface_ros);
     assert_eq!(input.moisture_foliar, 100.0);
-}
-fn check(actual: f64, expected: &Value, n: usize, ctx: &str) {
-    let target = value(expected, n);
-    if actual == 0.0 && target == 0.0 {
-        assert_eq!(
-            actual.is_sign_negative(),
-            target.is_sign_negative(),
-            "zero sign {ctx}"
-        );
-    }
-    let tolerance = if expected["dtype"] == "float32" {
-        1e-6
-    } else {
-        1e-9
-    };
-    assert!(
-        if target.is_nan() {
-            actual.is_nan()
-        } else if target.is_infinite() {
-            actual == target
-        } else {
-            (actual - target).abs() <= 1e-12 + tolerance * target.abs()
-        },
-        "{ctx}/{n}: actual {actual:?}, expected {target:?}"
-    );
-}
-fn truth(v: &Value, n: usize) -> bool {
-    if let Some(a) = v["values"].as_array() {
-        return truth(&a[n % a.len()], 0);
-    }
-    if let Some(s) = v.as_str() {
-        return !s.is_empty();
-    }
-    if v.is_null() {
-        return false;
-    }
-    number(v) != 0.0
 }
 
 #[test]
@@ -611,29 +636,4 @@ fn every_source_stage_matches_independent_python_oracle() {
         }
     }
     println!("Checked {count} scalar cells across the native Crown science stages");
-}
-
-// Original Python evidence remains unchanged. This legacy source-stage oracle
-// covers finite f64 inputs; normalized lower-precision inputs and dependency-aware
-// NoData are covered by f64_helpers, float64_missing, and public binding suites.
-fn finite_f64_inputs(value: &Value) -> bool {
-    match value {
-        Value::Object(values) => {
-            if let Some(dtype) = values.get("dtype").and_then(Value::as_str) {
-                if matches!(
-                    dtype,
-                    "float16" | "float32" | "complex64" | "complex128" | "object"
-                ) {
-                    return false;
-                }
-            }
-            values.values().all(finite_f64_inputs)
-        }
-        Value::Array(values) => values.iter().all(finite_f64_inputs),
-        Value::String(v) => !matches!(
-            v.as_str(),
-            "nan" | "NaN" | "inf" | "-inf" | "Infinity" | "-Infinity"
-        ),
-        _ => true,
-    }
 }
