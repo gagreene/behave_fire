@@ -105,6 +105,7 @@ mod tests {
         );
     }
 
+    // ---- prepared wind equations and cache dependencies ----
     #[test]
     fn prepared_wind_matches_ordinary_equations_at_thresholds_and_missing_values() {
         for sigma in [-0., 0., 1e-7, 1633., f64::NAN, f64::INFINITY] {

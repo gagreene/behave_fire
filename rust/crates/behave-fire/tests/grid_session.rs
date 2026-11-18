@@ -5,6 +5,7 @@ use behave_fire::engine::{
 use behave_fire::raster::{SurfaceColumns, SurfaceRaster, SurfaceTweakColumns};
 use behave_fire::{FuelModels, GridShape, PerCell};
 
+// ---- input snapshots and edits ----
 #[test]
 fn snapshot_owns_original_columns_and_validates_typed_edits() {
     let fuels = PreparedFuels::from_registry(&FuelModels::default());
@@ -55,6 +56,7 @@ fn snapshot_owns_original_columns_and_validates_typed_edits() {
     );
 }
 
+// ---- scalar composition ----
 #[test]
 fn fuelbed_and_reaction_stages_match_scalar_composition() {
     let fuels = PreparedFuels::from_registry(&FuelModels::default());

@@ -419,6 +419,8 @@ mod spread_tests {
         engine::{PreparedFuel, WindOrientation},
         FuelModels,
     };
+
+    // ---- crown spread stages and overrides ----
     #[test]
     fn crown_spread_stages_preserve_first_run_backsolve_and_overrides() {
         let models = FuelModels::default();

@@ -5,6 +5,8 @@ import pytest
 pytestmark = pytest.mark.rust
 
 
+# ---- float64 contract manifest tests ----
+
 def test_manifest_covers_each_operation_with_one_float64_contract():
     from behave_fire import _rust
     from behave_fire._backend_contract import BINDING_API_VERSION

@@ -42,6 +42,8 @@ def _forbid_native(*args, **kwargs):
     raise AssertionError("unsupported arithmetic reached native execution")
 
 
+# ---- numeric coercion and stateful control tests ----
+
 @pytest.mark.parametrize("scalar_type", [_CustomFloat, _CustomInt, _CustomNumpyFloat, _CustomNumpyInt])
 @pytest.mark.parametrize("container", [lambda value: value, lambda value: [value], lambda value: (value,)], ids=[
     "scalar", "list", "tuple"])

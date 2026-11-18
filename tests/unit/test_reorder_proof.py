@@ -15,6 +15,8 @@ def _proof(before, after, suffix):
     return checker.prove_reorder(before, after, suffix)
 
 
+# ---- reorder identity and change rejection tests ----
+
 @pytest.mark.parametrize('suffix,before,after', [
     ('.py', 'def z(x=1):\n return x\ndef a():\n return 2\n', 'def a():\n return 2\ndef z(x=1):\n return x\n'),
     ('.rs', 'fn z(x: f64) -> f64 { x }\npub fn a() {}', 'pub fn a() {}\nfn z(x: f64) -> f64 { x }'),
@@ -57,6 +59,8 @@ def test_non_order_changes_fail(suffix, before, after):
     with pytest.raises(ValueError):
         _proof(before, after, suffix)
 
+
+# ---- scanner boundary tests ----
 
 @pytest.mark.parametrize('suffix,source', [('.py', 'def test_a(): pass\ndef helper(): pass'),
                                           ('.rs', '#[test]\nfn a() {} fn helper() {}')])

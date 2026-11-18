@@ -6,6 +6,7 @@ import pytest
 from parity_batch_support import assert_comparisons, grouped_cases, run_cases
 from parity_support import cases
 
+# ---- batch comparison diagnostics tests ----
 
 @pytest.mark.parametrize("corruption", ["dtype", "shape", "mask", "value", "nan", "infinity", "zero-sign"])
 def test_batch_comparison_names_the_first_corrupt_source_case(corruption):
@@ -37,6 +38,8 @@ def test_batch_failure_order_includes_values_before_later_structure_errors():
     with pytest.raises(AssertionError, match="first-value"):
         assert_comparisons(rows)
 
+
+# ---- grouped call ownership and failure tests ----
 
 @pytest.mark.rust
 def test_grouped_calls_preserve_inputs_and_independent_warning_attribution(monkeypatch):

@@ -9,6 +9,8 @@ import pytest
 pytestmark = pytest.mark.rust
 
 
+# ---- complex state transition tests ----
+
 def test_complex_fire_size_mutation_moves_complete_state_once_and_stays_python(monkeypatch):
     from behave_fire import auto
     from behave_fire.components.fire_size import FireSize as PythonFireSize

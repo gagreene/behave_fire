@@ -19,6 +19,8 @@ def _load(name):
 
 
 class ArchiveTests(unittest.TestCase):
+    # ---- archive payload tests ----
+
     def test_archive_rejects_missing_core_manifest(self):
         checker = _load("check_sdist")
         with tempfile.TemporaryDirectory() as temporary:
@@ -47,6 +49,8 @@ class ArchiveTests(unittest.TestCase):
                     handle.addfile(tarfile.TarInfo("package/" + name))
             with self.assertRaisesRegex(ValueError, "Intel-SVML-BSD-3-Clause"):
                 checker.check_archive(archive)
+
+    # ---- inventory and version tests ----
 
     def test_expected_inventory_rejects_missing_embedded_table(self):
         checker = _load("check_sdist")

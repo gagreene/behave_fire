@@ -28,6 +28,8 @@ def _cases():
         encoding="utf-8")))]
 
 
+# ---- direction fixture parity tests ----
+
 @pytest.mark.parametrize("case", _cases())
 def test_direction_fixtures_match_current_host_python(case):
     from behave_fire.components import surface as reference

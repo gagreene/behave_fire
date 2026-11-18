@@ -33,6 +33,7 @@ fn comparison_columns(
         .collect()
 }
 
+// ---- batch parity and validity ----
 #[test]
 fn crown_validity_empty_shapes_and_bad_columns_keep_their_contracts() {
     let shape = GridShape::new(vec![2, 1]).unwrap();
@@ -202,6 +203,7 @@ fn crown_supplied_fields_broadcast_independently_without_fake_surface_records() 
     }
 }
 
+// ---- shape and range validation ----
 #[test]
 fn scalar_empty_and_uniform_slice_inputs_keep_checked_shapes() {
     let fuels = PreparedFuels::from_registry(&FuelModels::default());

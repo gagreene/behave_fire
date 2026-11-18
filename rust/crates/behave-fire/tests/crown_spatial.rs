@@ -2,6 +2,7 @@
 use behave_fire::engine::{CrownCell, CrownPlan, CrownSpatial, PreparedFuels, SurfaceOptions};
 use behave_fire::FuelModels;
 
+// ---- spatial spread inputs ----
 #[test]
 fn spatial_spread_uses_only_real_weather_and_moisture_inputs() {
     let fuels = PreparedFuels::from_registry(&FuelModels::default());

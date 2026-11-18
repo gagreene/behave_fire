@@ -1,6 +1,7 @@
 use behave_fire::{map_chunks, ParallelError};
 use std::sync::atomic::{AtomicUsize, Ordering};
 
+// ---- chunk dispatch and worker behavior ----
 #[test]
 fn empty_work_does_not_call_the_operation() {
     let calls = AtomicUsize::new(0);

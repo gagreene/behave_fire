@@ -124,6 +124,7 @@ mod tests {
     use super::*;
     use std::hint::black_box;
 
+    // ---- allocation probe scope accounting ----
     #[test]
     fn distinguishes_scopes_and_restores_after_nested_exit() {
         start();

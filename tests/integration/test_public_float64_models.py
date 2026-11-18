@@ -19,6 +19,8 @@ def _inputs():
                 canopy_height=30.)
 
 
+# ---- model precision and input normalization tests ----
+
 def test_crown_model_widens_typed_surface_fields_without_mask_emulation(monkeypatch):
     model = BehaveRun(FuelModels())
     arguments = _inputs()

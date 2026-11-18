@@ -4,6 +4,7 @@ import pytest
 
 from parity_support import ROOT as ROOT
 
+# ---- public benchmark layout tests ----
 
 @pytest.mark.rust
 @pytest.mark.parametrize('cells', [1, 16, 1031])

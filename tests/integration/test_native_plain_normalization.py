@@ -5,6 +5,8 @@ import pytest
 pytestmark = pytest.mark.rust
 
 
+# ---- plain float64 storage normalization tests ----
+
 @pytest.mark.parametrize('value', [3., np.float32(.1), np.array([1., -0., np.nan]),
     np.array([1, 2], dtype=np.uint16), np.array([1., 2.], dtype='>f4')[::-1]])
 def test_plain_physical_values_never_construct_a_masked_array(monkeypatch, value):

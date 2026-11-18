@@ -10,6 +10,8 @@ import pytest
 ROOT = next(parent for parent in Path(__file__).resolve().parents if (parent / 'pytest.ini').is_file())
 
 
+# ---- stale native api rejection tests ----
+
 @pytest.mark.rust
 @pytest.mark.parametrize('version', [1, 3])
 def test_native_restore_rejects_stale_binding_state(version):

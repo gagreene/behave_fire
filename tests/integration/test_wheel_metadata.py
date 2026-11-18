@@ -45,6 +45,8 @@ def _wheel(directory, tag, notice):
 
 
 class MetadataTests(unittest.TestCase):
+    # ---- artifact metadata aggregation tests ----
+
     def test_changed_native_notice_blocks_artifact_aggregation(self):
         with tempfile.TemporaryDirectory() as temporary:
             directory = Path(temporary)

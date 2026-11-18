@@ -6,6 +6,7 @@ use behave_fire::{
 
 const INVALID_IDS: [i32; 7] = [-100, -1, 0, 257, 261, 999, i32::MAX];
 
+// ---- fuel id ranges and missing rows ----
 #[test]
 fn custom_registration_rejects_outside_range_and_preserves_upper_endpoint() {
     let mut fuels = FuelModels::default();

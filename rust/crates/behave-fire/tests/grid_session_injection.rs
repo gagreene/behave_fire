@@ -4,6 +4,7 @@ use behave_fire::engine::{
 use behave_fire::raster::{CrownColumns, CrownRaster, CrownTweakColumns};
 use behave_fire::{FuelModels, GridShape, PerCell};
 
+// ---- injected fields and reset behavior ----
 #[test]
 fn partial_heat_injection_before_producer_keeps_siblings() {
     let fuels = PreparedFuels::from_registry(&FuelModels::default());

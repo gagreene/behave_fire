@@ -2,6 +2,7 @@
 use behave_fire::{canopy_crown_ratio, FuelModel, FuelModels};
 use std::collections::BTreeMap;
 
+// ---- binding value and record contracts ----
 #[test]
 fn canopy_ratio_preserves_clipping_and_nonfinite_propagation() {
     for (height, base, expected) in [

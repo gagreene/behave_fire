@@ -32,6 +32,8 @@ def _archive(tmp_path, changes=None):
     return path
 
 
+# ---- crate archive contents and manifest tests ----
+
 def test_archive_budget_is_enforced(tmp_path, monkeypatch):
     path = _archive(tmp_path)
     monkeypatch.setattr(CHECKER, "MAX_COMPRESSED_BYTES", 1)

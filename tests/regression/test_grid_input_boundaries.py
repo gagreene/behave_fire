@@ -28,6 +28,8 @@ def fuelbed():
     return {name: grid.get('ib.'+name) for name in _EMPTY_KEYS['calculate_fuelbed_intermediates']}
 
 
+# ---- grid input validation and session edits tests ----
+
 @pytest.mark.parametrize('operation', ['constructor', 'setter'])
 @pytest.mark.parametrize('flag', [-1, 2])
 def test_binary_grid_flags_reject_nonbinary_integers(operation, flag):

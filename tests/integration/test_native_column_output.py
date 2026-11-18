@@ -5,6 +5,8 @@ import pytest
 pytestmark = pytest.mark.rust
 
 
+# ---- column output representation tests ----
+
 def test_column_wire_rejects_retired_numeric_sidecars():
     from behave_fire import _rust
 

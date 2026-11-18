@@ -37,6 +37,7 @@ fn supplied(
     output
 }
 
+// ---- missing fuel and reaction inputs ----
 #[test]
 fn missing_prepared_fuel_properties_propagate_in_surface_and_crown() {
     let registry = FuelModels::default();

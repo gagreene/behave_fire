@@ -22,6 +22,8 @@ def _inputs(count=16):
                 wind_orientation_mode="RelativeToUpslope")
 
 
+# ---- prepared model pipeline tests ----
+
 @pytest.mark.parametrize("route", ["surface", "crown"])
 @pytest.mark.parametrize("storage", ["plain", "strided", "readonly"])
 @pytest.mark.parametrize("varying_units", [False, True])

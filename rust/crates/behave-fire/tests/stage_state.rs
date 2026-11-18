@@ -1,6 +1,7 @@
 //! Flat f64 stage state distinguishes absent data from known unavailable values.
 use behave_fire::engine::{CellState, Field, FieldKind, Stage};
 
+// ---- stage state and dependency metadata ----
 #[test]
 fn state_keeps_nan_presence_and_typed_controls_separate() {
     let mut state = CellState::new();

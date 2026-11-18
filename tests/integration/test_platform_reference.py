@@ -63,6 +63,8 @@ def _x86_asarray(value, dtype=None, *args, **kwargs):
     return ORIGINAL_ASARRAY(value, dtype, *args, **kwargs)
 
 
+# ---- platform-specific parity and fixture provenance tests ----
+
 @pytest.mark.parametrize("domain,name", SPECS)
 def test_canonical_export_keeps_original_golden_after_arm_cast(monkeypatch, domain, name):
     policy, exporter = _policy(), _exporter()

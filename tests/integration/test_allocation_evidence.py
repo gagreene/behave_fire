@@ -61,6 +61,8 @@ def _updated(evidence):
     return evidence
 
 
+# ---- allocation evidence tests ----
+
 def test_distinct_instrumented_binary_with_identical_science_is_accepted():
     result = _tool().assemble(_evidence(), {"datasets": ["uniform"], "operations": ["surface"]})
     row, = result["allocations"]

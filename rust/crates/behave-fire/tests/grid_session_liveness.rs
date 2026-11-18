@@ -2,6 +2,7 @@ use behave_fire::engine::{CrownPlan, Field, GridSession, ModelRun, OutputRequest
 use behave_fire::raster::{CrownColumns, CrownRaster, CrownTweakColumns};
 use behave_fire::{FuelModels, GridShape, PerCell};
 
+// ---- stage recovery and injection lifetime ----
 #[test]
 fn repeated_input_edits_rematerialize_freed_heat_ancestors() {
     let fuels = PreparedFuels::from_registry(&FuelModels::default());

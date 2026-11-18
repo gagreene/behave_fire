@@ -1,5 +1,6 @@
 use behave_fire::{effective_worker_count, BehaveError, GridOutput, GridShape, PerCell};
 
+// ---- grid shapes, fields and errors ----
 #[test]
 fn cells_must_match_the_checked_shape() {
     let shape = GridShape::new(vec![2, 3]).unwrap();
@@ -89,6 +90,7 @@ fn scalar_shapes_have_one_logical_cell() {
     assert_eq!(shape.validate_len("scalar", 1), Ok(()));
 }
 
+// ---- thread count limits ----
 #[test]
 fn thread_counts_are_capped_by_work_without_rejecting_large_requests() {
     assert_eq!(effective_worker_count(1, 6), 1);

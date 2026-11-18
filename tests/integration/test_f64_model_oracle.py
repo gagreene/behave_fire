@@ -3,6 +3,7 @@ import numpy as np
 
 from parity_support import ROOT as ROOT
 
+# ---- missing physical input classification tests ----
 
 def test_missing_density_cannot_classify_as_valid_surface_fire():
     from behave_fire.python import BehaveRun, FuelModels

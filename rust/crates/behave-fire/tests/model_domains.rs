@@ -1,6 +1,7 @@
 //! Standalone facade coverage with analytic geometry and independent domain anchors.
 use behave_fire::{BehaveRun, FuelModels};
 
+// ---- facade base units and ownership ----
 #[test]
 fn facade_geometry_has_base_unit_contracts() {
     // Equal forward/backing rates and unit L/W form a circle of radius 20 ft.

@@ -207,6 +207,7 @@ impl PreparedFuel {
 mod wind_cache_tests {
     use super::*;
 
+    // ---- wind term cache invalidation ----
     #[test]
     fn wind_terms_invalidate_after_fuel_edits_and_exclude_dynamic_transfers() {
         let registry = FuelModels::default();
@@ -278,6 +279,8 @@ impl PreparedFuels {
 #[cfg(test)]
 mod preparation_tests {
     use super::*;
+
+    // ---- surface area to volume term invalidation ----
     #[test]
     fn savr_terms_are_recomputed_after_raw_edits() {
         let mut fuel = PreparedFuel::from_model(FuelModels::default().for_grid(10));
@@ -296,6 +299,8 @@ mod preparation_tests {
 #[cfg(test)]
 mod static_preparation_tests {
     use super::*;
+
+    // ---- static coefficient isolation ----
     #[test]
     fn static_physical_coefficients_do_not_leak_into_dynamic_or_edited_fuelbeds() {
         let registry = FuelModels::default();
@@ -341,6 +346,8 @@ mod static_preparation_tests {
 #[cfg(test)]
 mod zero_sign_tests {
     use super::*;
+
+    // ---- physical cache signed zero ----
     #[test]
     fn physical_cache_preserves_changed_zero_signs() {
         let mut fuel = PreparedFuel::from_model(FuelModels::default().for_grid(0));
@@ -354,6 +361,8 @@ mod zero_sign_tests {
 #[cfg(test)]
 mod numeric_rows_tests {
     use super::*;
+
+    // ---- numeric fuel row preparation ----
     #[test]
     fn numeric_registry_rows_prepare_without_registry_names_and_refresh_edits() {
         let registry = FuelModels::default();

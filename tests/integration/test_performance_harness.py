@@ -107,6 +107,8 @@ def _tool(name):
     return module
 
 
+# ---- acceptance and timing evidence tests ----
+
 def test_any_missing_or_failed_route_fails_acceptance():
     checker = _tool("check_performance")
     report, requirements = _evidence()
@@ -261,6 +263,8 @@ def test_numpy_version_mismatch_fails_comparison():
     assert not checker.check_report(report, requirements)["passed"]
 
 
+# ---- output comparison and run pairing tests ----
+
 def test_output_comparator_keeps_masked_raw_data_and_zero_signs():
     import numpy as np
 
@@ -284,6 +288,8 @@ def test_pairing_and_seed_are_reproducible():
         assert sorted((backend, threads) for _, backend, threads in entries) == [
             ("python", 1), ("rust", 1), ("rust", 4)]
 
+
+# ---- profiling evidence tests ----
 
 def test_profile_component_boundary_never_requests_removed_timing_payloads():
     import numpy as np
@@ -323,6 +329,8 @@ def test_profiled_or_screen_runs_cannot_certify(problem):
     report["profile" if problem == "profile" else "preset"] = True if problem == "profile" else "screen"
     assert not checker.check_report(report, requirements)["passed"]
 
+
+# ---- requirement thresholds and scalar baselines tests ----
 
 def test_requirements_pin_owner_approved_thresholds():
     document = json.loads((TOOLS / "performance_requirements.json").read_text(encoding="utf-8"))
@@ -370,6 +378,8 @@ def test_scalar_baseline_uses_independent_preoptimization_identity():
     assert report["baseline"][0]["extension_hash"] != candidate["extension_hash"]
     assert checker.check_report(report, requirements)["passed"]
 
+
+# ---- validation scope and workload tests ----
 
 def test_typed_small_parity_target_is_not_common_speed_target():
     checker = _tool("check_performance")

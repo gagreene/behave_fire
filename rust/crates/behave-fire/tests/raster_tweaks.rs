@@ -3,6 +3,7 @@ use behave_fire::engine::{PreparedFuels, SurfaceCell, SurfaceOptions, SurfacePla
 use behave_fire::raster::{FuelbedColumns, SurfaceColumns, SurfaceRaster, SurfaceTweakColumns};
 use behave_fire::{FuelModels, GridShape, PerCell};
 
+// ---- raster overrides and fuelbed edits ----
 #[test]
 fn crown_override_columns_and_tiles_match_scalar_stages() {
     use behave_fire::crown::SurfaceFireInputs;

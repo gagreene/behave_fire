@@ -1,6 +1,8 @@
 """Verify directory-derived marks on the actual pytest collection."""
 
 
+# ---- directory-derived tier marker tests ----
+
 def test_collection_tier_markers_match_directories(request):
     expected = {"unit": [], "integration": ["integration"], "regression": ["regression"]}
     test_root = request.config.rootpath / "tests"

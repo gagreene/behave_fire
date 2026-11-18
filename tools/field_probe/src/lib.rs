@@ -37,6 +37,7 @@ mod primitive_component_tests {
     };
     use behave_fire::GridShape;
 
+    // ---- typed component input contracts ----
     #[test]
     fn typed_components_keep_controls_exact_and_access_without_allocations() {
         let mut a = Arguments::default();
@@ -94,6 +95,7 @@ mod component_schema_tests {
     use super::{component_schema::schema, operation::Operation};
     use behave_fire::engine::FieldKind;
 
+    // ---- operation column schemas ----
     #[test]
     fn every_operation_has_static_unique_typed_columns_without_prototype_evaluation() {
         for &operation in Operation::ALL {
@@ -127,6 +129,7 @@ mod primitive_output_tests {
     };
     use behave_fire::output::ColumnValues;
 
+    // ---- typed output layout and allocation ----
     #[test]
     fn final_typed_component_buffers_use_disjoint_workers_without_cell_allocations() {
         let mut output = Columns::new(
@@ -253,6 +256,7 @@ mod unit_producer_tests {
     };
     use behave_fire::{output::ColumnValues, GridShape};
 
+    // ---- unit decoding before dispatch ----
     #[test]
     fn varying_integral_units_are_predecoded_before_actual_worker_loops() {
         let cells = 1031;
@@ -295,6 +299,8 @@ mod configured_scope_tests {
     };
     use behave_fire::raster::{CrownColumns, CrownRaster, CrownTweakColumns};
     use behave_fire::{FuelModels, GridShape, PerCell};
+
+    // ---- model kernel and encoder allocations ----
     #[test]
     fn actual_model_kernel_and_encoder_have_zero_absolute_requests() {
         let cells = 10000;
@@ -356,6 +362,7 @@ mod staged_scope_tests {
     use behave_fire::raster::{CrownColumns, CrownRaster, CrownTweakColumns};
     use behave_fire::{FuelModels, GridShape, PerCell};
 
+    // ---- staged execution and allocation ----
     #[test]
     fn staged_scientific_and_encoder_scopes_allocate_nothing_and_use_actual_workers() {
         let fuels = PreparedFuels::from_registry(&FuelModels::default());

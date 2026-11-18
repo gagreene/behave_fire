@@ -7,12 +7,16 @@ from parity_support import cases, run_case
 pytestmark = pytest.mark.rust
 
 
+# ---- canopy ratio tests ----
+
 @pytest.mark.parametrize("height,base,expected", [(10,2,.8),(0,-1,1),(-1,2,0),(np.nan,1,np.nan),(10,np.nan,np.nan)])
 def test_native_canopy_ratio(height, base, expected):
     from behave_fire.rust._bridge import _call
     result = _call("model.canopy_crown_ratio", {"height":height,"base":base})
     np.testing.assert_allclose(result, expected, equal_nan=True)
 
+
+# ---- public route inventory tests ----
 
 def test_public_inventory_routes_exist():
     import json
@@ -26,6 +30,8 @@ def test_public_inventory_routes_exist():
         for part in entry["binding_route"].removeprefix("behave_fire.rust.").split("."):
             value = getattr(value, part)
 
+
+# ---- registry parity and snapshot tests ----
 
 @pytest.mark.parametrize("case", cases("registries", "fuel_models_array"))
 def test_registry_fixture_parity(case):

@@ -5,6 +5,8 @@ import pytest
 pytestmark = pytest.mark.rust
 
 
+# ---- floating-point byte order tests ----
+
 @pytest.mark.parametrize("dtype", ["<f2", ">f2", "<f4", ">f4", "<f8", ">f8"])
 @pytest.mark.parametrize("reverse", [False, True])
 @pytest.mark.parametrize("masked", [False, True])

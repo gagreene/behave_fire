@@ -29,6 +29,8 @@ def _wheel(root, tag, members=None):
     return path
 
 
+# ---- binary provenance and staging tests ----
+
 @pytest.mark.rust
 def test_actual_wheel_binary_provenance_needs_no_retired_math_profiles():
     from behave_fire import _rust
@@ -156,6 +158,8 @@ def test_extension_staging_preserves_existing_local_binary(tmp_path, name):
             pytest.fail("local binary was overwritten")
     assert existing.read_bytes() == b"local build"
 
+
+# ---- native wheel selection tests ----
 
 def test_native_selection_excludes_pure_and_other_platform_wheels(tmp_path):
     runner = _runner()

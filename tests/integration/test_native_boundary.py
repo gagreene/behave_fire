@@ -4,6 +4,8 @@ import pytest
 
 pytestmark = pytest.mark.rust
 
+# ---- native execution and array boundary tests ----
+
 def test_model_calculations_never_call_reference(monkeypatch):
     import inspect
 
@@ -101,6 +103,8 @@ def test_native_strided_array_ownership(layout):
     assert not np.shares_memory(actual, values)
 
 
+
+# ---- unit code parity tests ----
 
 @pytest.mark.parametrize("kind", ["SpeedUnits", "FractionUnits", "TemperatureUnits", "SurfaceAreaToVolumeUnits"])
 @pytest.mark.parametrize("unit", [-100, -1, 0.0, 1.0, 99, True, False])

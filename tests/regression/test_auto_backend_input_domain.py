@@ -37,6 +37,8 @@ def _prefer_python(monkeypatch, status):
     monkeypatch.setattr(auto, '_COMPLEX_WARNING_EMITTED', False)
 
 
+# ---- explicit rust input and state tests ----
+
 def test_explicit_rust_ignores_nonphysical_registry_copy_hooks():
     pytest.importorskip('behave_fire._rust')
     fuels = FuelModels()
@@ -53,6 +55,8 @@ def test_explicit_rust_without_auto_snapshot_retains_pickle_behavior():
     np.testing.assert_allclose(model.calculate_fire_length(2., 1., 0, 3., 0), 9.)
     assert model.backend_in_use == 'rust'
 
+
+# ---- python dispatch and original inputs tests ----
 
 @pytest.mark.parametrize('value', [np.complex64(3.+.25j), np.complex128(3.+.25j), np.clongdouble(3.+.25j)])
 def test_numpy_complex_elapsed_scalar_uses_proven_area_formula(monkeypatch, value):

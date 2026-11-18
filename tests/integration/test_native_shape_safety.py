@@ -133,6 +133,8 @@ def _subclass_cases(rank):
     return cases
 
 
+# ---- subprocess shape validation and diagnostics tests ----
+
 def test_child_assertions_survive_inherited_optimization(monkeypatch):
     original_run = subprocess.run
     monkeypatch.setenv('PYTHONOPTIMIZE', '1')

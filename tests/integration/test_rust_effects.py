@@ -6,6 +6,8 @@ from parity_support import cases, run_case
 pytestmark = pytest.mark.rust
 
 
+# ---- effect parity, missing species, and lightning tests ----
+
 @pytest.mark.parametrize("case", cases("safety", "spot", "ignite", "mortality", "boundaries"))
 def test_effect_parity(case):
     run_case(case)

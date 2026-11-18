@@ -26,6 +26,8 @@ fn close(actual: f64, expected: f64) {
         "actual={actual:?}, expected={expected:?}"
     );
 }
+
+// ---- atmospheric vapor pressure deficit ----
 // calculate_vpd/baseline
 #[test]
 #[allow(deprecated, unused_variables, unused_mut)]
@@ -569,6 +571,7 @@ fn oracle_294() {
     close(actual.vpd as f64, 110.7198612532597);
 }
 
+// ---- fine dead fuel moisture oracles ----
 // calculate_fine_dead_fuel_moisture/baseline
 #[test]
 #[allow(deprecated, unused_variables, unused_mut)]
@@ -846,6 +849,7 @@ fn oracle_323() {
     close(actual as f64, 0.03);
 }
 
+// ---- fire size oracles ----
 // FireSize.calculate_backing_spread_rate/baseline
 #[test]
 #[allow(deprecated, unused_variables, unused_mut)]
@@ -2190,6 +2194,7 @@ fn oracle_392() {
     close(helper.heading_to_backing_ratio_ as f64, 7.988029432928135);
 }
 
+// ---- slope tool oracles ----
 // SlopeTool.calculate_horizontal_distance/baseline
 #[test]
 #[allow(deprecated, unused_variables, unused_mut)]
@@ -6653,6 +6658,8 @@ fn oracle_422() {
     );
     close(helper.slope_horizontal_distance_ as f64, 23999.99999999904);
 }
+
+// ---- table reference and correction cells ----
 #[test]
 fn all_moisture_reference_and_correction_cells() {
     close(
@@ -9752,6 +9759,8 @@ fn all_moisture_reference_and_correction_cells() {
         0.06999999999999999,
     );
 }
+
+// ---- other tests ----
 // The appended Python numeric-kind and scalar-exception emulation tests were
 // replaced by f64_helpers.rs and f64_state_domains.rs. Original Python evidence
 // remains in tests/data/rust_port; finite oracle traces and all LUT cells above remain.

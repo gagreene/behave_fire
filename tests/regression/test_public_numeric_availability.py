@@ -7,6 +7,8 @@ from ..integration.test_native_grid_session import _crown_inputs, _surface_input
 pytestmark = pytest.mark.rust
 
 
+# ---- output selection and missingness tests ----
+
 @pytest.mark.parametrize('persistent', [False, True])
 def test_classification_flag_injections_select_final_sources(persistent):
     from behave_fire.rust import CrownGrid

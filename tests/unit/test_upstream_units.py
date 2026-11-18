@@ -7,6 +7,7 @@ from behave_fire.components.behave_units import HeatOfCombustionUnits, SurfaceAr
 from behave_fire.components.fuel_models import FuelModels
 from behave_fire.components.fuel_models_array import build_fuel_lookup_arrays
 
+# ---- fuel heat and surface-area-to-volume conversion tests ----
 
 def test_custom_metric_fuel_converts_heat_and_savr_once():
     fuels = FuelModels()

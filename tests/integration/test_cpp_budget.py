@@ -30,6 +30,8 @@ def _bundle(tmp_path):
     return root
 
 
+# ---- fixture size budget tests ----
+
 def test_fixture_budget_allows_the_exact_case_ceiling(tmp_path):
     root = _bundle(tmp_path)
     path = root / 'tests/data/cpp_reference/surface/cases.jsonl'

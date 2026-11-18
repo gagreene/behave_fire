@@ -28,6 +28,7 @@ fn rows(source: &str) -> BTreeMap<String, Value> {
     result
 }
 
+// ---- custom fuel controls ----
 #[test]
 fn explicit_percent_controls_match_numbered_physics_and_consume_all_cpp_fields() {
     let inputs = include_bytes!("data/cpp_reference/surface_custom/cases.jsonl");
@@ -166,6 +167,7 @@ fn explicit_percent_controls_match_numbered_physics_and_consume_all_cpp_fields()
     assert_eq!(compared, 695);
 }
 
+// ---- qualification inventory ----
 #[test]
 fn qualification_rejects_missing_core_source_inventory() {
     let mut policy: Value = serde_json::from_str(include_str!(

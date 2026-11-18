@@ -20,6 +20,8 @@ def _case():
     return dict(numbered, id='custom-fm110-angle0', fuel_mode='percent_unit_custom', moe_percent=24.)
 
 
+# ---- calibration cap and platform tests ----
+
 @pytest.mark.parametrize('value', [float('nan'), float('inf'), 1e-3, True])
 def test_calibration_cannot_accept_invalid_or_wider_caps_even_for_exact_values(value):
     fields = controls.calibration_policy(ROOT)
@@ -35,6 +37,8 @@ def test_calibration_report_rejects_a_wrong_platform_identity(tmp_path):
         controls.measure_ports(ROOT, report, expected_platform='not-a-real-platform')
     assert not report.exists()
 
+
+# ---- custom control schema and coverage tests ----
 
 def test_control_schema_accepts_an_explicit_percent_quantity():
     """A separate unit-labelled custom definition must pass the guarded schema."""
@@ -86,6 +90,8 @@ def test_controls_preserve_source_inputs_and_cover_every_affected_model():
     assert next(case for case in controls if case['fuel_model'] == 110)['moe_percent'] == 24.
     assert next(case for case in controls if case['fuel_model'] == 151)['moe_percent'] == 13.
 
+
+# ---- trusted input hashing tests ----
 
 def test_cross_compiler_trust_normalizes_text_but_preserves_binary_bytes(tmp_path):
     text, binary = tmp_path / 'source.cpp', tmp_path / 'data.bin'

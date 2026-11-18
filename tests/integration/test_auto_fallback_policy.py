@@ -15,6 +15,8 @@ def _run(source):
     assert result.returncode == 0, result.stdout + result.stderr
 
 
+# ---- backend absence warning tests ----
+
 @pytest.mark.parametrize('entry', ['facade', 'namespace'])
 def test_absence_error_filter_prevents_delegate_and_does_not_consume_warning(entry):
     _run(f'''

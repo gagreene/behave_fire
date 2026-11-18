@@ -326,6 +326,7 @@ fn main() -> Result<(), String> {
 mod tests {
     use super::*;
 
+    // ---- probe columns across layouts and datasets ----
     #[test]
     fn actual_f64_probe_validates_all_columns_for_every_fixture_layout_and_dataset() {
         let fuels = PreparedFuels::from_registry(&FuelModels::default());

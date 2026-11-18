@@ -15,6 +15,8 @@ def _cases():
     return module
 
 
+# ---- seeded weather generation tests ----
+
 def test_continuous_weather_is_unique_reproducible_and_seeded():
     cases = _cases()
     first = cases.build_inputs(1001, "continuous", seed=7)

@@ -33,6 +33,8 @@ def _native_model(monkeypatch, request):
     return model
 
 
+# ---- native facade serialization tests ----
+
 def test_native_automatic_copy_and_deepcopy_preserve_cached_state(_native_model):
     model = _native_model
     shallow, deep = copy.copy(model), copy.deepcopy(model)

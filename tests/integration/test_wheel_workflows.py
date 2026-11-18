@@ -9,6 +9,8 @@ import yaml
 ROOT = Path(__file__).parents[2]
 
 
+# ---- continuous integration workflow tests ----
+
 def test_built_wheels_all_receive_cpp_payload_checks_before_aggregation():
     workflow = yaml.load((ROOT / '.github/workflows/wheel-validation.yml').read_text(), Loader=yaml.BaseLoader)
     steps = workflow['jobs']['check-distributions']['steps']
@@ -101,7 +103,7 @@ def test_wheels_require_the_quick_style_gate():
     assert style.get('continue-on-error', 'false') == 'false'
     commands = [step['run'] for step in style['steps'] if 'run' in step]
     assert any('python -m ruff check src tests tools' in command for command in commands)
-    assert any('python tools/check_function_order.py' in command for command in commands)
+    assert 'uv run --no-sync python tools/check_function_order.py --require-labels' in commands
     assert any('cargo fmt --manifest-path rust/Cargo.toml --all -- --check' in command for command in commands)
     assert any('cargo clippy --manifest-path rust/Cargo.toml' in command and '-D warnings' in command
                for command in commands)
@@ -110,6 +112,8 @@ def test_wheels_require_the_quick_style_gate():
 
 
 class WorkflowTests(unittest.TestCase):
+    # ---- reusable workflow certification tests ----
+
     def test_all_requested_certification_rows_remain_required(self):
         workflow = yaml.load((ROOT / ".github/workflows/wheel-validation.yml").read_text(), Loader=yaml.BaseLoader)
         jobs = workflow["jobs"]

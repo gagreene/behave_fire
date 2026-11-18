@@ -24,6 +24,8 @@ def _problems(tmp_path, name, source, labels=True):
     return problems
 
 
+# ---- checker token and scope ownership tests ----
+
 def test_helper_classes_retain_ordinary_method_order(tmp_path):
     assert _problems(tmp_path, 'test_helpers.py', 'class Helper:\n def zebra(self): pass\n def alpha(self): pass\n')
 
@@ -79,6 +81,8 @@ def test_literal_text_does_not_change_label_order(tmp_path):
     assert not _problems(tmp_path, 'test_string.py', source)
 
 
+# ---- rust same-line attributes tests ----
+
 @pytest.mark.parametrize('attribute', ['#[inline]', '#[doc = "[not end]"] #[inline]',
                                      '#[cfg(all(\n test, feature="x"\n))]'])
 def test_same_line_rust_attributes_keep_declarations_visible(tmp_path, attribute):
@@ -92,6 +96,8 @@ def test_same_line_rust_test_attribute_keeps_test_rules(tmp_path):
     assert any('not in a labelled group' in item for item in problems)
     assert any('after the first test' in item for item in problems)
 
+
+# ---- test class ordering and grouping tests ----
 
 @pytest.mark.parametrize('header', ['class TestMath:', 'class Math(unittest.TestCase):'])
 def test_test_classes_keep_group_order_instead_of_alphabetizing_tests(tmp_path, header):
