@@ -2,11 +2,12 @@
 
 import hashlib
 import json
-import shutil
 import sys
 from pathlib import Path
 
 import pytest
+
+from cpp_snapshot_support import write_snapshot
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'tools'))
 import cpp_reference as reference
@@ -27,17 +28,6 @@ def _rewrite(root, relative, value):
     hashes_path.write_text(json.dumps(hashes), encoding="utf-8")
 
 
-def _snapshot(tmp_path):
-    hashes = json.loads((ROOT / "tests/data/cpp_reference/hashes.json").read_text())
-    qualification = ROOT / "tests/data/cpp_reference/calibration/qualification.json"
-    sources = json.loads(qualification.read_text()).get('source_files', {}) if qualification.is_file() else {}
-    for relative in {*hashes, *sources, "tests/data/cpp_reference/hashes.json"}:
-        target = tmp_path / relative
-        target.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copyfile(ROOT / relative, target)
-    return tmp_path
-
-
 def test_default_observations_are_offline_and_policy_gated():
     data = reference.load_reference()
     assert len(data["cases"]) == 634
@@ -51,8 +41,8 @@ def test_default_observations_are_offline_and_policy_gated():
             reference.assert_matches_cpp(result, result, data["policy"])
 
 
-def test_default_observations_need_neither_cpp_sources_nor_overlay(tmp_path):
-    root = _snapshot(tmp_path)
+def test_default_observations_need_neither_cpp_sources_nor_overlay(tmp_path, cpp_snapshot_template):
+    root = write_snapshot(cpp_snapshot_template, tmp_path)
     assert not (root / "reference").exists()
     data = reference.load_reference(root)
     assert data["manifest"]["available"] == 583
@@ -71,8 +61,8 @@ def test_default_qualified_policy_checks_selected_backend_and_unit_controls(tmp_
 
 
 @pytest.mark.parametrize("mutation", ("drop", "field", "duplicate", "unavailable", "status"))
-def test_invalid_result_contracts_fail_even_when_the_hash_is_updated(tmp_path, mutation):
-    root = _snapshot(tmp_path)
+def test_invalid_result_contracts_fail_even_when_the_hash_is_updated(tmp_path, mutation, cpp_snapshot_template):
+    root = write_snapshot(cpp_snapshot_template, tmp_path)
     relative = "tests/data/cpp_reference/surface/results.jsonl"
     rows = reference._rows(root / relative)
     if mutation == "drop":
@@ -102,8 +92,8 @@ def test_live_source_filter_only_allows_untracked_ide_material():
         " M src/behave/surface.cpp", "?? injected.h", " M .idea/tracked.xml"]
 
 
-def test_missing_artifact_hash_cannot_remove_verification(tmp_path):
-    root = _snapshot(tmp_path)
+def test_missing_artifact_hash_cannot_remove_verification(tmp_path, cpp_snapshot_template):
+    root = write_snapshot(cpp_snapshot_template, tmp_path)
     path = root / "tests/data/cpp_reference/hashes.json"
     hashes = json.loads(path.read_text())
     hashes.pop("tests/data/cpp_reference/inventory.json")
@@ -112,8 +102,8 @@ def test_missing_artifact_hash_cannot_remove_verification(tmp_path):
         reference.load_reference(root)
 
 
-def test_missing_supported_mode_measurement_is_rejected(tmp_path):
-    root = _snapshot(tmp_path)
+def test_missing_supported_mode_measurement_is_rejected(tmp_path, cpp_snapshot_template):
+    root = write_snapshot(cpp_snapshot_template, tmp_path)
     relative = "tests/data/cpp_reference/surface/cases.jsonl"
     cases = reference._rows(root / relative)
     row = next(row for row in cases if "-mode-" in row["id"] and row["wind_height"] == "TenMeter")
@@ -123,8 +113,8 @@ def test_missing_supported_mode_measurement_is_rejected(tmp_path):
         reference.load_reference(root)
 
 
-def test_missing_tolerance_classification_is_rejected(tmp_path):
-    root = _snapshot(tmp_path)
+def test_missing_tolerance_classification_is_rejected(tmp_path, cpp_snapshot_template):
+    root = write_snapshot(cpp_snapshot_template, tmp_path)
     relative = "tests/data/cpp_reference/tolerance-policy.json"
     policy = json.loads((root / relative).read_text())
     policy["fields"].pop(reference.FIELDS[0])
@@ -150,8 +140,8 @@ def test_numeric_comparator_requires_exact_boolean_approval_and_finite_values():
         reference.assert_matches_cpp(changed, changed, policy)
 
 
-def test_reused_state_must_match_a_fresh_full_run(tmp_path):
-    root = _snapshot(tmp_path)
+def test_reused_state_must_match_a_fresh_full_run(tmp_path, cpp_snapshot_template):
+    root = write_snapshot(cpp_snapshot_template, tmp_path)
     relative = "tests/data/cpp_reference/surface/results.jsonl"
     results = reference._rows(root / relative)
     next(row for row in results if row["id"] == "fm124-state-A2")["output"]["spread_chains_per_hour"] += 1
@@ -180,8 +170,8 @@ def test_source_identity_ignores_only_line_ending_translation(tmp_path):
     assert reference._text_digest(unix) != reference._text_digest(windows)
 
 
-def test_unsafe_case_fields_are_rejected_independently_of_hashes(tmp_path):
-    root = _snapshot(tmp_path)
+def test_unsafe_case_fields_are_rejected_independently_of_hashes(tmp_path, cpp_snapshot_template):
+    root = write_snapshot(cpp_snapshot_template, tmp_path)
     relative = "tests/data/cpp_reference/surface/cases.jsonl"
     cases = reference._rows(root / relative)
     cases[0]["fuel_model"] = 256

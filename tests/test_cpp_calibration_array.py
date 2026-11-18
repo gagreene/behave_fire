@@ -8,7 +8,7 @@ from pathlib import Path
 
 import pytest
 
-from test_cpp_reference_array import _snapshot
+from cpp_snapshot_support import write_snapshot
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'tools'))
 import cpp_reference as reference
@@ -16,8 +16,8 @@ import cpp_reference as reference
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def test_active_policy_requires_complete_calibration_metadata(tmp_path):
-    root = _snapshot(tmp_path)
+def test_active_policy_requires_complete_calibration_metadata(tmp_path, cpp_snapshot_template):
+    root = write_snapshot(cpp_snapshot_template, tmp_path)
     relative = 'tests/data/cpp_reference/tolerance-policy.json'
     path = root / relative
     policy = json.loads(path.read_text())
@@ -39,10 +39,10 @@ def test_empty_or_partial_evidence_cannot_qualify_the_matrix(tmp_path):
             module.validate_evidence(ROOT, paths)
 
 
-def test_reducing_the_required_matrix_cannot_activate_a_partial_record(tmp_path):
+def test_reducing_the_required_matrix_cannot_activate_a_partial_record(tmp_path, cpp_snapshot_template):
     module = importlib.import_module('cpp_calibrate')
     controls = importlib.import_module('cpp_controls')
-    root = _snapshot(tmp_path)
+    root = write_snapshot(cpp_snapshot_template, tmp_path)
     policy_path = root / 'tests/data/cpp_reference/tolerance-policy.json'
     policy = reference._document(policy_path)
     policy['activation_requirements'] = {'compilers': ['MSVC'], 'platforms': ['windows-x86_64']}
@@ -61,10 +61,10 @@ def test_reducing_the_required_matrix_cannot_activate_a_partial_record(tmp_path)
 
 
 @pytest.mark.parametrize('mutation', ['change', 'add', 'delete'])
-def test_source_changes_invalidate_otherwise_complete_qualification(tmp_path, mutation):
+def test_source_changes_invalidate_otherwise_complete_qualification(tmp_path, mutation, cpp_snapshot_template):
     module = importlib.import_module('cpp_calibrate')
     controls = importlib.import_module('cpp_controls')
-    root = _snapshot(tmp_path)
+    root = write_snapshot(cpp_snapshot_template, tmp_path)
     source = root / 'src/behave_fire/science.py'
     source.parent.mkdir(parents=True, exist_ok=True)
     source.write_text('VALUE = 1\n')
