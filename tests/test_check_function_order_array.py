@@ -1,7 +1,10 @@
 """The function-order checker (tools/check_function_order.py) flags what the style rule forbids, accepts the rest."""
 import importlib.util
 import textwrap
+import uuid
 from pathlib import Path
+
+import pytest
 
 TOOL = Path(__file__).resolve().parents[1] / 'tools' / 'check_function_order.py'
 _spec = importlib.util.spec_from_file_location('check_function_order', TOOL)
@@ -281,6 +284,38 @@ def test_rust_non_pub_functions_precede_pub_ones(tmp_path):
         fn zebra() {}
         ''')
     assert (good, bad) == (0, 1)
+
+
+def test_rust_repeated_scope_reuses_lexing_without_caching_diagnostics(monkeypatch):
+    original = checker._rust_identifier_end
+    calls = []
+
+    def observe(text, start):
+        calls.append(start)
+        return original(text, start)
+
+    monkeypatch.setattr(checker, '_rust_identifier_end', observe)
+    source = f'/* repeat probe {uuid.uuid4().hex} */ mod review {{ fn z() {{}} fn a() {{}} }}'
+    first, second = [], []
+    checker.check_rust_items(source, 'first location', first, require_labels=False)
+    first_count = len(calls)
+    assert first_count > 0
+    checker.check_rust_items(source, 'second location', second, require_labels=False)
+    detail = " > mod review { fn z() {} fn a() {} }: functions out of order: ['z', 'a']"
+    assert first == ['first location' + detail]
+    assert second == ['second location' + detail]
+    assert len(calls) == first_count, 'An unchanged scope must not repeat identifier lexing'
+
+
+def test_rust_reuse_retains_content_and_spacing_boundaries(tmp_path):
+    source = 'fn alpha_reuse_guard() { let value = 1 + 2; }\nfn beta_reuse_guard() {}\n'
+    good, _ = _check(tmp_path, 'same.rs', source)
+    bad, problems = _check(tmp_path, 'same.rs', 'fn beta_reuse_guard() {}\nfn alpha_reuse_guard() {}\n')
+    assert good == 0 and bad == 1
+    assert any('functions out of order' in problem for problem in problems)
+    altered = 'fn beta_reuse_guard() {}\nfn alpha_reuse_guard() { let value = 1+2; }\n'
+    with pytest.raises(ValueError, match='beyond declaration order'):
+        checker.prove_reorder(source, altered, '.rs')
 
 
 # ---- test section tests ----
