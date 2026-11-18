@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from test_cpp_reference_array import _snapshot
+from cpp_snapshot_support import write_snapshot
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'tools'))
 import cpp_reference as reference
@@ -17,8 +17,8 @@ ROOT = Path(__file__).resolve().parents[1]
 pytestmark = pytest.mark.cpp_reference
 
 
-def _stale_snapshot(tmp_path):
-    root = _snapshot(tmp_path)
+def _stale_snapshot(tmp_path, cpp_snapshot_template):
+    root = write_snapshot(cpp_snapshot_template, tmp_path)
     path = root / 'tests/data/cpp_reference/tolerance-policy.json'
     policy = reference._document(path)
     policy['approved'] = True
@@ -33,10 +33,13 @@ def _stale_snapshot(tmp_path):
     return root
 
 
-def test_compiler_observation_validation_does_not_require_previous_source_qualification(tmp_path):
+def test_compiler_observation_validation_does_not_require_previous_source_qualification(
+        tmp_path,
+        cpp_snapshot_template,
+):
     import cpp_calibrate
 
-    root = _stale_snapshot(tmp_path)
+    root = _stale_snapshot(tmp_path, cpp_snapshot_template)
     rows = [*reference._rows(root / 'tests/data/cpp_reference/surface/results.jsonl'),
             *reference._rows(root / 'tests/data/cpp_reference/surface_custom/results.jsonl')]
     protocol = dict(negative_cases=62, negative_upstream_entries=0, upstream_trap_exit=86,
@@ -92,10 +95,10 @@ assert data['parity_approved'] is False
 
 
 @pytest.mark.rust
-def test_replacement_port_measurement_keeps_stale_acceptance_closed(tmp_path):
+def test_replacement_port_measurement_keeps_stale_acceptance_closed(tmp_path, cpp_snapshot_template):
     from behave_fire import _rust
 
-    root = _stale_snapshot(tmp_path)
+    root = _stale_snapshot(tmp_path, cpp_snapshot_template)
     binary = Path(_rust.__file__)
     shutil.copyfile(binary, root / 'src/behave_fire' / binary.name)
     libraries = ROOT / 'src/behave_fire.libs'

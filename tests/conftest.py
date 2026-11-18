@@ -1,8 +1,17 @@
 """Native test selection with an explicit required-extension CI mode."""
 
 from importlib import import_module
+from pathlib import Path
 
 import pytest
+
+
+@pytest.fixture(scope="session")
+def cpp_snapshot_template():
+    """Capture pristine evidence bytes while retaining fresh per-case validation."""
+    from cpp_snapshot_support import capture_snapshot
+
+    return capture_snapshot(Path(__file__).resolve().parents[1])
 
 
 def pytest_addoption(parser):
