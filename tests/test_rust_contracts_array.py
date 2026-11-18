@@ -17,6 +17,15 @@ from behave_fire.components.species_master_table import SpeciesMasterTable, Spec
 from behave_fire.components.surface import calculate_eccentricity
 
 ROOT = Path(__file__).resolve().parents[1]
+REFERENCE_PATHS = frozenset({
+    "tests/data/rust_api_inventory.json",
+    *(f"tests/data/rust_port/{domain}.json" for domain in (
+        "behave", "behave_units", "boundaries", "crown", "fine_dead_fuel_moisture_tool", "fire_size", "fuels",
+        "fuel_models_array", "ignite", "mortality", "registries", "safety", "slope_tool", "species", "spot",
+        "surface", "tables", "unit_classes", "vapor_pressure_deficit_calculator")),
+    *(f"rust/crates/behave-fire/tests/data/{domain}.json" for domain in (
+        "crown", "effects", "fuels", "species", "surface", "tools", "units")),
+})
 
 
 def _decode_value(value):
@@ -39,6 +48,19 @@ def _exporter():
     return module
 
 
+@pytest.fixture(scope="module")
+def _reference_documents():
+    """Retain generated documents privately for independent inspection snapshots."""
+    documents = _exporter().build_documents()
+    return lambda: deepcopy(documents)
+
+
+def _snapshot_files(directory):
+    """Capture every relative file path and raw byte sequence beneath a test output root."""
+    return {path.relative_to(directory).as_posix(): path.read_bytes()
+            for path in directory.rglob("*") if path.is_file()}
+
+
 def test_explicit_namespaces_have_source_modules():
     from behave_fire.python import BehaveRun as PythonBehaveRun
 
@@ -47,16 +69,52 @@ def test_explicit_namespaces_have_source_modules():
     assert PythonBehaveRun is BehaveRun
 
 
-def test_export_check_detects_changed_and_missing_fixtures(tmp_path, capsys):
+def test_export_check_detects_changed_and_missing_fixtures(tmp_path, capsys, monkeypatch):
     exporter = _exporter()
+    documents = {
+        "tests/data/rust_api_inventory.json": {"entries": [{"signature": "(value)"}]},
+        "tests/data/rust_port/example.json": {
+            "cases": [{"inputs": {"value": 1.}, "output": {"dtype": "float64", "shape": [1], "values": [2.]}}]},
+    }
+    monkeypatch.setattr(exporter, "build_documents", lambda: documents)
     assert exporter.main(["--output-dir", str(tmp_path)]) == 0
     assert exporter.main(["--output-dir", str(tmp_path), "--check"]) == 0
-    path = tmp_path / "tests/data/rust_api_inventory.json"
-    path.write_text("{}\n", encoding="utf-8")
-    assert exporter.main(["--output-dir", str(tmp_path), "--check"]) == 1
-    assert "tests/data/rust_api_inventory.json" in capsys.readouterr().out
-    path.unlink()
-    assert exporter.main(["--output-dir", str(tmp_path), "--check"]) == 1
+    capsys.readouterr()
+    for name in documents:
+        path = tmp_path / name
+        original = path.read_bytes()
+        path.write_text("{}\n", encoding="utf-8")
+        before = _snapshot_files(tmp_path)
+        assert exporter.main(["--output-dir", str(tmp_path), "--check"]) == 1
+        changed_reason = {"tests/data/rust_api_inventory.json": "actual keys=['entries'], expected keys=[]",
+                          "tests/data/rust_port/example.json": "actual keys=['cases'], expected keys=[]"}[name]
+        assert capsys.readouterr().out.splitlines() == ["Reference fixture drift:", f"{name}: $: {changed_reason}"]
+        assert _snapshot_files(tmp_path) == before
+        path.unlink()
+        before = _snapshot_files(tmp_path)
+        assert exporter.main(["--output-dir", str(tmp_path), "--check"]) == 1
+        lines = capsys.readouterr().out.splitlines()
+        assert len(lines) == 2 and lines[0] == "Reference fixture drift:"
+        assert lines[1].startswith(f"{name}: unreadable JSON: [Errno 2]")
+        assert _snapshot_files(tmp_path) == before
+        path.write_bytes(original)
+
+
+def test_export_cli_round_trip_matches_reviewed_fixtures(tmp_path):
+    exporter = _exporter()
+    command = [sys.executable, "-B", "-W", "error", str(ROOT / "tools/export_rust_reference.py"),
+               "--output-dir", str(tmp_path)]
+    for extra, message in (([], "Reference fixtures exported"), (["--check"], "Reference fixtures match")):
+        process = subprocess.run(command + extra, cwd=ROOT, capture_output=True, text=True, timeout=120)
+        assert process.returncode == 0, process.stdout + process.stderr
+        assert process.stderr == ""
+        assert process.stdout.strip() == message
+    assert {path.relative_to(tmp_path).as_posix() for path in tmp_path.rglob("*.json")} == REFERENCE_PATHS
+    for name in sorted(REFERENCE_PATHS):
+        actual = json.loads((tmp_path / name).read_text(encoding="utf-8"))
+        expected = json.loads((ROOT / name).read_text(encoding="utf-8"))
+        assert exporter.contracts_match(actual, expected
+        ), f"{name}: {exporter.first_contract_difference(actual, expected)}"
 
 
 def test_export_comparison_accepts_roundoff_but_rejects_science_and_metadata_drift():
@@ -83,8 +141,8 @@ def test_export_comparison_rejects_changed_zero_sign(location, actual, expected)
     assert exporter.contracts_match({location: {"value": actual}}, {location: {"value": actual}})
 
 
-def test_export_crown_threshold_matrix_preserves_all_four_classifications():
-    documents = _exporter().build_documents()
+def test_export_crown_threshold_matrix_preserves_all_four_classifications(_reference_documents):
+    documents = _reference_documents()
     root_cases = documents["tests/data/rust_port/boundaries.json"]["cases"]
     core_cases = documents["rust/crates/behave-fire/tests/data/crown.json"]["cases"]
     for cases in (root_cases, core_cases):
@@ -158,9 +216,9 @@ def test_export_provenance_tracks_reference_implementation_only(tmp_path, monkey
     }
 
 
-def test_export_registry_receivers_replay_custom_clear_and_species_insert():
+def test_export_registry_receivers_replay_custom_clear_and_species_insert(_reference_documents):
     exporter = _exporter()
-    documents = exporter.build_documents()
+    documents = _reference_documents()
     cases = {case["id"]: case for case in documents["tests/data/rust_port/registries.json"]["cases"]}
     clear = cases["FuelModels.clear_custom_fuel_model/baseline"]
     assert "receiver_before" in clear
@@ -205,8 +263,8 @@ def test_export_registry_receivers_replay_custom_clear_and_species_insert():
         assert exporter.encode_value(vars(table.records[-1])) == expected
 
 
-def test_export_scenarios_cover_static_facade_methods_and_stateful_helpers():
-    documents = _exporter().build_documents()
+def test_export_scenarios_cover_static_facade_methods_and_stateful_helpers(_reference_documents):
+    documents = _reference_documents()
     records = documents["tests/data/rust_port/behave.json"]["cases"]
     assert len({case["entry_point"] for case in records}) == 11
     for domain in ("fire_size", "slope_tool", "unit_classes", "registries"):
@@ -216,8 +274,8 @@ def test_export_scenarios_cover_static_facade_methods_and_stateful_helpers():
             assert "exception" not in record, record
 
 
-def test_export_science_cases_cover_lightning_equations_and_terminal_states():
-    documents = _exporter().build_documents()
+def test_export_science_cases_cover_lightning_equations_and_terminal_states(_reference_documents):
+    documents = _reference_documents()
     cases = documents["tests/data/rust_port/boundaries.json"]["cases"]
     ids = {case["id"] for case in cases}
     assert {f"lightning/charge-{charge}" for charge in range(3)} <= ids
@@ -269,10 +327,21 @@ def test_pickle_protocols_retain_snapshots_and_custom_registries(protocol):
     assert restored._fuel_models.get_fuelbed_depth(250) == 19.0
 
 
+def test_reference_document_snapshots_cannot_mutate_other_tests(_reference_documents):
+    name = "tests/data/rust_api_inventory.json"
+    expected = json.loads((ROOT / name).read_text(encoding="utf-8"))
+    first = _reference_documents()
+    first[name]["entries"][0]["python_name"] = "mutated by another inspection"
+    second = _reference_documents()
+    assert second[name]["entries"][0]["python_name"] == expected["entries"][0]["python_name"]
+    assert second[name] == expected
+
+
 def test_reference_documents_are_deterministic_and_match_reviewed_fixtures():
     exporter = _exporter()
     first = exporter.build_documents()
     second = exporter.build_documents()
+    assert first.keys() == REFERENCE_PATHS
     assert first == second
     for name, document in first.items():
         expected = json.loads((ROOT / name).read_text(encoding="utf-8"))
