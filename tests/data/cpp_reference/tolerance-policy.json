@@ -70,7 +70,7 @@
     }
   },
   "qualification": {
-    "activation_reason": "Reviewed final lint cleanup and blocking style enforcement qualified across both compilers and all seven native platforms; scientific inputs, outputs, defaults, and caps unchanged",
+    "activation_reason": "Reviewed Rust lexer token reuse qualified by the complete unchanged-cap compiler and platform campaign",
     "artifacts": {
       "tests/data/cpp_reference/surface/cases.jsonl": "266d08d8b82d65d950461c73e70b44c228ad7b54fbe99eb1d14ed8af6add66da",
       "tests/data/cpp_reference/surface/results.jsonl": "ae006838d93bbb9533df74340085110c479315cb8238a8ce488a68fe5e9e1b71",
@@ -78,7 +78,7 @@
       "tests/data/cpp_reference/surface_custom/results.jsonl": "04e96268466338364a350d53ac05b639f1a7758c78911aaee97da389c0f779a2"
     },
     "calibration_complete": true,
-    "ci_run_url": "https://github.com/gagreene/behave_fire/actions/runs/44179706646",
+    "ci_run_url": "https://github.com/gagreene/behave_fire/actions/runs/44257141748",
     "fields": {
       "fireline_intensity_btu_ft_s": {
         "atol": 1e-12,
@@ -113,7 +113,7 @@
     },
     "reports": {
       "cpp-GNU": {
-        "sha256": "425744cd624cc1ed9c258073e85321f3ba270d920340440c83ebe2efa840d200",
+        "sha256": "b9db9e21ed526fb2c68236aa67c0ecd5ee864bc8c6e29eb4600b8884f3e573e4",
         "summary": {
           "available": 722,
           "cases": 773,
@@ -122,7 +122,7 @@
         }
       },
       "cpp-MSVC": {
-        "sha256": "2e84c53e0b2f03aeb2ee29c6953b443eb25360ad7c45b5a82ca1363cfaf9fa12",
+        "sha256": "6bc62eab50a029b61da342879ba24ad69870fd12c62157168b065e30cafcf1ed",
         "summary": {
           "available": 722,
           "cases": 773,
@@ -131,7 +131,7 @@
         }
       },
       "ports-linux-aarch64": {
-        "sha256": "b268e4c2da387a67242cf0ea3a4ff410c048f3b411f8efcf5b879820c4eae563",
+        "sha256": "de8fc9c95f97c609c61fdb3e23c763796fc706e9bc686163ae63909be1bc9425",
         "summary": {
           "cases_per_backend": 583,
           "fields_per_backend": 2915,
@@ -139,7 +139,7 @@
         }
       },
       "ports-linux-musl-x86_64": {
-        "sha256": "568d31135c7aed099460c4a185cff1eadd49af0bb50f29ae237dd4f28dba222f",
+        "sha256": "e3e329471f7aff5c42786e47247a978fe6f8f6312d8bce064676012dcda31571",
         "summary": {
           "cases_per_backend": 583,
           "fields_per_backend": 2915,
@@ -147,7 +147,7 @@
         }
       },
       "ports-linux-x86_64": {
-        "sha256": "09e2a960b7505d22a1fc8d2488f804e35844428a5bd9e2472eaaf3bd234d05c5",
+        "sha256": "05e5574a81e4ca4fd6f19f7c7604f030edebcbffa12d7e1b2955b694c6b364e8",
         "summary": {
           "cases_per_backend": 583,
           "fields_per_backend": 2915,
@@ -155,7 +155,7 @@
         }
       },
       "ports-macos-arm64": {
-        "sha256": "272a1a9e6960f2d8a1c2d9674e4f9759a57b8f645aeaea7cae283e34dbc3927e",
+        "sha256": "c97e909a0bfa7c9d8f63c73a5da18f2caa77f5f793efc9bf2f19ee09c3f307ff",
         "summary": {
           "cases_per_backend": 583,
           "fields_per_backend": 2915,
@@ -163,7 +163,7 @@
         }
       },
       "ports-macos-x86_64": {
-        "sha256": "71a84735620cb70a9737ae252fada414fdb190b9e3c79b622b1ac2df9456905f",
+        "sha256": "2eaa2102c70531972909a18eed34aa255ec8f4a63a6fcc479350517c8d2e5a66",
         "summary": {
           "cases_per_backend": 583,
           "fields_per_backend": 2915,
@@ -171,7 +171,7 @@
         }
       },
       "ports-windows-arm64": {
-        "sha256": "d23cb712a349d3119cfa0fd68f097bd1b4d49c5e1e22126c38bed0e21ae4ba04",
+        "sha256": "c7653f2d1619bd2ccc3d652a03be0e23022b92b19c52ed24fd5022043dfb4c8c",
         "summary": {
           "cases_per_backend": 583,
           "fields_per_backend": 2915,
@@ -179,7 +179,7 @@
         }
       },
       "ports-windows-x86_64": {
-        "sha256": "d9dbd3a5be906a22f5811980712f5df0400668e91f79fae54d3b013d2465a92f",
+        "sha256": "6a28d8a99a70a1375effbb68a04504fb96876c698ba3bc200f3e7318eaf3aed2",
         "summary": {
           "cases_per_backend": 583,
           "fields_per_backend": 2915,
@@ -188,7 +188,7 @@
       }
     },
     "schema_version": 1,
-    "source_commit": "2b8f1230d29189d018a6877801ce49fbc5af3c2c",
+    "source_commit": "619d99a293e1e534b658bf2ce2995ae9642ea3c0",
     "source_files": {
       ".github/workflows/ci.yml": "3a03fac3df21ae40de17b7451c6d82e62d9604811badd2bf057ff0e8fa2539d2",
       ".github/workflows/crate-validation.yml": "970147b312a0719d1e63318b2f8b8f200479c5592e5e368cbfd2407893ac1f6d",
@@ -348,7 +348,7 @@
       "tools/check_core_f64.py": "b69ee38251b47d8b3c58db30027b9024c7c7a2d1f7018fc3a8615cff9134b3ee",
       "tools/check_cpp_driver.py": "87a8b8c57e7432a5fe56d99235d1d267ea7a629970b781f1e21b2c8d07fc09b4",
       "tools/check_crate_package.py": "205665c89187b655515a40c7cf976d0d455f1ad95bf2e8eba96769c0d35aa982",
-      "tools/check_function_order.py": "4debea611e505cd19b49ed6123a31cb80886ff3d7ce6b44706bc31068ead0d9c",
+      "tools/check_function_order.py": "6d9e94a108593934cacd557a8d7fa32500ccc397be57123c3f884d089e1cb1dc",
       "tools/check_performance.py": "3d8866b469dc6ba965e3c94583e8573c69477492e10de4431289ce47c374babe",
       "tools/check_public_serial_f64.py": "0ec06d24629e72dcf0cc908fe7ab05387744b249d5a0c0be90b3ed9424282d0b",
       "tools/check_rust_tables.py": "cc3e957a6d44614ea91c87bedfc6f7d65858bf93b30215bd80fca0ced88d5941",

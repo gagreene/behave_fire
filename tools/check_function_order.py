@@ -24,11 +24,18 @@ import re
 import sys
 import tokenize
 from collections import Counter
+from functools import lru_cache
 from pathlib import Path
 
 SKIP = {'.venv', 'target', '__pycache__', '.git', 'node_modules', 'build', 'dist'}
 LABEL = re.compile(r'^\s*(?:#|//) ---- (.*) ----\s*$', re.M)
 EXEMPT = re.compile(r'(?:#|//)\s*order-exempt:\s*(\S.*)$')
+RUST_CHARACTER = re.compile(r"b?'(?:\\(?:[^\r\nxu]|x[0-9a-fA-F]{2}|u\{[0-9a-fA-F_]+\})|[^'\\\r\n])'")
+RUST_NUMBER_OR_OPERATOR = re.compile(r'\d[\d_]*\.(?![.\w])'
+                                    r'|\d[\d_]*(?:\.[\d_]+)?(?:[eE][+-]?[\d_]+)?\w*'
+                                    r'|::|->|=>|\.\.=|\.\.|<<=?|>>=?|&&|\|\||[=!<>+*/%&|^-]=')
+RUST_QUOTED_STRING = re.compile(r'(?:b|c)?"')
+RUST_RAW_STRING = re.compile(r'(?:br|cr|r)(#*)"')
 RUST_WHITESPACE = frozenset('\t\n\v\f\r \u0085\u200e\u200f\u2028\u2029')
 
 def _python_comment_lines(source):
@@ -294,12 +301,13 @@ def _rust_token_spans(text):
     return result
 
 
+@lru_cache(maxsize=512)
 def _rust_tokens(text, spacing=False):
     """Tokenize Rust without discarding string contents, attributes, or comments.
 
     :param text: Rust item source validated by the item scanner.
     :param spacing: Retain all token adjacency; conservatively reject non-order formatting changes.
-    :return: Lexical tokens with insignificant whitespace removed.
+    :return: Immutable lexical tokens cached by exact source content and spacing mode.
     """
     tokens = []
     i = 0
@@ -327,32 +335,30 @@ def _rust_tokens(text, spacing=False):
             if depth:
                 raise ValueError('Unterminated Rust comment')
         else:
-            raw = re.match(r'(?:br|cr|r)(#*)"', text[i:])
-            quoted = re.match(r'(?:b|c)?"', text[i:])
-            char = re.match(r"b?'(?:\\(?:[^\r\nxu]|x[0-9a-fA-F]{2}|u\{[0-9a-fA-F_]+\})|[^'\\\r\n])'", text[i:])
+            raw = RUST_RAW_STRING.match(text, i)
+            quoted = RUST_QUOTED_STRING.match(text, i)
+            char = RUST_CHARACTER.match(text, i)
             if raw:
                 close = '"' + raw.group(1)
-                end = text.find(close, i + raw.end())
+                end = text.find(close, raw.end())
                 if end < 0:
                     raise ValueError('Unterminated Rust raw string')
                 i = end + len(close)
             elif quoted:
-                i += quoted.end()
+                i = quoted.end()
                 while i < len(text) and text[i] != '"':
                     i += 2 if text[i] == '\\' else 1
                 if i >= len(text):
                     raise ValueError('Unterminated Rust string')
                 i += 1
             elif char:
-                i += char.end()
+                i = char.end()
             else:
                 identifier = _rust_identifier_end(text, i + 2) if text.startswith('r#', i) else i
                 if identifier <= i + 2:
                     identifier = _rust_identifier_end(text, i)
-                word = re.match(r'\d[\d_]*\.(?![.\w])'
-                                r'|\d[\d_]*(?:\.[\d_]+)?(?:[eE][+-]?[\d_]+)?\w*'
-                                r'|::|->|=>|\.\.=|\.\.|<<=?|>>=?|&&|\|\||[=!<>+*/%&|^-]=', text[i:])
-                i = identifier if identifier > i else i + (word.end() if word else 1)
+                word = RUST_NUMBER_OR_OPERATOR.match(text, i)
+                i = identifier if identifier > i else word.end() if word else i + 1
             if raw or quoted or char:
                 i = _rust_identifier_end(text, i)
         token = text[start:i]
