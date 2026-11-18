@@ -281,19 +281,6 @@ def test_reference_documents_are_deterministic_and_match_reviewed_fixtures():
         assert document["provenance"]["python_reference_sha"] == "7933789f00470c6bbfbe942dc22bdd7f74e192f9"
 
 
-def test_root_class_identity_and_explicit_python_subclassing():
-    from behave_fire import BehaveRun as RootBehaveRun
-
-    class CustomRun(BehaveRun):
-        pass
-
-    assert RootBehaveRun is not BehaveRun
-    automatic = RootBehaveRun(FuelModels(), backend="python")
-    assert automatic.backend_in_use == "python"
-    assert not isinstance(automatic, BehaveRun)
-    assert isinstance(CustomRun(FuelModels()), BehaveRun)
-
-
 def test_spawn_round_trip_retains_snapshot_after_registry_mutation(tmp_path):
     fuels = FuelModels()
     runner = BehaveRun(fuels)

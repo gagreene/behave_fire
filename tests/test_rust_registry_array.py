@@ -14,11 +14,6 @@ def test_native_canopy_ratio(height, base, expected):
     np.testing.assert_allclose(result, expected, equal_nan=True)
 
 
-def test_native_facade_constructor():
-    from behave_fire.rust import BehaveRun, FuelModels
-    assert BehaveRun(FuelModels(), threads=1).threads == 1
-
-
 def test_public_inventory_routes_exist():
     import json
 

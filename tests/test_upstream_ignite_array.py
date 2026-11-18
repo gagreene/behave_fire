@@ -17,7 +17,12 @@ LEGACY = json.loads((Path(__file__).parent / "data/legacy_lightning.json").read_
 
 
 def test_firebrand_remains_supported():
-    assert float(calculate_firebrand_ignition_probability(80.0, 0.0, 0.06)) >= 0.0
+    probability = calculate_firebrand_ignition_probability(80.0, 0.0, 0.06)
+    assert np.shape(probability) == ()
+    assert float(probability) == pytest.approx(0.5708689880918321, rel=1e-14, abs=1e-14)
+    # The shade=0.5 value is also pinned in rust_port/ignite.json.
+    probability = calculate_firebrand_ignition_probability(80.0, 0.5, 0.06)
+    assert float(probability) == pytest.approx(0.5483170476526804, rel=1e-14, abs=1e-14)
 
 
 @pytest.mark.parametrize("charge", range(3))

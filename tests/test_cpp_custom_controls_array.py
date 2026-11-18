@@ -38,7 +38,10 @@ def test_calibration_report_rejects_a_wrong_platform_identity(tmp_path):
 
 def test_control_schema_accepts_an_explicit_percent_quantity():
     """A separate unit-labelled custom definition must pass the guarded schema."""
-    reference._validate_case(_case())
+    case = _case()
+    before = deepcopy(case)
+    reference._validate_case(case)
+    assert case == before
 
 
 @pytest.mark.parametrize('field,value', [
