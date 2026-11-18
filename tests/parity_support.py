@@ -99,8 +99,15 @@ def _assert_result(actual, expected, floating, path):
         assert actual == expected, path
 
 
-def _float64_case(case, operation, arguments):
-    """Keep historical Python evidence separate from the new native model contract."""
+def _float64_case(case, operation, arguments, compare=None):
+    """Keep historical Python evidence separate from the new native model contract.
+
+    :param case: Frozen acceptance record.
+    :param operation: Native operation with the original argument contract.
+    :param arguments: Decoded original inputs.
+    :param compare: Optional output collector for compatible unit comparisons.
+    :return: None; validates frozen Python evidence and the native float64 result.
+    """
     import builtins
 
     from behave_fire import python as python_backend
@@ -164,7 +171,14 @@ def _float64_case(case, operation, arguments):
         except (TypeError, ValueError, IndexError) as error:
             _assert_native_error(operation, arguments, type(error))
             return
-        assert_outputs(operation(**arguments), expected)
+        if compare is None:
+            assert_outputs(operation(**arguments), expected)
+        else:
+            with warnings.catch_warnings(record=True) as caught:
+                warnings.simplefilter('always')
+                actual = operation(**arguments)
+            assert sorted(set(type(item.message).__name__ for item in caught)) == case['warnings'], 'warnings differ'
+            compare(actual, expected)
 
 
 def _numeric_family(value):
@@ -261,7 +275,13 @@ def registry_state(state):
 
 
 
-def run_case(case):
+def run_case(case, compare=None):
+    """Execute a frozen record with its original inputs and state.
+
+    :param case: Frozen acceptance record.
+    :param compare: Optional final float64 comparator for compatible unit cases.
+    :return: None; checks output, error, warning, and state contracts.
+    """
     route = case["entry_point"].replace("behave_fire.components", "behave_fire.rust").replace("behave_fire.behave",
         "behave_fire.rust.core")
     module, function = route.rsplit(".", 1)
@@ -288,7 +308,7 @@ def run_case(case):
         'vapor_pressure_deficit_calculator', 'surface', 'crown', 'fine_dead_fuel_moisture_tool'))
     stateless = stateless or ('.mortality.calculate_' in entry)
     if stateless or '.BehaveRun.' in entry or entry.rsplit('.', 1)[1] in ('run_crown_fire', 'coerce_crown_fire_inputs'):
-        _float64_case(case, operation, arguments)
+        _float64_case(case, operation, arguments, compare=compare)
         return
     if case['entry_point']=='behave_fire.components.surface.calculate_direction_of_max_spread':
         x,y=arguments['x_component'],arguments['y_component']
