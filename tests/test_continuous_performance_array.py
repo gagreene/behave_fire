@@ -29,6 +29,16 @@ def test_continuous_weather_is_unique_reproducible_and_seeded():
 
 
 @pytest.mark.parametrize("cells", [0, 1])
-def test_continuous_weather_supports_empty_and_scalar_inputs(cells):
+def test_continuous_weather_supports_empty_and_one_cell_vectors(cells):
     inputs = _cases().build_inputs(cells, "continuous")
-    assert inputs["m1h"].shape == (cells,)
+    assert set(inputs) == {'fuel_model_grid', 'm1h', 'm10h', 'm100h', 'mlh', 'mlw', 'wind_speed',
+                           'wind_speed_units', 'wind_direction', 'wind_orientation_mode', 'slope'}
+    for name in ('m1h', 'm10h', 'm100h', 'mlh', 'mlw', 'wind_speed', 'wind_direction', 'slope'):
+        assert inputs[name].shape == (cells,), name
+        assert inputs[name].dtype == np.float64, name
+        assert np.isfinite(inputs[name]).all(), name
+    assert inputs['fuel_model_grid'].shape == (cells,)
+    assert inputs['fuel_model_grid'].dtype == np.int32
+    assert inputs['fuel_model_grid'].tolist() == ([] if cells == 0 else [1])
+    assert inputs['wind_speed_units'] == 0
+    assert inputs['wind_orientation_mode'] == 'RelativeToUpslope'

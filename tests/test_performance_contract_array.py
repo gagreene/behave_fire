@@ -116,7 +116,8 @@ def test_profile_keeps_separate_kernel_encoder_and_transfer_measurements():
     assert row['profile'] is True and len(row['native_calls']) == 1
     assert row['native_stages']['kernel_seconds'] > 0
     assert row['native_stages']['encoder_seconds'] > 0
-    assert row['native_stages']['appended_bytes'] == row['native_stages']['concatenate_seconds'] == 0
+    assert row['native_stages']['detached_seconds'] > 0
+    assert row['native_stages']['numpy_transfer_seconds'] > 0
 
 
 @pytest.mark.rust

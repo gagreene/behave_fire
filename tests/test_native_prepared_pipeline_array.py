@@ -4,6 +4,7 @@ import numpy as np
 import pytest
 
 from parity_support import ROOT as ROOT
+from parity_support import assert_result, encode_value
 
 # Keep bootstrap setup before imports that require tools on sys.path.
 # isort: split
@@ -56,7 +57,7 @@ def test_fused_nonbase_units_preserve_reference_outputs(route, storage, varying_
         actual = rust.do_crown_run(surface_results=supplied, **arguments)
     assert_result(actual, encode_value(expected))
 @pytest.mark.parametrize("route", ["surface", "crown"])
-def test_parallel_pipeline_profiles_direct_output_without_concatenation(monkeypatch, route):
+def test_parallel_pipeline_profiles_both_model_routes(monkeypatch, route):
     from behave_fire.python import BehaveRun as PythonRun
     from behave_fire.python import FuelModels
     from behave_fire.rust import BehaveRun, _bridge
@@ -70,18 +71,27 @@ def test_parallel_pipeline_profiles_direct_output_without_concatenation(monkeypa
         kwargs["profile"] = True
         result = original(*args, **kwargs)
         if args[0] in ('surface', 'crown'):
-            observed.append((float(result["__timing.appended_bytes"]),
-                             float(result["__timing.concatenate_seconds"])))
+            observed.append((args[0], kwargs.get('threads', 1), {
+                name: float(result[f'__timing.{name}'])
+                for name in ('owned_copy_seconds', 'detached_seconds', 'kernel_seconds',
+                             'encoder_seconds', 'numpy_transfer_seconds')
+            }))
         return result
 
     monkeypatch.setattr(_bridge._native, "model_batch", profile)
     model = BehaveRun(FuelModels(), threads=4)
     if route == "surface":
-        model.do_surface_run(**arguments)
+        actual = model.do_surface_run(**arguments)
+        expected = supplied
     else:
-        model.do_crown_run(surface_results=supplied, **arguments)
+        actual = model.do_crown_run(surface_results=supplied, **arguments)
+        expected = model_reference(PythonRun(FuelModels()).do_crown_run,
+                                   dict(surface_results=supplied, **arguments))
     assert len(observed) == 1
-    assert observed[0] == (0., 0.)
+    assert observed[0][:2] == (route, 4)
+    for name, seconds in observed[0][2].items():
+        assert np.isfinite(seconds) and seconds > 0, name
+    assert_result(actual, encode_value(expected))
 
 @pytest.mark.parametrize("route", ["surface", "crown"])
 def test_public_model_uses_one_native_compute_call(monkeypatch, route):

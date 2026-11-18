@@ -206,6 +206,7 @@ def test_instance_threads_reach_native_boundary(monkeypatch):
     monkeypatch.setattr(_bridge._native, "component_batch", record)
     for workers in (0, 1, 2, 4):
         model = BehaveRun(FuelModels(), threads=workers)
+        assert model.threads == workers
         requests.clear()
         model.calculate_fire_length(np.arange(9.0), 1.0, 0, 3.0, 0)
         assert requests and all(value == workers for value in requests)

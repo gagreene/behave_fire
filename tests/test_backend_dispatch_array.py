@@ -179,6 +179,7 @@ def test_instance_backend_identity_immutability_and_signatures():
         '        from behave_fire.python import BehaveRun as Python\n'
         '        from behave_fire.components.fuel_models import FuelModels\n'
         '        assert Python is Legacy\n'
+        '        assert bf.BehaveRun is not Legacy\n'
         '        assert bf.FuelModels is FuelModels\n'
         '        class Subclass(Python): pass\n'
         '        assert isinstance(Subclass(FuelModels()), Legacy)\n'

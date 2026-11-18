@@ -41,6 +41,64 @@ def _assert_native_error(operation, arguments, category):
     raise AssertionError(f'Native contract requires {category.__name__} before calculation')
 
 
+def _assert_result(actual, expected, floating, path):
+    """Check structure eagerly and collect scalar floating leaves for one comparison."""
+    if hasattr(actual, "__dict__") and not isinstance(actual, (np.ndarray, int, float, str)):
+        actual = vars(actual)
+    if isinstance(expected, dict) and 'float' in expected:
+        assert not isinstance(actual, np.ndarray), path
+        _queue_floating(actual, decode(expected), floating, path)
+    elif isinstance(expected, (float, complex)):
+        assert not isinstance(actual, np.ndarray), path
+        _queue_floating(actual, expected, floating, path)
+    elif isinstance(expected, list):
+        assert len(actual) == len(expected), path
+        for index, (left, right) in enumerate(zip(actual, expected, strict=False)):
+            _assert_result(left, right, floating, f'{path}[{index}]')
+    elif isinstance(expected, dict) and "dtype" not in expected:
+        assert isinstance(actual, dict), path
+        assert actual.keys() == expected.keys(), path
+        for key in expected:
+            _assert_result(actual[key], expected[key], floating, f'{path}[{key!r}]')
+    elif isinstance(expected, dict) and "dtype" in expected:
+        wanted = decode(expected)
+        # Historical shape=[] records conflate NumPy scalars and zero-rank
+        # arrays. Enforce array structure only when the record distinguishes it.
+        if expected["shape"]:
+            assert isinstance(actual, np.ndarray), path
+        actual = np.asanyarray(actual)
+        assert actual.shape == wanted.shape, path
+        assert actual.dtype == wanted.dtype, path
+        assert np.ma.isMaskedArray(actual) == np.ma.isMaskedArray(wanted), path
+        np.testing.assert_array_equal(np.ma.getmaskarray(actual), np.ma.getmaskarray(wanted), err_msg=path)
+        actual_data, wanted_data = np.ma.getdata(actual), np.ma.getdata(wanted)
+        if wanted.dtype == object:
+            # Read the encoded entries directly: float coercion loses integers
+            # above 2**53 and obscures the boxed bool/integer distinction.
+            for index, (left, right) in enumerate(zip(actual_data.ravel(), expected["values"], strict=False)):
+                payload = decode(right)
+                if isinstance(payload, np.ndarray) and payload.ndim == 0:
+                    payload = payload[()]
+                assert _numeric_family(left) == _numeric_family(payload), f'{path}[{index}]'
+                _assert_result(left, right, floating, f'{path}[{index}]')
+        elif wanted.dtype.kind in "biu":
+            np.testing.assert_array_equal(actual_data, wanted_data, err_msg=path)
+        else:
+            try:
+                _assert_floating(actual_data, wanted_data,
+                                 wanted.dtype in (np.dtype("float32"), np.dtype("complex64")))
+            except AssertionError as error:
+                raise AssertionError(f'{path}: {error}') from error
+    elif isinstance(expected, bool):
+        assert isinstance(actual, (bool, np.bool_)), path
+        assert actual == expected, path
+    elif isinstance(expected, int):
+        assert isinstance(actual, (int, np.integer)) and not isinstance(actual, (bool, np.bool_)), path
+        assert actual == expected, path
+    else:
+        assert actual == expected, path
+
+
 def _float64_case(case, operation, arguments):
     """Keep historical Python evidence separate from the new native model contract."""
     import builtins
@@ -118,57 +176,30 @@ def _numeric_family(value):
     raise AssertionError(f"unsupported boxed numeric payload: {type(value).__name__}")
 
 
+def _queue_floating(actual, expected, floating, path):
+    """Snapshot scalar leaves without coercing their numeric dtype."""
+    actual, expected = np.asarray(actual), np.asarray(expected)
+    key = actual.dtype.str, expected.dtype.str
+    floating.setdefault(key, []).append((actual.copy(), expected.copy(), path))
+
+
 def assert_result(actual, expected):
-    if hasattr(actual, "__dict__") and not isinstance(actual, (np.ndarray, int, float, str)):
-        actual = vars(actual)
-    if isinstance(expected, dict) and 'float' in expected:
-        assert not isinstance(actual, np.ndarray)
-        _assert_floating(actual, decode(expected))
-    elif isinstance(expected, (float, complex)):
-        assert not isinstance(actual, np.ndarray)
-        _assert_floating(actual, expected)
-    elif isinstance(expected, list):
-        assert len(actual) == len(expected)
-        for left, right in zip(actual, expected, strict=False):
-            assert_result(left, right)
-    elif isinstance(expected, dict) and "dtype" not in expected:
-        assert isinstance(actual, dict)
-        assert actual.keys() == expected.keys()
-        for key in expected:
-            assert_result(actual[key], expected[key])
-    elif isinstance(expected, dict) and "dtype" in expected:
-        wanted = decode(expected)
-        # Historical shape=[] records conflate NumPy scalars and zero-rank
-        # arrays. Enforce array structure only when the record distinguishes it.
-        if expected["shape"]:
-            assert isinstance(actual, np.ndarray)
-        actual = np.asanyarray(actual)
-        assert actual.shape == wanted.shape
-        assert actual.dtype == wanted.dtype
-        assert np.ma.isMaskedArray(actual) == np.ma.isMaskedArray(wanted)
-        np.testing.assert_array_equal(np.ma.getmaskarray(actual), np.ma.getmaskarray(wanted))
-        actual_data, wanted_data = np.ma.getdata(actual), np.ma.getdata(wanted)
-        if wanted.dtype == object:
-            # Read the encoded entries directly: float coercion loses integers
-            # above 2**53 and obscures the boxed bool/integer distinction.
-            for left, right in zip(actual_data.ravel(), expected["values"], strict=False):
-                payload = decode(right)
-                if isinstance(payload, np.ndarray) and payload.ndim == 0:
-                    payload = payload[()]
-                assert _numeric_family(left) == _numeric_family(payload)
-                assert_result(left, right)
-        elif wanted.dtype.kind in "biu":
-            np.testing.assert_array_equal(actual_data, wanted_data)
-        else:
-            _assert_floating(actual_data, wanted_data, wanted.dtype in (np.dtype("float32"), np.dtype("complex64")))
-    elif isinstance(expected, bool):
-        assert isinstance(actual, (bool, np.bool_))
-        assert actual == expected
-    elif isinstance(expected, int):
-        assert isinstance(actual, (int, np.integer)) and not isinstance(actual, (bool, np.bool_))
-        assert actual == expected
-    else:
-        assert actual == expected
+    """Compare frozen values, batching scalar leaves and preserving array buffers."""
+    floating = {}
+    _assert_result(actual, expected, floating, '$')
+    for leaves in floating.values():
+        left = np.array([actual[()] for actual, _, _ in leaves], dtype=leaves[0][0].dtype)
+        right = np.array([expected[()] for _, expected, _ in leaves], dtype=leaves[0][1].dtype)
+        try:
+            _assert_floating(left, right)
+        except AssertionError:
+            # Recheck failed buckets only, retaining a precise field/case path.
+            for actual, expected, path in leaves:
+                try:
+                    _assert_floating(actual, expected)
+                except AssertionError as error:
+                    raise AssertionError(f'{path}: {error}') from error
+            raise
 
 
 def cases(*domains):
