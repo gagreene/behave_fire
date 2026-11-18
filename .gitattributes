@@ -22,5 +22,5 @@ tools/cpp_calibrate.py text eol=lf
 tools/cpp_inventory.py text eol=lf
 tools/check_cpp_driver.py text eol=lf
 tools/export_cpp_crate.py text eol=lf
-tests/test_cpp*_array.py text eol=lf
+tests/*/test_cpp*.py text eol=lf
 rust/crates/behave-fire/tests/cpp_reference.rs text eol=lf

@@ -70,7 +70,7 @@
     }
   },
   "qualification": {
-    "activation_reason": "Reviewed Rust lexer token reuse qualified by the complete unchanged-cap compiler and platform campaign",
+    "activation_reason": "Reviewed test-tier packaging and checker paths qualified by the complete compiler and platform campaign at unchanged caps",
     "artifacts": {
       "tests/data/cpp_reference/surface/cases.jsonl": "266d08d8b82d65d950461c73e70b44c228ad7b54fbe99eb1d14ed8af6add66da",
       "tests/data/cpp_reference/surface/results.jsonl": "ae006838d93bbb9533df74340085110c479315cb8238a8ce488a68fe5e9e1b71",
@@ -78,7 +78,7 @@
       "tests/data/cpp_reference/surface_custom/results.jsonl": "04e96268466338364a350d53ac05b639f1a7758c78911aaee97da389c0f779a2"
     },
     "calibration_complete": true,
-    "ci_run_url": "https://github.com/gagreene/behave_fire/actions/runs/44257141748",
+    "ci_run_url": "https://github.com/gagreene/behave_fire/actions/runs/44417630755",
     "fields": {
       "fireline_intensity_btu_ft_s": {
         "atol": 1e-12,
@@ -113,7 +113,7 @@
     },
     "reports": {
       "cpp-GNU": {
-        "sha256": "b9db9e21ed526fb2c68236aa67c0ecd5ee864bc8c6e29eb4600b8884f3e573e4",
+        "sha256": "216e6d4be4df8c47db17aa1edea8e758bbb737a1e66a787cc821ff96cdf52b60",
         "summary": {
           "available": 722,
           "cases": 773,
@@ -122,7 +122,7 @@
         }
       },
       "cpp-MSVC": {
-        "sha256": "6bc62eab50a029b61da342879ba24ad69870fd12c62157168b065e30cafcf1ed",
+        "sha256": "693cb7da3560efb30c97cae5b43275ba712ed7bc5006aa8b1e135821b8be0161",
         "summary": {
           "available": 722,
           "cases": 773,
@@ -131,7 +131,7 @@
         }
       },
       "ports-linux-aarch64": {
-        "sha256": "de8fc9c95f97c609c61fdb3e23c763796fc706e9bc686163ae63909be1bc9425",
+        "sha256": "55cda94b3642cdefeb301e4439485de6c30b0cb1a5b91017059504d653998173",
         "summary": {
           "cases_per_backend": 583,
           "fields_per_backend": 2915,
@@ -139,7 +139,7 @@
         }
       },
       "ports-linux-musl-x86_64": {
-        "sha256": "e3e329471f7aff5c42786e47247a978fe6f8f6312d8bce064676012dcda31571",
+        "sha256": "e9eb4adf0b1fe7629234363c4c417aa097b34aa384651b6e5e4f76c943cbd11a",
         "summary": {
           "cases_per_backend": 583,
           "fields_per_backend": 2915,
@@ -147,7 +147,7 @@
         }
       },
       "ports-linux-x86_64": {
-        "sha256": "05e5574a81e4ca4fd6f19f7c7604f030edebcbffa12d7e1b2955b694c6b364e8",
+        "sha256": "9dc8c167efc3a086af973e96c47045641c602b91306d28c556f5b74cf85fedaa",
         "summary": {
           "cases_per_backend": 583,
           "fields_per_backend": 2915,
@@ -155,7 +155,7 @@
         }
       },
       "ports-macos-arm64": {
-        "sha256": "c97e909a0bfa7c9d8f63c73a5da18f2caa77f5f793efc9bf2f19ee09c3f307ff",
+        "sha256": "256350a88e9fd63972dfe4efcd8d2d68fda546f840e72e122f4c6c28670716e1",
         "summary": {
           "cases_per_backend": 583,
           "fields_per_backend": 2915,
@@ -163,7 +163,7 @@
         }
       },
       "ports-macos-x86_64": {
-        "sha256": "2eaa2102c70531972909a18eed34aa255ec8f4a63a6fcc479350517c8d2e5a66",
+        "sha256": "a27968f54b57ceec449c97f4537687ac21bea1f9a94fdea358ca59d21db2d2fc",
         "summary": {
           "cases_per_backend": 583,
           "fields_per_backend": 2915,
@@ -171,7 +171,7 @@
         }
       },
       "ports-windows-arm64": {
-        "sha256": "c7653f2d1619bd2ccc3d652a03be0e23022b92b19c52ed24fd5022043dfb4c8c",
+        "sha256": "32eea161abe96be4b6fed75bb1a7a964a5cf5d8303f67b7a21aa98b82be683dd",
         "summary": {
           "cases_per_backend": 583,
           "fields_per_backend": 2915,
@@ -179,7 +179,7 @@
         }
       },
       "ports-windows-x86_64": {
-        "sha256": "6a28d8a99a70a1375effbb68a04504fb96876c698ba3bc200f3e7318eaf3aed2",
+        "sha256": "11557c32fb6566367be43fcd08298b250f27ebe99e1c3afe626e425d4cbadd8d",
         "summary": {
           "cases_per_backend": 583,
           "fields_per_backend": 2915,
@@ -188,14 +188,14 @@
       }
     },
     "schema_version": 1,
-    "source_commit": "619d99a293e1e534b658bf2ce2995ae9642ea3c0",
+    "source_commit": "4d30e74a8af2ff0abec954f79f07ee0367d93dd9",
     "source_files": {
       ".github/workflows/ci.yml": "3a03fac3df21ae40de17b7451c6d82e62d9604811badd2bf057ff0e8fa2539d2",
       ".github/workflows/crate-validation.yml": "970147b312a0719d1e63318b2f8b8f200479c5592e5e368cbfd2407893ac1f6d",
       ".github/workflows/release-crate.yml": "20ecaa481e1f6b5e73c1e5019da3ffe2db6de037529c2eb300f5c4a3adbfa2f3",
       ".github/workflows/release.yml": "8bcbc7c87a325d8505c88436e384d52d733a5d08b9dcc1b92b201b15c34dcfcd",
       ".github/workflows/wheel-validation.yml": "f14d3ce305d5c341351e5d1b17d14a2b28359d246376e130230c57c424cf8c0f",
-      "pyproject.toml": "a88c31d49c645e22fd267cbb23660b1db255309f0932025ea4c68a6bfb652fcc",
+      "pyproject.toml": "395faf4f9d87f4e8979ca818b7c7bfeff11d8fd5719ba601403a8f5863598440",
       "rust/Cargo.lock": "d1d2a7bca8b52c78ef86466f0639b6c44a5b08d2a000a8af4dc3ee1da45535b2",
       "rust/Cargo.toml": "31b5c56d96a7293e4d1298577bf422438fee6521d9f89858e23ddefd36dc75ac",
       "rust/crates/behave-fire/Cargo.toml": "b1326b42c725b7d50dfe6834cbbf28fafc8648e39e0825aeb232d43ec2b323c6",
@@ -348,7 +348,7 @@
       "tools/check_core_f64.py": "b69ee38251b47d8b3c58db30027b9024c7c7a2d1f7018fc3a8615cff9134b3ee",
       "tools/check_cpp_driver.py": "87a8b8c57e7432a5fe56d99235d1d267ea7a629970b781f1e21b2c8d07fc09b4",
       "tools/check_crate_package.py": "205665c89187b655515a40c7cf976d0d455f1ad95bf2e8eba96769c0d35aa982",
-      "tools/check_function_order.py": "6d9e94a108593934cacd557a8d7fa32500ccc397be57123c3f884d089e1cb1dc",
+      "tools/check_function_order.py": "79ab381e2f48e9e6fa8605d11a3d0c7459e7519325b3e59785c3e4271bad19d7",
       "tools/check_performance.py": "3d8866b469dc6ba965e3c94583e8573c69477492e10de4431289ce47c374babe",
       "tools/check_public_serial_f64.py": "0ec06d24629e72dcf0cc908fe7ab05387744b249d5a0c0be90b3ed9424282d0b",
       "tools/check_rust_tables.py": "cc3e957a6d44614ea91c87bedfc6f7d65858bf93b30215bd80fca0ced88d5941",

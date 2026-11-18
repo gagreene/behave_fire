@@ -180,7 +180,7 @@ behave_fire/
 │               ├── prepared/        #     Primitive argument parsing: controls, selectors, and keys
 │               ├── structures.rs, data.rs, state.rs, effects.rs, tools.rs   # Structured records, default-table export, checked stateful tools, effects and tools bindings
 │               └── allocation_probe.rs  #  Allocation diagnostics, compiled only under the allocation-probe feature
-├── tests/                           # Python tests, fixtures, and the legacy harness (test_behave.py)
+├── tests/                           # Python test tiers, fixtures, and the standalone legacy harness
 ├── tools/                           # Parity, benchmark, packaging, and artifact-validation tools, plus the Rust probe crates (field_probe, perf_probe) and rust_consumer.rs
 ├── docs/                            # Contracts, procedures, and measurements (see Documentation)
 ├── .github/workflows/               # CI, wheel validation, and release workflows
@@ -513,7 +513,7 @@ Native Python tests need a built extension (`uv sync --locked --extra test --ext
 uv run --no-sync python -m pytest --require-rust
 ```
 
-Pytest imports the package through `src` and collects `test_*_array.py` under root `tests/`. Fixtures are loaded relative to their test files from `tests/data/`. The native and parity suites compare Rust against the explicit Python backend (including dtype, mask, shape, and exception behavior) and cover packaging, dispatch, serialization, ownership, and workflow contracts. These checks do not establish full C++ numerical parity.
+Pytest imports the package through `src` and discovers `test_*.py` under `tests/unit`, `tests/integration`, and `tests/regression`. It applies the `integration` and `regression` markers from the corresponding directories. Shared fixtures live in `tests/data/`. The native and parity suites compare Rust against the explicit Python backend (including dtype, mask, shape, and exception behavior) and cover packaging, dispatch, serialization, ownership, and workflow contracts. These checks do not establish full C++ numerical parity.
 
 Rust tests (from the repository root; `rust/` has no `Cargo.toml` at the root, so pass the manifest path):
 
@@ -527,7 +527,7 @@ cargo +1.78.0 test --manifest-path rust/Cargo.toml -p behave-fire --locked   # m
 Run the legacy accumulator harness separately, also from the project root:
 
 ```bash
-python tests/test_behave.py
+python tests/legacy/behave_harness.py
 ```
 
 Expected lightning deprecation warnings may appear. The standalone harness locates `src/` relative to its own file and uses the same canonical `behave_fire` imports as pytest. No machine-specific paths or `PYTHONPATH` settings are required.

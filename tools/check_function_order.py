@@ -530,13 +530,15 @@ def check_python(path, problems, require_labels=True):
     tree = ast.parse(text)
     lines = text.splitlines()
     comments = _python_comment_lines(text)
-    is_test = path.name.startswith('test_')
+    # The standalone harness retains its reference scenario order outside collected tiers.
+    legacy_harness = path.parts[-3:] == ('tests', 'legacy', 'behave_harness.py')
+    is_test = legacy_harness or path.name.startswith('test_')
     where = path.as_posix()
     scopes = []
     py_scopes(tree.body, '<module>', is_test, scopes)
     for nodes, scope, scope_is_test in scopes:
         check_py_body(nodes, scope, scope_is_test, lines, problems, where,
-                      require_labels=require_labels, comments=comments)
+                      require_labels=require_labels and not legacy_harness, comments=comments)
 
 
 def check_rust(path, problems, require_labels=True):
