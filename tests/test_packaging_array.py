@@ -20,7 +20,7 @@ class PackagingTests(unittest.TestCase):
         for base in (root, root / "rust/crates/behave-fire"):
             for name in ("LICENSE", "NOTICE", "LICENSES/NumPy-BSD-3-Clause.txt", "LICENSES/Intel-SVML-BSD-3-Clause.txt"
             ):
-                with self.subTest(path=base / name):
+                with self.subTest(path=str(base / name)):
                     self.assertNotIn(b"\r", (base / name).read_bytes())
 
     def test_compiled_sources_are_rejected_before_staging(self):
