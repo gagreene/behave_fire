@@ -277,6 +277,14 @@ Coding agents must obtain direct permission before pushing release tags.
 Use the procedures in [RELEASING.md](RELEASING.md) for build-only GitHub runs, downloading the complete seven-platform native wheel set, the universal fallback wheel, and source distribution validation. Every tested OS/architecture has a native wheel, including Alpine/musl x86-64 and Windows ARM64; pure-only installation remains independently tested. Python-only source tests must use `uv sync --locked --no-install-project --extra test --extra dev` and `uv run --no-sync python -m pytest`; never install the project editable in that route. The native test route must run `python -m pytest --require-rust` against a built extension. The test extra contains pytest and PyYAML, without optional raster dependencies. All Python package release tags target approved released commits on `master`; the standalone Rust core has its own version and tag namespace.
 
 
+## Test organization
+
+- Put Python tests in `tests/unit`, `tests/integration`, or `tests/regression` and name them `test_*.py`. Shared helpers live at the top of `tests/`, and fixtures live in `tests/data/`.
+- Unit tests exercise an isolated function or contract. Integration tests exercise components, backends, or distribution tooling together. Regression tests preserve fixes for confirmed defects and state the original failure in the docstring. Use the smallest input that reproduces the defect.
+- Pytest applies `integration` and `regression` from the tier directory. The collection test checks for agreement. Use `python -m pytest -m integration` or `python -m pytest -m regression` to select a tier.
+- Keep pinned C++ observations under the `cpp_reference` marker. See [CPP_VALIDATION.md](CPP_VALIDATION.md) for offline validation and live qualification commands.
+
+
 ## C++ parity
 
 The coverage unit is hybrid (owner decision 11, 2026-11-13). Every public C++ method belongs to a route bundle, and every scientific candidate with Python or Rust targets also has a per-function status. State and lifecycle methods are exercised through bundle contracts. Route assignment and source-derived candidate mappings are not execution evidence. During pilot preparation, `pending_pilot` and `not_in_pilot` explicitly identify work that has no qualified numerical dataset; neither status is a waiver or a claim of tested coverage. The offline inventory check validates the committed snapshot without the C++ checkout. Its `--require-ready` gate rejects a snapshot with no executable scientific route. A tested status requires hashed cases, results, a manifest, and the owner's approved field policy and finding decision.

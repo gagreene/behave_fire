@@ -74,7 +74,7 @@ include = [
     { path = "rust/crates/behave-py/**/*", format = "sdist" },
     { path = "tools/*.py", format = "sdist" },
     { path = "tests/data/cpp_reference/**/*", format = "sdist" },
-    { path = "tests/test_cpp*_array.py", format = "sdist" },
+    { path = "tests/*/test_cpp*.py", format = "sdist" },
     { path = "LICENSES/**", format = "sdist" },
     { path = "NOTICE", format = "sdist" },
     { path = "docs/CPP_VALIDATION.md", format = "sdist" },
@@ -88,7 +88,3 @@ exclude = [
     "**/*.crate", "**/*.egg-info/**", "tests/data/rust_port/**", "reference/behave_cpp",
     "reference/behave_cpp/**", "reference/behave_cpp_overlay/**",
 ]
-
-[tool.pytest.ini_options]
-testpaths = ["tests"]
-pythonpath = ["src"]
