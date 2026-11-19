@@ -28,6 +28,8 @@ def _inputs():
                 wind_orientation_mode="RelativeToUpslope")
 
 
+# ---- crown routing and control normalization tests ----
+
 @pytest.mark.parametrize("field,value", [("aspect", 0.), ("aspect", -90.), ("aspect", np.nan),
     ("aspect", np.inf), ("moisture_foliar", 100.), ("moisture_foliar", np.nan),
     ("moisture_foliar", np.inf), ("wind_speed_units", 1), ("slope_units", 1)])

@@ -33,6 +33,8 @@ def _stale_snapshot(tmp_path, cpp_snapshot_template):
     return root
 
 
+# ---- observation receipts and generation tests ----
+
 def test_compiler_observation_validation_does_not_require_previous_source_qualification(
         tmp_path,
         cpp_snapshot_template,
@@ -72,6 +74,8 @@ def test_generation_accepts_current_and_legacy_receipts_before_preservation_guar
         reference.generate_reference(tmp_path, driver, attestation, 'Test receipt compatibility')
     assert cases.read_bytes() == b'protected observation input\n'
 
+
+# ---- python-only measurement and replacement tests ----
 
 def test_python_only_comparison_never_imports_the_native_extension(tmp_path):
     script = '''

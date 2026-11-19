@@ -37,6 +37,8 @@ def native_namespace(monkeypatch):
     return calls, root
 
 
+# ---- namespace dispatch tests ----
+
 def test_complex_namespace_warning_error_prevents_python_execution(native_namespace, monkeypatch):
     from functools import wraps
 

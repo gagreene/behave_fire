@@ -40,6 +40,7 @@ fn run(inputs: CrownColumns<'_>) -> CrownBatch {
     }
 }
 
+// ---- missing and invalid results ----
 #[test]
 fn explicit_invalid_cells_keep_all_missing_payloads_and_codes() {
     let mut input = columns(8., 32.729299106026254, 1000., 0.01);
@@ -141,6 +142,7 @@ fn unselected_missing_branch_does_not_poison_surface_assignment() {
     assert!(output.final_flame_length[0].is_finite());
 }
 
+// ---- thresholds and stage overrides ----
 #[test]
 fn valid_zero_retains_its_finite_threshold_rule() {
     let output = run(columns(8., 32.729299106026254, 1000., 0.));

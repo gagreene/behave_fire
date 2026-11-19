@@ -19,6 +19,8 @@ def _groups():
                 canopy_bulk_density=np.array([.01])),controls={})]
 
 
+# ---- grouped model preparation tests ----
+
 def test_all_group_snapshots_precede_the_single_owned_callback():
     groups = _groups()
     called = []

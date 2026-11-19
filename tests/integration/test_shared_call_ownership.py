@@ -6,6 +6,7 @@ from pathlib import Path
 
 import numpy as np
 
+# ---- shared ownership and import isolation tests ----
 
 def test_capture_and_invoke_share_owned_arrays_with_nested_native_ownership():
     from behave_fire._auto_routing import capture_call

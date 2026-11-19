@@ -6,6 +6,7 @@ import pytest
 
 from cpp_snapshot_support import capture_snapshot, write_snapshot
 
+# ---- snapshot immutability and path boundary tests ----
 
 @pytest.mark.parametrize('kind', ['absolute', 'parent'])
 def test_capture_rejects_paths_outside_the_source_root(tmp_path, kind):

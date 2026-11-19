@@ -49,6 +49,8 @@ def _tar(path, prefix, files):
     return path
 
 
+# ---- artifact build exclusion tests ----
+
 def test_cpp_reference_exclusions_apply_to_all_maturin_formats():
     configuration = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))
     exclusions = configuration["tool"]["maturin"]["exclude"]
@@ -63,6 +65,8 @@ def test_cpp_reference_exclusions_are_explicit_in_standalone_crate():
     assert "reference/behave_cpp/**" in exclusions
     assert "reference/behave_cpp_overlay/**" in exclusions
 
+
+# ---- crate fixture copies and exclusions tests ----
 
 def test_crate_cpp_fixture_copies_match_canonical_bytes():
     exporter = _load("export_cpp_crate")
@@ -79,6 +83,8 @@ def test_crate_rejects_cpp_reference_sources_and_notices(tmp_path, name):
     with pytest.raises(ValueError, match="C\\+\\+ reference"):
         checker.inspect_crate(_crate(tmp_path, {name: b"synthetic forbidden payload"}))
 
+
+# ---- fixture export tests ----
 
 def test_export_copies_only_explicit_numeric_fixture_inputs(tmp_path):
     exporter = _load("export_cpp_crate")
@@ -121,11 +127,15 @@ def test_export_fails_before_writing_when_any_canonical_input_is_missing(tmp_pat
     assert not destination.exists()
 
 
+# ---- numeric crate fixture tests ----
+
 def test_numeric_cpp_fixture_is_allowed_in_crate(tmp_path):
     checker = _load("check_crate_package")
     report = checker.inspect_crate(_crate(tmp_path, {"tests/data/cpp_reference/surface.tsv": b"1\t2\n"}))
     assert report["normal_dependencies"] == 0
 
+
+# ---- source distribution contents tests ----
 
 def test_sdist_explicitly_includes_untracked_cpp_candidate_inputs(tmp_path):
     checker = _load("check_sdist")
@@ -150,6 +160,8 @@ def test_sdist_rejects_cpp_reference_sources_and_notices(tmp_path, name):
     with pytest.raises(ValueError, match="C\\+\\+ reference"):
         checker.check_archive(archive)
 
+
+# ---- wheel inventory tests ----
 
 @pytest.mark.parametrize("name", FORBIDDEN)
 def test_wheel_rejects_cpp_reference_sources_and_notices(tmp_path, name):

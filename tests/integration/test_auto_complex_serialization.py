@@ -21,6 +21,8 @@ def _arguments(heat):
         slope=0., canopy_base_height=4., canopy_height=30., canopy_bulk_density=.01)
 
 
+# ---- complex state round-trip tests ----
+
 @pytest.mark.parametrize('method', ['copy', 'deepcopy', 'pickle'])
 def test_complex_then_real_state_roundtrip_keeps_policy_and_frozen_registry(monkeypatch, method):
     import behave_fire.auto as auto

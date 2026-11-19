@@ -3,6 +3,7 @@
 use behave_fire::engine::{PreparedFuel, SurfaceCell, SurfacePlan, SurfaceTweaks};
 use behave_fire::{surface, FuelModels};
 
+// ---- surface equation boundaries ----
 #[test]
 fn effective_wind_preserves_elongation_below_old_spread_cutoff() {
     for r0 in [1e-3, 1e-7, 1e-8, 5.23839427461715e-15] {

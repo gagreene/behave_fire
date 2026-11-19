@@ -7,6 +7,7 @@ use behave_fire::engine::{
 use behave_fire::raster::{CrownColumns, CrownRaster, CrownTweakColumns};
 use behave_fire::{FuelModels, GridShape, PerCell};
 
+// ---- requested crown outputs ----
 #[test]
 fn fused_crown_matches_scalar_f64_composition_across_options_and_numeric_fuels() {
     let models = FuelModels::default();

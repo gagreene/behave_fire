@@ -21,6 +21,8 @@ def _surface_inputs():
                 canopy_cover=0.4, canopy_height=30., crown_ratio=0.5, fuel_model_grid=124)
 
 
+# ---- grid session snapshots, edits, and routing tests ----
+
 @pytest.mark.parametrize('threads', [1, 4])
 @pytest.mark.parametrize('shape', [(), (0, 3), (7, 3)])
 @pytest.mark.parametrize('kind,inputs', [(SurfaceGrid, _surface_inputs), (CrownGrid, _crown_inputs)])

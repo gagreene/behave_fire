@@ -4,6 +4,7 @@ use behave_fire::engine::{
 use behave_fire::raster::{SurfaceColumns, SurfaceRaster, SurfaceTweakColumns};
 use behave_fire::{FuelModels, GridShape, PerCell};
 
+// ---- particle stage fuel inputs ----
 #[test]
 fn particle_stage_uses_actual_static_and_dynamic_fuel_inputs() {
     let fuels = PreparedFuels::from_registry(&FuelModels::default());

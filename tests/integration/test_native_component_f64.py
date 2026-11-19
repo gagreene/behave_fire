@@ -11,6 +11,8 @@ _UNIT_CLASSES = ('Area', 'BasalArea', 'Density', 'FirelineIntensity', 'Fraction'
                  'Pressure', 'Slope', 'Speed', 'SurfaceAreaToVolume', 'Temperature', 'Time')
 
 
+# ---- component precision and missing input tests ----
+
 @pytest.mark.parametrize('family', _UNIT_CLASSES)
 def test_all_unit_families_widen_once_and_preserve_missing_physical_values(family):
     from behave_fire.components import behave_units as reference

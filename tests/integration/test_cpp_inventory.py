@@ -49,6 +49,8 @@ def _validator():
     return module.validate_inventory
 
 
+# ---- inventory location and qualified coverage tests ----
+
 def test_inventory_accepts_qualified_surface_coverage():
     inventory = _inventory()
     summary = _validator()(inventory)
@@ -96,6 +98,8 @@ else:
     policy = json.loads((ROOT / 'tests/data/cpp_reference/tolerance-policy.json').read_text())
     assert result.stdout.strip() == ('READY' if policy['approved'] else 'QUALIFICATION_REJECTED')
 
+
+# ---- inventory validation and readiness tests ----
 
 @pytest.mark.parametrize("mutation", [
     "drop_row", "signature", "field", "route", "reverse", "source_hash", "universal_waiver",

@@ -32,6 +32,8 @@ def _report():
     return report
 
 
+# ---- public serial evidence and confirmation tests ----
+
 def test_complete_public_evidence_passes_unchanged_targets():
     from check_public_serial_f64 import check_public_screen
 

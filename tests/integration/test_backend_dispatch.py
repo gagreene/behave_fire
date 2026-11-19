@@ -15,6 +15,8 @@ def _run(source):
     assert result.returncode == 0, result.stdout + result.stderr
 
 
+# ---- backend selection and warning tests ----
+
 @pytest.mark.parametrize("outcome", ["absent", "loader", "version", "incomplete", "usable"])
 def test_cached_selection_and_warnings(outcome):
     _run(
@@ -169,6 +171,8 @@ def test_imports_and_explicit_python_never_probe():
         '    '
     )
 
+
+# ---- instance and native capability tests ----
 
 def test_instance_backend_identity_immutability_and_signatures():
     _run(

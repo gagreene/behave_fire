@@ -13,6 +13,8 @@ def _driver():
     return module
 
 
+# ---- screen confirmation tests ----
+
 def test_confirmation_rejects_failed_or_changed_screen():
     driver = _driver()
     identity = dict(source_hash='a' * 64, binary_hash='b' * 64,

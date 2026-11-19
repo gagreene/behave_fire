@@ -18,11 +18,15 @@ fn close(actual: f64, expected: f64) {
         "actual={actual:?}, expected={expected:?}"
     );
 }
+
+// ---- comparison of signed zeros and roundoff ----
 #[test]
 fn comparator_rejects_zero_sign_changes_but_allows_roundoff() {
     assert!(std::panic::catch_unwind(|| close(0.0, -0.0)).is_err());
     close(1.0 + 1e-10, 1.0);
 }
+
+// ---- effects oracles ----
 // build_mortality_lookup/baseline
 #[test]
 #[allow(deprecated, unused_variables, unused_mut)]
@@ -3463,6 +3467,7 @@ fn oracle_265() {
     close(actual.separation_distance as f64, 4.0);
 }
 
+// ---- mortality diagnostics and output names ----
 #[test]
 fn mortality_diagnostics_and_dictionary_names() {
     let mut table = behave_fire::species::SpeciesMasterTable::default();
@@ -3500,12 +3505,14 @@ fn mortality_diagnostics_and_dictionary_names() {
     );
 }
 
+// ---- near-zero comparison ----
 #[test]
 #[should_panic]
 fn comparator_rejects_near_zero_error_above_absolute_tolerance() {
     close(5e-10, 0.0);
 }
 
+// ---- selected mortality coefficients ----
 #[test]
 fn selected_coefficient_rows_match_python_custom_tables() {
     let result = mortality::calculate_crown_scorch_mortality_with_coefficients(

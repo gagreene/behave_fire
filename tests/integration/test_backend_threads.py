@@ -1,6 +1,7 @@
 """Pure selector and explicit Python worker-keyword contracts."""
 import pytest
 
+# ---- python thread interface tests ----
 
 def test_python_routes_keep_distinct_thread_interfaces():
     from behave_fire import BehaveRun as AutoRun

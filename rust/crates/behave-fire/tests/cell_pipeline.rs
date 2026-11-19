@@ -27,6 +27,7 @@ fn surface(columns: SurfaceColumns<'_>) -> SurfaceBatch {
     }
 }
 
+// ---- canopy and surface inputs ----
 #[test]
 fn missing_slope_is_not_a_zero_slope_and_keeps_reaction_available() {
     let output = surface(SurfaceColumns {
@@ -170,6 +171,7 @@ fn unknown_canopy_condition_does_not_become_a_sheltered_default() {
     assert!(output.spread_rate[0].is_nan());
 }
 
+// ---- wind context and missing outputs ----
 #[test]
 fn static_surface_wind_context_matches_uncached_composition_with_options_and_overrides() {
     let fuels = PreparedFuels::from_registry(&FuelModels::default());

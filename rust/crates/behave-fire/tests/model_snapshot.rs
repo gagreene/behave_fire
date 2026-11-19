@@ -1,5 +1,6 @@
 use behave_fire::{BehaveRun, FuelModels};
 
+// ---- registry snapshot ownership ----
 #[test]
 fn model_owns_its_registry_snapshot() {
     let mut original = FuelModels::default();

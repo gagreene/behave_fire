@@ -4,6 +4,7 @@ use behave_fire::engine::{
 use behave_fire::raster::{SurfaceColumns, SurfaceRaster, SurfaceTweakColumns};
 use behave_fire::{FuelModels, GridShape};
 
+// ---- fuelbed edits and dependent stages ----
 #[test]
 fn injected_sigma_and_packing_drive_their_actual_descendants() {
     let fuels = PreparedFuels::from_registry(&FuelModels::default());

@@ -76,6 +76,7 @@ fn options(value: &Value) -> SurfaceOptions {
     result
 }
 
+// ---- crown model parity ----
 #[test]
 fn crown_custom_model_ten_and_slope_match_pinned_python() {
     let fixtures: Value =
@@ -128,6 +129,7 @@ fn crown_custom_model_ten_and_slope_match_pinned_python() {
     }
 }
 
+// ---- engine ownership and fuel preparation ----
 #[test]
 fn engine_cells_and_tweaks_have_no_heap_owners() {
     fn copy_without_drop<T: Copy>() {
@@ -171,6 +173,7 @@ fn prepared_fuels_snapshot_registry_and_preserve_dynamic_curing() {
     }
 }
 
+// ---- surface model parity ----
 #[test]
 fn surface_all_grid_models_and_custom_science_match_pinned_python() {
     let fixtures: Value =

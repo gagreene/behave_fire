@@ -5,6 +5,7 @@ use behave_fire::output::{fill_chunks, ColumnValues};
 use behave_fire::{BehaveError, GridShape, ParallelError};
 use std::sync::atomic::{AtomicBool, Ordering};
 
+// ---- output construction and worker completion ----
 #[test]
 fn empty_work_never_reads_a_prototype_or_calls_a_worker() {
     let mut physical = Vec::<f64>::new();

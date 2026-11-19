@@ -5,6 +5,8 @@ import pytest
 pytestmark=pytest.mark.rust
 
 
+# ---- float64 normalization and control validation tests ----
+
 def test_float64_snapshot_preserves_missing_values_and_layouts():
     from behave_fire.rust._numeric import normalize_physical
 

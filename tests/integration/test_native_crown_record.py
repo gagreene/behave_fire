@@ -14,6 +14,8 @@ from performance_cases import assert_outputs
 pytestmark = pytest.mark.rust
 
 
+# ---- supplied surface precision tests ----
+
 @pytest.mark.parametrize('masked',[False,True])
 def test_full_crown_preserves_supplied_surface_field_precision(masked):
     from behave_fire.components import crown as reference

@@ -15,6 +15,8 @@ def _load(name):
 
 
 class PackagingTests(unittest.TestCase):
+    # ---- license payload and package configuration tests ----
+
     def test_license_payloads_have_canonical_line_endings(self):
         root = TOOLS.parent
         for base in (root, root / "rust/crates/behave-fire"):

@@ -5,6 +5,7 @@ import pytest
 
 from parity_support import assert_result, encode_value
 
+# ---- numeric parity and diagnostic tests ----
 
 @pytest.mark.parametrize("dtype", [np.float32, np.float64, object])
 def test_allowed_floating_roundoff_passes(dtype):
@@ -103,6 +104,8 @@ def test_numeric_profiles_do_not_share_the_looser_float32_tolerance():
     with pytest.raises(AssertionError):
         assert_result(actual, expected)
 
+
+# ---- structure and signed zero tests ----
 
 @pytest.mark.parametrize("actual, expected", [(np.array([1.0]), 1.0), (np.array(1.0), 1.0), (1.0, np.array([1.0]))])
 def test_scalar_array_structure_changes_fail(actual, expected):

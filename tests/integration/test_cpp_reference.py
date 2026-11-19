@@ -28,6 +28,8 @@ def _rewrite(root, relative, value):
     hashes_path.write_text(json.dumps(hashes), encoding="utf-8")
 
 
+# ---- default offline comparison tests ----
+
 def test_default_observations_are_offline_and_policy_gated():
     data = reference.load_reference()
     assert len(data["cases"]) == 634
@@ -59,6 +61,8 @@ def test_default_qualified_policy_checks_selected_backend_and_unit_controls(tmp_
     if data['policy']['approved']:
         assert data['policy']['qualification']['calibration_complete'] is True
 
+
+# ---- reference provenance and comparison guards tests ----
 
 @pytest.mark.parametrize("mutation", ("drop", "field", "duplicate", "unavailable", "status"))
 def test_invalid_result_contracts_fail_even_when_the_hash_is_updated(tmp_path, mutation, cpp_snapshot_template):

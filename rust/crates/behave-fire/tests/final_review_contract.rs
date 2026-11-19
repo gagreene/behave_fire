@@ -6,6 +6,7 @@ use behave_fire::output::ColumnValues;
 use behave_fire::raster::{CrownColumns, CrownRaster, CrownTweakColumns};
 use behave_fire::{FuelModels, GridShape, PerCell};
 
+// ---- public entry point missing results ----
 #[test]
 fn public_surface_scalar_plan_preserves_missing_slope() {
     let fuels = PreparedFuels::from_registry(&FuelModels::default());

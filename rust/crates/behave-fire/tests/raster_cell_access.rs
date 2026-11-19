@@ -6,6 +6,7 @@ use behave_fire::raster::{
 };
 use behave_fire::{FuelModels, GridShape, PerCell};
 
+// ---- raster cell index and validity checks ----
 #[test]
 fn validated_raster_cells_match_full_outputs_and_reject_out_of_range_indexes() {
     let fuels = PreparedFuels::from_registry(&FuelModels::default());

@@ -39,6 +39,8 @@ def _surface_inputs():
                 canopy_cover=.5, canopy_height=30., crown_ratio=.5)
 
 
+# ---- facade operand snapshot tests ----
+
 def test_crown_partition_owns_later_masked_field(monkeypatch):
     crown_ros = np.ma.array([4., 6.], mask=[False, True], fill_value=-99.)
     inputs = dict(surface_fli=np.array([2.]), crown_ros=crown_ros,
@@ -108,6 +110,8 @@ def test_facade_surface_owns_moisture_before_first_conversion(monkeypatch):
     _mutate_after_first_copy(monkeypatch, lambda: inputs["m10h"].fill(.7))
     assert_result(model.do_surface_run(**inputs), encode_value(expected))
 
+
+# ---- owned payload layouts and type parity tests ----
 
 @pytest.mark.parametrize("value", [np.float64(2.), np.array(2.), np.array([2.]),
                                      np.array([np.int64(2**53 + 1), np.float32(-0.)], dtype=object)])

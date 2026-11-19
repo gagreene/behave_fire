@@ -21,6 +21,8 @@ def _arguments(dtype):
                 lut=build_fuel_lookup_arrays(FuelModels()))
 
 
+# ---- model input normalization tests ----
+
 def test_common_model_mask_is_nan_and_ids_never_coerce_through_float():
     from behave_fire.rust._model_api4 import execute_common
 

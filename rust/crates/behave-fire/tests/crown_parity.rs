@@ -166,6 +166,7 @@ fn value(v: &Value, n: usize) -> f64 {
     }
 }
 
+// ---- classification and composed runs ----
 #[test]
 fn classification_equal_ratios_are_active() {
     assert_eq!(crown::classify_crown_fire_type(1.0, 1.0).fire_type, 3);
@@ -369,6 +370,7 @@ fn supplied_surface_and_live_model_ten_table_are_used() {
     assert_eq!(input.moisture_foliar, 100.0);
 }
 
+// ---- python stage oracle ----
 #[test]
 fn every_source_stage_matches_independent_python_oracle() {
     let fixture: Value = serde_json::from_str(include_str!("data/port_crown_crown.json")).unwrap();

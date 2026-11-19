@@ -22,6 +22,8 @@ def _problems(tmp_path, source, labels=False):
     return problems
 
 
+# ---- python duplicate binding tests ----
+
 @pytest.mark.parametrize('wrapper', ['{}', 'class C:\n{}'])
 @pytest.mark.parametrize('compound', ['if True:', 'try:', 'for _ in [1]:', 'with manager():'])
 def test_duplicate_python_bindings_keep_order_across_compound_statements(wrapper, compound):
@@ -42,6 +44,8 @@ def test_duplicate_python_bindings_still_allow_independent_reorders():
     after = 'def a(): pass\ndef f(): return 1\nif True:\n def f(): return 2\ndef z(): pass\n'
     _checker().prove_reorder(before, after, '.py')
 
+
+# ---- rust lexical and scope rules ----
 
 @pytest.mark.parametrize('container', ['mod data', 'impl S'])
 def test_rust_attribute_tokens_are_never_normalized(container):

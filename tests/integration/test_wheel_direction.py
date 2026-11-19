@@ -17,6 +17,8 @@ def _tool(name):
     return module
 
 
+# ---- direction evidence and wheel smoke tests ----
+
 def test_direction_evidence_runs_without_retired_calibration_and_checks_widened_reference(capsys):
     _tool('probe_direction_oracle').main()
     report = json.loads(capsys.readouterr().out)

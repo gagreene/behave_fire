@@ -18,6 +18,7 @@ impl RunObserver for Workers {
     }
 }
 
+// ---- staged column workers ----
 #[test]
 fn staged_columns_execute_on_requested_distinct_workers() {
     let fuels = PreparedFuels::from_registry(&FuelModels::default());

@@ -11,6 +11,8 @@ build_fuel_lookup_arrays = _import_module('behave_fire.components.fuel_models_ar
 pytestmark = pytest.mark.rust
 
 
+# ---- scoped field availability tests ----
+
 def test_canopy_heat_group_never_reads_unbound_spread_or_surface_inputs():
     actual = native.model_fields('crown', ['canopy_heat_per_unit_area'],
         dict(canopy_base_height=np.array([4., 5.]), canopy_height=np.array([30., 40.]),

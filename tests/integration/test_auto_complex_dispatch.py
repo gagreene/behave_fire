@@ -45,6 +45,8 @@ def delegates(monkeypatch):
     return calls
 
 
+# ---- complex dispatch tests ----
+
 def test_complex_error_filter_prevents_python_construction_and_call(delegates):
     model = BehaveRun(FuelModels())
     with warnings.catch_warnings():

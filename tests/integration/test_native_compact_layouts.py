@@ -24,6 +24,8 @@ def _inputs():
                 canopy_height=30., canopy_bulk_density=.01)
 
 
+# ---- compact layout parity tests ----
+
 @pytest.mark.parametrize("layout", ["a", "b", "third", "exact-integer"])
 @pytest.mark.parametrize("storage", ["plain", "strided", "readonly", "endian"])
 def test_compact_layouts_preserve_all_values_masks_and_types(layout, storage):

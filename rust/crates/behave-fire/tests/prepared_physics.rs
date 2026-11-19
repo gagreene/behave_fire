@@ -4,6 +4,7 @@ use behave_fire::{
     surface, FuelModels,
 };
 
+// ---- prepared surface area to volume terms ----
 #[test]
 fn prepared_savr_terms_match_particle_path_for_static_dynamic_custom_and_undefined_fuels() {
     let registry = FuelModels::default();

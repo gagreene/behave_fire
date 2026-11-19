@@ -36,6 +36,8 @@ def _spawn_roundtrip(payload, queue, extension_path, namespace_path):
         queue.put({'error':f'{type(error).__name__}: {error}'})
 
 
+# ---- native model serialization tests ----
+
 def test_fresh_process_native_unpickle_without_extension_raises(tmp_path):
     import os
     import subprocess

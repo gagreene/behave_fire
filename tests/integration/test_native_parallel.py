@@ -25,6 +25,8 @@ def _surface_inputs(shape):
                 slope=np.full(shape, 12.0))
 
 
+# ---- parallel model ownership, shapes, and worker tests ----
+
 @pytest.mark.parametrize("width", [0, 3])
 @pytest.mark.parametrize("independent", [False, True])
 def test_broadcast_crown_preserves_independent_field_shapes(width, independent):

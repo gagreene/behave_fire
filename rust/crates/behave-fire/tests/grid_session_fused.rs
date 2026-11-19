@@ -16,6 +16,8 @@ impl RunObserver for Calls {
         work()
     }
 }
+
+// ---- fused restart kernel calls ----
 #[test]
 fn fused_restart_uses_one_configured_model_kernel_per_cell() {
     let fuels = PreparedFuels::from_registry(&FuelModels::default());

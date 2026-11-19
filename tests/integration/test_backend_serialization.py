@@ -28,6 +28,8 @@ def _model():
     return model, before
 
 
+# ---- python facade serialization tests ----
+
 def test_copy_preserves_reference_sharing_and_deepcopy_independence():
     model, expected = _model()
     shallow = copy.copy(model)

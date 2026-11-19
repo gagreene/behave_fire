@@ -20,6 +20,7 @@ fn inputs() -> (SurfacePlan, SurfaceCell, PreparedFuels) {
     )
 }
 
+// ---- override order and recomputation ----
 #[test]
 fn crown_overrides_precede_classification_and_passive_outputs() {
     let fuels = PreparedFuels::from_registry(&FuelModels::default());

@@ -21,6 +21,8 @@ def _arguments():
                 lut=build_fuel_lookup_arrays(FuelModels()))
 
 
+# ---- model output projection and shape tests ----
+
 def test_crown_empty_weather_keeps_independent_heat_and_thresholds(monkeypatch):
     from behave_fire.rust._model_api4 import execute_model
 

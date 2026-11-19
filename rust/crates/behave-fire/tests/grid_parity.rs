@@ -22,6 +22,8 @@ fn comparison_columns(
         })
         .collect()
 }
+
+// ---- batch scheduling ----
 #[test]
 fn joins_all_workers_before_returning_an_error() {
     let finished = AtomicUsize::new(0);
@@ -52,6 +54,8 @@ fn short_requests_are_bounded() {
         );
     }
 }
+
+// ---- scalar and batch parity ----
 #[test]
 fn surface_batches_match_scalar_cells_bit_for_bit() {
     use behave_fire::batch::SurfaceBatch;
@@ -192,6 +196,8 @@ fn crown_batches_match_scalar_and_columns_transfer_without_copying() {
         .iter()
         .all(|(_, values)| values.is_empty()));
 }
+
+// ---- worker dispatch and batch errors ----
 #[test]
 fn requested_workers_execute_on_distinct_native_threads() {
     use std::sync::{Barrier, Mutex};

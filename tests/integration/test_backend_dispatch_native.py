@@ -33,6 +33,8 @@ def _usable_native(monkeypatch):
     return rust
 
 
+# ---- native dispatch and capability tests ----
+
 def test_all_eleven_instance_methods_enter_native_and_keep_signatures(_usable_native, monkeypatch):
     from behave_fire import BehaveRun, FuelModels
     from behave_fire.python import BehaveRun as PythonRun

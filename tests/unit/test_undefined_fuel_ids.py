@@ -46,6 +46,8 @@ def _run(backend, ids, crown=False):
                               canopy_base_height=3., canopy_bulk_density=.02, moisture_foliar=100.)
 
 
+# ---- custom fuel registration tests ----
+
 @pytest.mark.parametrize('backend', BACKENDS)
 @pytest.mark.parametrize('number', INVALID_IDS + [258, 259, 260])
 def test_custom_registration_rejects_undefined_ids_without_mutation(backend, number):
@@ -71,6 +73,8 @@ def test_custom_upper_endpoint_remains_readable_and_zero_row_stays_undefined(bac
     assert lookup['is_defined'][256]
     assert _run(name, np.array([256]))['spread_rate'][0] > 0
 
+
+# ---- undefined fuel lookup and surface tests ----
 
 @pytest.mark.parametrize('number', INVALID_IDS)
 @pytest.mark.parametrize('scalar', [True, False])

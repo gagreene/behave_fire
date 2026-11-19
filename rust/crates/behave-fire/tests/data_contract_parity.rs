@@ -47,6 +47,7 @@ fn custom() -> CustomFuelModel {
     }
 }
 
+// ---- fuel records and getters ----
 #[test]
 fn custom_fuel_registration_clear_and_snapshot() {
     let mut fuels = FuelModels::default();
@@ -271,6 +272,7 @@ fn every_fuel_getter_supports_all_output_units_and_missing_slots() {
     assert!(!fuels.is_all_fuel_load_zero(14));
 }
 
+// ---- moisture tables ----
 #[test]
 fn moisture_tables_match_every_cell() {
     use behave_fire::generated::fine_dead_fuel_moisture::{CORR, REF};
@@ -289,6 +291,7 @@ fn moisture_tables_match_every_cell() {
     assert_eq!(CORR[35][17], 0.06);
 }
 
+// ---- species records and lookup ----
 #[test]
 fn species_custom_lookup_filters_and_sentinel() {
     let mut table = SpeciesMasterTable::default();
@@ -455,6 +458,7 @@ fn species_enum_integer_codes_and_empty_defaults() {
     );
 }
 
+// ---- unit conversions and codes ----
 #[test]
 fn units_have_independently_pinned_anchors() {
     assert_eq!(

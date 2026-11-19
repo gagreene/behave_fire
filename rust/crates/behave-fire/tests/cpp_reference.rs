@@ -246,6 +246,7 @@ fn verify_manifest() {
     }
 }
 
+// ---- comparison policy ----
 #[test]
 fn cpp_surface_observations_follow_the_qualified_policy() {
     verify_manifest();
@@ -340,6 +341,7 @@ fn pending_policy_cannot_certify_even_exact_values() {
     );
 }
 
+// ---- fixture integrity ----
 #[test]
 fn sha256_matches_standard_vectors_and_detects_fixture_mutation() {
     assert_eq!(
@@ -360,6 +362,7 @@ fn sha256_matches_standard_vectors_and_detects_fixture_mutation() {
     assert_ne!(sha256(fixture), sha256(&mutated));
 }
 
+// ---- surface controls ----
 #[test]
 fn surface_controls_preserve_defaults_and_honor_optional_modes() {
     let defaults = surface_options(&json!({}));

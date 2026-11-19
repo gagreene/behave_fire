@@ -17,6 +17,7 @@ fn session() -> GridSession {
     GridSession::new(&run, OutputRequest::surface(), &[], 1).unwrap()
 }
 
+// ---- session controls and validation ----
 #[test]
 fn requests_threads_registry_and_override_lifetimes_are_explicit() {
     let mut s = session();

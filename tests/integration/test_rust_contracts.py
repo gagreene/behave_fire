@@ -61,6 +61,8 @@ def _snapshot_files(directory):
             for path in directory.rglob("*") if path.is_file()}
 
 
+# ---- backend namespace tests ----
+
 def test_explicit_namespaces_have_source_modules():
     from behave_fire.python import BehaveRun as PythonBehaveRun
 
@@ -68,6 +70,8 @@ def test_explicit_namespaces_have_source_modules():
     assert importlib.util.find_spec("behave_fire.rust") is not None
     assert PythonBehaveRun is BehaveRun
 
+
+# ---- exported reference contract tests ----
 
 def test_export_check_detects_changed_and_missing_fixtures(tmp_path, capsys, monkeypatch):
     exporter = _exporter()
@@ -293,6 +297,8 @@ def test_first_contract_difference_names_signature_path_and_respects_output_tole
         {"output": 1. + 1e-12}, {"output": 1.}) is None
 
 
+# ---- numeric overflow tests ----
+
 def test_float16_eccentricity_normalization_changes_overflow_contract():
     with np.errstate(all="ignore"):
         original = calculate_eccentricity(np.array([300], dtype=np.float16))
@@ -302,6 +308,8 @@ def test_float16_eccentricity_normalization_changes_overflow_contract():
     assert normalized.dtype == np.float32
     assert normalized[0] == pytest.approx(0.9999944, abs=1e-7)
 
+
+# ---- snapshot and serialization tests ----
 
 @pytest.mark.parametrize("restore", [copy, deepcopy, lambda model: pickle.loads(pickle.dumps(model))])
 def test_model_copy_and_pickle_preserve_cached_fuel_snapshot(restore):

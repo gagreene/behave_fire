@@ -1,3 +1,4 @@
+// ---- nonfinite slope geometry ----
 #[test]
 fn infinite_physical_slope_produces_ieee_missing_distances() {
     let mut state = behave_fire::slope::SlopeTool::new();

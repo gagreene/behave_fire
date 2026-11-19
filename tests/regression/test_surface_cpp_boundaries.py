@@ -14,6 +14,8 @@ def _surface_backend(request):
                          else 'behave_fire.rust.surface')
 
 
+# ---- effective wind and flame length tests ----
+
 @pytest.mark.parametrize('scalar', [False, True])
 def test_effective_wind_preserves_elongation_below_old_spread_cutoff(_surface_backend, scalar):
     """Tiny positive spread must not erase an existing wind-driven ellipse."""
@@ -46,6 +48,8 @@ def test_flame_length_uses_strict_cpp_intensity_cutoff(_surface_backend, scalar)
         actual = _surface_backend.calculate_flame_length(intensities)
     np.testing.assert_allclose(actual, expected, rtol=2e-14, atol=0)
 
+
+# ---- grid shape and flame tests ----
 
 @pytest.mark.rust
 @pytest.mark.parametrize('fused', [False, True])
@@ -89,6 +93,8 @@ def test_grid_fused_supported_tweaks_preserve_small_spread_shape():
     assert np.all((intensity > 0.) & (intensity < 1e-7))
     np.testing.assert_array_equal(grid.get('flame_length'), np.zeros(2))
 
+
+# ---- reaction damping tests ----
 
 def test_reaction_order_matches_pinned_cpp_near_extinction(_surface_backend):
     """The damping expression must not introduce the old threefold heat residual."""

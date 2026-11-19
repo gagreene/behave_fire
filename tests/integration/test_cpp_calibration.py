@@ -16,6 +16,8 @@ import cpp_reference as reference
 ROOT = Path(__file__).resolve().parents[2]
 
 
+# ---- qualification evidence tests ----
+
 def test_active_policy_requires_complete_calibration_metadata(tmp_path, cpp_snapshot_template):
     root = write_snapshot(cpp_snapshot_template, tmp_path)
     relative = 'tests/data/cpp_reference/tolerance-policy.json'
@@ -94,6 +96,8 @@ def test_source_changes_invalidate_otherwise_complete_qualification(tmp_path, mu
     with pytest.raises(ValueError, match='source'):
         module.validate_qualification(root, record)
 
+
+# ---- signed zero revalidation tests ----
 
 @pytest.mark.rust
 def test_unit_pair_revalidation_preserves_signed_zero(tmp_path):

@@ -1,5 +1,6 @@
 use behave_fire::{fire_size::FireSize, surface};
 
+// ---- float64 thresholds and geometry ----
 #[test]
 fn missing_threshold_operands_remain_missing_in_shared_geometry() {
     assert!(surface::calculate_eccentricity(f64::NAN).is_nan());

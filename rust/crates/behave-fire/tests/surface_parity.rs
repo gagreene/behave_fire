@@ -213,6 +213,8 @@ fn value(v: &Value, n: usize) -> f64 {
         number(&a[n % a.len()])
     }
 }
+
+// ---- ellipse and fuelbed outputs ----
 #[test]
 fn backing_rate_preserves_ellipse_ratio() {
     assert_eq!(surface::calculate_backing_spread_rate(12.0, 0.5), 4.0);
@@ -302,6 +304,8 @@ fn raw_default_rows_match_grid_particle_path() {
         }
     }
 }
+
+// ---- python oracle parity ----
 #[test]
 fn oracle_json_preserves_nextafter_one_boundaries() {
     let next: f64 = serde_json::from_str("1.0000000000000002").unwrap();

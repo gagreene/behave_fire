@@ -30,6 +30,8 @@ def _report():
         *64,binary_hash='b'*64,cases=cases,errors=[])
 
 
+# ---- core screen evidence tests ----
+
 def test_complete_core_proof_is_explicitly_not_public_speed_certification():
     result=_checker().check_core_screen(_report())
     assert result['passed']

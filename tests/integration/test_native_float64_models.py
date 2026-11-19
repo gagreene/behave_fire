@@ -19,6 +19,8 @@ def _inputs(cells):
         surface_ros=2., surface_fli=200., surface_hpua=1000.).items()}
 
 
+# ---- direct model validation and execution tests ----
+
 @pytest.mark.parametrize('kind', ['surface', 'crown'])
 def test_direct_model_boundary_stores_all_primitive_fields_and_typed_codes(kind):
     physical = _inputs(5)

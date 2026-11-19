@@ -6,6 +6,8 @@ import pytest
 pytestmark = pytest.mark.rust
 
 
+# ---- independent shape dependency tests ----
+
 def test_crown_ratio_fields_allow_independent_shapes():
     from behave_fire.components import crown as reference
     from behave_fire.rust import crown

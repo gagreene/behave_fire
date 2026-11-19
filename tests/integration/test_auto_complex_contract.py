@@ -4,6 +4,7 @@ import pytest
 
 from behave_fire.python import surface
 
+# ---- complex fallback contract tests ----
 
 @pytest.mark.parametrize('value', [3+.25j, np.array([3+.25j]),
     np.ma.array([3+.25j, 4+.5j], mask=[False, True]), np.array([3+.25j], dtype=object)])

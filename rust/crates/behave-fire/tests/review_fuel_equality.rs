@@ -2,6 +2,7 @@
 use behave_fire::engine::{PreparedFuel, PreparedFuels};
 use behave_fire::FuelModels;
 
+// ---- fuel equality and preparation history ----
 #[test]
 fn all_public_physical_fields_participate_in_equality() {
     let original = PreparedFuel::default();

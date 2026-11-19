@@ -40,6 +40,8 @@ def _current_evidence(tmp_path):
     return report, requirements
 
 
+# ---- evidence and allocation certification tests ----
+
 def test_complete_artifacts_and_original_public_baselines_pass(tmp_path):
     report, requirements = _current_evidence(tmp_path)
     result = _tool('check_performance').check_report(report, requirements, artifact_root=tmp_path)
@@ -93,6 +95,8 @@ def test_incomplete_or_misrepresented_current_contract_cannot_certify(tmp_path, 
         row['eligible_cells'] = 0
     assert not _tool('check_performance').check_report(report, requirements, artifact_root=tmp_path)['passed']
 
+
+# ---- input identity, profiling, and output validation tests ----
 
 def test_original_input_identity_preserves_dtype_mask_payload_and_values():
     _tool('performance_contract')

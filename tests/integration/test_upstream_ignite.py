@@ -16,6 +16,8 @@ from behave_fire.components.ignite import (
 LEGACY = json.loads((Path(__file__).parents[1] / "data/legacy_lightning.json").read_text(encoding="utf-8"))
 
 
+# ---- firebrand ignition tests ----
+
 def test_firebrand_remains_supported():
     probability = calculate_firebrand_ignition_probability(80.0, 0.0, 0.06)
     assert np.shape(probability) == ()
@@ -24,6 +26,8 @@ def test_firebrand_remains_supported():
     probability = calculate_firebrand_ignition_probability(80.0, 0.5, 0.06)
     assert float(probability) == pytest.approx(0.5483170476526804, rel=1e-14, abs=1e-14)
 
+
+# ---- lightning ignition tests ----
 
 @pytest.mark.parametrize("charge", range(3))
 def test_lightning_broadcast_results_and_caller_warning(charge):

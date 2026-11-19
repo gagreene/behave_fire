@@ -57,6 +57,8 @@ def _surface(fuels, grid):
     )
 
 
+# ---- upstream fuel records and surface parity tests ----
+
 @pytest.mark.parametrize("number", METRIC_MODELS + REFERENCE["control_models"])
 def test_fuel_records_and_lookup_match_upstream_reference(number):
     fuels = FuelModels()

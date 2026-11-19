@@ -1,5 +1,6 @@
 use behave_fire::math::{np_clip, np_max, np_min, np_remainder};
 
+// ---- numpy arithmetic semantics ----
 #[test]
 fn nan_propagates_from_either_minmax_operand() {
     assert!(np_min(f64::NAN, 2.0).is_nan());
