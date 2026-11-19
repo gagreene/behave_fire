@@ -1,9 +1,9 @@
-"""Dimensional SAVR checks and upstream heat-convention regression tests."""
+"""Upstream unit conversion checks for heat, surface-area-to-volume, and temperature."""
 
 import numpy as np
 import pytest
 
-from behave_fire.components.behave_units import HeatOfCombustionUnits, SurfaceAreaToVolumeUnits
+from behave_fire.components.behave_units import HeatOfCombustionUnits, SurfaceAreaToVolumeUnits, TemperatureUnits
 from behave_fire.components.fuel_models import FuelModels
 from behave_fire.components.fuel_models_array import build_fuel_lookup_arrays
 
@@ -57,3 +57,14 @@ def test_savr_dimensional_anchors(shape, units, base):
         SurfaceAreaToVolumeUnits.fromBaseUnits(value * base, units), value, rtol=1e-6, atol=1e-10,
     )
     assert np.shape(converted) == shape
+
+
+# ---- temperature conversion tests ----
+
+def test_celsius_conversion_below_freezing_in_both_directions():
+    celsius = TemperatureUnits.TemperatureUnitsEnum.Celsius
+    celsius_values = np.array([-40.0, -10.0])
+    fahrenheit_values = np.array([-40.0, 14.0])
+
+    np.testing.assert_array_equal(TemperatureUnits.toBaseUnits(celsius_values, celsius), fahrenheit_values)
+    np.testing.assert_array_equal(TemperatureUnits.fromBaseUnits(fahrenheit_values, celsius), celsius_values)
