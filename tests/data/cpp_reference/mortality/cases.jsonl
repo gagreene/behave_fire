@@ -1,0 +1,6 @@
+{"id":"scorch-zero-calm-77","operation":"mortality","intensity_btu_ft_s":0,"wind_mph":0,"air_temperature_f":77}
+{"id":"scorch-zero-wind-77","operation":"mortality","intensity_btu_ft_s":0,"wind_mph":2,"air_temperature_f":77}
+{"id":"scorch-zero-calm-14","operation":"mortality","intensity_btu_ft_s":0,"wind_mph":0,"air_temperature_f":14}
+{"id":"scorch-one-calm-77","operation":"mortality","intensity_btu_ft_s":1,"wind_mph":0,"air_temperature_f":77}
+{"id":"scorch-one-wind-77","operation":"mortality","intensity_btu_ft_s":1,"wind_mph":2,"air_temperature_f":77}
+{"id":"scorch-one-calm-14","operation":"mortality","intensity_btu_ft_s":1,"wind_mph":0,"air_temperature_f":14}

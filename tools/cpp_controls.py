@@ -12,6 +12,7 @@ from pathlib import Path
 
 import cpp_fire_size as fire_size
 import cpp_ignite as ignite
+import cpp_mortality as mortality
 import cpp_reference as reference
 
 
@@ -321,7 +322,7 @@ def measure_ports(root, report, backends=("python", "rust"), expected_platform=N
 
         result.update(binding_api_version=_rust.__binding_api_version__,
                       extension_sha256=reference._digest(Path(_rust.__file__)))
-    for operation in (fire_size, ignite):
+    for operation in (fire_size, ignite, mortality):
         result[operation.DATASET.name] = dict(
             artifacts=operation.artifacts(root), observations=operation.measure_ports(root, backends)
         )

@@ -1,9 +1,9 @@
 {
   "files": {
     "cases.jsonl": "62d6971537447beae8092a6eddba78495afac0522d8dfca6142ac938c4192867",
-    "results.jsonl": "04e96268466338364a350d53ac05b639f1a7758c78911aaee97da389c0f779a2",
-    "tolerance-policy.json": "3a5c63faea9e8f043b2574b8f8c2d4f0bceee2caebebe5ab409b96ae6dab0216"
+    "results.jsonl": "04e96268466338364a350d53ac05b639f1a7758c78911aaee97da389c0f779a2"
   },
   "schema_version": 1,
+  "shared_policy_sha256": "0f596ea7319b6ad685bc626f0ca7e60f0d7de4eeb27bdc82e8bc70152b02833a",
   "upstream_sha": "f3b2943e69abca942e795c5b1b45276f6338abb5"
 }

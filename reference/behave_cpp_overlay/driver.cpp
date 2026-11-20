@@ -2,6 +2,8 @@
 #include "fireSize.h"
 #include "fuelModels.h"
 #include "ignite.h"
+#include "mortality.h"
+#include "species_master_table.h"
 #include "surface.h"
 #include <cctype>
 #include <cerrno>
@@ -365,6 +367,51 @@ IgniteRequest validate_ignite(const std::map<std::string, Value>& input) {
     return {air_temperature_f, sun_shade_fraction, match->second};
 }
 
+struct MortalityRequest {
+    double intensity_btu_ft_s;
+    double wind_mph;
+    double air_temperature_f;
+};
+
+/// Validate a standalone request against the six reviewed scorch height inputs.
+///
+/// :param input: Parsed request object.
+/// :return: The matching reviewed input for a fresh Mortality object.
+MortalityRequest validate_mortality(const std::map<std::string, Value>& input) {
+    const std::set<std::string> fields = {"id", "operation", "intensity_btu_ft_s", "wind_mph", "air_temperature_f"};
+    for (const auto& item : input)
+        if (!fields.count(item.first)) throw std::runtime_error("unsupported_field");
+    for (const auto& field : fields)
+        if (!input.count(field)) throw std::runtime_error("missing_field_" + field);
+
+    const Value& id = input.at("id");
+    if (id.kind != Value::String || id.text.empty()) throw std::runtime_error("invalid_id");
+    for (const auto& field : {"air_temperature_f", "intensity_btu_ft_s", "wind_mph"})
+        if (input.at(field).kind != Value::Number) throw std::runtime_error(std::string("numeric_type_") + field);
+
+    const MortalityRequest request = {
+        numeric(input.at("intensity_btu_ft_s"), "intensity_btu_ft_s"),
+        numeric(input.at("wind_mph"), "wind_mph"),
+        numeric(input.at("air_temperature_f"), "air_temperature_f"),
+    };
+    const std::map<std::string, MortalityRequest> reviewed = {
+        {"scorch-one-calm-14", {1.0, 0.0, 14.0}},
+        {"scorch-one-calm-77", {1.0, 0.0, 77.0}},
+        {"scorch-one-wind-77", {1.0, 2.0, 77.0}},
+        {"scorch-zero-calm-14", {0.0, 0.0, 14.0}},
+        {"scorch-zero-calm-77", {0.0, 0.0, 77.0}},
+        {"scorch-zero-wind-77", {0.0, 2.0, 77.0}},
+    };
+    const auto match = reviewed.find(id.text);
+    if (match == reviewed.end()) throw std::runtime_error("unreviewed_mortality_request");
+    const auto& expected = match->second;
+    if (request.intensity_btu_ft_s != expected.intensity_btu_ft_s || request.wind_mph != expected.wind_mph
+            || request.air_temperature_f != expected.air_temperature_f
+            || std::signbit(request.intensity_btu_ft_s) || std::signbit(request.wind_mph))
+        throw std::runtime_error("unreviewed_mortality_request");
+    return expected;
+}
+
 struct Unavailable {};
 struct GeometryTrap {};
 struct Session {
@@ -461,6 +508,22 @@ std::string run_ignite(const IgniteRequest& request, bool forbid_output) {
         {"fuel_temperature_f", ignite.getFuelTemperature(TemperatureUnits::Fahrenheit)},
     });
 }
+
+/// Calculate scorch height with a fresh upstream Mortality object and species table.
+///
+/// :param request: Reviewed Mortality input.
+/// :param forbid_output: Whether the output entry trap is enabled.
+/// :return: JSON object with scorch height in feet.
+std::string run_mortality(const MortalityRequest& request, bool forbid_output) {
+    if (forbid_output) throw GeometryTrap{};
+    SpeciesMasterTable species;
+    Mortality mortality(species);
+    const double scorch_height = mortality.calculateScorchHeight(
+        request.intensity_btu_ft_s, FirelineIntensityUnits::BtusPerFootPerSecond,
+        request.wind_mph, SpeedUnits::MilesPerHour,
+        request.air_temperature_f, TemperatureUnits::Fahrenheit, LengthUnits::Feet);
+    return encode_result({{"scorch_height_ft", scorch_height}});
+}
 }
 
 int main(int argc, char** argv) {
@@ -495,6 +558,10 @@ int main(int argc, char** argv) {
                 const IgniteRequest request = validate_ignite(object);
                 enter_upstream(id, ids, forbid, entered);
                 result = run_ignite(request, forbid_geometry);
+            } else if (operation == "mortality") {
+                const MortalityRequest request = validate_mortality(object);
+                enter_upstream(id, ids, forbid, entered);
+                result = run_mortality(request, forbid_geometry);
             } else {
                 const Request request = validate(object);
                 enter_upstream(request.id, ids, forbid, entered);
@@ -502,8 +569,9 @@ int main(int argc, char** argv) {
                 auto& session = request.session.empty() ? fresh : sessions[request.session];
                 result = run(request, forbid_geometry, geometry_entered, session);
             }
+            const bool report_output_entries = operation == "ignite" || operation == "mortality";
             output << "{\"id\":" << encode(id) << ",\"status\":\"ok\",\"upstream_entries\":1,"
-                   << (operation == "ignite" ? "\"output_entries\"" : "\"geometry_entries\"")
+                   << (report_output_entries ? "\"output_entries\"" : "\"geometry_entries\"")
                    << ":1,\"output\":" << result << "}\n";
         } catch (const UpstreamTrap&) {
             std::cerr << "UPSTREAM_ENTRY_BLOCKED\n";

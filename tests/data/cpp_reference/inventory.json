@@ -34814,8 +34814,8 @@
     },
     {
       "access": "public",
-      "approval": null,
-      "dataset": null,
+      "approval": "Owner-approved exact binary64 comparison, including signed zero, for the six guarded standalone Mortality scorch-height cases.",
+      "dataset": "mortality",
       "definition_candidates": [
         {
           "definition_parameters": "double firelineIntensity, FirelineIntensityUnits::FirelineIntensityUnitsEnum firelineIntensityUnits, double midFlameWindSpeed, SpeedUnits::SpeedUnitsEnum windSpeedUnits, double airTemperature, TemperatureUnits::TemperatureUnitsEnum temperatureUnits, LengthUnits::LengthUnitsEnum scorchHeightUnits",
@@ -34826,10 +34826,23 @@
         }
       ],
       "deleted": false,
-      "execution_evidence": [],
+      "execution_evidence": [
+        {
+          "file": "mortality/cases.jsonl",
+          "sha256": "07268db26a450cbeab2f9780fbbce0800f49005520ce22429549f7a070a0981c"
+        },
+        {
+          "file": "mortality/results.jsonl",
+          "sha256": "c2a06f1fb3b1c7f46a47b2081d34e412f1135a84ff86610a97e583c9c178a066"
+        },
+        {
+          "file": "mortality/manifest.json",
+          "sha256": "0d20af418e6c80964c12f51244feeba4f35f78c0ad726bbb09bdc16217dc7ee5"
+        }
+      ],
       "file": "src/behave/mortality.h",
       "forwarded_cpp_ids": [],
-      "function_status": "not_in_pilot",
+      "function_status": "tested",
       "id": "5d3f0831fc05964e2f5f",
       "kind": "method",
       "lexically_qualified_signature": "double Mortality::calculateScorchHeight(double firelineIntensity, FirelineIntensityUnits::FirelineIntensityUnitsEnum firelineIntensityUnits, double midFlameWindSpeed, SpeedUnits::SpeedUnitsEnum windSpeedUnits, double airTemperature, TemperatureUnits::TemperatureUnitsEnum temperatureUnits, LengthUnits::LengthUnitsEnum scorchHeightUnits)",
@@ -34843,7 +34856,7 @@
         "src/behave/mortality_inputs.h",
         "src/behave/species_master_table.h"
       ],
-      "mapping_note": "Source-backed callable/parameter/field candidates; scientific equivalence and lifecycle remain unverified.",
+      "mapping_note": "Direct scalar scorch-height calculation in the six guarded standalone Mortality cases.",
       "mapping_status": "candidate_mapping",
       "name": "calculateScorchHeight",
       "oracle_access": "public_declaration_only_not_qualified",
@@ -34854,10 +34867,10 @@
       "pure_virtual": false,
       "python_targets": [
         {
-          "evidence": "same semantic family and exact case/underscore-normalized callable name; behavioral equivalence unverified",
+          "evidence": "Direct callable compared with the corresponding C++ output in the six guarded standalone Mortality cases.",
           "file": "src/behave_fire/components/mortality.py",
           "line": 137,
-          "relation": "callable_identity_candidate",
+          "relation": "observed_direct_callable",
           "signature": "calculate_scorch_height(fireline_intensity_btu_ft_s: Union[float, np.ndarray], midflame_wind_mph: Union[float, np.ndarray], air_temp_f: Union[float, np.ndarray]) -> np.ndarray",
           "target": "behave_fire.components.mortality.calculate_scorch_height"
         },
@@ -34877,10 +34890,10 @@
       ],
       "rust_targets": [
         {
-          "evidence": "same semantic family and exact case/underscore-normalized callable name; behavioral equivalence unverified",
+          "evidence": "Direct callable compared with the corresponding C++ output in the six guarded standalone Mortality cases.",
           "file": "rust/crates/behave-fire/src/mortality.rs",
           "line": 149,
-          "relation": "callable_identity_candidate",
+          "relation": "observed_direct_callable",
           "signature": "pub fn calculate_scorch_height( fireline_intensity_btu_ft_s: f64, midflame_wind_mph: f64, air_temp_f: f64, ) -> f64",
           "target": "behave_fire::mortality::calculate_scorch_height"
         }
@@ -88901,14 +88914,27 @@
         "5d3f0831fc05964e2f5f"
       ],
       "contract": {
-        "independent_cases": "Fresh objects per independent case;explicit transition cases only;validate every primitive/derived bound before every call,including setters and getters.",
-        "state_lifecycle": "State setters, getters, constructors, resets, and copy contracts are assigned to this bundle; assignment is not execution evidence.",
-        "status": "source_only_pending_execution",
-        "units": "Explicit declared unit enums and conversion bounds are checked before every call."
+        "independent_cases": "Accept only the six reviewed ID and input tuples before constructing upstream objects.",
+        "state_lifecycle": "Construct a fresh SpeciesMasterTable and Mortality instance for every case and call calculateScorchHeight directly.",
+        "status": "guarded_scorch_height_runs_checked",
+        "units": "Use fireline intensity in Btu/ft/s, wind speed in mph, and air temperature in Fahrenheit. Read scorch height in feet."
       },
-      "dataset": null,
-      "executable_now": false,
-      "execution_evidence": [],
+      "dataset": "mortality",
+      "executable_now": true,
+      "execution_evidence": [
+        {
+          "file": "mortality/cases.jsonl",
+          "sha256": "07268db26a450cbeab2f9780fbbce0800f49005520ce22429549f7a070a0981c"
+        },
+        {
+          "file": "mortality/results.jsonl",
+          "sha256": "c2a06f1fb3b1c7f46a47b2081d34e412f1135a84ff86610a97e583c9c178a066"
+        },
+        {
+          "file": "mortality/manifest.json",
+          "sha256": "0d20af418e6c80964c12f51244feeba4f35f78c0ad726bbb09bdc16217dc7ee5"
+        }
+      ],
       "guard_ids": [
         "units",
         "fresh_state",
@@ -88918,10 +88944,14 @@
       "method_ids": [
         "5d3f0831fc05964e2f5f"
       ],
-      "notes": "Construct with live SpeciesMasterTable;scalar output.",
-      "qualification": "Source-only;execution waits for approved next phases;unresolved identities unavailable.",
+      "notes": "Compare scalar scorch height in feet for the six guarded cases. Full mortality remains pending the species and equation audit.",
+      "qualification": {
+        "complete_cases": 6,
+        "directly_tested_functions": 1,
+        "policy": "tolerance-policy.json#/mortality"
+      },
       "route_id": "mortality_scorch",
-      "status": "not_in_pilot"
+      "status": "reviewed_mortality_scorch_height"
     },
     {
       "assigned_method_ids": [

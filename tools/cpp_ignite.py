@@ -22,15 +22,6 @@ EXACT_FIELDS = {field: {"kind": "exact_binary64"} for field in FIELDS}
 SOURCES = ("behaveUnits.cpp", "behaveUnits.h", "ignite.cpp", "ignite.h", "igniteInputs.cpp", "igniteInputs.h")
 
 
-def _parse_int(token):
-    """Preserve the negative sign when decoding a lexical zero.
-
-    :param token: JSON integer token.
-    :return: Integer value or negative binary64 zero for the signed zero token.
-    """
-    return -0.0 if token == "-0" else int(token)
-
-
 def _validate_output(output):
     """Require both finite scalar outputs with probability in its valid interval.
 
@@ -89,7 +80,7 @@ def exact_evidence(root, paths, record):
     for path in paths:
         raw = Path(path).read_bytes()
         report = json.loads(raw, object_pairs_hook=reference._unique_object,
-                            parse_constant=reference._reject_constant, parse_int=_parse_int)
+                            parse_constant=reference._reject_constant, parse_int=reference._signed_int)
         kind = report["kind"]
         if kind not in ("cpp", "ports"):
             raise ValueError("Unknown Ignite report kind")
@@ -130,7 +121,7 @@ def load_cases(root):
     :param root: Reference checkout root.
     :return: Validated cases.
     """
-    rows = reference._rows(Path(root) / DATASET / "cases.jsonl", parse_int=_parse_int)
+    rows = reference._rows(Path(root) / DATASET / "cases.jsonl", parse_int=reference._signed_int)
     expected = [dict(id=case, operation="ignite", air_temperature_f=71, sun_shade_fraction=0.5, moisture_1h=moisture)
                 for case, moisture in APPROVED_CASES]
     if json.dumps(rows, sort_keys=True, allow_nan=False) != json.dumps(expected, sort_keys=True):
@@ -197,7 +188,7 @@ def read_cpp_results(root, path):
     :param path: Raw C++ JSONL observations.
     :return: Approved case rows with verified execution and output counts.
     """
-    rows = reference._rows(path, parse_int=_parse_int)
+    rows = reference._rows(path, parse_int=reference._signed_int)
     validate_cpp_rows(root, rows)
     return rows
 
