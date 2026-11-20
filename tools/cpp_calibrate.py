@@ -12,6 +12,7 @@ from pathlib import Path
 import cpp_controls as controls
 import cpp_fire_size as fire_size
 import cpp_ignite as ignite
+import cpp_mortality as mortality
 import cpp_reference as reference
 
 
@@ -328,7 +329,7 @@ def measure_cpp(root, directory, expected_compiler=None):
     report = dict(schema_version=1, kind="cpp", upstream_sha=reference.PIN, passed=True,
                   parity_approved=False, artifacts=controls._artifacts(root), fields=controls.calibration_policy(root),
                   compiler=build["compiler"], protocol=protocol, observations=observations, **_context(root))
-    for operation in (fire_size, ignite):
+    for operation in (fire_size, ignite, mortality):
         name = operation.DATASET.name
         inputs = root / operation.DATASET / "cases.jsonl"
         output = directory / f"{name}.jsonl"

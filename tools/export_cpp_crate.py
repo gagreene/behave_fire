@@ -22,7 +22,8 @@ def export(source, destination, check=False, dataset="surface"):
     """Copy or verify an explicit, byte-preserving fixture allowlist.
 
     :param source: Canonical tests/data/cpp_reference directory.
-    :param destination: Crate-local tests/data/cpp_reference dataset directory.
+    :param destination: Crate-local dataset directory. Custom Surface requires the policy already exported
+        in the sibling surface directory.
     :param check: Check existing copies without changing files when True.
     :param dataset: Surface, custom Surface, standalone FireSize, or standalone Ignite observations.
     :return: Sorted payload and manifest names; raises for missing inputs or drift.
@@ -31,6 +32,7 @@ def export(source, destination, check=False, dataset="surface"):
         raise ValueError("Unknown C++ dataset")
     paths = {name: relative.replace("surface/", dataset + "/") for name, relative in INPUTS.items()}
     payloads = {name: (source / relative).read_bytes() for name, relative in paths.items()}
+    shared_policy = payloads.pop("tolerance-policy.json") if dataset == "surface_custom" else None
     if dataset in ("fire_size", "ignite"):
         policy = json.loads(payloads["tolerance-policy.json"])[dataset]
         payloads["tolerance-policy.json"] = (json.dumps(policy, indent=2, sort_keys=True) + "\n").encode("utf-8")
@@ -42,6 +44,14 @@ def export(source, destination, check=False, dataset="surface"):
         "upstream_sha": PIN,
         "files": {name: hashlib.sha256(payload).hexdigest() for name, payload in payloads.items()},
     }
+    if shared_policy is not None:
+        shared = destination.parent / "surface" / "tolerance-policy.json"
+        if not shared.is_file() or shared.read_bytes() != shared_policy:
+            raise ValueError("crate-local C++ shared policy drift: surface/tolerance-policy.json")
+        duplicate = destination / "tolerance-policy.json"
+        if duplicate.exists() or duplicate.is_symlink():
+            raise ValueError("crate-local C++ duplicate policy: surface_custom/tolerance-policy.json")
+        manifest["shared_policy_sha256"] = hashlib.sha256(shared_policy).hexdigest()
     payloads["manifest.json"] = (json.dumps(manifest, indent=2, sort_keys=True) + "\n").encode("utf-8")
     if check:
         for name, payload in payloads.items():

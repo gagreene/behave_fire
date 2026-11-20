@@ -33,18 +33,23 @@ fn rows(source: &str) -> BTreeMap<String, Value> {
 fn explicit_percent_controls_match_numbered_physics_and_consume_all_cpp_fields() {
     let inputs = include_bytes!("data/cpp_reference/surface_custom/cases.jsonl");
     let outputs = include_bytes!("data/cpp_reference/surface_custom/results.jsonl");
-    let policy_bytes = include_bytes!("data/cpp_reference/surface_custom/tolerance-policy.json");
+    let policy_bytes = include_bytes!("data/cpp_reference/surface/tolerance-policy.json");
     let manifest: Value = serde_json::from_str(include_str!(
         "data/cpp_reference/surface_custom/manifest.json"
     ))
     .unwrap();
+    let files = manifest["files"].as_object().unwrap();
+    assert_eq!(files.len(), 2);
     for (name, bytes) in [
         ("cases.jsonl", inputs.as_slice()),
         ("results.jsonl", outputs.as_slice()),
-        ("tolerance-policy.json", policy_bytes.as_slice()),
     ] {
-        assert_eq!(manifest["files"][name], cpp_hash::sha256(bytes));
+        assert_eq!(files[name], cpp_hash::sha256(bytes));
     }
+    assert_eq!(
+        manifest["shared_policy_sha256"],
+        cpp_hash::sha256(policy_bytes)
+    );
     assert_eq!(
         manifest["upstream_sha"],
         "f3b2943e69abca942e795c5b1b45276f6338abb5"

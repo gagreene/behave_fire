@@ -118,6 +118,56 @@ def test_export_copies_only_explicit_numeric_fixture_inputs(tmp_path):
         exporter.export(source, destination, check=True)
 
 
+def test_export_custom_controls_share_surface_policy(tmp_path):
+    exporter = _load("export_cpp_crate")
+    source = tmp_path / "canonical"
+    target = tmp_path / "crate"
+    policy = b'{"approved":false}\n'
+    for dataset in ("surface", "surface_custom"):
+        fixture = source / dataset
+        fixture.mkdir(parents=True)
+        (fixture / "cases.jsonl").write_bytes(b'{"id":"case"}\n')
+        (fixture / "results.jsonl").write_bytes(b'{"id":"case","status":"unavailable"}\n')
+        (fixture / "manifest.json").write_text(json.dumps({"upstream_sha": exporter.PIN}), encoding="utf-8")
+    (source / "tolerance-policy.json").write_bytes(policy)
+
+    exporter.export(source, target / "surface")
+    custom = target / "surface_custom"
+    names = exporter.export(source, custom, dataset="surface_custom")
+    assert names == sorted(path.name for path in custom.iterdir()) == ["cases.jsonl", "manifest.json", "results.jsonl"]
+    manifest = json.loads((custom / "manifest.json").read_bytes())
+    assert manifest["files"] == {
+        name: hashlib.sha256((source / "surface_custom" / name).read_bytes()).hexdigest()
+        for name in ("cases.jsonl", "results.jsonl")
+    }
+    assert manifest["shared_policy_sha256"] == hashlib.sha256(policy).hexdigest()
+
+    shared = target / "surface/tolerance-policy.json"
+    assert shared.read_bytes() == policy
+    exporter.export(source, custom, check=True, dataset="surface_custom")
+    results = custom / "results.jsonl"
+    results.write_bytes(b"stale results\n")
+    shared.write_bytes(policy + b"\n")
+    for check in (False, True):
+        with pytest.raises(ValueError, match="shared policy drift"):
+            exporter.export(source, custom, check=check, dataset="surface_custom")
+    assert shared.read_bytes() == policy + b"\n"
+    shared.unlink()
+    for check in (False, True):
+        with pytest.raises(ValueError, match="shared policy drift"):
+            exporter.export(source, custom, check=check, dataset="surface_custom")
+    assert not shared.exists()
+
+    shared.write_bytes(policy)
+    duplicate = custom / "tolerance-policy.json"
+    duplicate.write_bytes(policy)
+    for check in (False, True):
+        with pytest.raises(ValueError, match="duplicate policy"):
+            exporter.export(source, custom, check=check, dataset="surface_custom")
+    assert duplicate.read_bytes() == policy
+    assert results.read_bytes() == b"stale results\n"
+
+
 def test_export_fails_before_writing_when_any_canonical_input_is_missing(tmp_path):
     exporter = _load("export_cpp_crate")
     source = tmp_path / "canonical"

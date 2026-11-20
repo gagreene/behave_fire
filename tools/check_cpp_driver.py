@@ -6,6 +6,7 @@ import math
 import subprocess
 from pathlib import Path
 
+import cpp_mortality as mortality
 from cpp_fire_size import DATASET, load_cases
 from cpp_ignite import DATASET as IGNITE_DATASET
 from cpp_ignite import load_cases as load_ignite_cases
@@ -171,6 +172,56 @@ def _check_ignite(driver, directory, root, exact_replay):
                 output_trap_exit=87, duplicate_ids_rejected=True)
 
 
+def _check_mortality(driver, directory, root, exact_replay):
+    """Verify the Mortality input guard, both entry traps, and exact local replay.
+
+    :param driver: Source-matched executable.
+    :param directory: Retained scratch evidence directory.
+    :param root: Reference checkout root.
+    :param exact_replay: Whether to require the original compiler's exact bytes.
+    :return: Mortality rejection and execution control counts.
+    """
+    cases = {case["id"]: case for case in mortality.load_cases(root)}
+    zero_calm = cases["scorch-zero-calm-77"]
+    one_calm = cases["scorch-one-calm-77"]
+    one_wind = cases["scorch-one-wind-77"]
+    controls = (
+        (dict(zero_calm, intensity_btu_ft_s=1), "unreviewed_mortality_request"),
+        (dict(zero_calm, air_temperature_f=14), "unreviewed_mortality_request"),
+        (dict(one_wind, wind_mph=0), "unreviewed_mortality_request"),
+        (dict(zero_calm, intensity_btu_ft_s=-0.0), "unreviewed_mortality_request"),
+        (dict(one_calm, intensity_btu_ft_s=math.nextafter(1, math.inf)), "unreviewed_mortality_request"),
+        (dict(one_calm, id="scorch-unreviewed"), "unreviewed_mortality_request"),
+        (dict(zero_calm, air_temperature_f="77"), "numeric_type_air_temperature_f"),
+        (dict(one_wind, species="PIPO"), "unsupported_field"),
+    )
+    path = directory / "mortality-negative-input.jsonl"
+    path.write_text("".join(json.dumps(case) + "\n" for case, _ in controls), encoding="utf-8")
+    negative = _run(driver, directory, "mortality-negative", path, "--forbid-upstream", 0)
+    expected = [dict(id=case["id"], status="rejected", upstream_entries=0, error=error)
+                for case, error in controls]
+    if _read_lines(negative) != expected:
+        raise ValueError("Mortality mutation escaped guarded rejection")
+    cases_path = root / mortality.DATASET / "cases.jsonl"
+    if exact_replay:
+        replay = _run(driver, directory, "mortality-replay", cases_path, None, 0)
+        if replay.read_bytes() != (cases_path.parent / "results.jsonl").read_bytes():
+            raise ValueError("Exact Mortality replay differs from stored observations")
+    for name, code in (("upstream", 86), ("geometry", 87)):
+        stem = f"mortality-{name}-positive-trap"
+        _run(driver, directory, stem, cases_path, f"--forbid-{name}", code)
+        if f"{name.upper()}_ENTRY_BLOCKED".encode() not in (directory / f"{stem}.stderr").read_bytes():
+            raise ValueError("Mortality entry trap was not active")
+    duplicate = directory / "mortality-duplicate-input.jsonl"
+    duplicate.write_text((json.dumps(zero_calm) + "\n") * 2, encoding="utf-8")
+    rows = _read_lines(_run(driver, directory, "mortality-duplicate", duplicate, None, 0))
+    expected_duplicate = dict(id=zero_calm["id"], status="rejected", upstream_entries=0, error="duplicate_id")
+    if len(rows) != 2 or rows[0].get("status") != "ok" or rows[1] != expected_duplicate:
+        raise ValueError("Duplicate Mortality case reached upstream twice")
+    return dict(negative_cases=len(controls), negative_upstream_entries=0, upstream_trap_exit=86,
+                output_trap_exit=87, duplicate_ids_rejected=True)
+
+
 def _read_lines(path):
     """Decode protocol records, including null IDs after malformed input.
 
@@ -275,6 +326,7 @@ def check_driver(driver, directory, root=ROOT, build_receipt=None, exact_replay=
     summary.update(_check_custom(driver, directory, data, root))
     summary["fire_size"] = _check_fire_size(driver, directory, root, exact_replay)
     summary["ignite"] = _check_ignite(driver, directory, root, exact_replay)
+    summary["mortality"] = _check_mortality(driver, directory, root, exact_replay)
     (directory / "summary.json").write_text(json.dumps(summary, indent=2) + "\n", encoding="utf-8")
     return summary
 

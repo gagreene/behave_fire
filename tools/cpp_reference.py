@@ -193,13 +193,15 @@ def _required_artifacts(root):
         "negative-inputs.jsonl", "negative-expected.json", "prepared-build.json",
         "fire_size/cases.jsonl", "fire_size/manifest.json", "fire_size/results.jsonl", "fire_size/schema.json",
         "ignite/cases.jsonl", "ignite/manifest.json", "ignite/results.jsonl", "ignite/schema.json",
+        "mortality/cases.jsonl", "mortality/manifest.json", "mortality/results.jsonl", "mortality/schema.json",
         "surface_custom/cases.jsonl", "surface_custom/results.jsonl", "surface_custom/manifest.json")}
     mandatory.update("tools/" + name for name in (
         "cpp_reference.py", "cpp_controls.py", "cpp_fire_size.py", "cpp_ignite.py", "cpp_inventory.py",
-        "cpp_calibrate.py", "export_cpp_crate.py", "check_cpp_driver.py"))
+        "cpp_mortality.py", "cpp_calibrate.py", "export_cpp_crate.py", "check_cpp_driver.py"))
     mandatory.update(f"rust/crates/behave-fire/tests/data/cpp_reference/{dataset}/{name}"
                      for dataset in ("surface", "surface_custom", "fire_size", "ignite")
-                     for name in ("cases.jsonl", "results.jsonl", "manifest.json", "tolerance-policy.json"))
+                     for name in ("cases.jsonl", "results.jsonl", "manifest.json", "tolerance-policy.json")
+                     if dataset != "surface_custom" or name != "tolerance-policy.json")
     mandatory.update(p.relative_to(root).as_posix() for p in base.rglob("*") if p.is_file() and p.name != "hashes.json")
     return mandatory
 
@@ -219,6 +221,15 @@ def _rows(path, *, parse_int=int):
     if len({row["id"] for row in rows}) != len(rows):
         raise ValueError("Duplicate case ID")
     return rows
+
+
+def _signed_int(token):
+    """Preserve the negative sign when decoding a lexical zero.
+
+    :param token: JSON integer token.
+    :return: Integer value or negative binary64 zero for the signed zero token.
+    """
+    return -0.0 if token == "-0" else int(token)
 
 
 def _source_digest(path):
@@ -384,7 +395,7 @@ def check_fixture_budget(root=ROOT):
     if policy.get('approved') is not True or policy.get('limits') != FIXTURE_BUDGET:
         raise ValueError('Unapproved fixture budget limits')
     cases = sum(sum(bool(line.strip()) for line in (canonical / dataset / 'cases.jsonl').read_bytes().splitlines())
-                for dataset in ('surface', 'surface_custom', 'fire_size', 'ignite'))
+                for dataset in ('surface', 'surface_custom', 'fire_size', 'ignite', 'mortality'))
     if cases > FIXTURE_BUDGET['case_limit']:
         raise ValueError('C++ fixture case budget exceeded')
     measured = {'cases': cases}
@@ -594,12 +605,18 @@ def load_reference(root=ROOT, *, measurement=False):
     from cpp_ignite import EXACT_FIELDS as IGNITE_FIELDS
     from cpp_ignite import load_observations as load_ignite_observations
     from cpp_ignite import validate_policy as validate_ignite_policy
+    from cpp_mortality import MEASUREMENT_POLICY
+    from cpp_mortality import load_observations as load_mortality_observations
 
     controls = load(root, cases)
     load_observations(root)
     validate_policy(root, policy.get("fire_size"), policy.get("qualification") if policy["approved"] else None)
     load_ignite_observations(root)
     validate_ignite_policy(root, policy.get("ignite"), policy.get("qualification") if policy["approved"] else None)
+    load_mortality_observations(root)
+    mortality = policy.get("mortality")
+    if mortality != MEASUREMENT_POLICY or mortality["approved"] is not False:
+        raise ValueError("Mortality policy must remain measurement-only")
     _prepared_build(root)
     budget = check_fixture_budget(root)
     if measurement:
