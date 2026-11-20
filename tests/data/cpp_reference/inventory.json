@@ -5157,7 +5157,7 @@
       "signature": "void WindAjustmentFactor::applyLogProfile(const double canopyCover, const double canopyHeight, const double fuelbedDepth)"
     }
   ],
-  "phase": "Task 3: qualified Surface run and five outputs; remaining function coverage is not claimed",
+  "phase": "Task 3: six Surface and four standalone FireSize functions compared",
   "pilot_observations": {
     "approval": false,
     "available": 583,
@@ -29439,8 +29439,8 @@
     },
     {
       "access": "public",
-      "approval": null,
-      "dataset": null,
+      "approval": "Owner-approved exact binary64 comparison, including signed zero, for the three reviewed standalone FireSize cases. Positive-wind Crown cases are excluded (firelab/behave issue #85).",
+      "dataset": "fire_size",
       "definition_candidates": [
         {
           "definition_parameters": "bool isCrown, double effectiveWindSpeed, SpeedUnits::SpeedUnitsEnum windSpeedRateUnits, double forwardSpreadRate, SpeedUnits::SpeedUnitsEnum spreadRateUnits",
@@ -29451,10 +29451,23 @@
         }
       ],
       "deleted": false,
-      "execution_evidence": [],
+      "execution_evidence": [
+        {
+          "file": "fire_size/cases.jsonl",
+          "sha256": "b7eaafc8c07ad95c79dcb2cc553a659bf3106b1a215d08febb9f0e2c0ac2d755"
+        },
+        {
+          "file": "fire_size/results.jsonl",
+          "sha256": "3c8a90c2d0cb8af549b5d555938e439ed5867b5d2fbb66fdad978aa5c056d3df"
+        },
+        {
+          "file": "fire_size/manifest.json",
+          "sha256": "c450683a4dec4573af3fb9a38fa9b55487f270c63f6407d91abc5886dcf9b9b6"
+        }
+      ],
       "file": "src/behave/fireSize.h",
       "forwarded_cpp_ids": [],
-      "function_status": "not_in_pilot",
+      "function_status": "tested",
       "id": "7d9cb657b190558976b4",
       "kind": "method",
       "lexically_qualified_signature": "void FireSize::calculateFireBasicDimensions(bool isCrown, double effectiveWindSpeed, SpeedUnits::SpeedUnitsEnum windSpeedRateUnits, double forwardSpreadRate, SpeedUnits::SpeedUnitsEnum spreadRateUnits)",
@@ -29464,7 +29477,7 @@
         "src/behave/fireSize.cpp",
         "src/behave/fireSize.h"
       ],
-      "mapping_note": "Source-backed callable/parameter/field candidates; scientific equivalence and lifecycle remain unverified.",
+      "mapping_note": "Direct FireSize call in the three reviewed standalone geometry cases.",
       "mapping_status": "candidate_mapping",
       "name": "calculateFireBasicDimensions",
       "oracle_access": "public_declaration_only_not_qualified",
@@ -29475,10 +29488,10 @@
       "pure_virtual": false,
       "python_targets": [
         {
-          "evidence": "same semantic family and exact case/underscore-normalized callable name; behavioral equivalence unverified",
+          "evidence": "Direct callable exercised by the three reviewed standalone geometry cases.",
           "file": "src/behave_fire/components/fire_size.py",
           "line": 39,
-          "relation": "callable_identity_candidate",
+          "relation": "observed_direct_callable",
           "signature": "calculate_fire_basic_dimensions(self, is_crown, effective_wind_speed, wind_speed_units, forward_spread_rate, spread_rate_units)",
           "target": "behave_fire.components.fire_size.FireSize.calculate_fire_basic_dimensions"
         }
@@ -29490,10 +29503,10 @@
       ],
       "rust_targets": [
         {
-          "evidence": "same semantic family and exact case/underscore-normalized callable name; behavioral equivalence unverified",
+          "evidence": "Direct callable exercised by the three reviewed standalone geometry cases.",
           "file": "rust/crates/behave-fire/src/fire_size.rs",
           "line": 60,
-          "relation": "callable_identity_candidate",
+          "relation": "observed_direct_callable",
           "signature": "pub fn calculate_fire_basic_dimensions( &mut self, is_crown: bool, effective_wind_speed: f64, wind_speed_units: SpeedUnit, forward_spread_rate: f64, spread_rate_units: SpeedUnit, )",
           "target": "behave_fire::fire_size::<FireSize>::calculate_fire_basic_dimensions"
         }
@@ -29503,8 +29516,8 @@
     },
     {
       "access": "public",
-      "approval": null,
-      "dataset": null,
+      "approval": "Owner-approved exact binary64 comparison, including signed zero, for the three reviewed standalone FireSize cases. Positive-wind Crown cases are excluded (firelab/behave issue #85).",
+      "dataset": "fire_size",
       "definition_candidates": [
         {
           "definition_parameters": "",
@@ -29515,10 +29528,23 @@
         }
       ],
       "deleted": false,
-      "execution_evidence": [],
+      "execution_evidence": [
+        {
+          "file": "fire_size/cases.jsonl",
+          "sha256": "b7eaafc8c07ad95c79dcb2cc553a659bf3106b1a215d08febb9f0e2c0ac2d755"
+        },
+        {
+          "file": "fire_size/results.jsonl",
+          "sha256": "3c8a90c2d0cb8af549b5d555938e439ed5867b5d2fbb66fdad978aa5c056d3df"
+        },
+        {
+          "file": "fire_size/manifest.json",
+          "sha256": "c450683a4dec4573af3fb9a38fa9b55487f270c63f6407d91abc5886dcf9b9b6"
+        }
+      ],
       "file": "src/behave/fireSize.h",
       "forwarded_cpp_ids": [],
-      "function_status": "not_in_pilot",
+      "function_status": "tested",
       "id": "63d9e2bae17b401c6fc4",
       "kind": "method",
       "lexically_qualified_signature": "double FireSize::getFireLengthToWidthRatio() const",
@@ -29528,7 +29554,7 @@
         "src/behave/fireSize.cpp",
         "src/behave/fireSize.h"
       ],
-      "mapping_note": "Source-backed callable/parameter/field candidates; scientific equivalence and lifecycle remain unverified.",
+      "mapping_note": "Direct FireSize call in the three reviewed standalone geometry cases.",
       "mapping_status": "candidate_mapping",
       "name": "getFireLengthToWidthRatio",
       "oracle_access": "public_declaration_only_not_qualified",
@@ -29539,10 +29565,10 @@
       "pure_virtual": false,
       "python_targets": [
         {
-          "evidence": "same semantic family and exact case/underscore-normalized callable name; behavioral equivalence unverified",
+          "evidence": "Direct callable exercised by the three reviewed standalone geometry cases.",
           "file": "src/behave_fire/components/fire_size.py",
           "line": 154,
-          "relation": "callable_identity_candidate",
+          "relation": "observed_direct_callable",
           "signature": "get_fire_length_to_width_ratio(self)",
           "target": "behave_fire.components.fire_size.FireSize.get_fire_length_to_width_ratio"
         }
@@ -29554,10 +29580,10 @@
       ],
       "rust_targets": [
         {
-          "evidence": "same semantic family and exact case/underscore-normalized callable name; behavioral equivalence unverified",
+          "evidence": "Direct callable exercised by the three reviewed standalone geometry cases.",
           "file": "rust/crates/behave-fire/src/fire_size.rs",
           "line": 169,
-          "relation": "callable_identity_candidate",
+          "relation": "observed_direct_callable",
           "signature": "pub fn get_fire_length_to_width_ratio(&self) -> f64",
           "target": "behave_fire::fire_size::<FireSize>::get_fire_length_to_width_ratio"
         }
@@ -30143,8 +30169,8 @@
     },
     {
       "access": "public",
-      "approval": null,
-      "dataset": null,
+      "approval": "Owner-approved exact binary64 comparison, including signed zero, for the three reviewed standalone FireSize cases. Positive-wind Crown cases are excluded (firelab/behave issue #85).",
+      "dataset": "fire_size",
       "definition_candidates": [
         {
           "definition_parameters": "bool isCrown, LengthUnits::LengthUnitsEnum lengthUnits, double elapsedTime, TimeUnits::TimeUnitsEnum timeUnits",
@@ -30155,10 +30181,23 @@
         }
       ],
       "deleted": false,
-      "execution_evidence": [],
+      "execution_evidence": [
+        {
+          "file": "fire_size/cases.jsonl",
+          "sha256": "b7eaafc8c07ad95c79dcb2cc553a659bf3106b1a215d08febb9f0e2c0ac2d755"
+        },
+        {
+          "file": "fire_size/results.jsonl",
+          "sha256": "3c8a90c2d0cb8af549b5d555938e439ed5867b5d2fbb66fdad978aa5c056d3df"
+        },
+        {
+          "file": "fire_size/manifest.json",
+          "sha256": "c450683a4dec4573af3fb9a38fa9b55487f270c63f6407d91abc5886dcf9b9b6"
+        }
+      ],
       "file": "src/behave/fireSize.h",
       "forwarded_cpp_ids": [],
-      "function_status": "not_in_pilot",
+      "function_status": "tested",
       "id": "8bedf8f4c9b2ed65a11c",
       "kind": "method",
       "lexically_qualified_signature": "double FireSize::getFirePerimeter(bool isCrown, LengthUnits::LengthUnitsEnum lengthUnits, double elapsedTime, TimeUnits::TimeUnitsEnum timeUnits) const",
@@ -30168,7 +30207,7 @@
         "src/behave/fireSize.cpp",
         "src/behave/fireSize.h"
       ],
-      "mapping_note": "Source-backed callable/parameter/field candidates; scientific equivalence and lifecycle remain unverified.",
+      "mapping_note": "Direct FireSize call in the three reviewed standalone geometry cases.",
       "mapping_status": "candidate_mapping",
       "name": "getFirePerimeter",
       "oracle_access": "public_declaration_only_not_qualified",
@@ -30179,10 +30218,10 @@
       "pure_virtual": false,
       "python_targets": [
         {
-          "evidence": "same semantic family and exact case/underscore-normalized callable name; behavioral equivalence unverified",
+          "evidence": "Direct callable exercised by the three reviewed standalone geometry cases.",
           "file": "src/behave_fire/components/fire_size.py",
           "line": 267,
-          "relation": "callable_identity_candidate",
+          "relation": "observed_direct_callable",
           "signature": "get_fire_perimeter(self, is_crown, length_units, elapsed_time, time_units)",
           "target": "behave_fire.components.fire_size.FireSize.get_fire_perimeter"
         }
@@ -30194,10 +30233,10 @@
       ],
       "rust_targets": [
         {
-          "evidence": "same semantic family and exact case/underscore-normalized callable name; behavioral equivalence unverified",
+          "evidence": "Direct callable exercised by the three reviewed standalone geometry cases.",
           "file": "rust/crates/behave-fire/src/fire_size.rs",
           "line": 173,
-          "relation": "callable_identity_candidate",
+          "relation": "observed_direct_callable",
           "signature": "pub fn get_fire_perimeter( &self, is_crown: bool, units: LengthUnit, elapsed: f64, time: TimeUnit, ) -> f64",
           "target": "behave_fire::fire_size::<FireSize>::get_fire_perimeter"
         }
@@ -30207,8 +30246,8 @@
     },
     {
       "access": "public",
-      "approval": null,
-      "dataset": null,
+      "approval": "Owner-approved exact binary64 comparison, including signed zero, for the three reviewed standalone FireSize cases. Positive-wind Crown cases are excluded (firelab/behave issue #85).",
+      "dataset": "fire_size",
       "definition_candidates": [
         {
           "definition_parameters": "bool isCrown, AreaUnits::AreaUnitsEnum areaUnits, double elapsedTime, TimeUnits::TimeUnitsEnum timeUnits",
@@ -30219,10 +30258,23 @@
         }
       ],
       "deleted": false,
-      "execution_evidence": [],
+      "execution_evidence": [
+        {
+          "file": "fire_size/cases.jsonl",
+          "sha256": "b7eaafc8c07ad95c79dcb2cc553a659bf3106b1a215d08febb9f0e2c0ac2d755"
+        },
+        {
+          "file": "fire_size/results.jsonl",
+          "sha256": "3c8a90c2d0cb8af549b5d555938e439ed5867b5d2fbb66fdad978aa5c056d3df"
+        },
+        {
+          "file": "fire_size/manifest.json",
+          "sha256": "c450683a4dec4573af3fb9a38fa9b55487f270c63f6407d91abc5886dcf9b9b6"
+        }
+      ],
       "file": "src/behave/fireSize.h",
       "forwarded_cpp_ids": [],
-      "function_status": "not_in_pilot",
+      "function_status": "tested",
       "id": "a6bd9d473bb91e881474",
       "kind": "method",
       "lexically_qualified_signature": "double FireSize::getFireArea(bool isCrown, AreaUnits::AreaUnitsEnum areaUnits, double elapsedTime, TimeUnits::TimeUnitsEnum timeUnits) const",
@@ -30232,7 +30284,7 @@
         "src/behave/fireSize.cpp",
         "src/behave/fireSize.h"
       ],
-      "mapping_note": "Source-backed callable/parameter/field candidates; scientific equivalence and lifecycle remain unverified.",
+      "mapping_note": "Direct FireSize call in the three reviewed standalone geometry cases.",
       "mapping_status": "candidate_mapping",
       "name": "getFireArea",
       "oracle_access": "public_declaration_only_not_qualified",
@@ -30243,10 +30295,10 @@
       "pure_virtual": false,
       "python_targets": [
         {
-          "evidence": "same semantic family and exact case/underscore-normalized callable name; behavioral equivalence unverified",
+          "evidence": "Direct callable exercised by the three reviewed standalone geometry cases.",
           "file": "src/behave_fire/components/fire_size.py",
           "line": 306,
-          "relation": "callable_identity_candidate",
+          "relation": "observed_direct_callable",
           "signature": "get_fire_area(self, is_crown, area_units, elapsed_time, time_units)",
           "target": "behave_fire.components.fire_size.FireSize.get_fire_area"
         }
@@ -30258,10 +30310,10 @@
       ],
       "rust_targets": [
         {
-          "evidence": "same semantic family and exact case/underscore-normalized callable name; behavioral equivalence unverified",
+          "evidence": "Direct callable exercised by the three reviewed standalone geometry cases.",
           "file": "rust/crates/behave-fire/src/fire_size.rs",
           "line": 148,
-          "relation": "callable_identity_candidate",
+          "relation": "observed_direct_callable",
           "signature": "pub fn get_fire_area( &self, is_crown: bool, units: AreaUnit, elapsed: f64, time: TimeUnit, ) -> f64",
           "target": "behave_fire::fire_size::<FireSize>::get_fire_area"
         }
@@ -88373,12 +88425,25 @@
       "contract": {
         "independent_cases": "Fresh objects per independent case;explicit transition cases only;validate every primitive/derived bound before every call,including setters and getters.",
         "state_lifecycle": "State setters, getters, constructors, resets, and copy contracts are assigned to this bundle; assignment is not execution evidence.",
-        "status": "source_only_pending_execution",
+        "status": "standalone_geometry_runs_checked",
         "units": "Explicit declared unit enums and conversion bounds are checked before every call."
       },
-      "dataset": null,
-      "executable_now": false,
-      "execution_evidence": [],
+      "dataset": "fire_size",
+      "executable_now": true,
+      "execution_evidence": [
+        {
+          "file": "fire_size/cases.jsonl",
+          "sha256": "b7eaafc8c07ad95c79dcb2cc553a659bf3106b1a215d08febb9f0e2c0ac2d755"
+        },
+        {
+          "file": "fire_size/results.jsonl",
+          "sha256": "3c8a90c2d0cb8af549b5d555938e439ed5867b5d2fbb66fdad978aa5c056d3df"
+        },
+        {
+          "file": "fire_size/manifest.json",
+          "sha256": "c450683a4dec4573af3fb9a38fa9b55487f270c63f6407d91abc5886dcf9b9b6"
+        }
+      ],
       "guard_ids": [
         "units",
         "fresh_state",
@@ -88387,15 +88452,18 @@
       ],
       "method_ids": [
         "7d9cb657b190558976b4",
+        "63d9e2bae17b401c6fc4",
         "a6bd9d473bb91e881474",
-        "8bedf8f4c9b2ed65a11c",
-        "ded8bd9835279daa45bb",
-        "7b6c1ffb393320cfeffe"
+        "8bedf8f4c9b2ed65a11c"
       ],
-      "notes": "isCrown/time units explicit;no arbitrary ratio setter.",
-      "qualification": "Source-only;execution waits for approved next phases;unresolved identities unavailable.",
+      "notes": "Fresh standalone FireSize per case, with explicit Crown/Surface mode and time units. The calculation and three queried outputs use the reviewed case matrix. Positive-wind Crown cases are excluded (firelab/behave issue #85).",
+      "qualification": {
+        "complete_cases": 3,
+        "directly_tested_functions": 4,
+        "policy": "tolerance-policy.json#/fire_size"
+      },
       "route_id": "geometry",
-      "status": "not_in_pilot"
+      "status": "reviewed_fire_size_outputs"
     },
     {
       "assigned_method_ids": [

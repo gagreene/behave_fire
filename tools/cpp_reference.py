@@ -196,9 +196,8 @@ def _required_artifacts(root):
     mandatory.update("tools/" + name for name in (
         "cpp_reference.py", "cpp_controls.py", "cpp_fire_size.py", "cpp_inventory.py",
         "cpp_calibrate.py", "export_cpp_crate.py", "check_cpp_driver.py"))
-    mandatory.update("rust/crates/behave-fire/tests/data/cpp_reference/surface/" + name
-                     for name in ("cases.jsonl", "results.jsonl", "manifest.json", "tolerance-policy.json"))
-    mandatory.update("rust/crates/behave-fire/tests/data/cpp_reference/surface_custom/" + name
+    mandatory.update(f"rust/crates/behave-fire/tests/data/cpp_reference/{dataset}/{name}"
+                     for dataset in ("surface", "surface_custom", "fire_size")
                      for name in ("cases.jsonl", "results.jsonl", "manifest.json", "tolerance-policy.json"))
     mandatory.update(p.relative_to(root).as_posix() for p in base.rglob("*") if p.is_file() and p.name != "hashes.json")
     return mandatory
@@ -580,27 +579,24 @@ def load_reference(root=ROOT, *, measurement=False):
         if not qualification.is_file():
             raise ValueError("Active comparison policy lacks complete calibration qualification")
         record = _document(qualification)
-        if policy.get("qualification") != record:
+        embedded = json.dumps(policy.get("qualification"), sort_keys=True, allow_nan=False)
+        canonical = json.dumps(record, sort_keys=True, allow_nan=False)
+        if embedded != canonical:
             raise ValueError("Embedded calibration qualification differs from the reviewed record")
         validate_qualification(root, record)
     from cpp_inventory import validate_inventory
 
     validate_inventory(_document(directory / "inventory.json"), reference_root=directory)
     from cpp_controls import load
-    from cpp_fire_size import FIELDS as FIRE_SIZE_FIELDS
-    from cpp_fire_size import load_observations
+    from cpp_fire_size import EXACT_FIELDS, load_observations, validate_policy
 
     controls = load(root, cases)
     load_observations(root)
-    pending_fire_size = {
-        "approved": False, "fields": {field: {"kind": "measurement_only"} for field in FIRE_SIZE_FIELDS}
-    }
-    if policy.get("fire_size") != pending_fire_size or policy["fire_size"]["approved"] is not False:
-        raise ValueError("FireSize observations require a separate approved comparison policy")
+    validate_policy(root, policy.get("fire_size"), policy.get("qualification") if policy["approved"] else None)
     _prepared_build(root)
     budget = check_fixture_budget(root)
     if measurement:
-        policy = dict(policy, approved=False)
+        policy = dict(policy, approved=False, fire_size=dict(approved=False, fields=EXACT_FIELDS))
     return dict(cases=cases, results=results, manifest=manifest, policy=policy, controls=controls, budget=budget)
 
 

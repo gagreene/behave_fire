@@ -73,13 +73,13 @@
     "approved": false,
     "fields": {
       "area_ft2": {
-        "kind": "measurement_only"
+        "kind": "exact_binary64"
       },
       "length_to_width_ratio": {
-        "kind": "measurement_only"
+        "kind": "exact_binary64"
       },
       "perimeter_ft": {
-        "kind": "measurement_only"
+        "kind": "exact_binary64"
       }
     }
   }

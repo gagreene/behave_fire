@@ -18,19 +18,31 @@ ROOT = Path(__file__).resolve().parents[2]
 
 # ---- qualification evidence tests ----
 
-def test_active_policy_requires_complete_calibration_metadata(tmp_path, cpp_snapshot_template):
+@pytest.mark.parametrize("mutation", ["missing", "embedded_numeric_type"])
+def test_active_policy_requires_complete_calibration_metadata(tmp_path, cpp_snapshot_template, mutation):
     root = write_snapshot(cpp_snapshot_template, tmp_path)
     relative = 'tests/data/cpp_reference/tolerance-policy.json'
     path = root / relative
     policy = json.loads(path.read_text())
     policy['approved'] = True
-    policy.pop('qualification', None)
-    reference._json(path, policy)
     hash_path = root / 'tests/data/cpp_reference/hashes.json'
     hashes = json.loads(hash_path.read_text())
+    if mutation == "missing":
+        policy.pop("qualification", None)
+        error = "calibration"
+    else:
+        record_name = "tests/data/cpp_reference/calibration/qualification.json"
+        record_path = root / record_name
+        record = reference._document(record_path)
+        record["fire_size"] = {"comparisons": 144}
+        reference._json(record_path, record)
+        hashes[record_name] = hashlib.sha256(record_path.read_bytes()).hexdigest()
+        policy["qualification"] = dict(record, fire_size={"comparisons": 144.0})
+        error = "Embedded calibration qualification differs"
+    reference._json(path, policy)
     hashes[relative] = hashlib.sha256(path.read_bytes()).hexdigest()
     reference._json(hash_path, hashes)
-    with pytest.raises(ValueError, match='calibration'):
+    with pytest.raises(ValueError, match=error):
         reference.load_reference(root)
 
 

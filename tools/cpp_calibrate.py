@@ -205,15 +205,21 @@ def activate(root, paths, reason):
     root = Path(root)
     record = validate_evidence(root, paths)
     validate_qualification(root, record)
+    geometry = fire_size.summarize_evidence(root, paths)
+    if geometry["comparisons"] != 144 or any(row["nonmatching"] for row in geometry["maxima"].values()):
+        raise ValueError("FireSize evidence does not meet the approved exact comparison policy")
+    record["fire_size"] = {key: value for key, value in geometry.items() if key != "values"}
     record["activation_reason"] = reason
-    reference._json(root / "tests/data/cpp_reference/calibration/qualification.json", record)
     policy_path = root / "tests/data/cpp_reference/tolerance-policy.json"
     policy = reference._document(policy_path)
+    policy["fire_size"] = dict(approved=True, fields=fire_size.EXACT_FIELDS, qualification=record["fire_size"])
+    fire_size.validate_policy(root, policy["fire_size"], record)
+    reference._json(root / "tests/data/cpp_reference/calibration/qualification.json", record)
     policy["approved"] = True
     policy["qualification"] = record
     policy["approval_gate"] = "Conditionally owner-approved caps qualified by complete manual CI evidence"
     reference._json(policy_path, policy)
-    for dataset in ("surface", "surface_custom"):
+    for dataset in ("surface", "surface_custom", "fire_size"):
         export(root / "tests/data/cpp_reference", root / "rust/crates/behave-fire/tests/data/cpp_reference" / dataset,
                dataset=dataset)
     reference.sync_hashes(root, reason)

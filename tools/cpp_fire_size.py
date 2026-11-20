@@ -1,5 +1,6 @@
 """Collect standalone FireSize observations for a separate comparison policy."""
 
+import json
 import math
 import struct
 from importlib import import_module
@@ -15,6 +16,7 @@ APPROVED_CASES = (
 DATASET = Path("tests/data/cpp_reference/fire_size")
 FILES = ("cases.jsonl", "manifest.json", "results.jsonl", "schema.json")
 FIELDS = ("area_ft2", "length_to_width_ratio", "perimeter_ft")
+EXACT_FIELDS = {field: {"kind": "exact_binary64"} for field in FIELDS}
 INPUTS = ("id", "mode", "wind_mph", "spread_ft_min", "elapsed_min")
 MAGNITUDE_MASK = (1 << 63) - 1
 
@@ -57,6 +59,25 @@ def artifacts(root):
     """
     directory = Path(root) / DATASET
     return {name: reference._digest(directory / name) for name in FILES}
+
+
+def assert_matches_cpp(actual, expected, policy):
+    """Require exact binary64 geometry under the approved three-case policy.
+
+    :param actual: FireSize output from the selected backend.
+    :param expected: Geometry observed from pinned C++ in the same units.
+    :param policy: Validated FireSize comparison policy.
+    :return: None on equality. Raises on missing approval or a mismatch.
+    """
+    if policy.get("approved") is not True:
+        raise reference.UnapprovedCppPolicy("FireSize comparisons require complete qualification")
+    if policy.get("fields") != EXACT_FIELDS:
+        raise ValueError("Unexpected FireSize policy fields")
+    _validate_output(actual)
+    _validate_output(expected)
+    for name in FIELDS:
+        if struct.pack("!d", actual[name]) != struct.pack("!d", expected[name]):
+            raise AssertionError(f"{name}: port={actual[name]!r}, C++={expected[name]!r}")
 
 
 def load_cases(root):
@@ -204,3 +225,31 @@ def summarize_evidence(root, paths):
             case: {field: sorted(values) for field, values in output.items()} for case, output in observed.items()
         },
     }
+
+
+def validate_policy(root, policy, qualification):
+    """Enforce exact, source-bound FireSize qualification before comparison.
+
+    :param root: Reference checkout root.
+    :param policy: FireSize section of the canonical reference policy.
+    :param qualification: Source-bound qualification already checked by the caller.
+    :return: None. Raises for incomplete policy or evidence.
+    """
+    if not isinstance(policy, dict) or type(policy.get("approved")) is not bool or policy.get("fields") != EXACT_FIELDS:
+        raise ValueError("Incomplete exact FireSize comparison policy")
+    if not policy["approved"]:
+        if set(policy) != {"approved", "fields"}:
+            raise ValueError("Pending FireSize policy carries unexpected qualification")
+        return
+    proof = policy.get("qualification")
+    if (set(policy) != {"approved", "fields", "qualification"} or not isinstance(proof, dict)
+            or not isinstance(qualification, dict)):
+        raise ValueError("Incomplete or stale FireSize qualification")
+    zeros = {field: dict(absolute=0.0, relative=0.0, ulp=0, nonmatching=0) for field in FIELDS}
+    expected = dict(artifacts=artifacts(root), comparisons=144, maxima=zeros,
+                    source_commit=qualification.get("source_commit"), ci_run_url=qualification.get("ci_run_url"))
+    # JSON equality retains the distinction between boolean, integer and float evidence.
+    encoded = json.dumps(proof, sort_keys=True, allow_nan=False)
+    if any(encoded != json.dumps(record, sort_keys=True, allow_nan=False)
+           for record in (qualification.get("fire_size"), expected)):
+        raise ValueError("Incomplete or stale FireSize qualification")

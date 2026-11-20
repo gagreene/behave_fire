@@ -74,12 +74,13 @@ def _check_custom(driver, directory, data, root):
                 custom_duplicate_ids_rejected=True, custom_state_sequence_checked=True)
 
 
-def _check_fire_size(driver, directory, root):
+def _check_fire_size(driver, directory, root, exact_replay):
     """Check the standalone FireSize whitelist and both entry traps.
 
     :param driver: Source-matched executable.
     :param directory: Retained scratch evidence directory.
     :param root: Reference checkout root.
+    :param exact_replay: Whether to require the original compiler's exact bytes.
     :return: FireSize rejection and execution control counts.
     """
     calm, surface, zero = load_cases(root)
@@ -101,6 +102,10 @@ def _check_fire_size(driver, directory, root):
     if _read_lines(result_path) != expected:
         raise ValueError("FireSize mutation escaped guarded rejection")
     cases_path = root / DATASET / "cases.jsonl"
+    if exact_replay:
+        replay = _run(driver, directory, "fire-size-replay", cases_path, None, 0)
+        if replay.read_bytes() != (cases_path.parent / "results.jsonl").read_bytes():
+            raise ValueError("Exact FireSize replay differs from stored observations")
     _run(driver, directory, "fire-size-upstream-positive-trap", cases_path, "--forbid-upstream", 86)
     _run(driver, directory, "fire-size-geometry-positive-trap", cases_path, "--forbid-geometry", 87)
     for name in ("upstream", "geometry"):
@@ -219,7 +224,7 @@ def check_driver(driver, directory, root=ROOT, build_receipt=None, exact_replay=
                    replay_cases=len(data["cases"]), replay_byte_identical=byte_identical, duplicate_ids_rejected=True,
                    state_sequence_checked=True, scientific_parity_approved=False)
     summary.update(_check_custom(driver, directory, data, root))
-    summary["fire_size"] = _check_fire_size(driver, directory, root)
+    summary["fire_size"] = _check_fire_size(driver, directory, root, exact_replay)
     (directory / "summary.json").write_text(json.dumps(summary, indent=2) + "\n", encoding="utf-8")
     return summary
 
