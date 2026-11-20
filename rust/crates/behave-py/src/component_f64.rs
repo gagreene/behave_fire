@@ -122,13 +122,9 @@ pub fn component_batch<'py>(
         }
         prepared.require(&required).map_err(PyValueError::new_err)?;
         let needs_weather = operation != Operation::CrownCalculateCrownSurfaceFire
-            || names.iter().any(|name| {
-                name.starts_with("crown_surface.")
-                    || matches!(
-                        name.as_str(),
-                        "crown_fire_spread_rate" | "crown_length_to_width_ratio"
-                    )
-            });
+            || names
+                .iter()
+                .any(|name| name.starts_with("crown_surface.") || name == "crown_fire_spread_rate");
         if needs_weather
             && options.wind_orientation == behave_fire::engine::WindOrientation::North
             && matches!(

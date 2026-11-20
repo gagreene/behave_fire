@@ -18,23 +18,23 @@ pub(crate) fn required(operation: Operation, names: &[String]) -> Option<Vec<Fie
         );
     }
     if operation == Operation::CrownCalculateCrownSurfaceFire {
-        let weather = names.iter().any(|name| {
-            name.starts_with("crown_surface.")
-                || matches!(
-                    name.as_str(),
-                    "crown_fire_spread_rate" | "crown_length_to_width_ratio"
-                )
-        });
+        let weather = names
+            .iter()
+            .any(|name| name.starts_with("crown_surface.") || name == "crown_fire_spread_rate");
+        let length = names
+            .iter()
+            .any(|name| name == "crown_length_to_width_ratio");
+        let fuel = names
+            .iter()
+            .any(|name| name != "crown_length_to_width_ratio");
         return Some(
             crate::component_requirements::fields(operation)
                 .iter()
                 .copied()
-                .filter(|field| {
-                    weather
-                        || !matches!(
-                            field,
-                            WindSpeed | WindDirection | Slope | WindSpeedUnits | SlopeUnits
-                        )
+                .filter(|field| match field {
+                    WindSpeed | WindSpeedUnits => weather || length,
+                    WindDirection | Slope | SlopeUnits => weather,
+                    _ => fuel,
                 })
                 .collect(),
         );
@@ -233,7 +233,7 @@ pub(crate) fn run(
             row.f64(
                 "final_flame_length",
                 if surface {
-                    crown::available::flame_length(p.n(Field::SurfaceFli, i)?)
+                    behave_fire::surface::calculate_flame_length(p.n(Field::SurfaceFli, i)?)
                 } else {
                     p.n(
                         if passive {

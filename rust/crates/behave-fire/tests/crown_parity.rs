@@ -32,7 +32,10 @@ fn cells(v: &Value) -> usize {
 }
 
 fn check(actual: f64, expected: &Value, n: usize, ctx: &str) {
-    let target = value(expected, n);
+    check_target(actual, value(expected, n), expected, n, ctx);
+}
+
+fn check_target(actual: f64, target: f64, expected: &Value, n: usize, ctx: &str) {
     if actual == 0.0 && target == 0.0 {
         assert_eq!(
             actual.is_sign_negative(),
@@ -205,8 +208,9 @@ fn python_slope_passthrough_and_changed_or_undefined_model_ten_match() {
         rates.push(result.crown_fire_spread_rate);
         assert_eq!(result.fire_type, number(&c["output"]["fire_type"]) as i32);
         for (k, v) in result.named_values() {
-            check(
+            check_target(
                 v,
+                fixture::crown_expected(&c["inputs"], &c["output"], k, 0),
                 &c["output"][k],
                 0,
                 &format!("slope {} changes {changes}/{k}", x.slope),
@@ -322,7 +326,13 @@ fn composed_default_custom_fuels_and_canopy_units_match_python_facade() {
             c["output"].as_object().unwrap().len()
         );
         for (k, v) in result.named_values() {
-            check(v, &c["output"][k], 0, &format!("{ctx}/{k}"))
+            check_target(
+                v,
+                fixture::crown_expected(i, &c["output"], k, 0),
+                &c["output"][k],
+                0,
+                &format!("{ctx}/{k}"),
+            )
         }
     }
     assert_eq!(classes, std::collections::BTreeSet::from([0, 1, 2, 3]));
@@ -633,7 +643,13 @@ fn every_source_stage_matches_independent_python_oracle() {
                 check(v, out, n, id)
             }
             for (k, v) in vals {
-                check(v, &out[k], n, &format!("{id}/{k}"))
+                check_target(
+                    v,
+                    fixture::crown_expected(i, out, k, n),
+                    &out[k],
+                    n,
+                    &format!("{id}/{k}"),
+                )
             }
         }
     }

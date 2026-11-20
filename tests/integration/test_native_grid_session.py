@@ -117,7 +117,7 @@ def test_selected_final_branch_preserves_independent_surface_values_with_missing
     if code in (0, 2):
         np.testing.assert_array_equal(grid.get('final_spread_rate'), [5.] * 3)
         np.testing.assert_array_equal(grid.get('final_fireline_intensity'), [1000.] * 3)
-        assert np.isfinite(grid.get('final_flame_length')).all()
+        np.testing.assert_allclose(grid.get('final_flame_length'), [0.45 * 1000. ** 0.46] * 3)
     elif code == 3:
         assert np.isfinite(grid.get('final_spread_rate')).all()
         assert np.isnan(grid.get('final_fireline_intensity')).all()

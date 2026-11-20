@@ -235,7 +235,7 @@ impl Field {
                 Self::FuelbedDefined,
                 Self::CrownCriticalFireSpreadRate,
             ],
-            Self::CrownLengthToWidthRatio => &[Self::EffectiveWindSpeed],
+            Self::CrownLengthToWidthRatio => &[Self::Wind20],
             Self::DirectionOfMaxSpread => {
                 &[Self::VectorX, Self::VectorY, Self::RateVector, Self::Aspect]
             }

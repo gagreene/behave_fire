@@ -11,16 +11,17 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'src'))
 
 
-def _missing_rules(outputs, supplied):
+def _missing_rules(outputs, supplied, wind_speed):
     """Apply the shared reviewed NaN rules to independent Python equations.
 
     :param outputs: Ordinary Python result arrays on widened, NaN-filled inputs.
     :param supplied: Actual normalized Surface fields consumed by Crown.
+    :param wind_speed: Actual open wind input consumed by Crown.
     :return: Corrected complete output mapping without calling Rust.
     """
     from float64_model_reference import apply_crown_rules
 
-    return apply_crown_rules(outputs, supplied)
+    return apply_crown_rules(outputs, supplied, wind_speed=wind_speed)
 
 
 def expected_outputs(operation, cells, dataset, seed):
@@ -53,7 +54,7 @@ def expected_outputs(operation, cells, dataset, seed):
                     np.int32 if field == 'fire_type' else np.float64, copy=True)
                   for field, value in result.items()}
         if operation != 'surface':
-            result = _missing_rules(result, supplied)
+            result = _missing_rules(result, supplied, inputs['wind_speed'])
     return result
 
 

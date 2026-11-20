@@ -134,7 +134,7 @@ def reference(function, arguments):
             'direction_of_max_spread'])
     if name == 'calculate_crown_surface_fire':
         result['crown_surface'] = _surface_missing(result['crown_surface'], result['ib_crown'])
-        result['crown_length_to_width_ratio'] = np.where(nan(result['crown_surface']['effective_wind_speed']),np.nan,
+        result['crown_length_to_width_ratio'] = np.where(nan(args['wind_speed']), np.nan,
             result['crown_length_to_width_ratio'])
         result['crown_surface']['flame_length'] = np.where(nan(result['crown_surface']['fireline_intensity']), np.nan,
             result['crown_surface']['flame_length'])

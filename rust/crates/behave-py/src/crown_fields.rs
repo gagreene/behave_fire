@@ -2,6 +2,7 @@
 use behave_fire::crown::{self, CrownResult};
 use behave_fire::engine::{CrownPlan, CrownSpatial, Field as F, PreparedFuels, WindOrientation};
 use behave_fire::PerCell;
+use behave_fire::{surface, units::SpeedUnit};
 use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
 use std::collections::BTreeMap;
@@ -116,7 +117,7 @@ impl<'a> Program<'a> {
                     self.require(F::CanopyBulkDensity)?;
                     Op::CriticalRate
                 }
-                F::CrownFireSpreadRate | F::CrownLengthToWidthRatio => {
+                F::CrownFireSpreadRate => {
                     self.inputs(&[
                         F::M1h,
                         F::M10h,
@@ -130,11 +131,11 @@ impl<'a> Program<'a> {
                     if self.plan.options().wind_orientation == WindOrientation::North {
                         self.require(F::Aspect)?;
                     }
-                    if field == F::CrownFireSpreadRate {
-                        Op::Spread
-                    } else {
-                        Op::LengthWidth
-                    }
+                    Op::Spread
+                }
+                F::CrownLengthToWidthRatio => {
+                    self.require(F::WindSpeed)?;
+                    Op::LengthWidth
                 }
                 F::CrownFireHeatPerUnitArea => {
                     self.inputs(&[F::SurfaceHpua, F::CanopyHeatPerUnitArea])?;
@@ -274,7 +275,6 @@ impl<'a> Program<'a> {
     pub(crate) fn evaluate(&self, index: usize) -> CrownResult {
         let mut values = [f64::NAN; F::COUNT];
         let mut code = -1;
-        let mut spread = None;
         for node in &self.nodes {
             let v = |field: F| values[field as usize];
             let value = match &node.op {
@@ -290,9 +290,9 @@ impl<'a> Program<'a> {
                     v(F::MoistureFoliar),
                 ),
                 Op::CriticalRate => crown::available::critical_rate(v(F::CanopyBulkDensity)),
-                Op::Spread | Op::LengthWidth => {
-                    let result = spread.get_or_insert_with(|| {
-                        self.plan.prepare_spread_spatial(
+                Op::Spread => {
+                    self.plan
+                        .prepare_spread_spatial(
                             &CrownSpatial {
                                 m1h: v(F::M1h),
                                 m10h: v(F::M10h),
@@ -312,12 +312,15 @@ impl<'a> Program<'a> {
                             },
                             self.fuels.for_grid(10),
                         )
-                    });
-                    if matches!(node.op, Op::Spread) {
-                        result.crown_fire_spread_rate
-                    } else {
-                        result.crown_length_to_width_ratio
-                    }
+                        .crown_fire_spread_rate
+                }
+                Op::LengthWidth => {
+                    let wind20 = surface::calculate_twenty_foot_wind_speed(
+                        v(F::WindSpeed),
+                        SpeedUnit::FeetPerMinute,
+                        self.plan.options().wind_height,
+                    );
+                    crown::calculate_crown_length_to_width_ratio(wind20)
                 }
                 Op::Add(a, b) => v(*a) + v(*b),
                 Op::ActiveIntensity => {
@@ -368,7 +371,7 @@ impl<'a> Program<'a> {
                     _ => f64::NAN,
                 },
                 Op::SurfaceFlame => match code {
-                    0 | 2 => crown::available::flame_length(v(F::SurfaceFli)),
+                    0 | 2 => surface::calculate_flame_length(v(F::SurfaceFli)),
                     1 => v(F::PassiveCrownFireFlameLength),
                     3 => v(F::CrownFlameLength),
                     _ => f64::NAN,

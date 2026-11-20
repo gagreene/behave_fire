@@ -3731,7 +3731,7 @@
       "src/behave_fire/behave.py": "240e2095c012267a6de9dc7eaff5701b9833bb115f139810220ccd5dbedec211",
       "src/behave_fire/components/__init__.py": "6ca168e0df02cacae936946d295377763a1e6b0c5c8d0b8f6cde70056a3fe26a",
       "src/behave_fire/components/behave_units.py": "c60185999a863b8fdfc1452155a792e996b06c4661bb247f1d49e314ad4d880a",
-      "src/behave_fire/components/crown.py": "0758794b2c2ad12ff9c10aaa4d557ddf45dbf20dee32822e0222579c4ea6e554",
+      "src/behave_fire/components/crown.py": "c94b16cb0f0103345ad971d340815e7f783397fbf494bd9f9e7c259e7c5f7a04",
       "src/behave_fire/components/fine_dead_fuel_moisture_tool.py": "de7bf4297525d929e627e7f317f0ae0410829e35185f2023592588b6c14fd18e",
       "src/behave_fire/components/fire_size.py": "49dc5a69e918f6b8724d0cc486b38cba59d81819f4117824570a1de0323e63c2",
       "src/behave_fire/components/fuel_models.py": "dd0e9588e68810f2f4472afe55846e033380eb5cdd82476019c8a307c419e5c3",
