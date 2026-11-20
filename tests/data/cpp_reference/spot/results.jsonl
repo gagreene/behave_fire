@@ -1,0 +1,4 @@
+{"id":"spot-flat-calm-zero-cover","status":"ok","upstream_entries":1,"output_entries":1,"output":{"flat_distance_ft":0}}
+{"id":"spot-flat-calm-ten-cover","status":"ok","upstream_entries":1,"output_entries":1,"output":{"flat_distance_ft":0}}
+{"id":"spot-flat-wind-zero-cover","status":"ok","upstream_entries":1,"output_entries":1,"output":{"flat_distance_ft":585.64499435215191}}
+{"id":"spot-flat-wind-ten-cover","status":"ok","upstream_entries":1,"output_entries":1,"output":{"flat_distance_ft":565.55620610673429}}

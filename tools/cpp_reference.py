@@ -194,10 +194,11 @@ def _required_artifacts(root):
         "fire_size/cases.jsonl", "fire_size/manifest.json", "fire_size/results.jsonl", "fire_size/schema.json",
         "ignite/cases.jsonl", "ignite/manifest.json", "ignite/results.jsonl", "ignite/schema.json",
         "mortality/cases.jsonl", "mortality/manifest.json", "mortality/results.jsonl", "mortality/schema.json",
+        "spot/cases.jsonl", "spot/manifest.json", "spot/results.jsonl", "spot/schema.json",
         "surface_custom/cases.jsonl", "surface_custom/results.jsonl", "surface_custom/manifest.json")}
     mandatory.update("tools/" + name for name in (
         "cpp_reference.py", "cpp_controls.py", "cpp_fire_size.py", "cpp_ignite.py", "cpp_inventory.py",
-        "cpp_mortality.py", "cpp_calibrate.py", "export_cpp_crate.py", "check_cpp_driver.py"))
+        "cpp_mortality.py", "cpp_spot.py", "cpp_calibrate.py", "export_cpp_crate.py", "check_cpp_driver.py"))
     mandatory.update(f"rust/crates/behave-fire/tests/data/cpp_reference/{dataset}/{name}"
                      for dataset in ("surface", "surface_custom", "fire_size", "ignite", "mortality")
                      for name in ("cases.jsonl", "results.jsonl", "manifest.json", "tolerance-policy.json")
@@ -395,7 +396,7 @@ def check_fixture_budget(root=ROOT):
     if policy.get('approved') is not True or policy.get('limits') != FIXTURE_BUDGET:
         raise ValueError('Unapproved fixture budget limits')
     cases = sum(sum(bool(line.strip()) for line in (canonical / dataset / 'cases.jsonl').read_bytes().splitlines())
-                for dataset in ('surface', 'surface_custom', 'fire_size', 'ignite', 'mortality'))
+                for dataset in ('surface', 'surface_custom', 'fire_size', 'ignite', 'mortality', 'spot'))
     if cases > FIXTURE_BUDGET['case_limit']:
         raise ValueError('C++ fixture case budget exceeded')
     measured = {'cases': cases}
@@ -608,6 +609,8 @@ def load_reference(root=ROOT, *, measurement=False):
     from cpp_mortality import EXACT_FIELDS as MORTALITY_FIELDS
     from cpp_mortality import load_observations as load_mortality_observations
     from cpp_mortality import validate_policy as validate_mortality_policy
+    from cpp_spot import load_observations as load_spot_observations
+    from cpp_spot import validate_measurement as validate_spot_measurement
 
     controls = load(root, cases)
     qualification = policy.get("qualification") if policy["approved"] else None
@@ -617,6 +620,8 @@ def load_reference(root=ROOT, *, measurement=False):
     validate_ignite_policy(root, policy.get("ignite"), qualification)
     load_mortality_observations(root)
     validate_mortality_policy(root, policy.get("mortality"), qualification)
+    load_spot_observations(root)
+    validate_spot_measurement(root, policy.get("spot"), None if measurement else qualification)
     _prepared_build(root)
     budget = check_fixture_budget(root)
     if measurement:

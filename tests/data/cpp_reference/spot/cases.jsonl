@@ -1,0 +1,4 @@
+{"id":"spot-flat-calm-zero-cover","operation":"spot_surface","flame_ft":5,"wind_mph":0,"cover_ft":0}
+{"id":"spot-flat-calm-ten-cover","operation":"spot_surface","flame_ft":5,"wind_mph":0,"cover_ft":10}
+{"id":"spot-flat-wind-zero-cover","operation":"spot_surface","flame_ft":5,"wind_mph":5,"cover_ft":0}
+{"id":"spot-flat-wind-ten-cover","operation":"spot_surface","flame_ft":5,"wind_mph":5,"cover_ft":10}

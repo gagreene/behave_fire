@@ -18,7 +18,7 @@
       "results.jsonl": "3c8a90c2d0cb8af549b5d555938e439ed5867b5d2fbb66fdad978aa5c056d3df",
       "schema.json": "bcefacdfef527819dd578abc68c46e9c05518c143d6f013f170a06d6be4df340"
     },
-    "ci_run_url": "https://github.com/gagreene/behave_fire/actions/runs/44807861375",
+    "ci_run_url": "https://github.com/gagreene/behave_fire/actions/runs/44827291052",
     "comparisons": 144,
     "maxima": {
       "area_ft2": {
@@ -40,6 +40,6 @@
         "ulp": 0
       }
     },
-    "source_commit": "42055f41159759e9261af8d543cdf5469f00dd9f"
+    "source_commit": "bf2502d09e335c0f5579fc2062dac85af41d9ee8"
   }
 }
