@@ -87,10 +87,10 @@
     "approved": false,
     "fields": {
       "firebrand_probability": {
-        "kind": "measurement_only"
+        "kind": "exact_binary64"
       },
       "fuel_temperature_f": {
-        "kind": "measurement_only"
+        "kind": "exact_binary64"
       }
     }
   }

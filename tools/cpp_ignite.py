@@ -1,7 +1,9 @@
 """Verify and measure the four approved standalone Ignite reference cases."""
 
+import hashlib
 import json
 import math
+import struct
 from importlib import import_module
 from pathlib import Path
 
@@ -16,7 +18,7 @@ APPROVED_CASES = (
 DATASET = Path("tests/data/cpp_reference/ignite")
 FIELDS = ("firebrand_probability", "fuel_temperature_f")
 FILES = ("cases.jsonl", "manifest.json", "results.jsonl", "schema.json")
-MEASUREMENT_POLICY = {"approved": False, "fields": {field: {"kind": "measurement_only"} for field in FIELDS}}
+EXACT_FIELDS = {field: {"kind": "exact_binary64"} for field in FIELDS}
 SOURCES = ("behaveUnits.cpp", "behaveUnits.h", "ignite.cpp", "ignite.h", "igniteInputs.cpp", "igniteInputs.h")
 
 
@@ -48,6 +50,78 @@ def artifacts(root):
     :return: File names mapped to their SHA256 digests.
     """
     return {name: reference._digest(Path(root) / DATASET / name) for name in FILES}
+
+
+def assert_matches_cpp(actual, expected, policy):
+    """Compare both finite Ignite outputs as exact binary64 values.
+
+    :param actual: Observed Ignite result from a selected port.
+    :param expected: Pinned C++ result in the same units.
+    :param policy: Validated Ignite comparison policy.
+    :return: None. Raises without approval or on a result mismatch.
+    """
+    if policy.get("approved") is not True:
+        raise reference.UnapprovedCppPolicy("Ignite comparisons require complete qualification")
+    if policy.get("fields") != EXACT_FIELDS:
+        raise ValueError("Unexpected Ignite comparison fields")
+    _validate_output(actual)
+    _validate_output(expected)
+    for field in FIELDS:
+        if struct.pack("!d", actual[field]) != struct.pack("!d", expected[field]):
+            raise AssertionError(f"{field}: port={actual[field]!r}, C++={expected[field]!r}")
+
+
+def exact_evidence(root, paths, record):
+    """Verify the Ignite portion of the nine source-qualified reports.
+
+    :param root: Checkout with the approved raw dataset.
+    :param paths: The full original compiler and platform reports.
+    :param record: Source-qualified record binding the exact report digests.
+    :return: Compact receipt for the shared qualification.
+    """
+    expected = load_observations(root)
+    signature = artifacts(root)
+    controls = dict(negative_cases=8, negative_upstream_entries=0, upstream_trap_exit=86,
+                    output_trap_exit=87, duplicate_ids_rejected=True)
+    pending = {name: report["sha256"] for name, report in record["reports"].items()}
+    policy = dict(approved=True, fields=EXACT_FIELDS)
+    count = 0
+    for path in paths:
+        raw = Path(path).read_bytes()
+        report = json.loads(raw, object_pairs_hook=reference._unique_object,
+                            parse_constant=reference._reject_constant, parse_int=_parse_int)
+        kind = report["kind"]
+        if kind not in ("cpp", "ports"):
+            raise ValueError("Unknown Ignite report kind")
+        name = "cpp-" + report["compiler"]["id"] if kind == "cpp" else "ports-" + report["platform_key"]
+        if pending.pop(name, None) != hashlib.sha256(raw).hexdigest():
+            raise ValueError("Ignite report differs from the source-qualified evidence")
+        measurement = report["ignite"]
+        if set(measurement) != {"artifacts", "observations"} or measurement["artifacts"] != signature:
+            raise ValueError("Ignite report used a different dataset")
+        if kind == "cpp":
+            actual = report["protocol"]["ignite"]
+            if json.dumps(actual, sort_keys=True) != json.dumps(controls, sort_keys=True):
+                raise ValueError("Missing Ignite entry-guard evidence")
+            rows = measurement["observations"]
+            validate_cpp_rows(root, rows)
+            streams = [rows]
+        else:
+            backends = measurement["observations"]
+            if set(backends) != {"python", "rust"} or any(
+                set(row) != {"id", "output"} for rows in backends.values() for row in rows
+            ):
+                raise ValueError("Incomplete Ignite backend observations")
+            streams = backends.values()
+        for rows in streams:
+            if [row["id"] for row in rows] != [row["id"] for row in expected]:
+                raise ValueError("Incomplete Ignite report case identities")
+            for row, original in zip(rows, expected, strict=True):
+                assert_matches_cpp(row["output"], original["output"], policy)
+                count += len(FIELDS)
+    if pending or count != 128:
+        raise ValueError("Incomplete exact Ignite evidence")
+    return dict(artifacts=signature, comparisons=count, nonmatching=0)
 
 
 def load_cases(root):
@@ -123,7 +197,7 @@ def read_cpp_results(root, path):
     :param path: Raw C++ JSONL observations.
     :return: Approved case rows with verified execution and output counts.
     """
-    rows = reference._rows(path)
+    rows = reference._rows(path, parse_int=_parse_int)
     validate_cpp_rows(root, rows)
     return rows
 
@@ -142,3 +216,21 @@ def validate_cpp_rows(root, rows):
                 or any(type(row[key]) is not int or row[key] != 1 for key in ("upstream_entries", "output_entries"))):
             raise ValueError("Ignite row lacks one complete output action")
         _validate_output(row["output"])
+
+
+def validate_policy(root, policy, qualification):
+    """Require the approved rule and a complete compact Ignite proof.
+
+    :param root: Reference checkout root.
+    :param policy: Ignite section of the canonical policy.
+    :param qualification: Shared qualification already verified by the caller.
+    :return: None. Raises on missing or malformed evidence.
+    """
+    if (not isinstance(policy, dict) or set(policy) != {"approved", "fields"}
+            or type(policy["approved"]) is not bool or policy["fields"] != EXACT_FIELDS):
+        raise ValueError("Incomplete exact Ignite comparison policy")
+    if policy["approved"]:
+        proof = qualification.get("ignite") if isinstance(qualification, dict) else None
+        expected = dict(artifacts=artifacts(root), comparisons=128, nonmatching=0)
+        if json.dumps(proof, sort_keys=True, allow_nan=False) != json.dumps(expected, sort_keys=True, allow_nan=False):
+            raise ValueError("Incomplete or stale Ignite qualification")

@@ -1,0 +1,4 @@
+{"id":"ignite-dry","status":"ok","upstream_entries":1,"output_entries":1,"output":{"firebrand_probability":1,"fuel_temperature_f":86}}
+{"id":"ignite-moisture-12-5","status":"ok","upstream_entries":1,"output_entries":1,"output":{"firebrand_probability":0.19731079529848863,"fuel_temperature_f":86}}
+{"id":"ignite-moisture-25","status":"ok","upstream_entries":1,"output_entries":1,"output":{"firebrand_probability":0.014266188189609223,"fuel_temperature_f":86}}
+{"id":"ignite-wet","status":"ok","upstream_entries":1,"output_entries":1,"output":{"firebrand_probability":0,"fuel_temperature_f":86}}
