@@ -69,8 +69,53 @@
       "rtol": 1e-12
     }
   },
+  "fire_size": {
+    "approved": true,
+    "fields": {
+      "area_ft2": {
+        "kind": "exact_binary64"
+      },
+      "length_to_width_ratio": {
+        "kind": "exact_binary64"
+      },
+      "perimeter_ft": {
+        "kind": "exact_binary64"
+      }
+    },
+    "qualification": {
+      "artifacts": {
+        "cases.jsonl": "b7eaafc8c07ad95c79dcb2cc553a659bf3106b1a215d08febb9f0e2c0ac2d755",
+        "manifest.json": "c450683a4dec4573af3fb9a38fa9b55487f270c63f6407d91abc5886dcf9b9b6",
+        "results.jsonl": "3c8a90c2d0cb8af549b5d555938e439ed5867b5d2fbb66fdad978aa5c056d3df",
+        "schema.json": "bcefacdfef527819dd578abc68c46e9c05518c143d6f013f170a06d6be4df340"
+      },
+      "ci_run_url": "https://github.com/gagreene/behave_fire/actions/runs/44684262563",
+      "comparisons": 144,
+      "maxima": {
+        "area_ft2": {
+          "absolute": 0.0,
+          "nonmatching": 0,
+          "relative": 0.0,
+          "ulp": 0
+        },
+        "length_to_width_ratio": {
+          "absolute": 0.0,
+          "nonmatching": 0,
+          "relative": 0.0,
+          "ulp": 0
+        },
+        "perimeter_ft": {
+          "absolute": 0.0,
+          "nonmatching": 0,
+          "relative": 0.0,
+          "ulp": 0
+        }
+      },
+      "source_commit": "3dae7bfd6f8910b6cc7fb871fc086c7f405e3cce"
+    }
+  },
   "qualification": {
-    "activation_reason": "Reviewed Crown output corrections and updated test references qualified by the complete compiler and platform campaign at unchanged caps",
+    "activation_reason": "Qualify the unchanged Surface caps and owner-approved exact standalone FireSize comparisons",
     "artifacts": {
       "tests/data/cpp_reference/surface/cases.jsonl": "266d08d8b82d65d950461c73e70b44c228ad7b54fbe99eb1d14ed8af6add66da",
       "tests/data/cpp_reference/surface/results.jsonl": "ae006838d93bbb9533df74340085110c479315cb8238a8ce488a68fe5e9e1b71",
@@ -78,7 +123,7 @@
       "tests/data/cpp_reference/surface_custom/results.jsonl": "04e96268466338364a350d53ac05b639f1a7758c78911aaee97da389c0f779a2"
     },
     "calibration_complete": true,
-    "ci_run_url": "https://github.com/gagreene/behave_fire/actions/runs/44670468144",
+    "ci_run_url": "https://github.com/gagreene/behave_fire/actions/runs/44684262563",
     "fields": {
       "fireline_intensity_btu_ft_s": {
         "atol": 1e-12,
@@ -106,14 +151,45 @@
         "rtol": 1e-12
       }
     },
+    "fire_size": {
+      "artifacts": {
+        "cases.jsonl": "b7eaafc8c07ad95c79dcb2cc553a659bf3106b1a215d08febb9f0e2c0ac2d755",
+        "manifest.json": "c450683a4dec4573af3fb9a38fa9b55487f270c63f6407d91abc5886dcf9b9b6",
+        "results.jsonl": "3c8a90c2d0cb8af549b5d555938e439ed5867b5d2fbb66fdad978aa5c056d3df",
+        "schema.json": "bcefacdfef527819dd578abc68c46e9c05518c143d6f013f170a06d6be4df340"
+      },
+      "ci_run_url": "https://github.com/gagreene/behave_fire/actions/runs/44684262563",
+      "comparisons": 144,
+      "maxima": {
+        "area_ft2": {
+          "absolute": 0.0,
+          "nonmatching": 0,
+          "relative": 0.0,
+          "ulp": 0
+        },
+        "length_to_width_ratio": {
+          "absolute": 0.0,
+          "nonmatching": 0,
+          "relative": 0.0,
+          "ulp": 0
+        },
+        "perimeter_ft": {
+          "absolute": 0.0,
+          "nonmatching": 0,
+          "relative": 0.0,
+          "ulp": 0
+        }
+      },
+      "source_commit": "3dae7bfd6f8910b6cc7fb871fc086c7f405e3cce"
+    },
     "overlay_sha256": {
       "CMakeLists.txt": "c0e8fcd808dbfbbc993a4a16d782eef580b0982e496cb776fe473d27cf6a7a31",
-      "driver.cpp": "eb2498786e11cbb9c25a312b2e4d1e29c519e0a09be02de46d1a08bd5609b6ee",
+      "driver.cpp": "dc91373869d19e28f69876c7dd46ff247a163cbab53b11bfe34bee1151ac8ca3",
       "probe.cpp": "48338485a0b6f3fd64d0b3542a56c996e043d5e77e9887f0189101c1065df015"
     },
     "reports": {
       "cpp-GNU": {
-        "sha256": "4eab6f4f19915126409ea9800ebe163b9c12857e329430e411d848e137b5fa1e",
+        "sha256": "df91dd1c0e8b699c3590e281c232c83be5c5d6c9db8eb87ce39b6a2e13fd9623",
         "summary": {
           "available": 722,
           "cases": 773,
@@ -122,7 +198,7 @@
         }
       },
       "cpp-MSVC": {
-        "sha256": "e102a219aac7fffe9630fbc7859109b75acf51696db43102d7f01299f30655ae",
+        "sha256": "e4a0a8f2d9453764c783c31a7ad52808d7544c4d9c022ef42a7664bb8c6de7ed",
         "summary": {
           "available": 722,
           "cases": 773,
@@ -131,7 +207,7 @@
         }
       },
       "ports-linux-aarch64": {
-        "sha256": "5f5859bbee4e4edc32d5d5ae2afd97bc5bbf31927cf4f22eb947a6e746abd2a1",
+        "sha256": "923e50d6ce1106485d3b7f8820785c00f740ae37203e3eefe7cd622f4e27c53e",
         "summary": {
           "cases_per_backend": 583,
           "fields_per_backend": 2915,
@@ -139,7 +215,7 @@
         }
       },
       "ports-linux-musl-x86_64": {
-        "sha256": "b44383f29f563ddd96c891d4e7be205cbe59dc730d06da19e1f84f8e9db4261f",
+        "sha256": "c4f2266cabe2790ef907173844557a79cfb3d00c79997a60e292c7c7a95948a0",
         "summary": {
           "cases_per_backend": 583,
           "fields_per_backend": 2915,
@@ -147,7 +223,7 @@
         }
       },
       "ports-linux-x86_64": {
-        "sha256": "305e03eb419aae5d5e7f5843f2b3b6158a0225060df0c3ac70e45e291a893734",
+        "sha256": "8e0e02357911b3dacabd320cbf2a426d636c2daa624e3a63324ac42932e7eec9",
         "summary": {
           "cases_per_backend": 583,
           "fields_per_backend": 2915,
@@ -155,7 +231,7 @@
         }
       },
       "ports-macos-arm64": {
-        "sha256": "71ad6b7546d81aa6ed5dce9fdfff90e699b21fafaa4ca0d267b959e80d0c91ee",
+        "sha256": "b22e24527b49b9b874a314d19c4bfbc8ec679344b5198037b71bc2449966ed92",
         "summary": {
           "cases_per_backend": 583,
           "fields_per_backend": 2915,
@@ -163,7 +239,7 @@
         }
       },
       "ports-macos-x86_64": {
-        "sha256": "52c61714ddac94421e633ed2e9a20cfd17cdb71df7a427cd357c547baac9e07b",
+        "sha256": "1d1bdfbc7797dd6b52756949367c9dc307b2af255e33c364d4f22bced4ab51b0",
         "summary": {
           "cases_per_backend": 583,
           "fields_per_backend": 2915,
@@ -171,7 +247,7 @@
         }
       },
       "ports-windows-arm64": {
-        "sha256": "561d4c3e7acd083edcf937aa3d76b89c3767be46eb3ce52df8ebdfbfc7335061",
+        "sha256": "6d7e42073285775fd01a0a938104d06c534921fb20a4ad821bba6ea9e9fa052b",
         "summary": {
           "cases_per_backend": 583,
           "fields_per_backend": 2915,
@@ -179,7 +255,7 @@
         }
       },
       "ports-windows-x86_64": {
-        "sha256": "d5ab9a212b9701a1cd03ad5bc933a55574568415e5e1f3b83fadee58865acd1b",
+        "sha256": "b60aa9046ff0a545bd669c463db7a14f9f393126c1794976e91ea98ccccde925",
         "summary": {
           "cases_per_backend": 583,
           "fields_per_backend": 2915,
@@ -188,7 +264,7 @@
       }
     },
     "schema_version": 1,
-    "source_commit": "9aed729bd04c3081ce0b60a97c25aa8b671fdbd2",
+    "source_commit": "3dae7bfd6f8910b6cc7fb871fc086c7f405e3cce",
     "source_files": {
       ".github/workflows/ci.yml": "5141b47dd44444ae2d3f0310a762588f47c8bf35ae820ccd5c676b6890065e00",
       ".github/workflows/crate-validation.yml": "970147b312a0719d1e63318b2f8b8f200479c5592e5e368cbfd2407893ac1f6d",
@@ -346,8 +422,8 @@
       "tools/benchmark_public_serial_f64.py": "a321b8bcfdbb9b65ec7680d24dbc699426a4bfade4aea98ab100212847cd13e1",
       "tools/build_pure_wheel.py": "435d7fddf3d1d0fdb87af808654b154eb98fc6f627b92993264d4e3828f6a827",
       "tools/check_core_f64.py": "b69ee38251b47d8b3c58db30027b9024c7c7a2d1f7018fc3a8615cff9134b3ee",
-      "tools/check_cpp_driver.py": "87a8b8c57e7432a5fe56d99235d1d267ea7a629970b781f1e21b2c8d07fc09b4",
-      "tools/check_crate_package.py": "205665c89187b655515a40c7cf976d0d455f1ad95bf2e8eba96769c0d35aa982",
+      "tools/check_cpp_driver.py": "e3e36fb347efb4636cf4d8b196223502974e23061814b85f2b21330814801626",
+      "tools/check_crate_package.py": "16d90240e407457f6c2efa7daf54f2975a1cd50d62ce610a46966f49403b3145",
       "tools/check_function_order.py": "79ab381e2f48e9e6fa8605d11a3d0c7459e7519325b3e59785c3e4271bad19d7",
       "tools/check_performance.py": "3d8866b469dc6ba965e3c94583e8573c69477492e10de4431289ce47c374babe",
       "tools/check_public_serial_f64.py": "0ec06d24629e72dcf0cc908fe7ab05387744b249d5a0c0be90b3ed9424282d0b",
@@ -356,11 +432,12 @@
       "tools/check_wheel_metadata.py": "ff08a2a6bb74d59dca91bde336bf7920ce2e65f9a1c2f56093ea5db9278db4f0",
       "tools/compare_backends.py": "757cdb6401ab07aac6d0d9e2f0c4baa7865745e37f39ce4263c71db0d941001b",
       "tools/core_f64_reference.py": "f8d8d462e722ed0e4f8106d71e2d49544ccbaf77147bd1c7ec14db385683e779",
-      "tools/cpp_calibrate.py": "a0c17717bc80f5fe271d59dc4748130c3fd7dee5f5b87bf9555c60b8588fdb7d",
-      "tools/cpp_controls.py": "d4e75ab49a78d6dc46985a271a6285720c51badc74c97e618f37ce6525605099",
-      "tools/cpp_inventory.py": "d513d9a988879b09ecde67a6a0e9b2868ca48d5f33facb3f5cf08b63b5e81774",
-      "tools/cpp_reference.py": "6080bdeeb5739d00b8b0baeb148fcc094f734b47a2383a46691124ef15e9b4bc",
-      "tools/export_cpp_crate.py": "d599ffd04b94942e747c23ee0b3c89ec126b0fa4c7634a0bfa246b1b6fb0f1bd",
+      "tools/cpp_calibrate.py": "09993e9f09d00005175c08c5a79a8b708b23646c0828878f2e18139e7a2cf3d1",
+      "tools/cpp_controls.py": "46036b846dafa50184912901d934cde02011798d1df6770661c5f52e945c0017",
+      "tools/cpp_fire_size.py": "08ad6184e1c69d3053aa8736df0c9a5d94e46890d682b777a55e47cc33ff822d",
+      "tools/cpp_inventory.py": "e7ac04944a11d524ad96738fd954619aa07e8a218532e4af3370954618d8dee8",
+      "tools/cpp_reference.py": "67544ac4a206aa32bdf25349a1c8d9a05a87255376048fe5a9de5d31d3499cfc",
+      "tools/export_cpp_crate.py": "dabdc267e4db14823803cd5bd6c4c8d637889d8076c033621ce6a5b33a099315",
       "tools/export_rust_reference.py": "e61a9e60fcce4cedbe16875119c08e3cba2250b4305497f22c7070742bd5e766",
       "tools/float64_model_reference.py": "85541e8fc435f5cea72cd2243608081327a68f41a11f890ac9cb39cd69c10887",
       "tools/measure_native_allocations.py": "ca128ffa4d79d0aabdc22b80832ca9e500d5aeaf055e340fd5949a64598403c2",

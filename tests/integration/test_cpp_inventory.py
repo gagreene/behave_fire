@@ -1,6 +1,5 @@
 """Check the offline public API inventory and its fail-closed coverage contracts."""
 
-import hashlib
 import importlib.util
 import json
 import shutil
@@ -25,21 +24,16 @@ def _inventory():
 def _snapshot_inventory(tmp_path):
     inventory = _inventory()
     source = ROOT / 'tests/data/cpp_reference'
-    evidence = [{'file': 'surface/' + name, 'sha256': hashlib.sha256((source / 'surface' / name).read_bytes()
-    ).hexdigest()}
-                for name in ('cases.jsonl', 'results.jsonl', 'manifest.json')]
-    route = next(row for row in inventory['routes'] if row['route_id'] == 'surface_single')
-    route.update(executable_now=True, dataset='surface', execution_evidence=evidence)
-    function = next(row for row in inventory['public_functions']
-                    if row['qualified_name'] == 'Surface::doSurfaceRunInDirectionOfMaxSpread')
-    function.update(function_status='tested', dataset='surface', execution_evidence=evidence,
-                    approval='Synthetic artifact-binding test, not a scientific approval')
-    for row in evidence:
-        path = tmp_path / row['file']
+    reference = tmp_path / 'tests/data/cpp_reference'
+    executable_routes = [route for route in inventory['routes'] if route['executable_now']]
+    tested_functions = [row for row in inventory['public_functions'] if row['function_status'] == 'tested']
+    for filename in {item['file'] for row in executable_routes + tested_functions
+                     for item in row['execution_evidence']}:
+        path = reference / filename
         path.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copyfile(source / row['file'], path)
-    path = tmp_path / 'inventory.json'
-    path.write_text(json.dumps(inventory))
+        shutil.copyfile(source / filename, path)
+    path = reference / 'inventory.json'
+    shutil.copyfile(source / path.name, path)
     return path
 
 
@@ -51,31 +45,58 @@ def _validator():
 
 # ---- inventory location and qualified coverage tests ----
 
-def test_inventory_accepts_qualified_surface_coverage():
+def test_inventory_accepts_qualified_scientific_coverage():
     inventory = _inventory()
     summary = _validator()(inventory)
     assert summary["public_functions"] == 1394
     assert summary["scientific_candidates"] == 266
     assert summary["state_lifecycle_methods"] == 508
-    assert summary["tested_functions"] == 6
-    assert summary['executable_scientific_bundles'] == 1
+    assert summary["tested_functions"] == 10
+    assert summary['executable_scientific_bundles'] == 2
 
 
+def test_inventory_binds_only_direct_fire_size_witnesses():
+    inventory = _inventory()
+    expected = {
+        'FireSize::calculateFireBasicDimensions': 'calculate_fire_basic_dimensions',
+        'FireSize::getFireArea': 'get_fire_area',
+        'FireSize::getFireLengthToWidthRatio': 'get_fire_length_to_width_ratio',
+        'FireSize::getFirePerimeter': 'get_fire_perimeter',
+    }
+    tested = [row for row in inventory['public_functions']
+              if row['function_status'] == 'tested' and (row['owner'] == 'FireSize' or row['dataset'] == 'fire_size')]
+    route = next(row for row in inventory['routes'] if row['route_id'] == 'geometry')
+    assert route['executable_now'] and route['dataset'] == 'fire_size'
+    assert {row['qualified_name'] for row in tested} == expected.keys()
+    assert set(route['method_ids']) == {row['id'] for row in tested}
+    for row in tested:
+        method = expected[row['qualified_name']]
+        assert row['route_ids'] == ['geometry']
+        assert row['dataset'] == 'fire_size' and row['execution_evidence'] == route['execution_evidence']
+        assert [target['target'] for target in row['python_targets']] == [
+            f'behave_fire.components.fire_size.FireSize.{method}']
+        assert [target['target'] for target in row['rust_targets']] == [f'behave_fire::fire_size::<FireSize>::{method}']
+
+
+@pytest.mark.parametrize('dataset', ['fire_size', 'surface'])
+@pytest.mark.parametrize('artifact', ['cases.jsonl', 'manifest.json', 'results.jsonl'])
 @pytest.mark.parametrize('mutation', ['missing', 'modified'])
-def test_inventory_cli_uses_the_selected_snapshots_execution_artifacts(tmp_path, mutation):
+def test_inventory_cli_uses_the_selected_snapshots_execution_artifacts(tmp_path, dataset, artifact, mutation):
     path = _snapshot_inventory(tmp_path)
     result = subprocess.run([sys.executable, '-B', str(ROOT / 'tools/cpp_inventory.py'),
                              '--check', '--inventory', str(path)], capture_output=True, text=True)
     assert result.returncode == 0, result.stderr
-    cases = tmp_path / 'surface/cases.jsonl'
+    evidence = path.parent / dataset / artifact
+    assert evidence.is_file()
     if mutation == 'missing':
-        cases.unlink()
+        evidence.unlink()
     else:
-        cases.write_bytes(cases.read_bytes() + b'\n')
+        evidence.write_bytes(evidence.read_bytes() + b'\n')
     result = subprocess.run([sys.executable, '-B', str(ROOT / 'tools/cpp_inventory.py'),
                              '--check', '--inventory', str(path)], capture_output=True, text=True)
     assert result.returncode != 0, 'The checker silently used the original checkout instead of the selected snapshot'
     assert 'execution evidence' in result.stderr
+    assert f'{dataset}/{artifact}' in result.stderr
 
 
 def test_inventory_readiness_is_independent_of_module_search_path():
@@ -96,7 +117,8 @@ else:
     result = subprocess.run([sys.executable, '-I', '-B', '-c', script, str(ROOT)], capture_output=True, text=True)
     assert result.returncode == 0, result.stderr
     policy = json.loads((ROOT / 'tests/data/cpp_reference/tolerance-policy.json').read_text())
-    assert result.stdout.strip() == ('READY' if policy['approved'] else 'QUALIFICATION_REJECTED')
+    approvals_active = policy['approved'] and policy['fire_size']['approved']
+    assert result.stdout.strip() == ('READY' if approvals_active else 'QUALIFICATION_REJECTED')
 
 
 # ---- inventory validation and readiness tests ----
@@ -154,16 +176,18 @@ def test_inventory_requires_executable_routes_for_readiness():
 
 def test_inventory_requires_per_function_witnesses_for_an_executable_scientific_route(tmp_path):
     path = _snapshot_inventory(tmp_path)
-    inventory = json.loads(path.read_text())
+    inventory = json.loads(path.read_text(encoding='utf-8'))
     for row in inventory['public_functions']:
-        if row['function_status'] == 'tested':
+        if row['function_status'] == 'tested' and row['dataset'] == 'fire_size':
             row.update(function_status='pending_pilot', dataset=None, execution_evidence=[], approval=None)
     with pytest.raises(ValueError, match='witness'):
-        _validator()(inventory, reference_root=tmp_path)
+        _validator()(inventory, reference_root=path.parent)
 
 
 def test_inventory_requires_qualified_policy_for_readiness(tmp_path):
     path = _snapshot_inventory(tmp_path)
-    inventory = json.loads(path.read_text())
-    with pytest.raises(ValueError, match='qualification'):
-        _validator()(inventory, require_ready=True, reference_root=tmp_path)
+    inventory = json.loads(path.read_text(encoding='utf-8'))
+    policy = {'approved': True, 'fire_size': {'approved': False}}
+    (path.parent / 'tolerance-policy.json').write_text(json.dumps(policy), encoding='utf-8')
+    with pytest.raises(ValueError, match='Scientific qualification policy is inactive'):
+        _validator()(inventory, require_ready=True, reference_root=path.parent)

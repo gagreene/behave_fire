@@ -1,4 +1,5 @@
 // Phase 1 protocol probe. Scientific calculations are called in pinned upstream sources.
+#include "fireSize.h"
 #include "fuelModels.h"
 #include "surface.h"
 #include <cctype>
@@ -119,6 +120,42 @@ std::string encode(const std::string& value) {
     return result + '"';
 }
 
+/// Encode a finite numeric result with the reference driver's JSON formatting.
+///
+/// :param result: Output fields and their values.
+/// :return: JSON object preserving negative zeros.
+std::string encode_result(const std::map<std::string, double>& result) {
+    std::ostringstream output;
+    output.imbue(std::locale::classic());
+    output << std::setprecision(17) << '{';
+    bool first = true;
+    for (const auto& item : result) {
+        if (!std::isfinite(item.second)) throw std::runtime_error("nonfinite_upstream_output");
+        if (!first) output << ',';
+        first = false;
+        output << encode(item.first) << ':';
+        if (item.second == 0.0 && std::signbit(item.second)) output << "-0.0";
+        else output << item.second;
+    }
+    output << '}';
+    return output.str();
+}
+
+struct UpstreamTrap {};
+
+/// Register a validated request and check the trap before its upstream call.
+///
+/// :param id: Validated request ID.
+/// :param ids: IDs already seen on this invocation.
+/// :param forbid: Whether the upstream entry trap is enabled.
+/// :param entered: Entry flag to set once the trap is cleared.
+/// :return: Nothing. Records the ID and marks upstream entry on success.
+void enter_upstream(const std::string& id, std::set<std::string>& ids, bool forbid, bool& entered) {
+    if (!ids.insert(id).second) throw std::runtime_error("duplicate_id");
+    if (forbid) throw UpstreamTrap{};
+    entered = true;
+}
+
 double numeric(const Value& value, const std::string& field) {
     if (value.kind == Value::String) {
         if (value.text == "NaN") return std::numeric_limits<double>::quiet_NaN();
@@ -235,6 +272,53 @@ Request validate(const std::map<std::string, Value>& input) {
     return {input.at("id").text, static_cast<int>(model), direction, physical, modes, user_waf, session, percent_control, moe_percent};
 }
 
+struct FireSizeRequest {
+    bool crown;
+    double wind_mph;
+    double spread_ft_min;
+    double elapsed_min;
+};
+
+/// Validate a standalone request against the three reviewed FireSize inputs.
+///
+/// :param input: Parsed request object.
+/// :return: The matching reviewed input for a fresh FireSize object.
+FireSizeRequest validate_fire_size(const std::map<std::string, Value>& input) {
+    const std::set<std::string> fields = {"id", "operation", "mode", "wind_mph", "spread_ft_min", "elapsed_min"};
+    for (const auto& item : input)
+        if (!fields.count(item.first)) throw std::runtime_error("unsupported_field");
+    for (const auto& field : fields)
+        if (!input.count(field)) throw std::runtime_error("missing_field_" + field);
+
+    const Value& id = input.at("id");
+    if (id.kind != Value::String || id.text.empty()) throw std::runtime_error("invalid_id");
+    const Value& mode = input.at("mode");
+    if (mode.kind != Value::String || (mode.text != "Crown" && mode.text != "Surface"))
+        throw std::runtime_error("unsupported_fire_size_mode");
+    for (const auto& field : {"elapsed_min", "spread_ft_min", "wind_mph"})
+        if (input.at(field).kind != Value::Number) throw std::runtime_error(std::string("numeric_type_") + field);
+
+    const FireSizeRequest request = {
+        mode.text == "Crown",
+        numeric(input.at("wind_mph"), "wind_mph"),
+        numeric(input.at("spread_ft_min"), "spread_ft_min"),
+        numeric(input.at("elapsed_min"), "elapsed_min"),
+    };
+    const std::map<std::string, FireSizeRequest> reviewed = {
+        {"calm-crown", {true, 0.0, 4.0, 2.0}},
+        {"surface-5-mph", {false, 5.0, 10.0, 10.0}},
+        {"zero-elapsed", {false, 5.0, 10.0, 0.0}},
+    };
+    const auto match = reviewed.find(id.text);
+    if (match == reviewed.end()) throw std::runtime_error("unreviewed_fire_size_request");
+    const auto& expected = match->second;
+    if (request.crown != expected.crown || request.wind_mph != expected.wind_mph
+            || request.spread_ft_min != expected.spread_ft_min || request.elapsed_min != expected.elapsed_min
+            || std::signbit(request.wind_mph) || std::signbit(request.elapsed_min))
+        throw std::runtime_error("unreviewed_fire_size_request");
+    return expected;
+}
+
 struct Unavailable {};
 struct GeometryTrap {};
 struct Session {
@@ -291,20 +375,26 @@ std::string run(const Request& request, bool forbid_geometry, bool& geometry_ent
         {"length_to_width_ratio", surface.getFireLengthToWidthRatio()},
         {"spread_chains_per_hour", surface.getSpreadRate(SpeedUnits::ChainsPerHour)}
     };
-    std::ostringstream output;
-    output.imbue(std::locale::classic());
-    output << std::setprecision(17) << '{';
-    bool first = true;
-    for (const auto& item : result) {
-        if (!std::isfinite(item.second)) throw std::runtime_error("nonfinite_upstream_output");
-        if (!first) output << ',';
-        first = false;
-        output << encode(item.first) << ':';
-        if (item.second == 0.0 && std::signbit(item.second)) output << "-0.0";
-        else output << item.second;
-    }
-    output << '}';
-    return output.str();
+    return encode_result(result);
+}
+
+/// Calculate and read geometry on a fresh upstream FireSize object.
+///
+/// :param request: Reviewed FireSize input.
+/// :param forbid_geometry: Whether the geometry entry trap is enabled.
+/// :param geometry_entered: Geometry entry flag to set once the trap is cleared.
+/// :return: JSON object with length-to-width ratio, area, and perimeter.
+std::string run_fire_size(const FireSizeRequest& request, bool forbid_geometry, bool& geometry_entered) {
+    if (forbid_geometry) throw GeometryTrap{};
+    geometry_entered = true;
+    FireSize size;
+    size.calculateFireBasicDimensions(request.crown, request.wind_mph, SpeedUnits::MilesPerHour,
+        request.spread_ft_min, SpeedUnits::FeetPerMinute);
+    return encode_result({
+        {"area_ft2", size.getFireArea(request.crown, AreaUnits::SquareFeet, request.elapsed_min, TimeUnits::Minutes)},
+        {"length_to_width_ratio", size.getFireLengthToWidthRatio()},
+        {"perimeter_ft", size.getFirePerimeter(request.crown, LengthUnits::Feet, request.elapsed_min, TimeUnits::Minutes)},
+    });
 }
 }
 
@@ -328,15 +418,24 @@ int main(int argc, char** argv) {
             if (line.size() > 65536) throw std::runtime_error("line_too_long");
             const auto object = Parser(line).parse();
             if (object.count("id") && object.at("id").kind == Value::String) id = object.at("id").text;
-            const Request request = validate(object);
-            if (!ids.insert(request.id).second) throw std::runtime_error("duplicate_id");
-            // The trap sits immediately before the only upstream entry point.
-            if (forbid) { std::cerr << "UPSTREAM_ENTRY_BLOCKED\n"; return 86; }
-            entered = true;
-            std::unique_ptr<Session> fresh;
-            auto& session = request.session.empty() ? fresh : sessions[request.session];
-            const std::string result = run(request, forbid_geometry, geometry_entered, session);
+            const auto operation = object.find("operation");
+            std::string result;
+            if (operation != object.end() && operation->second.kind == Value::String
+                    && operation->second.text == "fire_size") {
+                const FireSizeRequest request = validate_fire_size(object);
+                enter_upstream(id, ids, forbid, entered);
+                result = run_fire_size(request, forbid_geometry, geometry_entered);
+            } else {
+                const Request request = validate(object);
+                enter_upstream(request.id, ids, forbid, entered);
+                std::unique_ptr<Session> fresh;
+                auto& session = request.session.empty() ? fresh : sessions[request.session];
+                result = run(request, forbid_geometry, geometry_entered, session);
+            }
             output << "{\"id\":" << encode(id) << ",\"status\":\"ok\",\"upstream_entries\":1,\"geometry_entries\":1,\"output\":" << result << "}\n";
+        } catch (const UpstreamTrap&) {
+            std::cerr << "UPSTREAM_ENTRY_BLOCKED\n";
+            return 86;
         } catch (const Unavailable&) {
             output << "{\"id\":" << encode(id) << ",\"status\":\"unavailable\",\"upstream_entries\":1,\"geometry_entries\":0,\"finding\":\"F-013\"}\n";
         } catch (const GeometryTrap&) {

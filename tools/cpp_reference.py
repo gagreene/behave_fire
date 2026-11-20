@@ -165,6 +165,9 @@ def _prepared_build(root):
             or prepared["historical_manifest_sha256"] != _digest(directory / "surface/manifest.json")
             or prepared["original_replay_sha256"] != _digest(directory / "surface/results.jsonl")):
         raise ValueError("Prepared build does not preserve historical observations")
+    custom_manifest = prepared.get("historical_custom_manifest_sha256")
+    if custom_manifest is not None and custom_manifest != _digest(directory / "surface_custom/manifest.json"):
+        raise ValueError("Prepared build does not preserve the historical custom manifest")
     return prepared
 
 
@@ -188,12 +191,13 @@ def _required_artifacts(root):
         "inventory.json", "findings.json", "tolerance-policy.json", "fixture-budget.json", "surface/cases.jsonl",
         "surface/results.jsonl", "surface/manifest.json", "surface/profiles.json", "surface/applicability.json",
         "negative-inputs.jsonl", "negative-expected.json", "prepared-build.json",
+        "fire_size/cases.jsonl", "fire_size/manifest.json", "fire_size/results.jsonl", "fire_size/schema.json",
         "surface_custom/cases.jsonl", "surface_custom/results.jsonl", "surface_custom/manifest.json")}
-    mandatory.update("tools/" + name for name in ("cpp_reference.py", "cpp_controls.py", "cpp_inventory.py",
-                                                 "cpp_calibrate.py", "export_cpp_crate.py", "check_cpp_driver.py"))
-    mandatory.update("rust/crates/behave-fire/tests/data/cpp_reference/surface/" + name
-                     for name in ("cases.jsonl", "results.jsonl", "manifest.json", "tolerance-policy.json"))
-    mandatory.update("rust/crates/behave-fire/tests/data/cpp_reference/surface_custom/" + name
+    mandatory.update("tools/" + name for name in (
+        "cpp_reference.py", "cpp_controls.py", "cpp_fire_size.py", "cpp_inventory.py",
+        "cpp_calibrate.py", "export_cpp_crate.py", "check_cpp_driver.py"))
+    mandatory.update(f"rust/crates/behave-fire/tests/data/cpp_reference/{dataset}/{name}"
+                     for dataset in ("surface", "surface_custom", "fire_size")
                      for name in ("cases.jsonl", "results.jsonl", "manifest.json", "tolerance-policy.json"))
     mandatory.update(p.relative_to(root).as_posix() for p in base.rglob("*") if p.is_file() and p.name != "hashes.json")
     return mandatory
@@ -369,7 +373,7 @@ def assert_matches_cpp(actual, expected, policy):
 def check_fixture_budget(root=ROOT):
     """Enforce the owner's case and deterministic compressed/uncompressed fixture ceilings.
 
-    :param root: Checkout containing canonical and standalone copied Surface fixtures.
+    :param root: Checkout containing canonical and standalone copied C++ fixtures.
     :return: Actual case count and byte measurements; raises for drift or unapproved limits.
     """
     root = Path(root)
@@ -378,9 +382,9 @@ def check_fixture_budget(root=ROOT):
     if policy.get('approved') is not True or policy.get('limits') != FIXTURE_BUDGET:
         raise ValueError('Unapproved fixture budget limits')
     cases = sum(sum(bool(line.strip()) for line in (canonical / dataset / 'cases.jsonl').read_bytes().splitlines())
-                for dataset in ('surface', 'surface_custom'))
+                for dataset in ('surface', 'surface_custom', 'fire_size'))
     if cases > FIXTURE_BUDGET['case_limit']:
-        raise ValueError('Surface fixture case budget exceeded')
+        raise ValueError('C++ fixture case budget exceeded')
     measured = {'cases': cases}
     for name, directory in [('canonical', canonical),
                             ('standalone', root / 'rust/crates/behave-fire/tests/data/cpp_reference')]:
@@ -575,19 +579,24 @@ def load_reference(root=ROOT, *, measurement=False):
         if not qualification.is_file():
             raise ValueError("Active comparison policy lacks complete calibration qualification")
         record = _document(qualification)
-        if policy.get("qualification") != record:
+        embedded = json.dumps(policy.get("qualification"), sort_keys=True, allow_nan=False)
+        canonical = json.dumps(record, sort_keys=True, allow_nan=False)
+        if embedded != canonical:
             raise ValueError("Embedded calibration qualification differs from the reviewed record")
         validate_qualification(root, record)
     from cpp_inventory import validate_inventory
 
     validate_inventory(_document(directory / "inventory.json"), reference_root=directory)
     from cpp_controls import load
+    from cpp_fire_size import EXACT_FIELDS, load_observations, validate_policy
 
     controls = load(root, cases)
+    load_observations(root)
+    validate_policy(root, policy.get("fire_size"), policy.get("qualification") if policy["approved"] else None)
     _prepared_build(root)
     budget = check_fixture_budget(root)
     if measurement:
-        policy = dict(policy, approved=False)
+        policy = dict(policy, approved=False, fire_size=dict(approved=False, fields=EXACT_FIELDS))
     return dict(cases=cases, results=results, manifest=manifest, policy=policy, controls=controls, budget=budget)
 
 

@@ -10,6 +10,7 @@ import subprocess
 from pathlib import Path
 
 import cpp_controls as controls
+import cpp_fire_size as fire_size
 import cpp_reference as reference
 
 
@@ -204,15 +205,21 @@ def activate(root, paths, reason):
     root = Path(root)
     record = validate_evidence(root, paths)
     validate_qualification(root, record)
+    geometry = fire_size.summarize_evidence(root, paths)
+    if geometry["comparisons"] != 144 or any(row["nonmatching"] for row in geometry["maxima"].values()):
+        raise ValueError("FireSize evidence does not meet the approved exact comparison policy")
+    record["fire_size"] = {key: value for key, value in geometry.items() if key != "values"}
     record["activation_reason"] = reason
-    reference._json(root / "tests/data/cpp_reference/calibration/qualification.json", record)
     policy_path = root / "tests/data/cpp_reference/tolerance-policy.json"
     policy = reference._document(policy_path)
+    policy["fire_size"] = dict(approved=True, fields=fire_size.EXACT_FIELDS, qualification=record["fire_size"])
+    fire_size.validate_policy(root, policy["fire_size"], record)
+    reference._json(root / "tests/data/cpp_reference/calibration/qualification.json", record)
     policy["approved"] = True
     policy["qualification"] = record
     policy["approval_gate"] = "Conditionally owner-approved caps qualified by complete manual CI evidence"
     reference._json(policy_path, policy)
-    for dataset in ("surface", "surface_custom"):
+    for dataset in ("surface", "surface_custom", "fire_size"):
         export(root / "tests/data/cpp_reference", root / "rust/crates/behave-fire/tests/data/cpp_reference" / dataset,
                dataset=dataset)
     reference.sync_hashes(root, reason)
@@ -317,6 +324,11 @@ def measure_cpp(root, directory, expected_compiler=None):
     report = dict(schema_version=1, kind="cpp", upstream_sha=reference.PIN, passed=True,
                   parity_approved=False, artifacts=controls._artifacts(root), fields=controls.calibration_policy(root),
                   compiler=build["compiler"], protocol=protocol, observations=observations, **_context(root))
+    fire_size_cases = root / fire_size.DATASET / "cases.jsonl"
+    fire_size_output = directory / "fire_size.jsonl"
+    _run([driver, fire_size_cases, fire_size_output], directory, "fire_size")
+    report["fire_size"] = dict(artifacts=fire_size.artifacts(root),
+                               observations=fire_size.read_cpp_results(root, fire_size_output))
     report["summary"] = _validate_observations(root, report)
     reference._json(directory / (build["compiler"]["id"] + "-calibration.json"), report)
     return report

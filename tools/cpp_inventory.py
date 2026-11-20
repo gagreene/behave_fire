@@ -135,7 +135,7 @@ def validate_inventory(inventory, require_ready=False, reference_root=None):
     """Validate hybrid coverage and distinguish preparation from qualified science.
 
     :param inventory: Committed source-derived snapshot, read without a live checkout.
-    :param require_ready: Require executable evidence for at least one scientific bundle.
+    :param require_ready: Require executable scientific coverage and active Surface and FireSize qualification.
     :param reference_root: Explicit artifact directory; defaults to this tool's checkout for direct callers.
     :return: Counts of structurally valid declarations, bundles, and tested functions.
     """
@@ -231,8 +231,11 @@ def validate_inventory(inventory, require_ready=False, reference_root=None):
         root = reference_root.parent.parent.parent
         if root / 'tests/data/cpp_reference' != reference_root:
             raise ValueError('Complete qualification requires a canonical reference directory')
-        policy = reference_root / 'tolerance-policy.json'
-        if not policy.is_file() or json.loads(policy.read_text(encoding='utf-8')).get('approved') is not True:
+        policy_path = reference_root / 'tolerance-policy.json'
+        policy = json.loads(policy_path.read_text(encoding='utf-8')) if policy_path.is_file() else {}
+        _require_fields(policy, {'approved', 'fire_size'}, 'scientific qualification policy')
+        fire_size = policy['fire_size']
+        if policy['approved'] is not True or not isinstance(fire_size, dict) or fire_size.get('approved') is not True:
             raise ValueError('Scientific qualification policy is inactive')
         # Use the explicit sibling script, independent of caller imports and module caches.
         # Its normal structural inventory call does not request readiness, so this cannot recurse.
