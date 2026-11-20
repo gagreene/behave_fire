@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "operation": "spot_surface",
+  "request": {
+    "id": "Case identifier",
+    "operation": "spot_surface",
+    "flame_ft": "Feet, surface flame length",
+    "wind_mph": "MilesPerHour, at twenty feet",
+    "cover_ft": "Feet, effective downwind cover height"
+  },
+  "bounds": "The driver accepts only the four reviewed IDs and their exact finite input tuples in cases.jsonl.",
+  "call_sequence": [
+    "Construct a fresh Spot.",
+    "Set Surface fire inputs for MIDSLOPE_WINDWARD with zero ridge distance and elevation and CLOSED canopy.",
+    "Calculate spotting distance from Surface fire and read only the flat terrain distance."
+  ],
+  "output": {
+    "flat_distance_ft": "Feet"
+  },
+  "scope": "Measure flat terrain Surface fire at the public input values. F-018 records the upstream wind conversion. The measurement excludes mountainous outputs, torching trees, piles, and active Crown fire."
+}

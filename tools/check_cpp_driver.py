@@ -7,6 +7,7 @@ import subprocess
 from pathlib import Path
 
 import cpp_mortality as mortality
+import cpp_spot as spot
 from cpp_fire_size import DATASET, load_cases
 from cpp_ignite import DATASET as IGNITE_DATASET
 from cpp_ignite import load_cases as load_ignite_cases
@@ -222,6 +223,56 @@ def _check_mortality(driver, directory, root, exact_replay):
                 output_trap_exit=87, duplicate_ids_rejected=True)
 
 
+def _check_spot(driver, directory, root, exact_replay):
+    """Verify the flat Spot input guard, both entry traps, and exact local replay.
+
+    :param driver: Source-matched executable.
+    :param directory: Retained scratch evidence directory.
+    :param root: Reference checkout root.
+    :param exact_replay: Whether to require the original compiler's exact bytes.
+    :return: Spot rejection and execution control counts.
+    """
+    cases = {case["id"]: case for case in spot.load_cases(root)}
+    calm = cases["spot-flat-calm-zero-cover"]
+    wind = cases["spot-flat-wind-zero-cover"]
+    covered = cases["spot-flat-wind-ten-cover"]
+    controls = (
+        (dict(calm, flame_ft=4), "unreviewed_spot_request"),
+        (dict(wind, wind_mph=math.nextafter(5, math.inf)), "unreviewed_spot_request"),
+        (dict(covered, cover_ft=0), "unreviewed_spot_request"),
+        (dict(calm, wind_mph=-0.0), "unreviewed_spot_request"),
+        (dict(wind, cover_ft=-0.0), "unreviewed_spot_request"),
+        (dict(wind, id="spot-unreviewed"), "unreviewed_spot_request"),
+        (dict(wind, cover_ft="0"), "numeric_type_cover_ft"),
+        (dict(covered, canopy_mode="OPEN"), "unsupported_field"),
+    )
+    path = directory / "spot-negative-input.jsonl"
+    path.write_text("".join(json.dumps(case) + "\n" for case, _ in controls), encoding="utf-8")
+    negative = _run(driver, directory, "spot-negative", path, "--forbid-upstream", 0)
+    expected = [dict(id=case["id"], status="rejected", upstream_entries=0, error=error)
+                for case, error in controls]
+    if _read_lines(negative) != expected:
+        raise ValueError("Spot mutation escaped guarded rejection")
+    cases_path = root / spot.DATASET / "cases.jsonl"
+    if exact_replay:
+        replay = _run(driver, directory, "spot-replay", cases_path, None, 0)
+        if replay.read_bytes() != (cases_path.parent / "results.jsonl").read_bytes():
+            raise ValueError("Exact Spot replay differs from stored observations")
+    for name, code in (("upstream", 86), ("geometry", 87)):
+        stem = f"spot-{name}-positive-trap"
+        _run(driver, directory, stem, cases_path, f"--forbid-{name}", code)
+        if f"{name.upper()}_ENTRY_BLOCKED".encode() not in (directory / f"{stem}.stderr").read_bytes():
+            raise ValueError("Spot entry trap was not active")
+    duplicate = directory / "spot-duplicate-input.jsonl"
+    duplicate.write_text((json.dumps(calm) + "\n") * 2, encoding="utf-8")
+    rows = _read_lines(_run(driver, directory, "spot-duplicate", duplicate, None, 0))
+    expected_duplicate = dict(id=calm["id"], status="rejected", upstream_entries=0, error="duplicate_id")
+    if len(rows) != 2 or rows[0].get("status") != "ok" or rows[1] != expected_duplicate:
+        raise ValueError("Duplicate Spot case reached upstream twice")
+    return dict(negative_cases=len(controls), negative_upstream_entries=0, upstream_trap_exit=86,
+                output_trap_exit=87, duplicate_ids_rejected=True)
+
+
 def _read_lines(path):
     """Decode protocol records, including null IDs after malformed input.
 
@@ -327,6 +378,7 @@ def check_driver(driver, directory, root=ROOT, build_receipt=None, exact_replay=
     summary["fire_size"] = _check_fire_size(driver, directory, root, exact_replay)
     summary["ignite"] = _check_ignite(driver, directory, root, exact_replay)
     summary["mortality"] = _check_mortality(driver, directory, root, exact_replay)
+    summary["spot"] = _check_spot(driver, directory, root, exact_replay)
     (directory / "summary.json").write_text(json.dumps(summary, indent=2) + "\n", encoding="utf-8")
     return summary
 

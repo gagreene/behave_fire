@@ -1,0 +1,50 @@
+{
+  "available": 4,
+  "build": {
+    "compiler": {
+      "id": "MSVC",
+      "version": "19.50.35728.0"
+    },
+    "driver_sha256": "c2dc6ec368eae7e8147ab974e0cb236857df6423cdd4c577d90eb4c5a34bb308",
+    "flags": [
+      "/O2",
+      "/fp:precise",
+      "/D_USE_MATH_DEFINES=",
+      "/EHsc"
+    ],
+    "machine": "AMD64",
+    "overlay_sha256": {
+      "CMakeLists.txt": "798bb364e58a87d6c788b981d0df4b4325ba4614982ac4e84cfeaf360aa19e4d",
+      "driver.cpp": "ee256e58415425edf9d02d799ab9e6aedac3877997be8565fcbcb49e67331255",
+      "probe.cpp": "48338485a0b6f3fd64d0b3542a56c996e043d5e77e9887f0189101c1065df015"
+    },
+    "pinned_checkout_clean": true,
+    "platform": "Windows-10-10.0.19044-SP0",
+    "upstream_sources": {
+      "src/behave/CrownFirebrandProcessor.cpp": "fd71f59c7dec7549fa69950a9c851947cb98233b4d5dc867c0c7b40dc30bd87c",
+      "src/behave/CrownFirebrandProcessor.h": "01231a8c923c5b046e71713efc12c39c7bcec248671fe6190da31b8fcd89c0de",
+      "src/behave/behaveUnits.cpp": "420149652f256ac89219470fbccde305221221b3cf4548f3ccb5ae4c58ba1a8e",
+      "src/behave/behaveUnits.h": "2840c9f1cec8bb9770601d0da54831a3daa9628188355ed17eb63b565431bf3c",
+      "src/behave/spot.cpp": "a0aaf969d3c5cabd305c23e8dab9d4063a37923edffa0d060df4276570f9448d",
+      "src/behave/spot.h": "866983a28210a1507a5c8cae9ebf0a502eb3c19cc130bd112e53997636d19681",
+      "src/behave/spotInputs.cpp": "4f0778e2a122cc6b5c376daca79b7285723088eef613fe801c75e10554b1e774",
+      "src/behave/spotInputs.h": "b297cdbc880d7425203d62564fef005c4dd111a9efa0055545b205f861553f7d"
+    }
+  },
+  "case_count": 4,
+  "command": "behave_ref_driver cases.jsonl results.jsonl",
+  "fields": [
+    "flat_distance_ft"
+  ],
+  "files": {
+    "cases.jsonl": "68bd36bc906cf26f91ad15a788eb3958709cf6f92948908ece814fcbbda9c88b",
+    "results.jsonl": "5cd6f66845063fc2afe8166e4c6313b7d7e12bd7096fc9e0dc67708e17ccdbf3",
+    "schema.json": "25b0ece65cdfedfa6f27bcf21c31406d3913599561f59a343a6081649f0e4373"
+  },
+  "generator": "behave_ref_driver guarded flat terrain Surface fire Spot operation",
+  "operation": "spot_surface",
+  "result_count": 4,
+  "schema_version": 1,
+  "seed": null,
+  "upstream_sha": "f3b2943e69abca942e795c5b1b45276f6338abb5"
+}

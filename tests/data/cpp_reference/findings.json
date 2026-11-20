@@ -164,5 +164,29 @@
       "relative": 8.000000000042403
     },
     "status": "Owner approved C++ multiplication order and the exactly classified reference refresh on 2026-11-14; Python/Rust boundary regressions pass; numerical caps remain conditional on complete calibration"
+  },
+  {
+    "class": "open_scientific_difference",
+    "evidence": "behaveUnits.cpp:157,219; spotInputs.cpp:101,239; spot.cpp:330",
+    "finding": "The pinned Spot input path converts 5 mph to 440 ft/min and back using 0.01136363636, so its flat terrain Surface fire formula receives 4.9999999984 mph. Python and Rust use the supplied 5 mph.",
+    "id": "F-018",
+    "observation_scope": "Pinned MSVC and local Python and Rust scalar observations at 5 ft flame, 5 mph wind at 20 ft, and 0 or 10 ft effective cover",
+    "observed_cases": [
+      {
+        "absolute_ft": 1.263675812879228e-07,
+        "cpp_ft": 585.6449943521519,
+        "id": "spot-flat-wind-zero-cover",
+        "python_ft": 585.6449944785195,
+        "rust_ft": 585.6449944785195
+      },
+      {
+        "absolute_ft": 1.1262898169661639e-07,
+        "cpp_ft": 565.5562061067343,
+        "id": "spot-flat-wind-ten-cover",
+        "python_ft": 565.5562062193633,
+        "rust_ft": 565.5562062193633
+      }
+    ],
+    "status": "Owner approved recording the four same-input measurements. The converted wind reproduces both pinned C++ results in the ports as a separate diagnostic. Spot has no approved acceptance policy."
   }
 ]
