@@ -4,8 +4,8 @@
     "id": "MSVC",
     "version": "19.50.35728.0"
   },
-  "driver_sha256": "507400b5cc66794675907dd54ee0475c7bd8145daede3433ce934b1607bedd5e",
-  "driver_source_sha256_lf": "dc91373869d19e28f69876c7dd46ff247a163cbab53b11bfe34bee1151ac8ca3",
+  "driver_sha256": "cd027b5cbc2129578b169ff91a10086c23adfb94b7ab3b05a0cffb09762f54df",
+  "driver_source_sha256_lf": "a5d5a572faaa30330be69038c5aa0da9e25d88d3e42a8ca24d28c016003f6ad2",
   "flags": [
     "/O2",
     "/fp:precise",
@@ -16,11 +16,11 @@
   "historical_manifest_sha256": "39e75b886c69607977227a90361e0ef7585fabf7736cdded1352fca151bc1409",
   "original_replay_sha256": "ae006838d93bbb9533df74340085110c479315cb8238a8ce488a68fe5e9e1b71",
   "prepared_overlay_sha256": {
-    "CMakeLists.txt": "c0e8fcd808dbfbbc993a4a16d782eef580b0982e496cb776fe473d27cf6a7a31",
-    "driver.cpp": "dc91373869d19e28f69876c7dd46ff247a163cbab53b11bfe34bee1151ac8ca3",
+    "CMakeLists.txt": "e9496d93b1b557e6850b20bb03576f2208d3c07e70814c24da406018eea4cffe",
+    "driver.cpp": "a5d5a572faaa30330be69038c5aa0da9e25d88d3e42a8ca24d28c016003f6ad2",
     "probe.cpp": "48338485a0b6f3fd64d0b3542a56c996e043d5e77e9887f0189101c1065df015"
   },
-  "reason": "Prepare the guarded standalone FireSize operation while preserving original Surface observations",
+  "reason": "Prepare the guarded Ignite operation with prior Surface and FireSize observations preserved",
   "schema_version": 1,
   "source_digest_format": "Git text-auto binary probe: CRLF-to-LF without encoding changes; binary raw SHA256",
   "submodule_checkout_used": true,

@@ -3309,9 +3309,9 @@
         {
           "evidence": "same semantic family and exact case/underscore-normalized callable name; behavioral equivalence unverified",
           "file": "src/behave_fire/components/ignite.py",
-          "line": 62,
+          "line": 98,
           "relation": "callable_identity_candidate",
-          "signature": "calculate_fuel_temperature(air_temp_f: Union[float, np.ndarray], sun_shade_fraction: Union[float, np.ndarray]) -> np.ndarray",
+          "signature": "calculate_fuel_temperature(air_temp_f: float | np.ndarray, sun_shade_fraction: float | np.ndarray) -> np.ndarray",
           "target": "behave_fire.components.ignite.calculate_fuel_temperature"
         }
       ],
@@ -3320,7 +3320,7 @@
         {
           "evidence": "same semantic family and exact case/underscore-normalized callable name; behavioral equivalence unverified",
           "file": "rust/crates/behave-fire/src/ignite.rs",
-          "line": 5,
+          "line": 20,
           "relation": "callable_identity_candidate",
           "signature": "pub fn calculate_fuel_temperature(air_temp_f: f64, sun_shade_fraction: f64) -> f64",
           "target": "behave_fire::ignite::calculate_fuel_temperature"
@@ -5157,7 +5157,7 @@
       "signature": "void WindAjustmentFactor::applyLogProfile(const double canopyCover, const double canopyHeight, const double fuelbedDepth)"
     }
   ],
-  "phase": "Task 3: six Surface and four standalone FireSize functions compared",
+  "phase": "Six Surface, four standalone FireSize, and two guarded Ignite functions compared",
   "pilot_observations": {
     "approval": false,
     "available": 583,
@@ -32017,8 +32017,8 @@
     },
     {
       "access": "public",
-      "approval": null,
-      "dataset": null,
+      "approval": "Owner-approved exact binary64 comparison, including signed zero, for both outputs of the four guarded Ignite cases.",
+      "dataset": "ignite",
       "definition_candidates": [
         {
           "definition_parameters": "FractionUnits::FractionUnitsEnum desiredUnits",
@@ -32029,10 +32029,23 @@
         }
       ],
       "deleted": false,
-      "execution_evidence": [],
+      "execution_evidence": [
+        {
+          "file": "ignite/cases.jsonl",
+          "sha256": "ca513faa5995464712b2004c56cf7467634faafc6c1bb16a7aca69aca05307bb"
+        },
+        {
+          "file": "ignite/results.jsonl",
+          "sha256": "e1f9b37c74477accf0561ebc06368d58d0a0b66fccc7d6898f803114f1b048de"
+        },
+        {
+          "file": "ignite/manifest.json",
+          "sha256": "cb7605793cc336e5dbba80f74f991c60ac834c4dc751627a1dfccee781681bc7"
+        }
+      ],
       "file": "src/behave/ignite.h",
       "forwarded_cpp_ids": [],
-      "function_status": "not_in_pilot",
+      "function_status": "tested",
       "id": "8bfe90e67b4e13f42f9d",
       "kind": "method",
       "lexically_qualified_signature": "double Ignite::calculateFirebrandIgnitionProbability(FractionUnits::FractionUnitsEnum desiredUnits)",
@@ -32043,7 +32056,7 @@
         "src/behave/ignite.h",
         "src/behave/igniteInputs.h"
       ],
-      "mapping_note": "Source-backed callable/parameter/field candidates; scientific equivalence and lifecycle remain unverified.",
+      "mapping_note": "Direct probability calculation in the four guarded Ignite cases.",
       "mapping_status": "candidate_mapping",
       "name": "calculateFirebrandIgnitionProbability",
       "oracle_access": "public_declaration_only_not_qualified",
@@ -32054,11 +32067,11 @@
       "pure_virtual": false,
       "python_targets": [
         {
-          "evidence": "same semantic family and exact case/underscore-normalized callable name; behavioral equivalence unverified",
+          "evidence": "Direct callable compared with the corresponding C++ output in the four guarded Ignite cases.",
           "file": "src/behave_fire/components/ignite.py",
-          "line": 84,
-          "relation": "callable_identity_candidate",
-          "signature": "calculate_firebrand_ignition_probability(air_temp_f: Union[float, np.ndarray], sun_shade_fraction: Union[float, np.ndarray], moisture_1h_fraction: Union[float, np.ndarray]) -> np.ndarray",
+          "line": 61,
+          "relation": "observed_direct_callable",
+          "signature": "calculate_firebrand_ignition_probability(air_temp_f: float | np.ndarray, sun_shade_fraction: float | np.ndarray, moisture_1h_fraction: float | np.ndarray) -> np.ndarray",
           "target": "behave_fire.components.ignite.calculate_firebrand_ignition_probability"
         }
       ],
@@ -32069,10 +32082,10 @@
       ],
       "rust_targets": [
         {
-          "evidence": "same semantic family and exact case/underscore-normalized callable name; behavioral equivalence unverified",
+          "evidence": "Direct callable compared with the corresponding C++ output in the four guarded Ignite cases.",
           "file": "rust/crates/behave-fire/src/ignite.rs",
-          "line": 10,
-          "relation": "callable_identity_candidate",
+          "line": 5,
+          "relation": "observed_direct_callable",
           "signature": "pub fn calculate_firebrand_ignition_probability( air_temp_f: f64, sun_shade_fraction: f64, moisture_1h_fraction: f64, ) -> f64",
           "target": "behave_fire::ignite::calculate_firebrand_ignition_probability"
         }
@@ -32474,8 +32487,8 @@
     },
     {
       "access": "public",
-      "approval": null,
-      "dataset": null,
+      "approval": "Owner-approved exact binary64 comparison, including signed zero, for both outputs of the four guarded Ignite cases.",
+      "dataset": "ignite",
       "definition_candidates": [
         {
           "definition_parameters": "TemperatureUnits::TemperatureUnitsEnum desiredUnits",
@@ -32486,10 +32499,23 @@
         }
       ],
       "deleted": false,
-      "execution_evidence": [],
+      "execution_evidence": [
+        {
+          "file": "ignite/cases.jsonl",
+          "sha256": "ca513faa5995464712b2004c56cf7467634faafc6c1bb16a7aca69aca05307bb"
+        },
+        {
+          "file": "ignite/results.jsonl",
+          "sha256": "e1f9b37c74477accf0561ebc06368d58d0a0b66fccc7d6898f803114f1b048de"
+        },
+        {
+          "file": "ignite/manifest.json",
+          "sha256": "cb7605793cc336e5dbba80f74f991c60ac834c4dc751627a1dfccee781681bc7"
+        }
+      ],
       "file": "src/behave/ignite.h",
       "forwarded_cpp_ids": [],
-      "function_status": "not_in_pilot",
+      "function_status": "tested",
       "id": "e2e571ef91bfa443f0ef",
       "kind": "method",
       "lexically_qualified_signature": "double Ignite::getFuelTemperature(TemperatureUnits::TemperatureUnitsEnum desiredUnits)",
@@ -32500,7 +32526,7 @@
         "src/behave/ignite.h",
         "src/behave/igniteInputs.h"
       ],
-      "mapping_note": "Named C++ getter has no established direct callable or exact returned-key match. Distinguish input-state readback, diagnostic, and observable result before assigning coverage.",
+      "mapping_note": "Direct readback of computed fuel temperature in Fahrenheit in the four guarded Ignite cases.",
       "mapping_status": "pending_mapping",
       "name": "getFuelTemperature",
       "oracle_access": "public_declaration_only_not_qualified",
@@ -32509,13 +32535,31 @@
       "owner_approved_waiver": false,
       "proposed_disposition": null,
       "pure_virtual": false,
-      "python_targets": [],
+      "python_targets": [
+        {
+          "evidence": "Direct callable compared with the corresponding C++ output in the four guarded Ignite cases.",
+          "file": "src/behave_fire/components/ignite.py",
+          "line": 98,
+          "relation": "observed_direct_callable",
+          "signature": "calculate_fuel_temperature(air_temp_f: float | np.ndarray, sun_shade_fraction: float | np.ndarray) -> np.ndarray",
+          "target": "behave_fire.components.ignite.calculate_fuel_temperature"
+        }
+      ],
       "qualified_name": "Ignite::getFuelTemperature",
       "review_category": "stateful_accessor_requires_field_or_state_mapping",
       "route_ids": [
         "ignite"
       ],
-      "rust_targets": [],
+      "rust_targets": [
+        {
+          "evidence": "Direct callable compared with the corresponding C++ output in the four guarded Ignite cases.",
+          "file": "rust/crates/behave-fire/src/ignite.rs",
+          "line": 20,
+          "relation": "observed_direct_callable",
+          "signature": "pub fn calculate_fuel_temperature(air_temp_f: f64, sun_shade_fraction: f64) -> f64",
+          "target": "behave_fire::ignite::calculate_fuel_temperature"
+        }
+      ],
       "scientific_candidate": false,
       "signature": "double Ignite::getFuelTemperature(TemperatureUnits::TemperatureUnitsEnum desiredUnits)"
     },
@@ -86188,15 +86232,16 @@
     {
       "coverage_status": "not_executed_phase0",
       "cpp_ids": [
-        "b7f23fb75cfb1a38cd8d"
+        "b7f23fb75cfb1a38cd8d",
+        "e2e571ef91bfa443f0ef"
       ],
       "file": "src/behave_fire/components/ignite.py",
-      "line": 62,
+      "line": 98,
       "mapping_status": "candidate_cpp_links",
       "module": "ignite",
       "name": "calculate_fuel_temperature",
       "owner": "",
-      "signature": "calculate_fuel_temperature(air_temp_f: Union[float, np.ndarray], sun_shade_fraction: Union[float, np.ndarray]) -> np.ndarray",
+      "signature": "calculate_fuel_temperature(air_temp_f: float | np.ndarray, sun_shade_fraction: float | np.ndarray) -> np.ndarray",
       "target": "behave_fire.components.ignite.calculate_fuel_temperature"
     },
     {
@@ -86205,12 +86250,12 @@
         "8bfe90e67b4e13f42f9d"
       ],
       "file": "src/behave_fire/components/ignite.py",
-      "line": 84,
+      "line": 61,
       "mapping_status": "candidate_cpp_links",
       "module": "ignite",
       "name": "calculate_firebrand_ignition_probability",
       "owner": "",
-      "signature": "calculate_firebrand_ignition_probability(air_temp_f: Union[float, np.ndarray], sun_shade_fraction: Union[float, np.ndarray], moisture_1h_fraction: Union[float, np.ndarray]) -> np.ndarray",
+      "signature": "calculate_firebrand_ignition_probability(air_temp_f: float | np.ndarray, sun_shade_fraction: float | np.ndarray, moisture_1h_fraction: float | np.ndarray) -> np.ndarray",
       "target": "behave_fire.components.ignite.calculate_firebrand_ignition_probability"
     },
     {
@@ -88597,12 +88642,25 @@
       "contract": {
         "independent_cases": "Fresh objects per independent case;explicit transition cases only;validate every primitive/derived bound before every call,including setters and getters.",
         "state_lifecycle": "State setters, getters, constructors, resets, and copy contracts are assigned to this bundle; assignment is not execution evidence.",
-        "status": "source_only_pending_execution",
+        "status": "guarded_firebrand_runs_checked",
         "units": "Explicit declared unit enums and conversion bounds are checked before every call."
       },
-      "dataset": null,
-      "executable_now": false,
-      "execution_evidence": [],
+      "dataset": "ignite",
+      "executable_now": true,
+      "execution_evidence": [
+        {
+          "file": "ignite/cases.jsonl",
+          "sha256": "ca513faa5995464712b2004c56cf7467634faafc6c1bb16a7aca69aca05307bb"
+        },
+        {
+          "file": "ignite/results.jsonl",
+          "sha256": "e1f9b37c74477accf0561ebc06368d58d0a0b66fccc7d6898f803114f1b048de"
+        },
+        {
+          "file": "ignite/manifest.json",
+          "sha256": "cb7605793cc336e5dbba80f74f991c60ac834c4dc751627a1dfccee781681bc7"
+        }
+      ],
       "guard_ids": [
         "units",
         "fresh_state",
@@ -88610,12 +88668,17 @@
         "numeric_unknown"
       ],
       "method_ids": [
-        "8bfe90e67b4e13f42f9d"
+        "8bfe90e67b4e13f42f9d",
+        "e2e571ef91bfa443f0ef"
       ],
-      "notes": "Fuel temperature protected;lightning removed/commented.",
-      "qualification": "Source-only;execution waits for approved next phases;unresolved identities unavailable.",
+      "notes": "Fresh standalone Ignite per case, initialized with explicit Fahrenheit and fraction units. Compare firebrand ignition probability and the computed fuel temperature. The air temperature and shade are fixed while one-hour moisture varies across four cases.",
+      "qualification": {
+        "complete_cases": 4,
+        "directly_tested_functions": 2,
+        "policy": "tolerance-policy.json#/ignite"
+      },
       "route_id": "ignite",
-      "status": "not_in_pilot"
+      "status": "reviewed_ignite_outputs"
     },
     {
       "assigned_method_ids": [
@@ -94304,10 +94367,11 @@
       "access": "pub",
       "coverage_status": "not_executed_phase0",
       "cpp_ids": [
-        "b7f23fb75cfb1a38cd8d"
+        "b7f23fb75cfb1a38cd8d",
+        "e2e571ef91bfa443f0ef"
       ],
       "file": "rust/crates/behave-fire/src/ignite.rs",
-      "line": 5,
+      "line": 20,
       "mapping_status": "candidate_cpp_links",
       "module": "ignite",
       "name": "calculate_fuel_temperature",
@@ -94322,7 +94386,7 @@
         "8bfe90e67b4e13f42f9d"
       ],
       "file": "rust/crates/behave-fire/src/ignite.rs",
-      "line": 10,
+      "line": 5,
       "mapping_status": "candidate_cpp_links",
       "module": "ignite",
       "name": "calculate_firebrand_ignition_probability",

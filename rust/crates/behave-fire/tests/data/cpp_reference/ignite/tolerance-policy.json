@@ -1,0 +1,11 @@
+{
+  "approved": true,
+  "fields": {
+    "firebrand_probability": {
+      "kind": "exact_binary64"
+    },
+    "fuel_temperature_f": {
+      "kind": "exact_binary64"
+    }
+  }
+}
