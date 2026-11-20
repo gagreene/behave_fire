@@ -4,22 +4,23 @@
     "id": "MSVC",
     "version": "19.50.35728.0"
   },
-  "driver_sha256": "5c2545973ac5e647e28a1f340304ae71a51c80084b1690f84d182e96daa0961f",
-  "driver_source_sha256_lf": "eb2498786e11cbb9c25a312b2e4d1e29c519e0a09be02de46d1a08bd5609b6ee",
+  "driver_sha256": "507400b5cc66794675907dd54ee0475c7bd8145daede3433ce934b1607bedd5e",
+  "driver_source_sha256_lf": "dc91373869d19e28f69876c7dd46ff247a163cbab53b11bfe34bee1151ac8ca3",
   "flags": [
     "/O2",
     "/fp:precise",
     "/D_USE_MATH_DEFINES=",
     "/EHsc"
   ],
+  "historical_custom_manifest_sha256": "2b9a67e7c1de97a94e0ed9f9e620c6fca942b55b28464016062593ac848d013a",
   "historical_manifest_sha256": "39e75b886c69607977227a90361e0ef7585fabf7736cdded1352fca151bc1409",
   "original_replay_sha256": "ae006838d93bbb9533df74340085110c479315cb8238a8ce488a68fe5e9e1b71",
   "prepared_overlay_sha256": {
     "CMakeLists.txt": "c0e8fcd808dbfbbc993a4a16d782eef580b0982e496cb776fe473d27cf6a7a31",
-    "driver.cpp": "eb2498786e11cbb9c25a312b2e4d1e29c519e0a09be02de46d1a08bd5609b6ee",
+    "driver.cpp": "dc91373869d19e28f69876c7dd46ff247a163cbab53b11bfe34bee1151ac8ca3",
     "probe.cpp": "48338485a0b6f3fd64d0b3542a56c996e043d5e77e9887f0189101c1065df015"
   },
-  "reason": "Owner-approved explicit percent-unit controls and compiler-portable overlay; original 634 observations replay byte-identically.",
+  "reason": "Prepare the guarded standalone FireSize operation while preserving original Surface observations",
   "schema_version": 1,
   "source_digest_format": "Git text-auto binary probe: CRLF-to-LF without encoding changes; binary raw SHA256",
   "submodule_checkout_used": true,

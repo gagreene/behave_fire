@@ -2,9 +2,11 @@
 
 import argparse
 import json
+import math
 import subprocess
 from pathlib import Path
 
+from cpp_fire_size import DATASET, load_cases
 from cpp_reference import PIN, ROOT, _digest, _document, _prepared_build, _text_digest, _unique_object, load_reference
 
 
@@ -70,6 +72,49 @@ def _check_custom(driver, directory, data, root):
     return dict(custom_negative_cases=18, custom_negative_upstream_entries=0,
                 custom_upstream_trap_exit=86, custom_geometry_trap_exit=87,
                 custom_duplicate_ids_rejected=True, custom_state_sequence_checked=True)
+
+
+def _check_fire_size(driver, directory, root):
+    """Check the standalone FireSize whitelist and both entry traps.
+
+    :param driver: Source-matched executable.
+    :param directory: Retained scratch evidence directory.
+    :param root: Reference checkout root.
+    :return: FireSize rejection and execution control counts.
+    """
+    calm, surface, zero = load_cases(root)
+    controls = (
+        (dict(calm, wind_mph=5), "unreviewed_fire_size_request"),
+        (dict(calm, wind_mph=-0.0), "unreviewed_fire_size_request"),
+        (dict(surface, wind_mph=math.nextafter(5, math.inf)), "unreviewed_fire_size_request"),
+        (dict(surface, spread_ft_min=-1), "unreviewed_fire_size_request"),
+        (dict(zero, elapsed_min=-0.0), "unreviewed_fire_size_request"),
+        (dict(calm, mode="Unknown"), "unsupported_fire_size_mode"),
+        (dict(surface, wind_mph="NaN"), "numeric_type_wind_mph"),
+        (dict(calm, session="state"), "unsupported_field"),
+    )
+    path = directory / "fire-size-negative-input.jsonl"
+    path.write_text("".join(json.dumps(case) + "\n" for case, _ in controls), encoding="utf-8")
+    result_path = _run(driver, directory, "fire-size-negative", path, "--forbid-upstream", 0)
+    expected = [dict(id=case["id"], status="rejected", upstream_entries=0, error=error)
+                for case, error in controls]
+    if _read_lines(result_path) != expected:
+        raise ValueError("FireSize mutation escaped guarded rejection")
+    cases_path = root / DATASET / "cases.jsonl"
+    _run(driver, directory, "fire-size-upstream-positive-trap", cases_path, "--forbid-upstream", 86)
+    _run(driver, directory, "fire-size-geometry-positive-trap", cases_path, "--forbid-geometry", 87)
+    for name in ("upstream", "geometry"):
+        message = (directory / f"fire-size-{name}-positive-trap.stderr").read_bytes()
+        if f"{name.upper()}_ENTRY_BLOCKED".encode() not in message:
+            raise ValueError("FireSize entry trap was not active")
+    duplicate = directory / "fire-size-duplicate-input.jsonl"
+    duplicate.write_text((json.dumps(calm) + "\n") * 2, encoding="utf-8")
+    rows = _read_lines(_run(driver, directory, "fire-size-duplicate", duplicate, None, 0))
+    expected_duplicate = dict(id=calm["id"], status="rejected", upstream_entries=0, error="duplicate_id")
+    if len(rows) != 2 or rows[0].get("status") != "ok" or rows[1] != expected_duplicate:
+        raise ValueError("Duplicate FireSize case reached upstream twice")
+    return dict(negative_cases=len(controls), negative_upstream_entries=0, upstream_trap_exit=86,
+                geometry_trap_exit=87, duplicate_ids_rejected=True)
 
 
 def _read_lines(path):
@@ -174,6 +219,7 @@ def check_driver(driver, directory, root=ROOT, build_receipt=None, exact_replay=
                    replay_cases=len(data["cases"]), replay_byte_identical=byte_identical, duplicate_ids_rejected=True,
                    state_sequence_checked=True, scientific_parity_approved=False)
     summary.update(_check_custom(driver, directory, data, root))
+    summary["fire_size"] = _check_fire_size(driver, directory, root)
     (directory / "summary.json").write_text(json.dumps(summary, indent=2) + "\n", encoding="utf-8")
     return summary
 

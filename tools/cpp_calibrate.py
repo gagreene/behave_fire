@@ -10,6 +10,7 @@ import subprocess
 from pathlib import Path
 
 import cpp_controls as controls
+import cpp_fire_size as fire_size
 import cpp_reference as reference
 
 
@@ -317,6 +318,11 @@ def measure_cpp(root, directory, expected_compiler=None):
     report = dict(schema_version=1, kind="cpp", upstream_sha=reference.PIN, passed=True,
                   parity_approved=False, artifacts=controls._artifacts(root), fields=controls.calibration_policy(root),
                   compiler=build["compiler"], protocol=protocol, observations=observations, **_context(root))
+    fire_size_cases = root / fire_size.DATASET / "cases.jsonl"
+    fire_size_output = directory / "fire_size.jsonl"
+    _run([driver, fire_size_cases, fire_size_output], directory, "fire_size")
+    report["fire_size"] = dict(artifacts=fire_size.artifacts(root),
+                               observations=fire_size.read_cpp_results(root, fire_size_output))
     report["summary"] = _validate_observations(root, report)
     reference._json(directory / (build["compiler"]["id"] + "-calibration.json"), report)
     return report

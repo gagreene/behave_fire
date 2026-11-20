@@ -1,0 +1,3 @@
+{"id":"calm-crown","operation":"fire_size","mode":"Crown","wind_mph":0,"spread_ft_min":4,"elapsed_min":2}
+{"id":"surface-5-mph","operation":"fire_size","mode":"Surface","wind_mph":5,"spread_ft_min":10,"elapsed_min":10}
+{"id":"zero-elapsed","operation":"fire_size","mode":"Surface","wind_mph":5,"spread_ft_min":10,"elapsed_min":0}

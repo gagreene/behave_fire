@@ -10,6 +10,7 @@ import subprocess
 import sys
 from pathlib import Path
 
+import cpp_fire_size as fire_size
 import cpp_reference as reference
 
 
@@ -211,12 +212,14 @@ def load(root, source_cases):
     directory = root / "tests/data/cpp_reference/surface_custom"
     manifest = reference._document(directory / "manifest.json")
     cases, results = reference._rows(directory / "cases.jsonl"), reference._rows(directory / "results.jsonl")
+    prepared = reference._prepared_build(root)
+    historical_build = prepared.get("historical_custom_manifest_sha256") is not None
     if (manifest["upstream_sha"] != reference.PIN or manifest["case_count"] != 139
             or manifest["result_count"] != 139 or manifest["available"] != 139
             or manifest["fields"] != list(reference.FIELDS)
             or manifest["source_models"] != sorted(reference.MOE_PERCENT_CONTROLS)
             or manifest["registered_model"] != reference.CONTROL_MODEL or manifest["moisture_units"] != "Percent"
-            or manifest["build"] != reference._prepared_build(root)
+            or (not historical_build and manifest["build"] != prepared)
             or manifest["source_cases_sha256"] != reference._digest(root
                 / "tests/data/cpp_reference/surface/cases.jsonl")
             or cases != reference._custom_cases(source_cases)):
@@ -317,6 +320,8 @@ def measure_ports(root, report, backends=("python", "rust"), expected_platform=N
 
         result.update(binding_api_version=_rust.__binding_api_version__,
                       extension_sha256=reference._digest(Path(_rust.__file__)))
+    result["fire_size"] = dict(artifacts=fire_size.artifacts(root),
+                               observations=fire_size.measure_ports(root, backends))
     reference._json(report, result)
     return result
 

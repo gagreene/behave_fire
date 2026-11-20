@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "operation": "fire_size",
+  "request": {
+    "id": "Case identifier",
+    "operation": "fire_size",
+    "mode": {
+      "Crown": true,
+      "Surface": false
+    },
+    "wind_mph": "MilesPerHour, effective for Surface and open 20-ft wind for Crown",
+    "spread_ft_min": "FeetPerMinute, forward spread rate",
+    "elapsed_min": "Minutes, elapsed time for geometry"
+  },
+  "bounds": "The driver accepts only the three reviewed IDs with their exact finite input tuples in cases.jsonl.",
+  "call_sequence": [
+    "Construct a fresh standalone FireSize.",
+    "Call calculateFireBasicDimensions with the mode, wind and forward spread.",
+    "Read getFireLengthToWidthRatio, getFireArea and getFirePerimeter."
+  ],
+  "output": {
+    "length_to_width_ratio": "dimensionless",
+    "area_ft2": "SquareFeet",
+    "perimeter_ft": "Feet"
+  },
+  "known_difference": "Standalone positive-wind Crown inputs are excluded from the eligible cases due to firelab/behave issue #85."
+}
