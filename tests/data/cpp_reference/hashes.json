@@ -57,7 +57,7 @@
   "tools/cpp_ignite.py": "61c7f0494e970717248bc882f7e5f14431fa3b599ccf65f9ed9dfd42362d3607",
   "tools/cpp_inventory.py": "7d727f7aac91728a78b69c06b048b7575fac44eb8e6cd5d03c0e3dc15f97c0ea",
   "tools/cpp_mortality.py": "c6215db6d08ffcd8d98485f420ff8c0fd17939ccda3b54da3c6a69152ac2a862",
-  "tools/cpp_reference.py": "a089c2b0da4b2cdb73c6b370b55db57ad19db1d61368dc3fbfd1c8d4e86bc837",
+  "tools/cpp_reference.py": "20d62f132acedc596d811cf2fe25200bff124a395a8c0e20408e21f2a6114699",
   "tools/cpp_spot.py": "02d77060f30bd49e8408787d58919e239b0536bed451114e6d84d567cab7fc75",
   "tools/export_cpp_crate.py": "b19e7f4e861780f89b75a1acfea181f4725dec139b2358a5ceb05d7046b6d90a"
 }

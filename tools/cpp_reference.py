@@ -621,7 +621,7 @@ def load_reference(root=ROOT, *, measurement=False):
     load_mortality_observations(root)
     validate_mortality_policy(root, policy.get("mortality"), qualification)
     load_spot_observations(root)
-    validate_spot_measurement(root, policy.get("spot"), qualification)
+    validate_spot_measurement(root, policy.get("spot"), None if measurement else qualification)
     _prepared_build(root)
     budget = check_fixture_budget(root)
     if measurement:
