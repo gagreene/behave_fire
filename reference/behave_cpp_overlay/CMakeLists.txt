@@ -30,7 +30,7 @@ if(MSVC)
     target_link_options(surface_link_probe PRIVATE "/MAP:${CMAKE_BINARY_DIR}/surface_link_probe.map")
 endif()
 
-add_executable(behave_ref_driver driver.cpp)
+add_executable(behave_ref_driver driver.cpp "${UPSTREAM}/ignite.cpp" "${UPSTREAM}/igniteInputs.cpp")
 target_compile_options(behave_ref_driver PRIVATE ${PRECISE_FLAGS})
 target_link_libraries(behave_ref_driver PRIVATE behave_sources)
 if(MSVC)

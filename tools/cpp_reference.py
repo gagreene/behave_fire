@@ -192,9 +192,10 @@ def _required_artifacts(root):
         "surface/results.jsonl", "surface/manifest.json", "surface/profiles.json", "surface/applicability.json",
         "negative-inputs.jsonl", "negative-expected.json", "prepared-build.json",
         "fire_size/cases.jsonl", "fire_size/manifest.json", "fire_size/results.jsonl", "fire_size/schema.json",
+        "ignite/cases.jsonl", "ignite/manifest.json", "ignite/results.jsonl", "ignite/schema.json",
         "surface_custom/cases.jsonl", "surface_custom/results.jsonl", "surface_custom/manifest.json")}
     mandatory.update("tools/" + name for name in (
-        "cpp_reference.py", "cpp_controls.py", "cpp_fire_size.py", "cpp_inventory.py",
+        "cpp_reference.py", "cpp_controls.py", "cpp_fire_size.py", "cpp_ignite.py", "cpp_inventory.py",
         "cpp_calibrate.py", "export_cpp_crate.py", "check_cpp_driver.py"))
     mandatory.update(f"rust/crates/behave-fire/tests/data/cpp_reference/{dataset}/{name}"
                      for dataset in ("surface", "surface_custom", "fire_size")
@@ -203,13 +204,14 @@ def _required_artifacts(root):
     return mandatory
 
 
-def _rows(path):
+def _rows(path, *, parse_int=int):
     """Read strict JSONL with unique case identifiers.
 
     :param path: JSONL path.
+    :param parse_int: Decoder for integer tokens.
     :return: Ordered case objects.
     """
-    rows = [json.loads(line, object_pairs_hook=_unique_object, parse_constant=_reject_constant)
+    rows = [json.loads(line, object_pairs_hook=_unique_object, parse_constant=_reject_constant, parse_int=parse_int)
             for line in Path(path).read_text(encoding="utf-8").splitlines()]
     if not rows or any(not isinstance(row, dict) or not isinstance(row.get("id"), str) or not row["id"] for row in rows
     ):
@@ -382,7 +384,7 @@ def check_fixture_budget(root=ROOT):
     if policy.get('approved') is not True or policy.get('limits') != FIXTURE_BUDGET:
         raise ValueError('Unapproved fixture budget limits')
     cases = sum(sum(bool(line.strip()) for line in (canonical / dataset / 'cases.jsonl').read_bytes().splitlines())
-                for dataset in ('surface', 'surface_custom', 'fire_size'))
+                for dataset in ('surface', 'surface_custom', 'fire_size', 'ignite'))
     if cases > FIXTURE_BUDGET['case_limit']:
         raise ValueError('C++ fixture case budget exceeded')
     measured = {'cases': cases}
@@ -589,10 +591,15 @@ def load_reference(root=ROOT, *, measurement=False):
     validate_inventory(_document(directory / "inventory.json"), reference_root=directory)
     from cpp_controls import load
     from cpp_fire_size import EXACT_FIELDS, load_observations, validate_policy
+    from cpp_ignite import MEASUREMENT_POLICY
+    from cpp_ignite import load_observations as load_ignite_observations
 
     controls = load(root, cases)
     load_observations(root)
     validate_policy(root, policy.get("fire_size"), policy.get("qualification") if policy["approved"] else None)
+    load_ignite_observations(root)
+    if policy.get("ignite") != MEASUREMENT_POLICY or policy["ignite"]["approved"] is not False:
+        raise ValueError("Ignite observations require a separate approved comparison policy")
     _prepared_build(root)
     budget = check_fixture_budget(root)
     if measurement:

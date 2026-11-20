@@ -1,6 +1,7 @@
 // Phase 1 protocol probe. Scientific calculations are called in pinned upstream sources.
 #include "fireSize.h"
 #include "fuelModels.h"
+#include "ignite.h"
 #include "surface.h"
 #include <cctype>
 #include <cerrno>
@@ -319,6 +320,51 @@ FireSizeRequest validate_fire_size(const std::map<std::string, Value>& input) {
     return expected;
 }
 
+struct IgniteRequest {
+    double air_temperature_f;
+    double sun_shade_fraction;
+    double moisture_1h;
+};
+
+/// Validate a standalone request against the four reviewed firebrand inputs.
+///
+/// :param input: Parsed request object.
+/// :return: The matching reviewed input for a fresh Ignite object.
+IgniteRequest validate_ignite(const std::map<std::string, Value>& input) {
+    const std::set<std::string> fields = {
+        "id", "operation", "air_temperature_f", "sun_shade_fraction", "moisture_1h",
+    };
+    for (const auto& item : input)
+        if (!fields.count(item.first)) throw std::runtime_error("unsupported_field");
+    for (const auto& field : fields)
+        if (!input.count(field)) throw std::runtime_error("missing_field_" + field);
+
+    const Value& id = input.at("id");
+    if (id.kind != Value::String || id.text.empty()) throw std::runtime_error("invalid_id");
+    for (const auto& field : {"air_temperature_f", "moisture_1h", "sun_shade_fraction"})
+        if (input.at(field).kind != Value::Number) throw std::runtime_error(std::string("numeric_type_") + field);
+
+    const IgniteRequest request = {
+        numeric(input.at("air_temperature_f"), "air_temperature_f"),
+        numeric(input.at("sun_shade_fraction"), "sun_shade_fraction"),
+        numeric(input.at("moisture_1h"), "moisture_1h"),
+    };
+    const double air_temperature_f = 71.0;
+    const double sun_shade_fraction = 0.5;
+    const std::map<std::string, double> reviewed_moisture = {
+        {"ignite-dry", 0.0},
+        {"ignite-moisture-12-5", 0.125},
+        {"ignite-moisture-25", 0.25},
+        {"ignite-wet", 0.5},
+    };
+    const auto match = reviewed_moisture.find(id.text);
+    if (match == reviewed_moisture.end() || request.air_temperature_f != air_temperature_f
+            || request.sun_shade_fraction != sun_shade_fraction || request.moisture_1h != match->second
+            || std::signbit(request.moisture_1h))
+        throw std::runtime_error("unreviewed_ignite_request");
+    return {air_temperature_f, sun_shade_fraction, match->second};
+}
+
 struct Unavailable {};
 struct GeometryTrap {};
 struct Session {
@@ -396,6 +442,25 @@ std::string run_fire_size(const FireSizeRequest& request, bool forbid_geometry, 
         {"perimeter_ft", size.getFirePerimeter(request.crown, LengthUnits::Feet, request.elapsed_min, TimeUnits::Minutes)},
     });
 }
+
+/// Calculate firebrand ignition probability on a fresh upstream Ignite object.
+///
+/// :param request: Reviewed Ignite input.
+/// :param forbid_output: Whether the output entry trap is enabled.
+/// :return: JSON object with ignition probability and fuel temperature.
+std::string run_ignite(const IgniteRequest& request, bool forbid_output) {
+    if (forbid_output) throw GeometryTrap{};
+    Ignite ignite;
+    ignite.initializeMembers();
+    ignite.setAirTemperature(request.air_temperature_f, TemperatureUnits::Fahrenheit);
+    ignite.setSunShade(request.sun_shade_fraction, FractionUnits::Fraction);
+    ignite.setMoistureOneHour(request.moisture_1h, FractionUnits::Fraction);
+    const double probability = ignite.calculateFirebrandIgnitionProbability(FractionUnits::Fraction);
+    return encode_result({
+        {"firebrand_probability", probability},
+        {"fuel_temperature_f", ignite.getFuelTemperature(TemperatureUnits::Fahrenheit)},
+    });
+}
 }
 
 int main(int argc, char** argv) {
@@ -418,13 +483,18 @@ int main(int argc, char** argv) {
             if (line.size() > 65536) throw std::runtime_error("line_too_long");
             const auto object = Parser(line).parse();
             if (object.count("id") && object.at("id").kind == Value::String) id = object.at("id").text;
-            const auto operation = object.find("operation");
+            const auto operation_field = object.find("operation");
+            const std::string operation = operation_field != object.end() && operation_field->second.kind == Value::String
+                ? operation_field->second.text : "";
             std::string result;
-            if (operation != object.end() && operation->second.kind == Value::String
-                    && operation->second.text == "fire_size") {
+            if (operation == "fire_size") {
                 const FireSizeRequest request = validate_fire_size(object);
                 enter_upstream(id, ids, forbid, entered);
                 result = run_fire_size(request, forbid_geometry, geometry_entered);
+            } else if (operation == "ignite") {
+                const IgniteRequest request = validate_ignite(object);
+                enter_upstream(id, ids, forbid, entered);
+                result = run_ignite(request, forbid_geometry);
             } else {
                 const Request request = validate(object);
                 enter_upstream(request.id, ids, forbid, entered);
@@ -432,7 +502,9 @@ int main(int argc, char** argv) {
                 auto& session = request.session.empty() ? fresh : sessions[request.session];
                 result = run(request, forbid_geometry, geometry_entered, session);
             }
-            output << "{\"id\":" << encode(id) << ",\"status\":\"ok\",\"upstream_entries\":1,\"geometry_entries\":1,\"output\":" << result << "}\n";
+            output << "{\"id\":" << encode(id) << ",\"status\":\"ok\",\"upstream_entries\":1,"
+                   << (operation == "ignite" ? "\"output_entries\"" : "\"geometry_entries\"")
+                   << ":1,\"output\":" << result << "}\n";
         } catch (const UpstreamTrap&) {
             std::cerr << "UPSTREAM_ENTRY_BLOCKED\n";
             return 86;

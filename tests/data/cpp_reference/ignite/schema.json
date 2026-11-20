@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "operation": "ignite",
+  "request": {
+    "id": "Case identifier",
+    "operation": "ignite",
+    "air_temperature_f": "Fahrenheit",
+    "sun_shade_fraction": "Fraction",
+    "moisture_1h": "Fraction, one-hour dead fuel moisture"
+  },
+  "bounds": "The driver accepts only the four reviewed IDs and their finite input tuples in cases.jsonl.",
+  "call_sequence": [
+    "Construct a fresh Ignite instance and initializeMembers.",
+    "Set air temperature, shade and one-hour moisture with their declared units.",
+    "Calculate firebrand ignition probability and read the computed fuel temperature."
+  ],
+  "output": {
+    "firebrand_probability": "Fraction",
+    "fuel_temperature_f": "Fahrenheit"
+  },
+  "scope": "The selected inputs exercise the dry and wet saturation branches and two interior points. This operation reads no Lightning inputs and uses only the one-hour moisture setter."
+}
