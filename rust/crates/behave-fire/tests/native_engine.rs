@@ -1,6 +1,9 @@
 //! Frozen scientific evidence for the replacement numerical engine.
 #![allow(clippy::field_reassign_with_default)]
 
+#[path = "support/engine_fixture.rs"]
+mod fixture;
+
 use behave_fire::crown::SurfaceFireInputs;
 use behave_fire::engine::{
     CrownCell, CrownPlan, CrownTweaks, PreparedFuel, PreparedFuels, SurfaceCell, SurfaceOptions,
@@ -124,7 +127,11 @@ fn crown_custom_model_ten_and_slope_match_pinned_python() {
             number(&case["output"]["fire_type"]) as i32
         );
         for (name, actual) in result.named_values() {
-            close(actual, number(&case["output"][name]), name);
+            close(
+                actual,
+                fixture::crown_expected(input, &case["output"], name, 0),
+                name,
+            );
         }
     }
 }

@@ -6,6 +6,7 @@ use crate::{
         CrownCell, PreparedFuel, SurfaceCell, SurfaceOptions, SurfacePlan, SurfaceTweaks, WafMethod,
     },
     surface::{self, FuelbedIntermediates, Particles, SurfaceResult},
+    units::SpeedUnit,
 };
 
 macro_rules! record {
@@ -255,7 +256,7 @@ macro_rules! numeric_stages {
                     final_spread_rate: surface_ros,
                     final_heat_per_unit_area: surface_hpua,
                     final_fireline_intensity: surface_fli,
-                    final_flame_length: flame(surface_fli),
+                    final_flame_length: surface::calculate_flame_length(surface_fli),
                 }
             } else if is_passive_crown {
                 FinalCrownBehavior {
@@ -443,19 +444,17 @@ fn calculate_fm10_surface<const FINISH: u8, const STRICT: bool>(
     };
     let plan = SurfacePlan::new(controls);
     let crown_surface = plan.run_with_wind::<FINISH, true>(x, &ib_crown, configured, wind);
-    let ews = crown_surface.effective_wind_speed;
+    let wind20 = surface::calculate_twenty_foot_wind_speed(
+        x.wind_speed,
+        SpeedUnit::FeetPerMinute,
+        options.wind_height,
+    );
     CrownSurfaceResult {
         p_crown,
         ib_crown,
         ri_crown,
         crown_fire_spread_rate: 3.34 * crown_surface.spread_rate,
-        crown_length_to_width_ratio: if STRICT && ews.is_nan() {
-            f64::NAN
-        } else if ews > 1e-7 {
-            1.0 + 0.125 * ews
-        } else {
-            1.0
-        },
+        crown_length_to_width_ratio: calculate_crown_length_to_width_ratio(wind20),
         crown_surface,
     }
 }
@@ -529,6 +528,19 @@ fn crowning_without_geometry(
 ) -> f64 {
     crowning_surface_rate(ri, bed, critical / 3.34, wind)
 }
+/// Evaluate Rothermel (1991), Equation 10, from open twenty-foot wind in ft/min.
+#[doc(hidden)]
+pub fn calculate_crown_length_to_width_ratio(twenty_foot_wind_speed: f64) -> f64 {
+    let mph = SpeedUnit::MilesPerHour.from_base(twenty_foot_wind_speed);
+    if mph.is_nan() {
+        f64::NAN
+    } else if mph > 1e-7 {
+        1.0 + 0.125 * mph
+    } else {
+        1.0
+    }
+}
+
 /// Compute Crown's consumed model-10 fields without unrelated Surface finishing.
 pub fn calculate_crown_spread(
     input: &CrownCell,

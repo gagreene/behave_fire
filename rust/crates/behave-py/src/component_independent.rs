@@ -18,8 +18,22 @@ fn crown_surface(
     let reaction = names.iter().any(|n| n == "ri_crown");
     let spread = names.iter().any(|n| n == "crown_fire_spread_rate");
     let length = names.iter().any(|n| n == "crown_length_to_width_ratio");
-    let weather = surface || spread || length;
+    let weather = surface || spread;
     output.fill(threads, |i, row| {
+        if length && !weather {
+            let wind20 = behave_fire::surface::calculate_twenty_foot_wind_speed(
+                p.n(Field::WindSpeed, i)?,
+                p.speed_units(i)?,
+                p.crown_options().wind_height,
+            );
+            row.f64(
+                "crown_length_to_width_ratio",
+                crown::calculate_crown_length_to_width_ratio(wind20),
+            );
+            if !(particles || fuelbed || reaction) {
+                return Ok(());
+            }
+        }
         let fuel = crate::structures::fuel(p, i)?;
         let full = if weather {
             Some(crown::calculate_crown_surface_fire(

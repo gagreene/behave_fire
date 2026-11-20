@@ -22,7 +22,9 @@ Key design points
 
 import numpy as np
 
+from .behave_units import SpeedUnits, speed_from_base
 from .fuel_models_array import _fuel_model_indices
+from .surface import calculate_flame_length, calculate_twenty_foot_wind_speed
 
 # ---------------------------------------------------------------------------
 # FM10 physical constants - pre-computed from the fuel model, used to
@@ -82,11 +84,27 @@ def assign_final_crown_fire_behavior(
         crown_fli: float | np.ndarray,
         crown_fl: float | np.ndarray,
 ) -> dict:
-    """Step 12 - assign final head fire behavior based on fire type."""
+    """Select the final head fire behavior for each fire type.
+
+    :param is_surface_fire: Mask for Surface and Conditional Crown Fire.
+    :param is_passive_crown: Mask for Torching.
+    :param surface_ros: Surface spread rate in ft/min.
+    :param surface_hpua: Surface heat per unit area in BTU/ft^2.
+    :param surface_fli: Surface fireline intensity in BTU/ft/s.
+    :param passive_ros: Passive crown spread rate in ft/min.
+    :param passive_hpua: Passive crown heat per unit area in BTU/ft^2.
+    :param passive_fli: Passive crown fireline intensity in BTU/ft/s.
+    :param passive_fl: Passive crown flame length in feet.
+    :param crown_ros: Active crown spread rate in ft/min.
+    :param crown_hpua: Active crown heat per unit area in BTU/ft^2.
+    :param crown_fli: Active crown fireline intensity in BTU/ft/s.
+    :param crown_fl: Active crown flame length in feet.
+    :return: Selected spread rate, heat per unit area, intensity, and flame length.
+    """
     final_ros = np.where(is_surface_fire, surface_ros, np.where(is_passive_crown, passive_ros, crown_ros))
     final_hpua = np.where(is_surface_fire, surface_hpua, np.where(is_passive_crown, passive_hpua, crown_hpua))
     final_fli = np.where(is_surface_fire, surface_fli, np.where(is_passive_crown, passive_fli, crown_fli))
-    surface_fl = np.where(surface_fli > 0.0, 0.2 * surface_fli ** (2.0 / 3.0), 0.0)
+    surface_fl = calculate_flame_length(surface_fli)
     final_fl = np.where(is_surface_fire, surface_fl, np.where(is_passive_crown, passive_fl, crown_fl))
     return {
         'final_spread_rate': final_ros,
@@ -198,11 +216,24 @@ def calculate_crown_surface_fire(
         aspect: float | np.ndarray,
         canopy_height: float | np.ndarray,
 ) -> dict:
-    """
-    Step 2 - run the crown fuel spread calculation using FM10, WAF=0.4.
+    """Run crown spread with FM10 and compute its length-to-width ratio.
 
-    Returns FM10 particle/intermediate arrays, crown surface results, active
-    crown ROS, and crown length-to-width ratio.
+    :param lut: Fuel property lookup arrays.
+    :param S: Spatial shape.
+    :param m1h: One-hour dead fuel moisture fraction.
+    :param m10h: Ten-hour dead fuel moisture fraction.
+    :param m100h: Hundred-hour dead fuel moisture fraction.
+    :param mlh: Live herbaceous fuel moisture fraction.
+    :param mlw: Live woody fuel moisture fraction.
+    :param wind_speed: Open wind speed at 20 ft, in ``wind_speed_units``.
+    :param wind_speed_units: SpeedUnitsEnum value.
+    :param wind_direction: Wind direction in degrees.
+    :param wind_orientation_mode: Reference direction for the wind angle.
+    :param slope_deg: Slope in degrees.
+    :param aspect: Downslope bearing in degrees.
+    :param canopy_height: Canopy height in feet.
+    :return: FM10 intermediates, crown surface results, active crown spread
+        rate, and crown length-to-width ratio.
     """
     (
         build_particle_arrays,
@@ -242,8 +273,13 @@ def calculate_crown_surface_fire(
     )
 
     crown_ros = 3.34 * crown_surface['spread_rate']
-    crown_ews_mph = crown_surface['effective_wind_speed']
-    crown_lwr = np.where(crown_ews_mph > 1e-7, 1.0 + 0.125 * crown_ews_mph, 1.0)
+    # Rothermel (1991), Equation 10 uses open wind at 20 ft.
+    twenty_foot_wind_mph = speed_from_base(
+        calculate_twenty_foot_wind_speed(wind_speed, wind_speed_units),
+        SpeedUnits.SpeedUnitsEnum.MilesPerHour,
+    )
+    twenty_foot_wind_mph = np.broadcast_to(twenty_foot_wind_mph, crown_ros.shape)
+    crown_lwr = np.where(twenty_foot_wind_mph > 1e-7, 1.0 + 0.125 * twenty_foot_wind_mph, 1.0)
 
     return {
         'p_crown': p_crown,

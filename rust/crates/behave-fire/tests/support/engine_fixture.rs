@@ -30,6 +30,36 @@ pub fn crown_cell(values: &Value, index: usize) -> CrownCell {
     cell
 }
 
+/// Read a legacy Crown expectation, applying the two corrected equations to frozen evidence.
+pub fn crown_expected(inputs: &Value, output: &Value, field: &str, index: usize) -> f64 {
+    if field == "crown_length_to_width_ratio" {
+        // The legacy Crown fixtures supply twenty-foot wind in mph or km/h.
+        assert!(inputs["wind_height_mode"].is_null());
+        let feet_per_minute = match number(&inputs["wind_speed_units"], index) as i32 {
+            5 => 88.0,
+            6 => 54.680665,
+            unit => panic!("unexpected legacy Crown wind unit {unit}"),
+        } * number(&inputs["wind_speed"], index);
+        let mph = feet_per_minute * 0.01136363636;
+        return if mph > 1e-7 { 1.0 + 0.125 * mph } else { 1.0 };
+    }
+    if field == "final_flame_length" {
+        let surface = match inputs.get("is_surface_fire") {
+            Some(flag) => number(flag, index) != 0.0,
+            None => matches!(number(&output["fire_type"], index) as i32, 0 | 2),
+        };
+        if surface {
+            let intensity = number(&output["final_fireline_intensity"], index);
+            return if intensity >= 1e-7 {
+                0.45 * intensity.powf(0.46)
+            } else {
+                0.0
+            };
+        }
+    }
+    number(&output[field], index)
+}
+
 pub fn height(value: &str) -> WindHeight {
     let value = value.to_ascii_lowercase();
     if value.contains("10") || value.contains("ten") {

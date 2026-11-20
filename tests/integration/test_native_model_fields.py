@@ -40,6 +40,18 @@ def test_critical_density_group_propagates_missing_without_dummy_fuel_inputs():
     assert values[2] > 0.
 
 
+def test_crown_geometry_reads_only_twenty_foot_wind():
+    fields = ['crown_length_to_width_ratio']
+    physical = {'wind_speed': np.array([0., 2200., np.nan])}
+    speed_units = {'wind_speed_units': np.array([0], dtype=np.int64)}
+    model = native.model_fields('crown', fields, physical, {},
+        build_fuel_lookup_arrays(FuelModels()), [3], {})
+    component = native.component_batch('crown.calculate_crown_surface_fire',
+        physical, speed_units, {}, [3], outputs=fields)
+    for result in (model, component):
+        np.testing.assert_allclose(result[fields[0]], [1., 4.125, np.nan])
+
+
 def test_every_scoped_crown_output_matches_complete_f64_model_in_all_regimes():
     physical = {name: np.full(4, value) for name, value in dict(m1h=.06,m10h=.07,m100h=.08,
         mlh=.6,mlw=.9,wind_speed=0.,wind_direction=35.,slope=12.,aspect=0.,
@@ -84,7 +96,8 @@ def test_spread_group_uses_only_real_weather_and_moisture_columns():
     actual = native.model_fields('crown', ['crown_fire_spread_rate','crown_length_to_width_ratio'],
         physical, {}, build_fuel_lookup_arrays(FuelModels()), [2], {})
     assert np.all(np.isfinite(actual['crown_fire_spread_rate']))
-    assert np.all(actual['crown_length_to_width_ratio'] >= 1.)
+    # The supplied 20-ft wind is 1 mph in both cells, independently of terrain or WAF.
+    np.testing.assert_allclose(actual['crown_length_to_width_ratio'], [1.125, 1.125])
 
 
 def test_surface_fuel_group_never_reads_unbound_weather_or_canopy():

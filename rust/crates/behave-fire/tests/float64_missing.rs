@@ -189,7 +189,10 @@ fn supplied_fm10_stage_overrides_bypass_unavailable_upstream_heat_sink() {
         output.crown_fire_spread_rate[0].is_finite(),
         "override closes the spread dependency chain"
     );
-    assert!(output.crown_length_to_width_ratio[0].is_finite());
+    assert!(
+        output.crown_length_to_width_ratio[0].is_nan(),
+        "midflame overrides cannot supply the missing open wind for crown geometry"
+    );
     assert!(
         output.crowning_surface_fire_spread_rate[0].is_nan(),
         "backsolve still needs unavailable fuelbed sink"

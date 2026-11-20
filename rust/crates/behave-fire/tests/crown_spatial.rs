@@ -1,8 +1,59 @@
-//! Crown spread has no canopy-geometry or supplied-Surface dependency.
-use behave_fire::engine::{CrownCell, CrownPlan, CrownSpatial, PreparedFuels, SurfaceOptions};
+//! Crown spatial and selected final outputs depend on their physical inputs.
+use behave_fire::crown::assign_final_crown_fire_behavior;
+use behave_fire::engine::{
+    CrownCell, CrownPlan, CrownSpatial, PreparedFuels, SurfaceOptions, WindHeight,
+};
 use behave_fire::FuelModels;
 
+// ---- crown final flame ----
+#[test]
+fn crown_final_surface_flame_uses_byram_cutoff_and_selected_intensity() {
+    for (intensity, expected) in [
+        (1.0, 0.45),
+        (0.5e-7, 0.0),
+        (1e-7, 0.45 * 1e-7_f64.powf(0.46)),
+        (f64::NAN, f64::NAN),
+    ] {
+        let result = assign_final_crown_fire_behavior(
+            true, false, 2., 3., intensity, 4., 5., 6., 7., 8., 9., 10., 11.,
+        );
+        assert!(
+            result.final_flame_length == expected
+                || (expected.is_nan() && result.final_flame_length.is_nan()),
+            "{intensity}: {} != {expected}",
+            result.final_flame_length
+        );
+    }
+}
+
 // ---- spatial spread inputs ----
+#[test]
+fn crown_ratio_uses_twenty_foot_wind_independent_of_spread() {
+    let fuels = PreparedFuels::from_registry(&FuelModels::default());
+    for (height, speed, expected) in [
+        (WindHeight::TwentyFoot, 1320., 2.8749999994),
+        (WindHeight::TenMetre, 1518., 2.8749999994),
+        (WindHeight::TwentyFoot, 0., 1.),
+        (WindHeight::TwentyFoot, f64::NAN, f64::NAN),
+    ] {
+        let input = CrownCell {
+            wind_speed: speed,
+            slope: f64::NAN,
+            ..Default::default()
+        };
+        let plan = CrownPlan::new(SurfaceOptions {
+            wind_height: height,
+            ..Default::default()
+        });
+        let result = plan.prepare_surface(&input, fuels.for_grid(10), Default::default());
+        let actual = result.crown_length_to_width_ratio;
+        assert!(
+            (actual - expected).abs() < 1e-14 || (expected.is_nan() && actual.is_nan()),
+            "{height:?} {speed}: {actual} != {expected}"
+        );
+    }
+}
+
 #[test]
 fn spatial_spread_uses_only_real_weather_and_moisture_inputs() {
     let fuels = PreparedFuels::from_registry(&FuelModels::default());

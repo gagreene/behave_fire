@@ -8,14 +8,7 @@ impl GridSession {
         Ok(match field {
             Field::CrownFireSpreadRate => 3.34 * p(Field::SpreadRate)?,
             Field::CrownLengthToWidthRatio => {
-                let v = p(Field::EffectiveWindSpeed)?;
-                if v.is_nan() {
-                    f64::NAN
-                } else if v > 1e-7 {
-                    1. + 0.125 * v
-                } else {
-                    1.
-                }
+                c::calculate_crown_length_to_width_ratio(p(Field::Wind20)?)
             }
             Field::CrownCriticalSurfaceFireLineIntensity => {
                 c::calculate_critical_surface_fireline_intensity(
@@ -131,7 +124,7 @@ impl GridSession {
                 };
                 match code {
                     0 | 2 if field == Field::FinalFlameLength => {
-                        c::available::flame_length(p(sources.0)?)
+                        crate::surface::calculate_flame_length(p(sources.0)?)
                     }
                     0 | 2 => p(sources.0)?,
                     1 => p(sources.1)?,

@@ -18,15 +18,16 @@ def _ratio(numerator, denominator):
                     np.where(denominator > 1e-7, numerator / denominator, 0.))
 
 
-def apply_crown_rules(outputs, supplied, *, density=None):
+def apply_crown_rules(outputs, supplied, *, wind_speed, density=None):
     """Apply reviewed missing thresholds and selected-branch rules to Python science.
 
     :param outputs: Complete Python Crown output mapping on widened inputs.
     :param supplied: Actual widened and NaN-filled Surface fields.
+    :param wind_speed: Widened open wind input, in the caller's wind units.
     :param density: Optional actual canopy density to distinguish missing from finite zero.
     :return: Independent output arrays using float64 physical values and int32 codes.
     """
-    from behave_fire.components import crown
+    from behave_fire.components import crown, surface
 
     result = {name: np.array(value, dtype=np.int32 if name == 'fire_type' else np.float64, copy=True)
               for name, value in outputs.items()}
@@ -35,9 +36,8 @@ def apply_crown_rules(outputs, supplied, *, density=None):
     if density is not None:
         active_critical = np.where(np.isnan(density), np.nan, active_critical)
     result['crown_critical_fire_spread_rate'] = active_critical
-    # An unavailable spatial rate has no defined effective wind or crown shape.
-    result['crown_length_to_width_ratio'] = np.where(np.isnan(result['crown_fire_spread_rate']),
-        np.nan, result['crown_length_to_width_ratio'])
+    result['crown_length_to_width_ratio'] = np.where(
+        np.isnan(wind_speed), np.nan, result['crown_length_to_width_ratio'])
     transition = _ratio(supplied['fireline_intensity'], critical)
     active = _ratio(result['crown_fire_spread_rate'], active_critical)
     result['crown_fire_transition_ratio'] = transition
@@ -60,10 +60,9 @@ def apply_crown_rules(outputs, supplied, *, density=None):
     result.update(passive)
     result['crown_flame_length'] = np.where(np.isnan(result['crown_fire_line_intensity']),
                                            np.nan, result['crown_flame_length'])
-    with np.errstate(invalid='ignore'):
-        surface_flame = np.where(np.isnan(supplied['fireline_intensity']), np.nan,
-            np.where(supplied['fireline_intensity'] > 0., .2 * supplied['fireline_intensity'] ** (2. / 3.), 0.))
-    for name, surface, passive_value, active_value in [
+    fli = supplied['fireline_intensity']
+    surface_flame = np.where(np.isnan(fli), np.nan, surface.calculate_flame_length(fli))
+    for name, surface_value, passive_value, active_value in [
         ('final_spread_rate', supplied['spread_rate'], result['passive_crown_fire_spread_rate'], result[
             'crown_fire_spread_rate']),
         ('final_heat_per_unit_area', supplied['heat_per_unit_area'], result['passive_crown_fire_heat_per_unit_area'],
@@ -72,7 +71,7 @@ def apply_crown_rules(outputs, supplied, *, density=None):
             result['crown_fire_line_intensity']),
         ('final_flame_length', surface_flame, result['passive_crown_fire_flame_length'], result['crown_flame_length']),
     ]:
-        result[name] = np.where(code < 0, np.nan, np.where(np.isin(code, [0, 2]), surface,
+        result[name] = np.where(code < 0, np.nan, np.where(np.isin(code, [0, 2]), surface_value,
             np.where(code == 1, passive_value, active_value)))
     return result
 
@@ -89,6 +88,7 @@ def model_reference(function, arguments):
         result = function(**arguments)
         if 'surface_results' in arguments:
             result = apply_crown_rules(result, arguments['surface_results'],
+                                       wind_speed=arguments['wind_speed'],
                                        density=arguments.get('canopy_bulk_density', 0.))
     return result
 
