@@ -70,7 +70,7 @@ def test_cpp_reference_exclusions_are_explicit_in_standalone_crate():
 
 def test_crate_cpp_fixture_copies_match_canonical_bytes():
     exporter = _load("export_cpp_crate")
-    for dataset in ("surface", "surface_custom", "fire_size", "ignite"):
+    for dataset in ("surface", "surface_custom", "fire_size", "ignite", "mortality"):
         exporter.export(
             ROOT / "tests/data/cpp_reference",
             ROOT / "rust/crates/behave-fire/tests/data/cpp_reference" / dataset,

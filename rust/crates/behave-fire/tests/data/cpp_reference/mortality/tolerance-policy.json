@@ -1,0 +1,8 @@
+{
+  "approved": false,
+  "fields": {
+    "scorch_height_ft": {
+      "kind": "exact_binary64"
+    }
+  }
+}

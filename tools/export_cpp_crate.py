@@ -25,15 +25,15 @@ def export(source, destination, check=False, dataset="surface"):
     :param destination: Crate-local dataset directory. Custom Surface requires the policy already exported
         in the sibling surface directory.
     :param check: Check existing copies without changing files when True.
-    :param dataset: Surface, custom Surface, standalone FireSize, or standalone Ignite observations.
+    :param dataset: Surface, custom Surface, FireSize, Ignite, or Mortality observations.
     :return: Sorted payload and manifest names; raises for missing inputs or drift.
     """
-    if dataset not in ("surface", "surface_custom", "fire_size", "ignite"):
+    if dataset not in ("surface", "surface_custom", "fire_size", "ignite", "mortality"):
         raise ValueError("Unknown C++ dataset")
     paths = {name: relative.replace("surface/", dataset + "/") for name, relative in INPUTS.items()}
     payloads = {name: (source / relative).read_bytes() for name, relative in paths.items()}
     shared_policy = payloads.pop("tolerance-policy.json") if dataset == "surface_custom" else None
-    if dataset in ("fire_size", "ignite"):
+    if dataset in ("fire_size", "ignite", "mortality"):
         policy = json.loads(payloads["tolerance-policy.json"])[dataset]
         payloads["tolerance-policy.json"] = (json.dumps(policy, indent=2, sort_keys=True) + "\n").encode("utf-8")
     canonical = json.loads((source / dataset / "manifest.json").read_text(encoding="utf-8"))
@@ -73,7 +73,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--check", action="store_true")
     arguments = parser.parse_args()
-    for dataset in ("surface", "surface_custom", "fire_size", "ignite"):
+    for dataset in ("surface", "surface_custom", "fire_size", "ignite", "mortality"):
         names = export(
             ROOT / "tests/data/cpp_reference",
             ROOT / "rust/crates/behave-fire/tests/data/cpp_reference" / dataset,

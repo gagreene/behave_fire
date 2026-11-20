@@ -51,8 +51,8 @@ def test_inventory_accepts_qualified_scientific_coverage():
     assert summary["public_functions"] == 1394
     assert summary["scientific_candidates"] == 266
     assert summary["state_lifecycle_methods"] == 508
-    assert summary["tested_functions"] == 12
-    assert summary['executable_scientific_bundles'] == 3
+    assert summary["tested_functions"] == 13
+    assert summary['executable_scientific_bundles'] == 4
 
 
 def test_inventory_binds_only_direct_fire_size_witnesses():
@@ -98,7 +98,28 @@ def test_inventory_binds_only_direct_ignite_witnesses():
         assert [target['target'] for target in row['rust_targets']] == [f'behave_fire::ignite::{method}']
 
 
-@pytest.mark.parametrize('dataset', ['fire_size', 'ignite', 'surface'])
+def test_inventory_binds_only_the_standalone_mortality_witness():
+    inventory = _inventory()
+    tested = [row for row in inventory['public_functions']
+              if row['function_status'] == 'tested' and (row['owner'] == 'Mortality' or row['dataset'] == 'mortality')]
+    route = next(row for row in inventory['routes'] if row['route_id'] == 'mortality_scorch')
+    full = next(row for row in inventory['routes'] if row['route_id'] == 'mortality_full')
+    assert route['executable_now'] and route['dataset'] == 'mortality'
+    assert not full['executable_now'] and full['dataset'] is None and not full['execution_evidence']
+    assert len(tested) == 1
+    row = tested[0]
+    assert row['qualified_name'] == 'Mortality::calculateScorchHeight'
+    assert route['method_ids'] == route['assigned_method_ids'] == [row['id']]
+    assert row['route_ids'] == ['mortality_scorch']
+    assert row['dataset'] == 'mortality' and row['execution_evidence'] == route['execution_evidence']
+    python_witnesses = [target['target'] for target in row['python_targets']
+                        if target['relation'] == 'observed_direct_callable']
+    assert python_witnesses == ['behave_fire.components.mortality.calculate_scorch_height']
+    assert [target['target'] for target in row['rust_targets'] if target['relation'] == 'observed_direct_callable'] == [
+        'behave_fire::mortality::calculate_scorch_height']
+
+
+@pytest.mark.parametrize('dataset', ['fire_size', 'ignite', 'mortality', 'surface'])
 @pytest.mark.parametrize('artifact', ['cases.jsonl', 'manifest.json', 'results.jsonl'])
 @pytest.mark.parametrize('mutation', ['missing', 'modified'])
 def test_inventory_cli_uses_the_selected_snapshots_execution_artifacts(tmp_path, dataset, artifact, mutation):
@@ -137,7 +158,8 @@ else:
     result = subprocess.run([sys.executable, '-I', '-B', '-c', script, str(ROOT)], capture_output=True, text=True)
     assert result.returncode == 0, result.stderr
     policy = json.loads((ROOT / 'tests/data/cpp_reference/tolerance-policy.json').read_text())
-    approvals_active = policy['approved'] and policy['fire_size']['approved'] and policy['ignite']['approved']
+    approvals_active = policy['approved'] and all(
+        policy[key]['approved'] for key in ('fire_size', 'ignite', 'mortality'))
     assert result.stdout.strip() == ('READY' if approvals_active else 'QUALIFICATION_REJECTED')
 
 
@@ -204,12 +226,12 @@ def test_inventory_requires_per_function_witnesses_for_an_executable_scientific_
         _validator()(inventory, reference_root=path.parent)
 
 
-@pytest.mark.parametrize('inactive', ['surface', 'fire_size', 'ignite'])
+@pytest.mark.parametrize('inactive', ['surface', 'fire_size', 'ignite', 'mortality'])
 def test_inventory_requires_qualified_policy_for_readiness(tmp_path, inactive):
     path = _snapshot_inventory(tmp_path)
     inventory = json.loads(path.read_text(encoding='utf-8'))
-    policy = {'approved': inactive != 'surface', 'fire_size': {'approved': inactive != 'fire_size'},
-              'ignite': {'approved': inactive != 'ignite'}}
+    policy = {name: {'approved': inactive != name} for name in ('fire_size', 'ignite', 'mortality')}
+    policy['approved'] = inactive != 'surface'
     (path.parent / 'tolerance-policy.json').write_text(json.dumps(policy), encoding='utf-8')
     _validator()(inventory, reference_root=path.parent)
     with pytest.raises(ValueError, match='Scientific qualification policy is inactive'):

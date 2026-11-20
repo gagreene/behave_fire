@@ -135,7 +135,7 @@ def validate_inventory(inventory, require_ready=False, reference_root=None):
     """Validate hybrid coverage and distinguish preparation from qualified science.
 
     :param inventory: Committed source-derived snapshot, read without a live checkout.
-    :param require_ready: Require active Surface, FireSize, and Ignite policies and a passing qualification proof.
+    :param require_ready: Require active Surface, FireSize, Ignite, and Mortality policies and a passing proof.
     :param reference_root: Explicit artifact directory; defaults to this tool's checkout for direct callers.
     :return: Counts of structurally valid declarations, bundles, and tested functions.
     """
@@ -233,8 +233,8 @@ def validate_inventory(inventory, require_ready=False, reference_root=None):
             raise ValueError('Complete qualification requires a canonical reference directory')
         policy_path = reference_root / 'tolerance-policy.json'
         policy = json.loads(policy_path.read_text(encoding='utf-8')) if policy_path.is_file() else {}
-        _require_fields(policy, {'approved', 'fire_size', 'ignite'}, 'scientific qualification policy')
-        policies = (policy, policy['fire_size'], policy['ignite'])
+        _require_fields(policy, {'approved', 'fire_size', 'ignite', 'mortality'}, 'scientific qualification policy')
+        policies = (policy, policy['fire_size'], policy['ignite'], policy['mortality'])
         if any(not isinstance(entry, dict) or entry.get('approved') is not True for entry in policies):
             raise ValueError('Scientific qualification policy is inactive')
         # Use the explicit sibling script, independent of caller imports and module caches.

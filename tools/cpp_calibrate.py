@@ -212,6 +212,7 @@ def activate(root, paths, reason):
         raise ValueError("FireSize evidence does not meet the approved exact comparison policy")
     record["fire_size"] = {key: value for key, value in geometry.items() if key != "values"}
     record["ignite"] = ignite.exact_evidence(root, paths, record)
+    record["mortality"] = mortality.exact_evidence(root, paths, record)
     record["activation_reason"] = reason
     policy_path = root / "tests/data/cpp_reference/tolerance-policy.json"
     policy = reference._document(policy_path)
@@ -219,12 +220,14 @@ def activate(root, paths, reason):
     fire_size.validate_policy(root, policy["fire_size"], record)
     policy["ignite"] = dict(approved=True, fields=ignite.EXACT_FIELDS)
     ignite.validate_policy(root, policy["ignite"], record)
+    policy["mortality"] = dict(approved=True, fields=mortality.EXACT_FIELDS)
+    mortality.validate_policy(root, policy["mortality"], record)
     reference._json(root / "tests/data/cpp_reference/calibration/qualification.json", record)
     policy["approved"] = True
     policy["qualification"] = record
     policy["approval_gate"] = "Conditionally owner-approved caps qualified by complete manual CI evidence"
     reference._json(policy_path, policy)
-    for dataset in ("surface", "surface_custom", "fire_size", "ignite"):
+    for dataset in ("surface", "surface_custom", "fire_size", "ignite", "mortality"):
         export(root / "tests/data/cpp_reference", root / "rust/crates/behave-fire/tests/data/cpp_reference" / dataset,
                dataset=dataset)
     reference.sync_hashes(root, reason)

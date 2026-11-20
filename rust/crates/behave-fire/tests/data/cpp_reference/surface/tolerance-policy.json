@@ -14,7 +14,7 @@
       "windows-arm64"
     ]
   },
-  "approval_gate": "Requalify the existing comparisons with the guarded standalone Mortality driver",
+  "approval_gate": "Owner approved exact Mortality comparisons pending complete source qualification",
   "approved": false,
   "conditional_owner_approval": true,
   "documented_unit_source_models": [
@@ -98,7 +98,7 @@
     "approved": false,
     "fields": {
       "scorch_height_ft": {
-        "kind": "measurement_only"
+        "kind": "exact_binary64"
       }
     }
   }

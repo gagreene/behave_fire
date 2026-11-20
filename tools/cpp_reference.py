@@ -199,7 +199,7 @@ def _required_artifacts(root):
         "cpp_reference.py", "cpp_controls.py", "cpp_fire_size.py", "cpp_ignite.py", "cpp_inventory.py",
         "cpp_mortality.py", "cpp_calibrate.py", "export_cpp_crate.py", "check_cpp_driver.py"))
     mandatory.update(f"rust/crates/behave-fire/tests/data/cpp_reference/{dataset}/{name}"
-                     for dataset in ("surface", "surface_custom", "fire_size", "ignite")
+                     for dataset in ("surface", "surface_custom", "fire_size", "ignite", "mortality")
                      for name in ("cases.jsonl", "results.jsonl", "manifest.json", "tolerance-policy.json")
                      if dataset != "surface_custom" or name != "tolerance-policy.json")
     mandatory.update(p.relative_to(root).as_posix() for p in base.rglob("*") if p.is_file() and p.name != "hashes.json")
@@ -605,23 +605,24 @@ def load_reference(root=ROOT, *, measurement=False):
     from cpp_ignite import EXACT_FIELDS as IGNITE_FIELDS
     from cpp_ignite import load_observations as load_ignite_observations
     from cpp_ignite import validate_policy as validate_ignite_policy
-    from cpp_mortality import MEASUREMENT_POLICY
+    from cpp_mortality import EXACT_FIELDS as MORTALITY_FIELDS
     from cpp_mortality import load_observations as load_mortality_observations
+    from cpp_mortality import validate_policy as validate_mortality_policy
 
     controls = load(root, cases)
+    qualification = policy.get("qualification") if policy["approved"] else None
     load_observations(root)
-    validate_policy(root, policy.get("fire_size"), policy.get("qualification") if policy["approved"] else None)
+    validate_policy(root, policy.get("fire_size"), qualification)
     load_ignite_observations(root)
-    validate_ignite_policy(root, policy.get("ignite"), policy.get("qualification") if policy["approved"] else None)
+    validate_ignite_policy(root, policy.get("ignite"), qualification)
     load_mortality_observations(root)
-    mortality = policy.get("mortality")
-    if mortality != MEASUREMENT_POLICY or mortality["approved"] is not False:
-        raise ValueError("Mortality policy must remain measurement-only")
+    validate_mortality_policy(root, policy.get("mortality"), qualification)
     _prepared_build(root)
     budget = check_fixture_budget(root)
     if measurement:
         policy = dict(policy, approved=False, fire_size=dict(approved=False, fields=EXACT_FIELDS),
-                      ignite=dict(approved=False, fields=IGNITE_FIELDS))
+                      ignite=dict(approved=False, fields=IGNITE_FIELDS),
+                      mortality=dict(approved=False, fields=MORTALITY_FIELDS))
     return dict(cases=cases, results=results, manifest=manifest, policy=policy, controls=controls, budget=budget)
 
 

@@ -1,7 +1,9 @@
 """Verify and measure the six approved standalone Mortality scorch-height cases."""
 
+import hashlib
 import json
 import math
+import struct
 from importlib import import_module
 from pathlib import Path
 
@@ -18,7 +20,7 @@ APPROVED_CASES = (
 DATASET = Path("tests/data/cpp_reference/mortality")
 FIELDS = ("scorch_height_ft",)
 FILES = ("cases.jsonl", "manifest.json", "results.jsonl", "schema.json")
-MEASUREMENT_POLICY = dict(approved=False, fields={field: {"kind": "measurement_only"} for field in FIELDS})
+EXACT_FIELDS = {field: {"kind": "exact_binary64"} for field in FIELDS}
 SOURCES = tuple(f"{name}.{extension}" for name in (
     "behaveUnits", "canopy_coefficient_table", "mortality", "mortality_equation_table",
     "mortality_inputs", "species_master_table",
@@ -45,6 +47,78 @@ def artifacts(root):
     :return: Dataset file names mapped to their SHA256 digests.
     """
     return {name: reference._digest(Path(root) / DATASET / name) for name in FILES}
+
+
+def assert_matches_cpp(actual, expected, policy):
+    """Compare one finite scorch height as exact binary64, including signed zero.
+
+    :param actual: Observed standalone scorch height from a selected port.
+    :param expected: Pinned C++ result in feet.
+    :param policy: Validated Mortality comparison policy.
+    :return: None. Raises without qualification or on a mismatch.
+    """
+    if policy.get("approved") is not True:
+        raise reference.UnapprovedCppPolicy("Mortality comparisons require complete qualification")
+    if policy.get("fields") != EXACT_FIELDS:
+        raise ValueError("Unexpected Mortality comparison fields")
+    _validate_output(actual)
+    _validate_output(expected)
+    field = FIELDS[0]
+    if struct.pack("!d", actual[field]) != struct.pack("!d", expected[field]):
+        raise AssertionError(f"{field}: port={actual[field]!r}, C++={expected[field]!r}")
+
+
+def exact_evidence(root, paths, record):
+    """Verify all 96 comparisons from the source-qualified reports.
+
+    :param root: Checkout with the approved raw dataset.
+    :param paths: The original compiler and platform reports.
+    :param record: Source qualification binding the exact report digests.
+    :return: Compact receipt for the shared qualification.
+    """
+    expected = load_observations(root)
+    signature = artifacts(root)
+    controls = dict(negative_cases=8, negative_upstream_entries=0, upstream_trap_exit=86,
+                    output_trap_exit=87, duplicate_ids_rejected=True)
+    pending = {name: report["sha256"] for name, report in record["reports"].items()}
+    policy = dict(approved=True, fields=EXACT_FIELDS)
+    count = 0
+    for path in paths:
+        raw = Path(path).read_bytes()
+        report = json.loads(raw, object_pairs_hook=reference._unique_object,
+                            parse_constant=reference._reject_constant, parse_int=reference._signed_int)
+        kind = report["kind"]
+        if kind not in ("cpp", "ports"):
+            raise ValueError("Unknown Mortality report kind")
+        name = "cpp-" + report["compiler"]["id"] if kind == "cpp" else "ports-" + report["platform_key"]
+        if pending.pop(name, None) != hashlib.sha256(raw).hexdigest():
+            raise ValueError("Mortality report differs from the source-qualified evidence")
+        measurement = report["mortality"]
+        if set(measurement) != {"artifacts", "observations"} or measurement["artifacts"] != signature:
+            raise ValueError("Mortality report used a different dataset")
+        if kind == "cpp":
+            actual = report["protocol"]["mortality"]
+            if json.dumps(actual, sort_keys=True) != json.dumps(controls, sort_keys=True):
+                raise ValueError("Missing Mortality entry-guard evidence")
+            rows = measurement["observations"]
+            validate_cpp_rows(root, rows)
+            streams = (rows,)
+        else:
+            backends = measurement["observations"]
+            if set(backends) != {"python", "rust"} or any(
+                set(row) != {"id", "output"} for rows in backends.values() for row in rows
+            ):
+                raise ValueError("Incomplete Mortality backend observations")
+            streams = backends.values()
+        for rows in streams:
+            if [row["id"] for row in rows] != [row["id"] for row in expected]:
+                raise ValueError("Incomplete Mortality report case identities")
+            for row, original in zip(rows, expected, strict=True):
+                assert_matches_cpp(row["output"], original["output"], policy)
+                count += 1
+    if pending or count != 96:
+        raise ValueError("Incomplete exact Mortality evidence")
+    return dict(artifacts=signature, comparisons=count, nonmatching=0)
 
 
 def load_cases(root):
@@ -137,3 +211,21 @@ def validate_cpp_rows(root, rows):
                 or any(type(row[key]) is not int or row[key] != 1 for key in ("upstream_entries", "output_entries"))):
             raise ValueError("Mortality row lacks one complete output action")
         _validate_output(row["output"])
+
+
+def validate_policy(root, policy, qualification):
+    """Require the approved rule and an exact source-qualified receipt.
+
+    :param root: Reference checkout root.
+    :param policy: Mortality section of the canonical policy.
+    :param qualification: Shared qualification already verified by the caller.
+    :return: None. Raises on missing, malformed, or stale evidence.
+    """
+    if (not isinstance(policy, dict) or set(policy) != {"approved", "fields"}
+            or type(policy["approved"]) is not bool or policy["fields"] != EXACT_FIELDS):
+        raise ValueError("Incomplete exact Mortality comparison policy")
+    if policy["approved"]:
+        actual = qualification.get("mortality") if isinstance(qualification, dict) else None
+        expected = dict(artifacts=artifacts(root), comparisons=96, nonmatching=0)
+        if json.dumps(actual, sort_keys=True, allow_nan=False) != json.dumps(expected, sort_keys=True, allow_nan=False):
+            raise ValueError("Incomplete or stale Mortality qualification")
