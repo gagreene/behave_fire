@@ -1,5 +1,5 @@
 {
-  "activation_reason": "Requalify prior comparison rules and record SlopeTool measurements",
+  "activation_reason": "Requalify prior comparison rules and record fine dead fuel moisture measurements",
   "artifacts": {
     "tests/data/cpp_reference/surface/cases.jsonl": "266d08d8b82d65d950461c73e70b44c228ad7b54fbe99eb1d14ed8af6add66da",
     "tests/data/cpp_reference/surface/results.jsonl": "ae006838d93bbb9533df74340085110c479315cb8238a8ce488a68fe5e9e1b71",
@@ -7,7 +7,7 @@
     "tests/data/cpp_reference/surface_custom/results.jsonl": "04e96268466338364a350d53ac05b639f1a7758c78911aaee97da389c0f779a2"
   },
   "calibration_complete": true,
-  "ci_run_url": "https://github.com/gagreene/behave_fire/actions/runs/45277410081",
+  "ci_run_url": "https://github.com/gagreene/behave_fire/actions/runs/45286444877",
   "fields": {
     "fireline_intensity_btu_ft_s": {
       "atol": 1e-12,
@@ -35,6 +35,19 @@
       "rtol": 1e-12
     }
   },
+  "fine_dead_fuel_moisture": {
+    "artifacts": {
+      "cases.jsonl": "e6d6d221cda5b27747f1b33a59cd2211160f8e526a92e4ac28632ae2d31589b5",
+      "manifest.json": "f7a5b361c5cc7e21bb652e674bbec5904e19905401d761cfd98ee5ca5981c582",
+      "results.jsonl": "0731751c000b92bdda710967d5b6a3dacd2f493cb015976ea1174e051fe2518e",
+      "schema.json": "997b29c26d37ea615384ee75397682db1ce990b9e8078d301b51f6aa3faeef60"
+    },
+    "comparisons": 48,
+    "max_abs": {
+      "moisture_fraction": 0.0
+    },
+    "nonmatching": 0
+  },
   "fire_size": {
     "artifacts": {
       "cases.jsonl": "b7eaafc8c07ad95c79dcb2cc553a659bf3106b1a215d08febb9f0e2c0ac2d755",
@@ -42,7 +55,7 @@
       "results.jsonl": "3c8a90c2d0cb8af549b5d555938e439ed5867b5d2fbb66fdad978aa5c056d3df",
       "schema.json": "bcefacdfef527819dd578abc68c46e9c05518c143d6f013f170a06d6be4df340"
     },
-    "ci_run_url": "https://github.com/gagreene/behave_fire/actions/runs/45277410081",
+    "ci_run_url": "https://github.com/gagreene/behave_fire/actions/runs/45286444877",
     "comparisons": 144,
     "maxima": {
       "area_ft2": {
@@ -64,7 +77,7 @@
         "ulp": 0
       }
     },
-    "source_commit": "2e5079b122469a0879ae77701d7b57255155efd5"
+    "source_commit": "f0908802414c984190e87c56e737e7d9f5bad651"
   },
   "ignite": {
     "artifacts": {
@@ -87,13 +100,13 @@
     "nonmatching": 0
   },
   "overlay_sha256": {
-    "CMakeLists.txt": "f03f6926afbc994eea25aafc44327e1544d9e35bfa7b3974b362770231653c28",
-    "driver.cpp": "08cd6c0aa5912cef25d748cfb3fc35e003f8922723e75ed92692c88710cfe988",
+    "CMakeLists.txt": "6e034192b662e9fc24ec63b54505e032d32784a6cc10222d72bdaab8686ff8b5",
+    "driver.cpp": "8eaea63d3fccfe7da8b2749446d91e6a169b86a303e192a77b8b2bb7335a88d5",
     "probe.cpp": "48338485a0b6f3fd64d0b3542a56c996e043d5e77e9887f0189101c1065df015"
   },
   "reports": {
     "cpp-GNU": {
-      "sha256": "72710d3486dde328a2f0aa80837d067f3b4dd4c93b0845a786b3df53d4dc1603",
+      "sha256": "8e7794fc1d638624893c0d6b6f5ea6fbc97bf65b7ce23ca37ed3290857cb848c",
       "summary": {
         "available": 722,
         "cases": 773,
@@ -102,7 +115,7 @@
       }
     },
     "cpp-MSVC": {
-      "sha256": "c064c5029d33c8b4ed4d0de301b55f7cf0be7ea4c1c5f743ab837945471ad9cd",
+      "sha256": "55c2237aa1982cef73fce8f783ec852e6c6f6f786673730ceb11273b48164611",
       "summary": {
         "available": 722,
         "cases": 773,
@@ -111,7 +124,7 @@
       }
     },
     "ports-linux-aarch64": {
-      "sha256": "0528dd6cd34c27fe8728d4b298f070f19b9a65252552ca7b78264e9c97d97327",
+      "sha256": "26825a421518065bb001523098dd5f563fbd6dd27fda4e3664f4d8a859ef7724",
       "summary": {
         "cases_per_backend": 583,
         "fields_per_backend": 2915,
@@ -119,7 +132,7 @@
       }
     },
     "ports-linux-musl-x86_64": {
-      "sha256": "4cd3926eea17882bd7da6b5d9e81b4fbeba5276767c2693036c31159ca599ef1",
+      "sha256": "5b5178b4eb50ceb10d8fa3acaa1e1c3ff2402dc5c9454d5cbef7995cbe6f7571",
       "summary": {
         "cases_per_backend": 583,
         "fields_per_backend": 2915,
@@ -127,7 +140,7 @@
       }
     },
     "ports-linux-x86_64": {
-      "sha256": "371e604b0a20a11ae3d227b35af89374294ab1bf67149cc32fdd83e33df7c960",
+      "sha256": "eeeccb4bedf7badb3d0749e070f9f87549b9d118cb9fa3a35c38a772beb07ec0",
       "summary": {
         "cases_per_backend": 583,
         "fields_per_backend": 2915,
@@ -135,7 +148,7 @@
       }
     },
     "ports-macos-arm64": {
-      "sha256": "de304967741b4f0ddde88662cb9cd8fdbc664674511e293436dd239e5f8fddfb",
+      "sha256": "8cfed8dc4fe5b649e71305f94579319011a4d211387e6e63ca112aa51f0a7e5f",
       "summary": {
         "cases_per_backend": 583,
         "fields_per_backend": 2915,
@@ -143,7 +156,7 @@
       }
     },
     "ports-macos-x86_64": {
-      "sha256": "74a812d3e1e713cb5a505adebc6ef21074f6d16077a3f7769a1ece31696909e9",
+      "sha256": "41a0ac2d8694c370ae839054df40f70cad043cf1f9529fb49bac074abc2bd868",
       "summary": {
         "cases_per_backend": 583,
         "fields_per_backend": 2915,
@@ -151,7 +164,7 @@
       }
     },
     "ports-windows-arm64": {
-      "sha256": "98204f4926b79c5e3ab3bb97e1dc65a0401eeb9e8df62d2af91d1e2f23b9ac76",
+      "sha256": "f6a0d8c2c177e7e714468c885b3a1c9edde6b5199b8d11c9b2cb05409c345dae",
       "summary": {
         "cases_per_backend": 583,
         "fields_per_backend": 2915,
@@ -159,7 +172,7 @@
       }
     },
     "ports-windows-x86_64": {
-      "sha256": "72c07e27f054f9cfe614cc6b467c733a7cb2dbcc0d00b73ddc51250b5bb7586d",
+      "sha256": "284e5628bfb21c135e2f0ea841cd30914f2744f71924151a467c1926436d330d",
       "summary": {
         "cases_per_backend": 583,
         "fields_per_backend": 2915,
@@ -206,7 +219,7 @@
     },
     "nonmatching": 13
   },
-  "source_commit": "2e5079b122469a0879ae77701d7b57255155efd5",
+  "source_commit": "f0908802414c984190e87c56e737e7d9f5bad651",
   "source_files": {
     ".github/workflows/ci.yml": "5141b47dd44444ae2d3f0310a762588f47c8bf35ae820ccd5c676b6890065e00",
     ".github/workflows/crate-validation.yml": "970147b312a0719d1e63318b2f8b8f200479c5592e5e368cbfd2407893ac1f6d",
@@ -364,7 +377,7 @@
     "tools/benchmark_public_serial_f64.py": "a321b8bcfdbb9b65ec7680d24dbc699426a4bfade4aea98ab100212847cd13e1",
     "tools/build_pure_wheel.py": "435d7fddf3d1d0fdb87af808654b154eb98fc6f627b92993264d4e3828f6a827",
     "tools/check_core_f64.py": "b69ee38251b47d8b3c58db30027b9024c7c7a2d1f7018fc3a8615cff9134b3ee",
-    "tools/check_cpp_driver.py": "b6a613a9d904342ef693262b3790983681bd8b5eb27e9bd6a72d7452dc206a67",
+    "tools/check_cpp_driver.py": "10417adf6773f75b4da90ab5f2712f5698523d9c1b0fa3c7a55da8421d8fe029",
     "tools/check_crate_package.py": "f6e568a33ac6a583aae5cf39fcf59b071170d51f0961451430232d96191b42c6",
     "tools/check_function_order.py": "79ab381e2f48e9e6fa8605d11a3d0c7459e7519325b3e59785c3e4271bad19d7",
     "tools/check_performance.py": "3d8866b469dc6ba965e3c94583e8573c69477492e10de4431289ce47c374babe",
@@ -374,13 +387,14 @@
     "tools/check_wheel_metadata.py": "ff08a2a6bb74d59dca91bde336bf7920ce2e65f9a1c2f56093ea5db9278db4f0",
     "tools/compare_backends.py": "757cdb6401ab07aac6d0d9e2f0c4baa7865745e37f39ce4263c71db0d941001b",
     "tools/core_f64_reference.py": "f8d8d462e722ed0e4f8106d71e2d49544ccbaf77147bd1c7ec14db385683e779",
-    "tools/cpp_calibrate.py": "e10e7c2122fbc7cb4cfe15e45588cbb1d2f21afce62091719756442af273d5b5",
-    "tools/cpp_controls.py": "7c2d57cc4a7e43335faa689dffb091e464f96f919e19eefcecc2bf3389b0fcab",
+    "tools/cpp_calibrate.py": "f60b6cf8f4984f0b4b1d0d66566cae20617d041b5026611f202541f373b51f28",
+    "tools/cpp_controls.py": "7f354231435b6248232cff49a63957ef255d0ce75b903d2b2ad99513abf3e342",
+    "tools/cpp_fine_dead_fuel_moisture.py": "d72359099f3a5382aee5f227b9de193adff97140766cbd6983cfa03b418be905",
     "tools/cpp_fire_size.py": "08ad6184e1c69d3053aa8736df0c9a5d94e46890d682b777a55e47cc33ff822d",
     "tools/cpp_ignite.py": "61c7f0494e970717248bc882f7e5f14431fa3b599ccf65f9ed9dfd42362d3607",
     "tools/cpp_inventory.py": "7d727f7aac91728a78b69c06b048b7575fac44eb8e6cd5d03c0e3dc15f97c0ea",
     "tools/cpp_mortality.py": "c6215db6d08ffcd8d98485f420ff8c0fd17939ccda3b54da3c6a69152ac2a862",
-    "tools/cpp_reference.py": "11651327d1122ebcd40f2c81c308fefcb5db92ad357030cc149f5f28457228eb",
+    "tools/cpp_reference.py": "649013fc00fe58e1ff847f5187e7d335787ec05ceb5db20626693bf7af4e151d",
     "tools/cpp_safety.py": "d1a1cd20c4ee255358b583bda3145bd1f55e3fd7db53b76957dce03cbd4a972d",
     "tools/cpp_slope_tool.py": "335a6bd5a183910ebc8839cbd216eb84f1b859c8dc880cd3d16d5c01d9ccc0ea",
     "tools/cpp_spot.py": "02d77060f30bd49e8408787d58919e239b0536bed451114e6d84d567cab7fc75",
