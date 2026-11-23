@@ -4,8 +4,8 @@
     "id": "MSVC",
     "version": "19.50.35728.0"
   },
-  "driver_sha256": "c2dc6ec368eae7e8147ab974e0cb236857df6423cdd4c577d90eb4c5a34bb308",
-  "driver_source_sha256_lf": "ee256e58415425edf9d02d799ab9e6aedac3877997be8565fcbcb49e67331255",
+  "driver_sha256": "73baf451c957292719a35b914f00678c81329dceb7c335550ad98c8b256cba94",
+  "driver_source_sha256_lf": "bf94d4e63177cf83349b9e3c36ff9085abb3174939513b4c340db4763964e2c8",
   "flags": [
     "/O2",
     "/fp:precise",
@@ -16,11 +16,11 @@
   "historical_manifest_sha256": "39e75b886c69607977227a90361e0ef7585fabf7736cdded1352fca151bc1409",
   "original_replay_sha256": "ae006838d93bbb9533df74340085110c479315cb8238a8ce488a68fe5e9e1b71",
   "prepared_overlay_sha256": {
-    "CMakeLists.txt": "798bb364e58a87d6c788b981d0df4b4325ba4614982ac4e84cfeaf360aa19e4d",
-    "driver.cpp": "ee256e58415425edf9d02d799ab9e6aedac3877997be8565fcbcb49e67331255",
+    "CMakeLists.txt": "0f7697302524f442f593576e7930af17a7c8c3fac0fcf10da79af0bb09ebb035",
+    "driver.cpp": "bf94d4e63177cf83349b9e3c36ff9085abb3174939513b4c340db4763964e2c8",
     "probe.cpp": "48338485a0b6f3fd64d0b3542a56c996e043d5e77e9887f0189101c1065df015"
   },
-  "reason": "Prepare the guarded Spot operation with prior Surface, FireSize, Ignite, and Mortality observations preserved",
+  "reason": "Prepare the guarded Safety operation and preserve prior pinned observations",
   "schema_version": 1,
   "source_digest_format": "Git text-auto binary probe: CRLF-to-LF without encoding changes; binary raw SHA256",
   "submodule_checkout_used": true,

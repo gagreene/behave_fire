@@ -34,7 +34,7 @@ add_executable(behave_ref_driver driver.cpp
     "${UPSTREAM}/ignite.cpp" "${UPSTREAM}/igniteInputs.cpp"
     "${UPSTREAM}/canopy_coefficient_table.cpp" "${UPSTREAM}/mortality.cpp"
     "${UPSTREAM}/mortality_equation_table.cpp" "${UPSTREAM}/mortality_inputs.cpp"
-    "${UPSTREAM}/species_master_table.cpp"
+    "${UPSTREAM}/species_master_table.cpp" "${UPSTREAM}/safety.cpp"
     "${UPSTREAM}/CrownFirebrandProcessor.cpp" "${UPSTREAM}/spot.cpp" "${UPSTREAM}/spotInputs.cpp")
 target_compile_options(behave_ref_driver PRIVATE ${PRECISE_FLAGS})
 target_link_libraries(behave_ref_driver PRIVATE behave_sources)

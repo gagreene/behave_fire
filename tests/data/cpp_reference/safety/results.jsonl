@@ -1,0 +1,8 @@
+{"id":"safety-0ft-0p-0e","status":"ok","upstream_entries":1,"output_entries":1,"output":{"area_sqft":0,"radius_ft":0,"separation_ft":0}}
+{"id":"safety-0ft-1p-0e","status":"ok","upstream_entries":1,"output_entries":1,"output":{"area_sqft":28.274333882308138,"radius_ft":3,"separation_ft":0}}
+{"id":"safety-0ft-0p-1e","status":"ok","upstream_entries":1,"output_entries":1,"output":{"area_sqft":50.26548245743669,"radius_ft":4,"separation_ft":0}}
+{"id":"safety-0ft-1p-1e","status":"ok","upstream_entries":1,"output_entries":1,"output":{"area_sqft":78.539816339744831,"radius_ft":5,"separation_ft":0}}
+{"id":"safety-1ft-0p-0e","status":"ok","upstream_entries":1,"output_entries":1,"output":{"area_sqft":50.26548245743669,"radius_ft":4,"separation_ft":4}}
+{"id":"safety-1ft-1p-0e","status":"ok","upstream_entries":1,"output_entries":1,"output":{"area_sqft":153.93804002589985,"radius_ft":7,"separation_ft":4}}
+{"id":"safety-1ft-0p-1e","status":"ok","upstream_entries":1,"output_entries":1,"output":{"area_sqft":201.06192982974676,"radius_ft":8,"separation_ft":4}}
+{"id":"safety-1ft-1p-1e","status":"ok","upstream_entries":1,"output_entries":1,"output":{"area_sqft":254.46900494077323,"radius_ft":9,"separation_ft":4}}
