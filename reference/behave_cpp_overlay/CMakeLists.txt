@@ -31,6 +31,7 @@ if(MSVC)
 endif()
 
 add_executable(behave_ref_driver driver.cpp
+    "${UPSTREAM}/fineDeadFuelMoistureTool.cpp"
     "${UPSTREAM}/ignite.cpp" "${UPSTREAM}/igniteInputs.cpp"
     "${UPSTREAM}/canopy_coefficient_table.cpp" "${UPSTREAM}/mortality.cpp"
     "${UPSTREAM}/mortality_equation_table.cpp" "${UPSTREAM}/mortality_inputs.cpp"

@@ -10,6 +10,7 @@ import subprocess
 from pathlib import Path
 
 import cpp_controls as controls
+import cpp_fine_dead_fuel_moisture as moisture
 import cpp_fire_size as fire_size
 import cpp_ignite as ignite
 import cpp_mortality as mortality
@@ -214,6 +215,7 @@ def activate(root, paths, reason):
     if geometry["comparisons"] != 144 or any(row["nonmatching"] for row in geometry["maxima"].values()):
         raise ValueError("FireSize evidence does not meet the approved exact comparison policy")
     record["fire_size"] = {key: value for key, value in geometry.items() if key != "values"}
+    record["fine_dead_fuel_moisture"] = moisture.measurement_evidence(root, paths, record)
     record["ignite"] = ignite.exact_evidence(root, paths, record)
     record["mortality"] = mortality.exact_evidence(root, paths, record)
     record["safety"] = safety.measurement_evidence(root, paths, record)
@@ -338,7 +340,7 @@ def measure_cpp(root, directory, expected_compiler=None):
     report = dict(schema_version=1, kind="cpp", upstream_sha=reference.PIN, passed=True,
                   parity_approved=False, artifacts=controls._artifacts(root), fields=controls.calibration_policy(root),
                   compiler=build["compiler"], protocol=protocol, observations=observations, **_context(root))
-    for operation in (fire_size, ignite, mortality, safety, slope_tool, spot):
+    for operation in (moisture, fire_size, ignite, mortality, safety, slope_tool, spot):
         name = operation.DATASET.name
         inputs = root / operation.DATASET / "cases.jsonl"
         output = directory / f"{name}.jsonl"

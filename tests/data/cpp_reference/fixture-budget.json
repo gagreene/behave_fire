@@ -5,11 +5,11 @@
       "gzip_bytes": 524288,
       "raw_bytes": 6291456
     },
-    "case_limit": 800,
+    "case_limit": 803,
     "standalone": {
       "gzip_bytes": 65536,
       "raw_bytes": 524288
     }
   },
-  "owner_approval": "2026-11-15"
+  "owner_approval": "2026-11-23"
 }

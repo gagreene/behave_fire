@@ -6,6 +6,7 @@ import math
 import subprocess
 from pathlib import Path
 
+import cpp_fine_dead_fuel_moisture as moisture
 import cpp_mortality as mortality
 import cpp_safety as safety
 import cpp_slope_tool as slope_tool
@@ -78,6 +79,58 @@ def _check_custom(driver, directory, data, root):
     return dict(custom_negative_cases=18, custom_negative_upstream_entries=0,
                 custom_upstream_trap_exit=86, custom_geometry_trap_exit=87,
                 custom_duplicate_ids_rejected=True, custom_state_sequence_checked=True)
+
+
+def _check_fine_dead_fuel_moisture(driver, directory, root, exact_replay):
+    """Verify the lookup guards, entry traps, and pinned replay.
+
+    :param driver: Source-matched executable.
+    :param directory: Retained scratch evidence directory.
+    :param root: Reference checkout root.
+    :param exact_replay: Whether to require the original compiler's exact bytes.
+    :return: Moisture rejection and execution control counts.
+    """
+    case = moisture.load_cases(root)[-1]
+    bad_index = "unreviewed_moisture_request"
+    controls = (
+        (dict(case, dry_bulb_i=6), bad_index),
+        (dict(case, rh_i=21), bad_index),
+        (dict(case, slope_i=2), bad_index),
+        (dict(case, aspect_i=4), bad_index),
+        (dict(case, shading_i=2), bad_index),
+        (dict(case, month_i=3), bad_index),
+        (dict(case, elev_i=3), bad_index),
+        (dict(case, time_i=6), bad_index),
+        (dict(case, dry_bulb_i=-1), bad_index),
+        (dict(case, rh_i=20.0), bad_index),
+        (dict(case, shading_i=True), "numeric_type_shading_i"),
+        (dict(case, shade=True), "unsupported_field"),
+    )
+    path = directory / "moisture-negative-input.jsonl"
+    path.write_text("".join(json.dumps(request) + "\n" for request, _ in controls), encoding="utf-8")
+    negative = _run(driver, directory, "moisture-negative", path, "--forbid-upstream", 0)
+    expected = [dict(id=request["id"], status="rejected", upstream_entries=0, error=error)
+                for request, error in controls]
+    if _read_lines(negative) != expected:
+        raise ValueError("Fine dead fuel moisture mutation escaped guarded rejection")
+    cases_path = root / moisture.DATASET / "cases.jsonl"
+    if exact_replay:
+        replay = _run(driver, directory, "moisture-replay", cases_path, None, 0)
+        if replay.read_bytes() != (cases_path.parent / "results.jsonl").read_bytes():
+            raise ValueError("Exact moisture replay differs from stored observations")
+    for name, code in (("upstream", 86), ("geometry", 87)):
+        stem = f"moisture-{name}-positive-trap"
+        _run(driver, directory, stem, cases_path, f"--forbid-{name}", code)
+        if f"{name.upper()}_ENTRY_BLOCKED".encode() not in (directory / f"{stem}.stderr").read_bytes():
+            raise ValueError("Fine dead fuel moisture entry trap was not active")
+    duplicate = directory / "moisture-duplicate-input.jsonl"
+    duplicate.write_text((json.dumps(case) + "\n") * 2, encoding="utf-8")
+    rows = _read_lines(_run(driver, directory, "moisture-duplicate", duplicate, None, 0))
+    expected_duplicate = dict(id=case["id"], status="rejected", upstream_entries=0, error="duplicate_id")
+    if len(rows) != 2 or rows[0].get("status") != "ok" or rows[1] != expected_duplicate:
+        raise ValueError("Duplicate moisture case reached upstream twice")
+    return dict(negative_cases=len(controls), negative_upstream_entries=0, upstream_trap_exit=86,
+                output_trap_exit=87, duplicate_ids_rejected=True)
 
 
 def _check_fire_size(driver, directory, root, exact_replay):
@@ -473,6 +526,7 @@ def check_driver(driver, directory, root=ROOT, build_receipt=None, exact_replay=
                    replay_cases=len(data["cases"]), replay_byte_identical=byte_identical, duplicate_ids_rejected=True,
                    state_sequence_checked=True, scientific_parity_approved=False)
     summary.update(_check_custom(driver, directory, data, root))
+    summary["fine_dead_fuel_moisture"] = _check_fine_dead_fuel_moisture(driver, directory, root, exact_replay)
     summary["fire_size"] = _check_fire_size(driver, directory, root, exact_replay)
     summary["ignite"] = _check_ignite(driver, directory, root, exact_replay)
     summary["mortality"] = _check_mortality(driver, directory, root, exact_replay)

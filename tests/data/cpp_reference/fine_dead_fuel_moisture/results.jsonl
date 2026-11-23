@@ -1,0 +1,3 @@
+{"id":"exposed-low-slope","status":"ok","upstream_entries":1,"output_entries":1,"output":{"moisture_fraction":0.14000000000000001}}
+{"id":"exposed-high-slope","status":"ok","upstream_entries":1,"output_entries":1,"output":{"moisture_fraction":0.15000000000000002}}
+{"id":"shaded-upper-indices","status":"ok","upstream_entries":1,"output_entries":1,"output":{"moisture_fraction":0.17999999999999999}}
