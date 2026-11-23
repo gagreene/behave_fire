@@ -1,0 +1,23 @@
+{
+  "bounds": "Only the eight listed IDs and their exact integer input tuples are accepted.",
+  "call_sequence": [
+    "Construct and initialize a fresh Safety instance.",
+    "Set flame height and occupancy with 9\u03c0 sq ft per person and 16\u03c0 sq ft per equipment unit.",
+    "Calculate the zone and read its area, radius, and separation distance."
+  ],
+  "operation": "safety",
+  "output": {
+    "area_sqft": "Square feet",
+    "radius_ft": "Feet",
+    "separation_ft": "Feet"
+  },
+  "request": {
+    "equipment": "Integer count, 0 or 1",
+    "flame_ft": "Feet, 0 or 1",
+    "id": "Case identifier",
+    "operation": "safety",
+    "personnel": "Integer count, 0 or 1"
+  },
+  "schema_version": 1,
+  "scope": "Measure standalone Safety for the bounded grid. Fractional occupancy, the small positive core cutoff, and the vegetation model are outside this grid."
+}

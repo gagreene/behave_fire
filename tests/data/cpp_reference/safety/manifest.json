@@ -1,0 +1,48 @@
+{
+  "available": 8,
+  "build": {
+    "compiler": {
+      "id": "MSVC",
+      "version": "19.50.35728.0"
+    },
+    "driver_sha256": "73baf451c957292719a35b914f00678c81329dceb7c335550ad98c8b256cba94",
+    "flags": [
+      "/O2",
+      "/fp:precise",
+      "/D_USE_MATH_DEFINES=",
+      "/EHsc"
+    ],
+    "machine": "AMD64",
+    "overlay_sha256": {
+      "CMakeLists.txt": "0f7697302524f442f593576e7930af17a7c8c3fac0fcf10da79af0bb09ebb035",
+      "driver.cpp": "bf94d4e63177cf83349b9e3c36ff9085abb3174939513b4c340db4763964e2c8",
+      "probe.cpp": "48338485a0b6f3fd64d0b3542a56c996e043d5e77e9887f0189101c1065df015"
+    },
+    "pinned_checkout_clean": true,
+    "platform": "Windows-10-10.0.19044-SP0",
+    "upstream_sources": {
+      "src/behave/behaveUnits.cpp": "420149652f256ac89219470fbccde305221221b3cf4548f3ccb5ae4c58ba1a8e",
+      "src/behave/behaveUnits.h": "2840c9f1cec8bb9770601d0da54831a3daa9628188355ed17eb63b565431bf3c",
+      "src/behave/safety.cpp": "347a5f6b60bec66e72d2cc346a7b3be60e98197864766cfa448bc2e3d6794ca4",
+      "src/behave/safety.h": "3fc3b3551510ccda0ecf07a48de9955f549b4f2edc9a6b4d256cb56161c9aa25"
+    }
+  },
+  "case_count": 8,
+  "command": "behave_ref_driver cases.jsonl results.jsonl",
+  "fields": [
+    "area_sqft",
+    "radius_ft",
+    "separation_ft"
+  ],
+  "files": {
+    "cases.jsonl": "e03d04ae7f48529b41f6888d940da76c766145aa7805d89fc40957dae730da0c",
+    "results.jsonl": "e478ef98ec7c0932789ef9c4695ff382edb4e48164a9594805cc1550b7be5264",
+    "schema.json": "8f950ad03abeb2c8df4774ec0c10022aa66257e0590aa126dbebe47cc80e7e87"
+  },
+  "generator": "behave_ref_driver guarded standalone Safety operation",
+  "operation": "safety",
+  "result_count": 8,
+  "schema_version": 1,
+  "seed": null,
+  "upstream_sha": "f3b2943e69abca942e795c5b1b45276f6338abb5"
+}

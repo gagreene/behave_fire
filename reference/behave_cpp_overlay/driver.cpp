@@ -3,6 +3,7 @@
 #include "fuelModels.h"
 #include "ignite.h"
 #include "mortality.h"
+#include "safety.h"
 #include "species_master_table.h"
 #include "spot.h"
 #include "surface.h"
@@ -413,6 +414,38 @@ MortalityRequest validate_mortality(const std::map<std::string, Value>& input) {
     return expected;
 }
 
+struct SafetyRequest {
+    int flame_ft;
+    int personnel;
+    int equipment;
+};
+
+/// Validate a request against the eight reviewed standalone Safety inputs.
+///
+/// :param input: Parsed request object.
+/// :return: Reviewed flame height and occupancy for a fresh Safety object.
+SafetyRequest validate_safety(const std::map<std::string, Value>& input) {
+    const std::set<std::string> fields = {"id", "operation", "flame_ft", "personnel", "equipment"};
+    for (const auto& item : input)
+        if (!fields.count(item.first)) throw std::runtime_error("unsupported_field");
+    for (const auto& field : fields)
+        if (!input.count(field)) throw std::runtime_error("missing_field_" + field);
+
+    const auto& id = input.at("id");
+    if (id.kind != Value::String || id.text.empty()) throw std::runtime_error("invalid_id");
+    for (const auto& field : {"flame_ft", "personnel", "equipment"}) {
+        const auto& value = input.at(field);
+        if (value.kind != Value::Number) throw std::runtime_error(std::string("numeric_type_") + field);
+        if (value.text != "0" && value.text != "1") throw std::runtime_error("unreviewed_safety_request");
+    }
+    const std::string& flame = input.at("flame_ft").text;
+    const std::string& personnel = input.at("personnel").text;
+    const std::string& equipment = input.at("equipment").text;
+    if (id.text != "safety-" + flame + "ft-" + personnel + "p-" + equipment + "e")
+        throw std::runtime_error("unreviewed_safety_request");
+    return {flame.front() - '0', personnel.front() - '0', equipment.front() - '0'};
+}
+
 struct SpotRequest {
     double flame_ft;
     double wind_mph;
@@ -568,6 +601,26 @@ std::string run_mortality(const MortalityRequest& request, bool forbid_output) {
     return encode_result({{"scorch_height_ft", scorch_height}});
 }
 
+/// Calculate standalone zone geometry on a fresh upstream Safety object.
+///
+/// :param request: Reviewed Safety input.
+/// :param forbid_output: Whether the output entry trap is enabled.
+/// :return: JSON object with zone area, radius, and separation distance.
+std::string run_safety(const SafetyRequest& request, bool forbid_output) {
+    if (forbid_output) throw GeometryTrap{};
+    constexpr double pi = 3.141592653589793238462643383279502884;
+    Safety safety;
+    safety.initializeMembers();
+    safety.updateSafetyInputs(request.flame_ft, LengthUnits::Feet, request.personnel, request.equipment,
+        9.0 * pi, 16.0 * pi, AreaUnits::SquareFeet);
+    safety.calculateSafetyZone();
+    return encode_result({
+        {"area_sqft", safety.getSafetyZoneArea(AreaUnits::SquareFeet)},
+        {"radius_ft", safety.getSafetyZoneRadius(LengthUnits::Feet)},
+        {"separation_ft", safety.getSeparationDistance(LengthUnits::Feet)},
+    });
+}
+
 /// Calculate flat surface-fire spotting distance on a fresh upstream Spot object.
 ///
 /// :param request: Reviewed Spot input.
@@ -623,6 +676,10 @@ int main(int argc, char** argv) {
                 const MortalityRequest request = validate_mortality(object);
                 enter_upstream(id, ids, forbid, entered);
                 result = run_mortality(request, forbid_geometry);
+            } else if (operation == "safety") {
+                const SafetyRequest request = validate_safety(object);
+                enter_upstream(id, ids, forbid, entered);
+                result = run_safety(request, forbid_geometry);
             } else if (operation == "spot_surface") {
                 const SpotRequest request = validate_spot(object);
                 enter_upstream(id, ids, forbid, entered);
@@ -635,7 +692,7 @@ int main(int argc, char** argv) {
                 result = run(request, forbid_geometry, geometry_entered, session);
             }
             const bool report_output_entries = operation == "ignite" || operation == "mortality"
-                || operation == "spot_surface";
+                || operation == "safety" || operation == "spot_surface";
             output << "{\"id\":" << encode(id) << ",\"status\":\"ok\",\"upstream_entries\":1,"
                    << (report_output_entries ? "\"output_entries\"" : "\"geometry_entries\"")
                    << ":1,\"output\":" << result << "}\n";
