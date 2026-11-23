@@ -195,12 +195,13 @@ def _required_artifacts(root):
         "ignite/cases.jsonl", "ignite/manifest.json", "ignite/results.jsonl", "ignite/schema.json",
         "mortality/cases.jsonl", "mortality/manifest.json", "mortality/results.jsonl", "mortality/schema.json",
         "safety/cases.jsonl", "safety/manifest.json", "safety/results.jsonl", "safety/schema.json",
+        "slope_tool/cases.jsonl", "slope_tool/manifest.json", "slope_tool/results.jsonl", "slope_tool/schema.json",
         "spot/cases.jsonl", "spot/manifest.json", "spot/results.jsonl", "spot/schema.json",
         "surface_custom/cases.jsonl", "surface_custom/results.jsonl", "surface_custom/manifest.json")}
     mandatory.update("tools/" + name for name in (
         "cpp_reference.py", "cpp_controls.py", "cpp_fire_size.py", "cpp_ignite.py", "cpp_inventory.py",
-        "cpp_mortality.py", "cpp_safety.py", "cpp_spot.py", "cpp_calibrate.py", "export_cpp_crate.py",
-        "check_cpp_driver.py"))
+        "cpp_mortality.py", "cpp_safety.py", "cpp_slope_tool.py", "cpp_spot.py", "cpp_calibrate.py",
+        "export_cpp_crate.py", "check_cpp_driver.py"))
     mandatory.update(f"rust/crates/behave-fire/tests/data/cpp_reference/{dataset}/{name}"
                      for dataset in ("surface", "surface_custom", "fire_size", "ignite", "mortality")
                      for name in ("cases.jsonl", "results.jsonl", "manifest.json", "tolerance-policy.json")
@@ -397,8 +398,9 @@ def check_fixture_budget(root=ROOT):
     policy = _document(canonical / 'fixture-budget.json')
     if policy.get('approved') is not True or policy.get('limits') != FIXTURE_BUDGET:
         raise ValueError('Unapproved fixture budget limits')
+    datasets = ('surface', 'surface_custom', 'fire_size', 'ignite', 'mortality', 'safety', 'slope_tool', 'spot')
     cases = sum(sum(bool(line.strip()) for line in (canonical / dataset / 'cases.jsonl').read_bytes().splitlines())
-                for dataset in ('surface', 'surface_custom', 'fire_size', 'ignite', 'mortality', 'safety', 'spot'))
+                for dataset in datasets)
     if cases > FIXTURE_BUDGET['case_limit']:
         raise ValueError('C++ fixture case budget exceeded')
     measured = {'cases': cases}
@@ -613,6 +615,8 @@ def load_reference(root=ROOT, *, measurement=False):
     from cpp_mortality import validate_policy as validate_mortality_policy
     from cpp_safety import load_observations as load_safety_observations
     from cpp_safety import validate_measurement as validate_safety_measurement
+    from cpp_slope_tool import load_observations as load_slope_observations
+    from cpp_slope_tool import validate_measurement as validate_slope_measurement
     from cpp_spot import load_observations as load_spot_observations
     from cpp_spot import validate_measurement as validate_spot_measurement
 
@@ -626,6 +630,8 @@ def load_reference(root=ROOT, *, measurement=False):
     validate_mortality_policy(root, policy.get("mortality"), qualification)
     load_safety_observations(root)
     validate_safety_measurement(root, policy.get("safety"), None if measurement else qualification)
+    load_slope_observations(root)
+    validate_slope_measurement(root, policy.get("slope_tool"), None if measurement else qualification)
     load_spot_observations(root)
     validate_spot_measurement(root, policy.get("spot"), None if measurement else qualification)
     _prepared_build(root)
