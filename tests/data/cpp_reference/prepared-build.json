@@ -4,8 +4,8 @@
     "id": "MSVC",
     "version": "19.50.35728.0"
   },
-  "driver_sha256": "8222e613dca94e08b0198d756370051503a28f013fcfacd737d32a428c9d7e21",
-  "driver_source_sha256_lf": "08cd6c0aa5912cef25d748cfb3fc35e003f8922723e75ed92692c88710cfe988",
+  "driver_sha256": "fbf2ec952ca97c24a1895b34b4a23c5677d129df64f804c7a5de6ffafa128d31",
+  "driver_source_sha256_lf": "8eaea63d3fccfe7da8b2749446d91e6a169b86a303e192a77b8b2bb7335a88d5",
   "flags": [
     "/O2",
     "/fp:precise",
@@ -16,11 +16,11 @@
   "historical_manifest_sha256": "39e75b886c69607977227a90361e0ef7585fabf7736cdded1352fca151bc1409",
   "original_replay_sha256": "ae006838d93bbb9533df74340085110c479315cb8238a8ce488a68fe5e9e1b71",
   "prepared_overlay_sha256": {
-    "CMakeLists.txt": "f03f6926afbc994eea25aafc44327e1544d9e35bfa7b3974b362770231653c28",
-    "driver.cpp": "08cd6c0aa5912cef25d748cfb3fc35e003f8922723e75ed92692c88710cfe988",
+    "CMakeLists.txt": "6e034192b662e9fc24ec63b54505e032d32784a6cc10222d72bdaab8686ff8b5",
+    "driver.cpp": "8eaea63d3fccfe7da8b2749446d91e6a169b86a303e192a77b8b2bb7335a88d5",
     "probe.cpp": "48338485a0b6f3fd64d0b3542a56c996e043d5e77e9887f0189101c1065df015"
   },
-  "reason": "Prepare the guarded SlopeTool operation and preserve prior pinned observations",
+  "reason": "Prepare the guarded fine dead fuel moisture operation and preserve prior pinned observations",
   "schema_version": 1,
   "source_digest_format": "Git text-auto binary probe: CRLF-to-LF without encoding changes; binary raw SHA256",
   "submodule_checkout_used": true,

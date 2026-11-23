@@ -1,0 +1,46 @@
+{
+  "available": 3,
+  "build": {
+    "compiler": {
+      "id": "MSVC",
+      "version": "19.50.35728.0"
+    },
+    "driver_sha256": "fbf2ec952ca97c24a1895b34b4a23c5677d129df64f804c7a5de6ffafa128d31",
+    "flags": [
+      "/O2",
+      "/fp:precise",
+      "/D_USE_MATH_DEFINES=",
+      "/EHsc"
+    ],
+    "machine": "AMD64",
+    "overlay_sha256": {
+      "CMakeLists.txt": "6e034192b662e9fc24ec63b54505e032d32784a6cc10222d72bdaab8686ff8b5",
+      "driver.cpp": "8eaea63d3fccfe7da8b2749446d91e6a169b86a303e192a77b8b2bb7335a88d5",
+      "probe.cpp": "48338485a0b6f3fd64d0b3542a56c996e043d5e77e9887f0189101c1065df015"
+    },
+    "pinned_checkout_clean": true,
+    "platform": "Windows-10-10.0.19044-SP0",
+    "upstream_sources": {
+      "src/behave/behaveUnits.cpp": "420149652f256ac89219470fbccde305221221b3cf4548f3ccb5ae4c58ba1a8e",
+      "src/behave/behaveUnits.h": "2840c9f1cec8bb9770601d0da54831a3daa9628188355ed17eb63b565431bf3c",
+      "src/behave/fineDeadFuelMoistureTool.cpp": "0edef305439cd6684c5382d508f77df13a59c6374796fb67c639d3437883bd15",
+      "src/behave/fineDeadFuelMoistureTool.h": "d7951669d46a03405c939934e13a34b00a1b9e6e88af64606aea7f4b923fa6d3"
+    }
+  },
+  "case_count": 3,
+  "command": "behave_ref_driver cases.jsonl results.jsonl",
+  "fields": [
+    "moisture_fraction"
+  ],
+  "files": {
+    "cases.jsonl": "e6d6d221cda5b27747f1b33a59cd2211160f8e526a92e4ac28632ae2d31589b5",
+    "results.jsonl": "0731751c000b92bdda710967d5b6a3dacd2f493cb015976ea1174e051fe2518e",
+    "schema.json": "997b29c26d37ea615384ee75397682db1ce990b9e8078d301b51f6aa3faeef60"
+  },
+  "generator": "behave_ref_driver guarded standalone fine dead fuel moisture operation",
+  "operation": "fine_dead_fuel_moisture",
+  "result_count": 3,
+  "schema_version": 1,
+  "seed": null,
+  "upstream_sha": "f3b2943e69abca942e795c5b1b45276f6338abb5"
+}

@@ -1,0 +1,24 @@
+{
+  "bounds": "The driver accepts only the three reviewed IDs and exact integer input tuples.",
+  "call_sequence": [
+    "Check every index and the derived correction-table access before upstream entry.",
+    "Construct a fresh FineDeadFuelMoistureTool and calculate by index.",
+    "Read the final moisture fraction."
+  ],
+  "operation": "fine_dead_fuel_moisture",
+  "output": {
+    "moisture_fraction": "Dimensionless fraction"
+  },
+  "request": {
+    "aspect_i": "Integer index in the reviewed case tuple",
+    "dry_bulb_i": "Integer index in the reviewed case tuple",
+    "elev_i": "Integer index in the reviewed case tuple",
+    "month_i": "Integer index in the reviewed case tuple",
+    "rh_i": "Integer index in the reviewed case tuple",
+    "shading_i": "Integer index in the reviewed case tuple",
+    "slope_i": "Integer index in the reviewed case tuple",
+    "time_i": "Integer index in the reviewed case tuple"
+  },
+  "schema_version": 1,
+  "scope": "Numeric indices only, with the F-005 validity guards applied before each lookup."
+}

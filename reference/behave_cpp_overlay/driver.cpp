@@ -1,4 +1,5 @@
 // Phase 1 protocol probe. Scientific calculations are called in pinned upstream sources.
+#include "fineDeadFuelMoistureTool.h"
 #include "fireSize.h"
 #include "fuelModels.h"
 #include "ignite.h"
@@ -8,6 +9,7 @@
 #include "species_master_table.h"
 #include "spot.h"
 #include "surface.h"
+#include <array>
 #include <cctype>
 #include <cerrno>
 #include <clocale>
@@ -276,6 +278,46 @@ Request validate(const std::map<std::string, Value>& input) {
             throw std::runtime_error("unreviewed_percent_quantity");
     } else if (input.count("moe_percent")) throw std::runtime_error("unused_custom_moe");
     return {input.at("id").text, static_cast<int>(model), direction, physical, modes, user_waf, session, percent_control, moe_percent};
+}
+
+using FineDeadFuelMoistureRequest = std::array<int, 8>;
+
+/// Validate the approved moisture inputs and every upstream table access.
+///
+/// :param input: Parsed request object.
+/// :return: Reviewed lookup indices in public port order.
+FineDeadFuelMoistureRequest validate_fine_dead_fuel_moisture(const std::map<std::string, Value>& input) {
+    const auto id = input.find("id");
+    if (id == input.end() || id->second.kind != Value::String) throw std::runtime_error("invalid_id");
+    const std::map<std::string, FineDeadFuelMoistureRequest> reviewed = {
+        {"exposed-low-slope", {{0, 20, 0, 0, 0, 0, 1, 3}}},
+        {"exposed-high-slope", {{0, 20, 1, 0, 0, 0, 1, 3}}},
+        {"shaded-upper-indices", {{5, 20, 1, 3, 1, 2, 2, 5}}},
+    };
+    const auto allowed = reviewed.find(id->second.text);
+    if (allowed == reviewed.end()) throw std::runtime_error("unreviewed_moisture_request");
+    const std::array<const char*, 8> fields = {{
+        "dry_bulb_i", "rh_i", "slope_i", "aspect_i", "shading_i", "month_i", "elev_i", "time_i",
+    }};
+    const FineDeadFuelMoistureRequest upper = {{5, 20, 1, 3, 1, 2, 2, 5}};
+    const auto& indices = allowed->second;
+    if (input.size() > fields.size() + 2) throw std::runtime_error("unsupported_field");
+    for (std::size_t index = 0; index < fields.size(); ++index) {
+        const auto field = input.find(fields[index]);
+        if (field == input.end()) throw std::runtime_error(std::string("missing_field_") + fields[index]);
+        if (field->second.kind != Value::Number)
+            throw std::runtime_error(std::string("numeric_type_") + fields[index]);
+        if (field->second.text != std::to_string(indices[index]))
+            throw std::runtime_error("unreviewed_moisture_request");
+        if (indices[index] < 0 || indices[index] > upper[index])
+            throw std::runtime_error("unsafe_moisture_index");
+    }
+    // F-005 requires independent bounds on the derived correction-table access.
+    const int row = 12 * indices[5] + (indices[4] == 0 ? 2 * indices[3] + indices[2] : 8 + indices[3]);
+    const int column = indices[6] + 3 * indices[7];
+    if (row < 0 || row >= 36 || column < 0 || column >= 18)
+        throw std::runtime_error("unsafe_moisture_table_access");
+    return indices;
 }
 
 struct FireSizeRequest {
@@ -588,6 +630,19 @@ std::string run(const Request& request, bool forbid_geometry, bool& geometry_ent
     return encode_result(result);
 }
 
+/// Measure one guarded lookup with a fresh upstream moisture tool.
+///
+/// :param indices: Reviewed indices in public port order.
+/// :param forbid_output: Whether the output entry trap is enabled.
+/// :return: Total moisture fraction as a JSON object.
+std::string run_fine_dead_fuel_moisture(const FineDeadFuelMoistureRequest& indices, bool forbid_output) {
+    if (forbid_output) throw GeometryTrap{};
+    FineDeadFuelMoistureTool tool;
+    tool.calculateByIndex(indices[3], indices[0], indices[6], indices[5],
+                          indices[1], indices[4], indices[2], indices[7]);
+    return encode_result({{"moisture_fraction", tool.getFineDeadFuelMoisture(FractionUnits::Fraction)}});
+}
+
 /// Calculate and read geometry on a fresh upstream FireSize object.
 ///
 /// :param request: Reviewed FireSize input.
@@ -732,7 +787,11 @@ int main(int argc, char** argv) {
             const std::string operation = operation_field != object.end() && operation_field->second.kind == Value::String
                 ? operation_field->second.text : "";
             std::string result;
-            if (operation == "fire_size") {
+            if (operation == "fine_dead_fuel_moisture") {
+                const auto request = validate_fine_dead_fuel_moisture(object);
+                enter_upstream(id, ids, forbid, entered);
+                result = run_fine_dead_fuel_moisture(request, forbid_geometry);
+            } else if (operation == "fire_size") {
                 const FireSizeRequest request = validate_fire_size(object);
                 enter_upstream(id, ids, forbid, entered);
                 result = run_fire_size(request, forbid_geometry, geometry_entered);
@@ -763,7 +822,8 @@ int main(int argc, char** argv) {
                 auto& session = request.session.empty() ? fresh : sessions[request.session];
                 result = run(request, forbid_geometry, geometry_entered, session);
             }
-            const bool report_output_entries = operation == "ignite" || operation == "mortality"
+            const bool report_output_entries = operation == "fine_dead_fuel_moisture"
+                || operation == "ignite" || operation == "mortality"
                 || operation == "safety" || operation == "slope_tool" || operation == "spot_surface";
             output << "{\"id\":" << encode(id) << ",\"status\":\"ok\",\"upstream_entries\":1,"
                    << (report_output_entries ? "\"output_entries\"" : "\"geometry_entries\"")

@@ -19,6 +19,7 @@ reference/behave_cpp_overlay/** text eol=lf
 tools/cpp_reference.py text eol=lf
 tools/cpp_controls.py text eol=lf
 tools/cpp_calibrate.py text eol=lf
+tools/cpp_fine_dead_fuel_moisture.py text eol=lf
 tools/cpp_fire_size.py text eol=lf
 tools/cpp_ignite.py text eol=lf
 tools/cpp_mortality.py text eol=lf
