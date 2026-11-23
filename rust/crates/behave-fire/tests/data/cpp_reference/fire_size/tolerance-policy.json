@@ -1,5 +1,5 @@
 {
-  "approved": false,
+  "approved": true,
   "fields": {
     "area_ft2": {
       "kind": "exact_binary64"
@@ -10,5 +10,36 @@
     "perimeter_ft": {
       "kind": "exact_binary64"
     }
+  },
+  "qualification": {
+    "artifacts": {
+      "cases.jsonl": "b7eaafc8c07ad95c79dcb2cc553a659bf3106b1a215d08febb9f0e2c0ac2d755",
+      "manifest.json": "c450683a4dec4573af3fb9a38fa9b55487f270c63f6407d91abc5886dcf9b9b6",
+      "results.jsonl": "3c8a90c2d0cb8af549b5d555938e439ed5867b5d2fbb66fdad978aa5c056d3df",
+      "schema.json": "bcefacdfef527819dd578abc68c46e9c05518c143d6f013f170a06d6be4df340"
+    },
+    "ci_run_url": "https://github.com/gagreene/behave_fire/actions/runs/45277410081",
+    "comparisons": 144,
+    "maxima": {
+      "area_ft2": {
+        "absolute": 0.0,
+        "nonmatching": 0,
+        "relative": 0.0,
+        "ulp": 0
+      },
+      "length_to_width_ratio": {
+        "absolute": 0.0,
+        "nonmatching": 0,
+        "relative": 0.0,
+        "ulp": 0
+      },
+      "perimeter_ft": {
+        "absolute": 0.0,
+        "nonmatching": 0,
+        "relative": 0.0,
+        "ulp": 0
+      }
+    },
+    "source_commit": "2e5079b122469a0879ae77701d7b57255155efd5"
   }
 }
