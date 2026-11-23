@@ -1,0 +1,2 @@
+{"id":"slope-projection","operation":"slope_tool","distance_ft":8,"slope_degrees":30}
+{"id":"slope-map","operation":"slope_tool","scale":1980,"distance_ft":0.125,"contour_interval_ft":20,"contours":3}

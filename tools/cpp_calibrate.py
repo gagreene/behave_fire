@@ -15,6 +15,7 @@ import cpp_ignite as ignite
 import cpp_mortality as mortality
 import cpp_reference as reference
 import cpp_safety as safety
+import cpp_slope_tool as slope_tool
 import cpp_spot as spot
 
 
@@ -216,6 +217,7 @@ def activate(root, paths, reason):
     record["ignite"] = ignite.exact_evidence(root, paths, record)
     record["mortality"] = mortality.exact_evidence(root, paths, record)
     record["safety"] = safety.measurement_evidence(root, paths, record)
+    record["slope_tool"] = slope_tool.measurement_evidence(root, paths, record)
     record["spot"] = spot.measurement_evidence(root, paths, record)
     record["activation_reason"] = reason
     policy_path = root / "tests/data/cpp_reference/tolerance-policy.json"
@@ -336,7 +338,7 @@ def measure_cpp(root, directory, expected_compiler=None):
     report = dict(schema_version=1, kind="cpp", upstream_sha=reference.PIN, passed=True,
                   parity_approved=False, artifacts=controls._artifacts(root), fields=controls.calibration_policy(root),
                   compiler=build["compiler"], protocol=protocol, observations=observations, **_context(root))
-    for operation in (fire_size, ignite, mortality, safety, spot):
+    for operation in (fire_size, ignite, mortality, safety, slope_tool, spot):
         name = operation.DATASET.name
         inputs = root / operation.DATASET / "cases.jsonl"
         output = directory / f"{name}.jsonl"

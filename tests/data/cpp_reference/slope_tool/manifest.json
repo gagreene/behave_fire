@@ -1,0 +1,56 @@
+{
+  "available": 2,
+  "build": {
+    "compiler": {
+      "id": "MSVC",
+      "version": "19.50.35728.0"
+    },
+    "driver_sha256": "8222e613dca94e08b0198d756370051503a28f013fcfacd737d32a428c9d7e21",
+    "flags": [
+      "/O2",
+      "/fp:precise",
+      "/D_USE_MATH_DEFINES=",
+      "/EHsc"
+    ],
+    "machine": "AMD64",
+    "overlay_sha256": {
+      "CMakeLists.txt": "f03f6926afbc994eea25aafc44327e1544d9e35bfa7b3974b362770231653c28",
+      "driver.cpp": "08cd6c0aa5912cef25d748cfb3fc35e003f8922723e75ed92692c88710cfe988",
+      "probe.cpp": "48338485a0b6f3fd64d0b3542a56c996e043d5e77e9887f0189101c1065df015"
+    },
+    "pinned_checkout_clean": true,
+    "platform": "Windows-10-10.0.19044-SP0",
+    "upstream_sources": {
+      "src/behave/behaveUnits.cpp": "420149652f256ac89219470fbccde305221221b3cf4548f3ccb5ae4c58ba1a8e",
+      "src/behave/behaveUnits.h": "2840c9f1cec8bb9770601d0da54831a3daa9628188355ed17eb63b565431bf3c",
+      "src/behave/slopeTool.cpp": "698960850574110e9aeadd460d1a88cb3ad9d5e026a846e3ed7925280ae12cce",
+      "src/behave/slopeTool.h": "16d8921fcd793aa616a7ffa4f95d9af61b3651f4f8293957ada47ea2295407b2"
+    }
+  },
+  "case_count": 2,
+  "command": "behave_ref_driver cases.jsonl results.jsonl",
+  "fields": [
+    "elevation_ft",
+    "horizontal_0_ft",
+    "horizontal_15_ft",
+    "horizontal_30_ft",
+    "horizontal_45_ft",
+    "horizontal_60_ft",
+    "horizontal_75_ft",
+    "horizontal_90_ft",
+    "horizontal_ft",
+    "slope_degrees",
+    "slope_percent"
+  ],
+  "files": {
+    "cases.jsonl": "b19e3d0aa6b5ea1460b67bb01bb2d6310004e87beeee801d4a34b29b6f95cc1e",
+    "results.jsonl": "ed96c5367bd6f42360ec4d41bb81a378b52581ac7d787a8a235a9ef31df3e939",
+    "schema.json": "bc366576dac0ee6abd15c18a8d314ebd42030e5000fe96a601c675fafabf9924"
+  },
+  "generator": "behave_ref_driver guarded standalone SlopeTool operation",
+  "operation": "slope_tool",
+  "result_count": 2,
+  "schema_version": 1,
+  "seed": null,
+  "upstream_sha": "f3b2943e69abca942e795c5b1b45276f6338abb5"
+}

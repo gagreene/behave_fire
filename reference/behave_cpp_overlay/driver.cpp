@@ -4,6 +4,7 @@
 #include "ignite.h"
 #include "mortality.h"
 #include "safety.h"
+#include "slopeTool.h"
 #include "species_master_table.h"
 #include "spot.h"
 #include "surface.h"
@@ -446,6 +447,46 @@ SafetyRequest validate_safety(const std::map<std::string, Value>& input) {
     return {flame.front() - '0', personnel.front() - '0', equipment.front() - '0'};
 }
 
+struct SlopeToolRequest {
+    bool projection;
+    double distance_ft;
+    double slope_degrees;
+    int scale;
+    double contour_interval_ft;
+    int contours;
+};
+
+/// Validate the two reviewed SlopeTool input tuples before entering C++.
+///
+/// :param input: Parsed request object.
+/// :return: Reviewed projection or map-slope request.
+SlopeToolRequest validate_slope_tool(const std::map<std::string, Value>& input) {
+    const auto id = input.find("id");
+    if (id == input.end() || id->second.kind != Value::String) throw std::runtime_error("invalid_id");
+    const std::map<std::string, std::map<std::string, std::string>> reviewed = {
+        {"slope-projection", {{"distance_ft", "8"}, {"slope_degrees", "30"}}},
+        {"slope-map", {{"scale", "1980"}, {"distance_ft", "0.125"},
+                       {"contour_interval_ft", "20"}, {"contours", "3"}}},
+    };
+    const auto allowed = reviewed.find(id->second.text);
+    if (allowed == reviewed.end()) throw std::runtime_error("unreviewed_slope_tool_request");
+    for (const auto& item : input)
+        if (item.first != "id" && item.first != "operation" && !allowed->second.count(item.first))
+            throw std::runtime_error("unsupported_field");
+    for (const auto& item : allowed->second) {
+        const auto field = input.find(item.first);
+        if (field == input.end()) throw std::runtime_error("missing_field_" + item.first);
+        if (field->second.kind != Value::Number) throw std::runtime_error("numeric_type_" + item.first);
+        if (field->second.text != item.second) throw std::runtime_error("unreviewed_slope_tool_request");
+    }
+    const double distance = numeric(input.at("distance_ft"), "distance_ft");
+    if (id->second.text == "slope-projection")
+        return {true, distance, numeric(input.at("slope_degrees"), "slope_degrees"), 0, 0.0, 0};
+    return {false, distance, 0.0, static_cast<int>(numeric(input.at("scale"), "scale")),
+            numeric(input.at("contour_interval_ft"), "contour_interval_ft"),
+            static_cast<int>(numeric(input.at("contours"), "contours"))};
+}
+
 struct SpotRequest {
     double flame_ft;
     double wind_mph;
@@ -621,6 +662,33 @@ std::string run_safety(const SafetyRequest& request, bool forbid_output) {
     });
 }
 
+/// Measure a reviewed projection or map slope on a fresh SlopeTool object.
+///
+/// :param request: Reviewed SlopeTool input.
+/// :param forbid_output: Whether the output entry trap is enabled.
+/// :return: JSON object with the fields for the reviewed operation.
+std::string run_slope_tool(const SlopeToolRequest& request, bool forbid_output) {
+    if (forbid_output) throw GeometryTrap{};
+    SlopeTool tool;
+    if (request.projection) {
+        tool.calculateHorizontalDistance(request.distance_ft, LengthUnits::Feet,
+                                         request.slope_degrees, SlopeUnits::Degrees);
+        std::map<std::string, double> result;
+        for (int index = 0; index < 7; ++index)
+            result.emplace("horizontal_" + std::to_string(index * 15) + "_ft",
+                           tool.getHorizontalDistanceAtIndex(index, LengthUnits::Feet));
+        return encode_result(result);
+    }
+    tool.calculateSlopeFromMapMeasurements(request.scale, request.distance_ft, LengthUnits::Feet,
+                                           request.contour_interval_ft, request.contours, LengthUnits::Feet);
+    return encode_result({
+        {"elevation_ft", tool.getSlopeElevationChangeFromMapMeasurements(LengthUnits::Feet)},
+        {"horizontal_ft", tool.getSlopeHorizontalDistanceFromMapMeasurements(LengthUnits::Feet)},
+        {"slope_degrees", tool.getSlopeFromMapMeasurementsInDegrees()},
+        {"slope_percent", tool.getSlopeFromMapMeasurementsInPercent()},
+    });
+}
+
 /// Calculate flat surface-fire spotting distance on a fresh upstream Spot object.
 ///
 /// :param request: Reviewed Spot input.
@@ -680,6 +748,10 @@ int main(int argc, char** argv) {
                 const SafetyRequest request = validate_safety(object);
                 enter_upstream(id, ids, forbid, entered);
                 result = run_safety(request, forbid_geometry);
+            } else if (operation == "slope_tool") {
+                const SlopeToolRequest request = validate_slope_tool(object);
+                enter_upstream(id, ids, forbid, entered);
+                result = run_slope_tool(request, forbid_geometry);
             } else if (operation == "spot_surface") {
                 const SpotRequest request = validate_spot(object);
                 enter_upstream(id, ids, forbid, entered);
@@ -692,7 +764,7 @@ int main(int argc, char** argv) {
                 result = run(request, forbid_geometry, geometry_entered, session);
             }
             const bool report_output_entries = operation == "ignite" || operation == "mortality"
-                || operation == "safety" || operation == "spot_surface";
+                || operation == "safety" || operation == "slope_tool" || operation == "spot_surface";
             output << "{\"id\":" << encode(id) << ",\"status\":\"ok\",\"upstream_entries\":1,"
                    << (report_output_entries ? "\"output_entries\"" : "\"geometry_entries\"")
                    << ":1,\"output\":" << result << "}\n";

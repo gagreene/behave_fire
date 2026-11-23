@@ -1,0 +1,2 @@
+{"id":"slope-projection","status":"ok","upstream_entries":1,"output_entries":1,"output":{"horizontal_0_ft":6.9282032302752317,"horizontal_15_ft":7.0051264635066062,"horizontal_30_ft":7.2111025509276905,"horizontal_45_ft":7.4833147735475842,"horizontal_60_ft":7.745966692414525,"horizontal_75_ft":7.9327298725136535,"horizontal_90_ft":7.9999999999996803}}
+{"id":"slope-map","status":"ok","upstream_entries":1,"output_entries":1,"output":{"elevation_ft":60,"horizontal_ft":247.49999999999008,"slope_degrees":13.626994859892065,"slope_percent":24.242424242425212}}

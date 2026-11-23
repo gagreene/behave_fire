@@ -1,0 +1,40 @@
+{
+  "bounds": "Each case ID accepts only its exact reviewed input tuple and listed fields.",
+  "call_sequence": [
+    "Construct a fresh SlopeTool for each request.",
+    "Calculate the horizontal projections or the slope from map measurements.",
+    "Read the seven projection distances or the four map results."
+  ],
+  "operation": "slope_tool",
+  "output": {
+    "slope-map": [
+      "elevation_ft",
+      "horizontal_ft",
+      "slope_degrees",
+      "slope_percent"
+    ],
+    "slope-projection": [
+      "horizontal_0_ft",
+      "horizontal_15_ft",
+      "horizontal_30_ft",
+      "horizontal_45_ft",
+      "horizontal_60_ft",
+      "horizontal_75_ft",
+      "horizontal_90_ft"
+    ]
+  },
+  "request": {
+    "slope-map": {
+      "contour_interval_ft": "Feet",
+      "contours": "Contour count",
+      "distance_ft": "Feet",
+      "scale": "Integer representative fraction"
+    },
+    "slope-projection": {
+      "distance_ft": "Feet",
+      "slope_degrees": "Degrees"
+    }
+  },
+  "schema_version": 1,
+  "scope": "The projection uses feet and the map scale is an integer. The measurements cover the two listed cases."
+}

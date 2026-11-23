@@ -8,6 +8,7 @@ from pathlib import Path
 
 import cpp_mortality as mortality
 import cpp_safety as safety
+import cpp_slope_tool as slope_tool
 import cpp_spot as spot
 from cpp_fire_size import DATASET, load_cases
 from cpp_ignite import DATASET as IGNITE_DATASET
@@ -272,6 +273,54 @@ def _check_safety(driver, directory, root, exact_replay):
                 output_trap_exit=87, duplicate_ids_rejected=True)
 
 
+def _check_slope_tool(driver, directory, root, exact_replay):
+    """Verify the SlopeTool input guard, entry traps, and pinned replay.
+
+    :param driver: Source-matched executable.
+    :param directory: Retained scratch evidence directory.
+    :param root: Reference checkout root.
+    :param exact_replay: Whether to require the original compiler's exact bytes.
+    :return: SlopeTool rejection and execution control counts.
+    """
+    projection, map_slope = slope_tool.load_cases(root)
+    incomplete_map = {key: value for key, value in map_slope.items() if key != "contours"}
+    controls = (
+        (dict(projection, slope_degrees=31), "unreviewed_slope_tool_request"),
+        (dict(projection, distance_ft=8.0), "unreviewed_slope_tool_request"),
+        (dict(projection, distance_ft=-0.0), "unreviewed_slope_tool_request"),
+        (dict(projection, distance_ft="8"), "numeric_type_distance_ft"),
+        (dict(map_slope, scale=1980.5), "unreviewed_slope_tool_request"),
+        (dict(map_slope, contours=True), "numeric_type_contours"),
+        (incomplete_map, "missing_field_contours"),
+        (dict(map_slope, distance_units="inches"), "unsupported_field"),
+    )
+    path = directory / "slope-tool-negative-input.jsonl"
+    path.write_text("".join(json.dumps(case) + "\n" for case, _ in controls), encoding="utf-8")
+    negative = _run(driver, directory, "slope-tool-negative", path, "--forbid-upstream", 0)
+    expected = [dict(id=case["id"], status="rejected", upstream_entries=0, error=error)
+                for case, error in controls]
+    if _read_lines(negative) != expected:
+        raise ValueError("SlopeTool mutation escaped guarded rejection")
+    cases_path = root / slope_tool.DATASET / "cases.jsonl"
+    if exact_replay:
+        replay = _run(driver, directory, "slope-tool-replay", cases_path, None, 0)
+        if replay.read_bytes() != (cases_path.parent / "results.jsonl").read_bytes():
+            raise ValueError("Exact SlopeTool replay differs from stored observations")
+    for name, code in (("upstream", 86), ("geometry", 87)):
+        stem = f"slope-tool-{name}-positive-trap"
+        _run(driver, directory, stem, cases_path, f"--forbid-{name}", code)
+        if f"{name.upper()}_ENTRY_BLOCKED".encode() not in (directory / f"{stem}.stderr").read_bytes():
+            raise ValueError("SlopeTool entry trap was not active")
+    duplicate = directory / "slope-tool-duplicate-input.jsonl"
+    duplicate.write_text((json.dumps(map_slope) + "\n") * 2, encoding="utf-8")
+    rows = _read_lines(_run(driver, directory, "slope-tool-duplicate", duplicate, None, 0))
+    expected_duplicate = dict(id=map_slope["id"], status="rejected", upstream_entries=0, error="duplicate_id")
+    if len(rows) != 2 or rows[0].get("status") != "ok" or rows[1] != expected_duplicate:
+        raise ValueError("Duplicate SlopeTool case reached upstream twice")
+    return dict(negative_cases=len(controls), negative_upstream_entries=0, upstream_trap_exit=86,
+                output_trap_exit=87, duplicate_ids_rejected=True)
+
+
 def _check_spot(driver, directory, root, exact_replay):
     """Verify the flat Spot input guard, both entry traps, and exact local replay.
 
@@ -428,6 +477,7 @@ def check_driver(driver, directory, root=ROOT, build_receipt=None, exact_replay=
     summary["ignite"] = _check_ignite(driver, directory, root, exact_replay)
     summary["mortality"] = _check_mortality(driver, directory, root, exact_replay)
     summary["safety"] = _check_safety(driver, directory, root, exact_replay)
+    summary["slope_tool"] = _check_slope_tool(driver, directory, root, exact_replay)
     summary["spot"] = _check_spot(driver, directory, root, exact_replay)
     (directory / "summary.json").write_text(json.dumps(summary, indent=2) + "\n", encoding="utf-8")
     return summary
