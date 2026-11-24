@@ -18,6 +18,7 @@
   "rust/crates/behave-fire/tests/data/cpp_reference/surface_custom/cases.jsonl": "2f73db7982476aea1676aa2b380e0de343600645f3b24e91fbfd9ee7e0037d7a",
   "rust/crates/behave-fire/tests/data/cpp_reference/surface_custom/manifest.json": "620e4badba64b8ad315f9fe5f210e4edf0bac0785d3e8370d62b9dca3b5034bb",
   "rust/crates/behave-fire/tests/data/cpp_reference/surface_custom/results.jsonl": "04e96268466338364a350d53ac05b639f1a7758c78911aaee97da389c0f779a2",
+  "tests/data/cpp_reference/calibration/qualification.json": "6e997b638a17b8e7a9669c7c450a1c8189dd72143c14fe6f3f0790ef0e6ae02e",
   "tests/data/cpp_reference/crown/cases.jsonl": "c4ab63a4a0d52e8c5a8fd98aac981213db6606200f385c6b88333682897dc2fc",
   "tests/data/cpp_reference/crown/manifest.json": "e7cde2548926e017b81efa32400f85c7bbc050512290a11db5a5096f497e76e9",
   "tests/data/cpp_reference/crown/results.jsonl": "6e57ab7fa5cda28d1bc5aa04de1c62bc5dcdef6d17521ddba73340fc54d017b4",
