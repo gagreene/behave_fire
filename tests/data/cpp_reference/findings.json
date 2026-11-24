@@ -199,7 +199,7 @@
   },
   {
     "class": "unsafe_oracle_route",
-    "evidence": "Behave 3ca33d5 crown.cpp:211,317-336,582-590",
+    "evidence": "Behave 3ca33d5 crown.cpp:206,230,317-336,583-590",
     "finding": "Scott and Reinhardt calculates active wind with 3.0 divided by converted canopy bulk density. Zero density yields a non-finite wind input for the threshold Surface run.",
     "id": "F-020",
     "observation_scope": "Source review and guarded rejection of a density override before upstream entry.",

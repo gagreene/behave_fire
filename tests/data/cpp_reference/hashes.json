@@ -23,7 +23,7 @@
   "tests/data/cpp_reference/crown/manifest.json": "e7cde2548926e017b81efa32400f85c7bbc050512290a11db5a5096f497e76e9",
   "tests/data/cpp_reference/crown/results.jsonl": "6e57ab7fa5cda28d1bc5aa04de1c62bc5dcdef6d17521ddba73340fc54d017b4",
   "tests/data/cpp_reference/crown/schema.json": "064f1d1a4821f00af71aacc0115c84b59382d66fd71c6b8164dae8353d79f514",
-  "tests/data/cpp_reference/findings.json": "f9456de98d1c552eb1e67742146b34ba5988658058e20a4f1fa018e5b06bf07b",
+  "tests/data/cpp_reference/findings.json": "ceb520a8879c30643d41c208b864ccaa8281536c07b58bf730d0322322f65ea6",
   "tests/data/cpp_reference/fine_dead_fuel_moisture/cases.jsonl": "e6d6d221cda5b27747f1b33a59cd2211160f8e526a92e4ac28632ae2d31589b5",
   "tests/data/cpp_reference/fine_dead_fuel_moisture/manifest.json": "998e839afd5034d0d979efe91fd5fbd92c24fa8631ff4e8645ab593c122ad48c",
   "tests/data/cpp_reference/fine_dead_fuel_moisture/results.jsonl": "0731751c000b92bdda710967d5b6a3dacd2f493cb015976ea1174e051fe2518e",
