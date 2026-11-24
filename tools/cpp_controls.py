@@ -18,6 +18,7 @@ import cpp_reference as reference
 import cpp_safety as safety
 import cpp_slope_tool as slope_tool
 import cpp_spot as spot
+import cpp_units as units
 import cpp_vapor_pressure_deficit as vpd
 
 
@@ -327,7 +328,7 @@ def measure_ports(root, report, backends=("python", "rust"), expected_platform=N
 
         result.update(binding_api_version=_rust.__binding_api_version__,
                       extension_sha256=reference._digest(Path(_rust.__file__)))
-    for operation in (moisture, fire_size, ignite, mortality, safety, slope_tool, spot, vpd):
+    for operation in (moisture, fire_size, ignite, mortality, safety, slope_tool, spot, units, vpd):
         result[operation.DATASET.name] = dict(
             artifacts=operation.artifacts(root), observations=operation.measure_ports(root, backends)
         )

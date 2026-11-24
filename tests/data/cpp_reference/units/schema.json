@@ -1,0 +1,18 @@
+{
+  "bounds": "Only the reviewed case ID and exact input tuple are accepted.",
+  "call_sequence": [
+    "Convert the Celsius input to Fahrenheit through toBaseUnits.",
+    "Convert the independent Fahrenheit input to Celsius through fromBaseUnits."
+  ],
+  "operation": "units",
+  "output": {
+    "celsius": "Degrees Celsius",
+    "fahrenheit": "Degrees Fahrenheit"
+  },
+  "request": {
+    "input_celsius": "Degrees Celsius",
+    "input_fahrenheit": "Degrees Fahrenheit"
+  },
+  "schema_version": 1,
+  "scope": "This measurement covers the bidirectional below-freezing Celsius case."
+}
