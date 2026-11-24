@@ -33,6 +33,15 @@ def test_manual_and_release_cpp_calibration_use_the_opt_in_live_lane():
     assert job['if'] == "${{ github.event_name == 'workflow_dispatch' || inputs.cpp_live }}"
     release = yaml.load((ROOT / '.github/workflows/release.yml').read_text(), Loader=yaml.BaseLoader)
     assert release['jobs']['validation']['with'] == {'cpp_live': 'true'}
+    shared = './.github/workflows/cpp-live-validation.yml'
+    assert job['uses'] == shared
+    crate = yaml.load((ROOT / '.github/workflows/release-crate.yml').read_text(), Loader=yaml.BaseLoader)
+    assert crate['jobs']['cpp-live']['uses'] == shared
+    assert set(crate['jobs']['publish-crate']['needs']) == {'verify', 'cpp-live'}
+    assert crate['jobs']['publish-crate']['if'] == 'inputs.publish'
+    lane = yaml.load((ROOT / shared).read_text(), Loader=yaml.BaseLoader)
+    assert 'workflow_call' in lane['on']
+    job = lane['jobs']['live']
     live_steps = [step for step in job['steps'] if 'pytest tests/cpp_live -m cpp_live' in step.get('run', '')]
     live, = live_steps
     assert live['env']['BEHAVE_CPP_LIVE'] == '1'
