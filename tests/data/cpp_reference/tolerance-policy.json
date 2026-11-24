@@ -17,6 +17,44 @@
   "approval_gate": "Conditionally owner-approved caps qualified by complete manual CI evidence",
   "approved": true,
   "conditional_owner_approval": true,
+  "crown": {
+    "approved": false,
+    "fields": {
+      "crown_fireline_btu_ft_s": {
+        "kind": "measurement_only"
+      },
+      "crown_flame_ft": {
+        "kind": "measurement_only"
+      },
+      "crown_fraction_burned": {
+        "kind": "measurement_only"
+      },
+      "crown_length_to_width_ratio": {
+        "kind": "measurement_only"
+      },
+      "crown_ros_ft_min": {
+        "kind": "measurement_only"
+      },
+      "final_fireline_btu_ft_s": {
+        "kind": "measurement_only"
+      },
+      "final_flame_ft": {
+        "kind": "measurement_only"
+      },
+      "final_hpua_btu_ft2": {
+        "kind": "measurement_only"
+      },
+      "final_ros_ft_min": {
+        "kind": "measurement_only"
+      },
+      "fire_type": {
+        "kind": "measurement_only"
+      },
+      "surface_ros_ft_min": {
+        "kind": "measurement_only"
+      }
+    }
+  },
   "documented_load_source_models": [
     152,
     153
@@ -76,7 +114,7 @@
         "results.jsonl": "3c8a90c2d0cb8af549b5d555938e439ed5867b5d2fbb66fdad978aa5c056d3df",
         "schema.json": "bcefacdfef527819dd578abc68c46e9c05518c143d6f013f170a06d6be4df340"
       },
-      "ci_run_url": "https://github.com/gagreene/behave_fire/actions/runs/45320989052",
+      "ci_run_url": "https://github.com/gagreene/behave_fire/actions/runs/45328421875",
       "comparisons": 144,
       "maxima": {
         "area_ft2": {
@@ -98,7 +136,7 @@
           "ulp": 0
         }
       },
-      "source_commit": "7cc27f305565a7344dfb643b8c885d7e3def94df"
+      "source_commit": "cd187571724c03f6033be8f945cab9a797adbd31"
     }
   },
   "ignite": {
@@ -121,7 +159,7 @@
     }
   },
   "qualification": {
-    "activation_reason": "Requalify existing caps at the reviewed updated Behave pin",
+    "activation_reason": "Requalify the existing reviewed caps with six guarded Crown measurements",
     "artifacts": {
       "tests/data/cpp_reference/surface/cases.jsonl": "266d08d8b82d65d950461c73e70b44c228ad7b54fbe99eb1d14ed8af6add66da",
       "tests/data/cpp_reference/surface/results.jsonl": "84ab8f5bf4197dcea68f302a2969f8f4c075c995a8e8f084d8611a12120ef14a",
@@ -129,7 +167,30 @@
       "tests/data/cpp_reference/surface_custom/results.jsonl": "04e96268466338364a350d53ac05b639f1a7758c78911aaee97da389c0f779a2"
     },
     "calibration_complete": true,
-    "ci_run_url": "https://github.com/gagreene/behave_fire/actions/runs/45320989052",
+    "ci_run_url": "https://github.com/gagreene/behave_fire/actions/runs/45328421875",
+    "crown": {
+      "artifacts": {
+        "cases.jsonl": "c4ab63a4a0d52e8c5a8fd98aac981213db6606200f385c6b88333682897dc2fc",
+        "manifest.json": "e7cde2548926e017b81efa32400f85c7bbc050512290a11db5a5096f497e76e9",
+        "results.jsonl": "6e57ab7fa5cda28d1bc5aa04de1c62bc5dcdef6d17521ddba73340fc54d017b4",
+        "schema.json": "064f1d1a4821f00af71aacc0115c84b59382d66fd71c6b8164dae8353d79f514"
+      },
+      "comparisons": 1056,
+      "max_abs": {
+        "crown_fireline_btu_ft_s": 9.094947017729282e-13,
+        "crown_flame_ft": 1.4210854715202004e-14,
+        "crown_fraction_burned": 1.6653345369377348e-16,
+        "crown_length_to_width_ratio": 0.0,
+        "crown_ros_ft_min": 1.4210854715202004e-14,
+        "final_fireline_btu_ft_s": 9.094947017729282e-13,
+        "final_flame_ft": 1.4210854715202004e-14,
+        "final_hpua_btu_ft2": 6.821210263296962e-13,
+        "final_ros_ft_min": 1.4210854715202004e-14,
+        "fire_type": 0.0,
+        "surface_ros_ft_min": 3.552713678800501e-15
+      },
+      "nonmatching": 476
+    },
     "fields": {
       "fireline_intensity_btu_ft_s": {
         "atol": 1e-12,
@@ -177,7 +238,7 @@
         "results.jsonl": "3c8a90c2d0cb8af549b5d555938e439ed5867b5d2fbb66fdad978aa5c056d3df",
         "schema.json": "bcefacdfef527819dd578abc68c46e9c05518c143d6f013f170a06d6be4df340"
       },
-      "ci_run_url": "https://github.com/gagreene/behave_fire/actions/runs/45320989052",
+      "ci_run_url": "https://github.com/gagreene/behave_fire/actions/runs/45328421875",
       "comparisons": 144,
       "maxima": {
         "area_ft2": {
@@ -199,7 +260,7 @@
           "ulp": 0
         }
       },
-      "source_commit": "7cc27f305565a7344dfb643b8c885d7e3def94df"
+      "source_commit": "cd187571724c03f6033be8f945cab9a797adbd31"
     },
     "ignite": {
       "artifacts": {
@@ -222,13 +283,14 @@
       "nonmatching": 0
     },
     "overlay_sha256": {
-      "CMakeLists.txt": "705a4dcb5a86fc3bf0e7c4679f0feb40b44f44faaad4aa7235bfd1efa093781d",
-      "driver.cpp": "16bd2d292fdcabea9ea4fe6fca832a3fc18c530043b0b3db5e1c32bf0ad69389",
+      "CMakeLists.txt": "79ff7cba02089f01fa27cd18c10e6b4e0fdaa18f18b80e29c8982af5e8eaf101",
+      "crown_reference.hpp": "b891482ff0e800d10e9b5918d4544bc5fd041da90358fb84b6f48f729cb45640",
+      "driver.cpp": "4feb0b3aca1696c886ee91b3620fbaaed3d2f2c59a07a7536f3be8389dfed1b8",
       "probe.cpp": "48338485a0b6f3fd64d0b3542a56c996e043d5e77e9887f0189101c1065df015"
     },
     "reports": {
       "cpp-GNU": {
-        "sha256": "f80a4b24bd077c28170c32184f5f737d784344e859733a63a659632bf46e4837",
+        "sha256": "557035773b7ee2519d891b5b73ef571cbf648652d4b067584679142c6079a676",
         "summary": {
           "available": 722,
           "cases": 773,
@@ -237,7 +299,7 @@
         }
       },
       "cpp-MSVC": {
-        "sha256": "6c733adcb798fe4043a3e83a33d09d7c0ced10317b69b24656a628a794f26d35",
+        "sha256": "4a3537cd5ec3e4001a8aaca8655ff48c4cea69156b80368f8f03f3292a22ad22",
         "summary": {
           "available": 722,
           "cases": 773,
@@ -246,7 +308,7 @@
         }
       },
       "ports-linux-aarch64": {
-        "sha256": "0507083b959c9dc79614bdaf53bfc8923088ca5b0476ad7245060b65e90a9c66",
+        "sha256": "fabcf3089cc1cd8284803afb4f64ed677a7db2014bec136886bb7fb53759392f",
         "summary": {
           "cases_per_backend": 710,
           "fields_per_backend": 3550,
@@ -254,7 +316,7 @@
         }
       },
       "ports-linux-musl-x86_64": {
-        "sha256": "9cb47836644e82a52894eae3b7b4f0ccdc33b50e0058e8f127ea8e7ae3edaa9b",
+        "sha256": "a81e0c9b3b515c0ddf51bd5a79c7dacf4715cd45c691418c1e9e8b775ad925e4",
         "summary": {
           "cases_per_backend": 710,
           "fields_per_backend": 3550,
@@ -262,7 +324,7 @@
         }
       },
       "ports-linux-x86_64": {
-        "sha256": "0dbb68fb013a8d57fc0916d067f948cf1f5d022241bf2f1782f201a9ef25cf4f",
+        "sha256": "d4596b74c1cf41fe69b18f48991f99cea6544cfbb0f873100390d7a074c02d38",
         "summary": {
           "cases_per_backend": 710,
           "fields_per_backend": 3550,
@@ -270,7 +332,7 @@
         }
       },
       "ports-macos-arm64": {
-        "sha256": "81b2765871d404ccc2da915b03095e70aab280ad9943c7d7fe0ac7cd39391c8e",
+        "sha256": "6b9ffb6b4f983534d90f1e39428a37bcffb4854e433fa632b8b3c4ccdd2afce7",
         "summary": {
           "cases_per_backend": 710,
           "fields_per_backend": 3550,
@@ -278,7 +340,7 @@
         }
       },
       "ports-macos-x86_64": {
-        "sha256": "447f5f14ec0631a630bc0be04ffcbe7b55fb47c338b9e3a3b5b2489356d8f219",
+        "sha256": "67c5170d56bfcf0b2eac78e791409754d575c1b26b72bc42224896b74ff649b9",
         "summary": {
           "cases_per_backend": 710,
           "fields_per_backend": 3550,
@@ -286,7 +348,7 @@
         }
       },
       "ports-windows-arm64": {
-        "sha256": "6da47745a1b6aae186f5330e6ca3919c8f74d6cef1b05cde5771985afb2dd36b",
+        "sha256": "707a2c222a0bba4b3a9c6e9ae76a31db7d03f504b4cefad0b3c28936a7556098",
         "summary": {
           "cases_per_backend": 710,
           "fields_per_backend": 3550,
@@ -294,7 +356,7 @@
         }
       },
       "ports-windows-x86_64": {
-        "sha256": "2ec7211c45978dcbb0d18b9120ec0f4a280b33bec56d74e4f5a4fadffcd580c5",
+        "sha256": "272cfb83d6cff65f565034c692c000b78cf0c21e857908b915d81bf7050a5c00",
         "summary": {
           "cases_per_backend": 710,
           "fields_per_backend": 3550,
@@ -341,7 +403,7 @@
       },
       "nonmatching": 13
     },
-    "source_commit": "7cc27f305565a7344dfb643b8c885d7e3def94df",
+    "source_commit": "cd187571724c03f6033be8f945cab9a797adbd31",
     "source_files": {
       ".github/workflows/ci.yml": "5141b47dd44444ae2d3f0310a762588f47c8bf35ae820ccd5c676b6890065e00",
       ".github/workflows/crate-validation.yml": "970147b312a0719d1e63318b2f8b8f200479c5592e5e368cbfd2407893ac1f6d",
@@ -499,7 +561,7 @@
       "tools/benchmark_public_serial_f64.py": "a321b8bcfdbb9b65ec7680d24dbc699426a4bfade4aea98ab100212847cd13e1",
       "tools/build_pure_wheel.py": "435d7fddf3d1d0fdb87af808654b154eb98fc6f627b92993264d4e3828f6a827",
       "tools/check_core_f64.py": "b69ee38251b47d8b3c58db30027b9024c7c7a2d1f7018fc3a8615cff9134b3ee",
-      "tools/check_cpp_driver.py": "5d9fd3cbba93eb856756f4e2f37d58e4de82009d32c06b7d77867dd56b45f580",
+      "tools/check_cpp_driver.py": "5717fc621fe987afe509ea47c65ce7a3576e00e197cae7d75d9e82a4eae89a0b",
       "tools/check_crate_package.py": "f6e568a33ac6a583aae5cf39fcf59b071170d51f0961451430232d96191b42c6",
       "tools/check_function_order.py": "79ab381e2f48e9e6fa8605d11a3d0c7459e7519325b3e59785c3e4271bad19d7",
       "tools/check_performance.py": "3d8866b469dc6ba965e3c94583e8573c69477492e10de4431289ce47c374babe",
@@ -509,14 +571,15 @@
       "tools/check_wheel_metadata.py": "ff08a2a6bb74d59dca91bde336bf7920ce2e65f9a1c2f56093ea5db9278db4f0",
       "tools/compare_backends.py": "757cdb6401ab07aac6d0d9e2f0c4baa7865745e37f39ce4263c71db0d941001b",
       "tools/core_f64_reference.py": "f8d8d462e722ed0e4f8106d71e2d49544ccbaf77147bd1c7ec14db385683e779",
-      "tools/cpp_calibrate.py": "03249042c824c653ef08d689a14619748fdeb7f689d1ddbd4433c19b93f78375",
-      "tools/cpp_controls.py": "76711cbc25223f7b2445dcdb40ee16a50d89473dc6a110e6c2a0a1bc0e555d12",
+      "tools/cpp_calibrate.py": "60eb28feb07719a9095c6bfdb46e2064193291aab42ef218003cc6040ebdfdf6",
+      "tools/cpp_controls.py": "3d1a46d2dab49a90347f58dfb1ecbc9ab5f7b8f406b9515e93ec14489c666e29",
+      "tools/cpp_crown.py": "6a5bbfca99ce5836605366099150dd5af7d70e1efe57bfdac361a8b6b48630d9",
       "tools/cpp_fine_dead_fuel_moisture.py": "d72359099f3a5382aee5f227b9de193adff97140766cbd6983cfa03b418be905",
       "tools/cpp_fire_size.py": "08ad6184e1c69d3053aa8736df0c9a5d94e46890d682b777a55e47cc33ff822d",
       "tools/cpp_ignite.py": "61c7f0494e970717248bc882f7e5f14431fa3b599ccf65f9ed9dfd42362d3607",
-      "tools/cpp_inventory.py": "ce2102aa1a3e656a046dd0dcc38a30616fb1e6576f79081882265eea841e9f83",
+      "tools/cpp_inventory.py": "1480c674823a61e1e7d6f6fc9578e0b5819be41751ab9c7d3691ac3f0aa0dc68",
       "tools/cpp_mortality.py": "c6215db6d08ffcd8d98485f420ff8c0fd17939ccda3b54da3c6a69152ac2a862",
-      "tools/cpp_reference.py": "75a59e65aecad292068b2cba59db523ce85e6f5efd270bcc9c82c720ecf66a29",
+      "tools/cpp_reference.py": "3b5339c1c1355ae1b34bf66566b450fc9f7b48e1f7076d72a500b6daed988035",
       "tools/cpp_safety.py": "d1a1cd20c4ee255358b583bda3145bd1f55e3fd7db53b76957dce03cbd4a972d",
       "tools/cpp_slope_tool.py": "335a6bd5a183910ebc8839cbd216eb84f1b859c8dc880cd3d16d5c01d9ccc0ea",
       "tools/cpp_spot.py": "02d77060f30bd49e8408787d58919e239b0536bed451114e6d84d567cab7fc75",

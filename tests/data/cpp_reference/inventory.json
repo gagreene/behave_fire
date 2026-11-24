@@ -88717,7 +88717,7 @@
         "3772b53cf30b565d4039"
       ],
       "notes": "Separate algorithm;port has no explicit same selector.",
-      "qualification": "Source-only;execution waits for approved next phases;unresolved identities unavailable.",
+      "qualification": "Upstream-only public run selector with no direct port counterpart.",
       "route_id": "crown_rothermel",
       "status": "not_in_pilot"
     },
@@ -88728,12 +88728,25 @@
       "contract": {
         "independent_cases": "Fresh objects per independent case;explicit transition cases only;validate every primitive/derived bound before every call,including setters and getters.",
         "state_lifecycle": "State setters, getters, constructors, resets, and copy contracts are assigned to this bundle; assignment is not execution evidence.",
-        "status": "source_only_pending_execution",
+        "status": "guarded_fixed_fm10_observations",
         "units": "Explicit declared unit enums and conversion bounds are checked before every call."
       },
-      "dataset": null,
+      "dataset": "crown",
       "executable_now": false,
-      "execution_evidence": [],
+      "execution_evidence": [
+        {
+          "file": "crown/cases.jsonl",
+          "sha256": "c4ab63a4a0d52e8c5a8fd98aac981213db6606200f385c6b88333682897dc2fc"
+        },
+        {
+          "file": "crown/results.jsonl",
+          "sha256": "6e57ab7fa5cda28d1bc5aa04de1c62bc5dcdef6d17521ddba73340fc54d017b4"
+        },
+        {
+          "file": "crown/manifest.json",
+          "sha256": "e7cde2548926e017b81efa32400f85c7bbc050512290a11db5a5096f497e76e9"
+        }
+      ],
       "guard_ids": [
         "fuel_storage",
         "surface_modes",
@@ -88746,10 +88759,10 @@
       "method_ids": [
         "936cb8f5d23ca0fec886"
       ],
-      "notes": "Current port full-run candidate.",
-      "qualification": "Source-only;execution waits for approved next phases;unresolved identities unavailable.",
+      "notes": "Six bounded flat FM10 runs cover all four fire classifications and the zero-base floor. Zero density is an upstream inversion hazard (F-020).",
+      "qualification": "Four exact fire classification categories and eleven shared measured fields. Measurement-only policy and a verified compiler and wheel receipt.",
       "route_id": "crown_scott_reinhardt",
-      "status": "not_in_pilot"
+      "status": "guarded_measurement_only"
     },
     {
       "assigned_method_ids": [

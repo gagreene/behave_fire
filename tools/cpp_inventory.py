@@ -213,10 +213,14 @@ def validate_inventory(inventory, require_ready=False, reference_root=None):
             raise ValueError(f"Missing or changed route membership: {route_id}")
         if not route["contract"] or not route["status"]:
             raise ValueError(f"Missing route state/lifecycle contract: {route_id}")
-        if route["executable_now"]:
+        measurement_only = route["status"] == "guarded_measurement_only"
+        if measurement_only and route["executable_now"]:
+            raise ValueError("Measurement-only route cannot claim qualified coverage")
+        if route["executable_now"] or measurement_only:
             if not route["dataset"] or not route["execution_evidence"]:
-                raise ValueError("Executable route lacks dataset and execution evidence")
+                raise ValueError("Observed route lacks dataset and execution evidence")
             _check_execution_evidence(route["execution_evidence"], route["dataset"], reference_root)
+        if route["executable_now"]:
             if any(functions[identity]["scientific_candidate"] for identity in assigned):
                 if not any(functions[identity]['scientific_candidate']
                            and functions[identity]['function_status'] == 'tested' for identity in assigned):

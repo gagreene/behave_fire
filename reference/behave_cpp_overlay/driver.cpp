@@ -1,4 +1,5 @@
 // Phase 1 protocol probe. Scientific calculations are called in pinned upstream sources.
+#include "crown_reference.hpp"
 #include "fineDeadFuelMoistureTool.h"
 #include "fireSize.h"
 #include "fuelModels.h"
@@ -150,7 +151,18 @@ std::string encode_result(const std::map<std::string, double>& result) {
     return output.str();
 }
 
+struct GeometryTrap {};
 struct UpstreamTrap {};
+
+/// Check the trap before reading the reviewed operation's outputs.
+///
+/// :param forbid: Whether the output entry trap is enabled.
+/// :param entered: Entry flag to set once the trap is cleared.
+/// :return: Nothing. Marks output entry on success.
+void enter_output(bool forbid, bool& entered) {
+    if (forbid) throw GeometryTrap{};
+    entered = true;
+}
 
 /// Register a validated request and check the trap before its upstream call.
 ///
@@ -301,6 +313,47 @@ Request validate(const std::map<std::string, Value>& input) {
         }
     }
     return {input.at("id").text, static_cast<int>(model), direction, physical, modes, user_waf, session, percent_control, moe_percent};
+}
+
+/// Validate the exact input tuple for one approved Crown case.
+///
+/// :param input: Parsed request object.
+/// :return: Reviewed input and expected classification for a fresh Crown calculation.
+crown_reference::Request validate_crown(const std::map<std::string, Value>& input) {
+    const std::set<std::string> fields = {"id", "operation", "wind_fpm", "canopy_base_ft", "crown_ratio"};
+    for (const auto& item : input)
+        if (!fields.count(item.first)) throw std::runtime_error("unsupported_field");
+    for (const auto& field : fields)
+        if (!input.count(field)) throw std::runtime_error("missing_field_" + field);
+
+    const Value& id = input.at("id");
+    if (id.kind != Value::String || id.text.empty()) throw std::runtime_error("invalid_id");
+    for (const auto& field : {"wind_fpm", "canopy_base_ft", "crown_ratio"})
+        if (input.at(field).kind != Value::Number) throw std::runtime_error(std::string("numeric_type_") + field);
+
+    struct ReviewedCase {
+        const char* wind_fpm;
+        const char* canopy_base_ft;
+        const char* crown_ratio;
+        FireType::FireTypeEnum fire_type;
+    };
+    const std::map<std::string, ReviewedCase> reviewed = {
+        {"calm", {"0", "15", "0.5", FireType::Surface}},
+        {"wind5", {"440", "15", "0.5", FireType::Surface}},
+        {"wind15", {"1320", "15", "0.5", FireType::ConditionalCrownFire}},
+        {"torching", {"616", "5", "0.8333333333333334", FireType::Torching}},
+        {"active", {"2200", "15", "0.5", FireType::Crowning}},
+        {"zero-base", {"0", "0", "1.0", FireType::Torching}},
+    };
+    const auto match = reviewed.find(id.text);
+    if (match == reviewed.end()) throw std::runtime_error("unreviewed_crown_request");
+    const auto& expected = match->second;
+    if (input.at("wind_fpm").text != expected.wind_fpm ||
+            input.at("canopy_base_ft").text != expected.canopy_base_ft ||
+            input.at("crown_ratio").text != expected.crown_ratio)
+        throw std::runtime_error("unreviewed_crown_request");
+    return {numeric(input.at("wind_fpm"), "wind_fpm"), numeric(input.at("canopy_base_ft"), "canopy_base_ft"),
+        numeric(input.at("crown_ratio"), "crown_ratio"), expected.fire_type};
 }
 
 using FineDeadFuelMoistureRequest = std::array<int, 8>;
@@ -657,7 +710,6 @@ VpdRequest validate_vpd(const std::map<std::string, Value>& input) {
 }
 
 struct Unavailable {};
-struct GeometryTrap {};
 struct Session {
     FuelModels fuels;
     Surface surface;
@@ -718,6 +770,21 @@ std::string run(const Request& request, bool forbid_geometry, bool& geometry_ent
         {"spread_chains_per_hour", surface.getSpreadRate(SpeedUnits::ChainsPerHour)}
     };
     return encode_result(result);
+}
+
+/// Run a guarded Crown calculation on fresh upstream objects.
+///
+/// :param request: Reviewed Crown input.
+/// :param forbid_output: Whether the output entry trap is enabled.
+/// :param output_entered: Output entry flag to set once the trap is cleared.
+/// :return: JSON object containing the eleven Crown outputs.
+std::string run_crown(const crown_reference::Request& request, bool forbid_output, bool& output_entered) {
+    FuelModels fuels;
+    const double expected_length_to_width = crown_reference::preflight(fuels, request);
+    Crown crown(fuels);
+    crown_reference::calculate(crown, request);
+    enter_output(forbid_output, output_entered);
+    return encode_result(crown_reference::read_result(crown, request, expected_length_to_width));
 }
 
 /// Measure one guarded lookup with a fresh upstream moisture tool.
@@ -908,7 +975,11 @@ int main(int argc, char** argv) {
             const std::string operation = operation_field != object.end() && operation_field->second.kind == Value::String
                 ? operation_field->second.text : "";
             std::string result;
-            if (operation == "fine_dead_fuel_moisture") {
+            if (operation == "crown") {
+                const auto request = validate_crown(object);
+                enter_upstream(id, ids, forbid, entered);
+                result = run_crown(request, forbid_geometry, geometry_entered);
+            } else if (operation == "fine_dead_fuel_moisture") {
                 const auto request = validate_fine_dead_fuel_moisture(object);
                 enter_upstream(id, ids, forbid, entered);
                 result = run_fine_dead_fuel_moisture(request, forbid_geometry);
@@ -951,13 +1022,14 @@ int main(int argc, char** argv) {
                 auto& session = request.session.empty() ? fresh : sessions[request.session];
                 result = run(request, forbid_geometry, geometry_entered, session);
             }
-            const bool report_output_entries = operation == "fine_dead_fuel_moisture"
+            const bool report_output_entries = operation == "crown" || operation == "fine_dead_fuel_moisture"
                 || operation == "ignite" || operation == "mortality"
                 || operation == "safety" || operation == "slope_tool" || operation == "spot_surface"
                 || operation == "units" || operation == "vapor_pressure_deficit";
             output << "{\"id\":" << encode(id) << ",\"status\":\"ok\",\"upstream_entries\":1,"
                    << (report_output_entries ? "\"output_entries\"" : "\"geometry_entries\"")
-                   << ":1,\"output\":" << result << "}\n";
+                   << ':' << (operation == "crown" ? static_cast<int>(geometry_entered) : 1)
+                   << ",\"output\":" << result << "}\n";
         } catch (const UpstreamTrap&) {
             std::cerr << "UPSTREAM_ENTRY_BLOCKED\n";
             return 86;

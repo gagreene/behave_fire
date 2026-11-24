@@ -20,9 +20,9 @@ def _bundle(tmp_path):
     canonical = root / 'tests/data/cpp_reference'
     canonical.mkdir(parents=True)
     reference._json(canonical / 'fixture-budget.json', dict(approved=True, owner_approval='2026-11-15', limits={
-        'case_limit': 806, 'canonical': {'raw_bytes': 6291456, 'gzip_bytes': 524288},
+        'case_limit': 812, 'canonical': {'raw_bytes': 6291456, 'gzip_bytes': 524288},
         'standalone': {'raw_bytes': 524288, 'gzip_bytes': 65536}}))
-    names = ('surface', 'surface_custom', 'fine_dead_fuel_moisture', 'fire_size', 'ignite',
+    names = ('crown', 'surface', 'surface_custom', 'fine_dead_fuel_moisture', 'fire_size', 'ignite',
              'mortality', 'safety', 'slope_tool', 'spot', 'units', 'vapor_pressure_deficit')
     for name in names:
         directory = canonical / name
@@ -37,9 +37,9 @@ def _bundle(tmp_path):
 def test_fixture_budget_allows_the_exact_case_ceiling(tmp_path):
     root = _bundle(tmp_path)
     path = root / 'tests/data/cpp_reference/surface/cases.jsonl'
-    path.write_bytes(b'{}\n' * 796)
-    assert reference.check_fixture_budget(root)['cases'] == 806
-    path.write_bytes(b'{}\n' * 797)
+    path.write_bytes(b'{}\n' * 801)
+    assert reference.check_fixture_budget(root)['cases'] == 812
+    path.write_bytes(b'{}\n' * 802)
     with pytest.raises(ValueError, match='case'):
         reference.check_fixture_budget(root)
 

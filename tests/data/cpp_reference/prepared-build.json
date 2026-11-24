@@ -4,8 +4,8 @@
     "id": "MSVC",
     "version": "19.50.35728.0"
   },
-  "driver_sha256": "9d93426d04be12a678a707f8c6b35e86905557bf6bb1a689909e86e1c8b312fd",
-  "driver_source_sha256_lf": "16bd2d292fdcabea9ea4fe6fca832a3fc18c530043b0b3db5e1c32bf0ad69389",
+  "driver_sha256": "5c2cd6285251f86279534de93256221518bcfca717dc58b82f0e4aa3fe2b21b9",
+  "driver_source_sha256_lf": "4feb0b3aca1696c886ee91b3620fbaaed3d2f2c59a07a7536f3be8389dfed1b8",
   "flags": [
     "/O2",
     "/fp:precise",
@@ -16,11 +16,12 @@
   "historical_manifest_sha256": "a8c10db6cf6d87acb76ba5469f02ae75fdcc99417fcf12d282f75a55810a635e",
   "original_replay_sha256": "84ab8f5bf4197dcea68f302a2969f8f4c075c995a8e8f084d8611a12120ef14a",
   "prepared_overlay_sha256": {
-    "CMakeLists.txt": "705a4dcb5a86fc3bf0e7c4679f0feb40b44f44faaad4aa7235bfd1efa093781d",
-    "driver.cpp": "16bd2d292fdcabea9ea4fe6fca832a3fc18c530043b0b3db5e1c32bf0ad69389",
+    "CMakeLists.txt": "79ff7cba02089f01fa27cd18c10e6b4e0fdaa18f18b80e29c8982af5e8eaf101",
+    "crown_reference.hpp": "b891482ff0e800d10e9b5918d4544bc5fd041da90358fb84b6f48f729cb45640",
+    "driver.cpp": "4feb0b3aca1696c886ee91b3620fbaaed3d2f2c59a07a7536f3be8389dfed1b8",
     "probe.cpp": "48338485a0b6f3fd64d0b3542a56c996e043d5e77e9887f0189101c1065df015"
   },
-  "reason": "Requalify the named Behave pin while preserving the reviewed Surface load inputs",
+  "reason": "Add six guarded Scott and Reinhardt Crown measurements",
   "schema_version": 1,
   "source_digest_format": "Git text-auto binary probe: CRLF-to-LF without encoding changes; binary raw SHA256",
   "submodule_checkout_used": true,

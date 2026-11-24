@@ -6,6 +6,7 @@ import math
 import subprocess
 from pathlib import Path
 
+import cpp_crown as crown
 import cpp_fine_dead_fuel_moisture as moisture
 import cpp_mortality as mortality
 import cpp_safety as safety
@@ -18,6 +19,58 @@ from cpp_ignite import DATASET as IGNITE_DATASET
 from cpp_ignite import load_cases as load_ignite_cases
 from cpp_reference import PIN, ROOT, _digest, _document, _prepared_build, _text_digest, _unique_object, load_reference
 
+
+def _check_crown(driver, directory, root, exact_replay):
+    """Check guarded inputs, execution boundaries, and replay for six Crown cases.
+
+    :param driver: Verified out-of-tree executable.
+    :param directory: Scratch evidence directory.
+    :param root: Checkout holding the approved Crown observations.
+    :param exact_replay: Require byte equality for the original prepared driver.
+    :return: Crown protocol summary for the compiler qualification report.
+    """
+    request_path = root / crown.DATASET / "cases.jsonl"
+    cases = crown.load_cases(root)
+    calm, wind5, _, torching, active, _ = cases
+    controls = (
+        (dict(calm, wind_fpm=-0.0), "unreviewed_crown_request"),
+        (dict(wind5, wind_fpm=441), "unreviewed_crown_request"),
+        (dict(wind5, wind_fpm=440.0), "unreviewed_crown_request"),
+        (dict(wind5, wind_fpm="440"), "numeric_type_wind_fpm"),
+        (dict(wind5, wind_fpm=True), "numeric_type_wind_fpm"),
+        (dict(wind5, id="unknown-crown"), "unreviewed_crown_request"),
+        (dict(torching, crown_ratio=0.83), "unreviewed_crown_request"),
+        (dict(torching, canopy_base_ft=15), "unreviewed_crown_request"),
+        (dict(active, fuel_model=10), "unsupported_field"),
+        (dict(active, canopy_bulk_density=0), "unsupported_field"),
+        ({key: value for key, value in active.items() if key != "canopy_base_ft"},
+         "missing_field_canopy_base_ft"),
+    )
+    negative = directory / "crown-negative-input.jsonl"
+    negative.write_text("".join(json.dumps(case) + "\n" for case, _ in controls), encoding="utf-8")
+    rows = _read_lines(_run(driver, directory, "crown-negative", negative, "--forbid-upstream", 0))
+    expected = [dict(id=case["id"], status="rejected", upstream_entries=0, error=reason)
+                for case, reason in controls]
+    if rows != expected:
+        raise ValueError("A Crown request escaped its bounded input guard")
+    _run(driver, directory, "crown-upstream-positive-trap", request_path, "--forbid-upstream", 86)
+    if b"UPSTREAM_ENTRY_BLOCKED" not in (directory / "crown-upstream-positive-trap.stderr").read_bytes():
+        raise ValueError("Crown upstream trap was not active")
+    _run(driver, directory, "crown-output-positive-trap", request_path, "--forbid-geometry", 87)
+    if b"GEOMETRY_ENTRY_BLOCKED" not in (directory / "crown-output-positive-trap.stderr").read_bytes():
+        raise ValueError("Crown output trap was not active")
+    replay = _run(driver, directory, "crown-replay", request_path, None, 0)
+    crown.read_cpp_results(root, replay)
+    if exact_replay and replay.read_bytes() != (root / crown.DATASET / "results.jsonl").read_bytes():
+        raise ValueError("Crown exact-driver replay differs from stored observations")
+    duplicate = directory / "crown-duplicate-input.jsonl"
+    duplicate.write_text((json.dumps(calm) + "\n") * 2, encoding="utf-8")
+    rows = _read_lines(_run(driver, directory, "crown-duplicate", duplicate, None, 0))
+    if rows != [_read_lines(replay)[0], dict(id=calm["id"], status="rejected", upstream_entries=0,
+                                            error="duplicate_id")]:
+        raise ValueError("Duplicate Crown ID reached upstream twice")
+    return dict(negative_cases=len(controls), negative_upstream_entries=0, upstream_trap_exit=86,
+                output_trap_exit=87, duplicate_ids_rejected=True)
 
 def _check_custom(driver, directory, data, root):
     """Qualify new custom inputs without weakening any original driver control.
@@ -631,6 +684,7 @@ def check_driver(driver, directory, root=ROOT, build_receipt=None, exact_replay=
                    replay_cases=len(data["cases"]), replay_byte_identical=byte_identical, duplicate_ids_rejected=True,
                    state_sequence_checked=True, scientific_parity_approved=False)
     summary.update(_check_custom(driver, directory, data, root))
+    summary["crown"] = _check_crown(driver, directory, root, exact_replay)
     summary["fine_dead_fuel_moisture"] = _check_fine_dead_fuel_moisture(driver, directory, root, exact_replay)
     summary["fire_size"] = _check_fire_size(driver, directory, root, exact_replay)
     summary["ignite"] = _check_ignite(driver, directory, root, exact_replay)

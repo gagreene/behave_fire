@@ -1,0 +1,65 @@
+{
+  "available": 6,
+  "build": {
+    "compiler": {
+      "id": "MSVC",
+      "version": "19.50.35728.0"
+    },
+    "driver_sha256": "5c2cd6285251f86279534de93256221518bcfca717dc58b82f0e4aa3fe2b21b9",
+    "flags": [
+      "/O2",
+      "/fp:precise",
+      "/D_USE_MATH_DEFINES=",
+      "/EHsc"
+    ],
+    "machine": "AMD64",
+    "overlay_sha256": {
+      "CMakeLists.txt": "79ff7cba02089f01fa27cd18c10e6b4e0fdaa18f18b80e29c8982af5e8eaf101",
+      "crown_reference.hpp": "b891482ff0e800d10e9b5918d4544bc5fd041da90358fb84b6f48f729cb45640",
+      "driver.cpp": "4feb0b3aca1696c886ee91b3620fbaaed3d2f2c59a07a7536f3be8389dfed1b8",
+      "probe.cpp": "48338485a0b6f3fd64d0b3542a56c996e043d5e77e9887f0189101c1065df015"
+    },
+    "pinned_checkout_clean": true,
+    "platform": "Windows-10-10.0.19044-SP0",
+    "upstream_sources": {
+      "src/behave/crown.cpp": "7abe8a7d7db93bf85f4606d1671f4d03decb876cbb8b914115be52ce16f22154",
+      "src/behave/crown.h": "d024b3b675278adb398912350380ff1e4e5278a2d0aae4760274be8f0b23f202",
+      "src/behave/crownInputs.cpp": "ed8d6021d0baa5063d936556edbde1bd678925e05f32ee558221845af6729701",
+      "src/behave/crownInputs.h": "b4d7173aa14f747b104eb7df637d1f15446daadf86413203a53a3fba653eed11",
+      "src/behave/fireSize.cpp": "1c674f27e8f00ed729639964b16b75a62d5dc507dd1efe0cdd453b14de5ac3b0",
+      "src/behave/fireSize.h": "5e061a0c088a16c423088fb6fdd556cf0979c2be9a26e87e04a6472aca4b99e0",
+      "src/behave/fuelModels.cpp": "bbcf4582470cac57f4d693ead2be20bae5d8a73f176d059c26cfca4ab853b73c",
+      "src/behave/fuelModels.h": "04ec57e1fbf7af2210be6d464265b7dc394ae8f51a6a4adb5b44833eb53350ec",
+      "src/behave/surface.cpp": "5f249e1b29229ba16c99077dd24b0586bf3b22a9cb06c9d89666ba50174207af",
+      "src/behave/surface.h": "609769de9cb756db90cbc3185d7276021117e6894a20d99500a65c903ea513a0",
+      "src/behave/surfaceFire.cpp": "1f6df873130ea5c7ea710c603527aabc22c1d5e437174d81b9ff2d432804715c",
+      "src/behave/surfaceFire.h": "73f0c53996171e1d8b2d1a3bbf37cb5669d3fa1a56eb4cb66580c5180635448f"
+    }
+  },
+  "case_count": 6,
+  "command": "behave_ref_driver cases.jsonl results.jsonl",
+  "fields": [
+    "surface_ros_ft_min",
+    "crown_ros_ft_min",
+    "crown_fireline_btu_ft_s",
+    "crown_flame_ft",
+    "crown_fraction_burned",
+    "fire_type",
+    "final_ros_ft_min",
+    "final_hpua_btu_ft2",
+    "final_fireline_btu_ft_s",
+    "final_flame_ft",
+    "crown_length_to_width_ratio"
+  ],
+  "files": {
+    "cases.jsonl": "c4ab63a4a0d52e8c5a8fd98aac981213db6606200f385c6b88333682897dc2fc",
+    "results.jsonl": "6e57ab7fa5cda28d1bc5aa04de1c62bc5dcdef6d17521ddba73340fc54d017b4",
+    "schema.json": "064f1d1a4821f00af71aacc0115c84b59382d66fd71c6b8164dae8353d79f514"
+  },
+  "generator": "behave_ref_driver guarded Scott and Reinhardt Crown operation",
+  "operation": "crown",
+  "result_count": 6,
+  "schema_version": 1,
+  "seed": null,
+  "upstream_sha": "3ca33d5b919d4253b411bfb6464b4c872dda6fc9"
+}

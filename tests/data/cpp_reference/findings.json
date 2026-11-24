@@ -196,5 +196,21 @@
     "id": "F-019",
     "observation_scope": "Twelve numbered Surface inputs exercise the two retained definitions. The new C++ numbered values are measured as produced. Explicit load fields in the corresponding custom controls provide the same physical inputs as the ports.",
     "status": "Twelve numbered cases are recorded as load differences. The 139 explicit controls and the other 571 available numbered cases enter the existing comparison caps."
+  },
+  {
+    "class": "unsafe_oracle_route",
+    "evidence": "Behave 3ca33d5 crown.cpp:206,230,317-336,583-590",
+    "finding": "Scott and Reinhardt calculates active wind with 3.0 divided by converted canopy bulk density. Zero density yields a non-finite wind input for the threshold Surface run.",
+    "id": "F-020",
+    "observation_scope": "Source review and guarded rejection of a density override before upstream entry.",
+    "status": "Guarded Crown cases require the fixed positive density. Port-only tests cover zero canopy fuel."
+  },
+  {
+    "class": "upstream_initialization_and_unit_contract",
+    "evidence": "Behave PR #84 and issue #85, and guarded Scott and Reinhardt Crown replay.",
+    "finding": "The updated pin initializes state needed by fresh objects. Full Crown passes its twenty-foot wind readback to FireSize with a miles-per-hour tag. The reviewed scope follows that call and its length-to-width calculation.",
+    "id": "F-021",
+    "observation_scope": "Six fixed full Crown calls, including zero base and both calm and positive winds.",
+    "status": "The bounded full Crown route is measured at the updated pin. Standalone positive-wind Crown-mode FireSize is tracked separately upstream."
   }
 ]
