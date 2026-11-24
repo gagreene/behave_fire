@@ -572,6 +572,34 @@ SpotRequest validate_spot(const std::map<std::string, Value>& input) {
     return expected;
 }
 
+struct UnitsRequest {
+    double input_celsius;
+    double input_fahrenheit;
+};
+
+/// Validate the approved signed Celsius and Fahrenheit conversion inputs.
+///
+/// :param input: Parsed request object.
+/// :return: The reviewed inputs for both conversion directions.
+UnitsRequest validate_units(const std::map<std::string, Value>& input) {
+    const std::set<std::string> fields = {"id", "operation", "input_celsius", "input_fahrenheit"};
+    for (const auto& item : input)
+        if (!fields.count(item.first)) throw std::runtime_error("unsupported_field");
+    for (const auto& field : fields)
+        if (!input.count(field)) throw std::runtime_error("missing_field_" + field);
+
+    const auto& id = input.at("id");
+    if (id.kind != Value::String || id.text.empty()) throw std::runtime_error("invalid_id");
+    for (const auto& name : {"input_celsius", "input_fahrenheit"})
+        if (input.at(name).kind != Value::Number)
+            throw std::runtime_error(std::string("numeric_type_") + name);
+    if (id.text != "temperature-minus10c-14f" || input.at("input_celsius").text != "-10"
+            || input.at("input_fahrenheit").text != "14")
+        throw std::runtime_error("unreviewed_units_request");
+    return {numeric(input.at("input_celsius"), "input_celsius"),
+            numeric(input.at("input_fahrenheit"), "input_fahrenheit")};
+}
+
 struct VpdRequest {
     double temperature_k;
     double rh_pct;
@@ -797,6 +825,19 @@ std::string run_spot(const SpotRequest& request, bool forbid_output) {
     return encode_result({{"flat_distance_ft", distance}});
 }
 
+/// Measure the two reviewed temperature conversions.
+///
+/// :param request: Reviewed Celsius and Fahrenheit inputs.
+/// :param forbid_output: Whether the output entry trap is enabled.
+/// :return: JSON object with the Celsius and Fahrenheit outputs.
+std::string run_units(const UnitsRequest& request, bool forbid_output) {
+    if (forbid_output) throw GeometryTrap{};
+    return encode_result({
+        {"celsius", TemperatureUnits::fromBaseUnits(request.input_fahrenheit, TemperatureUnits::Celsius)},
+        {"fahrenheit", TemperatureUnits::toBaseUnits(request.input_celsius, TemperatureUnits::Celsius)},
+    });
+}
+
 /// Measure the three public vapor pressure outputs using one fresh calculator.
 ///
 /// :param request: Reviewed VPD input.
@@ -868,6 +909,10 @@ int main(int argc, char** argv) {
                 const SpotRequest request = validate_spot(object);
                 enter_upstream(id, ids, forbid, entered);
                 result = run_spot(request, forbid_geometry);
+            } else if (operation == "units") {
+                const UnitsRequest request = validate_units(object);
+                enter_upstream(id, ids, forbid, entered);
+                result = run_units(request, forbid_geometry);
             } else if (operation == "vapor_pressure_deficit") {
                 const VpdRequest request = validate_vpd(object);
                 enter_upstream(id, ids, forbid, entered);
@@ -882,7 +927,7 @@ int main(int argc, char** argv) {
             const bool report_output_entries = operation == "fine_dead_fuel_moisture"
                 || operation == "ignite" || operation == "mortality"
                 || operation == "safety" || operation == "slope_tool" || operation == "spot_surface"
-                || operation == "vapor_pressure_deficit";
+                || operation == "units" || operation == "vapor_pressure_deficit";
             output << "{\"id\":" << encode(id) << ",\"status\":\"ok\",\"upstream_entries\":1,"
                    << (report_output_entries ? "\"output_entries\"" : "\"geometry_entries\"")
                    << ":1,\"output\":" << result << "}\n";

@@ -4,8 +4,8 @@
     "id": "MSVC",
     "version": "19.50.35728.0"
   },
-  "driver_sha256": "c38609526103420f5acdb51b53d978983c0056c07defe29ff3cd9ccef0851942",
-  "driver_source_sha256_lf": "dbb4039b9ccdfeff87a5c65564be16403ab168e0a86a559ca657c727a795efc8",
+  "driver_sha256": "64bf67eacfb661359fb05aa54b4d19586cbbbb7699af28037a3175e38a18530f",
+  "driver_source_sha256_lf": "fce290fba388883e1268a7a50891c2e6f7f79c286a65d888baa07270eac9ff53",
   "flags": [
     "/O2",
     "/fp:precise",
@@ -17,10 +17,10 @@
   "original_replay_sha256": "ae006838d93bbb9533df74340085110c479315cb8238a8ce488a68fe5e9e1b71",
   "prepared_overlay_sha256": {
     "CMakeLists.txt": "705a4dcb5a86fc3bf0e7c4679f0feb40b44f44faaad4aa7235bfd1efa093781d",
-    "driver.cpp": "dbb4039b9ccdfeff87a5c65564be16403ab168e0a86a559ca657c727a795efc8",
+    "driver.cpp": "fce290fba388883e1268a7a50891c2e6f7f79c286a65d888baa07270eac9ff53",
     "probe.cpp": "48338485a0b6f3fd64d0b3542a56c996e043d5e77e9887f0189101c1065df015"
   },
-  "reason": "Prepare the guarded VPD operation and preserve prior pinned observations",
+  "reason": "Prepare the guarded Units operation and preserve prior pinned observations",
   "schema_version": 1,
   "source_digest_format": "Git text-auto binary probe: CRLF-to-LF without encoding changes; binary raw SHA256",
   "submodule_checkout_used": true,
