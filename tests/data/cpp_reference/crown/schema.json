@@ -1,0 +1,47 @@
+{
+  "bounds": "The driver accepts only the six exact case IDs and numeric tuples.",
+  "call_sequence": [
+    "Create fresh standard FuelModels and verify that fuel model 10 is defined and burnable.",
+    "Replay external and internal FM10 Surface inputs. Check modes and arithmetic, then run the derived threshold wind and verify Surface restoration.",
+    "Check the predicted classification, fraction and ellipse before running a fresh Crown instance.",
+    "Verify the fixed Crown inputs and call doCrownRunScottAndReinhardt. Read the shared observations."
+  ],
+  "fixed_inputs": {
+    "aspect_degrees": 0,
+    "canopy_bulk_density_lb_ft3": 0.02,
+    "canopy_cover_percent": 50,
+    "canopy_height_ft": 30,
+    "foliar_moisture_percent": 100,
+    "fuel_model": 10,
+    "moisture_dead_100h_percent": 8,
+    "moisture_dead_10h_percent": 7,
+    "moisture_dead_1h_percent": 6,
+    "moisture_live_herbaceous_percent": 60,
+    "moisture_live_woody_percent": 90,
+    "slope_degrees": 0,
+    "wind_adjustment_factor": 0.4,
+    "wind_direction_degrees_upslope": 0,
+    "wind_height": "TwentyFoot"
+  },
+  "operation": "crown",
+  "output": {
+    "crown_fireline_btu_ft_s": "BTU/ft/s",
+    "crown_flame_ft": "ft",
+    "crown_fraction_burned": "fraction",
+    "crown_length_to_width_ratio": "ratio",
+    "crown_ros_ft_min": "ft/min",
+    "final_fireline_btu_ft_s": "BTU/ft/s",
+    "final_flame_ft": "ft",
+    "final_hpua_btu_ft2": "BTU/ft^2",
+    "final_ros_ft_min": "ft/min",
+    "fire_type": "integer enum: 0 surface, 1 torching, 2 conditional, 3 active",
+    "surface_ros_ft_min": "ft/min"
+  },
+  "request": {
+    "canopy_base_ft": "Canopy base height in feet",
+    "crown_ratio": "Canopy ratio as a fraction",
+    "wind_fpm": "Twenty-foot wind speed in ft/min"
+  },
+  "schema_version": 1,
+  "scope": "Six fixed flat FM10 Crown runs and their shared C++, Python, and Rust outputs."
+}

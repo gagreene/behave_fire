@@ -31,7 +31,7 @@ SURFACE_LOAD_CONTROLS = {
 }
 LOAD_CONTROL_FIELDS = {field for loads in SURFACE_LOAD_CONTROLS.values() for field in loads}
 CONTROL_MODEL = 250
-FIXTURE_BUDGET = {'case_limit': 806,
+FIXTURE_BUDGET = {'case_limit': 812,
                   'canonical': {'raw_bytes': 6 * 1024 ** 2, 'gzip_bytes': 512 * 1024},
                   'standalone': {'raw_bytes': 512 * 1024, 'gzip_bytes': 64 * 1024}}
 
@@ -197,6 +197,7 @@ def _required_artifacts(root):
         "inventory.json", "findings.json", "tolerance-policy.json", "fixture-budget.json", "surface/cases.jsonl",
         "surface/results.jsonl", "surface/manifest.json", "surface/profiles.json", "surface/applicability.json",
         "negative-inputs.jsonl", "negative-expected.json", "prepared-build.json",
+        "crown/cases.jsonl", "crown/manifest.json", "crown/results.jsonl", "crown/schema.json",
         "fine_dead_fuel_moisture/cases.jsonl", "fine_dead_fuel_moisture/manifest.json",
         "fine_dead_fuel_moisture/results.jsonl", "fine_dead_fuel_moisture/schema.json",
         "fire_size/cases.jsonl", "fire_size/manifest.json", "fire_size/results.jsonl", "fire_size/schema.json",
@@ -211,7 +212,7 @@ def _required_artifacts(root):
         "surface_custom/cases.jsonl", "surface_custom/results.jsonl", "surface_custom/manifest.json")}
     mandatory.update("tools/" + name for name in (
         "cpp_reference.py", "cpp_controls.py", "cpp_fire_size.py", "cpp_ignite.py", "cpp_inventory.py",
-        "cpp_mortality.py", "cpp_safety.py", "cpp_slope_tool.py", "cpp_spot.py", "cpp_calibrate.py",
+        "cpp_crown.py", "cpp_mortality.py", "cpp_safety.py", "cpp_slope_tool.py", "cpp_spot.py", "cpp_calibrate.py",
         "export_cpp_crate.py", "check_cpp_driver.py", "cpp_fine_dead_fuel_moisture.py",
         "cpp_units.py", "cpp_vapor_pressure_deficit.py"))
     mandatory.update(f"rust/crates/behave-fire/tests/data/cpp_reference/{dataset}/{name}"
@@ -415,7 +416,7 @@ def check_fixture_budget(root=ROOT):
     policy = _document(canonical / 'fixture-budget.json')
     if policy.get('approved') is not True or policy.get('limits') != FIXTURE_BUDGET:
         raise ValueError('Unapproved fixture budget limits')
-    datasets = ('surface', 'surface_custom', 'fine_dead_fuel_moisture', 'fire_size', 'ignite',
+    datasets = ('crown', 'surface', 'surface_custom', 'fine_dead_fuel_moisture', 'fire_size', 'ignite',
                 'mortality', 'safety', 'slope_tool', 'spot', 'units', 'vapor_pressure_deficit')
     cases = sum(sum(bool(line.strip()) for line in (canonical / dataset / 'cases.jsonl').read_bytes().splitlines())
                 for dataset in datasets)
@@ -624,6 +625,8 @@ def load_reference(root=ROOT, *, measurement=False):
 
     validate_inventory(_document(directory / "inventory.json"), reference_root=directory)
     from cpp_controls import load
+    from cpp_crown import load_observations as load_crown_observations
+    from cpp_crown import validate_measurement as validate_crown_measurement
     from cpp_fine_dead_fuel_moisture import load_observations as load_moisture_observations
     from cpp_fine_dead_fuel_moisture import validate_measurement as validate_moisture_measurement
     from cpp_fire_size import EXACT_FIELDS, load_observations, validate_policy
@@ -646,6 +649,8 @@ def load_reference(root=ROOT, *, measurement=False):
 
     controls = load(root, cases)
     qualification = policy.get("qualification") if policy["approved"] else None
+    load_crown_observations(root)
+    validate_crown_measurement(root, policy.get("crown"), None if measurement else qualification)
     load_moisture_observations(root)
     validate_moisture_measurement(root, policy.get("fine_dead_fuel_moisture"), None if measurement else qualification)
     load_observations(root)

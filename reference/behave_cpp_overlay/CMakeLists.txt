@@ -30,7 +30,8 @@ if(MSVC)
     target_link_options(surface_link_probe PRIVATE "/MAP:${CMAKE_BINARY_DIR}/surface_link_probe.map")
 endif()
 
-add_executable(behave_ref_driver driver.cpp
+add_executable(behave_ref_driver driver.cpp crown_reference.hpp
+    "${UPSTREAM}/crown.cpp" "${UPSTREAM}/crownInputs.cpp"
     "${UPSTREAM}/fineDeadFuelMoistureTool.cpp"
     "${UPSTREAM}/ignite.cpp" "${UPSTREAM}/igniteInputs.cpp"
     "${UPSTREAM}/canopy_coefficient_table.cpp" "${UPSTREAM}/mortality.cpp"

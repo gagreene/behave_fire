@@ -8,6 +8,43 @@ The old and new numbered Surface replays differ at 581 fields across 139 cases. 
 
 Each port qualification checks 571 available numbered cases and all 139 explicit controls under the existing `1e-12` caps. The reports also retain the 12 documented load differences and verify all numbered/custom port pairs. All nine standalone datasets replayed byte-for-byte across the pin change. The historical Surface qualification below documents the original inputs and the behavior at the previous pin.
 
+## Guarded Crown observations
+
+The Scott and Reinhardt dataset runs six flat fuel model 10 cases with fresh
+tables and models. The fixed moisture, canopy, wind mode, and adjustment
+factor are recorded in the [Crown schema](../tests/data/cpp_reference/crown/schema.json).
+The live driver accepts the exact requests below and checks the Surface
+inputs, the active-wind inversion, the threshold Surface replay and
+restoration, and the Crown branch and ellipse before the full run.
+
+| Case | Twenty-foot wind (ft/min) | Canopy base (ft) | Fire type |
+| --- | ---: | ---: | --- |
+| Calm | 0 | 15 | Surface |
+| Five mph | 440 | 15 | Surface |
+| Fifteen mph | 1320 | 15 | Conditional crown |
+| Torching | 616 | 5 | Torching |
+| Active | 2200 | 15 | Active crown |
+| Zero canopy base | 0 | 0 | Torching |
+
+The pinned upstream initializer fix permits these fresh-object runs. The
+zero-base case checks the upstream 0.1 m floor in critical surface intensity.
+The driver rejects density changes before entering upstream. At zero density
+the full upstream path divides by density during active-wind inversion and
+feeds the result into a second Surface run. The port unit tests exercise
+zero density and exact transition boundaries. The separate upstream
+Rothermel run has no explicit counterpart in the public port API.
+
+The eleven shared fields include the exact fire classification, Surface
+spread, Crown spread, fireline intensity, flame length, fraction burned,
+Crown length-to-width ratio, and the four final outputs. The offline tests
+check the six classifications. The numeric fields use a measurement-only
+policy. Qualification binds their differences across two compilers and seven
+wheel platforms. The positive-wind standalone FireSize Crown mode remains
+outside these results. [Upstream FireSize issue](https://github.com/firelab/behave/issues/85)
+
+The expanded canonical fixture ceiling is 812 cases. Compressed and raw
+byte ceilings and the standalone package budget retain their documented
+values.
 ## Historical Surface pilot at `f3b2943`
 
 The pilot includes the owner-approved Surface boundary and damping-arithmetic

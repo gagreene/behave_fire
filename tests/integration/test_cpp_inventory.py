@@ -26,9 +26,9 @@ def _snapshot_inventory(tmp_path):
     inventory = _inventory()
     source = ROOT / 'tests/data/cpp_reference'
     reference = tmp_path / 'tests/data/cpp_reference'
-    executable_routes = [route for route in inventory['routes'] if route['executable_now']]
+    evidence_routes = [route for route in inventory['routes'] if route['execution_evidence']]
     tested_functions = [row for row in inventory['public_functions'] if row['function_status'] == 'tested']
-    for filename in {item['file'] for row in executable_routes + tested_functions
+    for filename in {item['file'] for row in evidence_routes + tested_functions
                      for item in row['execution_evidence']}:
         path = reference / filename
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -54,6 +54,19 @@ def test_inventory_accepts_qualified_scientific_coverage():
     assert summary["state_lifecycle_methods"] == 508
     assert summary["tested_functions"] == 13
     assert summary['executable_scientific_bundles'] == 4
+
+
+def test_inventory_binds_guarded_crown_measurements():
+    inventory = _inventory()
+    route = next(row for row in inventory['routes'] if row['route_id'] == 'crown_scott_reinhardt')
+    assert route['status'] == 'guarded_measurement_only'
+    assert route['dataset'] == 'crown' and not route['executable_now']
+    assert {row['file'] for row in route['execution_evidence']} == {
+        'crown/cases.jsonl', 'crown/manifest.json', 'crown/results.jsonl',
+    }
+    route['executable_now'] = True
+    with pytest.raises(ValueError, match='Measurement-only route'):
+        _validator()(inventory)
 
 
 def test_inventory_binds_only_direct_fire_size_witnesses():
@@ -120,7 +133,7 @@ def test_inventory_binds_only_the_standalone_mortality_witness():
         'behave_fire::mortality::calculate_scorch_height']
 
 
-@pytest.mark.parametrize('dataset', ['fire_size', 'ignite', 'mortality', 'surface'])
+@pytest.mark.parametrize('dataset', ['crown', 'fire_size', 'ignite', 'mortality', 'surface'])
 @pytest.mark.parametrize('artifact', ['cases.jsonl', 'manifest.json', 'results.jsonl'])
 @pytest.mark.parametrize('mutation', ['missing', 'modified'])
 def test_inventory_cli_uses_the_selected_snapshots_execution_artifacts(tmp_path, dataset, artifact, mutation):
