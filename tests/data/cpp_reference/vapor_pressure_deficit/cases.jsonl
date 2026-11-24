@@ -1,0 +1,2 @@
+{"id":"freezing-dry","operation":"vapor_pressure_deficit","temperature_k":273.15,"rh_pct":0}
+{"id":"warm-half-humidity","operation":"vapor_pressure_deficit","temperature_k":293.15,"rh_pct":50}

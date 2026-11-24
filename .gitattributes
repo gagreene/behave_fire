@@ -26,6 +26,7 @@ tools/cpp_mortality.py text eol=lf
 tools/cpp_safety.py text eol=lf
 tools/cpp_slope_tool.py text eol=lf
 tools/cpp_spot.py text eol=lf
+tools/cpp_vapor_pressure_deficit.py text eol=lf
 tools/cpp_inventory.py text eol=lf
 tools/check_cpp_driver.py text eol=lf
 tools/export_cpp_crate.py text eol=lf
