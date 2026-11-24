@@ -1,7 +1,7 @@
 //! Independent C++ Surface observations with a fail-closed calibrated policy.
 //!
 //! Passing these tests validates fixture structure, real core evaluation, and a
-//! calibrated gate, while preserving documented original-unit differences. Run with
+//! calibrated gate, while preserving documented load differences. Run with
 //! `--test cpp_reference -- --nocapture` to retain every raw numeric difference.
 
 use behave_fire::engine::{
@@ -92,7 +92,7 @@ fn comparison_gate(policy: &Value, observations: &[Value]) -> Result<(), ReviewR
         let model = row["source_model"]
             .as_i64()
             .ok_or(ReviewRequired::IncompleteCoverage)?;
-        if cpp_policy::unit_record(model) {
+        if cpp_policy::LOAD_MODELS.contains(&model) {
             documented += 1;
             continue;
         }
@@ -111,7 +111,7 @@ fn comparison_gate(policy: &Value, observations: &[Value]) -> Result<(), ReviewR
             .map_err(|_| ReviewRequired::NumericalMismatch)?;
         compared += 1;
     }
-    if compared != 2220 || documented != 695 {
+    if compared != 2855 || documented != 60 {
         return Err(ReviewRequired::IncompleteCoverage);
     }
     Ok(())
@@ -213,7 +213,7 @@ fn verify_manifest() {
     assert_eq!(manifest["schema_version"], 1);
     assert_eq!(
         manifest["upstream_sha"],
-        "f3b2943e69abca942e795c5b1b45276f6338abb5"
+        "3ca33d5b919d4253b411bfb6464b4c872dda6fc9"
     );
     let payloads: [(&str, &[u8]); 3] = [
         (

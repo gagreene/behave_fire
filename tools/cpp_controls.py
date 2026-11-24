@@ -21,6 +21,10 @@ import cpp_spot as spot
 import cpp_units as units
 import cpp_vapor_pressure_deficit as vpd
 
+PORT_CASES = 710
+PAIRED_CASES = 139
+LOAD_DIFFERENCE_CASES = 12
+
 
 def _artifacts(root):
     """Identify numerical inputs whose identities must accompany every calibration.
@@ -80,7 +84,9 @@ def _port(case, backend, runners):
                 reference.CONTROL_MODEL, "UNIT_CONTROL", "Explicit Percent-unit control",
                 fuel["fuel_bed_depth"], 0, case["moe_percent"], 1,
                 fuel["heat_of_combustion_dead"], fuel["heat_of_combustion_live"], 0,
-                fuel["dead_1h"], fuel["dead_10h"], fuel["dead_100h"], fuel["live_herb"], fuel["live_woody"], 0,
+                case.get("dead_1h_load_lb_ft2", fuel["dead_1h"]), fuel["dead_10h"],
+                case.get("dead_100h_load_lb_ft2", fuel["dead_100h"]),
+                case.get("live_herb_load_lb_ft2", fuel["live_herb"]), fuel["live_woody"], 0,
                 fuel["savr_1h"], fuel["savr_live_herb"], fuel["savr_live_woody"], 0, fuel["is_dynamic"])
             if not accepted:
                 raise ValueError("Public custom registration failed")
@@ -203,6 +209,7 @@ def generate(root, driver, receipt, output, reason):
                     case_count=139, result_count=139, available=139, fields=list(reference.FIELDS),
                     source_models=sorted(reference.MOE_PERCENT_CONTROLS), registered_model=reference.CONTROL_MODEL,
                     moisture_units="Percent", generation_reason=reason, build=build,
+                    load_controls={str(model): loads for model, loads in reference.SURFACE_LOAD_CONTROLS.items()},
                     source_cases_sha256=reference._digest(root / "tests/data/cpp_reference/surface/cases.jsonl"),
                     files={name: reference._digest(output / name) for name in ("cases.jsonl", "results.jsonl")})
     reference._json(output / "manifest.json", manifest)
@@ -226,6 +233,9 @@ def load(root, source_cases):
             or manifest["result_count"] != 139 or manifest["available"] != 139
             or manifest["fields"] != list(reference.FIELDS)
             or manifest["source_models"] != sorted(reference.MOE_PERCENT_CONTROLS)
+            or manifest["load_controls"] != {
+                str(model): loads for model, loads in reference.SURFACE_LOAD_CONTROLS.items()
+            }
             or manifest["registered_model"] != reference.CONTROL_MODEL or manifest["moisture_units"] != "Percent"
             or (not historical_build and manifest["build"] != prepared)
             or manifest["source_cases_sha256"] != reference._digest(root
@@ -293,7 +303,7 @@ def measure_ports(root, report, backends=("python", "rust"), expected_platform=N
     for backend in backends:
         total, paired = 0, 0
         for case, expected in zip(data["cases"], data["results"], strict=False):
-            if expected["status"] != "ok" or case["fuel_model"] in reference.MOE_PERCENT_CONTROLS:
+            if expected["status"] != "ok" or case["fuel_model"] in reference.SURFACE_LOAD_CONTROLS:
                 continue
             actual = _port(case, backend, runners)
             differences = check_values(actual, expected["output"], fields)
@@ -306,17 +316,20 @@ def measure_ports(root, report, backends=("python", "rust"), expected_platform=N
             ):
                 raise AssertionError(f"{backend}/{case['id']}: numbered/custom definition differs")
             source_id = case["id"].removeprefix("custom-")
-            documented.append(dict(backend=backend, id=source_id, control=case["id"],
-                                   reason="numbered C++ record uses inconsistent extinction units",
-                                   numbered_cpp=raw_results[source_id]["output"], numbered_port=original))
+            if case["fuel_model"] in reference.SURFACE_LOAD_CONTROLS:
+                documented.append(dict(backend=backend, id=source_id, control=case["id"],
+                                       reason="numbered C++ loads differ from the retained port loads",
+                                       numbered_cpp=raw_results[source_id]["output"], numbered_port=original))
             differences = check_values(actual, expected["output"], fields)
             records.append(dict(backend=backend, id=case["id"], actual=actual, differences=differences))
             total += 1
             paired += 1
-        if total != 583 or paired != 139:
+        if total != PORT_CASES or paired != PAIRED_CASES or sum(
+            row["backend"] == backend for row in documented
+        ) != LOAD_DIFFERENCE_CASES:
             raise ValueError("Incomplete port calibration")
         counts[backend] = dict(cases=total, fields=total * len(reference.FIELDS), paired_cases=paired,
-                               original_unit_difference_cases=139)
+                               load_difference_cases=LOAD_DIFFERENCE_CASES)
     result = dict(schema_version=1, kind="ports", upstream_sha=reference.PIN, passed=True,
                   parity_approved=False, artifacts=_artifacts(root), fields=fields, counts=counts,
                   platform=platform.platform(), system=platform.system(), machine=platform.machine(),

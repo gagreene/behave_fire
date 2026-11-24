@@ -1,4 +1,14 @@
-# Pinned C++ Surface pilot
+# Pinned C++ validation
+
+## Current pin
+
+The registered oracle is [Behave `3ca33d5b919d4253b411bfb6464b4c872dda6fc9`](https://github.com/firelab/behave/commit/3ca33d5b919d4253b411bfb6464b4c872dda6fc9). The pin update replayed all 806 reviewed C++ cases on MSVC 19.50.35728 with C++14 and precise floating-point mode. The new revision adds five public wind-limit declarations and keeps the option off by default. It also includes the upstream initializer and PIPA2 mortality fixes. The standalone scorch-height measurement covers the same six inputs.
+
+The old and new numbered Surface replays differ at 581 fields across 139 cases. Upstream corrected the extinction units for all 23 affected models, so F-014 is historical. The new load values for models 152 and 153 are recorded under F-019. Their 12 numbered outputs are measured from the pinned upstream records. The matching custom inputs specify the retained port loads explicitly.
+
+Each port qualification checks 571 available numbered cases and all 139 explicit controls under the existing `1e-12` caps. The reports also retain the 12 documented load differences and verify all numbered/custom port pairs. All nine standalone datasets replayed byte-for-byte across the pin change. The historical Surface qualification below documents the original inputs and the behavior at the previous pin.
+
+## Historical Surface pilot at `f3b2943`
 
 The pilot includes the owner-approved Surface boundary and damping-arithmetic
 changes in Python and Rust. Python remains the behavioral reference. Numerical

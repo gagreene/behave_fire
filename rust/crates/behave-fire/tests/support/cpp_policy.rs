@@ -1,4 +1,4 @@
-//! Standalone checks for the qualified Surface bounds and declared unit exceptions.
+//! Standalone checks for the qualified Surface bounds and declared load differences.
 
 use super::cpp_hash::sha256;
 use serde_json::Value;
@@ -12,10 +12,7 @@ pub const FIELDS: [&str; 5] = [
     "length_to_width_ratio",
     "spread_chains_per_hour",
 ];
-pub const UNIT_MODELS: [i64; 23] = [
-    110, 111, 150, 151, 152, 153, 154, 155, 156, 157, 158, 159, 166, 167, 168, 169, 170, 171, 172,
-    190, 191, 192, 193,
-];
+pub const LOAD_MODELS: [i64; 2] = [152, 153];
 
 fn source_files(
     directory: &Path,
@@ -72,7 +69,7 @@ pub fn require_qualification(policy: &Value) -> Result<(), String> {
     }
     let qualification = &policy["qualification"];
     if qualification["calibration_complete"].as_bool() != Some(true)
-        || qualification["upstream_sha"] != "f3b2943e69abca942e795c5b1b45276f6338abb5"
+        || qualification["upstream_sha"] != "3ca33d5b919d4253b411bfb6464b4c872dda6fc9"
         || qualification["fields"] != policy["fields"]
     {
         return Err("missing Surface calibration qualification".into());
@@ -80,14 +77,14 @@ pub fn require_qualification(policy: &Value) -> Result<(), String> {
     for field in FIELDS {
         compare(1., 1., policy, field)?;
     }
-    let actual_models: Vec<_> = policy["documented_unit_source_models"]
+    let actual_models: Vec<_> = policy["documented_load_source_models"]
         .as_array()
-        .ok_or("missing unit-record disposition")?
+        .ok_or("missing load-record disposition")?
         .iter()
         .map(|value| value.as_i64())
         .collect();
-    if actual_models != UNIT_MODELS.into_iter().map(Some).collect::<Vec<_>>() {
-        return Err("unit-record disposition changed".into());
+    if actual_models != LOAD_MODELS.into_iter().map(Some).collect::<Vec<_>>() {
+        return Err("load-record disposition changed".into());
     }
     let expected: BTreeSet<_> = [
         "cpp-GNU",
@@ -122,8 +119,8 @@ pub fn require_qualification(policy: &Value) -> Result<(), String> {
             {
                 return Err("compiler coverage changed".into());
             }
-        } else if summary["cases_per_backend"].as_u64() != Some(583)
-            || summary["fields_per_backend"].as_u64() != Some(2915)
+        } else if summary["cases_per_backend"].as_u64() != Some(710)
+            || summary["fields_per_backend"].as_u64() != Some(3550)
             || summary["paired_cases_per_backend"].as_u64() != Some(139)
         {
             return Err("native-platform coverage changed".into());
@@ -193,9 +190,4 @@ pub fn require_qualification(policy: &Value) -> Result<(), String> {
         return Err("qualified core manifest changed".into());
     }
     Ok(())
-}
-
-/// Identify only the explicitly reviewed original C++ unit-convention records.
-pub fn unit_record(model: i64) -> bool {
-    UNIT_MODELS.contains(&model)
 }

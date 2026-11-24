@@ -48,7 +48,7 @@ def _validator():
 def test_inventory_accepts_qualified_scientific_coverage():
     inventory = _inventory()
     summary = _validator()(inventory)
-    assert summary["public_functions"] == 1394
+    assert summary["public_functions"] == 1399
     assert summary["scientific_candidates"] == 266
     assert summary["state_lifecycle_methods"] == 508
     assert summary["tested_functions"] == 13

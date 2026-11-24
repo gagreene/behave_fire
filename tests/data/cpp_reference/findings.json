@@ -67,7 +67,7 @@
     "evidence": "Phase 0 api/README.md and domains/REPORT.md",
     "finding": "Mortality crown-volume, scorch, and species-specific equation contracts differ between C++ and the Python reference.",
     "id": "F-010",
-    "status": "registered by owner decision 12; no scientific fix or golden generation"
+    "status": "registered by owner decision 12; no scientific fix or golden generation The updated pin corrects PIPA2 DBH conversion and the four-inch aggregate threshold. The six accepted standalone scorch-height inputs remain a narrower comparison scope."
   },
   {
     "class": "open_scientific_difference",
@@ -91,7 +91,7 @@
     "evidence": "surface.cpp:97-100,263-265; surfaceFire.cpp:205-207; fireSize.cpp:5-8; fireSize.h:73",
     "finding": "The skipped zero-load path resets SurfaceFire but does not initialize the separate FireSize geometry returned by public getters.",
     "id": "F-013",
-    "status": "confirmed and registered by owner; driver reports unavailable before Surface construction"
+    "status": "The new pin initializes FireSize scalar state. The driver still records undefined and zero-load Surface cases as unavailable before querying geometry."
   },
   {
     "analysis": "development/cpp-pilot/DIFFERENCES-ANALYSIS.md",
@@ -109,7 +109,7 @@
       "port": 1047.4059417058265,
       "relative": 0.6046877464843656
     },
-    "status": "Owner approved retaining fractional port records and documenting original C++ differences; 139 explicit Percent-unit controls pair numbered and custom port outputs; original observations preserved"
+    "status": "Resolved upstream at the updated pin by firelab/behave PRs #81 and #83. The historical unit discrepancy remains in the recorded measurements. Twenty-one of the corrected models now enter the direct numbered comparison. Models 152 and 153 follow F-019 for their distinct load records."
   },
   {
     "analysis": "development/cpp-pilot/DIFFERENCES-ANALYSIS.md",
@@ -188,5 +188,13 @@
       }
     ],
     "status": "Owner approved recording the four same-input measurements. The converted wind reproduces both pinned C++ results in the ports as a separate diagnostic. Spot has no approved acceptance policy."
+  },
+  {
+    "class": "intended_load_record_difference",
+    "evidence": "Behave 3ca33d5 includes upstream PR #81 and the reviewed two-pin replay of 806 existing inputs.",
+    "finding": "The updated C++ records change the dead one-hour load of model 152 from 2.2 to 2.25 tons/acre and the dead hundred-hour and live herbaceous loads of model 153 from 1.1 and 1.4 to 1.05 and 1.45 tons/acre. The Python and Rust records retain their established loads.",
+    "id": "F-019",
+    "observation_scope": "Twelve numbered Surface inputs exercise the two retained definitions. The new C++ numbered values are measured as produced. Explicit load fields in the corresponding custom controls provide the same physical inputs as the ports.",
+    "status": "Twelve numbered cases are recorded as load differences. The 139 explicit controls and the other 571 available numbered cases enter the existing comparison caps."
   }
 ]

@@ -46,7 +46,7 @@ def test_compiler_observation_validation_does_not_require_previous_source_qualif
             *reference._rows(root / 'tests/data/cpp_reference/surface_custom/results.jsonl')]
     protocol = dict(negative_cases=62, negative_upstream_entries=0, upstream_trap_exit=86,
                     geometry_trap_exit=87, duplicate_ids_rejected=True, state_sequence_checked=True,
-                    custom_negative_cases=18, custom_negative_upstream_entries=0,
+                    custom_negative_cases=21, custom_negative_upstream_entries=0,
                     custom_upstream_trap_exit=86, custom_geometry_trap_exit=87,
                     custom_duplicate_ids_rejected=True, custom_state_sequence_checked=True)
     report = dict(kind='cpp', observations=[dict(id=row['id'], actual=row) for row in rows], protocol=protocol)
@@ -89,7 +89,7 @@ class BlockNative:
 sys.meta_path.insert(0, BlockNative())
 import cpp_controls
 data = cpp_controls.measure_ports(root, report, backends=('python',))
-assert data['counts'] == {'python': dict(cases=583, fields=2915, paired_cases=139, original_unit_difference_cases=139)}
+assert data['counts'] == {'python': dict(cases=710, fields=3550, paired_cases=139, load_difference_cases=12)}
 assert 'extension_sha256' not in data and 'binding_api_version' not in data
 assert data['parity_approved'] is False
 '''
@@ -121,7 +121,7 @@ else:
     raise AssertionError('Stale qualification accepted')
 report = cpp_controls.measure_ports(root, output)
 assert report['parity_approved'] is False
-assert cpp_calibrate._validate_observations(root, report)['cases_per_backend'] == 583
+assert cpp_calibrate._validate_observations(root, report)['cases_per_backend'] == 710
 assert cpp_reference.compare_backends(root, output.parent / 'raw-differences')['policy_approved'] is False
 data = cpp_reference.load_reference(root, measurement=True)
 assert data['policy']['approved'] is False

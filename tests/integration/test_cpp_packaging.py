@@ -96,7 +96,7 @@ def test_export_copies_only_explicit_numeric_fixture_inputs(tmp_path):
     (source / "surface/results.jsonl").write_text('{"id":"case","status":"unavailable"}\n', encoding="utf-8")
     (source / "tolerance-policy.json").write_text(json.dumps({"approved": False}), encoding="utf-8")
     (source / "surface/manifest.json").write_text(
-        json.dumps({"upstream_sha": "f3b2943e69abca942e795c5b1b45276f6338abb5"}), encoding="utf-8",
+        json.dumps({"upstream_sha": "3ca33d5b919d4253b411bfb6464b4c872dda6fc9"}), encoding="utf-8",
     )
     (source / "LICENSE").write_text("synthetic excluded notice", encoding="utf-8")
     destination = tmp_path / "crate"
@@ -105,7 +105,7 @@ def test_export_copies_only_explicit_numeric_fixture_inputs(tmp_path):
         "cases.jsonl", "manifest.json", "results.jsonl", "tolerance-policy.json",
     ]
     manifest = json.loads((destination / "manifest.json").read_text(encoding="utf-8"))
-    assert manifest["upstream_sha"] == "f3b2943e69abca942e795c5b1b45276f6338abb5"
+    assert manifest["upstream_sha"] == "3ca33d5b919d4253b411bfb6464b4c872dda6fc9"
     assert manifest["files"] == {
         name: hashlib.sha256((destination / name).read_bytes()).hexdigest()
         for name in ("cases.jsonl", "results.jsonl", "tolerance-policy.json")

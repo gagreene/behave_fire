@@ -186,6 +186,10 @@ const std::map<int, double> percent_controls = {
     {168,35},{169,30},{170,27},{171,40},{172,32},{190,28},{191,25},
     {192,45},{193,26}
 };
+const std::map<int, std::map<std::string, double>> load_controls = {
+    {152, {{"dead_1h_load_lb_ft2", 0.10101010101010101}}},
+    {153, {{"dead_100h_load_lb_ft2", 0.050505050505050504}, {"live_herb_load_lb_ft2", 0.06427915518824609}}},
+};
 struct Request { std::string id; int model; double direction; std::map<std::string, double> physical; std::map<std::string,std::string> modes; double user_waf; std::string session; bool percent_control; double moe_percent; };
 Request validate(const std::map<std::string, Value>& input) {
     // Deny known hazardous special-mode inputs before any upstream construction.
@@ -203,8 +207,11 @@ Request validate(const std::map<std::string, Value>& input) {
                 throw std::runtime_error("chaparral_index_" + field);
         }
     }
-    const std::set<std::string> optional = {"wind_height","wind_orientation","waf_method","user_waf","moisture_mode","session","fuel_mode","moe_percent"};
-    const std::set<std::string> fields = {"id", "operation", "fuel_model", "wind_direction", "m1h", "m10h", "m100h", "mlh", "mlw", "wind_speed", "slope", "aspect", "canopy_cover", "canopy_height", "crown_ratio", "wind_height","wind_orientation","waf_method","user_waf","moisture_mode","session","fuel_mode","moe_percent"};
+    const std::set<std::string> optional = {"wind_height","wind_orientation","waf_method","user_waf","moisture_mode","session","fuel_mode","moe_percent",
+        "dead_1h_load_lb_ft2", "dead_100h_load_lb_ft2", "live_herb_load_lb_ft2"};
+    std::set<std::string> fields = {"id", "operation", "fuel_model", "wind_direction", "m1h", "m10h", "m100h", "mlh", "mlw",
+        "wind_speed", "slope", "aspect", "canopy_cover", "canopy_height", "crown_ratio"};
+    fields.insert(optional.begin(), optional.end());
     for (const auto& item : input)
         if (!fields.count(item.first)) throw std::runtime_error("unsupported_field");
     for (const auto& field : fields)
@@ -278,6 +285,21 @@ Request validate(const std::map<std::string, Value>& input) {
         if (!std::isfinite(moe_percent) || moe_percent != expected->second)
             throw std::runtime_error("unreviewed_percent_quantity");
     } else if (input.count("moe_percent")) throw std::runtime_error("unused_custom_moe");
+    const auto control_loads = load_controls.find(static_cast<int>(model));
+    const std::map<std::string, double> no_loads;
+    const auto& expected_loads = percent_control && control_loads != load_controls.end()
+        ? control_loads->second : no_loads;
+    for (const std::string field : {"dead_1h_load_lb_ft2", "dead_100h_load_lb_ft2", "live_herb_load_lb_ft2"}) {
+        const auto expected = expected_loads.find(field);
+        const auto value = input.find(field);
+        if ((expected != expected_loads.end()) != (value != input.end()))
+            throw std::runtime_error("unreviewed_load_control");
+        if (expected != expected_loads.end()) {
+            if (value->second.kind != Value::Number || numeric(value->second, field) != expected->second)
+                throw std::runtime_error("unreviewed_load_control");
+            physical.emplace(field, expected->second);
+        }
+    }
     return {input.at("id").text, static_cast<int>(model), direction, physical, modes, user_waf, session, percent_control, moe_percent};
 }
 
@@ -650,12 +672,17 @@ int register_percent_control(FuelModels& fuels, const Request& request) {
     const auto heat = HeatOfCombustionUnits::BtusPerPound;
     const auto loading = LoadingUnits::PoundsPerSquareFoot;
     const auto savr = SurfaceAreaToVolumeUnits::SquareFeetOverCubicFeet;
+    const auto dead_1h = request.physical.find("dead_1h_load_lb_ft2");
+    const auto dead_100h = request.physical.find("dead_100h_load_lb_ft2");
+    const auto live_herb = request.physical.find("live_herb_load_lb_ft2");
     const bool accepted = fuels.setCustomFuelModel(custom, "UNIT_CONTROL", "Explicit Percent-unit control",
         fuels.getFuelbedDepth(source, LengthUnits::Feet), LengthUnits::Feet,
         request.moe_percent, FractionUnits::Percent,
         fuels.getHeatOfCombustionDead(source, heat), fuels.getHeatOfCombustionLive(source, heat), heat,
-        fuels.getFuelLoadOneHour(source, loading), fuels.getFuelLoadTenHour(source, loading),
-        fuels.getFuelLoadHundredHour(source, loading), fuels.getFuelLoadLiveHerbaceous(source, loading),
+        dead_1h == request.physical.end() ? fuels.getFuelLoadOneHour(source, loading) : dead_1h->second,
+        fuels.getFuelLoadTenHour(source, loading),
+        dead_100h == request.physical.end() ? fuels.getFuelLoadHundredHour(source, loading) : dead_100h->second,
+        live_herb == request.physical.end() ? fuels.getFuelLoadLiveHerbaceous(source, loading) : live_herb->second,
         fuels.getFuelLoadLiveWoody(source, loading), loading, fuels.getSavrOneHour(source, savr),
         fuels.getSavrLiveHerbaceous(source, savr), fuels.getSavrLiveWoody(source, savr), savr,
         fuels.getIsDynamic(source));
