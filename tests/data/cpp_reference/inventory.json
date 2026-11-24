@@ -1728,9 +1728,9 @@
       "certified_scientific_domain": false,
       "evidence": [
         {
-          "end_line": 348,
+          "end_line": 351,
           "file": "src/behave/surfaceFire.cpp",
-          "line": 338
+          "line": 341
         },
         {
           "end_line": 137,
@@ -2097,9 +2097,9 @@
           "line": 358
         },
         {
-          "end_line": 2452,
+          "end_line": 2466,
           "file": "src/behave/mortality.cpp",
-          "line": 2437
+          "line": 2451
         },
         {
           "end_line": 103,
@@ -2188,9 +2188,9 @@
           "line": 96
         },
         {
-          "end_line": 150,
+          "end_line": 156,
           "file": "src/behave/surface.h",
-          "line": 133
+          "line": 139
         }
       ],
       "kind": "enum/index/derived",
@@ -5185,11 +5185,11 @@
       },
       {
         "file": "surface/results.jsonl",
-        "sha256": "ae006838d93bbb9533df74340085110c479315cb8238a8ce488a68fe5e9e1b71"
+        "sha256": "84ab8f5bf4197dcea68f302a2969f8f4c075c995a8e8f084d8611a12120ef14a"
       },
       {
         "file": "surface/manifest.json",
-        "sha256": "39e75b886c69607977227a90361e0ef7585fabf7736cdded1352fca151bc1409"
+        "sha256": "a8c10db6cf6d87acb76ba5469f02ae75fdcc99417fcf12d282f75a55810a635e"
       }
     ],
     "meaning": "Raw observations, not tested/approved scientific coverage",
