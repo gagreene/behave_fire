@@ -1,5 +1,5 @@
 {
-  "activation_reason": "Requalify prior comparison rules and record fine dead fuel moisture measurements",
+  "activation_reason": "Requalify prior comparison rules and record VPD measurements",
   "artifacts": {
     "tests/data/cpp_reference/surface/cases.jsonl": "266d08d8b82d65d950461c73e70b44c228ad7b54fbe99eb1d14ed8af6add66da",
     "tests/data/cpp_reference/surface/results.jsonl": "ae006838d93bbb9533df74340085110c479315cb8238a8ce488a68fe5e9e1b71",
@@ -7,7 +7,7 @@
     "tests/data/cpp_reference/surface_custom/results.jsonl": "04e96268466338364a350d53ac05b639f1a7758c78911aaee97da389c0f779a2"
   },
   "calibration_complete": true,
-  "ci_run_url": "https://github.com/gagreene/behave_fire/actions/runs/45286444877",
+  "ci_run_url": "https://github.com/gagreene/behave_fire/actions/runs/45301789372",
   "fields": {
     "fireline_intensity_btu_ft_s": {
       "atol": 1e-12,
@@ -55,7 +55,7 @@
       "results.jsonl": "3c8a90c2d0cb8af549b5d555938e439ed5867b5d2fbb66fdad978aa5c056d3df",
       "schema.json": "bcefacdfef527819dd578abc68c46e9c05518c143d6f013f170a06d6be4df340"
     },
-    "ci_run_url": "https://github.com/gagreene/behave_fire/actions/runs/45286444877",
+    "ci_run_url": "https://github.com/gagreene/behave_fire/actions/runs/45301789372",
     "comparisons": 144,
     "maxima": {
       "area_ft2": {
@@ -77,7 +77,7 @@
         "ulp": 0
       }
     },
-    "source_commit": "f0908802414c984190e87c56e737e7d9f5bad651"
+    "source_commit": "2f893c03cf38aaa106d2a4345bd3c9ece1c81105"
   },
   "ignite": {
     "artifacts": {
@@ -100,13 +100,13 @@
     "nonmatching": 0
   },
   "overlay_sha256": {
-    "CMakeLists.txt": "6e034192b662e9fc24ec63b54505e032d32784a6cc10222d72bdaab8686ff8b5",
-    "driver.cpp": "8eaea63d3fccfe7da8b2749446d91e6a169b86a303e192a77b8b2bb7335a88d5",
+    "CMakeLists.txt": "705a4dcb5a86fc3bf0e7c4679f0feb40b44f44faaad4aa7235bfd1efa093781d",
+    "driver.cpp": "dbb4039b9ccdfeff87a5c65564be16403ab168e0a86a559ca657c727a795efc8",
     "probe.cpp": "48338485a0b6f3fd64d0b3542a56c996e043d5e77e9887f0189101c1065df015"
   },
   "reports": {
     "cpp-GNU": {
-      "sha256": "8e7794fc1d638624893c0d6b6f5ea6fbc97bf65b7ce23ca37ed3290857cb848c",
+      "sha256": "34c1e50e76d9948585b6c2a4af6e081e7210e8a50a250e809aaf348117aa64c2",
       "summary": {
         "available": 722,
         "cases": 773,
@@ -115,7 +115,7 @@
       }
     },
     "cpp-MSVC": {
-      "sha256": "55c2237aa1982cef73fce8f783ec852e6c6f6f786673730ceb11273b48164611",
+      "sha256": "6059579e8808333cd481a50ada1a97f405fecca638eaf862e89a7352792c9206",
       "summary": {
         "available": 722,
         "cases": 773,
@@ -124,7 +124,7 @@
       }
     },
     "ports-linux-aarch64": {
-      "sha256": "26825a421518065bb001523098dd5f563fbd6dd27fda4e3664f4d8a859ef7724",
+      "sha256": "195c1a502f508ab275a2da603e8abaee7458d283b4e1426fc7d2a4da0e427a22",
       "summary": {
         "cases_per_backend": 583,
         "fields_per_backend": 2915,
@@ -132,7 +132,7 @@
       }
     },
     "ports-linux-musl-x86_64": {
-      "sha256": "5b5178b4eb50ceb10d8fa3acaa1e1c3ff2402dc5c9454d5cbef7995cbe6f7571",
+      "sha256": "4c1f6c62881dc2828bbb9b182a8077e659066742faf77696aeaa14537fa2cc81",
       "summary": {
         "cases_per_backend": 583,
         "fields_per_backend": 2915,
@@ -140,7 +140,7 @@
       }
     },
     "ports-linux-x86_64": {
-      "sha256": "eeeccb4bedf7badb3d0749e070f9f87549b9d118cb9fa3a35c38a772beb07ec0",
+      "sha256": "f6f31c2f17c76f81c32536739510badd55d6d394053e495667c7887bd586a3e6",
       "summary": {
         "cases_per_backend": 583,
         "fields_per_backend": 2915,
@@ -148,7 +148,7 @@
       }
     },
     "ports-macos-arm64": {
-      "sha256": "8cfed8dc4fe5b649e71305f94579319011a4d211387e6e63ca112aa51f0a7e5f",
+      "sha256": "10e6d29344ec9014533211bf65ddbac97c0e176f7d516e573ceeedfc9e7e0a21",
       "summary": {
         "cases_per_backend": 583,
         "fields_per_backend": 2915,
@@ -156,7 +156,7 @@
       }
     },
     "ports-macos-x86_64": {
-      "sha256": "41a0ac2d8694c370ae839054df40f70cad043cf1f9529fb49bac074abc2bd868",
+      "sha256": "f3dfd7cb3a778c95084162cbe0860bc81acd70db43cec33627414e96a8db8bd9",
       "summary": {
         "cases_per_backend": 583,
         "fields_per_backend": 2915,
@@ -164,7 +164,7 @@
       }
     },
     "ports-windows-arm64": {
-      "sha256": "f6a0d8c2c177e7e714468c885b3a1c9edde6b5199b8d11c9b2cb05409c345dae",
+      "sha256": "e512fe0b2633250675d76429283dcdeeeaf6735a1452012b3706219412e4805c",
       "summary": {
         "cases_per_backend": 583,
         "fields_per_backend": 2915,
@@ -172,7 +172,7 @@
       }
     },
     "ports-windows-x86_64": {
-      "sha256": "284e5628bfb21c135e2f0ea841cd30914f2744f71924151a467c1926436d330d",
+      "sha256": "ed422485a87ea46edbdfa1e8822e26c9782e0745285716ed57f96f6276c805a4",
       "summary": {
         "cases_per_backend": 583,
         "fields_per_backend": 2915,
@@ -219,7 +219,7 @@
     },
     "nonmatching": 13
   },
-  "source_commit": "f0908802414c984190e87c56e737e7d9f5bad651",
+  "source_commit": "2f893c03cf38aaa106d2a4345bd3c9ece1c81105",
   "source_files": {
     ".github/workflows/ci.yml": "5141b47dd44444ae2d3f0310a762588f47c8bf35ae820ccd5c676b6890065e00",
     ".github/workflows/crate-validation.yml": "970147b312a0719d1e63318b2f8b8f200479c5592e5e368cbfd2407893ac1f6d",
@@ -377,7 +377,7 @@
     "tools/benchmark_public_serial_f64.py": "a321b8bcfdbb9b65ec7680d24dbc699426a4bfade4aea98ab100212847cd13e1",
     "tools/build_pure_wheel.py": "435d7fddf3d1d0fdb87af808654b154eb98fc6f627b92993264d4e3828f6a827",
     "tools/check_core_f64.py": "b69ee38251b47d8b3c58db30027b9024c7c7a2d1f7018fc3a8615cff9134b3ee",
-    "tools/check_cpp_driver.py": "10417adf6773f75b4da90ab5f2712f5698523d9c1b0fa3c7a55da8421d8fe029",
+    "tools/check_cpp_driver.py": "51523e531970b0275db478e49114527d16cab921cf9bdb3daf106441eebef70c",
     "tools/check_crate_package.py": "f6e568a33ac6a583aae5cf39fcf59b071170d51f0961451430232d96191b42c6",
     "tools/check_function_order.py": "79ab381e2f48e9e6fa8605d11a3d0c7459e7519325b3e59785c3e4271bad19d7",
     "tools/check_performance.py": "3d8866b469dc6ba965e3c94583e8573c69477492e10de4431289ce47c374babe",
@@ -387,17 +387,18 @@
     "tools/check_wheel_metadata.py": "ff08a2a6bb74d59dca91bde336bf7920ce2e65f9a1c2f56093ea5db9278db4f0",
     "tools/compare_backends.py": "757cdb6401ab07aac6d0d9e2f0c4baa7865745e37f39ce4263c71db0d941001b",
     "tools/core_f64_reference.py": "f8d8d462e722ed0e4f8106d71e2d49544ccbaf77147bd1c7ec14db385683e779",
-    "tools/cpp_calibrate.py": "f60b6cf8f4984f0b4b1d0d66566cae20617d041b5026611f202541f373b51f28",
-    "tools/cpp_controls.py": "7f354231435b6248232cff49a63957ef255d0ce75b903d2b2ad99513abf3e342",
+    "tools/cpp_calibrate.py": "2262ce1092e4f5331411f583a1c6ff9d0576f6ea36cff3fba5231188a30b50c9",
+    "tools/cpp_controls.py": "bab18052597cca8e9bdfc309bd670082c93fada72273fe0a558ca3210f1d717a",
     "tools/cpp_fine_dead_fuel_moisture.py": "d72359099f3a5382aee5f227b9de193adff97140766cbd6983cfa03b418be905",
     "tools/cpp_fire_size.py": "08ad6184e1c69d3053aa8736df0c9a5d94e46890d682b777a55e47cc33ff822d",
     "tools/cpp_ignite.py": "61c7f0494e970717248bc882f7e5f14431fa3b599ccf65f9ed9dfd42362d3607",
     "tools/cpp_inventory.py": "7d727f7aac91728a78b69c06b048b7575fac44eb8e6cd5d03c0e3dc15f97c0ea",
     "tools/cpp_mortality.py": "c6215db6d08ffcd8d98485f420ff8c0fd17939ccda3b54da3c6a69152ac2a862",
-    "tools/cpp_reference.py": "649013fc00fe58e1ff847f5187e7d335787ec05ceb5db20626693bf7af4e151d",
+    "tools/cpp_reference.py": "fec36bba0ee1b61de697996816d383a56c3c8069585bc093ec4d3b9151a2dc3a",
     "tools/cpp_safety.py": "d1a1cd20c4ee255358b583bda3145bd1f55e3fd7db53b76957dce03cbd4a972d",
     "tools/cpp_slope_tool.py": "335a6bd5a183910ebc8839cbd216eb84f1b859c8dc880cd3d16d5c01d9ccc0ea",
     "tools/cpp_spot.py": "02d77060f30bd49e8408787d58919e239b0536bed451114e6d84d567cab7fc75",
+    "tools/cpp_vapor_pressure_deficit.py": "a5630083d7ac3d4ff730dff30514a9af10b95104f56f1dd81c3111ee5007d4ae",
     "tools/export_cpp_crate.py": "b19e7f4e861780f89b75a1acfea181f4725dec139b2358a5ceb05d7046b6d90a",
     "tools/export_rust_reference.py": "e61a9e60fcce4cedbe16875119c08e3cba2250b4305497f22c7070742bd5e766",
     "tools/float64_model_reference.py": "85541e8fc435f5cea72cd2243608081327a68f41a11f890ac9cb39cd69c10887",
@@ -426,5 +427,20 @@
     "max_abs_ft": 1.263675812879228e-07,
     "nonmatching": 28
   },
-  "upstream_sha": "f3b2943e69abca942e795c5b1b45276f6338abb5"
+  "upstream_sha": "f3b2943e69abca942e795c5b1b45276f6338abb5",
+  "vapor_pressure_deficit": {
+    "artifacts": {
+      "cases.jsonl": "bd89f8a338c027aeb10f79ac50e700981681543f0b90787b3a1a901d55566238",
+      "manifest.json": "652b9541139a092ea03e4b1f8e87ab35fd0e8b314227d81ff7f7474d87ae50c1",
+      "results.jsonl": "134482dba1abbeaf38c0dd54df1ff389beeb8a9793315ad284d10502d9579943",
+      "schema.json": "51014229c56d1e8b02a5811d1fa6d1d94b677c93a3eea57ed4c687b70c40b99b"
+    },
+    "comparisons": 96,
+    "max_abs": {
+      "actual_vp": 2.220446049250313e-16,
+      "saturated_vp": 4.440892098500626e-16,
+      "vpd": 2.220446049250313e-16
+    },
+    "nonmatching": 42
+  }
 }

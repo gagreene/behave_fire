@@ -26,7 +26,7 @@ MOE_PERCENT_CONTROLS = {
     192: 45., 193: 26.,
 }
 CONTROL_MODEL = 250
-FIXTURE_BUDGET = {'case_limit': 803,
+FIXTURE_BUDGET = {'case_limit': 805,
                   'canonical': {'raw_bytes': 6 * 1024 ** 2, 'gzip_bytes': 512 * 1024},
                   'standalone': {'raw_bytes': 512 * 1024, 'gzip_bytes': 64 * 1024}}
 
@@ -199,11 +199,14 @@ def _required_artifacts(root):
         "safety/cases.jsonl", "safety/manifest.json", "safety/results.jsonl", "safety/schema.json",
         "slope_tool/cases.jsonl", "slope_tool/manifest.json", "slope_tool/results.jsonl", "slope_tool/schema.json",
         "spot/cases.jsonl", "spot/manifest.json", "spot/results.jsonl", "spot/schema.json",
+        "vapor_pressure_deficit/cases.jsonl", "vapor_pressure_deficit/manifest.json",
+        "vapor_pressure_deficit/results.jsonl", "vapor_pressure_deficit/schema.json",
         "surface_custom/cases.jsonl", "surface_custom/results.jsonl", "surface_custom/manifest.json")}
     mandatory.update("tools/" + name for name in (
         "cpp_reference.py", "cpp_controls.py", "cpp_fire_size.py", "cpp_ignite.py", "cpp_inventory.py",
         "cpp_mortality.py", "cpp_safety.py", "cpp_slope_tool.py", "cpp_spot.py", "cpp_calibrate.py",
-        "export_cpp_crate.py", "check_cpp_driver.py", "cpp_fine_dead_fuel_moisture.py"))
+        "export_cpp_crate.py", "check_cpp_driver.py", "cpp_fine_dead_fuel_moisture.py",
+        "cpp_vapor_pressure_deficit.py"))
     mandatory.update(f"rust/crates/behave-fire/tests/data/cpp_reference/{dataset}/{name}"
                      for dataset in ("surface", "surface_custom", "fire_size", "ignite", "mortality")
                      for name in ("cases.jsonl", "results.jsonl", "manifest.json", "tolerance-policy.json")
@@ -401,7 +404,7 @@ def check_fixture_budget(root=ROOT):
     if policy.get('approved') is not True or policy.get('limits') != FIXTURE_BUDGET:
         raise ValueError('Unapproved fixture budget limits')
     datasets = ('surface', 'surface_custom', 'fine_dead_fuel_moisture', 'fire_size', 'ignite',
-                'mortality', 'safety', 'slope_tool', 'spot')
+                'mortality', 'safety', 'slope_tool', 'spot', 'vapor_pressure_deficit')
     cases = sum(sum(bool(line.strip()) for line in (canonical / dataset / 'cases.jsonl').read_bytes().splitlines())
                 for dataset in datasets)
     if cases > FIXTURE_BUDGET['case_limit']:
@@ -624,6 +627,8 @@ def load_reference(root=ROOT, *, measurement=False):
     from cpp_slope_tool import validate_measurement as validate_slope_measurement
     from cpp_spot import load_observations as load_spot_observations
     from cpp_spot import validate_measurement as validate_spot_measurement
+    from cpp_vapor_pressure_deficit import load_observations as load_vpd_observations
+    from cpp_vapor_pressure_deficit import validate_measurement as validate_vpd_measurement
 
     controls = load(root, cases)
     qualification = policy.get("qualification") if policy["approved"] else None
@@ -641,6 +646,8 @@ def load_reference(root=ROOT, *, measurement=False):
     validate_slope_measurement(root, policy.get("slope_tool"), None if measurement else qualification)
     load_spot_observations(root)
     validate_spot_measurement(root, policy.get("spot"), None if measurement else qualification)
+    load_vpd_observations(root)
+    validate_vpd_measurement(root, policy.get("vapor_pressure_deficit"), None if measurement else qualification)
     _prepared_build(root)
     budget = check_fixture_budget(root)
     if measurement:

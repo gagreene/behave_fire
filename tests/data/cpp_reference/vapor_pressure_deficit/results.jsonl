@@ -1,0 +1,2 @@
+{"id":"freezing-dry","status":"ok","upstream_entries":1,"output_entries":1,"output":{"actual_vp":0,"saturated_vp":0.61099999999999999,"vpd":0.61099999999999999}}
+{"id":"warm-half-humidity","status":"ok","upstream_entries":1,"output_entries":1,"output":{"actual_vp":1.1694678421549667,"saturated_vp":2.3389356843099334,"vpd":1.1694678421549667}}

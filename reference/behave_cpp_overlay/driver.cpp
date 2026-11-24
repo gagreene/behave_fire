@@ -9,6 +9,7 @@
 #include "species_master_table.h"
 #include "spot.h"
 #include "surface.h"
+#include "vaporPressureDeficitCalculator.h"
 #include <array>
 #include <cctype>
 #include <cerrno>
@@ -571,6 +572,40 @@ SpotRequest validate_spot(const std::map<std::string, Value>& input) {
     return expected;
 }
 
+struct VpdRequest {
+    double temperature_k;
+    double rh_pct;
+};
+
+/// Validate the two approved VPD tuples before the upstream calculation.
+///
+/// :param input: Parsed request object.
+/// :return: Reviewed temperature in Kelvin and relative humidity in percent.
+VpdRequest validate_vpd(const std::map<std::string, Value>& input) {
+    const std::set<std::string> fields = {"id", "operation", "temperature_k", "rh_pct"};
+    for (const auto& item : input)
+        if (!fields.count(item.first)) throw std::runtime_error("unsupported_field");
+    for (const auto& field : fields)
+        if (!input.count(field)) throw std::runtime_error("missing_field_" + field);
+
+    const auto& id = input.at("id");
+    if (id.kind != Value::String || id.text.empty()) throw std::runtime_error("invalid_id");
+    const std::map<std::string, std::array<std::string, 2>> reviewed = {
+        {"freezing-dry", {{"273.15", "0"}}},
+        {"warm-half-humidity", {{"293.15", "50"}}},
+    };
+    const auto allowed = reviewed.find(id.text);
+    if (allowed == reviewed.end()) throw std::runtime_error("unreviewed_vpd_request");
+    const std::array<const char*, 2> numeric_fields = {{"temperature_k", "rh_pct"}};
+    for (std::size_t index = 0; index < numeric_fields.size(); ++index) {
+        const auto& value = input.at(numeric_fields[index]);
+        if (value.kind != Value::Number)
+            throw std::runtime_error(std::string("numeric_type_") + numeric_fields[index]);
+        if (value.text != allowed->second[index]) throw std::runtime_error("unreviewed_vpd_request");
+    }
+    return {numeric(input.at("temperature_k"), "temperature_k"), numeric(input.at("rh_pct"), "rh_pct")};
+}
+
 struct Unavailable {};
 struct GeometryTrap {};
 struct Session {
@@ -761,6 +796,24 @@ std::string run_spot(const SpotRequest& request, bool forbid_output) {
     const double distance = spot.getMaxFlatTerrainSpottingDistanceFromSurfaceFire(LengthUnits::Feet);
     return encode_result({{"flat_distance_ft", distance}});
 }
+
+/// Measure the three public vapor pressure outputs using one fresh calculator.
+///
+/// :param request: Reviewed VPD input.
+/// :param forbid_output: Whether the output entry trap is enabled.
+/// :return: JSON object with pressures and deficit in kilopascals.
+std::string run_vpd(const VpdRequest& request, bool forbid_output) {
+    if (forbid_output) throw GeometryTrap{};
+    VaporPressureDeficitCalculator tool;
+    tool.setTemperature(request.temperature_k, TemperatureUnits::Kelvin);
+    tool.setRelativeHumidity(request.rh_pct, FractionUnits::Percent);
+    tool.runCalculation();
+    return encode_result({
+        {"actual_vp", tool.getActualVaporPressure(PressureUnits::KiloPascal)},
+        {"saturated_vp", tool.getSaturatedVaporPressure(PressureUnits::KiloPascal)},
+        {"vpd", tool.getVaporPressureDeficit(PressureUnits::KiloPascal)},
+    });
+}
 }
 
 int main(int argc, char** argv) {
@@ -815,6 +868,10 @@ int main(int argc, char** argv) {
                 const SpotRequest request = validate_spot(object);
                 enter_upstream(id, ids, forbid, entered);
                 result = run_spot(request, forbid_geometry);
+            } else if (operation == "vapor_pressure_deficit") {
+                const VpdRequest request = validate_vpd(object);
+                enter_upstream(id, ids, forbid, entered);
+                result = run_vpd(request, forbid_geometry);
             } else {
                 const Request request = validate(object);
                 enter_upstream(request.id, ids, forbid, entered);
@@ -824,7 +881,8 @@ int main(int argc, char** argv) {
             }
             const bool report_output_entries = operation == "fine_dead_fuel_moisture"
                 || operation == "ignite" || operation == "mortality"
-                || operation == "safety" || operation == "slope_tool" || operation == "spot_surface";
+                || operation == "safety" || operation == "slope_tool" || operation == "spot_surface"
+                || operation == "vapor_pressure_deficit";
             output << "{\"id\":" << encode(id) << ",\"status\":\"ok\",\"upstream_entries\":1,"
                    << (report_output_entries ? "\"output_entries\"" : "\"geometry_entries\"")
                    << ":1,\"output\":" << result << "}\n";
