@@ -23,6 +23,26 @@ import cpp_units as units
 import cpp_vapor_pressure_deficit as vpd
 
 
+def _check_approved_exact_replay(root, report, policy):
+    """Apply the active standalone exact policies to live compiler observations.
+
+    :param root: Source checkout with the pinned reference.
+    :param report: One compiler's measured standalone observations.
+    :param policy: Current committed field policies.
+    :return: None. Rejects an exact-result mismatch, including signed zero.
+    """
+    for operation in (fire_size, ignite, mortality):
+        name = operation.DATASET.name
+        approval = policy.get(name, {})
+        if approval.get("approved") is not True:
+            continue
+        for actual, expected in zip(report[name]["observations"], operation.load_observations(root), strict=True):
+            try:
+                operation.assert_matches_cpp(actual["output"], expected["output"], approval)
+            except AssertionError as error:
+                raise ValueError(f"Live {name} replay differs for {actual['id']}: {error}") from error
+
+
 def _compiler_environment():
     """Discover existing compiler tools without installing or exposing environment secrets.
 
@@ -76,6 +96,17 @@ def _context(root):
                 source_files=_sources(root),
                 overlay_sha256=reference._prepared_build(root)["prepared_overlay_sha256"])
 
+def _expected_public_api(root):
+    """Read the committed identity used to verify a live API report.
+
+    :param root: Checkout holding the committed API inventory.
+    :return: Expected public declaration count and SHA256 identity.
+    """
+    inventory = reference._document(Path(root) / "tests/data/cpp_reference/inventory.json")
+    return dict(public_functions=inventory["expected_counts"]["public_functions"],
+                public_identity_sha256=inventory["public_identity_sha256"])
+
+
 def _requirements(root):
     """Keep the owner-approved compiler/platform matrix from being reduced by metadata.
 
@@ -118,7 +149,8 @@ def _sources(root):
     paths = set()
     for pattern in ('src/behave_fire/**/*.py', 'rust/crates/*/src/**/*.rs', 'rust/**/Cargo.toml',
                     'rust/Cargo.lock', '.cargo/*', 'rust/.cargo/*', 'rust/crates/*/.cargo/*',
-                    'pyproject.toml', 'uv.lock', 'tools/*.py', '.github/workflows/*.yml'):
+                    'pyproject.toml', 'uv.lock', 'tools/*.py', '.github/workflows/*.yml',
+                    'pytest.ini', 'tests/conftest.py', 'tests/cpp_live/*.py'):
         paths.update(path for path in root.glob(pattern) if path.is_file() and 'target' not in path.parts)
     return {path.relative_to(root).as_posix(): reference._text_digest(path) for path in sorted(paths)}
 
@@ -343,9 +375,12 @@ def measure_cpp(root, directory, expected_compiler=None):
     :return: Complete compiler evidence, without activating parity.
     """
     from check_cpp_driver import check_driver
+    from cpp_live_api import verify_public_api
 
     root, directory = Path(root).resolve(), Path(directory).resolve()
     driver, build = build_driver(root, directory, expected_compiler)
+    inventory = reference._document(root / "tests/data/cpp_reference/inventory.json")
+    public_api = verify_public_api(root / "reference/behave_cpp", inventory)
     data = reference.load_reference(root, measurement=True)
     protocol = check_driver(driver, directory / "protocol", root, build_receipt=build, exact_replay=False)
     observations = []
@@ -359,13 +394,16 @@ def measure_cpp(root, directory, expected_compiler=None):
         observations.extend(dict(id=row["id"], dataset=dataset, actual=row) for row in actual)
     report = dict(schema_version=1, kind="cpp", upstream_sha=reference.PIN, passed=True,
                   parity_approved=False, artifacts=controls._artifacts(root), fields=controls.calibration_policy(root),
-                  compiler=build["compiler"], protocol=protocol, observations=observations, **_context(root))
+                  compiler=build["compiler"], protocol=protocol, observations=observations,
+                  public_api=public_api, **_context(root))
     for operation in (crown, moisture, fire_size, ignite, mortality, safety, slope_tool, spot, units, vpd):
         name = operation.DATASET.name
         inputs = root / operation.DATASET / "cases.jsonl"
         output = directory / f"{name}.jsonl"
         _run([driver, inputs, output], directory, name)
         report[name] = dict(artifacts=operation.artifacts(root), observations=operation.read_cpp_results(root, output))
+    policy = reference._document(root / "tests/data/cpp_reference/tolerance-policy.json")
+    _check_approved_exact_replay(root, report, policy)
     report["summary"] = _validate_observations(root, report)
     reference._json(directory / (build["compiler"]["id"] + "-calibration.json"), report)
     return report
@@ -382,6 +420,8 @@ def validate_evidence(root, paths):
     root = Path(root)
     required = _requirements(root)
     records, commits, runs = {}, set(), set()
+    public_api = _expected_public_api(root)
+    expected_api_bytes = json.dumps(public_api, sort_keys=True)
     for path in paths:
         report = reference._document(path)
         key = ("cpp-" + report.get("compiler", {}).get("id", "")) if report.get("kind"
@@ -397,6 +437,8 @@ def validate_evidence(root, paths):
                 or not re.fullmatch(r"https://github.com/gagreene/behave_fire/actions/runs/[0-9]+", report.get(
                     "ci_run_url", ""))):
             raise ValueError("Untrusted or incomplete calibration identity")
+        if key.startswith("cpp-") and json.dumps(report.get("public_api"), sort_keys=True) != expected_api_bytes:
+            raise ValueError("Compiler calibration lacks the verified live public API")
         summary = _validate_observations(root, report)
         records[key] = dict(sha256=reference._digest(path), summary=summary)
         commits.add(report["source_commit"])
@@ -405,7 +447,7 @@ def validate_evidence(root, paths):
         raise ValueError("Mixed or incomplete calibration matrix")
     return dict(schema_version=1, calibration_complete=True, upstream_sha=reference.PIN,
                 artifacts=controls._artifacts(root), fields=controls.calibration_policy(root), reports=records,
-                source_commit=commits.pop(), ci_run_url=runs.pop(),
+                source_commit=commits.pop(), ci_run_url=runs.pop(), public_api=public_api,
                 source_files=_sources(root),
                 overlay_sha256=reference._prepared_build(root)["prepared_overlay_sha256"])
 
@@ -428,6 +470,8 @@ def validate_qualification(root, record):
             or not re.fullmatch(r"https://github.com/gagreene/behave_fire/actions/runs/[0-9]+", record.get("ci_run_url",
                 ""))):
         raise ValueError("Incomplete or stale calibration qualification")
+    if json.dumps(record.get("public_api"), sort_keys=True) != json.dumps(_expected_public_api(root), sort_keys=True):
+        raise ValueError("Missing or changed live public API qualification")
     for key, report in record["reports"].items():
         expected = dict(cases=773, available=722, fields=3610, unavailable=51) if key.startswith("cpp-") else dict(
             cases_per_backend=controls.PORT_CASES, fields_per_backend=controls.PORT_CASES * len(reference.FIELDS),

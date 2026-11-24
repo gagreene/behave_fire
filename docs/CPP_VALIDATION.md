@@ -150,8 +150,9 @@ Original numbered-unit differences remain
 documented exceptions, tested through their separate explicit controls.
 
 Use the existing `CI` workflow with `workflow_dispatch` on the prepared branch
-for qualification. Only that manual route checks out the optional reference and
-builds C++; ordinary PR and push lanes retain their existing dependencies.
+for qualification. The manual and release validation jobs check out the
+optional reference and build C++. Ordinary PR and push validation uses the
+stored offline evidence.
 The wheel reports use the actual staged wheel extension, including Alpine/musl
 and Windows ARM64, and fail rather than skip if calibration cannot run.
 
@@ -187,6 +188,33 @@ build-input hashes are provenance; the absent C++ sources, overlay, and executab
 are not opened by an offline reader. Live verification additionally requires the
 exact pinned checkout, clean source state, and matching source/driver identities.
 
+## Opt-in live pytest
+
+Initialize the registered submodule and install CMake and the platform
+compiler. The out-of-tree build uses the Visual Studio C++ and CMake tools
+on Windows and GNU on Linux. From
+PowerShell, run the live lane with the configured test interpreter.
+
+```powershell
+git submodule update --init --recursive -- reference/behave_cpp
+$env:BEHAVE_CPP_LIVE = '1'
+python -m pytest -m cpp_live
+```
+
+The lane requires both the environment flag and the exact marker selection.
+A missing checkout or toolchain fails the selected test. The test verifies
+the pinned source hashes, compares freshly scanned public header declarations
+with the committed inventory, and replays all goldens and entry guards. The
+header comparison covers declarations, overloads, and lexical signatures in
+the registered inventory. A compiler report records the checked API identity
+alongside the replay with the existing numerical policies.
+
+Set `BEHAVE_CPP_LIVE_OUT` to retain reports in an explicit directory outside
+the checkout. Otherwise pytest uses its temporary directory. The compiler
+job selects GNU or MSVC through `BEHAVE_CPP_LIVE_COMPILER`. Run the local
+lane and the manual CI qualification before release and after any driver,
+overlay, or pin change. Release CI also runs the same live test before it
+can proceed to publication.
 ## Dependency and distribution boundaries
 
 The registered optional submodule at `reference/behave_cpp` is pinned to the

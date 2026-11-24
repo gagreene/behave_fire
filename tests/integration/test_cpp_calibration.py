@@ -47,6 +47,21 @@ def test_active_policy_requires_complete_calibration_metadata(tmp_path, cpp_snap
         reference.load_reference(root)
 
 
+def test_approved_exact_compiler_replay_rejects_numeric_drift():
+    calibration = importlib.import_module('cpp_calibrate')
+    ignite = importlib.import_module('cpp_ignite')
+    observations = ignite.load_observations(ROOT)
+    report = {'ignite': {'observations': observations}}
+    policy = {'ignite': dict(approved=True, fields=ignite.EXACT_FIELDS)}
+    calibration._check_approved_exact_replay(ROOT, report, policy)
+    first = observations[0]
+    field = 'fuel_temperature_f'
+    changed = dict(first, output=dict(first['output']))
+    changed['output'][field] = math.nextafter(first['output'][field], math.inf)
+    report['ignite']['observations'] = [changed, *observations[1:]]
+    with pytest.raises(ValueError, match=first['id']):
+        calibration._check_approved_exact_replay(ROOT, report, policy)
+
 def test_empty_or_partial_evidence_cannot_qualify_the_matrix(tmp_path):
     module = importlib.import_module('cpp_calibrate')
     for paths in ([], [tmp_path / 'missing.json']):
@@ -75,7 +90,7 @@ def test_reducing_the_required_matrix_cannot_activate_a_partial_record(tmp_path,
         module.validate_qualification(root, record)
 
 
-@pytest.mark.parametrize('mutation', ['change', 'add', 'delete'])
+@pytest.mark.parametrize('mutation', ['change', 'add', 'delete', 'missing_api', 'changed_api'])
 def test_source_changes_invalidate_otherwise_complete_qualification(tmp_path, mutation, cpp_snapshot_template):
     module = importlib.import_module('cpp_calibrate')
     controls = importlib.import_module('cpp_controls')
@@ -90,7 +105,10 @@ def test_source_changes_invalidate_otherwise_complete_qualification(tmp_path, mu
                   artifacts=controls._artifacts(root), fields=controls.calibration_policy(root),
                   overlay_sha256=reference._prepared_build(root)['prepared_overlay_sha256'],
                   source_commit='0' * 40, ci_run_url='https://github.com/gagreene/behave_fire/actions/runs/1',
-                  source_files=(module._sources(root) if hasattr(module, '_sources') else {}),
+                  source_files=module._sources(root),
+                  public_api=dict(public_functions=1399,
+                                  public_identity_sha256=reference._document(
+                                      root / 'tests/data/cpp_reference/inventory.json')['public_identity_sha256']),
                   reports={key: dict(sha256='1' * 64, summary=(dict(cases=773, available=722,
                       fields=3610, unavailable=51) if key.startswith('cpp-') else dict(
                       cases_per_backend=710, fields_per_backend=3550, paired_cases_per_backend=139))) for key in keys})
@@ -100,6 +118,14 @@ def test_source_changes_invalidate_otherwise_complete_qualification(tmp_path, mu
     policy['approval_gate'] = 'Metadata-only activation does not change tested implementation'
     reference._json(policy_path, policy)
     module.validate_qualification(root, record)
+    if mutation in {'missing_api', 'changed_api'}:
+        if mutation == 'missing_api':
+            record.pop('public_api')
+        else:
+            record['public_api']['public_functions'] = 1399.0
+        with pytest.raises(ValueError, match='live public API'):
+            module.validate_qualification(root, record)
+        return
     if mutation == 'change':
         source.write_text('VALUE = 2\n')
     elif mutation == 'add':

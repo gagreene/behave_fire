@@ -6,6 +6,10 @@ on:
   push:
     branches: [pre_release, master]
   workflow_call:
+    inputs:
+      cpp_live:
+        type: boolean
+        default: false
   workflow_dispatch:
 
 permissions:
@@ -195,28 +199,5 @@ jobs:
     if: ${{ !(github.event_name == 'pull_request' && github.base_ref != 'master') && !(github.event.action == 'edited' && !github.event.changes.base) }}
 
   cpp-calibration:
-    if: ${{ github.event_name == 'workflow_dispatch' }}
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - {os: ubuntu-24.04, compiler: GNU}
-          - {os: windows-2025, compiler: MSVC}
-    runs-on: ${{ matrix.os }}
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: recursive
-      - uses: actions/setup-python@v6
-        with:
-          python-version: "3.12"
-      - name: Build pinned C++ and qualify compiler and safety contracts
-        shell: bash
-        run: python tools/cpp_calibrate.py --cpp --compiler-id '${{ matrix.compiler }}' --out '${{ runner.temp }}/cpp-${{ matrix.compiler }}'
-      - name: Preserve numerical calibration only
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: cpp-calibration-${{ matrix.compiler }}
-          path: ${{ runner.temp }}/cpp-${{ matrix.compiler }}/*-calibration.json
-          if-no-files-found: error
+    if: ${{ github.event_name == 'workflow_dispatch' || inputs.cpp_live }}
+    uses: ./.github/workflows/cpp-live-validation.yml
