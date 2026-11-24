@@ -1,4 +1,4 @@
-//! Explicit percent-unit controls preserve the original numbered observations.
+//! Explicit percent-unit and load controls preserve the reviewed port inputs.
 
 #[path = "support/cpp_hash.rs"]
 mod cpp_hash;
@@ -12,6 +12,11 @@ use behave_fire::fuel_models::{CustomFuelModel, FuelModels};
 use behave_fire::units::{FractionUnit, SpeedUnit};
 use serde_json::Value;
 use std::collections::{BTreeMap, BTreeSet};
+
+const UNIT_MODELS: [i64; 23] = [
+    110, 111, 150, 151, 152, 153, 154, 155, 156, 157, 158, 159, 166, 167, 168, 169, 170, 171, 172,
+    190, 191, 192, 193,
+];
 
 fn number(case: &Value, key: &str) -> f64 {
     case[key].as_f64().unwrap()
@@ -52,7 +57,7 @@ fn explicit_percent_controls_match_numbered_physics_and_consume_all_cpp_fields()
     );
     assert_eq!(
         manifest["upstream_sha"],
-        "f3b2943e69abca942e795c5b1b45276f6338abb5"
+        "3ca33d5b919d4253b411bfb6464b4c872dda6fc9"
     );
     let cases = rows(std::str::from_utf8(inputs).unwrap());
     let results = rows(std::str::from_utf8(outputs).unwrap());
@@ -69,11 +74,30 @@ fn explicit_percent_controls_match_numbered_physics_and_consume_all_cpp_fields()
     let mut compared = 0;
     for (id, case) in &cases {
         let source = case["fuel_model"].as_i64().unwrap();
-        assert!(cpp_policy::unit_record(source));
+        assert!(UNIT_MODELS.contains(&source));
         source_models.insert(source);
         assert_eq!(case["fuel_mode"], "percent_unit_custom");
         let mut fuels = FuelModels::default();
         let source_fuel = fuels.for_grid(source as i32).clone();
+        for (field, port_load, required) in [
+            ("dead_1h_load_lb_ft2", source_fuel.dead_1h, source == 152),
+            (
+                "dead_100h_load_lb_ft2",
+                source_fuel.dead_100h,
+                source == 153,
+            ),
+            (
+                "live_herb_load_lb_ft2",
+                source_fuel.live_herb,
+                source == 153,
+            ),
+        ] {
+            assert_eq!(
+                case.get(field).and_then(Value::as_f64).map(f64::to_bits),
+                required.then(|| port_load.to_bits()),
+                "explicit load control {id}/{field}"
+            );
+        }
         assert_eq!(
             source_fuel.moisture_of_extinction_dead.to_bits(),
             FractionUnit::Percent
@@ -168,7 +192,7 @@ fn explicit_percent_controls_match_numbered_physics_and_consume_all_cpp_fields()
             compared += 1;
         }
     }
-    assert_eq!(source_models, cpp_policy::UNIT_MODELS.into_iter().collect());
+    assert_eq!(source_models, UNIT_MODELS.into_iter().collect());
     assert_eq!(compared, 695);
 }
 
@@ -219,7 +243,7 @@ fn qualification_rejects_missing_core_source_inventory() {
         let summary = if key.starts_with("cpp-") {
             serde_json::json!({"cases":773,"available":722,"fields":3610,"unavailable":51})
         } else {
-            serde_json::json!({"cases_per_backend":583,"fields_per_backend":2915,"paired_cases_per_backend":139})
+            serde_json::json!({"cases_per_backend":710,"fields_per_backend":3550,"paired_cases_per_backend":139})
         };
         reports.insert(
             key.into(),
@@ -227,7 +251,7 @@ fn qualification_rejects_missing_core_source_inventory() {
         );
     }
     policy["qualification"] = serde_json::json!({"calibration_complete":true,
-        "upstream_sha":"f3b2943e69abca942e795c5b1b45276f6338abb5",
+        "upstream_sha":"3ca33d5b919d4253b411bfb6464b4c872dda6fc9",
         "fields":policy["fields"],"artifacts":artifacts,"reports":reports,"source_files":{}});
     assert!(cpp_policy::require_qualification(&policy).is_err());
 }

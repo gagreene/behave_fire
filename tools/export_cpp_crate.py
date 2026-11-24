@@ -10,7 +10,7 @@ import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-PIN = "f3b2943e69abca942e795c5b1b45276f6338abb5"
+PIN = "3ca33d5b919d4253b411bfb6464b4c872dda6fc9"
 INPUTS = {
     "cases.jsonl": "surface/cases.jsonl",
     "results.jsonl": "surface/results.jsonl",

@@ -3,6 +3,7 @@
 import hashlib
 import importlib
 import json
+import math
 import sys
 from pathlib import Path
 
@@ -68,8 +69,8 @@ def test_reducing_the_required_matrix_cannot_activate_a_partial_record(tmp_path,
                   reports={
                       'cpp-MSVC': dict(sha256='1' * 64, summary=dict(cases=773, available=722, fields=3610,
                           unavailable=51)),
-                      'ports-windows-x86_64': dict(sha256='2' * 64, summary=dict(cases_per_backend=583,
-                          fields_per_backend=2915, paired_cases_per_backend=139))})
+                      'ports-windows-x86_64': dict(sha256='2' * 64, summary=dict(cases_per_backend=710,
+                          fields_per_backend=3550, paired_cases_per_backend=139))})
     with pytest.raises(ValueError, match='calibration'):
         module.validate_qualification(root, record)
 
@@ -92,7 +93,7 @@ def test_source_changes_invalidate_otherwise_complete_qualification(tmp_path, mu
                   source_files=(module._sources(root) if hasattr(module, '_sources') else {}),
                   reports={key: dict(sha256='1' * 64, summary=(dict(cases=773, available=722,
                       fields=3610, unavailable=51) if key.startswith('cpp-') else dict(
-                      cases_per_backend=583, fields_per_backend=2915, paired_cases_per_backend=139))) for key in keys})
+                      cases_per_backend=710, fields_per_backend=3550, paired_cases_per_backend=139))) for key in keys})
     module.validate_qualification(root, record)
     policy_path = root / 'tests/data/cpp_reference/tolerance-policy.json'
     policy = reference._document(policy_path)
@@ -112,13 +113,21 @@ def test_source_changes_invalidate_otherwise_complete_qualification(tmp_path, mu
 # ---- signed zero revalidation tests ----
 
 @pytest.mark.rust
-def test_unit_pair_revalidation_preserves_signed_zero(tmp_path):
+def test_revalidation_preserves_paired_bits_and_signed_zero(tmp_path):
     module = importlib.import_module('cpp_calibrate')
     controls = importlib.import_module('cpp_controls')
     report = controls.measure_ports(ROOT, tmp_path / 'ports.json')
     module._validate_observations(ROOT, report)
-    row, field = next((row, field) for row in report['documented_differences']
-                      for field, value in row['numbered_port'].items() if value == 0.)
-    row['numbered_port'][field] = -0.
+    row = report['documented_differences'][0]
+    field = reference.FIELDS[0]
+    observed = row['numbered_port'][field]
+    row['numbered_port'][field] = math.nextafter(observed, math.inf)
     with pytest.raises(ValueError, match='Numbered/custom'):
+        module._validate_observations(ROOT, report)
+    row['numbered_port'][field] = observed
+
+    row, field = next((row, field) for row in report['observations']
+                      for field, value in row['actual'].items() if value == 0.)
+    row['actual'][field] = math.copysign(0., -row['actual'][field])
+    with pytest.raises(AssertionError, match='signed-zero mismatch'):
         module._validate_observations(ROOT, report)

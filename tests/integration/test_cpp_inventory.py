@@ -1,5 +1,6 @@
 """Check the offline public API inventory and its fail-closed coverage contracts."""
 
+import hashlib
 import importlib.util
 import json
 import shutil
@@ -48,7 +49,7 @@ def _validator():
 def test_inventory_accepts_qualified_scientific_coverage():
     inventory = _inventory()
     summary = _validator()(inventory)
-    assert summary["public_functions"] == 1394
+    assert summary["public_functions"] == 1399
     assert summary["scientific_candidates"] == 266
     assert summary["state_lifecycle_methods"] == 508
     assert summary["tested_functions"] == 13
@@ -142,6 +143,7 @@ def test_inventory_cli_uses_the_selected_snapshots_execution_artifacts(tmp_path,
 
 def test_inventory_readiness_is_independent_of_module_search_path():
     script = '''
+import hashlib
 import importlib.util, json, pathlib, sys
 root = pathlib.Path(sys.argv[1])
 spec = importlib.util.spec_from_file_location('inventory_isolated', root / 'tools/cpp_inventory.py')
@@ -236,3 +238,15 @@ def test_inventory_requires_qualified_policy_for_readiness(tmp_path, inactive):
     _validator()(inventory, reference_root=path.parent)
     with pytest.raises(ValueError, match='Scientific qualification policy is inactive'):
         _validator()(inventory, require_ready=True, reference_root=path.parent)
+
+
+def test_inventory_surface_pilot_binds_current_observations():
+    inventory = _inventory()
+    pilot = inventory['pilot_observations']
+    assert pilot['dataset'] == 'surface'
+    assert {row['file'] for row in pilot['evidence']} == {
+        'surface/cases.jsonl', 'surface/manifest.json', 'surface/results.jsonl',
+    }
+    for row in pilot['evidence']:
+        file = ROOT / 'tests/data/cpp_reference' / row['file']
+        assert hashlib.sha256(file.read_bytes()).hexdigest() == row['sha256'], row['file']

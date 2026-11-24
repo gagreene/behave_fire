@@ -7,7 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-- Enforce the approved Surface fixture ceilings: 800 cases, 6 MiB raw and
+- Update the pinned Behave reference to `3ca33d5b919d4253b411bfb6464b4c872dda6fc9`. Replay the reviewed inputs, retire the corrected moisture-of-extinction discrepancy, and record the two retained port load definitions under F-019. The Surface caps remain `1e-12` relative and absolute.
+
+- Enforce the approved Surface fixture ceilings: 806 cases, 6 MiB raw and
   512 KiB gzip for canonical fixtures, and 512 KiB raw and 64 KiB gzip for
   standalone copies. Bind inventory evidence to the selected snapshot and
   require six exact Surface function witnesses plus active qualification for

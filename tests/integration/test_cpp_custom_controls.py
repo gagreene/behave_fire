@@ -84,8 +84,11 @@ def test_controls_preserve_source_inputs_and_cover_every_affected_model():
     for control in controls:
         expected = originals[control['id'].removeprefix('custom-')]
         assert {key: value for key, value in control.items()
-                if key not in ('id', 'fuel_mode', 'moe_percent')} == {
+                if key not in {'id', 'fuel_mode', 'moe_percent'} | reference.LOAD_CONTROL_FIELDS} == {
                     key: value for key, value in expected.items() if key != 'id'}
+        assert {key: control[key] for key in control.keys() & reference.LOAD_CONTROL_FIELDS} == (
+            reference.SURFACE_LOAD_CONTROLS.get(control['fuel_model'], {})
+        )
         reference._validate_case(control)
     assert next(case for case in controls if case['fuel_model'] == 110)['moe_percent'] == 24.
     assert next(case for case in controls if case['fuel_model'] == 151)['moe_percent'] == 13.

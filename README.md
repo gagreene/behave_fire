@@ -1,5 +1,7 @@
 # behave_fire
 
+The C++ validation oracle is [Behave `3ca33d5`](https://github.com/firelab/behave/commit/3ca33d5b919d4253b411bfb6464b4c872dda6fc9). See the [pinned observations and comparison rules](docs/CPP_VALIDATION.md).
+
 Fuel model IDs are supported from **1 through 256**. All other IDs, including
 NaN and infinite IDs supplied through Python, use undefined row zero rather than
 an endpoint fuel. Undefined fuels retain their existing zero-spread behavior;

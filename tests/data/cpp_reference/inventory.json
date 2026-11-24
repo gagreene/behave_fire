@@ -1,6 +1,6 @@
 {
   "coverage_unit": "hybrid_public_method_bundle_and_per_scientific_candidate",
-  "cpp_sha": "f3b2943e69abca942e795c5b1b45276f6338abb5",
+  "cpp_sha": "3ca33d5b919d4253b411bfb6464b4c872dda6fc9",
   "enums": {
     "AreaUnitsEnum": {
       "evidence": {
@@ -1717,9 +1717,9 @@
   },
   "expected_counts": {
     "deferred": 134,
-    "no_counterpart": 486,
+    "no_counterpart": 491,
     "phase0_routes": 45,
-    "public_functions": 1394,
+    "public_functions": 1399,
     "scientific_candidates": 266,
     "state_lifecycle_methods": 508
   },
@@ -1728,9 +1728,9 @@
       "certified_scientific_domain": false,
       "evidence": [
         {
-          "end_line": 348,
+          "end_line": 351,
           "file": "src/behave/surfaceFire.cpp",
-          "line": 338
+          "line": 341
         },
         {
           "end_line": 137,
@@ -2097,9 +2097,9 @@
           "line": 358
         },
         {
-          "end_line": 2452,
+          "end_line": 2466,
           "file": "src/behave/mortality.cpp",
-          "line": 2437
+          "line": 2451
         },
         {
           "end_line": 103,
@@ -2188,9 +2188,9 @@
           "line": 96
         },
         {
-          "end_line": 150,
+          "end_line": 156,
           "file": "src/behave/surface.h",
-          "line": 133
+          "line": 139
         }
       ],
       "kind": "enum/index/derived",
@@ -4140,7 +4140,7 @@
       "file": "src/behave/surface.h",
       "id": "609720de7c6e258817c9",
       "lexically_qualified_signature": "void Surface::memberwiseCopyAssignment(const Surface& rhs)",
-      "line": 309,
+      "line": 315,
       "python_targets": [],
       "qualified_name": "Surface::memberwiseCopyAssignment",
       "rust_targets": [],
@@ -4151,7 +4151,7 @@
       "file": "src/behave/surface.h",
       "id": "38696fbe59a4a79c3496",
       "lexically_qualified_signature": "double Surface::calculateSpreadRateAtVector(double directionOfinterest, SurfaceFireSpreadDirectionMode::SurfaceFireSpreadDirectionModeEnum directionMode)",
-      "line": 310,
+      "line": 316,
       "python_targets": [],
       "qualified_name": "Surface::calculateSpreadRateAtVector",
       "rust_targets": [],
@@ -4162,7 +4162,7 @@
       "file": "src/behave/surfaceFire.h",
       "id": "d0792559a332bcbb6030",
       "lexically_qualified_signature": "void SurfaceFire::setDirectionOfMaxSpread(double directionOFMaxSpread)",
-      "line": 146,
+      "line": 150,
       "python_targets": [],
       "qualified_name": "SurfaceFire::setDirectionOfMaxSpread",
       "rust_targets": [],
@@ -4173,7 +4173,7 @@
       "file": "src/behave/surfaceFire.h",
       "id": "5e2793dd41bf7062a88b",
       "lexically_qualified_signature": "void SurfaceFire::setEffectiveWindSpeed(double effectiveWindSpeed)",
-      "line": 147,
+      "line": 151,
       "python_targets": [
         {
           "evidence": "C++ named setter property equals a Python input parameter; setter lifecycle has no direct Python equivalent",
@@ -4203,7 +4203,7 @@
       "file": "src/behave/surfaceFire.h",
       "id": "22795dcfb9e8ff62bce5",
       "lexically_qualified_signature": "void SurfaceFire::setFirelineIntensity(double firelineIntensity)",
-      "line": 148,
+      "line": 152,
       "python_targets": [
         {
           "evidence": "C++ named setter property equals a Python input parameter; setter lifecycle has no direct Python equivalent",
@@ -4233,7 +4233,7 @@
       "file": "src/behave/surfaceFire.h",
       "id": "d4eabe6a30adf985c707",
       "lexically_qualified_signature": "void SurfaceFire::setFlameLength(double flameLength)",
-      "line": 149,
+      "line": 153,
       "python_targets": [],
       "qualified_name": "SurfaceFire::setFlameLength",
       "rust_targets": [],
@@ -4244,7 +4244,7 @@
       "file": "src/behave/surfaceFire.h",
       "id": "28c9cc95ea9ba16be0a4",
       "lexically_qualified_signature": "void SurfaceFire::setFireLengthToWidthRatio(double lengthToWidthRatio)",
-      "line": 150,
+      "line": 154,
       "python_targets": [
         {
           "evidence": "C++ named setter property equals a Python input parameter; setter lifecycle has no direct Python equivalent",
@@ -4291,7 +4291,7 @@
       "file": "src/behave/surfaceFire.h",
       "id": "6f49e58e895870414bc3",
       "lexically_qualified_signature": "void SurfaceFire::setResidenceTime(double residenceTime)",
-      "line": 151,
+      "line": 155,
       "python_targets": [
         {
           "evidence": "C++ named setter property equals a Python input parameter; setter lifecycle has no direct Python equivalent",
@@ -4321,7 +4321,7 @@
       "file": "src/behave/surfaceFire.h",
       "id": "fbb47adb2bcc11779960",
       "lexically_qualified_signature": "void SurfaceFire::setWindSpeedLimit(double windSpeedLimit)",
-      "line": 152,
+      "line": 156,
       "python_targets": [],
       "qualified_name": "SurfaceFire::setWindSpeedLimit",
       "rust_targets": [],
@@ -4332,7 +4332,7 @@
       "file": "src/behave/surfaceFire.h",
       "id": "d6ace631d965c8249675",
       "lexically_qualified_signature": "void SurfaceFire::setReactionIntensity(double reactionIntensity)",
-      "line": 153,
+      "line": 157,
       "python_targets": [
         {
           "evidence": "C++ named setter property equals a Python input parameter; setter lifecycle has no direct Python equivalent",
@@ -4396,7 +4396,7 @@
       "file": "src/behave/surfaceFire.h",
       "id": "e6c270e8f47f737e2167",
       "lexically_qualified_signature": "void SurfaceFire::setHeatPerUnitArea(double heatPerUnitArea)",
-      "line": 154,
+      "line": 158,
       "python_targets": [
         {
           "evidence": "C++ named setter property equals a Python input parameter; setter lifecycle has no direct Python equivalent",
@@ -4424,20 +4424,9 @@
     {
       "access": "protected",
       "file": "src/behave/surfaceFire.h",
-      "id": "6883d29ad754cfbff5b9",
-      "lexically_qualified_signature": "void SurfaceFire::setIsWindLimitEnabled(bool isWindLimitEnabled)",
-      "line": 155,
-      "python_targets": [],
-      "qualified_name": "SurfaceFire::setIsWindLimitEnabled",
-      "rust_targets": [],
-      "signature": "void SurfaceFire::setIsWindLimitEnabled(bool isWindLimitEnabled)"
-    },
-    {
-      "access": "protected",
-      "file": "src/behave/surfaceFire.h",
       "id": "fc7e17a3914fc8f60e70",
       "lexically_qualified_signature": "void SurfaceFire::setIsWindLimitExceeded(bool isWindLimitExceeded)",
-      "line": 156,
+      "line": 159,
       "python_targets": [],
       "qualified_name": "SurfaceFire::setIsWindLimitExceeded",
       "rust_targets": [],
@@ -4448,7 +4437,7 @@
       "file": "src/behave/surfaceFire.h",
       "id": "370df94a61cb809d5ff8",
       "lexically_qualified_signature": "void SurfaceFire::setWindAdjustmentFactor(double windAdjustmentFactor)",
-      "line": 157,
+      "line": 160,
       "python_targets": [],
       "qualified_name": "SurfaceFire::setWindAdjustmentFactor",
       "rust_targets": [],
@@ -4459,7 +4448,7 @@
       "file": "src/behave/surfaceFire.h",
       "id": "4e4c80b5778831b9afee",
       "lexically_qualified_signature": "void SurfaceFire::setMidflameWindSpeed(double midflameWindSpeed)",
-      "line": 158,
+      "line": 161,
       "python_targets": [
         {
           "evidence": "C++ named setter property equals a Python input parameter; setter lifecycle has no direct Python equivalent",
@@ -4489,7 +4478,7 @@
       "file": "src/behave/surfaceFire.h",
       "id": "ff2862e03b01d99f1161",
       "lexically_qualified_signature": "void SurfaceFire::memberwiseCopyAssignment(const SurfaceFire& rhs)",
-      "line": 161,
+      "line": 164,
       "python_targets": [],
       "qualified_name": "SurfaceFire::memberwiseCopyAssignment",
       "rust_targets": [],
@@ -4500,7 +4489,7 @@
       "file": "src/behave/surfaceFire.h",
       "id": "6c5e69eb809dcf606111",
       "lexically_qualified_signature": "void SurfaceFire::calculateHeatPerUnitArea()",
-      "line": 162,
+      "line": 165,
       "python_targets": [
         {
           "evidence": "same semantic family and exact case/underscore-normalized callable name; behavioral equivalence unverified",
@@ -4529,7 +4518,7 @@
       "file": "src/behave/surfaceFire.h",
       "id": "801a392f9f43a9eaafca",
       "lexically_qualified_signature": "void SurfaceFire::calculateWindAdjustmentFactor()",
-      "line": 163,
+      "line": 166,
       "python_targets": [
         {
           "evidence": "same semantic family and exact case/underscore-normalized callable name; behavioral equivalence unverified",
@@ -4558,7 +4547,7 @@
       "file": "src/behave/surfaceFire.h",
       "id": "fe4b45d14e257339206d",
       "lexically_qualified_signature": "void SurfaceFire::calculateWindFactor()",
-      "line": 164,
+      "line": 167,
       "python_targets": [
         {
           "evidence": "wind multiplier substep renamed factor to phi; source equality unverified",
@@ -4587,7 +4576,7 @@
       "file": "src/behave/surfaceFire.h",
       "id": "2a45b8c09c3180c87caf",
       "lexically_qualified_signature": "void SurfaceFire::calculateSlopeFactor()",
-      "line": 165,
+      "line": 168,
       "python_targets": [
         {
           "evidence": "slope multiplier substep renamed factor to phi; source equality unverified",
@@ -4616,7 +4605,7 @@
       "file": "src/behave/surfaceFire.h",
       "id": "e484d02ab4859fb3417e",
       "lexically_qualified_signature": "void SurfaceFire::calculateHeatSource()",
-      "line": 166,
+      "line": 169,
       "python_targets": [],
       "qualified_name": "SurfaceFire::calculateHeatSource",
       "rust_targets": [],
@@ -4627,7 +4616,7 @@
       "file": "src/behave/surfaceFire.h",
       "id": "04d64a99bf3d523aad18",
       "lexically_qualified_signature": "void SurfaceFire::calculateResidenceTime()",
-      "line": 168,
+      "line": 171,
       "python_targets": [
         {
           "evidence": "same semantic family and exact case/underscore-normalized callable name; behavioral equivalence unverified",
@@ -4656,7 +4645,7 @@
       "file": "src/behave/surfaceFire.h",
       "id": "20ae0cb2dd26de2d6810",
       "lexically_qualified_signature": "double SurfaceFire::calculateFirelineIntensity(double forwardSpreadRate, SpeedUnits::SpeedUnitsEnum speedUnits, FirelineIntensityUnits::FirelineIntensityUnitsEnum firelineIntensityUnits)",
-      "line": 169,
+      "line": 172,
       "python_targets": [
         {
           "evidence": "same semantic family and exact case/underscore-normalized callable name; behavioral equivalence unverified",
@@ -4685,7 +4674,7 @@
       "file": "src/behave/surfaceFire.h",
       "id": "1d3c116d48f8594b4b26",
       "lexically_qualified_signature": "void SurfaceFire::calculateFirelineIntensities()",
-      "line": 172,
+      "line": 175,
       "python_targets": [],
       "qualified_name": "SurfaceFire::calculateFirelineIntensities",
       "rust_targets": [],
@@ -4696,7 +4685,7 @@
       "file": "src/behave/surfaceFire.h",
       "id": "98a7abe9609d5c2c979d",
       "lexically_qualified_signature": "double SurfaceFire::calculateFlameLength(double firelineIntensity, FirelineIntensityUnits::FirelineIntensityUnitsEnum firelineIntensityUnits, LengthUnits::LengthUnitsEnum flameLengthUnits)",
-      "line": 173,
+      "line": 176,
       "python_targets": [
         {
           "evidence": "same semantic family and exact case/underscore-normalized callable name; behavioral equivalence unverified",
@@ -4725,7 +4714,7 @@
       "file": "src/behave/surfaceFire.h",
       "id": "3cc159f7de1e2a48807f",
       "lexically_qualified_signature": "void SurfaceFire::calculateFlameLengths()",
-      "line": 176,
+      "line": 179,
       "python_targets": [],
       "qualified_name": "SurfaceFire::calculateFlameLengths",
       "rust_targets": [],
@@ -4736,7 +4725,7 @@
       "file": "src/behave/surfaceFire.h",
       "id": "d7b8bc76145496fede8d",
       "lexically_qualified_signature": "void SurfaceFire::calculateScorchHeight()",
-      "line": 177,
+      "line": 180,
       "python_targets": [
         {
           "evidence": "scorch-height equation moved to the mortality port module; source equality unverified",
@@ -4773,7 +4762,7 @@
       "file": "src/behave/surfaceFire.h",
       "id": "d751055477dd12e1ca2f",
       "lexically_qualified_signature": "void SurfaceFire::calculateWindSpeedLimit()",
-      "line": 178,
+      "line": 181,
       "python_targets": [],
       "qualified_name": "SurfaceFire::calculateWindSpeedLimit",
       "rust_targets": [],
@@ -4784,7 +4773,7 @@
       "file": "src/behave/surfaceFire.h",
       "id": "1d1e420581aaa9093ef1",
       "lexically_qualified_signature": "void SurfaceFire::calculateDirectionOfMaxSpread()",
-      "line": 179,
+      "line": 182,
       "python_targets": [
         {
           "evidence": "same semantic family and exact case/underscore-normalized callable name; behavioral equivalence unverified",
@@ -4813,7 +4802,7 @@
       "file": "src/behave/surfaceFire.h",
       "id": "873b6f707d7205737810",
       "lexically_qualified_signature": "void SurfaceFire::calculateEffectiveWindSpeed()",
-      "line": 181,
+      "line": 184,
       "python_targets": [
         {
           "evidence": "same semantic family and exact case/underscore-normalized callable name; behavioral equivalence unverified",
@@ -4842,7 +4831,7 @@
       "file": "src/behave/surfaceFire.h",
       "id": "c585d868bd608f609549",
       "lexically_qualified_signature": "void SurfaceFire::applyWindSpeedLimit()",
-      "line": 182,
+      "line": 185,
       "python_targets": [],
       "qualified_name": "SurfaceFire::applyWindSpeedLimit",
       "rust_targets": [],
@@ -4853,7 +4842,7 @@
       "file": "src/behave/surfaceFire.h",
       "id": "7d10ce35ca5bf6051b4c",
       "lexically_qualified_signature": "double SurfaceFire::convertDirectionOfSpreadToRelativeToNorth(double directionOfMaxSpreadFromUpslope) const",
-      "line": 183,
+      "line": 186,
       "python_targets": [],
       "qualified_name": "SurfaceFire::convertDirectionOfSpreadToRelativeToNorth",
       "rust_targets": [],
@@ -5196,11 +5185,11 @@
       },
       {
         "file": "surface/results.jsonl",
-        "sha256": "ae006838d93bbb9533df74340085110c479315cb8238a8ce488a68fe5e9e1b71"
+        "sha256": "84ab8f5bf4197dcea68f302a2969f8f4c075c995a8e8f084d8611a12120ef14a"
       },
       {
         "file": "surface/manifest.json",
-        "sha256": "39e75b886c69607977227a90361e0ef7585fabf7736cdded1352fca151bc1409"
+        "sha256": "a8c10db6cf6d87acb76ba5469f02ae75fdcc99417fcf12d282f75a55810a635e"
       }
     ],
     "meaning": "Raw observations, not tested/approved scientific coverage",
@@ -29462,7 +29451,7 @@
         },
         {
           "file": "fire_size/manifest.json",
-          "sha256": "c450683a4dec4573af3fb9a38fa9b55487f270c63f6407d91abc5886dcf9b9b6"
+          "sha256": "c5f3598b3bc211f548a8e85e80687868eebf0cd7e8ec1fca3aab4d14d342b0a3"
         }
       ],
       "file": "src/behave/fireSize.h",
@@ -29539,7 +29528,7 @@
         },
         {
           "file": "fire_size/manifest.json",
-          "sha256": "c450683a4dec4573af3fb9a38fa9b55487f270c63f6407d91abc5886dcf9b9b6"
+          "sha256": "c5f3598b3bc211f548a8e85e80687868eebf0cd7e8ec1fca3aab4d14d342b0a3"
         }
       ],
       "file": "src/behave/fireSize.h",
@@ -30192,7 +30181,7 @@
         },
         {
           "file": "fire_size/manifest.json",
-          "sha256": "c450683a4dec4573af3fb9a38fa9b55487f270c63f6407d91abc5886dcf9b9b6"
+          "sha256": "c5f3598b3bc211f548a8e85e80687868eebf0cd7e8ec1fca3aab4d14d342b0a3"
         }
       ],
       "file": "src/behave/fireSize.h",
@@ -30269,7 +30258,7 @@
         },
         {
           "file": "fire_size/manifest.json",
-          "sha256": "c450683a4dec4573af3fb9a38fa9b55487f270c63f6407d91abc5886dcf9b9b6"
+          "sha256": "c5f3598b3bc211f548a8e85e80687868eebf0cd7e8ec1fca3aab4d14d342b0a3"
         }
       ],
       "file": "src/behave/fireSize.h",
@@ -32040,7 +32029,7 @@
         },
         {
           "file": "ignite/manifest.json",
-          "sha256": "cb7605793cc336e5dbba80f74f991c60ac834c4dc751627a1dfccee781681bc7"
+          "sha256": "ef998a9feb7b6fb76497a16ff32422df43994db1b25423e62eedbc4e6c91c7fa"
         }
       ],
       "file": "src/behave/ignite.h",
@@ -32510,7 +32499,7 @@
         },
         {
           "file": "ignite/manifest.json",
-          "sha256": "cb7605793cc336e5dbba80f74f991c60ac834c4dc751627a1dfccee781681bc7"
+          "sha256": "ef998a9feb7b6fb76497a16ff32422df43994db1b25423e62eedbc4e6c91c7fa"
         }
       ],
       "file": "src/behave/ignite.h",
@@ -34837,7 +34826,7 @@
         },
         {
           "file": "mortality/manifest.json",
-          "sha256": "0d20af418e6c80964c12f51244feeba4f35f78c0ad726bbb09bdc16217dc7ee5"
+          "sha256": "c4a6d9c0ea6917cf5f81388c36db3caa2d07132b215864d093d42a63d3d28ab4"
         }
       ],
       "file": "src/behave/mortality.h",
@@ -35919,9 +35908,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "std::string speciesCode, EquationType equationType",
-          "end_line": 2173,
+          "end_line": 2187,
           "file": "src/behave/mortality.cpp",
-          "line": 2157,
+          "line": 2171,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -37931,9 +37920,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "",
-          "end_line": 1876,
+          "end_line": 1890,
           "file": "src/behave/mortality.cpp",
-          "line": 1873,
+          "line": 1887,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -37981,9 +37970,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "string speciesCode",
-          "end_line": 1871,
+          "end_line": 1885,
           "file": "src/behave/mortality.cpp",
-          "line": 1868,
+          "line": 1882,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -38053,9 +38042,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "string speciesNameCode, EquationType equationType",
-          "end_line": 1881,
+          "end_line": 1895,
           "file": "src/behave/mortality.cpp",
-          "line": 1878,
+          "line": 1892,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -38125,9 +38114,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "",
-          "end_line": 1886,
+          "end_line": 1900,
           "file": "src/behave/mortality.cpp",
-          "line": 1883,
+          "line": 1897,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -38177,9 +38166,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "int index",
-          "end_line": 1891,
+          "end_line": 1905,
           "file": "src/behave/mortality.cpp",
-          "line": 1888,
+          "line": 1902,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -38227,9 +38216,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "string speciesCode, EquationType equationType",
-          "end_line": 1897,
+          "end_line": 1911,
           "file": "src/behave/mortality.cpp",
-          "line": 1893,
+          "line": 1907,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -38277,9 +38266,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "GACC region",
-          "end_line": 1993,
+          "end_line": 2007,
           "file": "src/behave/mortality.cpp",
-          "line": 1899,
+          "line": 1913,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -38327,9 +38316,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "GACC region, EquationType equationType",
-          "end_line": 2100,
+          "end_line": 2114,
           "file": "src/behave/mortality.cpp",
-          "line": 1995,
+          "line": 2009,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -38377,9 +38366,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "FractionUnits::FractionUnitsEnum probabilityUnits",
-          "end_line": 2105,
+          "end_line": 2119,
           "file": "src/behave/mortality.cpp",
-          "line": 2102,
+          "line": 2116,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -38427,9 +38416,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "",
-          "end_line": 2110,
+          "end_line": 2124,
           "file": "src/behave/mortality.cpp",
-          "line": 2107,
+          "line": 2121,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -38477,9 +38466,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "",
-          "end_line": 2115,
+          "end_line": 2129,
           "file": "src/behave/mortality.cpp",
-          "line": 2112,
+          "line": 2126,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -38527,9 +38516,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "LengthUnits::LengthUnitsEnum lengthUnits",
-          "end_line": 2120,
+          "end_line": 2134,
           "file": "src/behave/mortality.cpp",
-          "line": 2117,
+          "line": 2131,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -38577,9 +38566,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "FractionUnits::FractionUnitsEnum fractionUnits",
-          "end_line": 2125,
+          "end_line": 2139,
           "file": "src/behave/mortality.cpp",
-          "line": 2122,
+          "line": 2136,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -38627,9 +38616,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "",
-          "end_line": 2130,
+          "end_line": 2144,
           "file": "src/behave/mortality.cpp",
-          "line": 2127,
+          "line": 2141,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -38677,9 +38666,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "",
-          "end_line": 2135,
+          "end_line": 2149,
           "file": "src/behave/mortality.cpp",
-          "line": 2132,
+          "line": 2146,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -38727,9 +38716,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "",
-          "end_line": 2140,
+          "end_line": 2154,
           "file": "src/behave/mortality.cpp",
-          "line": 2137,
+          "line": 2151,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -38777,9 +38766,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "",
-          "end_line": 2145,
+          "end_line": 2159,
           "file": "src/behave/mortality.cpp",
-          "line": 2142,
+          "line": 2156,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -38827,9 +38816,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "",
-          "end_line": 2150,
+          "end_line": 2164,
           "file": "src/behave/mortality.cpp",
-          "line": 2147,
+          "line": 2161,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -52291,11 +52280,11 @@
         },
         {
           "file": "surface/results.jsonl",
-          "sha256": "ae006838d93bbb9533df74340085110c479315cb8238a8ce488a68fe5e9e1b71"
+          "sha256": "84ab8f5bf4197dcea68f302a2969f8f4c075c995a8e8f084d8611a12120ef14a"
         },
         {
           "file": "surface/manifest.json",
-          "sha256": "39e75b886c69607977227a90361e0ef7585fabf7736cdded1352fca151bc1409"
+          "sha256": "a8c10db6cf6d87acb76ba5469f02ae75fdcc99417fcf12d282f75a55810a635e"
         }
       ],
       "file": "src/behave/surface.h",
@@ -52638,11 +52627,11 @@
         },
         {
           "file": "surface/results.jsonl",
-          "sha256": "ae006838d93bbb9533df74340085110c479315cb8238a8ce488a68fe5e9e1b71"
+          "sha256": "84ab8f5bf4197dcea68f302a2969f8f4c075c995a8e8f084d8611a12120ef14a"
         },
         {
           "file": "surface/manifest.json",
-          "sha256": "39e75b886c69607977227a90361e0ef7585fabf7736cdded1352fca151bc1409"
+          "sha256": "a8c10db6cf6d87acb76ba5469f02ae75fdcc99417fcf12d282f75a55810a635e"
         }
       ],
       "file": "src/behave/surface.h",
@@ -53346,11 +53335,11 @@
         },
         {
           "file": "surface/results.jsonl",
-          "sha256": "ae006838d93bbb9533df74340085110c479315cb8238a8ce488a68fe5e9e1b71"
+          "sha256": "84ab8f5bf4197dcea68f302a2969f8f4c075c995a8e8f084d8611a12120ef14a"
         },
         {
           "file": "surface/manifest.json",
-          "sha256": "39e75b886c69607977227a90361e0ef7585fabf7736cdded1352fca151bc1409"
+          "sha256": "a8c10db6cf6d87acb76ba5469f02ae75fdcc99417fcf12d282f75a55810a635e"
         }
       ],
       "file": "src/behave/surface.h",
@@ -53618,11 +53607,11 @@
         },
         {
           "file": "surface/results.jsonl",
-          "sha256": "ae006838d93bbb9533df74340085110c479315cb8238a8ce488a68fe5e9e1b71"
+          "sha256": "84ab8f5bf4197dcea68f302a2969f8f4c075c995a8e8f084d8611a12120ef14a"
         },
         {
           "file": "surface/manifest.json",
-          "sha256": "39e75b886c69607977227a90361e0ef7585fabf7736cdded1352fca151bc1409"
+          "sha256": "a8c10db6cf6d87acb76ba5469f02ae75fdcc99417fcf12d282f75a55810a635e"
         }
       ],
       "file": "src/behave/surface.h",
@@ -53896,11 +53885,11 @@
         },
         {
           "file": "surface/results.jsonl",
-          "sha256": "ae006838d93bbb9533df74340085110c479315cb8238a8ce488a68fe5e9e1b71"
+          "sha256": "84ab8f5bf4197dcea68f302a2969f8f4c075c995a8e8f084d8611a12120ef14a"
         },
         {
           "file": "surface/manifest.json",
-          "sha256": "39e75b886c69607977227a90361e0ef7585fabf7736cdded1352fca151bc1409"
+          "sha256": "a8c10db6cf6d87acb76ba5469f02ae75fdcc99417fcf12d282f75a55810a635e"
         }
       ],
       "file": "src/behave/surface.h",
@@ -54168,11 +54157,11 @@
         },
         {
           "file": "surface/results.jsonl",
-          "sha256": "ae006838d93bbb9533df74340085110c479315cb8238a8ce488a68fe5e9e1b71"
+          "sha256": "84ab8f5bf4197dcea68f302a2969f8f4c075c995a8e8f084d8611a12120ef14a"
         },
         {
           "file": "surface/manifest.json",
-          "sha256": "39e75b886c69607977227a90361e0ef7585fabf7736cdded1352fca151bc1409"
+          "sha256": "a8c10db6cf6d87acb76ba5469f02ae75fdcc99417fcf12d282f75a55810a635e"
         }
       ],
       "file": "src/behave/surface.h",
@@ -57232,9 +57221,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "double userProvidedWindAdjustmentFactor",
-          "end_line": 1033,
+          "end_line": 1048,
           "file": "src/behave/surface.cpp",
-          "line": 1030,
+          "line": 1045,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -57248,7 +57237,7 @@
       "id": "8360ab2aa60ea86881ca",
       "kind": "method",
       "lexically_qualified_signature": "void Surface::setUserProvidedWindAdjustmentFactor(double userProvidedWindAdjustmentFactor)",
-      "line": 129,
+      "line": 135,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -57292,9 +57281,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "double windDirection",
-          "end_line": 1038,
+          "end_line": 1053,
           "file": "src/behave/surface.cpp",
-          "line": 1035,
+          "line": 1050,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -57308,7 +57297,7 @@
       "id": "c0d119df1f11fb5b99e0",
       "kind": "method",
       "lexically_qualified_signature": "void Surface::setWindDirection(double windDirection)",
-      "line": 130,
+      "line": 136,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -57380,9 +57369,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "WindAndSpreadOrientationMode::WindAndSpreadOrientationModeEnum windAndSpreadOrientationMode",
-          "end_line": 1043,
+          "end_line": 1058,
           "file": "src/behave/surface.cpp",
-          "line": 1040,
+          "line": 1055,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -57396,7 +57385,7 @@
       "id": "83c9a39ab2150618d371",
       "kind": "method",
       "lexically_qualified_signature": "void Surface::setWindAndSpreadOrientationMode(WindAndSpreadOrientationMode::WindAndSpreadOrientationModeEnum windAndSpreadOrientationMode)",
-      "line": 131,
+      "line": 137,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -57440,9 +57429,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "WindHeightInputMode::WindHeightInputModeEnum windHeightInputMode",
-          "end_line": 1048,
+          "end_line": 1063,
           "file": "src/behave/surface.cpp",
-          "line": 1045,
+          "line": 1060,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -57456,7 +57445,7 @@
       "id": "00ccadddec3543e5bf97",
       "kind": "method",
       "lexically_qualified_signature": "void Surface::setWindHeightInputMode(WindHeightInputMode::WindHeightInputModeEnum windHeightInputMode)",
-      "line": 132,
+      "line": 138,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -57500,9 +57489,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "int firstFuelModelNumber",
-          "end_line": 1053,
+          "end_line": 1068,
           "file": "src/behave/surface.cpp",
-          "line": 1050,
+          "line": 1065,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -57516,7 +57505,7 @@
       "id": "abdc759631fabc10e03f",
       "kind": "method",
       "lexically_qualified_signature": "void Surface::setFirstFuelModelNumber(int firstFuelModelNumber)",
-      "line": 133,
+      "line": 139,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -57560,9 +57549,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "int secondFuelModelNumber",
-          "end_line": 1058,
+          "end_line": 1073,
           "file": "src/behave/surface.cpp",
-          "line": 1055,
+          "line": 1070,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -57576,7 +57565,7 @@
       "id": "87b5d50c54e920dddc60",
       "kind": "method",
       "lexically_qualified_signature": "void Surface::setSecondFuelModelNumber(int secondFuelModelNumber)",
-      "line": 134,
+      "line": 140,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -57620,9 +57609,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "TwoFuelModelsMethod::TwoFuelModelsMethodEnum twoFuelModelsMethod",
-          "end_line": 1063,
+          "end_line": 1078,
           "file": "src/behave/surface.cpp",
-          "line": 1060,
+          "line": 1075,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -57636,7 +57625,7 @@
       "id": "ba36d769911c291541ac",
       "kind": "method",
       "lexically_qualified_signature": "void Surface::setTwoFuelModelsMethod(TwoFuelModelsMethod::TwoFuelModelsMethodEnum twoFuelModelsMethod)",
-      "line": 135,
+      "line": 141,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -57680,9 +57669,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "double firstFuelModelCoverage, FractionUnits::FractionUnitsEnum coverageUnits",
-          "end_line": 1068,
+          "end_line": 1083,
           "file": "src/behave/surface.cpp",
-          "line": 1065,
+          "line": 1080,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -57696,7 +57685,7 @@
       "id": "e6f760f18048fc588b57",
       "kind": "method",
       "lexically_qualified_signature": "void Surface::setTwoFuelModelsFirstFuelModelCoverage(double firstFuelModelCoverage, FractionUnits::FractionUnitsEnum coverageUnits)",
-      "line": 136,
+      "line": 142,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -57740,9 +57729,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "WindAdjustmentFactorCalculationMethod::WindAdjustmentFactorCalculationMethodEnum windAdjustmentFactorCalculationMethod",
-          "end_line": 1073,
+          "end_line": 1088,
           "file": "src/behave/surface.cpp",
-          "line": 1070,
+          "line": 1085,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -57756,7 +57745,7 @@
       "id": "abeffee4fdb9e784eca3",
       "kind": "method",
       "lexically_qualified_signature": "void Surface::setWindAdjustmentFactorCalculationMethod(WindAdjustmentFactorCalculationMethod::WindAdjustmentFactorCalculationMethodEnum windAdjustmentFactorCalculationMethod)",
-      "line": 137,
+      "line": 143,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -57800,9 +57789,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "int fuelModelNumber, double moistureOneHour, double moistureTenHour, double moistureHundredHour, double moistureLiveHerbaceous, double moistureLiveWoody, FractionUnits::FractionUnitsEnum moistureUnits, double windSpeed, SpeedUnits::SpeedUnitsEnum windSpeedUnits, WindHeightInputMode::WindHeightInputModeEnum windHeightInputMode, double windDirection, WindAndSpreadOrientationMode::WindAndSpreadOrientationModeEnum windAndSpreadOrientationMode, double slope, SlopeUnits::SlopeUnitsEnum slopeUnits, double aspect, double canopyCover, FractionUnits::FractionUnitsEnum canopyUnits, double canopyHeight, LengthUnits::LengthUnitsEnum canopyHeightUnits, double crownRatio, FractionUnits::FractionUnitsEnum crownRatioUnits",
-          "end_line": 1086,
+          "end_line": 1101,
           "file": "src/behave/surface.cpp",
-          "line": 1075,
+          "line": 1090,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -57814,7 +57803,7 @@
       "id": "670aaf1b1596fa2a7649",
       "kind": "method",
       "lexically_qualified_signature": "void Surface::updateSurfaceInputs(int fuelModelNumber, double moistureOneHour, double moistureTenHour, double moistureHundredHour, double moistureLiveHerbaceous, double moistureLiveWoody, FractionUnits::FractionUnitsEnum moistureUnits, double windSpeed, SpeedUnits::SpeedUnitsEnum windSpeedUnits, WindHeightInputMode::WindHeightInputModeEnum windHeightInputMode, double windDirection, WindAndSpreadOrientationMode::WindAndSpreadOrientationModeEnum windAndSpreadOrientationMode, double slope, SlopeUnits::SlopeUnitsEnum slopeUnits, double aspect, double canopyCover, FractionUnits::FractionUnitsEnum coverUnits, double canopyHeight, LengthUnits::LengthUnitsEnum canopyHeightUnits, double crownRatio, FractionUnits::FractionUnitsEnum crownRatioUnits)",
-      "line": 138,
+      "line": 144,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -57858,9 +57847,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "int firstfuelModelNumber, int secondFuelModelNumber, double moistureOneHour, double moistureTenHour, double moistureHundredHour, double moistureLiveHerbaceous, double moistureLiveWoody, FractionUnits::FractionUnitsEnum moistureUnits, double windSpeed, SpeedUnits::SpeedUnitsEnum windSpeedUnits, WindHeightInputMode::WindHeightInputModeEnum windHeightInputMode, double windDirection, WindAndSpreadOrientationMode::WindAndSpreadOrientationModeEnum windAndSpreadOrientationMode, double firstFuelModelCoverage, FractionUnits::FractionUnitsEnum firstFuelModelCoverageUnits, TwoFuelModelsMethod::TwoFuelModelsMethodEnum twoFuelModelsMethod, double slope, SlopeUnits::SlopeUnitsEnum slopeUnits, double aspect, double canopyCover, FractionUnits::FractionUnitsEnum canopyCoverUnits, double canopyHeight, LengthUnits::LengthUnitsEnum canopyHeightUnits, double crownRatio, FractionUnits::FractionUnitsEnum crownRatioUnits",
-          "end_line": 1103,
+          "end_line": 1118,
           "file": "src/behave/surface.cpp",
-          "line": 1088,
+          "line": 1103,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -57872,7 +57861,7 @@
       "id": "4c534d8fbb2cedca91be",
       "kind": "method",
       "lexically_qualified_signature": "void Surface::updateSurfaceInputsForTwoFuelModels(int firstFuelModelNumber, int secondFuelModelNumber, double moistureOneHour, double moistureTenHour, double moistureHundredHour, double moistureLiveHerbaceous, double moistureLiveWoody, FractionUnits::FractionUnitsEnum moistureUnits, double windSpeed, SpeedUnits::SpeedUnitsEnum windSpeedUnits, WindHeightInputMode::WindHeightInputModeEnum windHeightInputMode, double windDirection, WindAndSpreadOrientationMode::WindAndSpreadOrientationModeEnum windAndSpreadOrientationMode, double firstFuelModelCoverage, FractionUnits::FractionUnitsEnum firstFuelModelCoverageUnits, TwoFuelModelsMethod::TwoFuelModelsMethodEnum twoFuelModelsMethod, double slope, SlopeUnits::SlopeUnitsEnum slopeUnits, double aspect, double canopyCover, FractionUnits::FractionUnitsEnum canopyCoverUnits, double canopyHeight, LengthUnits::LengthUnitsEnum canopyHeightUnits, double crownRatio, FractionUnits::FractionUnitsEnum crownRatioUnits)",
-      "line": 143,
+      "line": 149,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -57916,9 +57905,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "double moistureOneHour, double moistureTenHour, double moistureHundredHour, double moistureLiveHerbaceous, double moistureLiveWoody, FractionUnits::FractionUnitsEnum moistureUnits, double windSpeed, SpeedUnits::SpeedUnitsEnum windSpeedUnits, WindHeightInputMode::WindHeightInputModeEnum windHeightInputMode, double windDirection, WindAndSpreadOrientationMode::WindAndSpreadOrientationModeEnum windAndSpreadOrientationMode, double ageOfRough, double heightOfUnderstory, double palmettoCoverage, double overstoryBasalArea, BasalAreaUnits::BasalAreaUnitsEnum basalAreaUnits, double slope, SlopeUnits::SlopeUnitsEnum slopeUnits, double aspect, double canopyCover, FractionUnits::FractionUnitsEnum canopyUnits, double canopyHeight, LengthUnits::LengthUnitsEnum canopyHeightUnits, double crownRatio, FractionUnits::FractionUnitsEnum crownRatioUnits",
-          "end_line": 1117,
+          "end_line": 1132,
           "file": "src/behave/surface.cpp",
-          "line": 1105,
+          "line": 1120,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -57930,7 +57919,7 @@
       "id": "964f6a07e746b77ea62e",
       "kind": "method",
       "lexically_qualified_signature": "void Surface::updateSurfaceInputsForPalmettoGallbery(double moistureOneHour, double moistureTenHour, double moistureHundredHour, double moistureLiveHerbaceous, double moistureLiveWoody, FractionUnits::FractionUnitsEnum moistureUnits, double windSpeed, SpeedUnits::SpeedUnitsEnum windSpeedUnits, WindHeightInputMode::WindHeightInputModeEnum windHeightInputMode, double windDirection, WindAndSpreadOrientationMode::WindAndSpreadOrientationModeEnum windAndSpreadOrientationMode, double ageOfRough, double heightOfUnderstory, double palmettoCoverage, double overstoryBasalArea, BasalAreaUnits::BasalAreaUnitsEnum basalAreaUnits, double slope, SlopeUnits::SlopeUnitsEnum slopeUnits, double aspect, double canopyCover, FractionUnits::FractionUnitsEnum coverUnits, double canopyHeight, LengthUnits::LengthUnitsEnum canopyHeightUnits, double crownRatio, FractionUnits::FractionUnitsEnum crownRatioUnits)",
-      "line": 153,
+      "line": 159,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -57974,9 +57963,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "double ageOfRough",
-          "end_line": 1312,
+          "end_line": 1327,
           "file": "src/behave/surface.cpp",
-          "line": 1309,
+          "line": 1324,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -57990,7 +57979,7 @@
       "id": "9fa9eb69e5f88a45e046",
       "kind": "method",
       "lexically_qualified_signature": "void Surface::setAgeOfRough(double ageOfRough)",
-      "line": 159,
+      "line": 165,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -58034,9 +58023,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "double heightOfUnderstory, LengthUnits::LengthUnitsEnum heightUnits",
-          "end_line": 1317,
+          "end_line": 1332,
           "file": "src/behave/surface.cpp",
-          "line": 1314,
+          "line": 1329,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -58050,7 +58039,7 @@
       "id": "032dd0a3a2157c7c43b0",
       "kind": "method",
       "lexically_qualified_signature": "void Surface::setHeightOfUnderstory(double heightOfUnderstory, LengthUnits::LengthUnitsEnum heightUnits)",
-      "line": 160,
+      "line": 166,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -58094,9 +58083,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "double palmettoCoverage, FractionUnits::FractionUnitsEnum coverageUnits",
-          "end_line": 1322,
+          "end_line": 1337,
           "file": "src/behave/surface.cpp",
-          "line": 1319,
+          "line": 1334,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -58110,7 +58099,7 @@
       "id": "45b3673cae9291292df6",
       "kind": "method",
       "lexically_qualified_signature": "void Surface::setPalmettoCoverage(double palmettoCoverage, FractionUnits::FractionUnitsEnum coverageUnits)",
-      "line": 161,
+      "line": 167,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -58154,9 +58143,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "double overstoryBasalArea, BasalAreaUnits::BasalAreaUnitsEnum basalAreaUnits",
-          "end_line": 1327,
+          "end_line": 1342,
           "file": "src/behave/surface.cpp",
-          "line": 1324,
+          "line": 1339,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -58170,7 +58159,7 @@
       "id": "326e7007c7d63d78466c",
       "kind": "method",
       "lexically_qualified_signature": "void Surface::setOverstoryBasalArea(double overstoryBasalArea, BasalAreaUnits::BasalAreaUnitsEnum basalAreaUnits)",
-      "line": 162,
+      "line": 168,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -58214,9 +58203,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "bool isUsingPalmettoGallberry",
-          "end_line": 1332,
+          "end_line": 1347,
           "file": "src/behave/surface.cpp",
-          "line": 1329,
+          "line": 1344,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -58230,7 +58219,7 @@
       "id": "7aa9ec748b946bb01feb",
       "kind": "method",
       "lexically_qualified_signature": "void Surface::setIsUsingPalmettoGallberry(bool isUsingPalmettoGallberry)",
-      "line": 163,
+      "line": 169,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -58274,9 +58263,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "int aspenFuelModelNumber, double aspenCuringLevel, FractionUnits::FractionUnitsEnum curingLevelUnits, AspenFireSeverity::AspenFireSeverityEnum aspenFireSeverity, double dbh, LengthUnits::LengthUnitsEnum dbhUnits, double moistureOneHour, double moistureTenHour, double moistureHundredHour, double moistureLiveHerbaceous, double moistureLiveWoody, FractionUnits::FractionUnitsEnum moistureUnits, double windSpeed, SpeedUnits::SpeedUnitsEnum windSpeedUnits, WindHeightInputMode::WindHeightInputModeEnum windHeightInputMode, double windDirection, WindAndSpreadOrientationMode::WindAndSpreadOrientationModeEnum windAndSpreadOrientationMode, double slope, SlopeUnits::SlopeUnitsEnum slopeUnits, double aspect, double canopyCover, FractionUnits::FractionUnitsEnum canopyUnits, double canopyHeight, LengthUnits::LengthUnitsEnum canopyHeightUnits, double crownRatio, FractionUnits::FractionUnitsEnum crownRatioUnits",
-          "end_line": 1132,
+          "end_line": 1147,
           "file": "src/behave/surface.cpp",
-          "line": 1119,
+          "line": 1134,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -58288,7 +58277,7 @@
       "id": "20f56b3e43f09e010377",
       "kind": "method",
       "lexically_qualified_signature": "void Surface::updateSurfaceInputsForWesternAspen(int aspenFuelModelNumber, double aspenCuringLevel, FractionUnits::FractionUnitsEnum curingLevelUnits, AspenFireSeverity::AspenFireSeverityEnum aspenFireSeverity, double dbh, LengthUnits::LengthUnitsEnum dbhUnits, double moistureOneHour, double moistureTenHour, double moistureHundredHour, double moistureLiveHerbaceous, double moistureLiveWoody, FractionUnits::FractionUnitsEnum moistureUnits, double windSpeed, SpeedUnits::SpeedUnitsEnum windSpeedUnits, WindHeightInputMode::WindHeightInputModeEnum windHeightInputMode, double windDirection, WindAndSpreadOrientationMode::WindAndSpreadOrientationModeEnum windAndSpreadOrientationMode, double slope, SlopeUnits::SlopeUnitsEnum slopeUnits, double aspect, double canopyCover, FractionUnits::FractionUnitsEnum coverUnits, double canopyHeight, LengthUnits::LengthUnitsEnum canopyHeightUnits, double crownRatio, FractionUnits::FractionUnitsEnum crownRatioUnits)",
-      "line": 166,
+      "line": 172,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -58332,9 +58321,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "int aspenFuelModelNumber",
-          "end_line": 1137,
+          "end_line": 1152,
           "file": "src/behave/surface.cpp",
-          "line": 1134,
+          "line": 1149,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -58348,7 +58337,7 @@
       "id": "b8d7eeea501e6b0a7479",
       "kind": "method",
       "lexically_qualified_signature": "void Surface::setAspenFuelModelNumber(int aspenFuelModelNumber)",
-      "line": 173,
+      "line": 179,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -58392,9 +58381,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "double aspenCuringLevel, FractionUnits::FractionUnitsEnum curingLevelUnits",
-          "end_line": 1142,
+          "end_line": 1157,
           "file": "src/behave/surface.cpp",
-          "line": 1139,
+          "line": 1154,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -58408,7 +58397,7 @@
       "id": "d17ad44ec4c15143c705",
       "kind": "method",
       "lexically_qualified_signature": "void Surface::setAspenCuringLevel(double aspenCuringLevel, FractionUnits::FractionUnitsEnum curingLevelUnits)",
-      "line": 174,
+      "line": 180,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -58452,9 +58441,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "double dbh, LengthUnits::LengthUnitsEnum dbhUnits",
-          "end_line": 1147,
+          "end_line": 1162,
           "file": "src/behave/surface.cpp",
-          "line": 1144,
+          "line": 1159,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -58468,7 +58457,7 @@
       "id": "6affa5efa0522f59f412",
       "kind": "method",
       "lexically_qualified_signature": "void Surface::setAspenDBH(double dbh, LengthUnits::LengthUnitsEnum dbhUnits)",
-      "line": 175,
+      "line": 181,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -58512,9 +58501,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "AspenFireSeverity::AspenFireSeverityEnum aspenFireSeverity",
-          "end_line": 1152,
+          "end_line": 1167,
           "file": "src/behave/surface.cpp",
-          "line": 1149,
+          "line": 1164,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -58528,7 +58517,7 @@
       "id": "e6c58ccf500099a8039e",
       "kind": "method",
       "lexically_qualified_signature": "void Surface::setAspenFireSeverity(AspenFireSeverity::AspenFireSeverityEnum aspenFireSeverity)",
-      "line": 176,
+      "line": 182,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -58572,9 +58561,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "bool isUsingWesternAspen",
-          "end_line": 1157,
+          "end_line": 1172,
           "file": "src/behave/surface.cpp",
-          "line": 1154,
+          "line": 1169,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -58588,7 +58577,7 @@
       "id": "fb4b9e2b79e0162d3ee9",
       "kind": "method",
       "lexically_qualified_signature": "void Surface::setIsUsingWesternAspen(bool isUsingWesternAspen)",
-      "line": 177,
+      "line": 183,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -58632,9 +58621,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "ChaparralFuelLoadInputMode::ChaparralFuelInputLoadModeEnum fuelLoadInputMode",
-          "end_line": 1162,
+          "end_line": 1177,
           "file": "src/behave/surface.cpp",
-          "line": 1159,
+          "line": 1174,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -58648,7 +58637,7 @@
       "id": "3ec406a2e2bdb3edfc2d",
       "kind": "method",
       "lexically_qualified_signature": "void Surface::setChaparralFuelLoadInputMode(ChaparralFuelLoadInputMode::ChaparralFuelInputLoadModeEnum fuelLoadInputMode)",
-      "line": 180,
+      "line": 186,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -58692,9 +58681,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "ChaparralFuelType::ChaparralFuelTypeEnum chaparralFuelType",
-          "end_line": 1167,
+          "end_line": 1182,
           "file": "src/behave/surface.cpp",
-          "line": 1164,
+          "line": 1179,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -58708,7 +58697,7 @@
       "id": "d426a2191a7d955886a8",
       "kind": "method",
       "lexically_qualified_signature": "void Surface::setChaparralFuelType(ChaparralFuelType::ChaparralFuelTypeEnum chaparralFuelType)",
-      "line": 181,
+      "line": 187,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -58752,9 +58741,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "double chaparralFuelBedDepth, LengthUnits::LengthUnitsEnum depthUnts",
-          "end_line": 1172,
+          "end_line": 1187,
           "file": "src/behave/surface.cpp",
-          "line": 1169,
+          "line": 1184,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -58768,7 +58757,7 @@
       "id": "656475a7152e568326fa",
       "kind": "method",
       "lexically_qualified_signature": "void Surface::setChaparralFuelBedDepth(double chaparralFuelBedDepth, LengthUnits::LengthUnitsEnum depthUnts)",
-      "line": 182,
+      "line": 188,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -58812,9 +58801,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "double chaparralFuelDeadLoadFraction",
-          "end_line": 1177,
+          "end_line": 1192,
           "file": "src/behave/surface.cpp",
-          "line": 1174,
+          "line": 1189,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -58828,7 +58817,7 @@
       "id": "98075c4e38898d967a6a",
       "kind": "method",
       "lexically_qualified_signature": "void Surface::setChaparralFuelDeadLoadFraction(double chaparralFuelDeadLoadFraction)",
-      "line": 183,
+      "line": 189,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -58872,9 +58861,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "double chaparralTotalFuelLoad, LoadingUnits::LoadingUnitsEnum fuelLoadUnits",
-          "end_line": 1182,
+          "end_line": 1197,
           "file": "src/behave/surface.cpp",
-          "line": 1179,
+          "line": 1194,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -58888,7 +58877,7 @@
       "id": "bee480795e663563133c",
       "kind": "method",
       "lexically_qualified_signature": "void Surface::setChaparralTotalFuelLoad(double chaparralTotalFuelLoad, LoadingUnits::LoadingUnitsEnum fuelLoadUnits)",
-      "line": 184,
+      "line": 190,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -58932,9 +58921,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "bool isUsingChaparral",
-          "end_line": 1187,
+          "end_line": 1202,
           "file": "src/behave/surface.cpp",
-          "line": 1184,
+          "line": 1199,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -58948,7 +58937,7 @@
       "id": "45d2474d2f1ec3550ae8",
       "kind": "method",
       "lexically_qualified_signature": "void Surface::setIsUsingChaparral(bool isUsingChaparral)",
-      "line": 185,
+      "line": 191,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -59008,7 +58997,7 @@
       "id": "c6a025b19c6b6cb8c91b",
       "kind": "method",
       "lexically_qualified_signature": "std::string Surface::getFuelCode(int fuelModelNumber) const",
-      "line": 188,
+      "line": 194,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -59088,7 +59077,7 @@
       "id": "98aa7d8c312878dfb1b1",
       "kind": "method",
       "lexically_qualified_signature": "std::string Surface::getFuelName(int fuelModelNumber) const",
-      "line": 189,
+      "line": 195,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -59168,7 +59157,7 @@
       "id": "007cf254f4a21e70265e",
       "kind": "method",
       "lexically_qualified_signature": "double Surface::getFuelbedDepth(int fuelModelNumber, LengthUnits::LengthUnitsEnum lengthUnits) const",
-      "line": 190,
+      "line": 196,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -59248,7 +59237,7 @@
       "id": "55f765201a9c503be156",
       "kind": "method",
       "lexically_qualified_signature": "double Surface::getFuelMoistureOfExtinctionDead(int fuelModelNumber, FractionUnits::FractionUnitsEnum moistureUnits) const",
-      "line": 191,
+      "line": 197,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -59328,7 +59317,7 @@
       "id": "1f8c67bc9496eb12de84",
       "kind": "method",
       "lexically_qualified_signature": "double Surface::getFuelHeatOfCombustionDead(int fuelModelNumber, HeatOfCombustionUnits::HeatOfCombustionUnitsEnum heatOfCombustionUnits) const",
-      "line": 192,
+      "line": 198,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -59408,7 +59397,7 @@
       "id": "c4b6cfe0a62e39a90468",
       "kind": "method",
       "lexically_qualified_signature": "double Surface::getFuelHeatOfCombustionLive(int fuelModelNumber, HeatOfCombustionUnits::HeatOfCombustionUnitsEnum heatOfCombustionUnits) const",
-      "line": 193,
+      "line": 199,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -59488,7 +59477,7 @@
       "id": "4837825d3232e5b74890",
       "kind": "method",
       "lexically_qualified_signature": "double Surface::getFuelLoadOneHour(int fuelModelNumber, LoadingUnits::LoadingUnitsEnum loadingUnits) const",
-      "line": 194,
+      "line": 200,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -59568,7 +59557,7 @@
       "id": "3561f7d686dbb5a35f92",
       "kind": "method",
       "lexically_qualified_signature": "double Surface::getFuelLoadTenHour(int fuelModelNumber, LoadingUnits::LoadingUnitsEnum loadingUnits) const",
-      "line": 195,
+      "line": 201,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -59648,7 +59637,7 @@
       "id": "d4d25895b1a69488e8d5",
       "kind": "method",
       "lexically_qualified_signature": "double Surface::getFuelLoadHundredHour(int fuelModelNumber, LoadingUnits::LoadingUnitsEnum loadingUnits) const",
-      "line": 196,
+      "line": 202,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -59728,7 +59717,7 @@
       "id": "0eca9592deaed2783f06",
       "kind": "method",
       "lexically_qualified_signature": "double Surface::getFuelLoadLiveHerbaceous(int fuelModelNumber, LoadingUnits::LoadingUnitsEnum loadingUnits) const",
-      "line": 197,
+      "line": 203,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -59808,7 +59797,7 @@
       "id": "bd51d6b8377d8ac358c0",
       "kind": "method",
       "lexically_qualified_signature": "double Surface::getFuelLoadLiveWoody(int fuelModelNumber, LoadingUnits::LoadingUnitsEnum loadingUnits) const",
-      "line": 198,
+      "line": 204,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -59888,7 +59877,7 @@
       "id": "5e5609abe05d397bfcfa",
       "kind": "method",
       "lexically_qualified_signature": "double Surface::getFuelSavrOneHour(int fuelModelNumber, SurfaceAreaToVolumeUnits::SurfaceAreaToVolumeUnitsEnum savrUnits) const",
-      "line": 199,
+      "line": 205,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -59968,7 +59957,7 @@
       "id": "52a91de0c137d175e71d",
       "kind": "method",
       "lexically_qualified_signature": "double Surface::getFuelSavrLiveHerbaceous(int fuelModelNumber, SurfaceAreaToVolumeUnits::SurfaceAreaToVolumeUnitsEnum savrUnits) const",
-      "line": 200,
+      "line": 206,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -60048,7 +60037,7 @@
       "id": "f2110d4ff5ff2f834b65",
       "kind": "method",
       "lexically_qualified_signature": "double Surface::getFuelSavrLiveWoody(int fuelModelNumber, SurfaceAreaToVolumeUnits::SurfaceAreaToVolumeUnitsEnum savrUnits) const",
-      "line": 201,
+      "line": 207,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -60128,7 +60117,7 @@
       "id": "493a556830f49eea6f3e",
       "kind": "method",
       "lexically_qualified_signature": "bool Surface::isFuelDynamic(int fuelModelNumber) const",
-      "line": 202,
+      "line": 208,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -60208,7 +60197,7 @@
       "id": "e3f15259a8a54f0a4adf",
       "kind": "method",
       "lexically_qualified_signature": "bool Surface::isFuelModelDefined(int fuelModelNumber) const",
-      "line": 203,
+      "line": 209,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -60288,7 +60277,7 @@
       "id": "c5a72e23a3159444a8b9",
       "kind": "method",
       "lexically_qualified_signature": "bool Surface::isFuelModelReserved(int fuelModelNumber) const",
-      "line": 204,
+      "line": 210,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -60373,7 +60362,7 @@
       "id": "948c48a598d3465dfc3b",
       "kind": "method",
       "lexically_qualified_signature": "bool Surface::isAllFuelLoadZero(int fuelModelNumber) const",
-      "line": 205,
+      "line": 211,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -60433,7 +60422,7 @@
       "id": "017eb6ca798e544a965b",
       "kind": "method",
       "lexically_qualified_signature": "bool Surface::isUsingTwoFuelModels() const",
-      "line": 208,
+      "line": 214,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -60493,7 +60482,7 @@
       "id": "36d7bdd43c878b46f32e",
       "kind": "method",
       "lexically_qualified_signature": "double Surface::getElapsedTime(TimeUnits::TimeUnitsEnum timeUnits) const",
-      "line": 209,
+      "line": 215,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -60553,7 +60542,7 @@
       "id": "ac7b6e72ce99079ffa1c",
       "kind": "method",
       "lexically_qualified_signature": "int Surface::getFuelModelNumber() const",
-      "line": 210,
+      "line": 216,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -60613,7 +60602,7 @@
       "id": "bd903f56e18b462d890c",
       "kind": "method",
       "lexically_qualified_signature": "double Surface::getMoistureOneHour(FractionUnits::FractionUnitsEnum moistureUnits) const",
-      "line": 211,
+      "line": 217,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -60673,7 +60662,7 @@
       "id": "7df0152cd6d4f08bb35b",
       "kind": "method",
       "lexically_qualified_signature": "double Surface::getMoistureTenHour(FractionUnits::FractionUnitsEnum moistureUnits) const",
-      "line": 212,
+      "line": 218,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -60733,7 +60722,7 @@
       "id": "f4b37bbd2902e1f25e74",
       "kind": "method",
       "lexically_qualified_signature": "double Surface::getMoistureHundredHour(FractionUnits::FractionUnitsEnum moistureUnits) const",
-      "line": 213,
+      "line": 219,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -60793,7 +60782,7 @@
       "id": "3e84c6f51424a6d53fc4",
       "kind": "method",
       "lexically_qualified_signature": "double Surface::getMoistureDeadAggregateValue(FractionUnits::FractionUnitsEnum moistureUnits) const",
-      "line": 214,
+      "line": 220,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -60853,7 +60842,7 @@
       "id": "ebb4911cf1d5b33da9c3",
       "kind": "method",
       "lexically_qualified_signature": "double Surface::getMoistureLiveHerbaceous(FractionUnits::FractionUnitsEnum moistureUnits) const",
-      "line": 215,
+      "line": 221,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -60913,7 +60902,7 @@
       "id": "c1ef4030cb8bca633dfa",
       "kind": "method",
       "lexically_qualified_signature": "double Surface::getMoistureLiveWoody(FractionUnits::FractionUnitsEnum moistureUnits) const",
-      "line": 216,
+      "line": 222,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -60973,7 +60962,7 @@
       "id": "f44161065f3de5aa10fb",
       "kind": "method",
       "lexically_qualified_signature": "double Surface::getMoistureLiveAggregateValue(FractionUnits::FractionUnitsEnum moistureUnits) const",
-      "line": 217,
+      "line": 223,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -61031,7 +61020,7 @@
       "id": "f0b35c5fe45c0450898f",
       "kind": "method",
       "lexically_qualified_signature": "bool Surface::isMoistureClassInputNeededForCurrentFuelModel(MoistureClassInput::MoistureClassInputEnum moistureClass) const",
-      "line": 218,
+      "line": 224,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -61091,7 +61080,7 @@
       "id": "fb265e3f5a246b74842b",
       "kind": "method",
       "lexically_qualified_signature": "MoistureInputMode::MoistureInputModeEnum Surface::getMoistureInputMode() const",
-      "line": 219,
+      "line": 225,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -61151,7 +61140,7 @@
       "id": "8431e8408570cf37dfd5",
       "kind": "method",
       "lexically_qualified_signature": "int Surface::getNumberOfMoistureScenarios() const",
-      "line": 220,
+      "line": 226,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -61211,7 +61200,7 @@
       "id": "64f6cf5092c71e7185a2",
       "kind": "method",
       "lexically_qualified_signature": "int Surface::getMoistureScenarioIndexByName(std::string name) const",
-      "line": 221,
+      "line": 227,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -61271,7 +61260,7 @@
       "id": "9962c7fc4096bda2814f",
       "kind": "method",
       "lexically_qualified_signature": "bool Surface::getIsMoistureScenarioDefinedByName(std::string name) const",
-      "line": 222,
+      "line": 228,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -61331,7 +61320,7 @@
       "id": "fa953c10c562bf6dd0d3",
       "kind": "method",
       "lexically_qualified_signature": "std::string Surface::getMoistureScenarioDescriptionByName(std::string name) const",
-      "line": 223,
+      "line": 229,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -61391,7 +61380,7 @@
       "id": "c47a50d6b8c62774ce62",
       "kind": "method",
       "lexically_qualified_signature": "double Surface::getMoistureScenarioOneHourByName(std::string name, FractionUnits::FractionUnitsEnum moistureUnits) const",
-      "line": 224,
+      "line": 230,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -61451,7 +61440,7 @@
       "id": "02eb70946583f7dc62ac",
       "kind": "method",
       "lexically_qualified_signature": "double Surface::getMoistureScenarioTenHourByName(std::string name, FractionUnits::FractionUnitsEnum moistureUnits) const",
-      "line": 225,
+      "line": 231,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -61511,7 +61500,7 @@
       "id": "095ba08296d23221124c",
       "kind": "method",
       "lexically_qualified_signature": "double Surface::getMoistureScenarioHundredHourByName(std::string name, FractionUnits::FractionUnitsEnum moistureUnits) const",
-      "line": 226,
+      "line": 232,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -61571,7 +61560,7 @@
       "id": "85dfdbb491120a8383d1",
       "kind": "method",
       "lexically_qualified_signature": "double Surface::getMoistureScenarioLiveHerbaceousByName(std::string name, FractionUnits::FractionUnitsEnum moistureUnits) const",
-      "line": 227,
+      "line": 233,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -61631,7 +61620,7 @@
       "id": "7258792504beb94c5b26",
       "kind": "method",
       "lexically_qualified_signature": "double Surface::getMoistureScenarioLiveWoodyByName(std::string name, FractionUnits::FractionUnitsEnum moistureUnits) const",
-      "line": 228,
+      "line": 234,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -61691,7 +61680,7 @@
       "id": "b185dc8369a7b6a8c1a3",
       "kind": "method",
       "lexically_qualified_signature": "bool Surface::getIsMoistureScenarioDefinedByIndex(int index) const",
-      "line": 229,
+      "line": 235,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -61751,7 +61740,7 @@
       "id": "e0321bbc0b8f29736c56",
       "kind": "method",
       "lexically_qualified_signature": "std::string Surface::getMoistureScenarioNameByIndex(int index) const",
-      "line": 230,
+      "line": 236,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -61811,7 +61800,7 @@
       "id": "cce01fc46869ccf70f86",
       "kind": "method",
       "lexically_qualified_signature": "std::string Surface::getMoistureScenarioDescriptionByIndex(int index) const",
-      "line": 231,
+      "line": 237,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -61871,7 +61860,7 @@
       "id": "1c7fcdef1507cba576f8",
       "kind": "method",
       "lexically_qualified_signature": "double Surface::getMoistureScenarioOneHourByIndex(int index, FractionUnits::FractionUnitsEnum moistureUnits) const",
-      "line": 232,
+      "line": 238,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -61931,7 +61920,7 @@
       "id": "b489c7c7ca16947270ed",
       "kind": "method",
       "lexically_qualified_signature": "double Surface::getMoistureScenarioTenHourByIndex(int index, FractionUnits::FractionUnitsEnum moistureUnits) const",
-      "line": 233,
+      "line": 239,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -61991,7 +61980,7 @@
       "id": "bac88b272036d65278f5",
       "kind": "method",
       "lexically_qualified_signature": "double Surface::getMoistureScenarioHundredHourByIndex(int index, FractionUnits::FractionUnitsEnum moistureUnits) const",
-      "line": 234,
+      "line": 240,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -62051,7 +62040,7 @@
       "id": "eaa2cb3f95101d160851",
       "kind": "method",
       "lexically_qualified_signature": "double Surface::getMoistureScenarioLiveHerbaceousByIndex(int index, FractionUnits::FractionUnitsEnum moistureUnits) const",
-      "line": 235,
+      "line": 241,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -62111,7 +62100,7 @@
       "id": "283e149702dcfe2c9fd4",
       "kind": "method",
       "lexically_qualified_signature": "double Surface::getMoistureScenarioLiveWoodyByIndex(int index, FractionUnits::FractionUnitsEnum moistureUnits) const",
-      "line": 236,
+      "line": 242,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -62169,7 +62158,7 @@
       "id": "6904ff9fd3d2267fad49",
       "kind": "method",
       "lexically_qualified_signature": "double Surface::getWindSpeed(SpeedUnits::SpeedUnitsEnum windSpeedUnits, WindHeightInputMode::WindHeightInputModeEnum windHeightInputMode) const",
-      "line": 237,
+      "line": 243,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -62229,7 +62218,7 @@
       "id": "d81bd8d349fd2e8707e6",
       "kind": "method",
       "lexically_qualified_signature": "double Surface::getWindDirection() const",
-      "line": 238,
+      "line": 244,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -62289,7 +62278,7 @@
       "id": "5a444f7d10e38a6b7735",
       "kind": "method",
       "lexically_qualified_signature": "double Surface::getSlope(SlopeUnits::SlopeUnitsEnum slopeUnits) const",
-      "line": 239,
+      "line": 245,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -62349,7 +62338,7 @@
       "id": "6131212bbf27d721db87",
       "kind": "method",
       "lexically_qualified_signature": "double Surface::getAspect() const",
-      "line": 240,
+      "line": 246,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -62409,7 +62398,7 @@
       "id": "51995fbdf6f9ed5f52a2",
       "kind": "method",
       "lexically_qualified_signature": "double Surface::getCanopyCover(FractionUnits::FractionUnitsEnum coverUnits) const",
-      "line": 241,
+      "line": 247,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -62469,7 +62458,7 @@
       "id": "b367b33a3e0f392aa2e3",
       "kind": "method",
       "lexically_qualified_signature": "double Surface::getCanopyHeight(LengthUnits::LengthUnitsEnum canopyHeightUnits) const",
-      "line": 242,
+      "line": 248,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -62529,7 +62518,7 @@
       "id": "7ca6553b3687b5778daf",
       "kind": "method",
       "lexically_qualified_signature": "double Surface::getCrownRatio(FractionUnits::FractionUnitsEnum crownRatioUnits) const",
-      "line": 243,
+      "line": 249,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -62589,7 +62578,7 @@
       "id": "f634cacc17110fdbb3f6",
       "kind": "method",
       "lexically_qualified_signature": "WindAndSpreadOrientationMode::WindAndSpreadOrientationModeEnum Surface::getWindAndSpreadOrientationMode() const",
-      "line": 244,
+      "line": 250,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -62649,7 +62638,7 @@
       "id": "cf2a68e66559703b5a76",
       "kind": "method",
       "lexically_qualified_signature": "WindHeightInputMode::WindHeightInputModeEnum Surface::getWindHeightInputMode() const",
-      "line": 245,
+      "line": 251,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -62709,7 +62698,7 @@
       "id": "0e746023d5eb2ad22c64",
       "kind": "method",
       "lexically_qualified_signature": "WindAdjustmentFactorCalculationMethod::WindAdjustmentFactorCalculationMethodEnum Surface::getWindAdjustmentFactorCalculationMethod() const",
-      "line": 246,
+      "line": 252,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -62769,7 +62758,7 @@
       "id": "69bf2e3d7b0122543d75",
       "kind": "method",
       "lexically_qualified_signature": "bool Surface::getIsUsingPalmettoGallberry() const",
-      "line": 249,
+      "line": 255,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -62829,7 +62818,7 @@
       "id": "3dfde0a133752f360345",
       "kind": "method",
       "lexically_qualified_signature": "double Surface::getAgeOfRough() const",
-      "line": 250,
+      "line": 256,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -62889,7 +62878,7 @@
       "id": "2273b9b043debaf7c781",
       "kind": "method",
       "lexically_qualified_signature": "double Surface::getHeightOfUnderstory(LengthUnits::LengthUnitsEnum heightUnits) const",
-      "line": 251,
+      "line": 257,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -62949,7 +62938,7 @@
       "id": "dd9e4375a282b003c227",
       "kind": "method",
       "lexically_qualified_signature": "double Surface::getPalmettoGallberryCoverage(FractionUnits::FractionUnitsEnum coverageUnits) const",
-      "line": 252,
+      "line": 258,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -63009,7 +62998,7 @@
       "id": "6c72fd7b444434eec132",
       "kind": "method",
       "lexically_qualified_signature": "double Surface::getOverstoryBasalArea(BasalAreaUnits::BasalAreaUnitsEnum basalAreaUnits) const",
-      "line": 253,
+      "line": 259,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -63067,7 +63056,7 @@
       "id": "70138c54981860c4486f",
       "kind": "method",
       "lexically_qualified_signature": "double Surface::getPalmettoGallberryMoistureOfExtinctionDead(FractionUnits::FractionUnitsEnum moistureUnits) const",
-      "line": 254,
+      "line": 260,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -63125,7 +63114,7 @@
       "id": "94ed014a2eb6534c84c0",
       "kind": "method",
       "lexically_qualified_signature": "double Surface::getPalmettoGallberryHeatOfCombustionDead(HeatOfCombustionUnits::HeatOfCombustionUnitsEnum heatOfCombustionUnits) const",
-      "line": 255,
+      "line": 261,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -63183,7 +63172,7 @@
       "id": "3cc748706abbe1a9f3c8",
       "kind": "method",
       "lexically_qualified_signature": "double Surface::getPalmettoGallberryHeatOfCombustionLive(HeatOfCombustionUnits::HeatOfCombustionUnitsEnum heatOfCombustionUnits) const",
-      "line": 256,
+      "line": 262,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -63241,7 +63230,7 @@
       "id": "da586ceb5f7b26cfe0c1",
       "kind": "method",
       "lexically_qualified_signature": "double Surface::getPalmettoGallberyDeadFineFuelLoad(LoadingUnits::LoadingUnitsEnum loadingUnits) const",
-      "line": 257,
+      "line": 263,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -63299,7 +63288,7 @@
       "id": "539f9f8b3ab338999990",
       "kind": "method",
       "lexically_qualified_signature": "double Surface::getPalmettoGallberyDeadMediumFuelLoad(LoadingUnits::LoadingUnitsEnum loadingUnits) const",
-      "line": 258,
+      "line": 264,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -63357,7 +63346,7 @@
       "id": "984b15857d17efa27884",
       "kind": "method",
       "lexically_qualified_signature": "double Surface::getPalmettoGallberyDeadFoliageLoad(LoadingUnits::LoadingUnitsEnum loadingUnits) const",
-      "line": 259,
+      "line": 265,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -63415,7 +63404,7 @@
       "id": "53f8b0f266fc6effec22",
       "kind": "method",
       "lexically_qualified_signature": "double Surface::getPalmettoGallberyLitterLoad(LoadingUnits::LoadingUnitsEnum loadingUnits) const",
-      "line": 260,
+      "line": 266,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -63473,7 +63462,7 @@
       "id": "4d508be08fe11845b031",
       "kind": "method",
       "lexically_qualified_signature": "double Surface::getPalmettoGallberyLiveFineFuelLoad(LoadingUnits::LoadingUnitsEnum loadingUnits) const",
-      "line": 261,
+      "line": 267,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -63531,7 +63520,7 @@
       "id": "cf65ee855259be3466ee",
       "kind": "method",
       "lexically_qualified_signature": "double Surface::getPalmettoGallberyLiveMediumFuelLoad(LoadingUnits::LoadingUnitsEnum loadingUnits) const",
-      "line": 262,
+      "line": 268,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -63589,7 +63578,7 @@
       "id": "26c542f3b8a76c28f5d5",
       "kind": "method",
       "lexically_qualified_signature": "double Surface::getPalmettoGallberyLiveFoliageLoad(LoadingUnits::LoadingUnitsEnum loadingUnits) const",
-      "line": 263,
+      "line": 269,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -63647,7 +63636,7 @@
       "id": "c291372953e1cce28426",
       "kind": "method",
       "lexically_qualified_signature": "double Surface::getPalmettoGallberyFuelBedDepth(LengthUnits::LengthUnitsEnum depthUnits) const",
-      "line": 264,
+      "line": 270,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -63707,7 +63696,7 @@
       "id": "0a83946095ace8363516",
       "kind": "method",
       "lexically_qualified_signature": "bool Surface::getIsUsingWesternAspen() const",
-      "line": 267,
+      "line": 273,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -63767,7 +63756,7 @@
       "id": "ac226bea09ead4e12781",
       "kind": "method",
       "lexically_qualified_signature": "int Surface::getAspenFuelModelNumber() const",
-      "line": 268,
+      "line": 274,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -63827,7 +63816,7 @@
       "id": "a271b58ba4552a082747",
       "kind": "method",
       "lexically_qualified_signature": "double Surface::getAspenCuringLevel(FractionUnits::FractionUnitsEnum curingLevelUnits) const",
-      "line": 269,
+      "line": 275,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -63887,7 +63876,7 @@
       "id": "21f99c62af75157c0343",
       "kind": "method",
       "lexically_qualified_signature": "double Surface::getAspenDBH(LengthUnits::LengthUnitsEnum dbhUnits) const",
-      "line": 270,
+      "line": 276,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -63947,7 +63936,7 @@
       "id": "8cfa56503f3f3f5da6b7",
       "kind": "method",
       "lexically_qualified_signature": "AspenFireSeverity::AspenFireSeverityEnum Surface::getAspenFireSeverity() const",
-      "line": 271,
+      "line": 277,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -64005,7 +63994,7 @@
       "id": "b7b7d609ff71f4dc2054",
       "kind": "method",
       "lexically_qualified_signature": "double Surface::getAspenLoadDeadOneHour(LoadingUnits::LoadingUnitsEnum loadingUnits) const",
-      "line": 272,
+      "line": 278,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -64063,7 +64052,7 @@
       "id": "0d4db79fe7f316e648f7",
       "kind": "method",
       "lexically_qualified_signature": "double Surface::getAspenLoadDeadTenHour(LoadingUnits::LoadingUnitsEnum loadingUnits) const",
-      "line": 273,
+      "line": 279,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -64121,7 +64110,7 @@
       "id": "be11d087d8deaf4f89db",
       "kind": "method",
       "lexically_qualified_signature": "double Surface::getAspenLoadLiveHerbaceous(LoadingUnits::LoadingUnitsEnum loadingUnits) const",
-      "line": 274,
+      "line": 280,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -64179,7 +64168,7 @@
       "id": "8a426ef6e815d3349951",
       "kind": "method",
       "lexically_qualified_signature": "double Surface::getAspenLoadLiveWoody(LoadingUnits::LoadingUnitsEnum loadingUnits) const",
-      "line": 275,
+      "line": 281,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -64237,7 +64226,7 @@
       "id": "5a719954762d716dec4c",
       "kind": "method",
       "lexically_qualified_signature": "double Surface::getAspenSavrDeadOneHour(SurfaceAreaToVolumeUnits::SurfaceAreaToVolumeUnitsEnum savrUnits) const",
-      "line": 276,
+      "line": 282,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -64295,7 +64284,7 @@
       "id": "637a419767c21d37d4c6",
       "kind": "method",
       "lexically_qualified_signature": "double Surface::getAspenSavrDeadTenHour(SurfaceAreaToVolumeUnits::SurfaceAreaToVolumeUnitsEnum savrUnits) const",
-      "line": 277,
+      "line": 283,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -64353,7 +64342,7 @@
       "id": "8a5c3123673050f40edd",
       "kind": "method",
       "lexically_qualified_signature": "double Surface::getAspenSavrLiveHerbaceous(SurfaceAreaToVolumeUnits::SurfaceAreaToVolumeUnitsEnum savrUnits) const",
-      "line": 278,
+      "line": 284,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -64411,7 +64400,7 @@
       "id": "03ea2ac978cbf79f22ec",
       "kind": "method",
       "lexically_qualified_signature": "double Surface::getAspenSavrLiveWoody(SurfaceAreaToVolumeUnits::SurfaceAreaToVolumeUnitsEnum savrUnits) const",
-      "line": 279,
+      "line": 285,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -64469,7 +64458,7 @@
       "id": "5aca713ae0fe7df68c23",
       "kind": "method",
       "lexically_qualified_signature": "double Surface::getAspenMortality(FractionUnits::FractionUnitsEnum mortalityUnits) const",
-      "line": 280,
+      "line": 286,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -64513,9 +64502,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "",
-          "end_line": 1307,
+          "end_line": 1322,
           "file": "src/behave/surface.cpp",
-          "line": 1304,
+          "line": 1319,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -64529,7 +64518,7 @@
       "id": "38ba241f9dea625a9dd2",
       "kind": "method",
       "lexically_qualified_signature": "bool Surface::getIsUsingChaparral() const",
-      "line": 283,
+      "line": 289,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -64573,9 +64562,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "",
-          "end_line": 1192,
+          "end_line": 1207,
           "file": "src/behave/surface.cpp",
-          "line": 1189,
+          "line": 1204,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -64589,7 +64578,7 @@
       "id": "9ba76ba6f658fa69f749",
       "kind": "method",
       "lexically_qualified_signature": "ChaparralFuelType::ChaparralFuelTypeEnum Surface::getChaparralFuelType() const",
-      "line": 284,
+      "line": 290,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -64633,9 +64622,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "LengthUnits::LengthUnitsEnum depthUnits",
-          "end_line": 1197,
+          "end_line": 1212,
           "file": "src/behave/surface.cpp",
-          "line": 1194,
+          "line": 1209,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -64649,7 +64638,7 @@
       "id": "73671af1a9e205f90953",
       "kind": "method",
       "lexically_qualified_signature": "double Surface::getChaparralFuelBedDepth(LengthUnits::LengthUnitsEnum depthUnits) const",
-      "line": 285,
+      "line": 291,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -64693,9 +64682,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "",
-          "end_line": 1202,
+          "end_line": 1217,
           "file": "src/behave/surface.cpp",
-          "line": 1199,
+          "line": 1214,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -64709,7 +64698,7 @@
       "id": "89d2cbd19a77288aa0ab",
       "kind": "method",
       "lexically_qualified_signature": "double Surface::getChaparralFuelDeadLoadFraction() const",
-      "line": 286,
+      "line": 292,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -64753,9 +64742,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "LoadingUnits::LoadingUnitsEnum loadingUnits",
-          "end_line": 1207,
+          "end_line": 1222,
           "file": "src/behave/surface.cpp",
-          "line": 1204,
+          "line": 1219,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -64769,7 +64758,7 @@
       "id": "196b26746322c1be36b4",
       "kind": "method",
       "lexically_qualified_signature": "double Surface::getChaparralTotalFuelLoad(LoadingUnits::LoadingUnitsEnum loadingUnits) const",
-      "line": 287,
+      "line": 293,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -64813,9 +64802,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "TimeUnits::TimeUnitsEnum ageUnits",
-          "end_line": 1212,
+          "end_line": 1227,
           "file": "src/behave/surface.cpp",
-          "line": 1209,
+          "line": 1224,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -64829,7 +64818,7 @@
       "id": "0e865b471929bd04ab96",
       "kind": "method",
       "lexically_qualified_signature": "double Surface::getChaparralAge(TimeUnits::TimeUnitsEnum ageUnits) const",
-      "line": 288,
+      "line": 294,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -64873,9 +64862,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "",
-          "end_line": 1217,
+          "end_line": 1232,
           "file": "src/behave/surface.cpp",
-          "line": 1214,
+          "line": 1229,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -64889,7 +64878,7 @@
       "id": "c2a350857daad97ff3d9",
       "kind": "method",
       "lexically_qualified_signature": "double Surface::getChaparralDaysSinceMayFirst() const",
-      "line": 289,
+      "line": 295,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -64933,9 +64922,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "",
-          "end_line": 1222,
+          "end_line": 1237,
           "file": "src/behave/surface.cpp",
-          "line": 1219,
+          "line": 1234,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -64949,7 +64938,7 @@
       "id": "c761a3fa6f9a988f99ab",
       "kind": "method",
       "lexically_qualified_signature": "double Surface::getChaparralDeadFuelFraction() const",
-      "line": 290,
+      "line": 296,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -64993,9 +64982,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "FractionUnits::FractionUnitsEnum moistureUnits",
-          "end_line": 1227,
+          "end_line": 1242,
           "file": "src/behave/surface.cpp",
-          "line": 1224,
+          "line": 1239,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -65007,7 +64996,7 @@
       "id": "820841ea1e8249009e3c",
       "kind": "method",
       "lexically_qualified_signature": "double Surface::getChaparralDeadMoistureOfExtinction(FractionUnits::FractionUnitsEnum moistureUnits) const",
-      "line": 291,
+      "line": 297,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -65051,9 +65040,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "FractionUnits::FractionUnitsEnum moistureUnits",
-          "end_line": 1232,
+          "end_line": 1247,
           "file": "src/behave/surface.cpp",
-          "line": 1229,
+          "line": 1244,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -65065,7 +65054,7 @@
       "id": "7f23381cd943da2aef8d",
       "kind": "method",
       "lexically_qualified_signature": "double Surface::getChaparralLiveMoistureOfExtinction(FractionUnits::FractionUnitsEnum moistureUnits) const",
-      "line": 292,
+      "line": 298,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -65109,9 +65098,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "FuelLifeState::FuelLifeStateEnum lifeState, int sizeClass, DensityUnits::DensityUnitsEnum densityUnits",
-          "end_line": 1237,
+          "end_line": 1252,
           "file": "src/behave/surface.cpp",
-          "line": 1234,
+          "line": 1249,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -65123,7 +65112,7 @@
       "id": "36329f6fd43bcf8d3d8d",
       "kind": "method",
       "lexically_qualified_signature": "double Surface::getChaparralDensity(FuelLifeState::FuelLifeStateEnum lifeState, int sizeClass, DensityUnits::DensityUnitsEnum densityUnits) const",
-      "line": 293,
+      "line": 299,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -65167,9 +65156,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "FuelLifeState::FuelLifeStateEnum lifeState, int sizeClass, HeatOfCombustionUnits::HeatOfCombustionUnitsEnum heatOfCombustionUnits",
-          "end_line": 1242,
+          "end_line": 1257,
           "file": "src/behave/surface.cpp",
-          "line": 1239,
+          "line": 1254,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -65181,7 +65170,7 @@
       "id": "e92bb41380cdda74b46f",
       "kind": "method",
       "lexically_qualified_signature": "double Surface::getChaparralHeatOfCombustion(FuelLifeState::FuelLifeStateEnum lifeState, int sizeClass, HeatOfCombustionUnits::HeatOfCombustionUnitsEnum heatOfCombustionUnits) const",
-      "line": 294,
+      "line": 300,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -65225,9 +65214,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "LoadingUnits::LoadingUnitsEnum loadingUnits",
-          "end_line": 1247,
+          "end_line": 1262,
           "file": "src/behave/surface.cpp",
-          "line": 1244,
+          "line": 1259,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -65239,7 +65228,7 @@
       "id": "0f5154c2087a3e64cb86",
       "kind": "method",
       "lexically_qualified_signature": "double Surface::getChaparralLoadDeadLessThanQuarterInch(LoadingUnits::LoadingUnitsEnum loadingUnits) const",
-      "line": 295,
+      "line": 301,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -65283,9 +65272,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "LoadingUnits::LoadingUnitsEnum loadingUnits",
-          "end_line": 1252,
+          "end_line": 1267,
           "file": "src/behave/surface.cpp",
-          "line": 1249,
+          "line": 1264,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -65297,7 +65286,7 @@
       "id": "cd7ed0e06001686adc75",
       "kind": "method",
       "lexically_qualified_signature": "double Surface::getChaparralLoadDeadQuarterInchToLessThanHalfInch(LoadingUnits::LoadingUnitsEnum loadingUnits) const",
-      "line": 296,
+      "line": 302,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -65341,9 +65330,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "LoadingUnits::LoadingUnitsEnum loadingUnits",
-          "end_line": 1257,
+          "end_line": 1272,
           "file": "src/behave/surface.cpp",
-          "line": 1254,
+          "line": 1269,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -65355,7 +65344,7 @@
       "id": "8a252bda2b4e8699c940",
       "kind": "method",
       "lexically_qualified_signature": "double Surface::getChaparralLoadDeadHalfInchToLessThanOneInch(LoadingUnits::LoadingUnitsEnum loadingUnits) const",
-      "line": 297,
+      "line": 303,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -65399,9 +65388,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "LoadingUnits::LoadingUnitsEnum loadingUnits",
-          "end_line": 1262,
+          "end_line": 1277,
           "file": "src/behave/surface.cpp",
-          "line": 1259,
+          "line": 1274,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -65413,7 +65402,7 @@
       "id": "08e497f055df5ae7e95d",
       "kind": "method",
       "lexically_qualified_signature": "double Surface::getChaparralLoadDeadOneInchToThreeInch(LoadingUnits::LoadingUnitsEnum loadingUnits) const",
-      "line": 298,
+      "line": 304,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -65457,9 +65446,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "LoadingUnits::LoadingUnitsEnum loadingUnits",
-          "end_line": 1267,
+          "end_line": 1282,
           "file": "src/behave/surface.cpp",
-          "line": 1264,
+          "line": 1279,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -65471,7 +65460,7 @@
       "id": "cc8b4be8856e7f68da13",
       "kind": "method",
       "lexically_qualified_signature": "double Surface::getChaparralLoadLiveLeaves(LoadingUnits::LoadingUnitsEnum loadingUnits) const",
-      "line": 299,
+      "line": 305,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -65515,9 +65504,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "LoadingUnits::LoadingUnitsEnum loadingUnits",
-          "end_line": 1272,
+          "end_line": 1287,
           "file": "src/behave/surface.cpp",
-          "line": 1269,
+          "line": 1284,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -65529,7 +65518,7 @@
       "id": "b966456fa1f04888e7c7",
       "kind": "method",
       "lexically_qualified_signature": "double Surface::getChaparralLoadLiveStemsLessThanQuaterInch(LoadingUnits::LoadingUnitsEnum loadingUnits) const",
-      "line": 300,
+      "line": 306,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -65573,9 +65562,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "LoadingUnits::LoadingUnitsEnum loadingUnits",
-          "end_line": 1277,
+          "end_line": 1292,
           "file": "src/behave/surface.cpp",
-          "line": 1274,
+          "line": 1289,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -65587,7 +65576,7 @@
       "id": "4b737f279871b614b136",
       "kind": "method",
       "lexically_qualified_signature": "double Surface::getChaparralLoadLiveQuarterInchToLessThanHalfInch(LoadingUnits::LoadingUnitsEnum loadingUnits) const",
-      "line": 301,
+      "line": 307,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -65631,9 +65620,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "LoadingUnits::LoadingUnitsEnum loadingUnits",
-          "end_line": 1282,
+          "end_line": 1297,
           "file": "src/behave/surface.cpp",
-          "line": 1279,
+          "line": 1294,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -65645,7 +65634,7 @@
       "id": "0dc14393dddc1e76bb4d",
       "kind": "method",
       "lexically_qualified_signature": "double Surface::getChaparralLoadLiveHalfInchToLessThanOneInch(LoadingUnits::LoadingUnitsEnum loadingUnits) const",
-      "line": 302,
+      "line": 308,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -65689,9 +65678,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "LoadingUnits::LoadingUnitsEnum loadingUnits",
-          "end_line": 1287,
+          "end_line": 1302,
           "file": "src/behave/surface.cpp",
-          "line": 1284,
+          "line": 1299,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -65703,7 +65692,7 @@
       "id": "d7562531b30447c6a79d",
       "kind": "method",
       "lexically_qualified_signature": "double Surface::getChaparralLoadLiveOneInchToThreeInch(LoadingUnits::LoadingUnitsEnum loadingUnits) const",
-      "line": 303,
+      "line": 309,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -65747,9 +65736,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "FuelLifeState::FuelLifeStateEnum lifeState, int sizeClass, FractionUnits::FractionUnitsEnum moistureUnits",
-          "end_line": 1292,
+          "end_line": 1307,
           "file": "src/behave/surface.cpp",
-          "line": 1289,
+          "line": 1304,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -65761,7 +65750,7 @@
       "id": "16a1e1b2b653c4dcf026",
       "kind": "method",
       "lexically_qualified_signature": "double Surface::getChaparralMoisture(FuelLifeState::FuelLifeStateEnum lifeState, int sizeClass, FractionUnits::FractionUnitsEnum moistureUnits) const",
-      "line": 304,
+      "line": 310,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -65805,9 +65794,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "LoadingUnits::LoadingUnitsEnum loadingUnits",
-          "end_line": 1297,
+          "end_line": 1312,
           "file": "src/behave/surface.cpp",
-          "line": 1294,
+          "line": 1309,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -65819,7 +65808,7 @@
       "id": "128c715f073564bda0ee",
       "kind": "method",
       "lexically_qualified_signature": "double Surface::getChaparralTotalDeadFuelLoad(LoadingUnits::LoadingUnitsEnum loadingUnits) const",
-      "line": 305,
+      "line": 311,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -65863,9 +65852,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "LoadingUnits::LoadingUnitsEnum loadingUnits",
-          "end_line": 1302,
+          "end_line": 1317,
           "file": "src/behave/surface.cpp",
-          "line": 1299,
+          "line": 1314,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -65877,7 +65866,7 @@
       "id": "d3fa982c72a6ac91bc31",
       "kind": "method",
       "lexically_qualified_signature": "double Surface::getChaparralTotalLiveFuelLoad(LoadingUnits::LoadingUnitsEnum loadingUnits) const",
-      "line": 306,
+      "line": 312,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -65978,9 +65967,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "const SurfaceFire& rhs",
-          "end_line": 63,
+          "end_line": 64,
           "file": "src/behave/surfaceFire.cpp",
-          "line": 59,
+          "line": 60,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -66035,9 +66024,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "const SurfaceFire& rhs",
-          "end_line": 72,
+          "end_line": 73,
           "file": "src/behave/surfaceFire.cpp",
-          "line": 65,
+          "line": 66,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -66092,7 +66081,7 @@
       "definition_candidates": [
         {
           "definition_parameters": "const FuelModels& fuelModels, const SurfaceInputs& surfaceInputs, FireSize& size",
-          "end_line": 56,
+          "end_line": 57,
           "file": "src/behave/surfaceFire.cpp",
           "line": 47,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
@@ -66149,9 +66138,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "",
-          "end_line": 116,
+          "end_line": 118,
           "file": "src/behave/surfaceFire.cpp",
-          "line": 74,
+          "line": 75,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -66206,9 +66195,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "double reactionIntensity, double propagatingFlux, double heatSink",
-          "end_line": 167,
+          "end_line": 170,
           "file": "src/behave/surfaceFire.cpp",
-          "line": 161,
+          "line": 164,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -66281,9 +66270,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "int fuelModelNumber, bool hasDirectionOfInterest, double directionOfInterest, SurfaceFireSpreadDirectionMode::SurfaceFireSpreadDirectionModeEnum directionMode",
-          "end_line": 336,
+          "end_line": 339,
           "file": "src/behave/surfaceFire.cpp",
-          "line": 255,
+          "line": 258,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -66356,9 +66345,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "double directionOfInterest, SurfaceFireSpreadDirectionMode::SurfaceFireSpreadDirectionModeEnum directionMode",
-          "end_line": 391,
+          "end_line": 394,
           "file": "src/behave/surfaceFire.cpp",
-          "line": 338,
+          "line": 341,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -66413,9 +66402,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "",
-          "end_line": 560,
+          "end_line": 563,
           "file": "src/behave/surfaceFire.cpp",
-          "line": 532,
+          "line": 535,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -66488,9 +66477,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "",
-          "end_line": 208,
+          "end_line": 211,
           "file": "src/behave/surfaceFire.cpp",
-          "line": 205,
+          "line": 208,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -66545,9 +66534,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "",
-          "end_line": 582,
+          "end_line": 585,
           "file": "src/behave/surfaceFire.cpp",
-          "line": 577,
+          "line": 580,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -66602,9 +66591,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "",
-          "end_line": 587,
+          "end_line": 590,
           "file": "src/behave/surfaceFire.cpp",
-          "line": 584,
+          "line": 587,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -66669,9 +66658,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "",
-          "end_line": 592,
+          "end_line": 595,
           "file": "src/behave/surfaceFire.cpp",
-          "line": 589,
+          "line": 592,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -66726,9 +66715,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "",
-          "end_line": 597,
+          "end_line": 600,
           "file": "src/behave/surfaceFire.cpp",
-          "line": 594,
+          "line": 597,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -66783,9 +66772,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "",
-          "end_line": 602,
+          "end_line": 605,
           "file": "src/behave/surfaceFire.cpp",
-          "line": 599,
+          "line": 602,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -66840,9 +66829,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "",
-          "end_line": 607,
+          "end_line": 610,
           "file": "src/behave/surfaceFire.cpp",
-          "line": 604,
+          "line": 607,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -66907,9 +66896,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "",
-          "end_line": 612,
+          "end_line": 615,
           "file": "src/behave/surfaceFire.cpp",
-          "line": 609,
+          "line": 612,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -66974,9 +66963,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "",
-          "end_line": 625,
+          "end_line": 628,
           "file": "src/behave/surfaceFire.cpp",
-          "line": 622,
+          "line": 625,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -67041,9 +67030,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "",
-          "end_line": 630,
+          "end_line": 633,
           "file": "src/behave/surfaceFire.cpp",
-          "line": 627,
+          "line": 630,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -67098,9 +67087,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "",
-          "end_line": 635,
+          "end_line": 638,
           "file": "src/behave/surfaceFire.cpp",
-          "line": 632,
+          "line": 635,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -67155,9 +67144,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "",
-          "end_line": 640,
+          "end_line": 643,
           "file": "src/behave/surfaceFire.cpp",
-          "line": 637,
+          "line": 640,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -67212,9 +67201,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "",
-          "end_line": 645,
+          "end_line": 648,
           "file": "src/behave/surfaceFire.cpp",
-          "line": 642,
+          "line": 645,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -67279,9 +67268,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "",
-          "end_line": 650,
+          "end_line": 653,
           "file": "src/behave/surfaceFire.cpp",
-          "line": 647,
+          "line": 650,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -67336,9 +67325,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "",
-          "end_line": 655,
+          "end_line": 658,
           "file": "src/behave/surfaceFire.cpp",
-          "line": 652,
+          "line": 655,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -67393,9 +67382,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "",
-          "end_line": 660,
+          "end_line": 663,
           "file": "src/behave/surfaceFire.cpp",
-          "line": 657,
+          "line": 660,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -67450,9 +67439,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "",
-          "end_line": 665,
+          "end_line": 668,
           "file": "src/behave/surfaceFire.cpp",
-          "line": 662,
+          "line": 665,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -67507,9 +67496,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "",
-          "end_line": 670,
+          "end_line": 673,
           "file": "src/behave/surfaceFire.cpp",
-          "line": 667,
+          "line": 670,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -67595,9 +67584,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "",
-          "end_line": 675,
+          "end_line": 678,
           "file": "src/behave/surfaceFire.cpp",
-          "line": 672,
+          "line": 675,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -67674,9 +67663,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "",
-          "end_line": 680,
+          "end_line": 683,
           "file": "src/behave/surfaceFire.cpp",
-          "line": 677,
+          "line": 680,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -67741,9 +67730,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "",
-          "end_line": 685,
+          "end_line": 688,
           "file": "src/behave/surfaceFire.cpp",
-          "line": 682,
+          "line": 685,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -67808,9 +67797,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "",
-          "end_line": 690,
+          "end_line": 693,
           "file": "src/behave/surfaceFire.cpp",
-          "line": 687,
+          "line": 690,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -67865,9 +67854,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "",
-          "end_line": 695,
+          "end_line": 698,
           "file": "src/behave/surfaceFire.cpp",
-          "line": 692,
+          "line": 695,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -67932,9 +67921,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "",
-          "end_line": 700,
+          "end_line": 703,
           "file": "src/behave/surfaceFire.cpp",
-          "line": 697,
+          "line": 700,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -67989,9 +67978,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "",
-          "end_line": 705,
+          "end_line": 708,
           "file": "src/behave/surfaceFire.cpp",
-          "line": 702,
+          "line": 705,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -68067,9 +68056,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "",
-          "end_line": 710,
+          "end_line": 713,
           "file": "src/behave/surfaceFire.cpp",
-          "line": 707,
+          "line": 710,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -68124,9 +68113,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "",
-          "end_line": 715,
+          "end_line": 718,
           "file": "src/behave/surfaceFire.cpp",
-          "line": 712,
+          "line": 715,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -68202,9 +68191,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "",
-          "end_line": 720,
+          "end_line": 723,
           "file": "src/behave/surfaceFire.cpp",
-          "line": 717,
+          "line": 720,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -68269,9 +68258,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "FuelLifeState::FuelLifeStateEnum lifeState",
-          "end_line": 725,
+          "end_line": 728,
           "file": "src/behave/surfaceFire.cpp",
-          "line": 722,
+          "line": 725,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -68328,9 +68317,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "FuelLifeState::FuelLifeStateEnum lifeState",
-          "end_line": 730,
+          "end_line": 733,
           "file": "src/behave/surfaceFire.cpp",
-          "line": 727,
+          "line": 730,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -68387,9 +68376,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "FuelLifeState::FuelLifeStateEnum lifeState",
-          "end_line": 735,
+          "end_line": 738,
           "file": "src/behave/surfaceFire.cpp",
-          "line": 732,
+          "line": 735,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -68446,9 +68435,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "",
-          "end_line": 740,
+          "end_line": 743,
           "file": "src/behave/surfaceFire.cpp",
-          "line": 737,
+          "line": 740,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -68503,9 +68492,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "",
-          "end_line": 745,
+          "end_line": 748,
           "file": "src/behave/surfaceFire.cpp",
-          "line": 742,
+          "line": 745,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -68583,9 +68572,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "",
-          "end_line": 750,
+          "end_line": 758,
           "file": "src/behave/surfaceFire.cpp",
-          "line": 747,
+          "line": 755,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -68597,7 +68586,7 @@
       "id": "627f5e7a7ee4542cda1c",
       "kind": "method",
       "lexically_qualified_signature": "bool SurfaceFire::getIsWindLimitExceeded() const",
-      "line": 89,
+      "line": 90,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -68640,9 +68629,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "",
-          "end_line": 754,
+          "end_line": 762,
           "file": "src/behave/surfaceFire.cpp",
-          "line": 752,
+          "line": 760,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -68656,7 +68645,7 @@
       "id": "00c2a99270c89b205099",
       "kind": "method",
       "lexically_qualified_signature": "double SurfaceFire::getRelativePackingRatio() const",
-      "line": 90,
+      "line": 91,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -68718,9 +68707,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "",
-          "end_line": 758,
+          "end_line": 766,
           "file": "src/behave/surfaceFire.cpp",
-          "line": 756,
+          "line": 764,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -68734,7 +68723,7 @@
       "id": "5c2db8d84ad9df327d02",
       "kind": "method",
       "lexically_qualified_signature": "double SurfaceFire::getPackingRatio() const",
-      "line": 91,
+      "line": 92,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -68796,9 +68785,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "",
-          "end_line": 763,
+          "end_line": 771,
           "file": "src/behave/surfaceFire.cpp",
-          "line": 760,
+          "line": 768,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -68812,7 +68801,7 @@
       "id": "b2d7d6a49cab8525a11e",
       "kind": "method",
       "lexically_qualified_signature": "double SurfaceFire::getPalmettoGallberryMoistureOfExtinctionDead() const",
-      "line": 94,
+      "line": 95,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -68855,9 +68844,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "",
-          "end_line": 768,
+          "end_line": 776,
           "file": "src/behave/surfaceFire.cpp",
-          "line": 765,
+          "line": 773,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -68871,7 +68860,7 @@
       "id": "a7fcc8df2863364aef5f",
       "kind": "method",
       "lexically_qualified_signature": "double SurfaceFire::getPalmettoGallberryHeatOfCombustionDead() const",
-      "line": 95,
+      "line": 96,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -68914,9 +68903,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "",
-          "end_line": 773,
+          "end_line": 781,
           "file": "src/behave/surfaceFire.cpp",
-          "line": 770,
+          "line": 778,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -68930,7 +68919,7 @@
       "id": "1d764ba07639f362de61",
       "kind": "method",
       "lexically_qualified_signature": "double SurfaceFire::getPalmettoGallberryHeatOfCombustionLive() const",
-      "line": 96,
+      "line": 97,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -68973,9 +68962,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "",
-          "end_line": 778,
+          "end_line": 786,
           "file": "src/behave/surfaceFire.cpp",
-          "line": 775,
+          "line": 783,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -68989,7 +68978,7 @@
       "id": "a5565c3a1ee61407cfe1",
       "kind": "method",
       "lexically_qualified_signature": "double SurfaceFire::getPalmettoGallberyDeadOneHourLoad() const",
-      "line": 97,
+      "line": 98,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -69032,9 +69021,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "",
-          "end_line": 783,
+          "end_line": 791,
           "file": "src/behave/surfaceFire.cpp",
-          "line": 780,
+          "line": 788,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -69048,7 +69037,7 @@
       "id": "8be9268f515852b7fc79",
       "kind": "method",
       "lexically_qualified_signature": "double SurfaceFire::getPalmettoGallberyDeadTenHourLoad() const",
-      "line": 98,
+      "line": 99,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -69091,9 +69080,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "",
-          "end_line": 788,
+          "end_line": 796,
           "file": "src/behave/surfaceFire.cpp",
-          "line": 785,
+          "line": 793,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -69107,7 +69096,7 @@
       "id": "b4d6002ea8d4915518df",
       "kind": "method",
       "lexically_qualified_signature": "double SurfaceFire::getPalmettoGallberyDeadFoliageLoad() const",
-      "line": 99,
+      "line": 100,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -69150,9 +69139,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "",
-          "end_line": 793,
+          "end_line": 801,
           "file": "src/behave/surfaceFire.cpp",
-          "line": 790,
+          "line": 798,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -69166,7 +69155,7 @@
       "id": "c9a9a6a32f5359b6ab78",
       "kind": "method",
       "lexically_qualified_signature": "double SurfaceFire::getPalmettoGallberyFuelBedDepth() const",
-      "line": 100,
+      "line": 101,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -69209,9 +69198,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "",
-          "end_line": 798,
+          "end_line": 806,
           "file": "src/behave/surfaceFire.cpp",
-          "line": 795,
+          "line": 803,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -69225,7 +69214,7 @@
       "id": "1e5598f9d37b43aba8c5",
       "kind": "method",
       "lexically_qualified_signature": "double SurfaceFire::getPalmettoGallberyLitterLoad() const",
-      "line": 101,
+      "line": 102,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -69268,9 +69257,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "",
-          "end_line": 803,
+          "end_line": 811,
           "file": "src/behave/surfaceFire.cpp",
-          "line": 800,
+          "line": 808,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -69284,7 +69273,7 @@
       "id": "42fc99d1583f5716f7c2",
       "kind": "method",
       "lexically_qualified_signature": "double SurfaceFire::getPalmettoGallberyLiveOneHourLoad() const",
-      "line": 102,
+      "line": 103,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -69327,9 +69316,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "",
-          "end_line": 808,
+          "end_line": 816,
           "file": "src/behave/surfaceFire.cpp",
-          "line": 805,
+          "line": 813,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -69343,7 +69332,7 @@
       "id": "3426ee176ba726b9c811",
       "kind": "method",
       "lexically_qualified_signature": "double SurfaceFire::getPalmettoGallberyLiveTenHourLoad() const",
-      "line": 103,
+      "line": 104,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -69386,9 +69375,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "",
-          "end_line": 813,
+          "end_line": 821,
           "file": "src/behave/surfaceFire.cpp",
-          "line": 810,
+          "line": 818,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -69402,7 +69391,7 @@
       "id": "1c9156d62258e92c16f5",
       "kind": "method",
       "lexically_qualified_signature": "double SurfaceFire::getPalmettoGallberyLiveFoliageLoad() const",
-      "line": 104,
+      "line": 105,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -69445,9 +69434,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "",
-          "end_line": 818,
+          "end_line": 826,
           "file": "src/behave/surfaceFire.cpp",
-          "line": 815,
+          "line": 823,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -69461,7 +69450,7 @@
       "id": "5a6bbe38499505bf09f2",
       "kind": "method",
       "lexically_qualified_signature": "double SurfaceFire::getAspenMortality() const",
-      "line": 107,
+      "line": 108,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -69504,9 +69493,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "int typeIndex",
-          "end_line": 823,
+          "end_line": 831,
           "file": "src/behave/surfaceFire.cpp",
-          "line": 820,
+          "line": 828,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -69520,7 +69509,7 @@
       "id": "697bc4b8995ea3e2aba5",
       "kind": "method",
       "lexically_qualified_signature": "double SurfaceFire::getAspenFuelBedDepth(int typeIndex) const",
-      "line": 108,
+      "line": 109,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -69563,9 +69552,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "",
-          "end_line": 828,
+          "end_line": 836,
           "file": "src/behave/surfaceFire.cpp",
-          "line": 825,
+          "line": 833,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -69579,7 +69568,7 @@
       "id": "70ea4a466dc452acd9e8",
       "kind": "method",
       "lexically_qualified_signature": "double SurfaceFire::getAspenHeatOfCombustionDead() const",
-      "line": 109,
+      "line": 110,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -69622,9 +69611,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "",
-          "end_line": 833,
+          "end_line": 841,
           "file": "src/behave/surfaceFire.cpp",
-          "line": 830,
+          "line": 838,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -69638,7 +69627,7 @@
       "id": "7f30dda85f5ef59dffac",
       "kind": "method",
       "lexically_qualified_signature": "double SurfaceFire::getAspenHeatOfCombustionLive() const",
-      "line": 110,
+      "line": 111,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -69681,9 +69670,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "",
-          "end_line": 838,
+          "end_line": 846,
           "file": "src/behave/surfaceFire.cpp",
-          "line": 835,
+          "line": 843,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -69697,7 +69686,7 @@
       "id": "4793476e64962710777a",
       "kind": "method",
       "lexically_qualified_signature": "double SurfaceFire::getAspenMoistureOfExtinctionDead() const",
-      "line": 111,
+      "line": 112,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -69740,9 +69729,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "",
-          "end_line": 843,
+          "end_line": 851,
           "file": "src/behave/surfaceFire.cpp",
-          "line": 840,
+          "line": 848,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -69756,7 +69745,7 @@
       "id": "da316814e382fcfb0f95",
       "kind": "method",
       "lexically_qualified_signature": "double SurfaceFire::getAspenLoadDeadOneHour() const",
-      "line": 112,
+      "line": 113,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -69799,9 +69788,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "",
-          "end_line": 848,
+          "end_line": 856,
           "file": "src/behave/surfaceFire.cpp",
-          "line": 845,
+          "line": 853,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -69815,7 +69804,7 @@
       "id": "fce3a71f735bdf7f39b2",
       "kind": "method",
       "lexically_qualified_signature": "double SurfaceFire::getAspenLoadDeadTenHour() const",
-      "line": 113,
+      "line": 114,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -69858,9 +69847,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "",
-          "end_line": 853,
+          "end_line": 861,
           "file": "src/behave/surfaceFire.cpp",
-          "line": 850,
+          "line": 858,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -69874,7 +69863,7 @@
       "id": "8d747f7bd0999cb96639",
       "kind": "method",
       "lexically_qualified_signature": "double SurfaceFire::getAspenLoadLiveHerbaceous() const",
-      "line": 114,
+      "line": 115,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -69917,9 +69906,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "",
-          "end_line": 858,
+          "end_line": 866,
           "file": "src/behave/surfaceFire.cpp",
-          "line": 855,
+          "line": 863,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -69933,7 +69922,7 @@
       "id": "2805163fca138e81cbc3",
       "kind": "method",
       "lexically_qualified_signature": "double SurfaceFire::getAspenLoadLiveWoody() const",
-      "line": 115,
+      "line": 116,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -69976,9 +69965,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "",
-          "end_line": 863,
+          "end_line": 871,
           "file": "src/behave/surfaceFire.cpp",
-          "line": 860,
+          "line": 868,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -69992,7 +69981,7 @@
       "id": "48dfc85768d129a157f9",
       "kind": "method",
       "lexically_qualified_signature": "double SurfaceFire::getAspenSavrDeadOneHour() const",
-      "line": 116,
+      "line": 117,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -70035,9 +70024,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "",
-          "end_line": 868,
+          "end_line": 876,
           "file": "src/behave/surfaceFire.cpp",
-          "line": 865,
+          "line": 873,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -70051,7 +70040,7 @@
       "id": "8992e4e42d0ae0a6c473",
       "kind": "method",
       "lexically_qualified_signature": "double SurfaceFire::getAspenSavrDeadTenHour() const",
-      "line": 117,
+      "line": 118,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -70094,9 +70083,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "",
-          "end_line": 873,
+          "end_line": 881,
           "file": "src/behave/surfaceFire.cpp",
-          "line": 870,
+          "line": 878,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -70110,7 +70099,7 @@
       "id": "3d9a488a41764a4faeac",
       "kind": "method",
       "lexically_qualified_signature": "double SurfaceFire::getAspenSavrLiveHerbaceous() const",
-      "line": 118,
+      "line": 119,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -70153,9 +70142,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "",
-          "end_line": 878,
+          "end_line": 886,
           "file": "src/behave/surfaceFire.cpp",
-          "line": 875,
+          "line": 883,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -70169,7 +70158,7 @@
       "id": "7eb1499b923ec716d253",
       "kind": "method",
       "lexically_qualified_signature": "double SurfaceFire::getAspenSavrLiveWoody() const",
-      "line": 119,
+      "line": 120,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -70212,9 +70201,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "",
-          "end_line": 883,
+          "end_line": 891,
           "file": "src/behave/surfaceFire.cpp",
-          "line": 880,
+          "line": 888,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -70228,7 +70217,7 @@
       "id": "ab7efd895babb51f4a4c",
       "kind": "method",
       "lexically_qualified_signature": "double SurfaceFire::getChaparralAge() const",
-      "line": 122,
+      "line": 123,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -70271,9 +70260,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "",
-          "end_line": 888,
+          "end_line": 896,
           "file": "src/behave/surfaceFire.cpp",
-          "line": 885,
+          "line": 893,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -70287,7 +70276,7 @@
       "id": "371554e5cb1d7db1c818",
       "kind": "method",
       "lexically_qualified_signature": "double SurfaceFire::getChaparralDaysSinceMayFirst() const",
-      "line": 123,
+      "line": 124,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -70330,9 +70319,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "",
-          "end_line": 893,
+          "end_line": 901,
           "file": "src/behave/surfaceFire.cpp",
-          "line": 890,
+          "line": 898,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -70346,7 +70335,7 @@
       "id": "6f65ecfd4521a288d3f6",
       "kind": "method",
       "lexically_qualified_signature": "double SurfaceFire::getChaparralDeadFuelFraction() const",
-      "line": 124,
+      "line": 125,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -70389,9 +70378,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "",
-          "end_line": 898,
+          "end_line": 906,
           "file": "src/behave/surfaceFire.cpp",
-          "line": 895,
+          "line": 903,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -70405,7 +70394,7 @@
       "id": "24c6065521aa3dfbfe9c",
       "kind": "method",
       "lexically_qualified_signature": "double SurfaceFire::getChaparralDeadMoistureOfExtinction() const",
-      "line": 125,
+      "line": 126,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -70448,9 +70437,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "",
-          "end_line": 903,
+          "end_line": 911,
           "file": "src/behave/surfaceFire.cpp",
-          "line": 900,
+          "line": 908,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -70464,7 +70453,7 @@
       "id": "95f4c941c9263166cc86",
       "kind": "method",
       "lexically_qualified_signature": "double SurfaceFire::getChaparralLiveMoistureOfExtinction() const",
-      "line": 126,
+      "line": 127,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -70507,9 +70496,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "FuelLifeState::FuelLifeStateEnum lifeState, int sizeClass",
-          "end_line": 908,
+          "end_line": 916,
           "file": "src/behave/surfaceFire.cpp",
-          "line": 905,
+          "line": 913,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -70523,7 +70512,7 @@
       "id": "529fc7374530e2d3a353",
       "kind": "method",
       "lexically_qualified_signature": "double SurfaceFire::getChaparralDensity(FuelLifeState::FuelLifeStateEnum lifeState, int sizeClass) const",
-      "line": 127,
+      "line": 128,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -70566,9 +70555,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "",
-          "end_line": 913,
+          "end_line": 921,
           "file": "src/behave/surfaceFire.cpp",
-          "line": 910,
+          "line": 918,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -70582,7 +70571,7 @@
       "id": "df550196bda42e06045b",
       "kind": "method",
       "lexically_qualified_signature": "double SurfaceFire::getChaparralFuelBedDepth() const",
-      "line": 128,
+      "line": 129,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -70625,9 +70614,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "FuelLifeState::FuelLifeStateEnum lifeState, int sizeClass",
-          "end_line": 918,
+          "end_line": 926,
           "file": "src/behave/surfaceFire.cpp",
-          "line": 915,
+          "line": 923,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -70641,7 +70630,7 @@
       "id": "e636d7bfd9690ad76f39",
       "kind": "method",
       "lexically_qualified_signature": "double SurfaceFire::getChaparralHeatOfCombustion(FuelLifeState::FuelLifeStateEnum lifeState, int sizeClass) const",
-      "line": 129,
+      "line": 130,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -70684,9 +70673,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "FuelLifeState::FuelLifeStateEnum lifeState, int sizeClass",
-          "end_line": 923,
+          "end_line": 931,
           "file": "src/behave/surfaceFire.cpp",
-          "line": 920,
+          "line": 928,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -70700,7 +70689,7 @@
       "id": "c1374299196fc337669e",
       "kind": "method",
       "lexically_qualified_signature": "double SurfaceFire::getChaparralLoad(FuelLifeState::FuelLifeStateEnum lifeState, int sizeClass) const",
-      "line": 130,
+      "line": 131,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -70743,9 +70732,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "FuelLifeState::FuelLifeStateEnum lifeState, int sizeClass",
-          "end_line": 928,
+          "end_line": 936,
           "file": "src/behave/surfaceFire.cpp",
-          "line": 925,
+          "line": 933,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -70759,7 +70748,7 @@
       "id": "41778467fe4047189446",
       "kind": "method",
       "lexically_qualified_signature": "double SurfaceFire::getChaparralMoisture(FuelLifeState::FuelLifeStateEnum lifeState, int sizeClass) const",
-      "line": 131,
+      "line": 132,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -70802,9 +70791,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "FuelLifeState::FuelLifeStateEnum lifeState, int sizeClass",
-          "end_line": 933,
+          "end_line": 941,
           "file": "src/behave/surfaceFire.cpp",
-          "line": 930,
+          "line": 938,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -70818,7 +70807,7 @@
       "id": "064f2d2b3a6e816ecbf3",
       "kind": "method",
       "lexically_qualified_signature": "double SurfaceFire::getChaparralSavr(FuelLifeState::FuelLifeStateEnum lifeState, int sizeClass) const",
-      "line": 132,
+      "line": 133,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -70861,9 +70850,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "FuelLifeState::FuelLifeStateEnum lifeState, int sizeClass",
-          "end_line": 938,
+          "end_line": 946,
           "file": "src/behave/surfaceFire.cpp",
-          "line": 935,
+          "line": 943,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -70877,7 +70866,7 @@
       "id": "89193501f835e4f9c55a",
       "kind": "method",
       "lexically_qualified_signature": "double SurfaceFire::getChaparralEffectiveSilicaContent(FuelLifeState::FuelLifeStateEnum lifeState, int sizeClass) const",
-      "line": 133,
+      "line": 134,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -70920,9 +70909,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "FuelLifeState::FuelLifeStateEnum lifeState, int sizeClass",
-          "end_line": 943,
+          "end_line": 951,
           "file": "src/behave/surfaceFire.cpp",
-          "line": 940,
+          "line": 948,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -70936,7 +70925,7 @@
       "id": "4b25074fe9f0ba6019cd",
       "kind": "method",
       "lexically_qualified_signature": "double SurfaceFire::getChaparralTotalSilicaContent(FuelLifeState::FuelLifeStateEnum lifeState, int sizeClass) const",
-      "line": 134,
+      "line": 135,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -70979,9 +70968,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "",
-          "end_line": 948,
+          "end_line": 956,
           "file": "src/behave/surfaceFire.cpp",
-          "line": 945,
+          "line": 953,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -70995,7 +70984,7 @@
       "id": "a111ee1cf13820306bd6",
       "kind": "method",
       "lexically_qualified_signature": "double SurfaceFire::getChaparralTotalDeadFuelLoad() const",
-      "line": 135,
+      "line": 136,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -71038,9 +71027,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "",
-          "end_line": 953,
+          "end_line": 961,
           "file": "src/behave/surfaceFire.cpp",
-          "line": 950,
+          "line": 958,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -71054,7 +71043,7 @@
       "id": "49045de29ba538233337",
       "kind": "method",
       "lexically_qualified_signature": "double SurfaceFire::getChaparralTotalFuelLoad() const",
-      "line": 136,
+      "line": 137,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -71097,9 +71086,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "",
-          "end_line": 958,
+          "end_line": 966,
           "file": "src/behave/surfaceFire.cpp",
-          "line": 955,
+          "line": 963,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -71113,7 +71102,7 @@
       "id": "78c74a18c1f943da563d",
       "kind": "method",
       "lexically_qualified_signature": "double SurfaceFire::getChaparralTotalLiveFuelLoad() const",
-      "line": 137,
+      "line": 138,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -71162,7 +71151,7 @@
       "id": "cd642af11fb3b11eef3e",
       "kind": "method",
       "lexically_qualified_signature": "ChaparralFuelType::ChaparralFuelTypeEnum SurfaceFire::getChaparralFuelType() const",
-      "line": 138,
+      "line": 139,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -71203,9 +71192,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "LoadingUnits::LoadingUnitsEnum loadingUnits",
-          "end_line": 963,
+          "end_line": 971,
           "file": "src/behave/surfaceFire.cpp",
-          "line": 960,
+          "line": 968,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -71219,7 +71208,7 @@
       "id": "129963630660c90b1582",
       "kind": "method",
       "lexically_qualified_signature": "double SurfaceFire::getTotalLiveFuelLoad(LoadingUnits::LoadingUnitsEnum loadingUnits) const",
-      "line": 139,
+      "line": 140,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -71262,9 +71251,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "LoadingUnits::LoadingUnitsEnum loadingUnits",
-          "end_line": 968,
+          "end_line": 976,
           "file": "src/behave/surfaceFire.cpp",
-          "line": 965,
+          "line": 973,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -71278,7 +71267,7 @@
       "id": "f51c33736ea51a3a9908",
       "kind": "method",
       "lexically_qualified_signature": "double SurfaceFire::getTotalDeadFuelLoad(LoadingUnits::LoadingUnitsEnum loadingUnits) const",
-      "line": 140,
+      "line": 141,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -71321,9 +71310,9 @@
       "definition_candidates": [
         {
           "definition_parameters": "LoadingUnits::LoadingUnitsEnum loadingUnits",
-          "end_line": 973,
+          "end_line": 981,
           "file": "src/behave/surfaceFire.cpp",
-          "line": 970,
+          "line": 978,
           "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
         }
       ],
@@ -71337,7 +71326,7 @@
       "id": "ee6a00150bb38ad6c01b",
       "kind": "method",
       "lexically_qualified_signature": "double SurfaceFire::getTotalDeadHerbaceousFuelLoad(LoadingUnits::LoadingUnitsEnum loadingUnits) const",
-      "line": 141,
+      "line": 142,
       "literal_source_and_header_dependencies": [
         "src/behave/behaveUnits.h",
         "src/behave/chaparralFuel.h",
@@ -84355,9 +84344,303 @@
       ],
       "scientific_candidate": true,
       "signature": "double WindSpeedUtility::windSpeedAtTwentyFeetFromTenMeter(double windSpeedAtTenMeters)"
+    },
+    {
+      "access": "public",
+      "approval": "Owner decision 13 excludes upstream APIs without port counterparts.",
+      "dataset": null,
+      "definition_candidates": [
+        {
+          "definition_parameters": "",
+          "end_line": 1038,
+          "file": "src/behave/surface.cpp",
+          "line": 1035,
+          "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
+        }
+      ],
+      "deleted": false,
+      "execution_evidence": [],
+      "file": "src/behave/surface.h",
+      "forwarded_cpp_ids": [
+        "a1911948602646457226"
+      ],
+      "function_status": "no_counterpart",
+      "id": "5eaa098f8280c6164c00",
+      "kind": "method",
+      "lexically_qualified_signature": "bool Surface::getIsWindLimitEnabled() const",
+      "line": 133,
+      "literal_source_and_header_dependencies": [
+        "src/behave/behaveUnits.h",
+        "src/behave/chaparralFuel.h",
+        "src/behave/fireSize.h",
+        "src/behave/fuelModels.h",
+        "src/behave/moistureScenarios.h",
+        "src/behave/palmettoGallberry.h",
+        "src/behave/surface.cpp",
+        "src/behave/surface.h",
+        "src/behave/surfaceFire.h",
+        "src/behave/surfaceFireReactionIntensity.h",
+        "src/behave/surfaceFuelbedIntermediates.h",
+        "src/behave/surfaceInputEnums.h",
+        "src/behave/surfaceInputs.h",
+        "src/behave/surfaceTwoFuelModels.h",
+        "src/behave/westernAspen.h"
+      ],
+      "mapping_note": "Upstream adds a stateful wind-limit option and readback. The ports use the existing off default.",
+      "mapping_status": "no_current_counterpart",
+      "name": "getIsWindLimitEnabled",
+      "oracle_access": "public_declaration_only_not_qualified",
+      "overload_count": 1,
+      "owner": "Surface",
+      "owner_approved_waiver": false,
+      "proposed_disposition": "no_counterpart",
+      "pure_virtual": false,
+      "python_targets": [],
+      "qualified_name": "Surface::getIsWindLimitEnabled",
+      "review_category": "no_counterpart_in_current_ports",
+      "route_ids": [
+        "surface_single"
+      ],
+      "rust_targets": [],
+      "scientific_candidate": false,
+      "signature": "bool Surface::getIsWindLimitEnabled() const"
+    },
+    {
+      "access": "public",
+      "approval": "Owner decision 13 excludes upstream APIs without port counterparts.",
+      "dataset": null,
+      "definition_candidates": [
+        {
+          "definition_parameters": "",
+          "end_line": 1043,
+          "file": "src/behave/surface.cpp",
+          "line": 1040,
+          "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
+        }
+      ],
+      "deleted": false,
+      "execution_evidence": [],
+      "file": "src/behave/surface.h",
+      "forwarded_cpp_ids": [
+        "627f5e7a7ee4542cda1c"
+      ],
+      "function_status": "no_counterpart",
+      "id": "29da1f06937fc660d56f",
+      "kind": "method",
+      "lexically_qualified_signature": "bool Surface::getIsWindLimitExceeded() const",
+      "line": 134,
+      "literal_source_and_header_dependencies": [
+        "src/behave/behaveUnits.h",
+        "src/behave/chaparralFuel.h",
+        "src/behave/fireSize.h",
+        "src/behave/fuelModels.h",
+        "src/behave/moistureScenarios.h",
+        "src/behave/palmettoGallberry.h",
+        "src/behave/surface.cpp",
+        "src/behave/surface.h",
+        "src/behave/surfaceFire.h",
+        "src/behave/surfaceFireReactionIntensity.h",
+        "src/behave/surfaceFuelbedIntermediates.h",
+        "src/behave/surfaceInputEnums.h",
+        "src/behave/surfaceInputs.h",
+        "src/behave/surfaceTwoFuelModels.h",
+        "src/behave/westernAspen.h"
+      ],
+      "mapping_note": "Upstream adds a stateful wind-limit option and readback. The ports use the existing off default.",
+      "mapping_status": "no_current_counterpart",
+      "name": "getIsWindLimitExceeded",
+      "oracle_access": "public_declaration_only_not_qualified",
+      "overload_count": 1,
+      "owner": "Surface",
+      "owner_approved_waiver": false,
+      "proposed_disposition": "no_counterpart",
+      "pure_virtual": false,
+      "python_targets": [],
+      "qualified_name": "Surface::getIsWindLimitExceeded",
+      "review_category": "no_counterpart_in_current_ports",
+      "route_ids": [
+        "surface_single"
+      ],
+      "rust_targets": [],
+      "scientific_candidate": false,
+      "signature": "bool Surface::getIsWindLimitExceeded() const"
+    },
+    {
+      "access": "public",
+      "approval": "Owner decision 13 excludes upstream APIs without port counterparts.",
+      "dataset": null,
+      "definition_candidates": [
+        {
+          "definition_parameters": "bool isWindLimitEnabled",
+          "end_line": 1033,
+          "file": "src/behave/surface.cpp",
+          "line": 1030,
+          "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
+        }
+      ],
+      "deleted": false,
+      "execution_evidence": [],
+      "file": "src/behave/surface.h",
+      "forwarded_cpp_ids": [
+        "6883d29ad754cfbff5b9"
+      ],
+      "function_status": "no_counterpart",
+      "id": "8f90324a166a4688fa4d",
+      "kind": "method",
+      "lexically_qualified_signature": "void Surface::setIsWindLimitEnabled(bool isWindLimitEnabled)",
+      "line": 132,
+      "literal_source_and_header_dependencies": [
+        "src/behave/behaveUnits.h",
+        "src/behave/chaparralFuel.h",
+        "src/behave/fireSize.h",
+        "src/behave/fuelModels.h",
+        "src/behave/moistureScenarios.h",
+        "src/behave/palmettoGallberry.h",
+        "src/behave/surface.cpp",
+        "src/behave/surface.h",
+        "src/behave/surfaceFire.h",
+        "src/behave/surfaceFireReactionIntensity.h",
+        "src/behave/surfaceFuelbedIntermediates.h",
+        "src/behave/surfaceInputEnums.h",
+        "src/behave/surfaceInputs.h",
+        "src/behave/surfaceTwoFuelModels.h",
+        "src/behave/westernAspen.h"
+      ],
+      "mapping_note": "Upstream adds a stateful wind-limit option and readback. The ports use the existing off default.",
+      "mapping_status": "no_current_counterpart",
+      "name": "setIsWindLimitEnabled",
+      "oracle_access": "public_declaration_only_not_qualified",
+      "overload_count": 1,
+      "owner": "Surface",
+      "owner_approved_waiver": false,
+      "proposed_disposition": "no_counterpart",
+      "pure_virtual": false,
+      "python_targets": [],
+      "qualified_name": "Surface::setIsWindLimitEnabled",
+      "review_category": "no_counterpart_in_current_ports",
+      "route_ids": [
+        "surface_single"
+      ],
+      "rust_targets": [],
+      "scientific_candidate": false,
+      "signature": "void Surface::setIsWindLimitEnabled(bool isWindLimitEnabled)"
+    },
+    {
+      "access": "public",
+      "approval": "Owner decision 13 excludes upstream APIs without port counterparts.",
+      "dataset": null,
+      "definition_candidates": [
+        {
+          "definition_parameters": "",
+          "end_line": 753,
+          "file": "src/behave/surfaceFire.cpp",
+          "line": 750,
+          "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
+        }
+      ],
+      "deleted": false,
+      "execution_evidence": [],
+      "file": "src/behave/surfaceFire.h",
+      "forwarded_cpp_ids": [],
+      "function_status": "no_counterpart",
+      "id": "a1911948602646457226",
+      "kind": "method",
+      "lexically_qualified_signature": "bool SurfaceFire::getIsWindLimitEnabled() const",
+      "line": 89,
+      "literal_source_and_header_dependencies": [
+        "src/behave/behaveUnits.h",
+        "src/behave/chaparralFuel.h",
+        "src/behave/fireSize.h",
+        "src/behave/fuelModels.h",
+        "src/behave/moistureScenarios.h",
+        "src/behave/palmettoGallberry.h",
+        "src/behave/surfaceFire.cpp",
+        "src/behave/surfaceFire.h",
+        "src/behave/surfaceFireReactionIntensity.h",
+        "src/behave/surfaceFuelbedIntermediates.h",
+        "src/behave/surfaceInputEnums.h",
+        "src/behave/surfaceInputs.h",
+        "src/behave/westernAspen.h",
+        "src/behave/windAdjustmentFactor.h"
+      ],
+      "mapping_note": "Upstream adds a stateful wind-limit option and readback. The ports use the existing off default.",
+      "mapping_status": "no_current_counterpart",
+      "name": "getIsWindLimitEnabled",
+      "oracle_access": "public_declaration_only_not_qualified",
+      "overload_count": 1,
+      "owner": "SurfaceFire",
+      "owner_approved_waiver": false,
+      "proposed_disposition": "no_counterpart",
+      "pure_virtual": false,
+      "python_targets": [],
+      "qualified_name": "SurfaceFire::getIsWindLimitEnabled",
+      "review_category": "no_counterpart_in_current_ports",
+      "route_ids": [
+        "surface_single"
+      ],
+      "rust_targets": [],
+      "scientific_candidate": false,
+      "signature": "bool SurfaceFire::getIsWindLimitEnabled() const"
+    },
+    {
+      "access": "public",
+      "approval": "Owner decision 13 excludes upstream APIs without port counterparts.",
+      "dataset": null,
+      "definition_candidates": [
+        {
+          "definition_parameters": "bool isWindLimitEnabled",
+          "end_line": 1032,
+          "file": "src/behave/surfaceFire.cpp",
+          "line": 1029,
+          "resolution": "qualified-name and parameter-count candidate; overload types not compiler-resolved"
+        }
+      ],
+      "deleted": false,
+      "execution_evidence": [],
+      "file": "src/behave/surfaceFire.h",
+      "forwarded_cpp_ids": [],
+      "function_status": "no_counterpart",
+      "id": "6883d29ad754cfbff5b9",
+      "kind": "method",
+      "lexically_qualified_signature": "void SurfaceFire::setIsWindLimitEnabled(bool isWindLimitEnabled)",
+      "line": 145,
+      "literal_source_and_header_dependencies": [
+        "src/behave/behaveUnits.h",
+        "src/behave/chaparralFuel.h",
+        "src/behave/fireSize.h",
+        "src/behave/fuelModels.h",
+        "src/behave/moistureScenarios.h",
+        "src/behave/palmettoGallberry.h",
+        "src/behave/surfaceFire.cpp",
+        "src/behave/surfaceFire.h",
+        "src/behave/surfaceFireReactionIntensity.h",
+        "src/behave/surfaceFuelbedIntermediates.h",
+        "src/behave/surfaceInputEnums.h",
+        "src/behave/surfaceInputs.h",
+        "src/behave/westernAspen.h",
+        "src/behave/windAdjustmentFactor.h"
+      ],
+      "mapping_note": "Upstream adds a stateful wind-limit option and readback. The ports use the existing off default.",
+      "mapping_status": "no_current_counterpart",
+      "name": "setIsWindLimitEnabled",
+      "oracle_access": "public_declaration_only_not_qualified",
+      "overload_count": 1,
+      "owner": "SurfaceFire",
+      "owner_approved_waiver": false,
+      "proposed_disposition": "no_counterpart",
+      "pure_virtual": false,
+      "python_targets": [],
+      "qualified_name": "SurfaceFire::setIsWindLimitEnabled",
+      "review_category": "no_counterpart_in_current_ports",
+      "route_ids": [
+        "surface_single"
+      ],
+      "rust_targets": [],
+      "scientific_candidate": false,
+      "signature": "void SurfaceFire::setIsWindLimitEnabled(bool isWindLimitEnabled)"
     }
   ],
-  "public_identity_sha256": "213febf45cf781f69925699f2017a357a7d35cbb826e64ca2aed62e71c879442",
+  "public_identity_sha256": "9f04ba5496af14cf30b8eb6f46890cb44262f04f43fd59bdace5b2f87f66c9d1",
   "python_reverse_join": [
     {
       "coverage_status": "not_executed_phase0",
@@ -87656,6 +87939,7 @@
         "250aec44733bfde977e3",
         "26163eae6d90a2cc1cf9",
         "290ef32edf8f071bb4be",
+        "29da1f06937fc660d56f",
         "2ab8c8a80cae960824c1",
         "2ac9055b5f641df4d015",
         "2afe0c21558e57f0edd2",
@@ -87718,6 +88002,7 @@
         "5dc78ea306cd6eb650c1",
         "5dddbc741ab75af1d0b7",
         "5e5609abe05d397bfcfa",
+        "5eaa098f8280c6164c00",
         "60073df3698dbcc5ad8c",
         "6131212bbf27d721db87",
         "61af648c1b52c36b35f8",
@@ -87730,6 +88015,7 @@
         "660437dd4fdf4a14e836",
         "668ac22fdd52acf422bd",
         "670aaf1b1596fa2a7649",
+        "6883d29ad754cfbff5b9",
         "6904ff9fd3d2267fad49",
         "69f8c5e7262ae95df9db",
         "6b5feac8286d715e55ce",
@@ -87756,6 +88042,7 @@
         "8d0af6407f54a33a9e43",
         "8f01947a0d8b013a878f",
         "8f02223cb016575d0bf0",
+        "8f90324a166a4688fa4d",
         "8fadb38c92883e91a5de",
         "90c789a5ddc690d909d3",
         "90ffe1a1f8b30103b0b3",
@@ -87774,6 +88061,7 @@
         "9f6dd1bbc6f28b086a74",
         "9fa9eb69e5f88a45e046",
         "9fe3f22d61af07f7acc4",
+        "a1911948602646457226",
         "a32b09d3a63aea10db28",
         "a49c830eaa90fbfd958c",
         "a580988a211e98a4d4ab",
@@ -87875,11 +88163,11 @@
         },
         {
           "file": "surface/results.jsonl",
-          "sha256": "ae006838d93bbb9533df74340085110c479315cb8238a8ce488a68fe5e9e1b71"
+          "sha256": "84ab8f5bf4197dcea68f302a2969f8f4c075c995a8e8f084d8611a12120ef14a"
         },
         {
           "file": "surface/manifest.json",
-          "sha256": "39e75b886c69607977227a90361e0ef7585fabf7736cdded1352fca151bc1409"
+          "sha256": "a8c10db6cf6d87acb76ba5469f02ae75fdcc99417fcf12d282f75a55810a635e"
         }
       ],
       "guard_ids": [
@@ -88499,7 +88787,7 @@
         },
         {
           "file": "fire_size/manifest.json",
-          "sha256": "c450683a4dec4573af3fb9a38fa9b55487f270c63f6407d91abc5886dcf9b9b6"
+          "sha256": "c5f3598b3bc211f548a8e85e80687868eebf0cd7e8ec1fca3aab4d14d342b0a3"
         }
       ],
       "guard_ids": [
@@ -88671,7 +88959,7 @@
         },
         {
           "file": "ignite/manifest.json",
-          "sha256": "cb7605793cc336e5dbba80f74f991c60ac834c4dc751627a1dfccee781681bc7"
+          "sha256": "ef998a9feb7b6fb76497a16ff32422df43994db1b25423e62eedbc4e6c91c7fa"
         }
       ],
       "guard_ids": [
@@ -88932,7 +89220,7 @@
         },
         {
           "file": "mortality/manifest.json",
-          "sha256": "0d20af418e6c80964c12f51244feeba4f35f78c0ad726bbb09bdc16217dc7ee5"
+          "sha256": "c4a6d9c0ea6917cf5f81388c36db3caa2d07132b215864d093d42a63d3d28ab4"
         }
       ],
       "guard_ids": [
@@ -98312,6 +98600,14 @@
     {
       "file": "domains/enum-domains.json",
       "sha256": "7a3c254a4c024dc9c8b1e1dec719027c1486278373e810eb4ce40ab3e5faebe4"
+    },
+    {
+      "file": "pin-update/candidate-headers.json",
+      "sha256": "2b7d7515a378cf6135e6f50dc27dcf5367237a36be07518daaaadd6cff7455de"
+    },
+    {
+      "file": "pin-update/public-api-delta.json",
+      "sha256": "79ff8fd4aed0c409ad17ec8f68227a3aae8db8ccdb3be86f9038b0c8c52b60cd"
     }
   ],
   "source_inputs": [
@@ -98437,11 +98733,11 @@
     },
     {
       "file": "src/behave/fireSize.h",
-      "sha256": "26fe82005a4d3c0c5c65bf9c2713acdfc36145c6ce70708d3de320dcec65f7eb"
+      "sha256": "73e21944ea08f7638f17e630aba7941419683f4a75b9039e274e4fe3330d93c6"
     },
     {
       "file": "src/behave/fuelModels.cpp",
-      "sha256": "3a7bb5db1a1592a058f88b7e684a2a85aa2d66d756e41255a3ed2e1d1adc8cd4"
+      "sha256": "97be23cac87eb56a175fa5b10ef1353a4d56458fd21c5c0ab3dabed60e8fc4f0"
     },
     {
       "file": "src/behave/fuelModels.h",
@@ -98473,7 +98769,7 @@
     },
     {
       "file": "src/behave/mortality.cpp",
-      "sha256": "e804d582301a24a5545f0af25b1bf44248ca21e3ffdba8abb2f5eefeec9dfbf9"
+      "sha256": "f67713876dced3c72ba6e6aef5596207084a6e76d265c84d62b1530fe27466e3"
     },
     {
       "file": "src/behave/mortality.h",
@@ -98585,19 +98881,19 @@
     },
     {
       "file": "src/behave/surface.cpp",
-      "sha256": "eaca610271751a2c80d55e806be81cceaf6a5abafb9c507dd7aa7b1c326bc78b"
+      "sha256": "11da9991f5c494dfd74920ccc5ccf4084536d8ad1c7f5fc6200bd1897f9e892c"
     },
     {
       "file": "src/behave/surface.h",
-      "sha256": "da0ebb82740f8a60114fe39c495ca69c4534f79c956f2979c4d4770269570ca4"
+      "sha256": "4fbd8dc725179623825568c2e912fdd8d63fc1d1cd3d1dccfc8d86de2b77f2d5"
     },
     {
       "file": "src/behave/surfaceFire.cpp",
-      "sha256": "cb45b59c0df04f666dcbc693fb377bd3b2a19fa251ee791f23279ee70f0894e0"
+      "sha256": "7fc5c91da80391e33b4090cab535a552a5c5f920ef8b386dc285189f77962388"
     },
     {
       "file": "src/behave/surfaceFire.h",
-      "sha256": "f9c78a0044bb1fed16ba1daee356d8bcdf0cf9a820026689f17c060046d08964"
+      "sha256": "99141c0260e082a2582110e67e3da059c08a389d8373dda9f71310c3f5f49a36"
     },
     {
       "file": "src/behave/surfaceFireReactionIntensity.cpp",
@@ -98649,7 +98945,7 @@
     },
     {
       "file": "src/behave/westernAspen.h",
-      "sha256": "cc2151a960e66d250634ecd1eefe9aefc17dde26329599dda557a004c09d2425"
+      "sha256": "8d0198df2def8caba8854b988fbe9bab87be854fcca35ff1d0dee3185c521780"
     },
     {
       "file": "src/behave/windAdjustmentFactor.cpp",

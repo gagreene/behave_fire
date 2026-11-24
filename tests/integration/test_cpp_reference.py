@@ -34,7 +34,7 @@ def test_default_observations_are_offline_and_policy_gated():
     data = reference.load_reference()
     assert len(data["cases"]) == 634
     assert data["manifest"]["available"] == 583
-    assert data["manifest"]["submodule_checkout_used"] is False
+    assert data["manifest"]["submodule_checkout_used"] is True
     result = next(row["output"] for row in data["results"] if row["status"] == "ok")
     if data['policy']['approved']:
         reference.assert_matches_cpp(result, result, data['policy'])
@@ -56,13 +56,37 @@ def test_default_qualified_policy_checks_selected_backend_and_unit_controls(tmp_
 
     data = reference.load_reference()
     report = cpp_controls.measure_ports(ROOT, tmp_path / 'surface-check.json', backends=(backend,))
-    assert report['counts'] == {backend: dict(cases=583, fields=2915, paired_cases=139,
-        original_unit_difference_cases=139)}
+    assert report['counts'] == {backend: dict(cases=710, fields=3550, paired_cases=139,
+        load_difference_cases=12)}
     if data['policy']['approved']:
         assert data['policy']['qualification']['calibration_complete'] is True
 
 
 # ---- reference provenance and comparison guards tests ----
+
+@pytest.mark.parametrize(('model', 'loads'), [
+    (152, {'dead_1h_load_lb_ft2': 'dead_1h'}),
+    (153, {'dead_100h_load_lb_ft2': 'dead_100h', 'live_herb_load_lb_ft2': 'live_herb'}),
+])
+def test_explicit_load_controls_preserve_the_ports_model_definition(model, loads):
+    from behave_fire.components.fuel_models import FuelModels
+
+    cases = reference._rows(ROOT / 'tests/data/cpp_reference/surface/cases.jsonl')
+    case = next(candidate for candidate in cases if candidate['fuel_model'] == model)
+    control, = reference._custom_cases([case])
+    model_record = FuelModels().fuel_models_[model]
+    assert {name: control[name] for name in loads} == {name: model_record[key] for name, key in loads.items()}
+    reference._validate_case(control)
+
+    field = next(iter(loads))
+    missing = {key: value for key, value in control.items() if key != field}
+    with pytest.raises(ValueError, match='custom load control'):
+        reference._validate_case(missing)
+    with pytest.raises(ValueError, match='custom load control'):
+        reference._validate_case(dict(control, **{field: control[field] + 0.001}))
+    with pytest.raises(ValueError, match='custom load control'):
+        reference._validate_case(dict(case, **{field: control[field]}))
+
 
 @pytest.mark.parametrize("mutation", ("drop", "field", "duplicate", "unavailable", "status"))
 def test_invalid_result_contracts_fail_even_when_the_hash_is_updated(tmp_path, mutation, cpp_snapshot_template):

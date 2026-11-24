@@ -45,10 +45,19 @@ def _check_custom(driver, directory, data, root):
         row = dict(base, id="custom-missing-" + field)
         del row[field]
         invalid.append(row)
+    load_control = next(case for case in cases if case["fuel_model"] == 152)
+    missing_load = dict(load_control, id="custom-missing-load-control")
+    del missing_load["dead_1h_load_lb_ft2"]
+    numbered = next(case for case in data["cases"] if case["fuel_model"] == 152)
+    invalid.extend([
+        missing_load,
+        dict(load_control, id="custom-wrong-load", dead_1h_load_lb_ft2=0.5),
+        dict(numbered, id="numbered-load-override", dead_1h_load_lb_ft2=load_control["dead_1h_load_lb_ft2"]),
+    ])
     path = directory / "custom-negative-inputs.jsonl"
     path.write_text("".join(json.dumps(row, allow_nan=False) + "\n" for row in invalid), encoding="utf-8")
     rows = _read_lines(_run(driver, directory, "custom-negative", path, "--forbid-upstream", 0))
-    if len(rows) != 18 or any(row["status"] != "rejected" or row["upstream_entries"] != 0 for row in rows):
+    if len(rows) != 21 or any(row["status"] != "rejected" or row["upstream_entries"] != 0 for row in rows):
         raise ValueError("An unreviewed custom definition reached upstream")
     _run(driver, directory, "custom-entry-trap", inputs, "--forbid-upstream", 86)
     _run(driver, directory, "custom-geometry-trap", inputs, "--forbid-geometry", 87)
@@ -78,7 +87,7 @@ def _check_custom(driver, directory, data, root):
             or rows[0]["output"] != fresh[base["id"]]["output"]
             or rows[2]["status"] != "unavailable" or rows[2]["geometry_entries"] != 0):
         raise ValueError("Custom definition state did not restore a fresh full run")
-    return dict(custom_negative_cases=18, custom_negative_upstream_entries=0,
+    return dict(custom_negative_cases=21, custom_negative_upstream_entries=0,
                 custom_upstream_trap_exit=86, custom_geometry_trap_exit=87,
                 custom_duplicate_ids_rejected=True, custom_state_sequence_checked=True)
 

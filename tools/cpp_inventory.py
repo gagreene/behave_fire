@@ -9,13 +9,13 @@ import sys
 from collections import Counter
 from pathlib import Path
 
-CPP_SHA = "f3b2943e69abca942e795c5b1b45276f6338abb5"
-PUBLIC_IDENTITY_SHA256 = "213febf45cf781f69925699f2017a357a7d35cbb826e64ca2aed62e71c879442"
+CPP_SHA = "3ca33d5b919d4253b411bfb6464b4c872dda6fc9"
+PUBLIC_IDENTITY_SHA256 = "9f04ba5496af14cf30b8eb6f46890cb44262f04f43fd59bdace5b2f87f66c9d1"
 EXPECTED_COUNTS = {
-    "public_functions": 1394,
+    "public_functions": 1399,
     "scientific_candidates": 266,
     "state_lifecycle_methods": 508,
-    "no_counterpart": 486,
+    "no_counterpart": 491,
     "deferred": 134,
     "phase0_routes": 45,
 }
@@ -193,9 +193,9 @@ def validate_inventory(inventory, require_ready=False, reference_root=None):
     digest = hashlib.sha256(json.dumps(identities, separators=(",", ":")).encode()).hexdigest()
     if digest != PUBLIC_IDENTITY_SHA256 or digest != inventory["public_identity_sha256"]:
         raise ValueError("Public identity/signature snapshot changed")
-    if mapping_counts != {"candidate_mapping": 266, "pending_mapping": 508, "no_current_counterpart": 620}:
+    if mapping_counts != {"candidate_mapping": 266, "pending_mapping": 508, "no_current_counterpart": 625}:
         raise ValueError("Hybrid scientific/state/no-counterpart counts changed")
-    if statuses["no_counterpart"] != 486 or statuses["deferred"] != 134:
+    if statuses["no_counterpart"] != 491 or statuses["deferred"] != 134:
         raise ValueError("Approved scope exclusions or containment deferrals changed")
     if all(row["function_status"] == "waived" for row in rows):
         raise ValueError("Universally waived inventory is not coverage")
@@ -243,7 +243,7 @@ def validate_inventory(inventory, require_ready=False, reference_root=None):
                                  '--root', str(root), '--check'], capture_output=True, text=True, check=False)
         if result.returncode != 0:
             raise ValueError('Scientific qualification failed: ' + result.stderr[-4000:])
-    if len(inventory["nonpublic_functions"]) != 194:
+    if len(inventory["nonpublic_functions"]) != 193:
         raise ValueError("Nonpublic join scope changed")
     for row in inventory["nonpublic_functions"]:
         _require_fields(row, {"id", "qualified_name", "signature", "lexically_qualified_signature",

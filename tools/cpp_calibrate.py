@@ -86,8 +86,8 @@ def _requirements(root):
         "linux-x86_64", "linux-aarch64", "linux-musl-x86_64", "macos-x86_64", "macos-arm64",
         "windows-x86_64", "windows-arm64"])
     if (policy.get("activation_requirements") != expected
-            or policy.get("documented_unit_source_models") != sorted(reference.MOE_PERCENT_CONTROLS)):
-        raise ValueError("Owner-approved calibration matrix or unit disposition changed")
+            or policy.get("documented_load_source_models") != sorted(reference.SURFACE_LOAD_CONTROLS)):
+        raise ValueError("Owner-approved calibration matrix or load disposition changed")
     return {"cpp-" + key for key in expected["compilers"]} | {"ports-" + key for key in expected["platforms"]}
 
 def _run(command, directory, name, environment=None):
@@ -142,7 +142,7 @@ def _validate_observations(root, report):
                 or not re.fullmatch(r"[0-9a-f]{64}", report.get("extension_sha256", ""))):
             raise ValueError("Inconsistent native calibration platform")
         expected = {case["id"]: row["output"] for case, row in zip(data["cases"], data["results"], strict=False)
-                    if row["status"] == "ok" and case["fuel_model"] not in reference.MOE_PERCENT_CONTROLS}
+                    if row["status"] == "ok" and case["fuel_model"] not in reference.SURFACE_LOAD_CONTROLS}
         expected.update({row["id"]: row["output"] for row in data["controls"]["results"]})
         required = {(backend, identity) for backend in ("python", "rust") for identity in expected}
         observed = set()
@@ -155,23 +155,37 @@ def _validate_observations(root, report):
         if observed != required:
             raise ValueError("Incomplete platform calibration observations")
         documented = report.get("documented_differences", [])
-        if len(documented) != 278 or any(report["counts"].get(backend) != dict(
-                cases=583, fields=2915, paired_cases=139, original_unit_difference_cases=139)
-                for backend in ("python", "rust")):
+        expected_counts = dict(cases=controls.PORT_CASES, fields=controls.PORT_CASES * len(reference.FIELDS),
+                               paired_cases=controls.PAIRED_CASES, load_difference_cases=controls.LOAD_DIFFERENCE_CASES)
+        if any(report["counts"].get(backend) != expected_counts for backend in ("python", "rust")):
             raise ValueError("Incomplete numbered/custom calibration accounting")
         raw = {row["id"]: row for row in data["results"]}
         actual = {(row["backend"], row["id"]): row["actual"] for row in report["observations"]}
-        pairs = set()
+        differing_cases = {
+            case["id"] for case in data["cases"] if case["fuel_model"] in reference.SURFACE_LOAD_CONTROLS
+        }
+        required_differences = {(backend, identity) for backend in ("python", "rust") for identity in differing_cases}
+        differences = {}
         for row in documented:
             key = (row["backend"], row["id"])
-            if (key in pairs or row["control"] != "custom-" + row["id"]
+            if (key in differences or key not in required_differences or row["control"] != "custom-" + row["id"]
                     or row["numbered_cpp"] != raw[row["id"]]["output"]
-                    or set(row["numbered_port"]) != set(reference.FIELDS)
-                    or any(struct.pack('!d', row['numbered_port'][field]) != struct.pack(
-                        '!d', actual[row['backend'], row['control']][field]) for field in reference.FIELDS)):
+                    or set(row["numbered_port"]) != set(reference.FIELDS)):
                 raise ValueError("Numbered/custom evidence changed")
-            pairs.add(key)
-        return dict(cases_per_backend=583, fields_per_backend=2915, paired_cases_per_backend=139)
+            differences[key] = row["numbered_port"]
+        if set(differences) != required_differences or len(differing_cases) != controls.LOAD_DIFFERENCE_CASES:
+            raise ValueError("Incomplete documented load differences")
+        for backend in ("python", "rust"):
+            for case in data["controls"]["cases"]:
+                source_key = (backend, case["id"].removeprefix("custom-"))
+                numbered = differences[source_key] if source_key in differences else actual[source_key]
+                custom = actual[backend, case["id"]]
+                if any(struct.pack("!d", numbered[field]) != struct.pack("!d", custom[field])
+                       for field in reference.FIELDS):
+                    raise ValueError("Numbered/custom evidence changed")
+        return dict(cases_per_backend=controls.PORT_CASES,
+                    fields_per_backend=controls.PORT_CASES * len(reference.FIELDS),
+                    paired_cases_per_backend=controls.PAIRED_CASES)
     if report.get("kind") != "cpp":
         raise ValueError("Unknown calibration report")
     expected = {row["id"]: row for row in [*data["results"], *data["controls"]["results"]]}
@@ -191,7 +205,7 @@ def _validate_observations(root, report):
             or protocol.get("negative_upstream_entries") != 0 or protocol.get("upstream_trap_exit") != 86
             or protocol.get("geometry_trap_exit") != 87 or protocol.get("duplicate_ids_rejected") is not True
             or protocol.get("state_sequence_checked") is not True
-            or protocol.get("custom_negative_cases") != 18 or protocol.get("custom_negative_upstream_entries") != 0
+            or protocol.get("custom_negative_cases") != 21 or protocol.get("custom_negative_upstream_entries") != 0
             or protocol.get("custom_upstream_trap_exit") != 86 or protocol.get("custom_geometry_trap_exit") != 87
             or protocol.get("custom_duplicate_ids_rejected") is not True
             or protocol.get("custom_state_sequence_checked") is not True):
@@ -414,7 +428,8 @@ def validate_qualification(root, record):
         raise ValueError("Incomplete or stale calibration qualification")
     for key, report in record["reports"].items():
         expected = dict(cases=773, available=722, fields=3610, unavailable=51) if key.startswith("cpp-") else dict(
-            cases_per_backend=583, fields_per_backend=2915, paired_cases_per_backend=139)
+            cases_per_backend=controls.PORT_CASES, fields_per_backend=controls.PORT_CASES * len(reference.FIELDS),
+            paired_cases_per_backend=controls.PAIRED_CASES)
         if not re.fullmatch(r"[0-9a-f]{64}", report.get("sha256", "")) or report.get("summary") != expected:
             raise ValueError("Invalid calibration summary or report hash")
 

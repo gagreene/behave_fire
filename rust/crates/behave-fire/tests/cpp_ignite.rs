@@ -16,7 +16,7 @@ const RESULTS: &str = include_str!("data/cpp_reference/ignite/results.jsonl");
 const MANIFEST: &str = include_str!("data/cpp_reference/ignite/manifest.json");
 const POLICY: &str = include_str!("data/cpp_reference/ignite/tolerance-policy.json");
 const SURFACE_POLICY: &str = include_str!("data/cpp_reference/surface/tolerance-policy.json");
-const UPSTREAM_SHA: &str = "f3b2943e69abca942e795c5b1b45276f6338abb5";
+const UPSTREAM_SHA: &str = "3ca33d5b919d4253b411bfb6464b4c872dda6fc9";
 const CI_RUN_PREFIX: &str = "https://github.com/gagreene/behave_fire/actions/runs/";
 const APPROVED_CASES: [(&str, f64); 4] = [
     ("ignite-dry", 0.0),

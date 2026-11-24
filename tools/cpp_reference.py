@@ -12,7 +12,7 @@ import subprocess
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-PIN = "f3b2943e69abca942e795c5b1b45276f6338abb5"
+PIN = "3ca33d5b919d4253b411bfb6464b4c872dda6fc9"
 FIELDS = ("fireline_intensity_btu_ft_s", "flame_length_ft", "heat_per_unit_area_btu_ft2",
           "length_to_width_ratio", "spread_chains_per_hour")
 INPUTS = {"id", "operation", "fuel_model", "wind_direction", "m1h", "m10h", "m100h", "mlh", "mlw",
@@ -25,6 +25,11 @@ MOE_PERCENT_CONTROLS = {
     168: 35., 169: 30., 170: 27., 171: 40., 172: 32., 190: 28., 191: 25.,
     192: 45., 193: 26.,
 }
+SURFACE_LOAD_CONTROLS = {
+    152: {"dead_1h_load_lb_ft2": 0.10101010101010101},
+    153: {"dead_100h_load_lb_ft2": 0.050505050505050504, "live_herb_load_lb_ft2": 0.06427915518824609},
+}
+LOAD_CONTROL_FIELDS = {field for loads in SURFACE_LOAD_CONTROLS.values() for field in loads}
 CONTROL_MODEL = 250
 FIXTURE_BUDGET = {'case_limit': 806,
                   'canonical': {'raw_bytes': 6 * 1024 ** 2, 'gzip_bytes': 512 * 1024},
@@ -114,7 +119,8 @@ def _custom_cases(cases):
     :return: New control cases retaining all original weather and geometry inputs.
     """
     return [dict(case, id="custom-" + case["id"], fuel_mode="percent_unit_custom",
-                 moe_percent=MOE_PERCENT_CONTROLS[case["fuel_model"]])
+                 moe_percent=MOE_PERCENT_CONTROLS[case["fuel_model"]],
+                 **SURFACE_LOAD_CONTROLS.get(case["fuel_model"], {}))
             for case in cases if case["fuel_model"] in MOE_PERCENT_CONTROLS]
 
 
@@ -291,7 +297,7 @@ def _validate_case(case):
     :param case: Candidate input row.
     :return: None; raises for a malformed or unsafe input.
     """
-    if (not INPUTS <= set(case) <= INPUTS | OPTIONAL_INPUTS or case["operation"] != "surface"
+    if (not INPUTS <= set(case) <= INPUTS | OPTIONAL_INPUTS | LOAD_CONTROL_FIELDS or case["operation"] != "surface"
             or not re.fullmatch(r"[A-Za-z0-9_.-]{1,64}", case["id"])):
         raise ValueError("Case schema changed")
     if type(case["fuel_model"]) is not int or not 0 <= case["fuel_model"] <= 255:
@@ -306,6 +312,11 @@ def _validate_case(case):
             raise ValueError("Unreviewed custom Percent-unit extinction definition")
     elif "moe_percent" in case:
         raise ValueError("Unused custom extinction quantity")
+    loads = SURFACE_LOAD_CONTROLS.get(case["fuel_model"], {}) if mode == "percent_unit_custom" else {}
+    if set(case) & LOAD_CONTROL_FIELDS != loads.keys() or any(
+        type(case[field]) not in (int, float) or case[field] != expected for field, expected in loads.items()
+    ):
+        raise ValueError("Unreviewed custom load control")
     if type(case["wind_direction"]) is not int or case["wind_direction"] not in (0, 90, 180, 270, 360):
         raise ValueError("Unsafe wind-direction grid")
     maximum = dict(m1h=300, m10h=300, m100h=300, mlh=300, mlw=300, wind_speed=40,
