@@ -17,6 +17,8 @@ permissions:
 jobs:
   validation:
     uses: ./.github/workflows/ci.yml
+    with:
+      cpp_live: true
 
   release-policy:
     runs-on: ubuntu-24.04

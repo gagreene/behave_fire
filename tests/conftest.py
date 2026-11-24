@@ -1,5 +1,6 @@
 """Test tier selection and native-extension requirements."""
 
+import os
 from importlib import import_module
 from pathlib import Path
 
@@ -21,12 +22,17 @@ def pytest_addoption(parser):
 
 @pytest.hookimpl(tryfirst=True)
 def pytest_collection_modifyitems(config, items):
-    """Apply test-tier markers before selection and skip unavailable native tests.
+    """Select the live lane explicitly, apply tier markers, and skip unavailable native tests.
 
     :param config: Active pytest configuration with native availability recorded.
     :param items: Tests discovered by pytest.
     :return: None. Updates test markers in place.
     """
+    if config.getoption("markexpr").strip() != "cpp_live":
+        live_items = [item for item in items if item.get_closest_marker("cpp_live") is not None]
+        if live_items:
+            items[:] = [item for item in items if item.get_closest_marker("cpp_live") is None]
+            config.hook.pytest_deselected(items=live_items)
     test_root = config.rootpath / "tests"
     tier_marks = {"integration": pytest.mark.integration, "regression": pytest.mark.regression}
     native_error = config._behave_native_error
@@ -40,6 +46,8 @@ def pytest_collection_modifyitems(config, items):
 
 
 def pytest_configure(config):
+    if config.getoption("markexpr").strip() == "cpp_live" and os.environ.get("BEHAVE_CPP_LIVE") != "1":
+        raise pytest.UsageError("The cpp_live lane requires BEHAVE_CPP_LIVE=1 and -m cpp_live.")
     error = None
     try:
         native = import_module("behave_fire._rust")

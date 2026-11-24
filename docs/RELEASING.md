@@ -36,7 +36,9 @@ The test extra includes pytest and PyYAML for the collected regression and workf
 
 ## Build and inspect artifacts
 
-Use a clean authorized release commit. All Rust manifests, sources, embedded tables, and notices must be tracked by Git before a git-mode sdist build. `git ls-files` includes staged new files; the tracking gate does not itself certify a clean release commit. Do not commit to bypass a packaging check without permission.
+Use a clean authorized release commit. Run the [live C++ pytest lane](CPP_VALIDATION.md#opt-in-live-pytest)
+locally and complete manual CI qualification on the release candidate. Release validation runs the live
+lane on MSVC and GNU before publication. All Rust manifests, sources, embedded tables, and notices must be tracked by Git before a git-mode sdist build. `git ls-files` includes staged new files; the tracking gate does not itself certify a clean release commit. Do not commit to bypass a packaging check without permission.
 
 ```sh
 uv run --no-sync python tools/check_sdist.py --check-tracked .

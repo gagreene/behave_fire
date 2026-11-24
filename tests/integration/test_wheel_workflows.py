@@ -25,10 +25,19 @@ def test_built_wheels_all_receive_cpp_payload_checks_before_aggregation():
     assert index < metadata_index
 
 
-def test_manual_cpp_calibration_uses_both_compilers_and_only_manual_submodules():
+def test_manual_and_release_cpp_calibration_use_the_opt_in_live_lane():
     workflow = yaml.load((ROOT / '.github/workflows/ci.yml').read_text(), Loader=yaml.BaseLoader)
     job = workflow['jobs']['cpp-calibration']
-    assert job['if'] == "${{ github.event_name == 'workflow_dispatch' }}"
+    setting = workflow['on']['workflow_call']['inputs']['cpp_live']
+    assert setting == {'type': 'boolean', 'default': 'false'}
+    assert job['if'] == "${{ github.event_name == 'workflow_dispatch' || inputs.cpp_live }}"
+    release = yaml.load((ROOT / '.github/workflows/release.yml').read_text(), Loader=yaml.BaseLoader)
+    assert release['jobs']['validation']['with'] == {'cpp_live': 'true'}
+    live_steps = [step for step in job['steps'] if 'pytest tests/cpp_live -m cpp_live' in step.get('run', '')]
+    live, = live_steps
+    assert live['env']['BEHAVE_CPP_LIVE'] == '1'
+    assert live['env']['BEHAVE_CPP_LIVE_COMPILER'] == '${{ matrix.compiler }}'
+    assert live['env']['BEHAVE_CPP_LIVE_OUT'] == '${{ runner.temp }}/cpp-${{ matrix.compiler }}'
     assert {(row['os'], row['compiler']) for row in job['strategy']['matrix']['include']} == {
         ('ubuntu-24.04', 'GNU'), ('windows-2025', 'MSVC')}
     checkout = next(step for step in job['steps'] if step.get('uses') == 'actions/checkout@v4')

@@ -1,5 +1,5 @@
 {
-  "approved": true,
+  "approved": false,
   "fields": {
     "firebrand_probability": {
       "kind": "exact_binary64"
