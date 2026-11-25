@@ -1,6 +1,6 @@
 # Python package release procedure
 
-Python package versions come from `rust/crates/behave-py/Cargo.toml`. Cargo `1.0.0-beta.2` maps to Python `1.0.0b2` and Python tag `v1.0.0b2`. The standalone core version (`rust/crates/behave-fire/Cargo.toml`, currently `0.1.0`) is independent. Never bump the core solely to match Python.
+Python package versions come from `rust/crates/behave-py/Cargo.toml` and use `MAJOR.MINOR.PATCH`. A release such as Cargo `0.1.0` builds Python `0.1.0` with tag `v0.1.0`. TestPyPI rehearsals use release candidates: Cargo `0.1.0-rc.1` builds Python `0.1.0rc1`, and each rehearsal upload needs the next `rcN`. The standalone core version (`rust/crates/behave-fire/Cargo.toml`, currently `0.1.0`) is independent. Never bump the core solely to match Python. Version-only edits to these first-party version fields need no new C++ source qualification; any other manifest or lock change does.
 
 Build-only validation is safe on an unmerged branch. PR CI calls `.github/workflows/wheel-validation.yml` through a local reusable-workflow reference, so the branch's own scripts and workflow run before merge. The registered CI workflow also accepts manual dispatch on a selected ref; it builds and tests artifacts without publishing. Manual `release.yml` dispatch defaults to `build-only`. No package upload is authorized by implementing or testing these files.
 
@@ -45,7 +45,7 @@ uv run --no-sync python tools/check_sdist.py --check-tracked .
 uv build --sdist --out-dir dist
 uv build --wheel --out-dir dist
 uv run --no-sync python tools/build_pure_wheel.py --out-dir dist
-uv run --no-sync python tools/check_sdist.py dist/behave_fire-1.0.0b2.tar.gz
+uv run --no-sync python tools/check_sdist.py dist/behave_fire-0.1.0rc1.tar.gz
 uv run --no-sync python -m twine check dist/*
 ```
 

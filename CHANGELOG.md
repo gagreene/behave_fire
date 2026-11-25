@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- Restart version numbering at `0.1.0` under `MAJOR.MINOR.PATCH`; the package
+  remains beta. Versions `1.0.0b1` and `1.0.0b2` were never published to a
+  package registry. The current candidate is `0.1.0rc1` (Cargo `0.1.0-rc.1`), and
+  TestPyPI rehearsals use `MAJOR.MINOR.PATCHrcN`.
+- Leave the first-party version fields of `rust/crates/behave-py/Cargo.toml`,
+  `rust/crates/behave-fire/Cargo.toml`, and `rust/Cargo.lock` out of the C++
+  qualification source digests, so version-only changes need no new
+  qualification. Every other manifest and lock byte stays bound, and a missing,
+  duplicated, or malformed version field fails closed.
+- Remove the development-era timing apparatus from the repository: the
+  `docs/performance/` evidence, `docs/RUST_BACKEND_BENCHMARKS.md`, the benchmark,
+  allocation, and acceptance tools with their tests, the `tools/perf_probe` crate,
+  and the private `allocation-probe` Cargo feature of the bindings. Git history
+  retains them. Correctness checks from those tests moved to retained tests,
+  including the Rust raster parity check in the renamed
+  `tools/binding_field_tests` crate, and `tools/performance_cases.py` became
+  `tools/raster_cases.py`.
+- Add `tools/time_standard_runs.py`, which prints Surface and Crown run times for
+  each available backend on one machine. Timing is reported only and never used
+  as a pass or fail check.
+
 - Update the pinned Behave reference to `3ca33d5b919d4253b411bfb6464b4c872dda6fc9`. Replay the reviewed inputs, retire the corrected moisture-of-extinction discrepancy, and record the two retained port load definitions under F-019. The Surface caps remain `1e-12` relative and absolute.
 
 - Enforce the approved Surface fixture ceilings: 806 cases, 6 MiB raw and
@@ -37,7 +58,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Remove the Python, Rust core, and native containment module pending a licensing
   review: the upstream C++ containment headers declare GNU Public License 2.
   The module is preserved locally and is expected to return as a separate project.
-  Historical benchmark records and Git history are retained.
+  Git history retains the module.
 
 - Follow the official C++ `FuelModels::isFuelModelDefined` bounds (1–256) for fuel
   lookups
@@ -69,9 +90,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   dtype/mask behavior. These installation-dependent differences are intentional.
 - Certify the final Windows float64 model campaign: all 40 cases and 80
   first/warm confidence bounds pass. At 100k/1M cells, warmed speedups are
-  3.18-5.52x serial and 6.06-13.44x with four workers on the declared host.
-  Retain complete arrays, confidence/memory/scalar/allocation evidence, and
-  independent additional-layout/containment/continuous diagnostics.
+  3.18-5.52x serial and 6.06-13.44x with four workers on the declared host,
+  measured at source `9be8a50`.
 
 ### Staged Rust raster sessions
 
@@ -159,14 +179,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Backend selection: `BehaveRun(fuel_models, *, backend="auto" | "python" | "rust", threads=1)`, `available_backends()`, `get_backend()`, and `BehaveBackendWarning`. Explicit namespaces are `behave_fire.python` and `behave_fire.rust`; historical component imports continue to use Python. `auto` selects Python silently when the extension is absent and with a once-per-process warning when it is present but unusable; forced Rust raises.
 - Native `threads` setting (`1` serial, `0` all available, positive count capped by work) using scoped threads with deterministic output order.
 - Typed native calculation stages (`engine`) with a reusable fuel snapshot, stage resumption from editable intermediates, and fused overrides (`SurfaceTweaks`, `CrownTweaks`). Borrowed raster columns (`raster`) with per-cell overrides, optional native validity, and caller-driven tiles. These are Rust interfaces; the Python binding does not yet route public calls through them.
-- Python/Rust parity, ownership, serialization, packaging, and workflow tests, and tools for backend comparison, platform probing, paired benchmarking, and performance acceptance (`tools/compare_backends.py`, `tools/benchmark_backends.py`, `tools/check_performance.py`).
-- Contracts and measurements: `docs/RUST_BACKEND.md`, `docs/BACKEND_DIFFERENCES.md`, `docs/RUST_ENGINE.md`, `docs/RUST_BACKEND_BENCHMARKS.md`, `docs/RELEASING.md`, and `docs/CRATES_IO.md`.
+- Python/Rust parity, ownership, serialization, packaging, and workflow tests, and tools for backend comparison and platform probing (`tools/compare_backends.py`).
+- Contracts and procedures: `docs/RUST_BACKEND.md`, `docs/BACKEND_DIFFERENCES.md`, `docs/RUST_ENGINE.md`, `docs/RELEASING.md`, and `docs/CRATES_IO.md`.
 - Pytest regression coverage for unit conversions, metric fuel records, static flags, and lightning compatibility, using portable fixtures without requiring a C++ checkout.
-
-### Known limitations
-
-- The Rust backend is not yet faster than Python for typical workloads. Measured single-host results show Python ahead for single-cell and 10,000-cell public calls, with parallel Rust ahead only on very large surface and crown rasters; mixed-dtype or masked Crown inputs are much slower on Rust. No speedup is promised. See `docs/RUST_BACKEND_BENCHMARKS.md` and `docs/RUST_ENGINE.md`.
-- Neither the Python package nor the Rust crate has been published to PyPI or crates.io.
 
 ## [1.0.0b2] - 2026-04-29
 

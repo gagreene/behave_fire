@@ -68,9 +68,16 @@ session-context settings, or personal e-mail addresses into tracked documents.
 
 ## Merge routing and releases
 
-Version numbers use `MAJOR.MINOR.PATCH` (for example, `1.2.3`); pre-releases keep the
-`pyproject.toml` form already in use (for example, `1.0.0b2`). Two branches live
-permanently, and neither may ever be deleted:
+Version numbers use `MAJOR.MINOR.PATCH` (for example, `0.1.0`). The Python version
+comes from `rust/crates/behave-py/Cargo.toml`, not `pyproject.toml`. TestPyPI
+rehearsals use release candidates `MAJOR.MINOR.PATCHrcN` with `N` starting at 1:
+Cargo `0.1.0-rc.1` builds Python `0.1.0rc1`. Each TestPyPI upload needs a new `N`.
+The standalone core crate keeps its own version in
+`rust/crates/behave-fire/Cargo.toml`. A change to only these first-party version
+fields (including the matching `rust/Cargo.lock` entries and the core version
+requirement in `behave-py`) needs no new C++ source qualification; any other
+manifest or lock change does. Two branches live permanently, and neither may ever
+be deleted:
 
 - `master` holds released code only. Every release tag is on `master`.
 - `pre_release` is the integration branch for all work toward the next release,

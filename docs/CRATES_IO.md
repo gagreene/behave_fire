@@ -8,6 +8,9 @@ retains the project license and historical NumPy/Intel notices. The current core
 forbids unsafe code and contains no float32/SVML emulation.
 
 The initial core version is `0.1.0`. Publication requires separate approval.
+Changing only the core version (with its `rust/Cargo.lock` entry and the
+version requirement in `behave-py`) needs no new C++ source qualification; any
+other manifest or lock change does.
 A read-only crates.io query on 2026-11-04 returned no existing `behave-fire`
 package. This does not reserve the name or establish ownership. Recheck both
 before the first upload. The Python version and its `v*` tags are independent.

@@ -34,7 +34,7 @@ Python's original complex/object behavior without Rust-specific input preflight.
 
 A NumPy-based Python port of the US Forest Service [Behave<sup>7</sup>](https://www.firelab.org/project/behave) fire behavior modeling system, supporting scalar and array calculations. The package has two calculation backends: the original Python/NumPy implementation (the behavioral reference) and a native Rust implementation selected automatically when its compiled extension is installed. The same Rust core is also a standalone crate, `behave-fire`, for Rust applications.
 
-Upstream alignment is ongoing; full C++ parity has not been established. Fuel data and heat constants follow `firelab/behave` at `f3b2943`, with documented extinction-unit exceptions for 23 records that retain fractional values here. Lightning ignition remains available only as a deprecated compatibility API. Rust performance is being validated against the public Python API; see [Performance](#performance).
+Upstream alignment is ongoing; full C++ parity has not been established. Fuel data and heat constants follow `firelab/behave` at `f3b2943`, with documented extinction-unit exceptions for 23 records that retain fractional values here. Lightning ignition remains available only as a deprecated compatibility API. Run times for both backends are reported for one machine in [Performance](#performance).
 
 ---
 
@@ -180,11 +180,10 @@ behave_fire/
 │               ├── grid_session.rs  #     Python-owned staged sessions
 │               ├── numeric/         #     Numeric snapshot, shape, and contract handling for Python inputs
 │               ├── prepared/        #     Primitive argument parsing: controls, selectors, and keys
-│               ├── structures.rs, data.rs, state.rs, effects.rs, tools.rs   # Structured records, default-table export, checked stateful tools, effects and tools bindings
-│               └── allocation_probe.rs  #  Allocation diagnostics, compiled only under the allocation-probe feature
+│               └── structures.rs, data.rs, state.rs, effects.rs, tools.rs   # Structured records, default-table export, checked stateful tools, effects and tools bindings
 ├── tests/                           # Python test tiers, fixtures, and the standalone legacy harness
-├── tools/                           # Parity, benchmark, packaging, and artifact-validation tools, plus the Rust probe crates (field_probe, perf_probe) and rust_consumer.rs
-├── docs/                            # Contracts, procedures, and measurements (see Documentation)
+├── tools/                           # Parity, timing, packaging, and artifact-validation tools, plus the binding_field_tests crate and rust_consumer.rs
+├── docs/                            # Contracts and procedures (see Documentation)
 ├── .github/workflows/               # CI, wheel validation, and release workflows
 ├── pyproject.toml                   # Maturin build configuration and Python metadata
 ├── uv.lock                          # Locked development/CI dependencies
@@ -402,9 +401,16 @@ Getters return independent arrays. `run_remaining` preserves transient injection
 
 ## Performance
 
-The [recorded Windows acceptance](docs/performance/2026-11-09-reviewed-float64-acceptance.md), measured at scientific source `9be8a50`, passes **all 40 cases and 80 first/warmed confidence bounds**, plus scalar latency, peak-memory, complete-output, and allocation gates. At 100k/1M cells, warmed Rust speedups range from **3.18–5.52x with one worker** and **6.06–13.44x with four workers**. Ratios divide Python time by Rust time: higher means faster Rust. The [later boundary-review follow-up](docs/performance/2026-11-09-claude-pr-review-followup.md) preserves these dated observations without claiming a new timing campaign for subsequent fixes.
+The Rust and Python backends produce matching results within the documented tolerances, so the choice between them only affects run time. Run time depends on hardware, load, and build; `python tools/time_standard_runs.py` prints a report for the machine it runs on, with no pass or fail threshold.
 
-Measurements use original-input Python timing, seven fresh paired blocks, five warm calls, and separately checked complete outputs on an eight-core Windows x86-64 host with CPython 3.12.8 and NumPy 2.1.3. Native physical calculations use the documented float64/NaN contract. These results do not guarantee speed on other hosts or workloads; other-platform wheel correctness is separate. Raw records, complete-array bundles, controlled source provenance, and earlier failed campaigns remain available in [the benchmark history](docs/RUST_BACKEND_BENCHMARKS.md).
+One-machine report, not a guarantee: behave_fire 0.1.0rc1, heterogeneous 100,000-cell rasters, one thread, five timed calls after one warm-up, Intel Xeon E5-2640 v3 (16 logical cores), Windows 10, CPython 3.12.8, NumPy 2.1.3, measured 2026-11-24 (Table 1).
+
+**Table 1.** Median wall time in seconds.
+
+| Model | Python | Rust |
+|-------|-------:|-----:|
+| Surface | 0.381 | 0.116 |
+| Crown | 0.541 | 0.162 |
 
 ---
 
@@ -534,7 +540,7 @@ python tests/legacy/behave_harness.py
 
 Expected lightning deprecation warnings may appear. The standalone harness locates `src/` relative to its own file and uses the same canonical `behave_fire` imports as pytest. No machine-specific paths or `PYTHONPATH` settings are required.
 
-Useful tools under `tools/`: `compare_backends.py` (Rust versus the frozen Python oracle), `benchmark_backends.py` and `check_performance.py` (paired timing and acceptance gates), and the packaging checks described in [docs/RELEASING.md](docs/RELEASING.md).
+Useful tools under `tools/`: `compare_backends.py` (Rust versus the frozen Python oracle), `time_standard_runs.py` (a timing report for one machine), and the packaging checks described in [docs/RELEASING.md](docs/RELEASING.md).
 
 ---
 
@@ -545,8 +551,7 @@ Useful tools under `tools/`: `compare_backends.py` (Rust versus the frozen Pytho
 | [CHANGELOG.md](CHANGELOG.md) | Release notes, including unreleased changes |
 | [docs/RUST_BACKEND.md](docs/RUST_BACKEND.md) | Backend, selection, ownership, dtype, and packaging contract |
 | [docs/BACKEND_DIFFERENCES.md](docs/BACKEND_DIFFERENCES.md) | Intentional differences between the Rust and Python backends |
-| [docs/RUST_ENGINE.md](docs/RUST_ENGINE.md) | Typed stages, raster API, injection, performance targets, and checkpoint results |
-| [docs/RUST_BACKEND_BENCHMARKS.md](docs/RUST_BACKEND_BENCHMARKS.md) | Measured timings, memory, and the performance investigation |
+| [docs/RUST_ENGINE.md](docs/RUST_ENGINE.md) | Typed stages, raster API, injection, and engine design |
 | [docs/RELEASING.md](docs/RELEASING.md) | Building, validating, and releasing Python wheels and the source distribution |
 | [docs/CRATES_IO.md](docs/CRATES_IO.md) | Packaging and publishing the standalone Rust crate |
 | [docs/CONTRIBUTION_PROCEDURES.md](docs/CONTRIBUTION_PROCEDURES.md) | Branches, PRs, test records, release routing, and contributor rules |
