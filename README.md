@@ -6,8 +6,6 @@ behave_fire is an open-source Python and Rust implementation of the US Forest Se
 
 The package has two implementations that give the same results within documented tolerances. A native Rust implementation is selected automatically when the compiled extension is installed, as it is with the native wheels for Linux, macOS, and Windows. A NumPy implementation is the behavioral reference and runs anywhere Python and NumPy do. The Rust core is also a standalone crate, `behave-fire`, with no runtime or build dependencies, for use directly from Rust applications. Results are checked against a pinned release of the official Behave C++ code (see [Validation against Behave C++](#validation-against-behave-c)).
 
-> behave_fire is beta research software under active development. Review units, model assumptions, and the documented [backend differences](docs/BACKEND_DIFFERENCES.md) before using results operationally.
-
 ## Contents
 
 - [What behave_fire does](#what-behave_fire-does)
