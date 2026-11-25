@@ -52,7 +52,14 @@ The package has two implementations that give the same results within documented
 
 ### Validation against Behave C++
 
-The C++ validation oracle is [Behave `3ca33d5`](https://github.com/firelab/behave/commit/3ca33d5b919d4253b411bfb6464b4c872dda6fc9). Pinned C++ observations are replayed against both implementations, and Surface comparisons must stay within `1e-12` relative and absolute caps. Fuel data and heat constants follow `firelab/behave` at `f3b2943`, with documented extinction-unit exceptions for 23 records that retain fractional values here. Full C++ parity has not been established for every module; see the [pinned observations and comparison rules](docs/CPP_VALIDATION.md). Lightning ignition remains available only as a deprecated compatibility API.
+The C++ validation oracle is [Behave `3ca33d5`](https://github.com/firelab/behave/commit/3ca33d5b919d4253b411bfb6464b4c872dda6fc9). Pinned C++ observations are replayed against both implementations, and each qualification covers GNU and MSVC builds and all seven native wheel platforms:
+
+- **Surface:** 571 numbered cases and 139 explicit controls match within `1e-12` relative and absolute caps. Fuel models 152 and 153 are the one documented difference: upstream changed their loads at this pin, and behave_fire keeps its own load values (12 outputs).
+- **FireSize, Ignite, and Mortality scorch height:** the standalone cases match exactly.
+- **Crown:** the six fire-type classifications match exactly. Crown numeric outputs are measured but have no approved comparison policy yet.
+- **Spot, Safety, SlopeTool, fine dead fuel moisture, vapor pressure deficit, and Units:** measured, with no approved comparison policy yet.
+
+The positive-wind standalone FireSize Crown mode is outside these results ([upstream issue #85](https://github.com/firelab/behave/issues/85)). See the [pinned observations and comparison rules](docs/CPP_VALIDATION.md). Lightning ignition remains available only as a deprecated compatibility API.
 
 ## How behave_fire is structured
 
@@ -533,12 +540,11 @@ The separate moisture-of-extinction discrepancy has an explicit unit-control
 disposition (see [C++ validation](docs/CPP_VALIDATION.md)).
 
 Moisture damping uses the pinned C++ multiplication order with the same empirical
-coefficients. The 23 upstream fuel records with inconsistent extinction units
-retain their fractional values here. Separately declared custom-fuel controls
-exercise the C++ equations with explicit Percent inputs. Comparison caps of
-`1e-12` relative and absolute require a current complete manual GNU/MSVC and
-seven-native-platform qualification before acceptance, as described in
-[C++ validation](docs/CPP_VALIDATION.md).
+coefficients. Upstream corrected the extinction units of 23 fuel records at the
+current pin, so behave_fire and the C++ now store the same fractional values.
+Comparison caps of `1e-12` relative and absolute require a current complete
+manual GNU/MSVC and seven-native-platform qualification before acceptance, as
+described in [C++ validation](docs/CPP_VALIDATION.md).
 
 #### Design notes
 

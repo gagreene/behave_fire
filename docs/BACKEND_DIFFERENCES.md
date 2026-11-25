@@ -66,13 +66,13 @@ and [flame-length cutoff](https://github.com/firelab/behave/blob/f3b2943e69abca9
 The shared Surface reaction calculation follows the pinned C++ multiplication
 order for moisture damping, with unchanged coefficients and extinction guards.
 The Surface comparison caps passed GNU/MSVC and all seven native platforms
-([qualification evidence](CPP_VALIDATION.md)); original numbered-unit differences
-remain documented and have separate explicit Percent-unit controls.
+([qualification evidence](CPP_VALIDATION.md)).
 This deliberately changes last-bit Python results and corresponding derived
-fixture intermediates. Both ports retain fractional extinction values for the
-23 inconsistent numbered C++ records. Their separately labelled Percent-unit
-custom controls preserve the original C++ observations and check the equations
-on matching physical definitions (see [C++ validation](CPP_VALIDATION.md)).
+fixture intermediates. Upstream corrected the extinction units of the 23
+previously inconsistent C++ records at the current pin, so both ports and the
+C++ store the same fractional values. The separately labelled Percent-unit
+custom controls remain as explicit equation checks, and fuel models 152 and
+153 keep their documented load difference (see [C++ validation](CPP_VALIDATION.md)).
 
 NaN means unavailable physical data. A missing condition or denominator does not
 silently select a zero fallback. Availability follows actual field dependencies:
