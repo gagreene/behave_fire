@@ -113,7 +113,7 @@ def _float64_case(case, operation, arguments, compare=None):
     from behave_fire import python as python_backend
     from behave_fire.python import BehaveRun, FuelModels
     from float64_model_reference import model_reference
-    from performance_cases import assert_outputs
+    from raster_cases import assert_outputs
 
     name = case['entry_point'].rsplit('.', 1)[1]
     if '.BehaveRun.' in case['entry_point']:

@@ -1,12 +1,14 @@
 """Explicit cross-compiler qualification and conditional Surface-policy activation."""
 
 import argparse
+import hashlib
 import json
 import os
 import re
 import shutil
 import struct
 import subprocess
+import tomllib
 from pathlib import Path
 
 import cpp_controls as controls
@@ -21,6 +23,15 @@ import cpp_slope_tool as slope_tool
 import cpp_spot as spot
 import cpp_units as units
 import cpp_vapor_pressure_deficit as vpd
+
+# First-party version literals left out of qualification digests, so version-only
+# releases need no new source qualification. Every other manifest byte stays bound.
+# SemVer 2.0.0: no leading zeros in numeric parts or numeric prerelease identifiers, no empty identifiers.
+_NUMBER = r"(?:0|[1-9][0-9]*)"
+_PRERELEASE_ID = r"(?:0|[1-9][0-9]*|[0-9]*[A-Za-z-][0-9A-Za-z-]*)"
+SEMVER = re.compile(rf"{_NUMBER}\.{_NUMBER}\.{_NUMBER}(?:-{_PRERELEASE_ID}(?:\.{_PRERELEASE_ID})*)?"
+                    r"(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?")
+NEUTRAL_VERSION = "0.0.0-version-neutral"
 
 
 def _check_approved_exact_replay(root, report, policy):
@@ -139,11 +150,11 @@ def _run(command, directory, name, environment=None):
     if process.returncode != 0:
         raise ValueError(f"{name} failed with exit {process.returncode}; see {directory / (name + '.log')}")
 
-def _sources(root):
-    """Bind calibration to the exact production, build, and measurement sources.
+def _source_paths(root):
+    """List the production, build, and measurement sources bound to calibration.
 
-    :param root: Source checkout, with portable normalized line endings.
-    :return: Relative-path SHA256 inventory, excluding activation metadata.
+    :param root: Source checkout.
+    :return: Sorted repository-relative POSIX names; file contents are not read.
     """
     root = Path(root)
     paths = set()
@@ -152,7 +163,24 @@ def _sources(root):
                     'pyproject.toml', 'uv.lock', 'tools/*.py', '.github/workflows/*.yml',
                     'pytest.ini', 'tests/conftest.py', 'tests/cpp_live/*.py'):
         paths.update(path for path in root.glob(pattern) if path.is_file() and 'target' not in path.parts)
-    return {path.relative_to(root).as_posix(): reference._text_digest(path) for path in sorted(paths)}
+    return sorted(path.relative_to(root).as_posix() for path in paths)
+
+
+def _sources(root):
+    """Bind calibration to the exact production, build, and measurement sources.
+
+    :param root: Source checkout, with portable normalized line endings.
+    :return: Relative-path SHA256 inventory, excluding activation metadata and
+        first-party version literals.
+    """
+    root = Path(root)
+    inventory = {}
+    for relative in _source_paths(root):
+        payload = (root / relative).read_bytes().replace(b"\r\n", b"\n")
+        neutral = _version_neutral(relative, payload)
+        inventory[relative] = (reference._text_digest(root / relative) if neutral == payload
+                               else hashlib.sha256(neutral).hexdigest())
+    return inventory
 
 
 def _validate_observations(root, report):
@@ -244,6 +272,63 @@ def _validate_observations(root, report):
             or protocol.get("custom_state_sequence_checked") is not True):
         raise ValueError("Incomplete compiler calibration or safety controls")
     return dict(cases=773, available=722, fields=3610, unavailable=51)
+
+def _version_neutral(relative, payload):
+    """Replace first-party version literals with a fixed placeholder before hashing.
+
+    :param relative: Repository-relative POSIX path of the source file.
+    :param payload: File bytes after CRLF-to-LF normalization.
+    :return: The payload with only the expected version literals replaced; other
+        paths return unchanged. Raises ValueError naming the file when an expected
+        field is missing, duplicated, or not a valid version.
+    """
+    sections = {
+        'rust/crates/behave-fire/Cargo.toml': (('package', 'version'),),
+        'rust/crates/behave-py/Cargo.toml': (('package', 'version'), ('dependencies', 'behave-fire')),
+    }
+    if relative not in sections and relative != 'rust/Cargo.lock':
+        return payload
+    text = payload.decode('utf-8')
+    try:
+        document = tomllib.loads(text)
+    except tomllib.TOMLDecodeError as error:
+        raise ValueError(f"{relative}: invalid TOML ({error})") from error
+    lines = text.split('\n')
+    if relative == 'rust/Cargo.lock':
+        for name in ('behave-fire', 'behave-py'):
+            entries = [entry for entry in document.get('package', []) if entry.get('name') == name]
+            if len(entries) != 1 or not SEMVER.fullmatch(str(entries[0].get('version', ''))):
+                raise ValueError(f"{relative}: expected one {name} package with a valid version")
+            starts = [i for i, line in enumerate(lines) if line == f'name = "{name}"']
+            following = lines[starts[0] + 1] if len(starts) == 1 and starts[0] + 1 < len(lines) else ''
+            if len(starts) != 1 or following != f'version = "{entries[0]["version"]}"':
+                raise ValueError(f"{relative}: {name} version must follow its name line")
+            lines[starts[0] + 1] = f'version = "{NEUTRAL_VERSION}"'
+        return '\n'.join(lines).encode('utf-8')
+    for section, key in sections[relative]:
+        value = document.get(section, {}).get(key)
+        if key == 'behave-fire':
+            if not isinstance(value, dict) or value.get('path') != '../behave-fire':
+                raise ValueError(f"{relative}: expected the behave-fire path dependency")
+            value = value.get('version')
+        if not isinstance(value, str) or not SEMVER.fullmatch(value):
+            raise ValueError(f"{relative}: [{section}] {key} needs a valid version")
+        if key == 'version':
+            pattern = r'(version = ")' + re.escape(value) + r'(")'
+        else:
+            pattern = r'(behave-fire = \{.*\bversion = ")' + re.escape(value) + r'(".*\})'
+        current, matches = None, []
+        for index, line in enumerate(lines):
+            header = re.fullmatch(r'\[([^\[\]]+)\]\s*', line)
+            if header:
+                current = header.group(1).strip()
+            elif current == section and re.fullmatch(pattern, line):
+                matches.append(index)
+        if len(matches) != 1:
+            raise ValueError(f"{relative}: expected one [{section}] {key} version line")
+        lines[matches[0]] = re.sub(pattern, lambda m: m.group(1) + NEUTRAL_VERSION + m.group(2), lines[matches[0]])
+    return '\n'.join(lines).encode('utf-8')
+
 
 def activate(root, paths, reason):
     """Activate only the unchanged owner-approved caps after complete qualification.

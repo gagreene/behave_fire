@@ -114,7 +114,7 @@
         "results.jsonl": "3c8a90c2d0cb8af549b5d555938e439ed5867b5d2fbb66fdad978aa5c056d3df",
         "schema.json": "bcefacdfef527819dd578abc68c46e9c05518c143d6f013f170a06d6be4df340"
       },
-      "ci_run_url": "https://github.com/gagreene/behave_fire/actions/runs/45341346958",
+      "ci_run_url": "https://github.com/gagreene/behave_fire/actions/runs/45552664829",
       "comparisons": 144,
       "maxima": {
         "area_ft2": {
@@ -136,7 +136,7 @@
           "ulp": 0
         }
       },
-      "source_commit": "7e9f437b6372875d92b34962be33c800474190b0"
+      "source_commit": "b1a1baf7be61651ab69f6a3bd361a0918d0832f9"
     }
   },
   "ignite": {
@@ -159,7 +159,7 @@
     }
   },
   "qualification": {
-    "activation_reason": "Requalify the existing caps after opt-in live C++ API and replay checks",
+    "activation_reason": "Requalify the existing caps after timing cleanup and version-neutral manifest hashing.",
     "artifacts": {
       "tests/data/cpp_reference/surface/cases.jsonl": "266d08d8b82d65d950461c73e70b44c228ad7b54fbe99eb1d14ed8af6add66da",
       "tests/data/cpp_reference/surface/results.jsonl": "84ab8f5bf4197dcea68f302a2969f8f4c075c995a8e8f084d8611a12120ef14a",
@@ -167,7 +167,7 @@
       "tests/data/cpp_reference/surface_custom/results.jsonl": "04e96268466338364a350d53ac05b639f1a7758c78911aaee97da389c0f779a2"
     },
     "calibration_complete": true,
-    "ci_run_url": "https://github.com/gagreene/behave_fire/actions/runs/45341346958",
+    "ci_run_url": "https://github.com/gagreene/behave_fire/actions/runs/45552664829",
     "crown": {
       "artifacts": {
         "cases.jsonl": "c4ab63a4a0d52e8c5a8fd98aac981213db6606200f385c6b88333682897dc2fc",
@@ -238,7 +238,7 @@
         "results.jsonl": "3c8a90c2d0cb8af549b5d555938e439ed5867b5d2fbb66fdad978aa5c056d3df",
         "schema.json": "bcefacdfef527819dd578abc68c46e9c05518c143d6f013f170a06d6be4df340"
       },
-      "ci_run_url": "https://github.com/gagreene/behave_fire/actions/runs/45341346958",
+      "ci_run_url": "https://github.com/gagreene/behave_fire/actions/runs/45552664829",
       "comparisons": 144,
       "maxima": {
         "area_ft2": {
@@ -260,7 +260,7 @@
           "ulp": 0
         }
       },
-      "source_commit": "7e9f437b6372875d92b34962be33c800474190b0"
+      "source_commit": "b1a1baf7be61651ab69f6a3bd361a0918d0832f9"
     },
     "ignite": {
       "artifacts": {
@@ -294,7 +294,7 @@
     },
     "reports": {
       "cpp-GNU": {
-        "sha256": "a68b410148420efa0d0379054d1db570fb57d7d0e98f2e58de7042ae2f9b02d7",
+        "sha256": "3476c7f12884d7e0a0720aee0f5c23defad221b18806e9fbafa270125e81e45b",
         "summary": {
           "available": 722,
           "cases": 773,
@@ -303,7 +303,7 @@
         }
       },
       "cpp-MSVC": {
-        "sha256": "bcd0734fabeb147f8c10442cf81bf61dfdb8611d5314e0a32867764f52f9ac9f",
+        "sha256": "322fc1a1e7ea54f9440d680ce8b89c72d30b9870a2d969629b699d262b98028a",
         "summary": {
           "available": 722,
           "cases": 773,
@@ -312,7 +312,7 @@
         }
       },
       "ports-linux-aarch64": {
-        "sha256": "528854441014c0fbca2a59a9efcd9f3941e8b9d1582d0f819d16cd01acd48c31",
+        "sha256": "a50aab89551e9babc8e613860c478442ea7233ff68d8fb843b1cc7bb47d4fdf3",
         "summary": {
           "cases_per_backend": 710,
           "fields_per_backend": 3550,
@@ -320,7 +320,7 @@
         }
       },
       "ports-linux-musl-x86_64": {
-        "sha256": "cabfc9ea352e889bc047d04325edb24b0d4cf5867959b2d6ecb4259e68be36f9",
+        "sha256": "588a18467d919e06a4cdbd20bac47956ae4ace4e378edfb7e2540fad6a118d15",
         "summary": {
           "cases_per_backend": 710,
           "fields_per_backend": 3550,
@@ -328,7 +328,7 @@
         }
       },
       "ports-linux-x86_64": {
-        "sha256": "d92f4652cbda80c9febf78b3fd3ba4824b0fc59196a34681e8ca1b133a8e7367",
+        "sha256": "ffc8b3ba2cf201e8d4ca3ab85f99e75f5d807171657ea4c5714d91c6d7f3c490",
         "summary": {
           "cases_per_backend": 710,
           "fields_per_backend": 3550,
@@ -336,7 +336,7 @@
         }
       },
       "ports-macos-arm64": {
-        "sha256": "3a648cd20e5af8c030aaa3d52a014c72a57ae060a6bd168a2c80799e833989e4",
+        "sha256": "0eac08c85f75945e41e7104967bb79870917813d281d259b3e836628041db458",
         "summary": {
           "cases_per_backend": 710,
           "fields_per_backend": 3550,
@@ -344,7 +344,7 @@
         }
       },
       "ports-macos-x86_64": {
-        "sha256": "4af6de8a52cf11fbe2e6393d814f75fe608b9167c3536e491ae891f0dc4518f6",
+        "sha256": "b9b6b984b06eb3441d796a95cd0b9c6f1ef0a6fe5336de947aa0491ef148d0a6",
         "summary": {
           "cases_per_backend": 710,
           "fields_per_backend": 3550,
@@ -352,7 +352,7 @@
         }
       },
       "ports-windows-arm64": {
-        "sha256": "2d16e79d0af5707504ad1ff04bd919f47bc98032723a3bf4e48706d0b33a67e0",
+        "sha256": "795c708e8b8099a4a745b53936bf5ad861d40251f3afbc112314afa8237db99e",
         "summary": {
           "cases_per_backend": 710,
           "fields_per_backend": 3550,
@@ -360,7 +360,7 @@
         }
       },
       "ports-windows-x86_64": {
-        "sha256": "8de682d2e6391004240cb43a578cd21a7ebab5b9a952c03b8b5132b9e93ff895",
+        "sha256": "c4e64786a42ffb286686cf6e798404add8763f520efb4058b9afa2d98c8734e0",
         "summary": {
           "cases_per_backend": 710,
           "fields_per_backend": 3550,
@@ -407,9 +407,9 @@
       },
       "nonmatching": 13
     },
-    "source_commit": "7e9f437b6372875d92b34962be33c800474190b0",
+    "source_commit": "b1a1baf7be61651ab69f6a3bd361a0918d0832f9",
     "source_files": {
-      ".github/workflows/ci.yml": "41e3b2f5902f71c8c61f7c9e5ef7f58db6cb2b7cb93cfec0c88d99a6d5356ae0",
+      ".github/workflows/ci.yml": "92aae2758842fcc5a8887e995f6a0cb9c930ea7bf80b6298c08645be6a42bf0d",
       ".github/workflows/cpp-live-validation.yml": "87fdc583529286cc18f6f60af0c53f75f17065215bf09f29fa220dd70d4491e6",
       ".github/workflows/crate-validation.yml": "970147b312a0719d1e63318b2f8b8f200479c5592e5e368cbfd2407893ac1f6d",
       ".github/workflows/release-crate.yml": "ff025886d4349f8fc28650744b0c0fafca00d2f2e2dff4fc9a31e978811fdb7e",
@@ -417,9 +417,9 @@
       ".github/workflows/wheel-validation.yml": "f14d3ce305d5c341351e5d1b17d14a2b28359d246376e130230c57c424cf8c0f",
       "pyproject.toml": "395faf4f9d87f4e8979ca818b7c7bfeff11d8fd5719ba601403a8f5863598440",
       "pytest.ini": "81bfc81ad49a4a63c9dcb76915f49cf438179566b74ed33da1a67183ba90065d",
-      "rust/Cargo.lock": "d1d2a7bca8b52c78ef86466f0639b6c44a5b08d2a000a8af4dc3ee1da45535b2",
+      "rust/Cargo.lock": "fe5f4fa8774a16da0d212059aa7d8785a3b5635bf90bcce5369e98973cc771ef",
       "rust/Cargo.toml": "31b5c56d96a7293e4d1298577bf422438fee6521d9f89858e23ddefd36dc75ac",
-      "rust/crates/behave-fire/Cargo.toml": "b1326b42c725b7d50dfe6834cbbf28fafc8648e39e0825aeb232d43ec2b323c6",
+      "rust/crates/behave-fire/Cargo.toml": "e875def585fced82a1016dc612ab8408b10289041dd91edb37bda7dd377b3d20",
       "rust/crates/behave-fire/src/batch.rs": "f56d034493186b52364fed04f5c2fcabb20b4d15897c25ed28b40fbb76f793e6",
       "rust/crates/behave-fire/src/crown.rs": "a0111054edf2cf04801e28e64a836f2f48846ef7c060f2b7a5715c908d512d1f",
       "rust/crates/behave-fire/src/engine/crown.rs": "7e4902db3f3dd45be7737bdf7e6fee0626edc39c3c84963dcd147442105fd0df",
@@ -473,10 +473,9 @@
       "rust/crates/behave-fire/src/surface/wind.rs": "5194d38d530a4485017da73e226b3dc6e18493cd4bc521e34086564a57399627",
       "rust/crates/behave-fire/src/units.rs": "090679874ed09c785e1bd82600d5ecd66c1b3ec4c4baefde70bc8a2419ce948b",
       "rust/crates/behave-fire/src/vapor_pressure_deficit.rs": "5d7c3c60d48d06754f834005e9f0ec892e5b74de28788e1e3301c519e7bce745",
-      "rust/crates/behave-py/Cargo.toml": "ae627a1fe28fa05c20255a9918288993e4daa2abee73f1ffab28af26abb18680",
-      "rust/crates/behave-py/src/allocation_probe.rs": "98a06756bd94db0eecf81773eb123a697abf59b302ec1a01e7819357c8a67193",
+      "rust/crates/behave-py/Cargo.toml": "4cc17f048236bf971d4073e4469e219219f8e87ccf56af687be01c423bfa54e0",
       "rust/crates/behave-py/src/capabilities.rs": "b4a0edbf8a0793c234db22d2e97530cb28515676a197200bffea1cf0cfd28e9f",
-      "rust/crates/behave-py/src/component_columns.rs": "d36eceb2f669c20bb64df6c968525608e6156106d2df25ca88a0d465c74e6780",
+      "rust/crates/behave-py/src/component_columns.rs": "b4221db8901bbc11aaba2aeef78c8b64c4024a2d9eaad867efeaf3cfd0fe0448",
       "rust/crates/behave-py/src/component_f64.rs": "8c763f44685a34318fd0b3183dcfb469b0307a47205569c522ae8a8c63cce44b",
       "rust/crates/behave-py/src/component_fuelbed.rs": "1b91ff0f3f6383f409cd1e7accdbf30358057abd04192e62e4b47b5fcc73a811",
       "rust/crates/behave-py/src/component_independent.rs": "d5043d78d853123e4f00a0eeb83e7bf95ed8a9582fbd99f8046fcab0f00017f5",
@@ -491,12 +490,12 @@
       "rust/crates/behave-py/src/dispatch.rs": "f01d2401aa4573702e805b1b13d9e8078f8709e1c55dbd47738e829d2ccdc57f",
       "rust/crates/behave-py/src/effects.rs": "4f585fe5e168bf7a1ad74f97682a062e2a9e0492618e3803c043d1a9273bcb27",
       "rust/crates/behave-py/src/grid_session.rs": "7877c50807ce5e757dd9fd2dd563e3f2f50c0bc1b09e0c87afd14d90a139145e",
-      "rust/crates/behave-py/src/lib.rs": "30261508b0639e1211134a2cdd8e71ea2e4e5905b51ddeff13824b9dd7c03421",
+      "rust/crates/behave-py/src/lib.rs": "04921c3562f6823f0110004d3d83cf49edb29b4e1e1c15207ca9ef5a9310cd01",
       "rust/crates/behave-py/src/model.rs": "8679fd6fc120275d942cf38f7c996e6dc858ca3bc99095d809d1fa6a59b5e7d1",
-      "rust/crates/behave-py/src/model_f64.rs": "c371d916cca6c23242aeee52558275c6c15fcf072b313a9b3dfdd95949818651",
+      "rust/crates/behave-py/src/model_f64.rs": "7c83c19d7180fc9f124db8e1f00163dd95f2c8ee7749af5f061343c191d5d0dc",
       "rust/crates/behave-py/src/model_fields.rs": "e8ed4f479a7e24f84c135014c9cc5a0f1c2324331b749e17d60dd2a5f43a1f3d",
       "rust/crates/behave-py/src/model_groups.rs": "af20023d7e92025406acd58a3fada7ca698af0d87532ecc8fe20f2eaaa83ca51",
-      "rust/crates/behave-py/src/model_observer.rs": "03041fcdfaf652f6d13474d4ec1256e0ec9d9ce8d107a3bc52e055046de0fab3",
+      "rust/crates/behave-py/src/model_observer.rs": "a9a75cae18a77fc5afc568a5d4c2620b698cf9a3d3cb84164d671fb45597745f",
       "rust/crates/behave-py/src/numeric/contract.rs": "4e695d27f311845de0de94a660a5c3ce5f9e9ce3773eafdb598d4ebfffdf948e",
       "rust/crates/behave-py/src/numeric/shape.rs": "9b561793ee5ba5be3e731320f102f257591d5f369faf572089da66fb550da72f",
       "rust/crates/behave-py/src/numeric/snapshot.rs": "06a0687e89839c850869055f46c224e13b282340f8de7cdef330241872bcfa63",
@@ -562,24 +561,15 @@
       "src/behave_fire/rust/vapor_pressure_deficit_calculator.py": "8e5abce6339aaabf6fd36662887b530ba1974c17067084ecb1feae90681a9eb4",
       "tests/conftest.py": "c945a3687cca2a85ea1f2505cd94cf858a60d7212369ff10db37e85a199fdfad",
       "tests/cpp_live/test_cpp_live.py": "31a8f578ac0563c3178136b3fe79bd657d66e6e807751e10aca7d5f394f8b27b",
-      "tools/assemble_allocation_evidence.py": "f2c7fd4a9cbdfe9c3ce53b2603d039504ac37393d74555659ece2ee1f7bfe68c",
-      "tools/benchmark_backends.py": "66e1313d884b6c774099f17a69932b18eb0c52794a4090fb1e8877a24aed50cf",
-      "tools/benchmark_component_families.py": "f02e25205a5457ead3ed83fb5cc94662b1c9f4aa0ddc2da6a04526677eb0727c",
-      "tools/benchmark_core_f64.py": "ef37bf4697b6b330493a97136861faeb914fc0a005f2a4ba6340b4d9c5a25a11",
-      "tools/benchmark_public_serial_f64.py": "a321b8bcfdbb9b65ec7680d24dbc699426a4bfade4aea98ab100212847cd13e1",
       "tools/build_pure_wheel.py": "435d7fddf3d1d0fdb87af808654b154eb98fc6f627b92993264d4e3828f6a827",
-      "tools/check_core_f64.py": "b69ee38251b47d8b3c58db30027b9024c7c7a2d1f7018fc3a8615cff9134b3ee",
       "tools/check_cpp_driver.py": "5717fc621fe987afe509ea47c65ce7a3576e00e197cae7d75d9e82a4eae89a0b",
       "tools/check_crate_package.py": "f6e568a33ac6a583aae5cf39fcf59b071170d51f0961451430232d96191b42c6",
       "tools/check_function_order.py": "79ab381e2f48e9e6fa8605d11a3d0c7459e7519325b3e59785c3e4271bad19d7",
-      "tools/check_performance.py": "3d8866b469dc6ba965e3c94583e8573c69477492e10de4431289ce47c374babe",
-      "tools/check_public_serial_f64.py": "0ec06d24629e72dcf0cc908fe7ab05387744b249d5a0c0be90b3ed9424282d0b",
       "tools/check_rust_tables.py": "cc3e957a6d44614ea91c87bedfc6f7d65858bf93b30215bd80fca0ced88d5941",
       "tools/check_sdist.py": "d9cd6a907cf09d7ce21c2ef1fd5d5163d625b04144807b06789513790240ceab",
       "tools/check_wheel_metadata.py": "ff08a2a6bb74d59dca91bde336bf7920ce2e65f9a1c2f56093ea5db9278db4f0",
       "tools/compare_backends.py": "757cdb6401ab07aac6d0d9e2f0c4baa7865745e37f39ce4263c71db0d941001b",
-      "tools/core_f64_reference.py": "f8d8d462e722ed0e4f8106d71e2d49544ccbaf77147bd1c7ec14db385683e779",
-      "tools/cpp_calibrate.py": "c64352f0d17f219ae0db5d729ddfa67cd58ef4eef62b53ab0ebe896e458f300f",
+      "tools/cpp_calibrate.py": "6d36029d379eb1e2e1f6afa93366080d2ad11808dbe483d810f387d90e5ad274",
       "tools/cpp_controls.py": "3d1a46d2dab49a90347f58dfb1ecbc9ab5f7b8f406b9515e93ec14489c666e29",
       "tools/cpp_crown.py": "6a5bbfca99ce5836605366099150dd5af7d70e1efe57bfdac361a8b6b48630d9",
       "tools/cpp_fine_dead_fuel_moisture.py": "d72359099f3a5382aee5f227b9de193adff97140766cbd6983cfa03b418be905",
@@ -596,19 +586,18 @@
       "tools/cpp_vapor_pressure_deficit.py": "a5630083d7ac3d4ff730dff30514a9af10b95104f56f1dd81c3111ee5007d4ae",
       "tools/export_cpp_crate.py": "ea03c0b3ccd585a3ae0d9158934575726a669b05c6387986fb29ef619e74b819",
       "tools/export_rust_reference.py": "e61a9e60fcce4cedbe16875119c08e3cba2250b4305497f22c7070742bd5e766",
-      "tools/float64_model_reference.py": "85541e8fc435f5cea72cd2243608081327a68f41a11f890ac9cb39cd69c10887",
-      "tools/measure_native_allocations.py": "ca128ffa4d79d0aabdc22b80832ca9e500d5aeaf055e340fd5949a64598403c2",
-      "tools/performance_cases.py": "89bfaaef56364a064f082732894eef99f35115b6a34c51c8f958d2718b85c364",
-      "tools/performance_contract.py": "420a372638f8c8f2dc8d878b7a4bf135c723ef77ac7c1aab91bdb748e8b8a62a",
+      "tools/float64_model_reference.py": "436647a3b7548e78479afcf5a172c839858e07a1508bb60d9b689d2ffac5ea60",
       "tools/probe_direction_fixtures.py": "9be31dcbdfbecc602771249b07d8fde2f2926e3b55d2c4a8e113ec8f8b34e189",
       "tools/probe_direction_layout.py": "1598c6dbfc832c58cbc9e4a74cffb4f8bd2666e5e7d8a425d6936d678baa83a9",
       "tools/probe_direction_oracle.py": "2dcd5b584145ccd595837cb757cd0767ec541e3d94c2815ab5646dd21d4fb5d3",
       "tools/probe_numpy_aliases.py": "964f43459244365a2886fbb9ee3fa1d935991fa468b43be7705c92a8d5a11e45",
       "tools/probe_platform_oracle.py": "135101a9647e3010bc8fa6eb4cfeb39b9d03c15233dc3f8326ded8b890ed303b",
+      "tools/raster_cases.py": "8cb9b3406c0a9878ba9b91e131d38fcb2539e0253085b9eaa1aab7ade777053f",
       "tools/rust_reference_platform.py": "663b072a0eb456bd86cdc78137886375243dae4ed0c475c7e0b211487b9ee467",
       "tools/smoke_test_wheel.py": "2ddc9b38d4a0e03bfb4954e62423059ddd03d4b04464133469656eb8f03cc1a5",
       "tools/test_native_wheel_suite.py": "a82736ab26ccfe88a68213cf5e153869a5757ce8aaf08edee9edb163f6d21003",
       "tools/test_wheel_install.py": "9ad2936eafe1e3a1aadc087ab41e5dafe4465959991daf108858df9160ab92d4",
+      "tools/time_standard_runs.py": "75eb84b55751350d5e98dceb2883f49fc8ad44a6442c0728bbe81c536c8855f0",
       "uv.lock": "c259b3a141f671cfa47424d8668c3b6cfe3a75a6ec086594a8f47e3aab970101"
     },
     "spot": {

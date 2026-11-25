@@ -9,12 +9,35 @@ from pathlib import Path
 
 import pytest
 
-from cpp_snapshot_support import write_snapshot
+from cpp_snapshot_support import capture_snapshot, write_snapshot
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / 'tools'))
 import cpp_reference as reference
 
 ROOT = Path(__file__).resolve().parents[2]
+MANIFESTS = ('rust/Cargo.toml', 'rust/Cargo.lock', 'rust/crates/behave-fire/Cargo.toml',
+             'rust/crates/behave-py/Cargo.toml')
+
+
+def _copy_manifests(tmp_path):
+    root = tmp_path / 'root'
+    for relative in MANIFESTS:
+        target = root / relative
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_bytes((ROOT / relative).read_bytes().replace(b'\r\n', b'\n'))
+    return root
+
+
+def _edit(root, relative, old, new, count=1):
+    """Replace text in a copied manifest; ``<core>`` and ``<py>`` stand for the current versions."""
+    import tomllib
+    core = tomllib.loads((root / 'rust/crates/behave-fire/Cargo.toml').read_text())['package']['version']
+    py = tomllib.loads((root / 'rust/crates/behave-py/Cargo.toml').read_text())['package']['version']
+    old, new = (value.replace('<core>', core).replace('<py>', py) for value in (old, new))
+    path = root / relative
+    text = path.read_bytes().decode()
+    assert text.count(old) == count, (relative, old)
+    path.write_bytes(text.replace(old, new).encode())
 
 
 # ---- qualification evidence tests ----
@@ -157,3 +180,97 @@ def test_revalidation_preserves_paired_bits_and_signed_zero(tmp_path):
     row['actual'][field] = math.copysign(0., -row['actual'][field])
     with pytest.raises(AssertionError, match='signed-zero mismatch'):
         module._validate_observations(ROOT, report)
+
+
+# ---- snapshot capture tests ----
+
+def test_snapshot_captures_current_sources_while_receipt_lists_deleted_files(tmp_path):
+    root = tmp_path / 'source'
+    base = root / 'tests/data/cpp_reference'
+    (base / 'calibration').mkdir(parents=True)
+    (root / 'tools').mkdir()
+    (root / 'tools/present.py').write_bytes(b'VALUE = 1\n')
+    receipt = json.dumps({'source_files': {'tools/gone.py': '0' * 64}}).encode()
+    (base / 'calibration/qualification.json').write_bytes(receipt)
+    (base / 'tolerance-policy.json').write_text(json.dumps({'approved': False}))
+    (base / 'hashes.json').write_text(json.dumps({
+        'tests/data/cpp_reference/calibration/qualification.json': 'receipt identity',
+        'tests/data/cpp_reference/tolerance-policy.json': 'policy identity'}))
+    snapshot = dict(capture_snapshot(root))
+    assert snapshot['tools/present.py'] == b'VALUE = 1\n'
+    assert snapshot['tests/data/cpp_reference/calibration/qualification.json'] == receipt
+    assert 'tools/gone.py' not in snapshot
+
+
+# ---- version-neutral source hash tests ----
+
+def test_crlf_manifests_hash_like_lf(tmp_path):
+    module = importlib.import_module('cpp_calibrate')
+    root = _copy_manifests(tmp_path)
+    before = module._sources(root)
+    for relative in MANIFESTS:
+        path = root / relative
+        path.write_bytes(path.read_bytes().replace(b'\n', b'\r\n'))
+    assert module._sources(root) == before
+
+
+@pytest.mark.parametrize('relative,old,new', [
+    ('rust/crates/behave-fire/Cargo.toml', 'version = "<core>"\n', 'version = "<core>"\nversion = "<core>"\n'),
+    ('rust/crates/behave-fire/Cargo.toml', 'version = "<core>"\n', 'version = "abc"\n'),
+    ('rust/crates/behave-fire/Cargo.toml', 'version = "<core>"\n', 'version = "01.2.3"\n'),
+    ('rust/crates/behave-fire/Cargo.toml', 'version = "<core>"\n', 'version = "1.2.3-rc..1"\n'),
+    ('rust/crates/behave-fire/Cargo.toml', 'version = "<core>"\n', 'version = "1.2.3-01"\n'),
+    ('rust/crates/behave-py/Cargo.toml', 'version = "<py>"', 'version = "0.1.0-rc.01"'),
+    ('rust/Cargo.lock', 'name = "behave-py"\nversion = "<py>"', 'name = "behave-py"\nversion = "1.2.3+"'),
+    ('rust/crates/behave-py/Cargo.toml', 'path = "../behave-fire", version = "<core>" }', 'path = "../behave-fire" }'),
+    ('rust/crates/behave-py/Cargo.toml', 'path = "../behave-fire"', 'path = "../behave-fire-copy"'),
+    ('rust/Cargo.lock', 'name = "behave-py"\nversion = "<py>"\n', 'name = "behave-py"\n'),
+    ('rust/Cargo.lock', 'name = "behave-fire"\nversion = "<core>"\n',
+     'name = "behave-fire"\nversion = "<core>"\n\n[[package]]\nname = "behave-fire"\nversion = "<core>"\n'),
+])
+def test_malformed_version_fields_raise(tmp_path, relative, old, new):
+    module = importlib.import_module('cpp_calibrate')
+    root = _copy_manifests(tmp_path)
+    _edit(root, relative, old, new)
+    with pytest.raises(ValueError, match=Path(relative).name):
+        module._sources(root)
+
+
+@pytest.mark.parametrize('relative,old,new', [
+    ('rust/crates/behave-py/Cargo.toml', 'numpy = "=0.27.0"', 'numpy = "=0.27.1"'),
+    ('rust/crates/behave-py/Cargo.toml', 'default = []', 'default = []\nextra = []'),
+    ('rust/crates/behave-fire/Cargo.toml', 'edition.workspace = true', 'edition = "2021"'),
+    ('rust/Cargo.lock', 'name = "numpy"\nversion = "0.27.0"', 'name = "numpy"\nversion = "0.27.1"'),
+    ('rust/Cargo.toml', '[workspace.package]', '[profile.release]\nlto = true\n\n[workspace.package]'),
+])
+def test_non_version_manifest_edits_change_source_hashes(tmp_path, relative, old, new):
+    module = importlib.import_module('cpp_calibrate')
+    root = _copy_manifests(tmp_path)
+    before = module._sources(root)
+    _edit(root, relative, old, new)
+    assert module._sources(root)[relative] != before[relative]
+
+
+def test_unrelated_sources_keep_text_digest(tmp_path):
+    module = importlib.import_module('cpp_calibrate')
+    root = _copy_manifests(tmp_path)
+    tool = root / 'tools/example.py'
+    tool.parent.mkdir(parents=True)
+    tool.write_bytes(b'VALUE = 1\r\n')
+    sources = module._sources(root)
+    assert sources['tools/example.py'] == reference._text_digest(tool)
+    assert sources['rust/Cargo.toml'] == reference._text_digest(root / 'rust/Cargo.toml')
+
+
+def test_version_only_edits_keep_source_hashes(tmp_path):
+    module = importlib.import_module('cpp_calibrate')
+    root = _copy_manifests(tmp_path)
+    before = module._sources(root)
+    _edit(root, 'rust/Cargo.lock', 'name = "behave-fire"\nversion = "<core>"',
+          'name = "behave-fire"\nversion = "9.8.7"')
+    _edit(root, 'rust/Cargo.lock', 'name = "behave-py"\nversion = "<py>"', 'name = "behave-py"\nversion = "9.8.7-rc.6"')
+    _edit(root, 'rust/crates/behave-py/Cargo.toml', 'path = "../behave-fire", version = "<core>"',
+          'path = "../behave-fire", version = "9.8.7"')
+    _edit(root, 'rust/crates/behave-py/Cargo.toml', 'version = "<py>"', 'version = "9.8.7-rc.6"')
+    _edit(root, 'rust/crates/behave-fire/Cargo.toml', 'version = "<core>"\n', 'version = "9.8.7"\n')
+    assert module._sources(root) == before

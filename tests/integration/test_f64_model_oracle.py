@@ -8,7 +8,7 @@ from parity_support import ROOT as ROOT
 def test_missing_density_cannot_classify_as_valid_surface_fire():
     from behave_fire.python import BehaveRun, FuelModels
     from float64_model_reference import apply_crown_rules
-    from performance_cases import build_inputs
+    from raster_cases import build_inputs
 
     inputs = build_inputs(2, 'uniform')
     model = BehaveRun(FuelModels())
@@ -24,7 +24,7 @@ def test_missing_density_cannot_classify_as_valid_surface_fire():
 def test_missing_heat_preserves_crown_spread_and_classification():
     from behave_fire.python import BehaveRun, FuelModels
     from float64_model_reference import apply_crown_rules
-    from performance_cases import build_inputs
+    from raster_cases import build_inputs
 
     inputs = build_inputs(3, 'uniform')
     model = BehaveRun(FuelModels())

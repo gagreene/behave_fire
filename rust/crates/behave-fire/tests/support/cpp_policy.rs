@@ -39,6 +39,38 @@ fn source_files(
     Ok(())
 }
 
+/// Check a version against SemVer 2.0.0, matching the Python qualification writer.
+fn valid_semver(version: &str) -> bool {
+    fn number(part: &str) -> bool {
+        !part.is_empty()
+            && part.bytes().all(|b| b.is_ascii_digit())
+            && (part == "0" || !part.starts_with('0'))
+    }
+    fn identifier(part: &str, prerelease: bool) -> bool {
+        !part.is_empty()
+            && part.bytes().all(|b| b.is_ascii_alphanumeric() || b == b'-')
+            && (!prerelease || !part.bytes().all(|b| b.is_ascii_digit()) || number(part))
+    }
+    let (rest, build) = match version.split_once('+') {
+        Some((rest, build)) => (rest, Some(build)),
+        None => (version, None),
+    };
+    let (core, prerelease) = match rest.split_once('-') {
+        Some((core, prerelease)) => (core, Some(prerelease)),
+        None => (rest, None),
+    };
+    let parts: Vec<&str> = core.split('.').collect();
+    let prerelease_ok = match prerelease {
+        Some(text) => text.split('.').all(|part| identifier(part, true)),
+        None => true,
+    };
+    let build_ok = match build {
+        Some(text) => text.split('.').all(|part| identifier(part, false)),
+        None => true,
+    };
+    parts.len() == 3 && parts.iter().all(|part| number(part)) && prerelease_ok && build_ok
+}
+
 /// Apply the owner's unchanged numerical caps, preserving finite and zero rules.
 pub fn compare(left: f64, right: f64, policy: &Value, field: &str) -> Result<(), String> {
     let cap = &policy["fields"][field];
@@ -184,10 +216,47 @@ pub fn require_qualification(policy: &Value) -> Result<(), String> {
         base.join("Cargo.toml")
     };
     let text = std::fs::read_to_string(manifest).map_err(|error| error.to_string())?;
+    let neutral = version_neutral_core_manifest(&text.replace("\r\n", "\n"))?;
     if sources["rust/crates/behave-fire/Cargo.toml"].as_str()
-        != Some(sha256(text.replace("\r\n", "\n").as_bytes()).as_str())
+        != Some(sha256(neutral.as_bytes()).as_str())
     {
         return Err("qualified core manifest changed".into());
     }
     Ok(())
+}
+
+/// Blank the core `[package]` version exactly as `tools/cpp_calibrate.py` does before hashing.
+///
+/// Every other byte is kept. A missing, duplicated, or invalid version is an error, so a
+/// version-only release keeps the qualified digest while any other manifest edit changes it.
+pub fn version_neutral_core_manifest(text: &str) -> Result<String, String> {
+    let mut lines: Vec<String> = text.split('\n').map(str::to_string).collect();
+    let mut section = String::new();
+    let mut found = Vec::new();
+    for (index, line) in lines.iter().enumerate() {
+        let trimmed = line.trim_end();
+        let inner = trimmed
+            .strip_prefix('[')
+            .and_then(|rest| rest.strip_suffix(']'));
+        if let Some(name) = inner.filter(|name| !name.contains(['[', ']']) && !name.is_empty()) {
+            section = name.trim().to_string();
+        } else if section == "package" {
+            if let Some(value) = line
+                .strip_prefix("version = \"")
+                .and_then(|rest| rest.strip_suffix('"'))
+            {
+                found.push((index, value.to_string()));
+            }
+        }
+    }
+    let [(index, value)] = found.as_slice() else {
+        return Err("core manifest needs exactly one [package] version line".into());
+    };
+    if !valid_semver(value) {
+        return Err(format!(
+            "core manifest version {value:?} is not valid SemVer"
+        ));
+    }
+    lines[*index] = "version = \"0.0.0-version-neutral\"".to_string();
+    Ok(lines.join("\n"))
 }

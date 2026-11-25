@@ -8,14 +8,9 @@ its original dtype, mask, and arithmetic behavior. Automatic selection can
 therefore return different types on native and Python-only installations.
 See [backend differences](BACKEND_DIFFERENCES.md) for the complete contract.
 
-The [recorded Windows acceptance](performance/2026-11-09-reviewed-float64-acceptance.md)
-passes every required speed, confidence, scalar, memory, and allocation gate.
-Warmed 100k/1M speedups are 3.18-5.52x with one worker and 6.06-13.44x with four,
-on the declared Windows host using CPython 3.12.8 and NumPy 2.1.3. Other hosts
-and workloads require their own speed measurements.
-The measured scientific source is `9be8a50`; the
-[later review follow-up](performance/2026-11-09-claude-pr-review-followup.md)
-does not relabel those dated results as measurements of newer boundary fixes.
+Run time depends on hardware, load, and build. `python tools/time_standard_runs.py`
+prints a timing report for one machine; the README's Performance section has a
+sample (Table 1 there). Timing is reported, never used as a pass or fail check.
 
 ## Backend selection
 
@@ -97,7 +92,7 @@ work. Scalars stay compact; real broadcast columns materialize once. Logical
 array order is preserved for strided, readonly, endian-swapped, and empty inputs.
 Results and getters are independently owned; modifying them cannot alter input
 buffers or a session. Buffers are initialized before work and split safely across
-workers. Ordinary scientific/encoder loops request zero heap allocations.
+workers.
 Full models use the existing core batch owners; output chunks are not concatenated.
 
 `threads=1` is serial, `threads=0` uses available parallelism, and positive counts
@@ -147,8 +142,7 @@ Alpine/Windows ARM64 full suites, and strict artifact inventory/version/tag chec
 A pure project wheel requires no compiler. A completely compiler-free install
 also depends on binary NumPy availability for that platform/interpreter.
 
-See [release verification](RELEASING.md), [standalone crate delivery](CRATES_IO.md),
-and [performance evidence](performance/2026-11-09-reviewed-float64-acceptance.md). Builds
+See [release verification](RELEASING.md) and [standalone crate delivery](CRATES_IO.md). Builds
 and validation do not authorize PyPI/crates.io publishing, tags, or merges.
 Dependent PRs ultimately target `pre_release`; `master` receives released code
 through the documented promotion route.
