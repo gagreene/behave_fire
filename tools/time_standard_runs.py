@@ -106,7 +106,8 @@ def run(cells=100_000, repeats=5, threads=1, backends=None, seed=20261105):
     import behave_fire
     if backends is None:
         backends = ("python", "rust") if "rust" in behave_fire.available_backends() else ("python",)
-    unknown = [backend for backend in backends if backend not in ("python", "rust")]
+    backends = tuple(backends)
+    unknown =[backend for backend in backends if backend not in ("python", "rust")]
     if unknown:
         raise ValueError(f"Unknown backend(s) {unknown}; expected 'python' or 'rust'")
     rows = []

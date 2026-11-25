@@ -8,6 +8,14 @@ from parity_support import ROOT as ROOT
 
 # ---- timing report tests ----
 
+def test_backend_iterator_is_timed_like_a_tuple():
+    from time_standard_runs import run
+
+    report = run(cells=64, repeats=1, backends=iter(["python"]))
+    assert [(r["model"], r["backend"]) for r in report["rows"]] == [("surface", "python"), ("crown", "python")]
+    assert report["settings"]["backends"] == ["python"]
+
+
 def test_main_writes_json_and_returns_zero(tmp_path, capsys):
     from time_standard_runs import main
 
