@@ -29,10 +29,15 @@ def _copy_manifests(tmp_path):
 
 
 def _edit(root, relative, old, new, count=1):
+    """Replace text in a copied manifest; ``<core>`` and ``<py>`` stand for the current versions."""
+    import tomllib
+    core = tomllib.loads((root / 'rust/crates/behave-fire/Cargo.toml').read_text())['package']['version']
+    py = tomllib.loads((root / 'rust/crates/behave-py/Cargo.toml').read_text())['package']['version']
+    old, new = (value.replace('<core>', core).replace('<py>', py) for value in (old, new))
     path = root / relative
-    text = path.read_text()
+    text = path.read_bytes().decode()
     assert text.count(old) == count, (relative, old)
-    path.write_text(text.replace(old, new))
+    path.write_bytes(text.replace(old, new).encode())
 
 
 # ---- qualification evidence tests ----
@@ -190,13 +195,13 @@ def test_crlf_manifests_hash_like_lf(tmp_path):
 
 
 @pytest.mark.parametrize('relative,old,new', [
-    ('rust/crates/behave-fire/Cargo.toml', 'version = "0.1.0"\n', 'version = "0.1.0"\nversion = "0.1.0"\n'),
-    ('rust/crates/behave-fire/Cargo.toml', 'version = "0.1.0"\n', 'version = "abc"\n'),
-    ('rust/crates/behave-py/Cargo.toml', 'path = "../behave-fire", version = "0.1.0" }', 'path = "../behave-fire" }'),
+    ('rust/crates/behave-fire/Cargo.toml', 'version = "<core>"\n', 'version = "<core>"\nversion = "<core>"\n'),
+    ('rust/crates/behave-fire/Cargo.toml', 'version = "<core>"\n', 'version = "abc"\n'),
+    ('rust/crates/behave-py/Cargo.toml', 'path = "../behave-fire", version = "<core>" }', 'path = "../behave-fire" }'),
     ('rust/crates/behave-py/Cargo.toml', 'path = "../behave-fire"', 'path = "../behave-fire-copy"'),
-    ('rust/Cargo.lock', 'name = "behave-py"\nversion = "1.0.0-beta.2"\n', 'name = "behave-py"\n'),
-    ('rust/Cargo.lock', 'name = "behave-fire"\nversion = "0.1.0"\n',
-     'name = "behave-fire"\nversion = "0.1.0"\n\n[[package]]\nname = "behave-fire"\nversion = "0.1.0"\n'),
+    ('rust/Cargo.lock', 'name = "behave-py"\nversion = "<py>"\n', 'name = "behave-py"\n'),
+    ('rust/Cargo.lock', 'name = "behave-fire"\nversion = "<core>"\n',
+     'name = "behave-fire"\nversion = "<core>"\n\n[[package]]\nname = "behave-fire"\nversion = "<core>"\n'),
 ])
 def test_malformed_version_fields_raise(tmp_path, relative, old, new):
     module = importlib.import_module('cpp_calibrate')
@@ -236,11 +241,11 @@ def test_version_only_edits_keep_source_hashes(tmp_path):
     module = importlib.import_module('cpp_calibrate')
     root = _copy_manifests(tmp_path)
     before = module._sources(root)
-    _edit(root, 'rust/crates/behave-py/Cargo.toml', 'version = "1.0.0-beta.2"', 'version = "0.1.0-rc.1"')
-    _edit(root, 'rust/crates/behave-py/Cargo.toml', 'path = "../behave-fire", version = "0.1.0"',
-          'path = "../behave-fire", version = "0.2.0"')
-    _edit(root, 'rust/crates/behave-fire/Cargo.toml', 'version = "0.1.0"\n', 'version = "0.2.0"\n')
-    _edit(root, 'rust/Cargo.lock', 'name = "behave-fire"\nversion = "0.1.0"', 'name = "behave-fire"\nversion = "0.2.0"')
-    _edit(root, 'rust/Cargo.lock', 'name = "behave-py"\nversion = "1.0.0-beta.2"',
-          'name = "behave-py"\nversion = "0.1.0-rc.1"')
+    _edit(root, 'rust/Cargo.lock', 'name = "behave-fire"\nversion = "<core>"',
+          'name = "behave-fire"\nversion = "9.8.7"')
+    _edit(root, 'rust/Cargo.lock', 'name = "behave-py"\nversion = "<py>"', 'name = "behave-py"\nversion = "9.8.7-rc.6"')
+    _edit(root, 'rust/crates/behave-py/Cargo.toml', 'path = "../behave-fire", version = "<core>"',
+          'path = "../behave-fire", version = "9.8.7"')
+    _edit(root, 'rust/crates/behave-py/Cargo.toml', 'version = "<py>"', 'version = "9.8.7-rc.6"')
+    _edit(root, 'rust/crates/behave-fire/Cargo.toml', 'version = "<core>"\n', 'version = "9.8.7"\n')
     assert module._sources(root) == before
