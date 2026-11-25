@@ -3,12 +3,12 @@
 version = 3
 
 [[package]]
-name = "behave-fire"
-version = "0.1.0"
-
-[[package]]
-name = "behave-performance-probe"
+name = "behave-binding-field-tests"
 version = "0.0.0"
 dependencies = [
  "behave-fire",
 ]
+
+[[package]]
+name = "behave-fire"
+version = "0.1.0"

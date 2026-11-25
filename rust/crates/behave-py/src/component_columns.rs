@@ -54,9 +54,6 @@ impl Columns {
                         flags: 0,
                         failed: false,
                     };
-                    #[cfg(feature = "allocation-probe")]
-                    let _scope =
-                        crate::allocation_probe::Scope::enter(crate::allocation_probe::KERNEL);
                     evaluate(index, &mut row)?;
                     row.finish()?;
                 }
@@ -86,13 +83,7 @@ impl Columns {
             &mut [],
             |range, output| {
                 for (local, row) in range.enumerate() {
-                    #[cfg(feature = "allocation-probe")]
-                    let _scope =
-                        crate::allocation_probe::Scope::enter(crate::allocation_probe::KERNEL);
                     let value = evaluate(row);
-                    #[cfg(feature = "allocation-probe")]
-                    let _encoder =
-                        crate::allocation_probe::Scope::enter(crate::allocation_probe::ENCODER);
                     output.physical[0][local] = value;
                 }
                 Ok(())
@@ -140,8 +131,6 @@ impl RowWriter<'_, '_> {
     }
     /// Store an exact boolean result without a numeric metadata object.
     pub(crate) fn boolean(&mut self, _name: &'static str, value: bool) {
-        #[cfg(feature = "allocation-probe")]
-        let _scope = crate::allocation_probe::Scope::enter(crate::allocation_probe::ENCODER);
         if let Some(slot) = self
             .output
             .flags
@@ -156,8 +145,6 @@ impl RowWriter<'_, '_> {
     }
     /// Store one physical result in the next prepared physical slot.
     pub(crate) fn f64(&mut self, _name: &'static str, value: f64) {
-        #[cfg(feature = "allocation-probe")]
-        let _scope = crate::allocation_probe::Scope::enter(crate::allocation_probe::ENCODER);
         if let Some(slot) = self
             .output
             .physical
@@ -172,8 +159,6 @@ impl RowWriter<'_, '_> {
     }
     /// Store an exact classification/status without float64 transit.
     pub(crate) fn i32(&mut self, _name: &'static str, value: i32) {
-        #[cfg(feature = "allocation-probe")]
-        let _scope = crate::allocation_probe::Scope::enter(crate::allocation_probe::ENCODER);
         if let Some(slot) = self
             .output
             .codes

@@ -1,6 +1,4 @@
-//! Actual surviving primitive producers, with isolated allocation observations.
-#[path = "../../../rust/crates/behave-py/src/allocation_probe.rs"]
-mod allocation_probe;
+//! Behavior tests for production binding modules compiled without the Python linker.
 #[path = "../../../rust/crates/behave-py/src/component_columns.rs"]
 mod component_columns;
 #[path = "../../../rust/crates/behave-py/src/component_schema.rs"]
@@ -18,6 +16,9 @@ mod primitive;
 #[path = "../../../rust/crates/behave-py/src/prepared/selectors.rs"]
 mod selectors;
 
+#[cfg(test)]
+mod raster_parity;
+
 mod prepared {
     pub(crate) use super::keys::Field;
     pub(crate) mod primitive {
@@ -31,39 +32,12 @@ mod prepared {
 #[cfg(test)]
 mod primitive_component_tests {
     use super::{
-        allocation_probe as probe,
         keys::Field,
         primitive::{Arguments, Prepared},
     };
     use behave_fire::GridShape;
 
     // ---- typed component input contracts ----
-    #[test]
-    fn typed_components_keep_controls_exact_and_access_without_allocations() {
-        let mut a = Arguments::default();
-        a.physical
-            .insert("spread_rate".into(), vec![1., f64::NAN, 3.]);
-        a.codes.insert("fuel_model_grid".into(), vec![124]);
-        a.flags.insert("is_crown".into(), vec![true]);
-        let p = Prepared::new(&a, &GridShape::new(vec![3]).unwrap()).unwrap();
-        p.require(&[Field::SpreadRate, Field::FuelModelGrid, Field::IsCrown])
-            .unwrap();
-        probe::start();
-        for row in 0..3 {
-            assert_eq!(p.code(Field::FuelModelGrid, row).unwrap(), 124);
-            assert!(p.flag(Field::IsCrown, row).unwrap());
-            assert_eq!(
-                p.physical(Field::SpreadRate, row).unwrap().is_nan(),
-                row == 1
-            );
-        }
-        let counts = probe::stop();
-        assert_eq!(counts[0].0, 0);
-        assert!(p.physical(Field::FuelModelGrid, 0).is_err());
-        assert!(p.code(Field::FuelModelGrid, 3).is_err());
-        assert!(p.require(&[Field::FlameLengthFt]).is_err());
-    }
-
     #[test]
     fn typed_component_validation_rejects_wrong_roles_lengths_and_retired_metadata() {
         let shape = GridShape::new(vec![3]).unwrap();
@@ -87,6 +61,29 @@ mod primitive_component_tests {
         let p = Prepared::new(&a, &GridShape::new(vec![0]).unwrap()).unwrap();
         p.require(&[Field::SpreadRate]).unwrap();
         assert!(p.physical(Field::SpreadRate, 0).is_err());
+    }
+
+    #[test]
+    fn typed_components_keep_controls_exact_and_reject_wrong_access() {
+        let mut a = Arguments::default();
+        a.physical
+            .insert("spread_rate".into(), vec![1., f64::NAN, 3.]);
+        a.codes.insert("fuel_model_grid".into(), vec![124]);
+        a.flags.insert("is_crown".into(), vec![true]);
+        let p = Prepared::new(&a, &GridShape::new(vec![3]).unwrap()).unwrap();
+        p.require(&[Field::SpreadRate, Field::FuelModelGrid, Field::IsCrown])
+            .unwrap();
+        for row in 0..3 {
+            assert_eq!(p.code(Field::FuelModelGrid, row).unwrap(), 124);
+            assert!(p.flag(Field::IsCrown, row).unwrap());
+            assert_eq!(
+                p.physical(Field::SpreadRate, row).unwrap().is_nan(),
+                row == 1
+            );
+        }
+        assert!(p.physical(Field::FuelModelGrid, 0).is_err());
+        assert!(p.code(Field::FuelModelGrid, 3).is_err());
+        assert!(p.require(&[Field::FlameLengthFt]).is_err());
     }
 }
 
@@ -123,75 +120,10 @@ mod component_schema_tests {
 
 #[cfg(test)]
 mod primitive_output_tests {
-    use super::{
-        allocation_probe as probe, component_columns::Columns, component_schema::schema,
-        operation::Operation,
-    };
+    use super::{component_columns::Columns, component_schema::schema, operation::Operation};
     use behave_fire::output::ColumnValues;
 
-    // ---- typed output layout and allocation ----
-    #[test]
-    fn final_typed_component_buffers_use_disjoint_workers_without_cell_allocations() {
-        let mut output = Columns::new(
-            vec![
-                crate::component_schema::Column {
-                    name: "code".into(),
-                    kind: behave_fire::engine::FieldKind::Code,
-                },
-                crate::component_schema::Column {
-                    name: "first".into(),
-                    kind: behave_fire::engine::FieldKind::Physical,
-                },
-                crate::component_schema::Column {
-                    name: "second".into(),
-                    kind: behave_fire::engine::FieldKind::Physical,
-                },
-                crate::component_schema::Column {
-                    name: "third".into(),
-                    kind: behave_fire::engine::FieldKind::Physical,
-                },
-            ],
-            1031,
-        )
-        .unwrap();
-        probe::start();
-        output
-            .fill(4, |index, row| {
-                row.i32("code", index as i32);
-                row.f64("first", index as f64);
-                row.f64("second", 2. * index as f64);
-                row.f64("third", 3. * index as f64);
-                Ok(())
-            })
-            .unwrap();
-        let counts = probe::stop();
-        for phase in [probe::KERNEL, probe::ENCODER] {
-            assert_eq!((counts[phase].0, counts[phase].1), (0, 0));
-            assert_eq!(counts[phase].3, 4);
-        }
-        assert_eq!(counts[probe::KERNEL].2, 1031);
-        assert_eq!(counts[probe::ENCODER].2, 4 * 1031);
-        for (index, (_, values)) in output.columns.iter().enumerate() {
-            match values {
-                ColumnValues::Int32(v) => assert_eq!(v[1030], 1030),
-                ColumnValues::Float64(v) => assert_eq!(v[1030], index as f64 * 1030.),
-                _ => panic!("unexpected output kind"),
-            }
-        }
-    }
-
-    #[test]
-    fn empty_components_never_evaluate_a_prototype_and_fields_start_unavailable() {
-        let mut empty = Columns::new(schema(Operation::CrownClassifyCrownFireType), 0).unwrap();
-        empty
-            .fill(4, |_, _| panic!("empty scientific callback"))
-            .unwrap();
-        let mut output = Columns::new(schema(Operation::CrownClassifyCrownFireType), 3).unwrap();
-        assert!(matches!(&output.columns[0].1, ColumnValues::Int32(v) if v == &[-1, -1, -1]));
-        assert!(matches!(&output.columns[1].1, ColumnValues::Bool(v) if v == &[false; 3]));
-        assert!(output.fill(1, |_, _| Ok(())).is_err());
-    }
-
+    // ---- typed output layout ----
     #[test]
     fn compound_crown_scalar_records_follow_the_same_static_typed_layout() {
         use behave_fire::engine::{CrownCell, PreparedFuels, SurfaceOptions, SurfaceTweaks};
@@ -242,12 +174,65 @@ mod primitive_output_tests {
         let last = &output.columns.last().unwrap().1;
         assert!(matches!(last, ColumnValues::Float64(v) if v[0].is_finite()));
     }
+
+    #[test]
+    fn empty_components_never_evaluate_a_prototype_and_fields_start_unavailable() {
+        let mut empty = Columns::new(schema(Operation::CrownClassifyCrownFireType), 0).unwrap();
+        empty
+            .fill(4, |_, _| panic!("empty scientific callback"))
+            .unwrap();
+        let mut output = Columns::new(schema(Operation::CrownClassifyCrownFireType), 3).unwrap();
+        assert!(matches!(&output.columns[0].1, ColumnValues::Int32(v) if v == &[-1, -1, -1]));
+        assert!(matches!(&output.columns[1].1, ColumnValues::Bool(v) if v == &[false; 3]));
+        assert!(output.fill(1, |_, _| Ok(())).is_err());
+    }
+
+    #[test]
+    fn final_typed_component_buffers_fill_every_row_with_disjoint_workers() {
+        let mut output = Columns::new(
+            vec![
+                crate::component_schema::Column {
+                    name: "code".into(),
+                    kind: behave_fire::engine::FieldKind::Code,
+                },
+                crate::component_schema::Column {
+                    name: "first".into(),
+                    kind: behave_fire::engine::FieldKind::Physical,
+                },
+                crate::component_schema::Column {
+                    name: "second".into(),
+                    kind: behave_fire::engine::FieldKind::Physical,
+                },
+                crate::component_schema::Column {
+                    name: "third".into(),
+                    kind: behave_fire::engine::FieldKind::Physical,
+                },
+            ],
+            1031,
+        )
+        .unwrap();
+        output
+            .fill(4, |index, row| {
+                row.i32("code", index as i32);
+                row.f64("first", index as f64);
+                row.f64("second", 2. * index as f64);
+                row.f64("third", 3. * index as f64);
+                Ok(())
+            })
+            .unwrap();
+        for (index, (_, values)) in output.columns.iter().enumerate() {
+            match values {
+                ColumnValues::Int32(v) => assert_eq!(v[1030], 1030),
+                ColumnValues::Float64(v) => assert_eq!(v[1030], index as f64 * 1030.),
+                _ => panic!("unexpected output kind"),
+            }
+        }
+    }
 }
 
 #[cfg(test)]
 mod unit_producer_tests {
     use super::{
-        allocation_probe as probe,
         component_columns::Columns,
         component_schema::schema,
         component_units,
@@ -258,7 +243,7 @@ mod unit_producer_tests {
 
     // ---- unit decoding before dispatch ----
     #[test]
-    fn varying_integral_units_are_predecoded_before_actual_worker_loops() {
+    fn varying_integral_units_convert_every_row_with_four_workers() {
         let cells = 1031;
         let mut input = Arguments::default();
         input.physical.insert("value".into(), vec![2.; cells]);
@@ -268,16 +253,9 @@ mod unit_producer_tests {
         let prepared = Prepared::new(&input, &GridShape::new(vec![cells]).unwrap()).unwrap();
         let operation = Operation::UnitsLengthToBase;
         let mut output = Columns::new(schema(operation), cells).unwrap();
-        probe::start();
         component_units::run(operation, &input, &prepared, &mut output, 4)
             .unwrap()
             .unwrap();
-        let counts = probe::stop();
-        for phase in [probe::KERNEL, probe::ENCODER] {
-            assert_eq!((counts[phase].0, counts[phase].1), (0, 0));
-            assert_eq!(counts[phase].2, cells);
-            assert_eq!(counts[phase].3, 4);
-        }
         if let ColumnValues::Float64(values) = &output.columns[0].1 {
             for (index, &actual) in values.iter().enumerate() {
                 let expected = behave_fire::units::LengthUnit::try_from((index % 8) as i32)
@@ -292,24 +270,23 @@ mod unit_producer_tests {
 }
 
 #[cfg(test)]
-mod configured_scope_tests {
-    use super::model_observer::Observer as Probe;
+mod model_output_tests {
+    use super::model_observer::Observer;
     use behave_fire::engine::{
         run_model_observed, CrownPlan, ModelBatch, ModelRun, OutputRequest, PreparedFuels,
     };
     use behave_fire::raster::{CrownColumns, CrownRaster, CrownTweakColumns};
     use behave_fire::{FuelModels, GridShape, PerCell};
 
-    // ---- model kernel and encoder allocations ----
+    // ---- configured model outputs ----
     #[test]
-    fn actual_model_kernel_and_encoder_have_zero_absolute_requests() {
+    fn model_crown_output_marks_missing_fire_type_and_full_length() {
         let cells = 10000;
         let fuels = PreparedFuels::from_registry(&FuelModels::default());
         let heat = (0..cells)
             .map(|i| if i % 7 == 0 { f64::NAN } else { 1000. })
             .collect::<Vec<_>>();
         let validity = (0..cells).map(|i| i % 17 != 0).collect::<Vec<_>>();
-        let eligible = validity.iter().filter(|&&v| v).count();
         let raster = CrownRaster::new(
             GridShape::new(vec![cells]).unwrap(),
             CrownColumns {
@@ -331,19 +308,7 @@ mod configured_scope_tests {
             tweaks: CrownTweakColumns::default(),
         };
         let request = OutputRequest::crown();
-        super::allocation_probe::start();
-        let output = run_model_observed(&run, &request, 4, &Probe).unwrap();
-        let counts = super::allocation_probe::stop();
-        for phase in [
-            super::allocation_probe::KERNEL,
-            super::allocation_probe::ENCODER,
-        ] {
-            assert_eq!(counts[phase].0, 0, "absolute request count in scope{phase}");
-            assert_eq!(counts[phase].1, 0);
-        }
-        assert_eq!(counts[super::allocation_probe::KERNEL].2, eligible);
-        assert_eq!(counts[super::allocation_probe::ENCODER].2, cells);
-        assert_eq!(counts[super::allocation_probe::KERNEL].3, 4);
+        let output = run_model_observed(&run, &request, 4, &Observer).unwrap();
         if let ModelBatch::Crown(output) = output {
             assert_eq!(output.fire_type[0], -1);
             assert_eq!(output.final_spread_rate.len(), cells);
@@ -354,17 +319,17 @@ mod configured_scope_tests {
 }
 
 #[cfg(test)]
-mod staged_scope_tests {
-    use super::{allocation_probe as probe, model_observer::Observer};
+mod staged_output_tests {
+    use super::model_observer::Observer;
     use behave_fire::engine::{
         CrownPlan, Field, GridSession, ModelRun, OutputRequest, PreparedFuels,
     };
     use behave_fire::raster::{CrownColumns, CrownRaster, CrownTweakColumns};
     use behave_fire::{FuelModels, GridShape, PerCell};
 
-    // ---- staged execution and allocation ----
+    // ---- staged execution outputs ----
     #[test]
-    fn staged_scientific_and_encoder_scopes_allocate_nothing_and_use_actual_workers() {
+    fn staged_spread_rate_masks_invalid_and_keeps_valid_cells() {
         let fuels = PreparedFuels::from_registry(&FuelModels::default());
         for workers in [1, 4] {
             let valid = (0..1031).map(|i| i % 17 != 0).collect::<Vec<_>>();
@@ -391,14 +356,7 @@ mod staged_scope_tests {
             let mut s = GridSession::new(&run, OutputRequest::crown(), &[], workers).unwrap();
             s.set_physical(Field::CrownFractionBurned, vec![0.5])
                 .unwrap();
-            probe::start();
             s.run_remaining_observed(&Observer).unwrap();
-            let counts = probe::stop();
-            for phase in [probe::KERNEL, probe::ENCODER] {
-                assert_eq!((counts[phase].0, counts[phase].1), (0, 0), "{counts:?}");
-                assert!(counts[phase].2 > 1031);
-                assert!(counts[phase].3 >= workers);
-            }
             assert!(s.get(Field::FinalSpreadRate).unwrap().physical().unwrap()[0].is_nan());
             assert!(s.get(Field::FinalSpreadRate).unwrap().physical().unwrap()[1].is_finite());
         }

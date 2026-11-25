@@ -29,11 +29,6 @@ struct Timings {
 impl behave_fire::output::RunObserver for Timings {
     fn observe<T>(&self, phase: behave_fire::output::RunPhase, work: impl FnOnce() -> T) -> T {
         let started = Instant::now();
-        #[cfg(feature = "allocation-probe")]
-        let _scope = crate::allocation_probe::Scope::enter(match phase {
-            behave_fire::output::RunPhase::Kernel => crate::allocation_probe::KERNEL,
-            behave_fire::output::RunPhase::Encoder => crate::allocation_probe::ENCODER,
-        });
         let value = work();
         let elapsed = started.elapsed().as_nanos().min(u64::MAX as u128) as u64;
         let counter = match phase {
@@ -542,14 +537,7 @@ pub fn model_batch<'py>(
             if profile {
                 run_model_observed(&run, &request, threads, &timings)
             } else {
-                #[cfg(feature = "allocation-probe")]
-                {
-                    run_model_observed(&run, &request, threads, &crate::model_observer::Observer)
-                }
-                #[cfg(not(feature = "allocation-probe"))]
-                {
-                    behave_fire::engine::run_model(&run, &request, threads)
-                }
+                behave_fire::engine::run_model(&run, &request, threads)
             }
         })
         .map_err(|e| PyValueError::new_err(e.to_string()))?;
