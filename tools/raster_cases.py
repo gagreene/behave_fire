@@ -1,6 +1,4 @@
-"""Deterministic raster cases and fresh-process block ordering."""
-
-import random
+"""Deterministic raster cases and correctness helpers shared by tests."""
 
 OPERATIONS = ("surface", "crown", "typed-crown", "typed-crown-b", "masked-crown",
               "masked-false-crown", "typed-crown-c")
@@ -33,7 +31,7 @@ def assert_outputs(actual, expected):
     if right.dtype.kind in "biu":
         np.testing.assert_array_equal(left, right)
         return
-    assert right.dtype.kind in "fc", "Benchmark outputs must be numerical arrays"
+    assert right.dtype.kind in "fc", "Outputs must be numerical arrays"
     parts = ((left.real, right.real), (left.imag, right.imag)) if right.dtype.kind == "c" else ((left, right),)
     single = right.dtype in (np.dtype("float32"), np.dtype("complex64"))
     for left_part, right_part in parts:
@@ -77,25 +75,57 @@ def build_inputs(cells, dataset, seed=20261105):
     return inputs
 
 
-def paired_schedule(repetitions, seed, workers):
-    """Shuffle each block while sharing one reference across native worker settings.
+def model_call(operation, dataset, cells, backend, *, threads=1, seed=20261105, normalize_reference=False):
+    """Prepare a model and identical inputs before any call is made.
 
-    :param repetitions: Number of independent paired blocks.
-    :param seed: Reproducible shuffle seed.
-    :param workers: Distinct positive or automatic native worker requests.
-    :return: Ordered block/backend/worker triples with one Python member per block.
+    :param operation: Surface, common Crown, or one of the typed or masked Crown layouts.
+    :param dataset: Uniform, heterogeneous, or continuously varying case.
+    :param cells: Nonnegative logical cell count.
+    :param backend: Explicit ``"python"`` or ``"rust"`` implementation.
+    :param threads: Native worker count; ignored by the Python backend.
+    :param seed: Stable phase offset for spatial variation.
+    :param normalize_reference: Widen inputs for the independent Python correctness oracle.
+    :return: Zero-argument callable returning the complete model output dictionary.
     """
-    if type(repetitions) is not int or repetitions < 1 or len(set(workers)) != len(workers):
-        raise ValueError("Require positive repetitions and distinct worker requests")
-    if any(type(worker) is not int or worker < 0 for worker in workers):
-        raise ValueError("Worker requests must be nonnegative integers")
-    rng = random.Random(seed)
-    schedule = []
-    for block in range(repetitions):
-        members = [("python", 1), *(("rust", worker) for worker in workers)]
-        rng.shuffle(members)
-        schedule.extend((block, backend, worker) for backend, worker in members)
-    return schedule
+    import numpy as np
+    if normalize_reference and backend != 'python':
+        raise ValueError('Only the independent Python correctness oracle can normalize reference inputs')
+    from behave_fire.python import BehaveRun as PythonRun
+    from behave_fire.python import FuelModels
+    inputs = build_inputs(cells, dataset, seed)
+    if backend == "rust":
+        from behave_fire.rust import BehaveRun
+        model = BehaveRun(FuelModels(), threads=threads)
+    else:
+        model = PythonRun(FuelModels())
+    if operation == "surface":
+        def call():
+            """Invoke Surface with normalized shape-matching input arrays.
+
+            :return: Complete Surface output dictionary.
+            """
+            if normalize_reference:
+                from float64_model_reference import model_reference
+                return model_reference(model.do_surface_run, inputs)
+            return model.do_surface_run(**inputs)
+        return call
+    surface = supplied_surface(inputs, operation, PythonRun(FuelModels()), uniform=dataset == "uniform")
+    canopy = dict(canopy_base_height=4.0, canopy_height=30.0, canopy_bulk_density=.01, moisture_foliar=100.0)
+    if dataset == "heterogeneous":
+        phase = ((np.arange(cells) + seed) % 17) / 16
+        canopy = dict(canopy_base_height=1 + 5 * phase, canopy_height=15 + 25 * phase,
+                      canopy_bulk_density=.005 + .02 * phase, moisture_foliar=80 + 40 * phase)
+
+    def call():
+        """Invoke Crown with independently typed supplied Surface fields.
+
+        :return: Complete Crown output dictionary.
+        """
+        if normalize_reference:
+            from float64_model_reference import model_reference
+            return model_reference(model.do_crown_run, dict(surface_results=surface, **inputs, **canopy))
+        return model.do_crown_run(surface_results=surface, **inputs, **canopy)
+    return call
 
 
 def supplied_surface(inputs, operation, python_model, uniform=False):
@@ -131,3 +161,53 @@ def supplied_surface(inputs, operation, python_model, uniform=False):
                                                    mask=np.arange(cells) % 11 == 0)
         surface['heat_per_unit_area'] = surface['heat_per_unit_area'].astype(np.int32)
     return surface
+
+
+def validate_layout(operation, dataset, cells, *, threads=1, seed=20261105):
+    """Compare complete native outputs with the independent Python oracle.
+
+    :param operation: Surface, common Crown, or one of the typed or masked Crown layouts.
+    :param dataset: Uniform, heterogeneous, or continuously varying case.
+    :param cells: Nonnegative logical cell count.
+    :param threads: Native worker count.
+    :param seed: Stable phase offset for spatial variation.
+    :return: Validation status, compared fields, and the native boundaries the call used.
+    """
+    expected = model_call(operation, dataset, cells, 'python', seed=seed, normalize_reference=True)()
+    from behave_fire import _rust
+    calls = []
+    originals = {name: getattr(_rust, name) for name in ('component_batch', 'model_batch', 'model_groups')}
+
+    def instrument(name, original):
+        """Record a real native boundary without changing its operands.
+
+        :param name: Native boundary identity.
+        :param original: Unmodified native callable.
+        :return: Transparent recording wrapper.
+        """
+        def invoke(*args, **kwargs):
+            """Record and execute exactly one native operation.
+
+            :param args: Original positional arguments.
+            :param kwargs: Original keyword arguments.
+            :return: Unmodified native result.
+            """
+            calls.append(name)
+            return original(*args, **kwargs)
+        return invoke
+
+    try:
+        for name, function in originals.items():
+            setattr(_rust, name, instrument(name, function))
+        actual = model_call(operation, dataset, cells, 'rust', threads=threads, seed=seed)()
+    finally:
+        for name, function in originals.items():
+            setattr(_rust, name, function)
+    result = dict(passed=False, error=None, output_fields=len(expected), fields=sorted(expected),
+                  native_boundary_calls=calls)
+    try:
+        assert_outputs(actual, expected)
+        result['passed'] = True
+    except AssertionError as error:
+        result['error'] = str(error)
+    return result

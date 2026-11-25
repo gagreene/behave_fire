@@ -28,7 +28,7 @@ def test_complex_then_real_state_roundtrip_keeps_policy_and_frozen_registry(monk
     import behave_fire.auto as auto
     from behave_fire.python import BehaveRun as PythonRun
     from float64_model_reference import model_reference
-    from performance_cases import assert_outputs
+    from raster_cases import assert_outputs
 
     monkeypatch.setattr(auto, '_COMPLEX_WARNING_EMITTED', False)
     registry = FuelModels()

@@ -12,7 +12,7 @@ from parity_support import ROOT as ROOT
 from behave_fire.python import BehaveRun as PythonRun
 from behave_fire.python import FuelModels
 from float64_model_reference import model_reference
-from performance_cases import assert_outputs
+from raster_cases import assert_outputs
 
 pytestmark = pytest.mark.rust
 _native = pytest.importorskip("behave_fire.rust", exc_type=ImportError)

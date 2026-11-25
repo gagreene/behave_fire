@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 
 from parity_support import cases, run_case
-from performance_cases import assert_outputs
+from raster_cases import assert_outputs
 
 
 def assert_comparisons(rows):

@@ -1,7 +1,7 @@
 """Independent Python equations with the reviewed float64/NaN model contract.
 
-This module is a correctness oracle only. Timed Python calls must receive the
-original caller data; widening here must never replace that timing baseline.
+This module is a correctness oracle only. Widening here applies to the oracle's
+own copy and never replaces the caller's original data.
 """
 import numpy as np
 
