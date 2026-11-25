@@ -9,7 +9,7 @@ from pathlib import Path
 
 import pytest
 
-from cpp_snapshot_support import write_snapshot
+from cpp_snapshot_support import capture_snapshot, write_snapshot
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / 'tools'))
 import cpp_reference as reference
@@ -180,6 +180,26 @@ def test_revalidation_preserves_paired_bits_and_signed_zero(tmp_path):
     row['actual'][field] = math.copysign(0., -row['actual'][field])
     with pytest.raises(AssertionError, match='signed-zero mismatch'):
         module._validate_observations(ROOT, report)
+
+
+# ---- snapshot capture tests ----
+
+def test_snapshot_captures_current_sources_while_receipt_lists_deleted_files(tmp_path):
+    root = tmp_path / 'source'
+    base = root / 'tests/data/cpp_reference'
+    (base / 'calibration').mkdir(parents=True)
+    (root / 'tools').mkdir()
+    (root / 'tools/present.py').write_bytes(b'VALUE = 1\n')
+    receipt = json.dumps({'source_files': {'tools/gone.py': '0' * 64}}).encode()
+    (base / 'calibration/qualification.json').write_bytes(receipt)
+    (base / 'tolerance-policy.json').write_text(json.dumps({'approved': False}))
+    (base / 'hashes.json').write_text(json.dumps({
+        'tests/data/cpp_reference/calibration/qualification.json': 'receipt identity',
+        'tests/data/cpp_reference/tolerance-policy.json': 'policy identity'}))
+    snapshot = dict(capture_snapshot(root))
+    assert snapshot['tools/present.py'] == b'VALUE = 1\n'
+    assert snapshot['tests/data/cpp_reference/calibration/qualification.json'] == receipt
+    assert 'tools/gone.py' not in snapshot
 
 
 # ---- version-neutral source hash tests ----

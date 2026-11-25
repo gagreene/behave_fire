@@ -1,7 +1,24 @@
 """Independent temporary input snapshots for C++ evidence rejection tests."""
 
 import json
+import sys
 from pathlib import Path, PurePosixPath, PureWindowsPath
+
+QUALIFICATION = 'tests/data/cpp_reference/calibration/qualification.json'
+POLICY = 'tests/data/cpp_reference/tolerance-policy.json'
+
+
+def _current_source_names(source_root):
+    """List the sources the calibration tool binds today, without reading them.
+
+    :param source_root: Checkout holding ``tools/cpp_calibrate.py``.
+    :return: Sorted repository-relative names from the current source inventory.
+    """
+    tools = str(Path(source_root) / 'tools')
+    if tools not in sys.path:
+        sys.path.insert(0, tools)
+    from cpp_calibrate import _source_paths
+    return _source_paths(source_root)
 
 
 def _snapshot_paths(root, names):
@@ -40,11 +57,16 @@ def capture_snapshot(source_root):
     :return: Immutable tuples of relative paths and captured bytes.
     """
     source_root = Path(source_root).resolve()
-    metadata = dict(_snapshot_paths(source_root, (
-        'tests/data/cpp_reference/hashes.json', 'tests/data/cpp_reference/calibration/qualification.json')))
+    metadata = dict(_snapshot_paths(source_root, ('tests/data/cpp_reference/hashes.json', QUALIFICATION, POLICY)))
     hashes = json.loads(metadata['tests/data/cpp_reference/hashes.json'].read_text())
-    qualification = metadata['tests/data/cpp_reference/calibration/qualification.json']
-    sources = json.loads(qualification.read_text()).get('source_files', {}) if qualification.is_file() else {}
+    qualification, policy = metadata[QUALIFICATION], metadata[POLICY]
+    sources = {}
+    if qualification.is_file():
+        inactive = policy.is_file() and json.loads(policy.read_text()).get('approved') is False
+        # An inactive policy keeps the historical receipt, whose source list may name
+        # retired files; capture the current inventory instead.
+        sources = (_current_source_names(source_root) if inactive
+                   else json.loads(qualification.read_text()).get('source_files', {}))
     paths = _snapshot_paths(source_root, sorted({*hashes, *sources, 'tests/data/cpp_reference/hashes.json'}))
     return tuple((name, path.read_bytes()) for name, path in paths)
 
