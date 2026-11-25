@@ -7,7 +7,7 @@
     "tests/data/cpp_reference/surface_custom/results.jsonl": "04e96268466338364a350d53ac05b639f1a7758c78911aaee97da389c0f779a2"
   },
   "calibration_complete": true,
-  "ci_run_url": "https://github.com/gagreene/behave_fire/actions/runs/45547893204",
+  "ci_run_url": "https://github.com/gagreene/behave_fire/actions/runs/45552664829",
   "crown": {
     "artifacts": {
       "cases.jsonl": "c4ab63a4a0d52e8c5a8fd98aac981213db6606200f385c6b88333682897dc2fc",
@@ -78,7 +78,7 @@
       "results.jsonl": "3c8a90c2d0cb8af549b5d555938e439ed5867b5d2fbb66fdad978aa5c056d3df",
       "schema.json": "bcefacdfef527819dd578abc68c46e9c05518c143d6f013f170a06d6be4df340"
     },
-    "ci_run_url": "https://github.com/gagreene/behave_fire/actions/runs/45547893204",
+    "ci_run_url": "https://github.com/gagreene/behave_fire/actions/runs/45552664829",
     "comparisons": 144,
     "maxima": {
       "area_ft2": {
@@ -100,7 +100,7 @@
         "ulp": 0
       }
     },
-    "source_commit": "43760d6069b79f463ca04bd56380e759f3c6823f"
+    "source_commit": "b1a1baf7be61651ab69f6a3bd361a0918d0832f9"
   },
   "ignite": {
     "artifacts": {
@@ -134,7 +134,7 @@
   },
   "reports": {
     "cpp-GNU": {
-      "sha256": "a49bbbb20f55e4e5b86bf8b5453241f03cc0445c6c1c1628522aed0c71c60a12",
+      "sha256": "3476c7f12884d7e0a0720aee0f5c23defad221b18806e9fbafa270125e81e45b",
       "summary": {
         "available": 722,
         "cases": 773,
@@ -143,7 +143,7 @@
       }
     },
     "cpp-MSVC": {
-      "sha256": "0071a0827acd676e6872af888b5db203224c3bcd8f47f00da8651b5086e414a6",
+      "sha256": "322fc1a1e7ea54f9440d680ce8b89c72d30b9870a2d969629b699d262b98028a",
       "summary": {
         "available": 722,
         "cases": 773,
@@ -152,7 +152,7 @@
       }
     },
     "ports-linux-aarch64": {
-      "sha256": "dcd3956196e509d3423f135bdfa5aa34da9c7704f95a4740aee142181799e67c",
+      "sha256": "a50aab89551e9babc8e613860c478442ea7233ff68d8fb843b1cc7bb47d4fdf3",
       "summary": {
         "cases_per_backend": 710,
         "fields_per_backend": 3550,
@@ -160,7 +160,7 @@
       }
     },
     "ports-linux-musl-x86_64": {
-      "sha256": "6d1e362eaca655e0541137678cdd73a2fbff2e973fe87ed8a12bb354928a2398",
+      "sha256": "588a18467d919e06a4cdbd20bac47956ae4ace4e378edfb7e2540fad6a118d15",
       "summary": {
         "cases_per_backend": 710,
         "fields_per_backend": 3550,
@@ -168,7 +168,7 @@
       }
     },
     "ports-linux-x86_64": {
-      "sha256": "19fd946afeb949263d9d54d6562d40cabac1e9e9e2c283adda81c272e8a35589",
+      "sha256": "ffc8b3ba2cf201e8d4ca3ab85f99e75f5d807171657ea4c5714d91c6d7f3c490",
       "summary": {
         "cases_per_backend": 710,
         "fields_per_backend": 3550,
@@ -176,7 +176,7 @@
       }
     },
     "ports-macos-arm64": {
-      "sha256": "cf5f0e16d0988033d76b17d9a2ca920b784a7abe8551b21e33deb4153cfa6a37",
+      "sha256": "0eac08c85f75945e41e7104967bb79870917813d281d259b3e836628041db458",
       "summary": {
         "cases_per_backend": 710,
         "fields_per_backend": 3550,
@@ -184,7 +184,7 @@
       }
     },
     "ports-macos-x86_64": {
-      "sha256": "54a1baa7aa668cab94d526316692f97ad2db1a3b02980a08440d12a2fa98594f",
+      "sha256": "b9b6b984b06eb3441d796a95cd0b9c6f1ef0a6fe5336de947aa0491ef148d0a6",
       "summary": {
         "cases_per_backend": 710,
         "fields_per_backend": 3550,
@@ -192,7 +192,7 @@
       }
     },
     "ports-windows-arm64": {
-      "sha256": "d5d8cb8e32358c7d2b32764e406a3a78ff608d5418147c43ae62be33451c592f",
+      "sha256": "795c708e8b8099a4a745b53936bf5ad861d40251f3afbc112314afa8237db99e",
       "summary": {
         "cases_per_backend": 710,
         "fields_per_backend": 3550,
@@ -200,7 +200,7 @@
       }
     },
     "ports-windows-x86_64": {
-      "sha256": "da0498c331876ff76ba3e83e9af2737941d95ebb2ba48814a1aa6d1b75c411c3",
+      "sha256": "c4e64786a42ffb286686cf6e798404add8763f520efb4058b9afa2d98c8734e0",
       "summary": {
         "cases_per_backend": 710,
         "fields_per_backend": 3550,
@@ -247,7 +247,7 @@
     },
     "nonmatching": 13
   },
-  "source_commit": "43760d6069b79f463ca04bd56380e759f3c6823f",
+  "source_commit": "b1a1baf7be61651ab69f6a3bd361a0918d0832f9",
   "source_files": {
     ".github/workflows/ci.yml": "92aae2758842fcc5a8887e995f6a0cb9c930ea7bf80b6298c08645be6a42bf0d",
     ".github/workflows/cpp-live-validation.yml": "87fdc583529286cc18f6f60af0c53f75f17065215bf09f29fa220dd70d4491e6",
@@ -437,7 +437,7 @@
     "tools/smoke_test_wheel.py": "2ddc9b38d4a0e03bfb4954e62423059ddd03d4b04464133469656eb8f03cc1a5",
     "tools/test_native_wheel_suite.py": "a82736ab26ccfe88a68213cf5e153869a5757ce8aaf08edee9edb163f6d21003",
     "tools/test_wheel_install.py": "9ad2936eafe1e3a1aadc087ab41e5dafe4465959991daf108858df9160ab92d4",
-    "tools/time_standard_runs.py": "c5a0540e78a90195a4e023c3b467fd5fbed5260224731d25833861cfe4aa44fa",
+    "tools/time_standard_runs.py": "75eb84b55751350d5e98dceb2883f49fc8ad44a6442c0728bbe81c536c8855f0",
     "uv.lock": "c259b3a141f671cfa47424d8668c3b6cfe3a75a6ec086594a8f47e3aab970101"
   },
   "spot": {
