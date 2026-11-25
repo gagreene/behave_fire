@@ -20,6 +20,13 @@ def test_gate_layouts_validate_every_native_output(cells, dataset, operation):
     assert record['native_boundary_calls'] == ['model_batch']
 
 
+def test_model_call_rejects_unknown_backends():
+    from raster_cases import model_call
+
+    with pytest.raises(ValueError, match='rsut'):
+        model_call('surface', 'uniform', 4, 'rsut')
+
+
 def test_model_call_rejects_normalized_native_reference():
     from raster_cases import model_call
 

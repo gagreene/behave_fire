@@ -81,13 +81,15 @@ def model_call(operation, dataset, cells, backend, *, threads=1, seed=20261105, 
     :param operation: Surface, common Crown, or one of the typed or masked Crown layouts.
     :param dataset: Uniform, heterogeneous, or continuously varying case.
     :param cells: Nonnegative logical cell count.
-    :param backend: Explicit ``"python"`` or ``"rust"`` implementation.
+    :param backend: Explicit ``"python"`` or ``"rust"`` implementation; other names raise ValueError.
     :param threads: Native worker count; ignored by the Python backend.
     :param seed: Stable phase offset for spatial variation.
     :param normalize_reference: Widen inputs for the independent Python correctness oracle.
     :return: Zero-argument callable returning the complete model output dictionary.
     """
     import numpy as np
+    if backend not in ('python', 'rust'):
+        raise ValueError(f'Unknown backend {backend!r}; expected "python" or "rust"')
     if normalize_reference and backend != 'python':
         raise ValueError('Only the independent Python correctness oracle can normalize reference inputs')
     from behave_fire.python import BehaveRun as PythonRun

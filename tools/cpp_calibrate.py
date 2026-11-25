@@ -26,7 +26,11 @@ import cpp_vapor_pressure_deficit as vpd
 
 # First-party version literals left out of qualification digests, so version-only
 # releases need no new source qualification. Every other manifest byte stays bound.
-SEMVER = re.compile(r"[0-9]+\.[0-9]+\.[0-9]+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?")
+# SemVer 2.0.0: no leading zeros in numeric parts or numeric prerelease identifiers, no empty identifiers.
+_NUMBER = r"(?:0|[1-9][0-9]*)"
+_PRERELEASE_ID = r"(?:0|[1-9][0-9]*|[0-9]*[A-Za-z-][0-9A-Za-z-]*)"
+SEMVER = re.compile(rf"{_NUMBER}\.{_NUMBER}\.{_NUMBER}(?:-{_PRERELEASE_ID}(?:\.{_PRERELEASE_ID})*)?"
+                    r"(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?")
 NEUTRAL_VERSION = "0.0.0-version-neutral"
 
 

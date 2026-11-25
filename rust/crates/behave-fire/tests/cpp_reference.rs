@@ -362,6 +362,62 @@ fn sha256_matches_standard_vectors_and_detects_fixture_mutation() {
     assert_ne!(sha256(fixture), sha256(&mutated));
 }
 
+#[test]
+fn version_neutral_core_manifest_matches_python_and_rejects_malformed_versions() {
+    let base = std::path::Path::new(env!("CARGO_MANIFEST_DIR"));
+    let orig = base.join("Cargo.toml.orig");
+    let path = if orig.is_file() {
+        orig
+    } else {
+        base.join("Cargo.toml")
+    };
+    let manifest = std::fs::read_to_string(path).unwrap().replace("\r\n", "\n");
+    let neutral = cpp_policy::version_neutral_core_manifest(&manifest).unwrap();
+    let policy: Value = serde_json::from_str(include_str!(
+        "data/cpp_reference/surface/tolerance-policy.json"
+    ))
+    .unwrap();
+    if let Some(receipt) = policy["qualification"]["source_files"].as_object() {
+        assert_eq!(
+            receipt["rust/crates/behave-fire/Cargo.toml"].as_str(),
+            Some(sha256(neutral.as_bytes()).as_str()),
+        );
+    }
+    let version = manifest
+        .lines()
+        .find(|line| line.starts_with("version = \""))
+        .unwrap()
+        .to_string();
+    let bumped = manifest.replacen(&version, "version = \"9.8.7-rc.6\"", 1);
+    assert_eq!(
+        cpp_policy::version_neutral_core_manifest(&bumped).unwrap(),
+        neutral
+    );
+    let edited = manifest.replacen("edition.workspace = true", "edition = \"2021\"", 1);
+    assert_ne!(
+        cpp_policy::version_neutral_core_manifest(&edited).unwrap(),
+        neutral
+    );
+    for bad in [
+        "01.2.3",
+        "1.2.3-rc..1",
+        "1.2.3-01",
+        "abc",
+        "1.2.3-",
+        "1.2.3+",
+    ] {
+        let text = manifest.replacen(&version, &format!("version = \"{bad}\""), 1);
+        assert!(
+            cpp_policy::version_neutral_core_manifest(&text).is_err(),
+            "{bad}"
+        );
+    }
+    let duplicated = manifest.replacen(&version, &format!("{version}\n{version}"), 1);
+    assert!(cpp_policy::version_neutral_core_manifest(&duplicated).is_err());
+    let missing = manifest.replacen(&format!("{version}\n"), "", 1);
+    assert!(cpp_policy::version_neutral_core_manifest(&missing).is_err());
+}
+
 // ---- surface controls ----
 #[test]
 fn surface_controls_preserve_defaults_and_honor_optional_modes() {

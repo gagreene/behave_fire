@@ -97,7 +97,8 @@ def run(cells=100_000, repeats=5, threads=1, backends=None, seed=20261105):
     :param cells: Raster cells per run.
     :param repeats: Timed calls per model and backend, after one warm-up call.
     :param threads: Native worker count for the Rust backend.
-    :param backends: Backends to time; ``None`` means Python plus Rust when it is usable.
+    :param backends: Backends to time; ``None`` means Python plus Rust when it is usable. Names other
+        than ``"python"`` and ``"rust"`` raise ValueError before any run.
     :param seed: Stable phase offset for the heterogeneous inputs.
     :return: Host details, settings, and one row per model and backend with median and
         minimum seconds.
@@ -105,6 +106,9 @@ def run(cells=100_000, repeats=5, threads=1, backends=None, seed=20261105):
     import behave_fire
     if backends is None:
         backends = ("python", "rust") if "rust" in behave_fire.available_backends() else ("python",)
+    unknown = [backend for backend in backends if backend not in ("python", "rust")]
+    if unknown:
+        raise ValueError(f"Unknown backend(s) {unknown}; expected 'python' or 'rust'")
     rows = []
     for model in MODELS:
         for backend in backends:

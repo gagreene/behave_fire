@@ -2,6 +2,8 @@
 
 import json
 
+import pytest
+
 from parity_support import ROOT as ROOT
 
 # ---- timing report tests ----
@@ -34,3 +36,13 @@ def test_report_lists_every_model_and_backend():
     assert sorted(pairs) == sorted((m, b) for m in ("surface", "crown") for b in backends)
     assert all({"median_s", "min_s"} <= set(r) for r in report["rows"])
     assert all(isinstance(r["median_s"], float) and isinstance(r["min_s"], float) for r in report["rows"])
+
+
+def test_unknown_backend_is_rejected_before_any_run(monkeypatch):
+    import time_standard_runs
+
+    calls = []
+    monkeypatch.setattr(time_standard_runs, "model_call", lambda *args, **kwargs: calls.append(args))
+    with pytest.raises(ValueError, match="rsut"):
+        time_standard_runs.run(cells=64, repeats=1, backends=("python", "rsut"))
+    assert calls == []

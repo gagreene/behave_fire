@@ -217,6 +217,11 @@ def test_crlf_manifests_hash_like_lf(tmp_path):
 @pytest.mark.parametrize('relative,old,new', [
     ('rust/crates/behave-fire/Cargo.toml', 'version = "<core>"\n', 'version = "<core>"\nversion = "<core>"\n'),
     ('rust/crates/behave-fire/Cargo.toml', 'version = "<core>"\n', 'version = "abc"\n'),
+    ('rust/crates/behave-fire/Cargo.toml', 'version = "<core>"\n', 'version = "01.2.3"\n'),
+    ('rust/crates/behave-fire/Cargo.toml', 'version = "<core>"\n', 'version = "1.2.3-rc..1"\n'),
+    ('rust/crates/behave-fire/Cargo.toml', 'version = "<core>"\n', 'version = "1.2.3-01"\n'),
+    ('rust/crates/behave-py/Cargo.toml', 'version = "<py>"', 'version = "0.1.0-rc.01"'),
+    ('rust/Cargo.lock', 'name = "behave-py"\nversion = "<py>"', 'name = "behave-py"\nversion = "1.2.3+"'),
     ('rust/crates/behave-py/Cargo.toml', 'path = "../behave-fire", version = "<core>" }', 'path = "../behave-fire" }'),
     ('rust/crates/behave-py/Cargo.toml', 'path = "../behave-fire"', 'path = "../behave-fire-copy"'),
     ('rust/Cargo.lock', 'name = "behave-py"\nversion = "<py>"\n', 'name = "behave-py"\n'),
