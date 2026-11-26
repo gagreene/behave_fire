@@ -52,10 +52,10 @@ The package has two implementations that give the same results within documented
 
 ### Validation against Behave C++
 
-The C++ validation oracle is [Behave `3ca33d5`](https://github.com/firelab/behave/commit/3ca33d5b919d4253b411bfb6464b4c872dda6fc9). Pinned C++ observations are replayed against both implementations, and each qualification covers GNU and MSVC builds and all seven native wheel platforms:
+Both implementations are tested against [Behave `3ca33d5`](https://github.com/firelab/behave/commit/3ca33d5b919d4253b411bfb6464b4c872dda6fc9). Full qualification across GNU, MSVC and all seven native wheel platforms is pending for the corrected fuel tables.
 
-- **Surface:** 571 numbered cases and 139 explicit controls match within `1e-12` relative and absolute caps. Fuel models 152 and 153 are the one documented difference: upstream changed their loads at this pin, and behave_fire keeps its own load values (12 outputs).
-- **FireSize, Ignite, and Mortality scorch height:** the standalone cases match exactly.
+- **Surface** compares 583 numbered cases and 139 paired custom controls, including models 152 (SCAL16) and 153 (SCAL14), against pinned C++ outputs with `1e-12` relative and absolute caps.
+- **FireSize, Ignite, and Mortality scorch height** use exact binary64 comparisons for the standalone cases.
 - **Crown:** the six fire-type classifications match exactly. Crown numeric outputs are measured but have no approved comparison policy yet.
 - **Spot, Safety, SlopeTool, fine dead fuel moisture, vapor pressure deficit, and Units:** measured, with no approved comparison policy yet.
 

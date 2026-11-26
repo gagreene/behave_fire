@@ -86,6 +86,17 @@ def test_metric_surface_matches_independent_imperial_custom_records(grid):
         np.testing.assert_allclose(actual[key], expected[key], rtol=1e-12, atol=1e-12, err_msg=key)
 
 
+@pytest.mark.parametrize(("number", "getter", "tons_per_acre"), [
+    (152, FuelModels.get_fuel_load_one_hour, 2.25),
+    (153, FuelModels.get_fuel_load_hundred_hour, 1.05),
+    (153, FuelModels.get_fuel_load_live_herbaceous, 1.45),
+])
+def test_scal_fuel_loads_match_upstream(number, getter, tons_per_acre):
+    # Upstream fuelModels.cpp specifies these loads in short tons per acre.
+    pounds_per_square_foot = tons_per_acre * 2000 / 43560
+    assert getter(FuelModels(), number) == pytest.approx(pounds_per_square_foot, rel=1e-12)
+
+
 @pytest.mark.parametrize("number", SCOTT_BURGAN_MODELS)
 def test_scott_burgan_dynamic_flags_follow_herbaceous_load(number):
     fuels = FuelModels()

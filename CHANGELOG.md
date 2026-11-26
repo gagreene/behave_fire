@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- Align Python and Rust with the pinned Behave fuel records for SCAL16 (152) and SCAL14 (153).
+  SCAL16 dead 1-hour load changes from 2.20 to 2.25 US tons/acre. SCAL14 dead 100-hour load
+  changes from 1.10 to 1.05 and live herbaceous load from 1.40 to 1.45 US tons/acre.
+  Calculations using these built-in models now use the corrected loads, resolving F-019.
+
 - Restart version numbering at `0.1.0` under `MAJOR.MINOR.PATCH`; the package
   remains beta. Versions `1.0.0b1` and `1.0.0b2` were never published to a
   package registry. The current candidate is `0.1.0rc1` (Cargo `0.1.0-rc.1`), and
@@ -28,7 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   each available backend on one machine. Timing is reported only and never used
   as a pass or fail check.
 
-- Update the pinned Behave reference to `3ca33d5b919d4253b411bfb6464b4c872dda6fc9`. Replay the reviewed inputs, retire the corrected moisture-of-extinction discrepancy, and record the two retained port load definitions under F-019. The Surface caps remain `1e-12` relative and absolute.
+- Update the pinned Behave reference to `3ca33d5b919d4253b411bfb6464b4c872dda6fc9`, replay the reviewed inputs, and retire the corrected moisture-of-extinction discrepancy. The Surface caps remain `1e-12` relative and absolute.
 
 - Enforce the approved Surface fixture ceilings: 806 cases, 6 MiB raw and
   512 KiB gzip for canonical fixtures, and 512 KiB raw and 64 KiB gzip for

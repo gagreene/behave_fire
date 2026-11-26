@@ -26,8 +26,8 @@ MOE_PERCENT_CONTROLS = {
     192: 45., 193: 26.,
 }
 SURFACE_LOAD_CONTROLS = {
-    152: {"dead_1h_load_lb_ft2": 0.10101010101010101},
-    153: {"dead_100h_load_lb_ft2": 0.050505050505050504, "live_herb_load_lb_ft2": 0.06427915518824609},
+    152: {"dead_1h_load_lb_ft2": 2.25 * (2000.0 / 43560.0)},
+    153: {"dead_100h_load_lb_ft2": 1.05 * (2000.0 / 43560.0), "live_herb_load_lb_ft2": 1.45 * (2000.0 / 43560.0)},
 }
 LOAD_CONTROL_FIELDS = {field for loads in SURFACE_LOAD_CONTROLS.values() for field in loads}
 CONTROL_MODEL = 250

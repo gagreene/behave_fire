@@ -1,4 +1,4 @@
-//! Standalone checks for the qualified Surface bounds and declared load differences.
+//! Standalone checks for Surface bounds and full compiler/platform qualification.
 
 use super::cpp_hash::sha256;
 use serde_json::Value;
@@ -12,7 +12,6 @@ pub const FIELDS: [&str; 5] = [
     "length_to_width_ratio",
     "spread_chains_per_hour",
 ];
-pub const LOAD_MODELS: [i64; 2] = [152, 153];
 
 fn source_files(
     directory: &Path,
@@ -109,14 +108,8 @@ pub fn require_qualification(policy: &Value) -> Result<(), String> {
     for field in FIELDS {
         compare(1., 1., policy, field)?;
     }
-    let actual_models: Vec<_> = policy["documented_load_source_models"]
-        .as_array()
-        .ok_or("missing load-record disposition")?
-        .iter()
-        .map(|value| value.as_i64())
-        .collect();
-    if actual_models != LOAD_MODELS.into_iter().map(Some).collect::<Vec<_>>() {
-        return Err("load-record disposition changed".into());
+    if policy.get("documented_load_source_models").is_some() {
+        return Err("Surface qualification cannot exclude numbered models".into());
     }
     let expected: BTreeSet<_> = [
         "cpp-GNU",
@@ -151,8 +144,8 @@ pub fn require_qualification(policy: &Value) -> Result<(), String> {
             {
                 return Err("compiler coverage changed".into());
             }
-        } else if summary["cases_per_backend"].as_u64() != Some(710)
-            || summary["fields_per_backend"].as_u64() != Some(3550)
+        } else if summary["cases_per_backend"].as_u64() != Some(722)
+            || summary["fields_per_backend"].as_u64() != Some(3610)
             || summary["paired_cases_per_backend"].as_u64() != Some(139)
         {
             return Err("native-platform coverage changed".into());
