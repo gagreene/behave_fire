@@ -67,7 +67,7 @@ def test_manual_and_release_cpp_calibration_use_the_opt_in_live_lane():
     assert job['uses'] == shared
     crate = yaml.load((ROOT / '.github/workflows/release-crate.yml').read_text(), Loader=yaml.BaseLoader)
     assert crate['jobs']['cpp-live']['uses'] == shared
-    assert set(crate['jobs']['publish-crate']['needs']) == {'verify', 'cpp-live'}
+    assert set(crate['jobs']['publish-crate']['needs']) == {'verify', 'cpp-live', 'qualification-gate'}
     assert crate['jobs']['publish-crate']['if'] == 'inputs.publish'
     lane = yaml.load((ROOT / shared).read_text(), Loader=yaml.BaseLoader)
     assert 'workflow_call' in lane['on']
@@ -169,6 +169,47 @@ def test_pypi_publication_requires_a_tag_push():
     assert jobs['publish-testpypi']['if'] == ("github.event_name == 'workflow_dispatch' && inputs.target == 'testpypi' "
                                               "&& vars.TESTPYPI_PUBLISHING_ENABLED == 'true'")
     assert jobs['publish-pypi']['environment']['name'] == 'pypi'
+
+
+def test_reusable_ci_callers_grant_the_permissions_its_jobs_request():
+    called = yaml.load((ROOT / '.github/workflows/ci.yml').read_text(), Loader=yaml.BaseLoader)
+    requested = {}
+    for job in called['jobs'].values():
+        for scope, level in job.get('permissions', {}).items():
+            requested[scope] = 'write' if 'write' in (level, requested.get(scope)) else level
+    assert requested == {'contents': 'read', 'actions': 'read', 'pull-requests': 'read'}
+    callers = 0
+    for path in (ROOT / '.github/workflows').glob('*.yml'):
+        workflow = yaml.load(path.read_text(), Loader=yaml.BaseLoader)
+        for name, job in workflow['jobs'].items():
+            if job.get('uses') != './.github/workflows/ci.yml':
+                continue
+            callers += 1
+            granted = job.get('permissions', workflow.get('permissions', {}))
+            for scope, level in requested.items():
+                assert granted.get(scope) in ({level, 'write'} if level == 'read' else {'write'}), (path.name, name)
+    assert callers == 1
+
+
+def test_uploads_require_an_active_cpp_qualification():
+    testpypi = ("github.event_name == 'workflow_dispatch' && inputs.target == 'testpypi' "
+                "&& vars.TESTPYPI_PUBLISHING_ENABLED == 'true'")
+    pypi = ("github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') "
+            "&& vars.PYPI_PUBLISHING_ENABLED == 'true'")
+    expected = {'release.yml': ("(" + testpypi + ") || (" + pypi + ")", ('publish-testpypi', 'publish-pypi')),
+                'release-crate.yml': ('inputs.publish', ('publish-crate',))}
+    for name, (condition, uploads) in expected.items():
+        jobs = yaml.load((ROOT / '.github/workflows' / name).read_text(), Loader=yaml.BaseLoader)['jobs']
+        gate = jobs['qualification-gate']
+        # The gate runs only for an actual upload, so build-only runs work while qualification is withdrawn.
+        assert gate['if'] == condition, name
+        commands = [step.get('run', '') for step in gate['steps']]
+        assert 'uv run --no-sync python tools/cpp_inventory.py --check --require-ready' in commands, name
+        assert all(step.get('continue-on-error', 'false') == 'false' for step in gate['steps'])
+        for upload in uploads:
+            assert 'qualification-gate' in jobs[upload]['needs'], (name, upload)
+        validation = [job for job in jobs.values() if job.get('uses', '').startswith('./')]
+        assert all('qualification-gate' not in job.get('needs', []) for job in validation), name
 
 
 def test_wheel_validation_scopes_select_targeted_jobs():

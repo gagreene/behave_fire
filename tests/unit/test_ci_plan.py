@@ -1,6 +1,8 @@
 """Check CI tier selection and the master reuse proof without contacting GitHub."""
 
 import importlib.util
+import json
+import subprocess
 from pathlib import Path
 
 import pytest
@@ -33,6 +35,43 @@ def _run(identifier=1, created="2026-11-25T01:00:00Z", conclusion="success"):
 
 
 # ---- reuse proof tests ----
+
+@pytest.mark.parametrize("content", [b"{not json", b"\xff\xfe\x00", b""])
+def test_download_treats_an_unreadable_record_as_missing(monkeypatch, content):
+    def fake_run(command, **_):
+        directory = Path(command[command.index("--dir") + 1])
+        (directory / "result.json").write_bytes(content)
+        return subprocess.CompletedProcess(command, 0, "", "")
+    monkeypatch.setattr(plan.subprocess, "run", fake_run)
+    assert plan._download_result(1, "o/r") is None
+
+
+@pytest.mark.parametrize("evidence", [[], "run/7", {}, {"run_url": 7}, {"run_url": None}])
+def test_master_push_runs_full_for_invalid_reuse_evidence(evidence):
+    assert plan.choose(PUSH, lambda *_: evidence) == {"tier": "full", "scope": "full"}
+
+
+@pytest.mark.parametrize("pulls", [{"message": "rate limited"}, [{"number": 76}], ["not a pull"]])
+def test_master_push_runs_full_for_malformed_api_responses(pulls):
+    def lookup(sha, repository):
+        return plan.find_reusable_result(sha, repository, _reader(pulls, [_run()]), lambda *_: _record(),
+                                         lambda _: "tree-a")
+    assert plan.choose(PUSH, lookup) == {"tier": "full", "scope": "full"}
+
+
+@pytest.mark.parametrize("failure", [
+    subprocess.CalledProcessError(1, ["gh", "api"]),
+    json.JSONDecodeError("bad", "", 0),
+    KeyError("head"),
+    TypeError("not a list"),
+    FileNotFoundError("gh"),
+])
+def test_master_push_runs_full_when_the_reuse_lookup_fails(failure, capsys):
+    def lookup(*_):
+        raise failure
+    assert plan.choose(PUSH, lookup) == {"tier": "full", "scope": "full"}
+    assert "running the full tier" in capsys.readouterr().err
+
 
 def test_reuse_accepts_only_the_latest_matching_full_record():
     runs = [_run(1, "2026-11-25T01:00:00Z"), _run(2, "2026-11-25T02:00:00Z")]

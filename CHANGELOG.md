@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- Gate TestPyPI, PyPI, and crates.io uploads on an active C++ qualification that
+  matches the candidate's sources (`cpp_inventory.py --check --require-ready`);
+  build-only and targeted runs stay available while qualification is withdrawn.
+  `release.yml` grants its CI call the permissions the `plan` job needs, and a
+  missing, unreadable, or invalid reuse record on `master` falls back to the full tier.
 - Run the full platform and packaging CI once per promotion. Pull requests into
   `pre_release` and merges into it run the quick tier; promotion and hotfix pull
   requests into `master` run the full tier, and the following `master` push reuses

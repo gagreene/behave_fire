@@ -39,7 +39,7 @@ def _download_result(run_id, repository):
 
     :param run_id: Workflow run identifier.
     :param repository: ``owner/name`` repository.
-    :return: Decoded record, or ``None`` when the run has no such artifact.
+    :return: Decoded record, or ``None`` when the run has no such artifact or it is unreadable.
     """
     with tempfile.TemporaryDirectory() as directory:
         process = subprocess.run(["gh", "run", "download", str(run_id), "--repo", repository, "--name", FULL_RESULT,
@@ -47,7 +47,10 @@ def _download_result(run_id, repository):
         path = Path(directory) / "result.json"
         if process.returncode != 0 or not path.is_file():
             return None
-        return json.loads(path.read_text(encoding="utf-8"))
+        try:
+            return json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, UnicodeDecodeError, ValueError):
+            return None
 
 
 def _git_tree(revision):
@@ -81,8 +84,13 @@ def choose(environment, find_reusable=None):
     if event == "push":
         if environment.get("GITHUB_REF") != "refs/heads/master":
             return {"tier": "quick", "scope": ""}
-        record = find_reusable(environment["GITHUB_SHA"], environment["GITHUB_REPOSITORY"])
-        if record is None:
+        try:
+            record = find_reusable(environment["GITHUB_SHA"], environment["GITHUB_REPOSITORY"])
+        except Exception as error:  # Any failure to prove reuse means running the full tier.
+            print(f"Reuse evidence unavailable ({type(error).__name__}: {error}); running the full tier.",
+                  file=sys.stderr)
+            record = None
+        if not isinstance(record, dict) or not isinstance(record.get("run_url"), str):
             return {"tier": "full", "scope": "full"}
         return {"tier": "reused", "scope": "", "reused_run": record["run_url"]}
     if event == "workflow_dispatch":
@@ -102,7 +110,7 @@ def find_reusable_result(sha, repository, api=_api, download=_download_result, t
     :param download: Full-result artifact reader, replaceable in tests.
     :param tree: Tree reader for the checked-out push commit, replaceable in tests.
     :return: Matching record with ``run_url`` added, or ``None`` when proof is missing or the
-        trees differ.
+        trees differ. GitHub API failures propagate; ``choose`` treats them as missing proof.
     """
     landed = tree("HEAD")
     for pull in api(f"repos/{repository}/commits/{sha}/pulls"):
@@ -115,7 +123,7 @@ def find_reusable_result(sha, repository, api=_api, download=_download_result, t
             if run.get("conclusion") != "success":
                 continue
             record = download(run["id"], repository)
-            if (record and record.get("tier") == "full" and record.get("tree") == landed
+            if (isinstance(record, dict) and record.get("tier") == "full" and record.get("tree") == landed
                     and record.get("head_sha") == head and record.get("pull_request") == pull["number"]):
                 return dict(record, run_url=run["html_url"])
     return None
