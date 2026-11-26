@@ -41,7 +41,7 @@ The package has two implementations that give the same results within documented
 |--------|------------|
 | **Surface fire** | Rothermel (1972) spread model — ROS, flame length, fireline intensity, heat per unit area, backing/flanking spread, fire geometry |
 | **Crown fire** | Rothermel (1991) & Scott–Reinhardt (2005) — transition ratio, active ratio, fire-type classification (surface / torching / conditional / active crown) |
-| **Tree mortality** | Crown scorch (Van Wagner), bole char, and crown damage equations for 300+ species / 9 GACC regions |
+| **Tree mortality** | Crown scorch (with Van Wagner scorch height) and bole char equations for 24 species / 9 GACC regions |
 | **Spotting** | Albini firebrand lofting model for burning piles, surface fires, and torching trees |
 | **Ignition** | Firebrand ignition probability; deprecated lightning calculation retained for compatibility |
 | **Safety zones** | Minimum separation distance, zone radius, and personnel capacity from radiant heat |
@@ -255,8 +255,8 @@ fm     = FuelModels()
 runner = BehaveRun(fm)          # backend="auto": Rust when its extension is installed, otherwise Python
 
 # --- Surface fire on a single cell ---
-results = runner.do_surface_run(
-    fuel_model_grid      = np.array([[124]]),          # GR4
+surface_inputs = dict(
+    fuel_model_grid      = np.array([[124]]),          # GS4
     m1h                  = np.array([[0.06]]),          # 6% (as fraction)
     m10h                 = np.array([[0.07]]),
     m100h                = np.array([[0.08]]),
@@ -273,6 +273,9 @@ results = runner.do_surface_run(
     canopy_height        = np.array([[15.0]]),          # feet
     crown_ratio          = np.array([[0.55]]),          # fraction (0–1)
     wind_height_mode     = 'TenMeter',
+)
+results = runner.do_surface_run(
+    **surface_inputs,
     out_units={
         'spread_rate'        : 3,   # MetersPerMinute
         'flame_length'       : 4,   # Meters
@@ -286,11 +289,15 @@ print(f"FLI          : {results['fireline_intensity'][0, 0]:.1f} kW/m")
 print(f"Backend      : {runner.backend_in_use}")
 ```
 
-#### Crown fire + mortality
+#### Crown fire
+
+`do_crown_run` reads `spread_rate`, `fireline_intensity`, and `heat_per_unit_area` from `surface_results` in base units (ft/min, BTU/ft/s, and BTU/ft²) without conversion. Pass a surface run made without `out_units`, and convert results separately for display.
 
 ```python
+surface_base = runner.do_surface_run(**surface_inputs)   # base units for the crown run
+
 crown = runner.do_crown_run(
-    surface_results     = results,
+    surface_results     = surface_base,
     fuel_model_grid     = np.array([[124]]),
     m1h=np.array([[0.06]]), m10h=np.array([[0.07]]),
     m100h=np.array([[0.08]]), mlh=np.array([[0.60]]),
@@ -302,16 +309,19 @@ crown = runner.do_crown_run(
     slope               = np.array([[20.0]]),
     slope_units         = 1,
     aspect              = np.array([[180.0]]),
-    canopy_base_height  = np.array([[19.7]]),   # feet (6 m × 3.28084)
-    canopy_height       = np.array([[49.2]]),   # feet (15 m × 3.28084)
-    canopy_bulk_density = np.array([[0.0075]]), # lb/ft³ (0.12 kg/m³ ÷ 16.0185)
+    canopy_base_height  = np.array([[6.0]]),    # m
+    canopy_base_height_units = 4,               # Meters
+    canopy_height       = np.array([[15.0]]),   # m
+    canopy_height_units = 4,                    # Meters
+    canopy_bulk_density = np.array([[0.12]]),   # kg/m³
+    canopy_bulk_density_units = 1,              # KilogramsPerCubicMeter
     moisture_foliar     = np.array([[100.0]]),  # percent
 )
 
 print(f"Fire type : {int(crown['fire_type'][0, 0])}")   # 0=surface … 3=active crown
 ```
 
-> **Note on `do_crown_run` inputs:** `canopy_base_height` and `canopy_height` are always in **feet** and `canopy_bulk_density` is in **lb/ft³** — these parameters do not have associated unit enums and must be converted before calling.
+> **Note on `do_crown_run` inputs:** `canopy_base_height` and `canopy_height` default to **feet** and `canopy_bulk_density` to **lb/ft³**. Select other units with `canopy_base_height_units` and `canopy_height_units` (`LengthUnitsEnum`), and `canopy_bulk_density_units` (`DensityUnitsEnum`). Surface results passed in `surface_results` must stay in base units.
 
 ### Choosing a backend
 

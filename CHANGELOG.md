@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- Correct the README and landscape example Crown runs: `do_crown_run` reads surface
+  spread rate, fireline intensity, and heat per unit area in base units, so the
+  examples now pass a base-unit surface run instead of metric display output, which
+  understated crown-stage spread (5.34 instead of about 30.5 ft/min in the README
+  case). The README also documents the canopy unit selectors, labels model 124 as
+  GS4, and states the shipped mortality coverage (24 species with crown scorch and
+  bole char equations). Calculations are unchanged.
+- Publish to PyPI only from a tag push; a manual run on a tag ref can no longer
+  reach the production publishing job.
+- Link the GCC runtime statically into the musl wheel, which no longer bundles a
+  separate `libgcc_s` shared library; the build job rejects any `libgcc_s` member or
+  dependency.
+- Ship the Python/Rust acceptance fixtures (`tests/data/rust_port`) in the source
+  distribution, verify them against the release commit, and run the shipped fixture
+  test and full parity comparison from the extracted archive.
+  `tools/compare_backends.py` now fails when it finds no acceptance scenario.
 - Restart version numbering at `0.1.0` under `MAJOR.MINOR.PATCH`; the package
   remains beta. Versions `1.0.0b1` and `1.0.0b2` were never published to a
   package registry. The current candidate is `0.1.0rc1` (Cargo `0.1.0-rc.1`), and
@@ -143,7 +159,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Drop Python 3.10 support; require Python 3.11 or newer. Standard CPython 3.11-3.14 are the certification targets. Free-threaded interpreters and PyPy are not supported.
 - Source/Git/editable/`--no-binary` project builds now use Maturin and require Rust. Binary native and universal pure-Python wheels share metadata and runtime APIs.
 - The package-root `BehaveRun` is now an automatic backend facade built by composition. Its class identity and default `repr` differ from the historical class, and an instance is not an `isinstance` of `behave_fire.behave.BehaveRun`. Use `behave_fire.python.BehaveRun` or `behave_fire.behave.BehaveRun` for legacy type checks and subclassing. Calculation signatures, output dictionaries, root `FuelModels`, species types, and unit enum identities are unchanged.
-- With the Rust backend, float16 inputs are widened to float32, so results can be float32 where the Python backend returns float16, and overflow, NaN, and threshold outcomes can differ. Select `backend="python"` for the historical float16 behavior. See `docs/BACKEND_DIFFERENCES.md`.
+- With the Rust backend, real physical inputs (including float16 and float32) are computed in float64, masked values become NaN, and physical results are float64 arrays. Result dtypes, masks, and overflow, NaN, and threshold outcomes can therefore differ from the Python backend. Select `backend="python"` for the historical dtype and mask behavior. See `docs/BACKEND_DIFFERENCES.md`.
 
 ### Packaging
 
@@ -162,7 +178,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Corrected centimetre surface-area-to-volume conversion: `1 cm^-1` now converts to `30.48 ft^-1`, with the inverse conversion updated consistently.
 - Converted depth, fuel loading, heat, and SAVR for metric fuel models 110–111, 155–159, 166–172, and 190–193 to internal US customary units, following upstream `f3b2943`. Existing fractional moisture-of-extinction corrections are preserved. Surface results for these models change.
 - Aligned 23 Scott and Burgan static-model flags with upstream: SH2–8, TU2/4/5, TL1–9, and SB1–4. The flags now report static behavior; scalar and mixed-grid checks show unchanged surface results for their zero-herbaceous-load records.
-- Corrected containment descriptions and examples to reflect the simplified fixed-step model, its input-shape limitation, and actual output. Containment calculations are unchanged.
 
 ### Changed
 
@@ -176,9 +191,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Native Rust backend. The Cargo workspace under `rust/` contains the standalone `behave-fire` core crate (version `0.1.0`, independent of the Python version, no runtime or build dependencies) and the unpublished `behave-py` PyO3 bindings built as `behave_fire._rust`. The core covers every public calculation: surface and crown fire with their stages, mortality, spotting, ignition, safety zones, fine dead fuel moisture, vapor pressure deficit, and slope and ellipse helpers, plus typed unit conversions and embedded fuel and species tables.
-- Backend selection: `BehaveRun(fuel_models, *, backend="auto" | "python" | "rust", threads=1)`, `available_backends()`, `get_backend()`, and `BehaveBackendWarning`. Explicit namespaces are `behave_fire.python` and `behave_fire.rust`; historical component imports continue to use Python. `auto` selects Python silently when the extension is absent and with a once-per-process warning when it is present but unusable; forced Rust raises.
+- Backend selection: `BehaveRun(fuel_models, *, backend="auto" | "python" | "rust", threads=1)`, `available_backends()`, `get_backend()`, and `BehaveBackendWarning`. Explicit namespaces are `behave_fire.python` and `behave_fire.rust`; historical component imports continue to use Python. `auto` prefers Rust and falls back to Python with a once-per-process `BehaveBackendWarning` when the extension is absent or unusable; forced Rust raises.
 - Native `threads` setting (`1` serial, `0` all available, positive count capped by work) using scoped threads with deterministic output order.
-- Typed native calculation stages (`engine`) with a reusable fuel snapshot, stage resumption from editable intermediates, and fused overrides (`SurfaceTweaks`, `CrownTweaks`). Borrowed raster columns (`raster`) with per-cell overrides, optional native validity, and caller-driven tiles. These are Rust interfaces; the Python binding does not yet route public calls through them.
+- Typed native calculation stages (`engine`) with a reusable fuel snapshot, stage resumption from editable intermediates, and fused overrides (`SurfaceTweaks`, `CrownTweaks`). Borrowed raster columns (`raster`) with per-cell overrides, optional native validity, and caller-driven tiles. Python reaches the staged engine through `behave_fire.rust.SurfaceGrid` and `CrownGrid`, and public Rust Surface and Crown calls use the float64 raster engine (see "Float64 models and backend routing").
 - Python/Rust parity, ownership, serialization, packaging, and workflow tests, and tools for backend comparison and platform probing (`tools/compare_backends.py`).
 - Contracts and procedures: `docs/RUST_BACKEND.md`, `docs/BACKEND_DIFFERENCES.md`, `docs/RUST_ENGINE.md`, `docs/RELEASING.md`, and `docs/CRATES_IO.md`.
 - Pytest regression coverage for unit conversions, metric fuel records, static flags, and lightning compatibility, using portable fixtures without requiring a C++ checkout.

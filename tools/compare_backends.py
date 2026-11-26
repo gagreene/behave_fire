@@ -72,7 +72,8 @@ def main(argv=None):
     """Run every acceptance fixture without rewriting its oracle.
 
     :param argv: Optional command-line arguments.
-    :return: Zero for complete parity; one if any scenario differs.
+    :return: Zero for complete parity; one if any scenario differs or no acceptance
+        scenario is found.
     """
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--seed", type=int, default=7)
@@ -120,6 +121,10 @@ def main(argv=None):
                 "error": f"{type(error).__name__}: {error}"})
         finally:
             parity_support.assert_result = original_assertion
+    if not scenarios:
+        # An empty comparison must not pass, for example a source archive without its fixtures.
+        report["failures"].append({"domain": None, "scenario": None,
+            "error": "no acceptance scenarios found under tests/data/rust_port"})
     text = json.dumps(report, indent=2, sort_keys=True, allow_nan=False) + "\n"
     if arguments.output:
         arguments.output.write_text(text, encoding="utf-8")

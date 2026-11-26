@@ -85,6 +85,6 @@ exclude = [
     { path = "**/*.dylib", format = "sdist" },
     "**/target/**", "**/build/**", ".superpowers/**", ".claude/**", ".idea/**",
     "rust/target/**", "**/__pycache__/**", "**/*.pyc", "dist/**", "build/**", "**/*.pdb",
-    "**/*.crate", "**/*.egg-info/**", "tests/data/rust_port/**", "reference/behave_cpp",
+    "**/*.crate", "**/*.egg-info/**", "reference/behave_cpp",
     "reference/behave_cpp/**", "reference/behave_cpp_overlay/**",
 ]

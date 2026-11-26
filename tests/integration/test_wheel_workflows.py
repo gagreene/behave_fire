@@ -69,6 +69,19 @@ def test_maturin_action_uses_only_one_compatibility_setting():
     assert "--compatibility" not in build["args"]
 
 
+def test_musl_wheel_links_the_gcc_runtime_statically():
+    workflow = yaml.load((ROOT / ".github/workflows/wheel-validation.yml").read_text(), Loader=yaml.BaseLoader)
+    steps = workflow["jobs"]["build-native-wheels"]["steps"]
+    musl = [index for index, step in enumerate(steps) if step.get("if") == "matrix.artifact == 'linux-musl-x86_64'"]
+    build = next(index for index, step in enumerate(steps) if step.get("uses") == "PyO3/maturin-action@v1")
+    link, check = musl
+    assert link < build < check
+    assert "INPUT(-lgcc_eh)" in steps[link]["run"]
+    assert "CARGO_TARGET_X86_64_UNKNOWN_LINUX_MUSL_RUSTFLAGS=-C link-arg=-static-libgcc" in steps[link]["run"]
+    assert "NEEDED.*libgcc_s" in steps[check]["run"]
+    assert "libgcc_s[^/]*\\.so" in steps[check]["run"]
+
+
 def test_native_build_matrix_covers_every_tested_platform():
     workflow = yaml.load((ROOT / ".github/workflows/wheel-validation.yml").read_text(), Loader=yaml.BaseLoader)
     job = workflow["jobs"]["build-native-wheels"]
@@ -109,6 +122,17 @@ def test_previous_fallback_hosts_require_native_choice():
         steps = workflow["jobs"][job]["steps"]
         install = next(step["run"] for step in steps if "test_wheel_install.py --wheels" in step.get("run", ""))
         assert "--expect-choice rust" in install
+
+
+def test_pypi_publication_requires_a_tag_push():
+    release = yaml.load((ROOT / '.github/workflows/release.yml').read_text(), Loader=yaml.BaseLoader)
+    jobs = release['jobs']
+    # A manual dispatch on a tag ref also has refs/tags/v*; only the tag push may publish to PyPI.
+    assert jobs['publish-pypi']['if'] == ("github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') "
+                                          "&& vars.PYPI_PUBLISHING_ENABLED == 'true'")
+    assert jobs['publish-testpypi']['if'] == ("github.event_name == 'workflow_dispatch' && inputs.target == 'testpypi' "
+                                              "&& vars.TESTPYPI_PUBLISHING_ENABLED == 'true'")
+    assert jobs['publish-pypi']['environment']['name'] == 'pypi'
 
 
 def test_wheels_require_the_quick_style_gate():

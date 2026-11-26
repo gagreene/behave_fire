@@ -368,7 +368,7 @@ runner = BehaveRun(fm)
 # ---- 5a  Surface run ----
 # Wind input is at 10-m mast height → wind_height_mode='TenMeter'
 # Wind is compass-north bearing      → wind_orientation_mode='RelativeToNorth'
-surface = runner.do_surface_run(
+surface_inputs = dict(
     fuel_model_grid      = fuel_grid,
     m1h=m1h, m10h=m10h, m100h=m100h, mlh=mlh, mlw=mlw,
     moisture_units       = 0,          # Fraction (data stored as 0.06, not 6%)
@@ -387,6 +387,12 @@ surface = runner.do_surface_run(
     crown_ratio_units    = 0,          # Fraction (data stored as 0–1)
     wind_height_mode     = 'TenMeter',
     waf_method           = 'UseCrownRatio',
+)
+# The crown run reads surface spread rate, fireline intensity, and heat per unit
+# area in base units (ft/min, BTU/ft/s, BTU/ft^2), so it gets its own base-unit run.
+surface_base = runner.do_surface_run(**surface_inputs)
+surface = runner.do_surface_run(
+    **surface_inputs,
     out_units={
         'spread_rate'              : 3,   # MetersPerMinute
         'backing_spread_rate'      : 3,
@@ -404,7 +410,7 @@ surface = runner.do_surface_run(
 
 # ---- 5b  Crown run ----
 crown = runner.do_crown_run(
-    surface_results      = surface,
+    surface_results      = surface_base,
     fuel_model_grid      = fuel_grid,
     m1h=m1h, m10h=m10h, m100h=m100h, mlh=mlh, mlw=mlw,
     moisture_units       = 0,          # Fraction (data stored as 0–1)

@@ -138,15 +138,20 @@ go in a `Breaking changes and action needed` block of the same section.
 
 1. Confirm that `pre_release` holds everything intended for the release and that
    every PR in it has its test record.
-2. Open a promotion PR from `pre_release` into `master`. Along with a hotfix PR, it is
-   the only PR that changes the version: it bumps `pyproject.toml` and renames the
-   `Unreleased` heading of `CHANGELOG.md` to the new version and date. The description
-   of the promotion PR carries the test record for the head of `pre_release`.
-3. After the owner merges it, run the full test suite on Linux, macOS, and Windows
+2. Set the version in a version-bump PR into `pre_release`. Along with a hotfix PR, it
+   is the only PR that changes the version. It edits the version in
+   `rust/crates/behave-py/Cargo.toml` and the matching `rust/Cargo.lock` entry; the
+   Python version is dynamic and comes from that manifest, so `pyproject.toml` never
+   carries a version. For a final release, the same PR renames the `Unreleased` heading
+   of `CHANGELOG.md` to the new version and date. Release candidates (`rcN`) keep the
+   `Unreleased` heading until the final release.
+3. Open a promotion PR from `pre_release` into `master`. Its description carries the
+   test record for the head of `pre_release`.
+4. After the owner merges it, run the full test suite on Linux, macOS, and Windows
    before tagging (use the CI matrix when one is configured), then create an
    annotated tag on `master`. Release tags use the `vMAJOR.MINOR.PATCH` form (for
    example, `v1.2.3`).
-4. `master` is now one merge commit ahead of `pre_release`: merge `master` back into
+5. `master` is now one merge commit ahead of `pre_release`: merge `master` back into
    `pre_release` through a PR, as a merge commit, so that the two branches stay equal
    after every release.
 
@@ -157,7 +162,8 @@ When a serious defect is found in released code and cannot wait for the next rel
 1. Branch `hotfix/<name>` from `master`, fix the defect with a regression test, and
    open a PR into `master`. PRs that are open on `pre_release` are not blocked or
    changed by this.
-2. The hotfix PR is its own release: it bumps the patch version and adds a section for
+2. The hotfix PR is its own release: it bumps the patch version (in
+   `rust/crates/behave-py/Cargo.toml` and `rust/Cargo.lock`) and adds a section for
    the new version to `CHANGELOG.md`. After the owner merges it, run the full test
    suite and tag, as for any release.
 3. Merge `master` back into `pre_release` through a PR. Resolve any conflict with

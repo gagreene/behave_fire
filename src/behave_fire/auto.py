@@ -602,7 +602,10 @@ class BehaveRun:
     ) -> dict:
         """Forward do_crown_run to the selected backend.
 
-        :param surface_results: Passed unchanged to the selected backend.
+        :param surface_results: Passed unchanged to the selected backend. Crown reads
+            ``spread_rate`` (ft/min), ``fireline_intensity`` (BTU/ft/s), and
+            ``heat_per_unit_area`` (BTU/ft^2) in base units, so pass a surface run made
+            without ``out_units`` for these keys.
         :param fuel_model_grid: Passed unchanged to the selected backend.
         :param m1h: Passed unchanged to the selected backend.
         :param m10h: Passed unchanged to the selected backend.

@@ -52,6 +52,18 @@ jobs:
         with:
           python-version: "3.11"
           architecture: ${{ matrix.architecture }}
+      - name: Link the GCC runtime statically into the musl extension
+        if: matrix.artifact == 'linux-musl-x86_64'
+        shell: bash
+        # Rust's musl unwinder requests gcc_s explicitly. The stub library script redirects that
+        # request to the static libgcc_eh, and -static-libgcc covers the compiler driver's own
+        # runtime libraries, so the wheel ships no libgcc_s shared library.
+        run: |
+          stub="$GITHUB_WORKSPACE/rust/target/static-libgcc"
+          mkdir -p "$stub"
+          printf 'INPUT(-lgcc_eh)\n' > "$stub/libgcc_s.so"
+          echo "CARGO_TARGET_X86_64_UNKNOWN_LINUX_MUSL_RUSTFLAGS=-C link-arg=-static-libgcc -C link-arg=-L$stub" \
+            >> "$GITHUB_ENV"
       - uses: PyO3/maturin-action@v1
         with:
           maturin-version: "1.10.0"
@@ -59,6 +71,32 @@ jobs:
           target: ${{ matrix.target }}
           args: --release --locked --out dist --interpreter ${{ runner.os == 'Linux' && 'python3.11' || 'python' }}
           manylinux: ${{ matrix.compatibility }}
+      - name: Require a musl wheel without a GCC runtime shared library
+        if: matrix.artifact == 'linux-musl-x86_64'
+        shell: bash
+        run: |
+          set -euo pipefail
+          wheels=(dist/*.whl)
+          test "${#wheels[@]}" -eq 1
+          if unzip -Z1 "${wheels[0]}" | grep -E '(^|/)libgcc_s[^/]*\.so'; then
+            echo "the musl wheel bundles libgcc_s" >&2
+            exit 1
+          fi
+          extract="$RUNNER_TEMP/musl-wheel"
+          mkdir -p "$extract"
+          unzip -q "${wheels[0]}" -d "$extract"
+          binaries=0
+          while IFS= read -r -d '' file; do
+            if [ "$(head -c 4 "$file" | od -An -c | tr -d ' \n')" = '177ELF' ]; then
+              binaries=$((binaries + 1))
+              readelf -d "$file" | tee -a "$RUNNER_TEMP/musl-dynamic.txt"
+              if readelf -d "$file" | grep -E 'NEEDED.*libgcc_s'; then
+                echo "$file requires libgcc_s" >&2
+                exit 1
+              fi
+            fi
+          done < <(find "$extract" -type f -print0)
+          test "$binaries" -ge 1
       - uses: actions/upload-artifact@v4
         with:
           name: distributions-${{ matrix.artifact }}
@@ -77,7 +115,9 @@ jobs:
           python -m pip install --only-binary=:all: build
       - run: python tools/check_sdist.py --check-tracked . --inventory sdist-expected.txt
       - run: python -m build --sdist --outdir dist
-      - run: python tools/check_sdist.py dist/*.tar.gz --inventory sdist-expected.txt > sdist-inventory.txt
+      - run: >-
+          python tools/check_sdist.py dist/*.tar.gz --inventory sdist-expected.txt --committed-fixtures .
+          > sdist-inventory.txt
       - name: Rebuild using only the extracted source distribution
         shell: bash
         run: |
@@ -92,6 +132,39 @@ jobs:
           version=$("$RUNNER_TEMP/sdist-venv/bin/python" -c 'import importlib.metadata; print(importlib.metadata.version("behave-fire"))')
           cd "$RUNNER_TEMP"
           "$RUNNER_TEMP/sdist-venv/bin/python" -I smoke_test_wheel.py --expect rust --version "$version"
+      - name: Run the shipped fixture checks from the extracted source distribution
+        shell: bash
+        run: |
+          python - "$RUNNER_TEMP/sdist-wheel" "$RUNNER_TEMP/sdist-source/src/behave_fire" <<'EOF'
+          import sys, zipfile
+          from pathlib import Path
+          wheel, = Path(sys.argv[1]).glob("*.whl")
+          with zipfile.ZipFile(wheel) as archive:
+              native = [name for name in archive.namelist() if name.startswith("behave_fire/_rust.")]
+              assert len(native) == 1, native
+              (Path(sys.argv[2]) / Path(native[0]).name).write_bytes(archive.read(native[0]))
+          EOF
+          "$RUNNER_TEMP/sdist-venv/bin/python" -m pip install --only-binary=:all: pytest pyyaml
+          cd "$RUNNER_TEMP/sdist-source"
+          "$RUNNER_TEMP/sdist-venv/bin/python" -B -m pytest -p no:cacheprovider --require-rust \
+            tests/integration/test_platform_reference.py
+          "$RUNNER_TEMP/sdist-venv/bin/python" -B tools/compare_backends.py --output "$RUNNER_TEMP/sdist-parity.json" \
+            > /dev/null
+          python - "$GITHUB_WORKSPACE/tests/data/rust_port" "$RUNNER_TEMP/sdist-parity.json" <<'EOF'
+          import json, sys
+          from pathlib import Path
+          expected = {}
+          for path in sorted(Path(sys.argv[1]).glob("*.json")):
+              cases = json.loads(path.read_text(encoding="utf-8")).get("cases", [])
+              count = sum(case.get("policy", "acceptance") == "acceptance" for case in cases)
+              if count:
+                  expected[path.stem] = count
+          report = json.loads(Path(sys.argv[2]).read_text(encoding="utf-8"))
+          found = {domain: summary["scenarios"] for domain, summary in report["domains"].items()}
+          assert found == expected, (found, expected)
+          assert not report["failures"], report["failures"]
+          print(f"source distribution parity: {sum(found.values())} acceptance cases across {len(found)} domains")
+          EOF
       - uses: actions/upload-artifact@v4
         with:
           name: distributions-sdist
