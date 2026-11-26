@@ -197,6 +197,38 @@ build-input hashes are provenance; the absent C++ sources, overlay, and executab
 are not opened by an offline reader. Live verification additionally requires the
 exact pinned checkout, clean source state, and matching source/driver identities.
 
+## Local comparison receipts
+
+A receipt records one platform's full local comparison of the Python and Rust ports with the
+pinned C++ outputs. `tools/cpp_receipt.py --write --archive <dir>` runs on a clean checkout of the
+commit to record, with the native extension built from it. It writes two full reports to the
+archive directory (the ports report from `tools/cpp_calibrate.py --ports` and the log of the Rust
+core comparisons, `cargo test -p behave-fire -- --ignored --nocapture`) and the compact receipt
+`tests/data/cpp_receipts/<platform-key>.json`.
+
+The receipt binds the results to the commit and its tree, the version-neutral qualified source
+inventory, the fixture inventory (`fixture_inventory_sha256`, the SHA-256 of
+`tests/data/cpp_reference/hashes.json`), the Surface and exact-module datasets, the pin, the
+overlay, the public API identity, the native extension, the toolchains, and the host, and names
+each archived report by SHA-256. Receipts live outside `tests/data/cpp_reference/`, whose hasher
+lists every file under that tree, so a receipt never changes the inventory digest it records.
+
+`tools/cpp_receipt.py --check <receipt> --archive <dir>` requires the checkout to match the
+receipt's commit apart from receipt files, reads the archived reports, checks their hashes, and
+re-applies the existing numerical rules: every Surface observation within the `1e-12` caps with
+the documented load exceptions (710 cases, 3,550 fields, and 139 paired controls per backend),
+exact binary64 FireSize, Ignite, and Mortality results (9, 8, and 6 fields per backend), the
+Rust core counts (2,855 Surface fields plus 60 documented, and 9, 8, and 6 exact fields), and the
+four Rust deliberate-failure tests. Measurement-only modules must be present but are not
+compared. `--check-claims` requires a valid receipt for every platform listed in
+`tests/data/cpp_receipts/claims.json` and then the owner's approval of those claims; a claimed
+platform without a receipt is rejected.
+
+The claims file lists `windows-x86_64` and is not approved, and the archive location is not yet
+decided. Receipts do not activate a qualification: the qualification stays withdrawn and
+publication stays gated until the owner approves the platform claims, the archive location, and
+activation.
+
 ## Opt-in live pytest
 
 Initialize the registered submodule and install CMake and the platform

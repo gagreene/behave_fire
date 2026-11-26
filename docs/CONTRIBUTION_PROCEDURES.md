@@ -218,7 +218,9 @@ rules for FireSize, Ignite, and Mortality whatever the release approval state, w
 measurement-only cases and the documented load exceptions stay as they are.
 Deliberate-failure tests (`tests/integration/test_cpp_local_enforcement.py` and the
 `perturbed_cpp_copy_*` Rust tests) perturb a temporary copy of a fixture and prove
-that a cap violation or a one-ulp exact mismatch fails the check. Run every comparison on every PR, whether or not it touches C++
+that a cap violation or a one-ulp exact mismatch fails the check. For release evidence,
+`tools/cpp_receipt.py` records a platform's full comparison in a machine-checked receipt (see
+"Local comparison receipts" in [CPP_VALIDATION.md](CPP_VALIDATION.md)). Run every comparison on every PR, whether or not it touches C++
 data, with the native extension built from the PR's commit:
 
 ```shell

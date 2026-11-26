@@ -29,6 +29,12 @@ PYTHON_COMPARISONS = {
     "tests/integration/test_cpp_measurement.py::test_replacement_port_measurement_keeps_stale_acceptance_closed",
     "tests/integration/test_cpp_mortality.py::test_approved_cases_match_exact_binary64[python]",
     "tests/integration/test_cpp_mortality.py::test_approved_cases_match_exact_binary64[rust]",
+    "tests/integration/test_cpp_receipt.py::test_archived_ports_report_reapplies_every_numerical_rule",
+    *(f"tests/integration/test_cpp_receipt.py::test_archived_ports_report_rejects_tampering[{case}]"
+      for case in ("surface", "exact", "backend", "platform", "measured", "origin")),
+    *(f"tests/integration/test_cpp_receipt.py::test_receipt_verification_reads_the_archived_reports[{case}]"
+      for case in ("valid", "report-bytes", "missing-report", "fixture-digest", "results", "extension",
+                   "platform-name")),
     "tests/integration/test_cpp_reference.py::"
     "test_default_qualified_policy_checks_selected_backend_and_unit_controls[python]",
     "tests/integration/test_cpp_reference.py::"

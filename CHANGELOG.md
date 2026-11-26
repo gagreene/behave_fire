@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- Add machine-checked local C++ comparison receipts (`tools/cpp_receipt.py`). A receipt binds one
+  platform's full local comparison to the tested commit, sources, fixture inventory, extension,
+  toolchains, and host; verification reads the archived reports, re-applies the Surface caps and
+  exact rules, and rejects claimed platforms without evidence. Receipts live in
+  `tests/data/cpp_receipts/`, outside the hashed fixture inventory. The platform claims
+  (`windows-x86_64`) are not yet approved, and the qualification stays withdrawn.
 - Gate TestPyPI, PyPI, and crates.io uploads on an active C++ qualification that
   matches the candidate's sources (`cpp_inventory.py --check --require-ready`);
   build-only and targeted runs stay available while qualification is withdrawn.
