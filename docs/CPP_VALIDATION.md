@@ -142,8 +142,8 @@ at source commit `b1a1baf7be61651ab69f6a3bd361a0918d0832f9` and was activated at
 each of seven native platforms checked 710 cases and 3,550 fields per backend,
 including all 139 numbered/custom pairs. Commit `7a57e8e` withdrew it, because the
 release review fixes and the CI policy change edited qualified sources.
-Requalification is pending the owner's decision on accepting local evidence. The compact qualification binds the exact production, build, tool, and
-workflow source inventory. Changed, added, or deleted sources invalidate it;
+The withdrawn qualification is historical evidence. The compact qualification binds the exact
+production, build, tool, and workflow source inventory. Changed, added, or deleted sources invalidate it;
 metadata-only activation can follow without changing the tested implementation.
 All nine complete reports passed validation before reactivation of the unchanged
 caps. The final budget and inventory verification code is included in that
@@ -153,8 +153,8 @@ Original numbered-unit differences remain
 documented exceptions, tested through their separate explicit controls.
 
 Use the existing `CI` workflow with `workflow_dispatch` on the prepared branch
-for qualification, with `-f scope=full -f cpp_qualification=true`. The qualification
-and release validation jobs check out the optional reference and build C++.
+to investigate the nine-report qualification, with `-f scope=full -f cpp_qualification=true`.
+Those jobs check out the optional reference and build C++.
 Ordinary PR and push CI checks the integrity of the stored offline evidence but
 does not compare Python or Rust outputs with it: those comparisons (pytest marker
 `cpp_comparison` and the `#[ignore]`d Rust comparison tests) run in the full local
@@ -200,17 +200,25 @@ exact pinned checkout, clean source state, and matching source/driver identities
 ## Local comparison receipts
 
 A receipt records one platform's full local comparison of the Python and Rust ports with the
-pinned C++ outputs. `tools/cpp_receipt.py --write --archive <dir>` runs on a clean checkout of the
-commit to record, with the native extension built from it. It writes two full reports to the
-archive directory (the ports report from `tools/cpp_calibrate.py --ports` and the log of the Rust
-core comparisons, `cargo test -p behave-fire -- --ignored --nocapture`) and the compact receipt
+pinned C++ outputs. Run the writer from a clean checkout with Python, NumPy, and the
+native Rust toolchain available.
+
+    python tools/cpp_receipt.py --write --archive <dir>
+
+The writer extracts the exact Git commit into a temporary directory, builds the
+native extension with Cargo, and runs the ports comparison using that extension.
+It runs the standalone Rust comparisons from the same source snapshot. Each attempt
+gets a new directory in the external archive for the ports report, Rust comparison
+log, and exact extension tested. After verifying the full attempt, the writer
+atomically updates the compact receipt at
 `tests/data/cpp_receipts/<platform-key>.json`.
 
 The receipt binds the results to the commit and its tree, the version-neutral qualified source
 inventory, the fixture inventory (`fixture_inventory_sha256`, the SHA-256 of
 `tests/data/cpp_reference/hashes.json`), the Surface and exact-module datasets, the pin, the
-overlay, the public API identity, the native extension, the toolchains, and the host, and names
-each archived report by SHA-256. Receipts live outside `tests/data/cpp_reference/`, whose hasher
+overlay, the public API identity, the native extension, the toolchains, and the host.
+It records the Cargo build command, compiler version, target, and flags. The verifier checks the hashes of the
+archived reports and extension. Receipts live outside `tests/data/cpp_reference/`, whose hasher
 lists every file under that tree, so a receipt never changes the inventory digest it records.
 
 `tools/cpp_receipt.py --check <receipt> --archive <dir>` requires the checkout to match the
@@ -219,15 +227,23 @@ re-applies the existing numerical rules: every Surface observation within the `1
 the documented load exceptions (710 cases, 3,550 fields, and 139 paired controls per backend),
 exact binary64 FireSize, Ignite, and Mortality results (9, 8, and 6 fields per backend), the
 Rust core counts (2,855 Surface fields plus 60 documented, and 9, 8, and 6 exact fields), and the
-four Rust deliberate-failure tests. Measurement-only modules must be present but are not
-compared. `--check-claims` requires a valid receipt for every platform listed in
-`tests/data/cpp_receipts/claims.json` and then the owner's approval of those claims; a claimed
-platform without a receipt is rejected.
+four Rust deliberate-failure tests. Measurement-only modules must have matching
+dataset hashes and complete case IDs and output fields for both backends.
+For approved claims, the supplied directory must resolve to the absolute archive
+location in the claims file. `--check-claims` requires a valid receipt for every
+platform listed in `tests/data/cpp_receipts/claims.json`.
 
-The claims file lists `windows-x86_64` and is not approved, and the archive location is not yet
-decided. Receipts do not activate a qualification: the qualification stays withdrawn and
-publication stays gated until the owner approves the platform claims, the archive location, and
-activation.
+The shared publication gate runs `tools/cpp_receipt.py --check-release-claims`.
+For this check, `archive_location` in the approved claims file must contain `url`
+and `sha256`. The URL points to an HTTPS ZIP the runner can download without
+credentials. The digest is the lowercase SHA-256 of the ZIP. Include each
+claimed attempt directory directly at the archive root with its `ports.json`,
+`rust.log`, and native extension. The gate verifies the ZIP's digest, then checks
+each receipt and its evidence against the release candidate. Build-only and
+check-only workflows skip the publication gate.
+
+The claims file lists `windows-x86_64`. Publication requires owner approval of
+the platform claims and archive, plus a valid receipt for each platform.
 
 ## Opt-in live pytest
 
@@ -252,10 +268,10 @@ alongside the replay with the existing numerical policies.
 
 Set `BEHAVE_CPP_LIVE_OUT` to retain reports in an explicit directory outside
 the checkout. Otherwise pytest uses its temporary directory. The compiler
-job selects GNU or MSVC through `BEHAVE_CPP_LIVE_COMPILER`. Run the local
-lane and the manual CI qualification before release and after any driver,
-overlay, or pin change. Release CI also runs the same live test before it
-can proceed to publication.
+job selects GNU or MSVC through `BEHAVE_CPP_LIVE_COMPILER`. Use the local
+lane to investigate driver, overlay, or pin changes. Manual CI can still collect
+the historical nine-report qualification for investigations. Publication uses
+the approved local receipts.
 ## Dependency and distribution boundaries
 
 The registered optional submodule at `reference/behave_cpp` is pinned to the

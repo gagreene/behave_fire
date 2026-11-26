@@ -36,9 +36,7 @@ The test extra includes pytest and PyYAML for the collected regression and workf
 
 ## Build and inspect artifacts
 
-Use a clean authorized release commit. Run the [live C++ pytest lane](CPP_VALIDATION.md#opt-in-live-pytest)
-locally and complete manual CI qualification on the release candidate (`gh workflow run CI --ref <branch> -f scope=full -f cpp_qualification=true`). Release validation runs the live
-lane on MSVC and GNU before publication. All Rust manifests, sources, embedded tables, and notices must be tracked by Git before a git-mode sdist build. `git ls-files` includes staged new files; the tracking gate does not itself certify a clean release commit. Do not commit to bypass a packaging check without permission.
+Use a clean authorized release commit. Generate the [local C++ receipts](CPP_VALIDATION.md#local-comparison-receipts) for the approved platform claims and retain the tested source commit in Git history. All Rust manifests, sources, embedded tables, and notices must be tracked by Git before a git-mode sdist build. `git ls-files` includes staged new files. The tracking gate checks archive inputs, and publication also checks the tested commit and its receipts.
 
 ```sh
 uv run --no-sync python tools/check_sdist.py --check-tracked .
@@ -97,7 +95,7 @@ Runner labels and setup-python ARM64 support were checked against [GitHub's runn
 4. After explicit owner authorization, enable only the intended repository variable: `TESTPYPI_PUBLISHING_ENABLED=true` or `PYPI_PUBLISHING_ENABLED=true`. These switches default to disabled when absent and prevent an unconfigured tag from publishing. The protected environment remains the final approval gate.
 5. Use an explicit manual `target=testpypi` dispatch only after its own authorization. A default manual dispatch builds and validates without publishing. Verify uploaded TestPyPI artifacts separately when upload is authorized.
 6. Follow `docs/CONTRIBUTION_PROCEDURES.md`: version-bump PR into `pre_release`, promotion PR into `master`, full Linux/macOS/Windows checks, then an explicitly authorized annotated Python tag on an approved commit reachable from `master`. The workflow checks annotation, ancestry, and exact Python-version spelling. Tag creation and pushing each require permission.
-7. Production publication requires the approved tag, every CI/package/wheel/MSRV gate, the enabled production switch, an active C++ qualification that matches the candidate (the `qualification-gate` job runs `cpp_inventory.py --check --require-ready` before any TestPyPI or PyPI upload; build-only runs skip it), and protected-environment approval. No release can omit a requested certification row without explicit scope approval.
+7. Production publication requires the approved tag, every CI/package/wheel/MSRV gate, the enabled production switch, approved C++ receipts that match the candidate, and protected-environment approval. The `qualification-gate` job verifies the archived evidence before any TestPyPI or PyPI upload. Build-only runs skip that gate. No release can omit a requested certification row without explicit scope approval.
 
 Crates.io publication is separate (`release-crate.yml`, independent `behave-fire-vX.Y.Z` tags and core version). Standalone archive validation is a required CI gate and therefore also gates Python release validation. Publishing the crate is not a prerequisite for Python publication: Python source archives bundle both crates and build through their relative path dependency. See [standalone crate verification](CRATES_IO.md) for package, Rust-only consumer, and separately authorized registry steps.
 ## Build backend minimum

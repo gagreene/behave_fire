@@ -15,27 +15,13 @@ jobs:
   verify:
     uses: ./.github/workflows/crate-validation.yml
 
-  cpp-live:
-    uses: ./.github/workflows/cpp-live-validation.yml
-
   qualification-gate:
-    # Only an actual crates.io upload needs an active C++ qualification for this source;
-    # check-only runs skip this job, so they stay available while qualification is withdrawn.
     if: inputs.publish
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v6
-        with:
-          python-version: "3.12"
-      - uses: astral-sh/setup-uv@v6
-      - run: uv sync --locked --no-install-project --extra test
-      - name: Require an active C++ qualification that matches these sources
-        run: uv run --no-sync python tools/cpp_inventory.py --check --require-ready
+    uses: ./.github/workflows/cpp-receipt-validation.yml
 
   publish-crate:
     if: inputs.publish
-    needs: [verify, cpp-live, qualification-gate]
+    needs: [verify, qualification-gate]
     runs-on: ubuntu-latest
     environment:
       name: crates-io

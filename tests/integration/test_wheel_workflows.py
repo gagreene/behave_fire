@@ -51,23 +51,22 @@ def test_ci_tiers_come_from_the_plan_job():
     assert text.count('github.base_ref') == 1, 'Only the plan job reads the base branch; tiers come from ci_plan.py'
 
 
-def test_manual_and_release_cpp_calibration_use_the_opt_in_live_lane():
+def test_manual_cpp_calibration_uses_the_opt_in_live_lane():
     workflow = yaml.load((ROOT / '.github/workflows/ci.yml').read_text(), Loader=yaml.BaseLoader)
     job = workflow['jobs']['cpp-calibration']
-    setting = workflow['on']['workflow_call']['inputs']['cpp_live']
-    assert setting == {'type': 'boolean', 'default': 'false'}
+    assert 'cpp_live' not in workflow['on']['workflow_call']['inputs']
     assert workflow['on']['workflow_call']['inputs']['tier'] == {'type': 'string', 'default': 'full'}
     assert workflow['on']['workflow_dispatch']['inputs']['cpp_qualification']['default'] == 'false'
     manual = ("github.event_name == 'workflow_dispatch' && needs.plan.outputs.tier == 'full' && "
-              "(inputs.cpp_qualification == true || inputs.tier == 'full')")
-    assert job['if'] == "${{ (" + manual + ") || inputs.cpp_live }}"
+              "inputs.cpp_qualification == true")
+    assert job['if'] == "${{ " + manual + " }}"
     release = yaml.load((ROOT / '.github/workflows/release.yml').read_text(), Loader=yaml.BaseLoader)
-    assert release['jobs']['validation']['with'] == {'cpp_live': 'true'}
+    assert 'cpp_live' not in release['jobs']['validation'].get('with', {})
     shared = './.github/workflows/cpp-live-validation.yml'
     assert job['uses'] == shared
     crate = yaml.load((ROOT / '.github/workflows/release-crate.yml').read_text(), Loader=yaml.BaseLoader)
-    assert crate['jobs']['cpp-live']['uses'] == shared
-    assert set(crate['jobs']['publish-crate']['needs']) == {'verify', 'cpp-live', 'qualification-gate'}
+    assert 'cpp-live' not in crate['jobs']
+    assert set(crate['jobs']['publish-crate']['needs']) == {'verify', 'qualification-gate'}
     assert crate['jobs']['publish-crate']['if'] == 'inputs.publish'
     lane = yaml.load((ROOT / shared).read_text(), Loader=yaml.BaseLoader)
     assert 'workflow_call' in lane['on']
@@ -191,7 +190,15 @@ def test_reusable_ci_callers_grant_the_permissions_its_jobs_request():
     assert callers == 1
 
 
-def test_uploads_require_an_active_cpp_qualification():
+def test_uploads_require_approved_cpp_receipts():
+    shared = './.github/workflows/cpp-receipt-validation.yml'
+    workflow = yaml.load((ROOT / shared).read_text(), Loader=yaml.BaseLoader)
+    assert 'workflow_call' in workflow['on']
+    steps = workflow['jobs']['verify']['steps']
+    assert next(step for step in steps if step.get('uses') == 'actions/checkout@v4')['with']['fetch-depth'] == '0'
+    assert 'uv run --no-sync python tools/cpp_receipt.py --check-release-claims' in [
+        step.get('run', '') for step in steps]
+    assert all(step.get('continue-on-error', 'false') == 'false' for step in steps)
     testpypi = ("github.event_name == 'workflow_dispatch' && inputs.target == 'testpypi' "
                 "&& vars.TESTPYPI_PUBLISHING_ENABLED == 'true'")
     pypi = ("github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') "
@@ -203,9 +210,8 @@ def test_uploads_require_an_active_cpp_qualification():
         gate = jobs['qualification-gate']
         # The gate runs only for an actual upload, so build-only runs work while qualification is withdrawn.
         assert gate['if'] == condition, name
-        commands = [step.get('run', '') for step in gate['steps']]
-        assert 'uv run --no-sync python tools/cpp_inventory.py --check --require-ready' in commands, name
-        assert all(step.get('continue-on-error', 'false') == 'false' for step in gate['steps'])
+        assert gate['uses'] == shared
+        assert all('always()' not in jobs[upload]['if'] for upload in uploads)
         for upload in uploads:
             assert 'qualification-gate' in jobs[upload]['needs'], (name, upload)
         validation = [job for job in jobs.values() if job.get('uses', '').startswith('./')]

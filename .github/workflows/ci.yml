@@ -7,9 +7,6 @@ on:
     branches: [pre_release, master]
   workflow_call:
     inputs:
-      cpp_live:
-        type: boolean
-        default: false
       tier:
         # Present only for release.yml calls, which always run the full tier.
         type: string
@@ -233,8 +230,7 @@ jobs:
     if: ${{ !cancelled() && !contains(needs.*.result, 'failure') && contains(fromJSON('["full","targeted"]'), needs.plan.outputs.tier) }}
     with:
       scope: ${{ needs.plan.outputs.scope }}
-      # Calibration reports are collected for a manual qualification request and for release.yml manual runs.
-      cpp_calibration: ${{ github.event_name == 'workflow_dispatch' && needs.plan.outputs.tier == 'full' && (inputs.cpp_qualification == true || inputs.tier == 'full') }}
+      cpp_calibration: ${{ github.event_name == 'workflow_dispatch' && needs.plan.outputs.tier == 'full' && inputs.cpp_qualification == true }}
 
   crate-validation:
     needs: plan
@@ -243,7 +239,7 @@ jobs:
 
   cpp-calibration:
     needs: plan
-    if: ${{ (github.event_name == 'workflow_dispatch' && needs.plan.outputs.tier == 'full' && (inputs.cpp_qualification == true || inputs.tier == 'full')) || inputs.cpp_live }}
+    if: ${{ github.event_name == 'workflow_dispatch' && needs.plan.outputs.tier == 'full' && inputs.cpp_qualification == true }}
     uses: ./.github/workflows/cpp-live-validation.yml
 
   full-result:
