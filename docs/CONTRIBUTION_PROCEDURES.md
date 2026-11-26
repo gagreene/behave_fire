@@ -213,9 +213,10 @@ and its wheel suites pass `--skip-cpp-comparisons` to `tools/test_native_wheel_s
 The Rust comparison tests in `rust/crates/behave-fire/tests/` are marked `#[ignore]`,
 so `cargo test` in CI and in the extracted crate skips them; the local command above
 runs them with `--include-ignored`. `tests/integration/test_cpp_comparison_selection.py`
-pins both sets. The comparisons enforce the owner's Surface caps and the exact binary64
-rules for FireSize, Ignite, and Mortality whatever the release approval state, while
-measurement-only cases and the documented load exceptions stay as they are.
+pins both sets. The comparisons enforce the owner's Surface caps for all 583
+available numbered cases and 139 paired custom controls, plus the exact binary64
+rules for FireSize, Ignite, and Mortality, regardless of release approval.
+The remaining measured modules retain their measurement-only policies.
 Deliberate-failure tests (`tests/integration/test_cpp_local_enforcement.py` and the
 `perturbed_cpp_copy_*` Rust tests) perturb a temporary copy of a fixture and prove
 that a cap violation or a one-ulp exact mismatch fails the check. For release evidence,

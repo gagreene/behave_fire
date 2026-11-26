@@ -11,8 +11,8 @@ import json
 import sys
 from pathlib import Path
 
-sys.dont_write_bytecode = True
 SOURCE_REVISION = "7933789f00470c6bbfbe942dc22bdd7f74e192f9"
+SCAL_LOAD_REFERENCE = "firelab/behave@3ca33d5b919d4253b411bfb6464b4c872dda6fc9:src/behave/fuelModels.cpp"
 FUEL_NUMBERS = (
     "fuel_bed_depth", "moisture_of_extinction_dead", "heat_of_combustion_dead",
     "heat_of_combustion_live", "dead_1h", "dead_10h", "dead_100h", "live_herb",
@@ -70,7 +70,10 @@ def _outputs(root):
     fuels = fuel_module.FuelModels().fuel_models_
     species = species_module.SpeciesMasterTable().records
     result = {}
-    fuel_lines = [header, "#[rustfmt::skip]",
+    fuel_header = (f"// Python baseline: {SOURCE_REVISION}.\n"
+                   f"// SCAL16 and SCAL14 load corrections: {SCAL_LOAD_REFERENCE}.\n"
+                   "// Regenerate with tools/check_rust_tables.py; do not edit by hand.\n")
+    fuel_lines = [fuel_header, "#[rustfmt::skip]",
         "fn standard_fuel_models() -> std::collections::BTreeMap<i32, FuelModel> {", "    ["]
     fuel_fixture = []
     for number, record in sorted(fuels.items()):
@@ -114,6 +117,7 @@ def _outputs(root):
     hashes = {name: hashlib.sha256((root / "src" / "behave_fire" / "components" / f"{name}.py").read_bytes().replace(
         b"\r\n", b"\n")).hexdigest() for name in names}
     result["tests/data/tables_metadata.json"] = json.dumps({"reference_revision": SOURCE_REVISION,
+        "scal_load_reference": SCAL_LOAD_REFERENCE,
         "source_sha256_lf": hashes, "fuel_records": len(fuels), "species_records": len(species), "moisture_cells": sum(
             table.size for table in (moisture._REF, moisture._CORR))}, indent=2, sort_keys=True) + "\n"
     return result
@@ -147,4 +151,5 @@ def main():
 
 
 if __name__ == "__main__":
+    sys.dont_write_bytecode = True
     raise SystemExit(main())

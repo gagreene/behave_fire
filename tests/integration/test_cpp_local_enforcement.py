@@ -70,12 +70,11 @@ def test_exact_mismatch_fails_while_qualification_is_withdrawn(tmp_path, dataset
 def test_surface_cap_violation_fails_while_qualification_is_withdrawn(tmp_path, monkeypatch, backend):
     field = reference.FIELDS[0]
 
-    # Load-control models are documented exceptions that the check skips, so perturb a compared case.
-    compared = {case["id"] for case in reference.load_reference()["cases"]
-                if case["fuel_model"] not in reference.SURFACE_LOAD_CONTROLS}
+    # Model 152 was formerly exempt. Its numbered observations now use the same caps.
+    model_cases = {case["id"] for case in reference.load_reference()["cases"] if case["fuel_model"] == 152}
 
     def change(rows):
-        target = next(row for row in rows if row["status"] == "ok" and row["id"] in compared)
+        target = next(row for row in rows if row["status"] == "ok" and row["id"] in model_cases)
         value = target["output"][field]
         target["output"][field] = value + max(1e-9, abs(value) * 1e-9)
         return target["id"]
@@ -90,4 +89,4 @@ def test_surface_cap_violation_fails_while_qualification_is_withdrawn(tmp_path, 
     monkeypatch.setattr(cpp_controls.reference, "load_reference", load_with_perturbed_results)
     with pytest.raises(AssertionError, match=field):
         cpp_controls.measure_ports(ROOT, tmp_path / "report.json", backends=(backend,))
-    assert case_id in compared
+    assert case_id in model_cases

@@ -107,13 +107,13 @@ def test_reducing_the_required_matrix_cannot_activate_a_partial_record(tmp_path,
                   reports={
                       'cpp-MSVC': dict(sha256='1' * 64, summary=dict(cases=773, available=722, fields=3610,
                           unavailable=51)),
-                      'ports-windows-x86_64': dict(sha256='2' * 64, summary=dict(cases_per_backend=710,
-                          fields_per_backend=3550, paired_cases_per_backend=139))})
+                      'ports-windows-x86_64': dict(sha256='2' * 64, summary=dict(cases_per_backend=722,
+                          fields_per_backend=3610, paired_cases_per_backend=139))})
     with pytest.raises(ValueError, match='calibration'):
         module.validate_qualification(root, record)
 
 
-@pytest.mark.parametrize('mutation', ['change', 'add', 'delete', 'missing_api', 'changed_api'])
+@pytest.mark.parametrize('mutation', ['change', 'add', 'delete', 'missing_api', 'changed_api', 'old_coverage'])
 def test_source_changes_invalidate_otherwise_complete_qualification(tmp_path, mutation, cpp_snapshot_template):
     module = importlib.import_module('cpp_calibrate')
     controls = importlib.import_module('cpp_controls')
@@ -134,13 +134,18 @@ def test_source_changes_invalidate_otherwise_complete_qualification(tmp_path, mu
                                       root / 'tests/data/cpp_reference/inventory.json')['public_identity_sha256']),
                   reports={key: dict(sha256='1' * 64, summary=(dict(cases=773, available=722,
                       fields=3610, unavailable=51) if key.startswith('cpp-') else dict(
-                      cases_per_backend=710, fields_per_backend=3550, paired_cases_per_backend=139))) for key in keys})
+                      cases_per_backend=722, fields_per_backend=3610, paired_cases_per_backend=139))) for key in keys})
     module.validate_qualification(root, record)
     policy_path = root / 'tests/data/cpp_reference/tolerance-policy.json'
     policy = reference._document(policy_path)
     policy['approval_gate'] = 'Metadata-only activation does not change tested implementation'
     reference._json(policy_path, policy)
     module.validate_qualification(root, record)
+    if mutation == 'old_coverage':
+        record['reports']['ports-windows-x86_64']['summary'].update(cases_per_backend=710, fields_per_backend=3550)
+        with pytest.raises(ValueError, match='calibration summary'):
+            module.validate_qualification(root, record)
+        return
     if mutation in {'missing_api', 'changed_api'}:
         if mutation == 'missing_api':
             record.pop('public_api')
@@ -168,13 +173,17 @@ def test_revalidation_preserves_paired_bits_and_signed_zero(tmp_path):
     controls = importlib.import_module('cpp_controls')
     report = controls.measure_ports(ROOT, tmp_path / 'ports.json')
     module._validate_observations(ROOT, report)
-    row = report['documented_differences'][0]
+    index = next(i for i, row in enumerate(report['observations']) if row['id'] == 'fm152-angle0')
+    row = report['observations'].pop(index)
+    with pytest.raises(ValueError, match='Incomplete platform calibration observations'):
+        module._validate_observations(ROOT, report)
+    report['observations'].insert(index, row)
     field = reference.FIELDS[0]
-    observed = row['numbered_port'][field]
-    row['numbered_port'][field] = math.nextafter(observed, math.inf)
+    observed = row['actual'][field]
+    row['actual'][field] = math.nextafter(observed, math.inf)
     with pytest.raises(ValueError, match='Numbered/custom'):
         module._validate_observations(ROOT, report)
-    row['numbered_port'][field] = observed
+    row['actual'][field] = observed
 
     row, field = next((row, field) for row in report['observations']
                       for field, value in row['actual'].items() if value == 0.)

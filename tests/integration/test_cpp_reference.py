@@ -57,8 +57,10 @@ def test_default_qualified_policy_checks_selected_backend_and_unit_controls(tmp_
 
     data = reference.load_reference()
     report = cpp_controls.measure_ports(ROOT, tmp_path / 'surface-check.json', backends=(backend,))
-    assert report['counts'] == {backend: dict(cases=710, fields=3550, paired_cases=139,
-        load_difference_cases=12)}
+    expected_ids = {row['id'] for row in data['results'] if row['status'] == 'ok'}
+    expected_ids.update(row['id'] for row in data['controls']['results'])
+    assert {row['id'] for row in report['observations']} == expected_ids
+    assert report['counts'] == {backend: dict(cases=722, fields=3610, paired_cases=139)}
     if data['policy']['approved']:
         assert data['policy']['qualification']['calibration_complete'] is True
 

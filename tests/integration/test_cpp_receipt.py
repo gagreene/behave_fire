@@ -6,6 +6,8 @@ import subprocess
 import sys
 from io import BytesIO
 from pathlib import Path
+from types import SimpleNamespace
+from urllib.request import Request
 from zipfile import ZipFile
 
 import pytest
@@ -98,7 +100,7 @@ def test_archived_ports_report_reapplies_every_numerical_rule(ports_report):
     report = json.loads(ports_report.read_text(encoding="utf-8"))
     summary = receipts._validate_ports_report(ROOT, report, controls._platform_key())
     assert summary == dict(
-        surface=dict(cases_per_backend=710, fields_per_backend=3550, paired_cases_per_backend=139),
+        surface=dict(cases_per_backend=722, fields_per_backend=3610, paired_cases_per_backend=139),
         exact_binary64_per_backend={"fire_size": 9, "ignite": 8, "mortality": 6},
         measurement_only=list(receipts.MEASURED))
 
@@ -234,10 +236,21 @@ def test_check_claims_rejects_malformed_claims(tmp_path, claims):
         receipts.check_claims(tmp_path, tmp_path)
 
 
-def test_committed_claims_stay_unapproved_and_unpublishable(tmp_path):
-    assert json.loads((ROOT / receipts.CLAIMS).read_text(encoding="utf-8")) == CLAIMS
-    with pytest.raises(ValueError, match="Missing platform evidence|not approved"):
-        receipts.check_claims(ROOT, tmp_path)
+def test_receipt_rejects_rename_into_receipt_directory(tmp_path, monkeypatch):
+    commit, tree = "1" * 40, "2" * 40
+    moved_to = (receipts.RECEIPTS / "Cargo.lock").as_posix()
+
+    def git(_root, command, *args):
+        if command == "rev-parse":
+            return tree
+        if command == "diff":
+            return f"rust/Cargo.lock\n{moved_to}" if "--no-renames" in args else moved_to
+        assert command == "ls-files"
+        return ""
+
+    monkeypatch.setattr(receipts, "_git", git)
+    with pytest.raises(ValueError, match=r"outside receipts: .*rust/Cargo.lock"):
+        receipts._bound_revision(tmp_path, {"source_commit": commit, "source_tree": tree})
 
 
 def test_receipt_tree_must_match_its_commit(tmp_path):
@@ -258,12 +271,15 @@ def test_receipts_stay_outside_the_hashed_fixture_inventory():
 
 
 def test_rust_log_requires_every_comparison_and_enforced_count():
-    assert receipts._validate_cargo_log(_cargo_log()) == dict(tests=10, enforced=receipts.RUST_ENFORCED)
+    surface = {"CPP_SURFACE_ENFORCED": "compared=2915"}
+    assert receipts._validate_cargo_log(_cargo_log(enforced=surface)) == dict(
+        tests=10, enforced=dict(receipts.RUST_ENFORCED, **surface))
     bad = [
         _cargo_log(failed=1),
         _cargo_log(tests={"perturbed_cpp_copy_fails_the_surface_caps": 0}),
         _cargo_log(tests={"perturbed_cpp_copy_fails_the_exact_regression": 2}),
-        _cargo_log(enforced={"CPP_SURFACE_ENFORCED": "compared=2854 documented=60"}),
+        _cargo_log(enforced={"CPP_SURFACE_ENFORCED": "compared=2914"}),
+        _cargo_log(enforced={"CPP_SURFACE_ENFORCED": "compared=2855 documented=60"}),
         _cargo_log(enforced={"CPP_IGNITE_ENFORCED": None}),
         "",
     ]
@@ -304,6 +320,7 @@ def test_failed_rust_retry_preserves_prior_reports(tmp_path, monkeypatch):
 
 @pytest.mark.parametrize("failure,error", [
     (None, None), ("approved", "not approved"), ("archive", "approved HTTPS archive"),
+    ("archive-null", "approved HTTPS archive"),
     ("missing", "Missing platform evidence"),
     ("digest", "archive SHA-256"), ("path", "Unsafe evidence archive member"), ("receipt", "bad receipt"),
 ])
@@ -319,7 +336,8 @@ def test_release_claims_fail_closed(tmp_path, monkeypatch, failure, error):
         location["url"] = "http://example.test/evidence.zip"
     if failure == "digest":
         location["sha256"] = "0" * 64
-    _write_claims(tmp_path, approved=failure != "approved", archive_location=location)
+    _write_claims(tmp_path, approved=failure != "approved", archive_location=None if failure == "archive-null"
+                  else location)
     receipt = tmp_path / receipts.RECEIPTS / "windows-x86_64.json"
     if failure != "missing":
         receipt.write_text("{}", encoding="utf-8")
@@ -330,11 +348,24 @@ def test_release_claims_fail_closed(tmp_path, monkeypatch, failure, error):
             raise ValueError("bad receipt")
         return {"validated": True}
 
-    if failure not in {"approved", "archive", "missing"}:
-        monkeypatch.setattr(receipts, "urlopen", lambda *_args, **_kwargs: archive.open("rb"), raising=False)
+    if failure not in {"approved", "archive", "archive-null", "missing"}:
+        opener = SimpleNamespace(open=lambda *_args, **_kwargs: archive.open("rb"))
+        monkeypatch.setattr(receipts, "build_opener", lambda *_: opener)
     monkeypatch.setattr(receipts, "check_receipt", verify_receipt)
     if failure is None:
         assert receipts.check_release_claims(tmp_path) == {"windows-x86_64": {"validated": True}}
     else:
         with pytest.raises(ValueError, match=error):
             receipts.check_release_claims(tmp_path)
+
+
+@pytest.mark.parametrize("scheme", ["http", "https"])
+def test_release_redirect_requires_https(scheme):
+    handler = receipts._HttpsRedirect()
+    request = Request("https://example.test/evidence.zip")
+    target = f"{scheme}://download.example.test/evidence.zip"
+    if scheme == "https":
+        assert handler.redirect_request(request, None, 302, "Found", {}, target).full_url == target
+    else:
+        with pytest.raises(ValueError, match="HTTPS"):
+            handler.redirect_request(request, None, 302, "Found", {}, target)

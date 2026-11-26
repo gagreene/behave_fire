@@ -198,9 +198,11 @@ const std::map<int, double> percent_controls = {
     {168,35},{169,30},{170,27},{171,40},{172,32},{190,28},{191,25},
     {192,45},{193,26}
 };
+const double tons_per_acre_to_lb_ft2 = 2000.0 / 43560.0;
 const std::map<int, std::map<std::string, double>> load_controls = {
-    {152, {{"dead_1h_load_lb_ft2", 0.10101010101010101}}},
-    {153, {{"dead_100h_load_lb_ft2", 0.050505050505050504}, {"live_herb_load_lb_ft2", 0.06427915518824609}}},
+    {152, {{"dead_1h_load_lb_ft2", 2.25 * tons_per_acre_to_lb_ft2}}},
+    {153, {{"dead_100h_load_lb_ft2", 1.05 * tons_per_acre_to_lb_ft2},
+           {"live_herb_load_lb_ft2", 1.45 * tons_per_acre_to_lb_ft2}}},
 };
 struct Request { std::string id; int model; double direction; std::map<std::string, double> physical; std::map<std::string,std::string> modes; double user_waf; std::string session; bool percent_control; double moe_percent; };
 Request validate(const std::map<std::string, Value>& input) {

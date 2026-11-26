@@ -4,9 +4,11 @@
 
 The registered oracle is [Behave `3ca33d5b919d4253b411bfb6464b4c872dda6fc9`](https://github.com/firelab/behave/commit/3ca33d5b919d4253b411bfb6464b4c872dda6fc9). The pin update replayed all 806 reviewed C++ cases on MSVC 19.50.35728 with C++14 and precise floating-point mode. The new revision adds five public wind-limit declarations and keeps the option off by default. It also includes the upstream initializer and PIPA2 mortality fixes. The standalone scorch-height measurement covers the same six inputs.
 
-The old and new numbered Surface replays differ at 581 fields across 139 cases. Upstream corrected the extinction units for all 23 affected models, so F-014 is historical. The new load values for models 152 and 153 are recorded under F-019. Their 12 numbered outputs are measured from the pinned upstream records. The matching custom inputs specify the retained port loads explicitly.
+Upstream corrected the extinction units for 23 numbered models (historical finding F-014). Both ports now also use the official loads for SCAL16 and SCAL14, resolving F-019. In US tons per acre, model 152 dead 1-hour load is 2.25, model 153 dead 100-hour load is 1.05, and model 153 live herbaceous load is 1.45. [Pinned upstream fuel records](https://github.com/firelab/behave/blob/3ca33d5b919d4253b411bfb6464b4c872dda6fc9/src/behave/fuelModels.cpp#L461-L472)
 
-Each port qualification checks 571 available numbered cases and all 139 explicit controls under the existing `1e-12` caps. The reports also retain the 12 documented load differences and verify all numbered/custom port pairs. All nine standalone datasets replayed byte-for-byte across the pin change. The historical Surface qualification below documents the original inputs and the behavior at the previous pin.
+All 583 available numbered cases and all 139 explicit custom controls enter the same `1e-12` comparisons. This includes the 12 numbered cases formerly recorded as load differences. The fixture refresh changes the matching custom inputs and their outputs because they previously requested the older loads. The numbered C++ inputs and observations remain the independent baseline.
+
+The custom controls were replayed with the pinned C++ source and the repository driver on MSVC. All five outputs for each of the 12 refreshed controls matched the corresponding numbered C++ case bit-for-bit. For the standalone Rust parity tests, the Python reference supplied the revised outputs for eight composed Surface cases and four composed Crown cases. Replaying those cases with the previous loads reproduced their former expected values.
 
 ## Guarded Crown observations
 
@@ -49,7 +51,7 @@ values.
 
 The pilot includes the owner-approved Surface boundary and damping-arithmetic
 changes in Python and Rust. Python remains the behavioral reference. Numerical
-caps are active at unchanged bounds after qualification of the measurement,
+caps were activated at unchanged bounds after qualification of the measurement,
 receipt, Python-only coverage, and built-wheel review fixes. The owner approved
 the fixture ceilings on 2026-11-15, and full Surface readiness passes.
 
@@ -90,7 +92,7 @@ numerical qualification; selected snapshots must supply their own artifacts.
 | F-014 | Twenty-three C++ records store dead moisture-of-extinction values 100 times the Python fractional convention. | Owner approved retaining fractions, explicit original-record differences, and separate Percent-unit controls. |
 | F-015 | The ports previously discarded effective wind at baseline spread at or below `1e-7 ft/min`. | Owner approved matching C++ for positive spread; zero-denominator guards retained. |
 | F-016 | The ports previously returned positive flame length below the C++ intensity cutoff of `1e-7 BTU/ft/s`. | Owner approved the same strict cutoff; the threshold itself retains the Byram equation. |
-| F-017 | Polynomial evaluation order gave different tiny extinction residuals. | Owner approved the C++ multiplication order; unchanged caps passed complete calibration and are active. |
+| F-017 | Polynomial evaluation order gave different tiny extinction residuals. | The owner approved the C++ multiplication order. The pilot passed full calibration at the original caps. |
 
 The two approved boundary changes have scalar, array, staged/fused grid, and
 standalone core regressions. Their approval does not approve tolerances, resolve
@@ -149,8 +151,8 @@ All nine complete reports passed validation before reactivation of the unchanged
 caps. The final budget and inventory verification code is included in that
 qualification. `python tools/cpp_inventory.py --check --require-ready` passed at
 activation; while the qualification is withdrawn it fails by design.
-Original numbered-unit differences remain
-documented exceptions, tested through their separate explicit controls.
+The SCAL14 and SCAL16 load correction requires fresh qualification before
+claiming coverage across the full platform matrix.
 
 Use the existing `CI` workflow with `workflow_dispatch` on the prepared branch
 to investigate the nine-report qualification, with `-f scope=full -f cpp_qualification=true`.
@@ -167,8 +169,8 @@ Measurement calls use `load_reference(..., measurement=True)`: all reference
 integrity and size checks remain required, but previous source qualification
 does not block collecting its replacement. The returned policy is always
 unapproved, so this view cannot certify acceptance. Default readers and the full
-readiness check still reject stale qualification. Python's complete 583-case
-comparison runs without the extension; only Rust comparisons require native
+readiness check still reject stale qualification. Python checks 583 numbered
+cases and 139 custom controls without the extension. Rust comparisons require native
 metadata. Aggregation checks every produced native and pure wheel for prohibited
 reference payloads before metadata validation or distribution upload.
 
@@ -223,10 +225,10 @@ lists every file under that tree, so a receipt never changes the inventory diges
 
 `tools/cpp_receipt.py --check <receipt> --archive <dir>` requires the checkout to match the
 receipt's commit apart from receipt files, reads the archived reports, checks their hashes, and
-re-applies the existing numerical rules: every Surface observation within the `1e-12` caps with
-the documented load exceptions (710 cases, 3,550 fields, and 139 paired controls per backend),
+re-applies the existing numerical rules for all available Surface observations within the `1e-12`
+caps (722 cases, 3,610 fields, and 139 paired controls per backend),
 exact binary64 FireSize, Ignite, and Mortality results (9, 8, and 6 fields per backend), the
-Rust core counts (2,855 Surface fields plus 60 documented, and 9, 8, and 6 exact fields), and the
+Rust core counts (2,915 numbered Surface fields and 9, 8, and 6 exact fields), and the
 four Rust deliberate-failure tests. Measurement-only modules must have matching
 dataset hashes and complete case IDs and output fields for both backends.
 For approved claims, the supplied directory must resolve to the absolute archive
@@ -236,7 +238,7 @@ platform listed in `tests/data/cpp_receipts/claims.json`.
 The shared publication gate runs `tools/cpp_receipt.py --check-release-claims`.
 For this check, `archive_location` in the approved claims file must contain `url`
 and `sha256`. The URL points to an HTTPS ZIP the runner can download without
-credentials. The digest is the lowercase SHA-256 of the ZIP. Include each
+credentials. Any redirects must also use HTTPS. The digest is the lowercase SHA-256 of the ZIP. Include each
 claimed attempt directory directly at the archive root with its `ports.json`,
 `rust.log`, and native extension. The gate verifies the ZIP's digest, then checks
 each receipt and its evidence against the release candidate. Build-only and

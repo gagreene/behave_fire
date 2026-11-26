@@ -128,9 +128,8 @@ def _requirements(root):
     expected = dict(compilers=["GNU", "MSVC"], platforms=[
         "linux-x86_64", "linux-aarch64", "linux-musl-x86_64", "macos-x86_64", "macos-arm64",
         "windows-x86_64", "windows-arm64"])
-    if (policy.get("activation_requirements") != expected
-            or policy.get("documented_load_source_models") != sorted(reference.SURFACE_LOAD_CONTROLS)):
-        raise ValueError("Owner-approved calibration matrix or load disposition changed")
+    if policy.get("activation_requirements") != expected or "documented_load_source_models" in policy:
+        raise ValueError("Owner-approved calibration requires the full matrix without load exclusions")
     return {"cpp-" + key for key in expected["compilers"]} | {"ports-" + key for key in expected["platforms"]}
 
 def _run(command, directory, name, environment=None):
@@ -202,44 +201,26 @@ def _validate_observations(root, report):
                 or report.get("binding_api_version") != 4
                 or not re.fullmatch(r"[0-9a-f]{64}", report.get("extension_sha256", ""))):
             raise ValueError("Inconsistent native calibration platform")
-        expected = {case["id"]: row["output"] for case, row in zip(data["cases"], data["results"], strict=False)
-                    if row["status"] == "ok" and case["fuel_model"] not in reference.SURFACE_LOAD_CONTROLS}
+        expected = {row["id"]: row["output"] for row in data["results"] if row["status"] == "ok"}
         expected.update({row["id"]: row["output"] for row in data["controls"]["results"]})
         required = {(backend, identity) for backend in ("python", "rust") for identity in expected}
-        observed = set()
+        actual = {}
         for row in report.get("observations", []):
             key = (row.get("backend"), row.get("id"))
-            if key in observed or key not in required:
+            if key in actual or key not in required:
                 raise ValueError("Duplicate or unknown calibration observation")
             controls.check_values(row["actual"], expected[row["id"]], fields)
-            observed.add(key)
-        if observed != required:
+            actual[key] = row["actual"]
+        if actual.keys() != required:
             raise ValueError("Incomplete platform calibration observations")
-        documented = report.get("documented_differences", [])
         expected_counts = dict(cases=controls.PORT_CASES, fields=controls.PORT_CASES * len(reference.FIELDS),
-                               paired_cases=controls.PAIRED_CASES, load_difference_cases=controls.LOAD_DIFFERENCE_CASES)
-        if any(report["counts"].get(backend) != expected_counts for backend in ("python", "rust")):
+                               paired_cases=controls.PAIRED_CASES)
+        if report.get("counts") != dict.fromkeys(("python", "rust"), expected_counts) or report.get(
+                "documented_differences"):
             raise ValueError("Incomplete numbered/custom calibration accounting")
-        raw = {row["id"]: row for row in data["results"]}
-        actual = {(row["backend"], row["id"]): row["actual"] for row in report["observations"]}
-        differing_cases = {
-            case["id"] for case in data["cases"] if case["fuel_model"] in reference.SURFACE_LOAD_CONTROLS
-        }
-        required_differences = {(backend, identity) for backend in ("python", "rust") for identity in differing_cases}
-        differences = {}
-        for row in documented:
-            key = (row["backend"], row["id"])
-            if (key in differences or key not in required_differences or row["control"] != "custom-" + row["id"]
-                    or row["numbered_cpp"] != raw[row["id"]]["output"]
-                    or set(row["numbered_port"]) != set(reference.FIELDS)):
-                raise ValueError("Numbered/custom evidence changed")
-            differences[key] = row["numbered_port"]
-        if set(differences) != required_differences or len(differing_cases) != controls.LOAD_DIFFERENCE_CASES:
-            raise ValueError("Incomplete documented load differences")
         for backend in ("python", "rust"):
             for case in data["controls"]["cases"]:
-                source_key = (backend, case["id"].removeprefix("custom-"))
-                numbered = differences[source_key] if source_key in differences else actual[source_key]
+                numbered = actual[backend, case["id"].removeprefix("custom-")]
                 custom = actual[backend, case["id"]]
                 if any(struct.pack("!d", numbered[field]) != struct.pack("!d", custom[field])
                        for field in reference.FIELDS):

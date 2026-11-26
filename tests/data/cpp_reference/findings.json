@@ -109,7 +109,7 @@
       "port": 1047.4059417058265,
       "relative": 0.6046877464843656
     },
-    "status": "Resolved upstream at the updated pin by firelab/behave PRs #81 and #83. The historical unit discrepancy remains in the recorded measurements. Twenty-one of the corrected models now enter the direct numbered comparison. Models 152 and 153 follow F-019 for their distinct load records."
+    "status": "Resolved upstream at the updated pin by firelab/behave PRs #81 and #83. All 23 corrected models enter the direct numbered comparison."
   },
   {
     "analysis": "development/cpp-pilot/DIFFERENCES-ANALYSIS.md",
@@ -192,10 +192,10 @@
   {
     "class": "intended_load_record_difference",
     "evidence": "Behave 3ca33d5 includes upstream PR #81 and the reviewed two-pin replay of 806 existing inputs.",
-    "finding": "The updated C++ records change the dead one-hour load of model 152 from 2.2 to 2.25 tons/acre and the dead hundred-hour and live herbaceous loads of model 153 from 1.1 and 1.4 to 1.05 and 1.45 tons/acre. The Python and Rust records retain their established loads.",
+    "finding": "The updated C++ records changed the dead one-hour load of model 152 from 2.2 to 2.25 tons/acre and the dead hundred-hour and live herbaceous loads of model 153 from 1.1 and 1.4 to 1.05 and 1.45 tons/acre. Python and Rust initially retained their previous loads.",
     "id": "F-019",
-    "observation_scope": "Twelve numbered Surface inputs exercise the two retained definitions. The new C++ numbered values are measured as produced. Explicit load fields in the corresponding custom controls provide the same physical inputs as the ports.",
-    "status": "Twelve numbered cases are recorded as load differences. The 139 explicit controls and the other 571 available numbered cases enter the existing comparison caps."
+    "observation_scope": "Twelve numbered Surface cases exercise these two models. The corresponding custom controls explicitly specify the three loads in pounds per square foot.",
+    "status": "Resolved. Python, Rust, and the custom controls now use the pinned Behave loads. All 583 available numbered cases and 139 explicit controls enter the comparison."
   },
   {
     "class": "unsafe_oracle_route",

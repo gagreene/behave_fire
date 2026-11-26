@@ -1,7 +1,7 @@
 //! Independent C++ Surface observations with a fail-closed calibrated policy.
 //!
-//! Passing these tests validates fixture structure, real core evaluation, and a
-//! calibrated gate, while preserving documented load differences. Run with
+//! Passing these tests validates fixture structure, real core evaluation, and
+//! all five numerical caps for every available numbered case. Run with
 //! `--test cpp_reference -- --nocapture` to retain every raw numeric difference.
 
 use behave_fire::engine::{
@@ -25,14 +25,6 @@ const FIELDS: [&str; 5] = [
     "length_to_width_ratio",
     "spread_chains_per_hour",
 ];
-
-#[derive(Debug, Eq, PartialEq)]
-enum ReviewRequired {
-    MissingCalibration,
-    NumericalMismatch,
-    IncompleteCoverage,
-    RequiresOwnerReview,
-}
 
 fn compare_core_to_cpp(case: &Value, golden: &Value, fuels: &FuelModels) -> Vec<Value> {
     assert_eq!(case["operation"], "surface");
@@ -80,50 +72,16 @@ fn compare_core_to_cpp(case: &Value, golden: &Value, fuels: &FuelModels) -> Vec<
         .collect()
 }
 
-fn comparison_gate(policy: &Value, observations: &[Value]) -> Result<(), ReviewRequired> {
-    assert!(!observations.is_empty(), "no independent observations");
-    if policy["approved"].as_bool() != Some(true) {
-        return Err(ReviewRequired::RequiresOwnerReview);
-    }
-    cpp_policy::require_qualification(policy).map_err(|_| ReviewRequired::MissingCalibration)?;
-    enforce_caps(policy, observations)?;
-    Ok(())
-}
-
-/// Apply the owner's Surface caps and documented load exceptions whatever the approval state.
-///
-/// The full local check relies on this, so a withdrawn qualification never hides a
-/// numerical regression; `comparison_gate` adds the release approval requirement.
-fn enforce_caps(policy: &Value, observations: &[Value]) -> Result<(usize, usize), ReviewRequired> {
-    let mut compared = 0;
-    let mut documented = 0;
+/// Apply the owner's Surface caps to every available numbered observation.
+fn enforce_caps(policy: &Value, observations: &[Value]) -> Result<(), String> {
     for row in observations {
-        let model = row["source_model"]
-            .as_i64()
-            .ok_or(ReviewRequired::IncompleteCoverage)?;
-        if cpp_policy::LOAD_MODELS.contains(&model) {
-            documented += 1;
-            continue;
-        }
-        let left = row["rust"]
-            .as_str()
-            .and_then(|value| value.parse::<f64>().ok())
-            .ok_or(ReviewRequired::NumericalMismatch)?;
-        let right = row["cpp"]
-            .as_str()
-            .and_then(|value| value.parse::<f64>().ok())
-            .ok_or(ReviewRequired::NumericalMismatch)?;
-        let field = row["field"]
-            .as_str()
-            .ok_or(ReviewRequired::IncompleteCoverage)?;
+        let left = row["rust"].as_str().unwrap().parse::<f64>().unwrap();
+        let right = row["cpp"].as_str().unwrap().parse::<f64>().unwrap();
+        let field = row["field"].as_str().unwrap();
         cpp_policy::compare(left, right, policy, field)
-            .map_err(|_| ReviewRequired::NumericalMismatch)?;
-        compared += 1;
+            .map_err(|error| format!("{}: {error}", row["id"]))?;
     }
-    if compared != 2855 || documented != 60 {
-        return Err(ReviewRequired::IncompleteCoverage);
-    }
-    Ok((compared, documented))
+    Ok(())
 }
 
 fn number(record: &Value, key: &str) -> f64 {
@@ -280,7 +238,7 @@ fn cpp_surface_observations_follow_the_qualified_policy() {
         assert_eq!(policy["fields"][field]["rtol"].as_f64(), Some(1e-12));
         assert_eq!(policy["fields"][field]["atol"].as_f64(), Some(1e-12));
     }
-    assert!(!cases.is_empty());
+    assert_eq!(cases.len(), 634);
     assert_eq!(
         cases.keys().collect::<Vec<_>>(),
         results.keys().collect::<Vec<_>>()
@@ -314,22 +272,15 @@ fn cpp_surface_observations_follow_the_qualified_policy() {
             status => panic!("unsupported C++ status for {id}: {status}"),
         }
     }
-    assert_eq!(
-        observations.len(),
-        (cases.len() - unavailable) * FIELDS.len()
-    );
+    assert_eq!(unavailable, 51);
+    assert_eq!(observations.len(), 583 * FIELDS.len());
     for observation in &observations {
         println!("CPP_SURFACE_RAW {observation}");
     }
-    assert_eq!(enforce_caps(&policy, &observations), Ok((2855, 60)));
-    println!("CPP_SURFACE_ENFORCED compared=2855 documented=60");
-    if policy["approved"].as_bool() == Some(true) {
-        assert_eq!(comparison_gate(&policy, &observations), Ok(()));
-    } else {
-        assert_eq!(
-            comparison_gate(&policy, &observations),
-            Err(ReviewRequired::RequiresOwnerReview)
-        );
+    enforce_caps(&policy, &observations).unwrap();
+    println!("CPP_SURFACE_ENFORCED compared={}", observations.len());
+    if policy["approved"].as_bool().unwrap() {
+        cpp_policy::require_qualification(&policy).unwrap();
     }
     println!(
         "CPP_SURFACE_POLICY cases={} observations={} unavailable={} qualified={}",
@@ -352,33 +303,29 @@ fn perturbed_cpp_copy_fails_the_surface_caps() {
     .unwrap();
     let (id, case) = cases
         .iter()
-        .find(|(id, case)| {
-            results[*id]["status"] == "ok"
-                && !cpp_policy::LOAD_MODELS.contains(&case["fuel_model"].as_i64().unwrap())
-        })
+        .find(|(id, case)| results[*id]["status"] == "ok" && case["fuel_model"] == 152)
         .unwrap();
     let field = FIELDS[0];
     let golden = results.get_mut(id).unwrap();
     let value = golden["output"][field].as_f64().unwrap();
     golden["output"][field] = json!(value + (value.abs() * 1e-9).max(1e-9));
     let observations = compare_core_to_cpp(case, &results[id], &FuelModels::default());
-    assert_eq!(
-        enforce_caps(&policy, &observations),
-        Err(ReviewRequired::NumericalMismatch)
-    );
+    let error = enforce_caps(&policy, &observations).unwrap_err();
+    assert!(error.contains(id) && error.contains(field), "{error}");
 }
 
 #[test]
 fn pending_policy_cannot_certify_even_exact_values() {
-    let observations = [json!({"cpp": "1", "rust": "1", "exact_bits": true})];
-    assert_eq!(
-        comparison_gate(&json!({"approved": false}), &observations),
-        Err(ReviewRequired::RequiresOwnerReview),
-    );
-    assert_eq!(
-        comparison_gate(&json!({"approved": true}), &observations),
-        Err(ReviewRequired::MissingCalibration),
-    );
+    let mut policy: Value = serde_json::from_str(include_str!(
+        "data/cpp_reference/surface/tolerance-policy.json"
+    ))
+    .unwrap();
+    policy["approved"] = false.into();
+    cpp_policy::compare(1., 1., &policy, FIELDS[0]).unwrap();
+    assert!(cpp_policy::require_qualification(&policy).is_err());
+    policy["approved"] = true.into();
+    policy["qualification"] = Value::Null;
+    assert!(cpp_policy::require_qualification(&policy).is_err());
 }
 
 // ---- fixture integrity ----

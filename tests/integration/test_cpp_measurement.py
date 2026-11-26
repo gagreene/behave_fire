@@ -90,7 +90,7 @@ class BlockNative:
 sys.meta_path.insert(0, BlockNative())
 import cpp_controls
 data = cpp_controls.measure_ports(root, report, backends=('python',))
-assert data['counts'] == {'python': dict(cases=710, fields=3550, paired_cases=139, load_difference_cases=12)}
+assert data['counts'] == {'python': dict(cases=722, fields=3610, paired_cases=139)}
 assert 'extension_sha256' not in data and 'binding_api_version' not in data
 assert data['parity_approved'] is False
 '''
@@ -123,7 +123,7 @@ else:
     raise AssertionError('Stale qualification accepted')
 report = cpp_controls.measure_ports(root, output)
 assert report['parity_approved'] is False
-assert cpp_calibrate._validate_observations(root, report)['cases_per_backend'] == 710
+assert cpp_calibrate._validate_observations(root, report)['cases_per_backend'] == 722
 assert cpp_reference.compare_backends(root, output.parent / 'raw-differences')['policy_approved'] is False
 data = cpp_reference.load_reference(root, measurement=True)
 assert data['policy']['approved'] is False

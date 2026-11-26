@@ -14,7 +14,7 @@
       "windows-arm64"
     ]
   },
-  "approval_gate": "Pending complete qualification after the release review fixes (sdist fixtures, musl static libgcc, PyPI tag gate)",
+  "approval_gate": "Pending complete qualification after the release review fixes and the SCAL16 and SCAL14 load corrections",
   "approved": false,
   "conditional_owner_approval": true,
   "crown": {
@@ -55,10 +55,6 @@
       }
     }
   },
-  "documented_load_source_models": [
-    152,
-    153
-  ],
   "fields": {
     "fireline_intensity_btu_ft_s": {
       "atol": 1e-12,

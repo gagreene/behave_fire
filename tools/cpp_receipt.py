@@ -4,8 +4,8 @@ A receipt records one platform's full local comparison of the Python and Rust po
 pinned Behave C++ outputs. It binds the results to the tested commit and tree, the qualified
 source inventory, the fixture inventory, the native extension, the toolchains, and the host,
 and it names the archived full reports by SHA-256. Verification reads those archived reports,
-re-applies the existing numerical rules (Surface ``1e-12`` caps with the documented load
-exceptions, and exact binary64 FireSize, Ignite, and Mortality results), and rejects a claimed
+re-applies the existing numerical rules (Surface ``1e-12`` caps for all available cases
+and exact binary64 FireSize, Ignite, and Mortality results), and rejects a claimed
 platform without valid evidence.
 
 Receipts live in ``tests/data/cpp_receipts/``, outside ``tests/data/cpp_reference/``: the
@@ -26,7 +26,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from tempfile import TemporaryDirectory, mkdtemp
 from urllib.parse import urlsplit
-from urllib.request import urlopen
+from urllib.request import HTTPRedirectHandler, build_opener
 from zipfile import ZipFile
 
 import cpp_calibrate as calibrate
@@ -43,7 +43,7 @@ PLATFORMS = ("linux-x86_64", "linux-aarch64", "linux-musl-x86_64", "macos-x86_64
 BACKENDS = ("python", "rust")
 EXACT = {"fire_size": (fire_size, 9), "ignite": (ignite, 8), "mortality": (mortality, 6)}
 MEASURED = ("crown", "fine_dead_fuel_moisture", "safety", "slope_tool", "spot", "units", "vapor_pressure_deficit")
-RUST_ENFORCED = {"CPP_SURFACE_ENFORCED": "compared=2855 documented=60", "CPP_FIRE_SIZE_ENFORCED": "exact_binary64=9",
+RUST_ENFORCED = {"CPP_SURFACE_ENFORCED": "compared=2915", "CPP_FIRE_SIZE_ENFORCED": "exact_binary64=9",
                  "CPP_IGNITE_ENFORCED": "exact_binary64=8", "CPP_MORTALITY_ENFORCED": "exact_binary64=6"}
 RUST_TESTS = {"cpp_surface_observations_follow_the_qualified_policy": 1,
               "explicit_percent_controls_match_numbered_physics_and_consume_all_cpp_fields": 1,
@@ -54,6 +54,26 @@ RUST_TESTS = {"cpp_surface_observations_follow_the_qualified_policy": 1,
               "perturbed_cpp_copy_fails_the_surface_caps": 1,
               "perturbed_cpp_copy_fails_the_exact_regression": 3}
 SCHEMA = 2
+
+
+class _HttpsRedirect(HTTPRedirectHandler):
+    """Keep evidence archive downloads on HTTPS across redirects."""
+
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        """Build an HTTPS redirect request or reject the redirect.
+
+        :param req: Original request.
+        :param fp: Response stream.
+        :param code: Redirect status code.
+        :param msg: Redirect status message.
+        :param headers: Redirect response headers.
+        :param newurl: Redirect URL resolved by urllib.
+        :return: Request for the HTTPS destination.
+        """
+        target = urlsplit(newurl)
+        if target.scheme != "https" or not target.hostname or target.username is not None:
+            raise ValueError("Evidence archive redirects require HTTPS without credentials")
+        return super().redirect_request(req, fp, code, msg, headers, newurl)
 
 
 def _approved_claims(root):
@@ -88,7 +108,7 @@ def _bound_revision(root, receipt):
         raise ValueError("Receipt commit is not a full SHA-1")
     if _git(root, "rev-parse", commit + "^{tree}") != receipt["source_tree"]:
         raise ValueError("Receipt tree does not match its commit")
-    changed = _git(root, "diff", "--name-only", commit).splitlines()
+    changed = _git(root, "diff", "--no-renames", "--name-only", commit).splitlines()
     changed += _git(root, "ls-files", "--others", "--exclude-standard").splitlines()
     outside = sorted(name for name in changed if not name.startswith(RECEIPTS.as_posix() + "/"))
     if outside:
@@ -483,7 +503,7 @@ def check_release_claims(root):
         raise ValueError("Release claims require an approved HTTPS archive and SHA-256")
     with TemporaryDirectory(prefix="bf-release-evidence-") as temporary:
         download = Path(temporary) / "evidence.zip"
-        with urlopen(url, timeout=30) as source, download.open("wb") as output:
+        with build_opener(_HttpsRedirect()).open(url, timeout=30) as source, download.open("wb") as output:
             shutil.copyfileobj(source, output)
         if reference._digest(download) != digest:
             raise ValueError("Downloaded evidence archive SHA-256 differs from approved claims")

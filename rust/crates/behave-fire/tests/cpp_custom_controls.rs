@@ -187,7 +187,8 @@ fn explicit_percent_controls_match_numbered_physics_and_consume_all_cpp_fields()
             let cpp = number(&golden["output"], field);
             assert!(rust.is_finite() && cpp.is_finite());
             // The owner's caps apply whatever the release approval state.
-            cpp_policy::compare(rust, cpp, &policy, field).unwrap();
+            cpp_policy::compare(rust, cpp, &policy, field)
+                .unwrap_or_else(|error| panic!("{id}: {error}"));
             println!("CPP_PERCENT_CONTROL id={id} field={field} cpp={cpp:.17e} rust={rust:.17e}");
             compared += 1;
         }
@@ -243,7 +244,7 @@ fn qualification_rejects_missing_core_source_inventory() {
         let summary = if key.starts_with("cpp-") {
             serde_json::json!({"cases":773,"available":722,"fields":3610,"unavailable":51})
         } else {
-            serde_json::json!({"cases_per_backend":710,"fields_per_backend":3550,"paired_cases_per_backend":139})
+            serde_json::json!({"cases_per_backend":722,"fields_per_backend":3610,"paired_cases_per_backend":139})
         };
         reports.insert(
             key.into(),
