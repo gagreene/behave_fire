@@ -65,7 +65,7 @@ short-lived credential. [Official authentication action](https://github.com/rust
 ## Subsequent releases
 
 Run the [live C++ pytest lane](CPP_VALIDATION.md#opt-in-live-pytest) and
-manual CI qualification before release. The crate release workflow requires
+manual CI qualification (`-f scope=full -f cpp_qualification=true`) before release. The crate release workflow requires
 the shared live GNU and MSVC checks before publication.
 
 The manual workflow defaults to `publish=false`, which runs checks only. An

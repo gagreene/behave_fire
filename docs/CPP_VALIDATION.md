@@ -136,16 +136,19 @@ activate them. A qualification must cover GNU and MSVC builds plus all seven
 native wheel platforms from one manual CI run, with complete case/field evidence,
 matching input hashes, and no widened cap. The full reports remain CI artifacts;
 only their validated compact qualification metadata is eligible for the repository.
-Qualification passed in [manual run 43752200280](https://github.com/gagreene/behave_fire/actions/runs/43752200280)
-at commit `8ba5085a636d4f8ebc6dbc5747dbe311c0a22b4b`: GNU and MSVC each
-checked 773 cases (722 available, 51 unavailable); each of seven native platforms
-checked 583 cases and 2,915 fields per backend, including all 139 numbered/custom
-pairs. The compact qualification binds the exact production, build, tool, and
+The most recent qualification passed in [manual run 45552664829](https://github.com/gagreene/behave_fire/actions/runs/45552664829)
+at source commit `b1a1baf7be61651ab69f6a3bd361a0918d0832f9` and was activated at
+`b58110d`: GNU and MSVC each checked 773 cases (722 available, 51 unavailable);
+each of seven native platforms checked 710 cases and 3,550 fields per backend,
+including all 139 numbered/custom pairs. Commit `7a57e8e` withdrew it, because the
+release review fixes and the CI policy change edited qualified sources.
+Requalification is pending the owner's decision on accepting local evidence. The compact qualification binds the exact production, build, tool, and
 workflow source inventory. Changed, added, or deleted sources invalidate it;
 metadata-only activation can follow without changing the tested implementation.
 All nine complete reports passed validation before reactivation of the unchanged
 caps. The final budget and inventory verification code is included in that
-qualification, and `python tools/cpp_inventory.py --check --require-ready` passes.
+qualification. `python tools/cpp_inventory.py --check --require-ready` passed at
+activation; while the qualification is withdrawn it fails by design.
 Original numbered-unit differences remain
 documented exceptions, tested through their separate explicit controls.
 
@@ -176,15 +179,16 @@ python tools/cpp_reference.py --check
 python tools/cpp_inventory.py --check
 python tools/export_cpp_crate.py --check
 python -m pytest --require-rust -W error
+cargo test --manifest-path rust/Cargo.toml -p behave-fire --locked --no-fail-fast -- --include-ignored
 python tools/cpp_reference.py --compare development/cpp-pilot/measurements
 ```
 
 The first three commands check integrity, not scientific parity. The comparer
 records every Python/C++ and Rust/C++ field difference without accepting it.
 `assert_matches_cpp` raises until an explicit field policy is approved. The
-standalone crate verifies its own copied fixture hashes, evaluates real core
-cells, records raw differences, and likewise refuses to certify an unapproved
-policy. No Python, C++, or NumPy runtime is added to the Rust library.
+standalone crate verifies its own copied fixture hashes. Its `#[ignore]`d
+comparison tests, run with `--include-ignored`, evaluate real core cells, record
+raw differences, and likewise refuse to certify an unapproved policy. No Python, C++, or NumPy runtime is added to the Rust library.
 
 Manifest verification is divided deliberately. Offline readers verify shipped
 goldens, policy, inventory, findings, tools, and crate-local copies. Historical

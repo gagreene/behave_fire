@@ -2,7 +2,7 @@
 
 Python package versions come from `rust/crates/behave-py/Cargo.toml` and use `MAJOR.MINOR.PATCH`. A release such as Cargo `0.1.0` builds Python `0.1.0` with tag `v0.1.0`. TestPyPI rehearsals use release candidates: Cargo `0.1.0-rc.1` builds Python `0.1.0rc1`, and each rehearsal upload needs the next `rcN`. The standalone core version (`rust/crates/behave-fire/Cargo.toml`, currently `0.1.0`) is independent. Never bump the core solely to match Python. Version-only edits to these first-party version fields need no new C++ source qualification; any other manifest or lock change does.
 
-Build-only validation is safe on an unmerged branch. PR CI calls `.github/workflows/wheel-validation.yml` through a local reusable-workflow reference, so the branch's own scripts and workflow run before merge. The registered CI workflow also accepts manual dispatch on a selected ref; it builds and tests artifacts without publishing. Manual `release.yml` dispatch defaults to `build-only`. No package upload is authorized by implementing or testing these files.
+Build-only validation is safe on an unmerged branch. CI for a promotion or hotfix pull request into `master` calls `.github/workflows/wheel-validation.yml` through a local reusable-workflow reference, so the branch's own scripts and workflow run before merge. Pull requests into `pre_release` run only the quick tier, so validate wheel or packaging changes on such a branch with a manual `scope=full` or targeted dispatch. The registered CI workflow also accepts manual dispatch on a selected ref; it builds and tests artifacts without publishing. Manual `release.yml` dispatch defaults to `build-only`. No package upload is authorized by implementing or testing these files.
 
 ## Build wheels on GitHub
 
@@ -37,7 +37,7 @@ The test extra includes pytest and PyYAML for the collected regression and workf
 ## Build and inspect artifacts
 
 Use a clean authorized release commit. Run the [live C++ pytest lane](CPP_VALIDATION.md#opt-in-live-pytest)
-locally and complete manual CI qualification on the release candidate. Release validation runs the live
+locally and complete manual CI qualification on the release candidate (`gh workflow run CI --ref <branch> -f scope=full -f cpp_qualification=true`). Release validation runs the live
 lane on MSVC and GNU before publication. All Rust manifests, sources, embedded tables, and notices must be tracked by Git before a git-mode sdist build. `git ls-files` includes staged new files; the tracking gate does not itself certify a clean release commit. Do not commit to bypass a packaging check without permission.
 
 ```sh

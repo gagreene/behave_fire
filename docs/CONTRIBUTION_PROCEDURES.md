@@ -173,27 +173,28 @@ When a serious defect is found in released code and cannot wait for the next rel
 
 ## Local tests before every PR merge
 
-Run the full default test suite locally against the **latest PR commit** before
-merging. The project builds with Maturin, so `pip install -e .` needs a Rust
-toolchain. From the repository root, the Python-only route installs dependencies
-without building or installing the project:
+Run the full local check against the **latest PR commit** before merging. Every
+PR runs both pytest routes, the Rust checks, and the pinned C++ comparisons that
+they contain, whatever the PR changes. The project builds with Maturin, so
+`pip install -e .` needs a Rust toolchain. From the repository root, the
+Python-only route installs dependencies without building or installing the project:
 
 ```shell
 uv sync --locked --no-install-project --extra test --extra dev
 uv run --no-sync python -m pytest -vv
 ```
 
-Changes that touch the native extension or its tests also run the native route,
-which builds the extension (Rust required) and fails, rather than skips, if it is
-missing or incompatible:
+The native route builds the extension (Rust required) and fails, rather than skips,
+if it is missing or incompatible. The Rust half of the pinned C++ comparisons runs
+only on this route:
 
 ```shell
 uv sync --locked --extra test --extra dev
 uv run --no-sync python -m pytest --require-rust -vv
 ```
 
-When a PR changes anything under `rust/`, also run the Rust checks. There is no
-`Cargo.toml` at the repository root, so every command passes `--manifest-path`:
+Run the Rust checks on every PR. There is no `Cargo.toml` at the repository root,
+so every command passes `--manifest-path`:
 
 ```shell
 cargo fmt    --manifest-path rust/Cargo.toml --all -- --check
@@ -236,8 +237,9 @@ does not satisfy the passing-test checkbox below. If pytest cannot use its cache
 folder, add `-p no:cacheprovider`.
 
 Rerun the suite after changes to the PR branch. Record the command, Python
-version, operating system, latest commit SHA, and pass/skip counts in the PR
-description. Do not treat a run against an earlier commit as validation of the
+version, operating system, latest commit SHA, pass/skip counts, and the pinned C++
+comparison results (Python `-m cpp_comparison` and Rust `-- --ignored` counts) in
+the PR description. Do not treat a run against an earlier commit as validation of the
 current PR head.
 
 ### CI tiers

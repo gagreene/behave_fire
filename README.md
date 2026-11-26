@@ -52,7 +52,7 @@ The package has two implementations that give the same results within documented
 
 ### Validation against Behave C++
 
-The C++ validation oracle is [Behave `3ca33d5`](https://github.com/firelab/behave/commit/3ca33d5b919d4253b411bfb6464b4c872dda6fc9). Pinned C++ observations are replayed against both implementations, and each qualification covers GNU and MSVC builds and all seven native wheel platforms:
+The C++ validation oracle is [Behave `3ca33d5`](https://github.com/firelab/behave/commit/3ca33d5b919d4253b411bfb6464b4c872dda6fc9). Pinned C++ observations are replayed against both implementations in the full local check before every merge, and each qualification covers GNU and MSVC builds and all seven native wheel platforms. The results below come from the most recent qualification, [manual run 45552664829](https://github.com/gagreene/behave_fire/actions/runs/45552664829) at source `b1a1baf`. Later source changes withdrew it, and requalification is pending:
 
 - **Surface:** 571 numbered cases and 139 explicit controls match within `1e-12` relative and absolute caps. Fuel models 152 and 153 are the one documented difference: upstream changed their loads at this pin, and behave_fire keeps its own load values (12 outputs).
 - **FireSize, Ignite, and Mortality scorch height:** the standalone cases match exactly.
@@ -615,7 +615,7 @@ Before submitting a change:
 
 1. Create a focused branch from `pre_release`.
 2. Add or update tests for the behavior you change, in Python and, for native code, in Rust.
-3. Run the full test suite (see [Testing](#testing)) and, for changes under `rust/`, the Rust checks.
+3. Run the full test suite (see [Testing](#testing)), the Rust checks, and the pinned C++ comparisons on every pull request, as described in [docs/CONTRIBUTION_PROCEDURES.md](docs/CONTRIBUTION_PROCEDURES.md).
 4. Fill in the test record in the pull request description from a run on the pull request's latest commit.
 5. Describe scientific assumptions, unit changes, and regression risks in the pull request.
 
