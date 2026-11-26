@@ -305,11 +305,11 @@ class FuelModels:
             640, 2200, 640, False)
         rec(152, "SCAL16", "North Slope Ceanothus with Moderate Load Grass (Static)",
             6, 0.15, 8000, 8000,
-            2.2*f, 4.8*f, 1.8*f, 3.0*f, 2.8*f,
+            2.25*f, 4.8*f, 1.8*f, 3.0*f, 2.8*f,
             500, 1500, 500, False)
         rec(153, "SCAL14", "Manzanita/Scrub Oak with Low Load Grass (Static)",
             3, 0.15, 9211, 9211,
-            3.0*f, 4.5*f, 1.1*f, 1.4*f, 5.0*f,
+            3.0*f, 4.5*f, 1.05*f, 1.45*f, 5.0*f,
             350, 1500, 250, False)
         rec(154, "SCAL18", "Coastal Sage/Buckwheat Scrub with Low Load Grass (Static)",
             3, 0.25, 9200, 9200,

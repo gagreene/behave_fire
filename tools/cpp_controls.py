@@ -22,9 +22,9 @@ import cpp_spot as spot
 import cpp_units as units
 import cpp_vapor_pressure_deficit as vpd
 
-PORT_CASES = 710
+NUMBERED_CASES = 583
 PAIRED_CASES = 139
-LOAD_DIFFERENCE_CASES = 12
+PORT_CASES = NUMBERED_CASES + PAIRED_CASES
 
 
 def _artifacts(root):
@@ -298,44 +298,33 @@ def measure_ports(root, report, backends=("python", "rust"), expected_platform=N
     data = reference.load_reference(root, measurement=True)
     controls = load(root, data["cases"])
     fields = calibration_policy(root)
-    numbered = {case["id"]: case for case in data["cases"]}
-    raw_results = {row["id"]: row for row in data["results"]}
-    records, counts, runners, documented = [], {}, {}, []
+    records, counts, runners = [], {}, {}
     for backend in backends:
-        total, paired = 0, 0
-        for case, expected in zip(data["cases"], data["results"], strict=False):
-            if expected["status"] != "ok" or case["fuel_model"] in reference.SURFACE_LOAD_CONTROLS:
+        numbered = {}
+        for case, expected in zip(data["cases"], data["results"], strict=True):
+            if expected["status"] != "ok":
                 continue
             actual = _port(case, backend, runners)
             differences = check_values(actual, expected["output"], fields)
             records.append(dict(backend=backend, id=case["id"], actual=actual, differences=differences))
-            total += 1
-        for case, expected in zip(controls["cases"], controls["results"], strict=False):
+            numbered[case["id"]] = actual
+        paired = 0
+        for case, expected in zip(controls["cases"], controls["results"], strict=True):
             actual = _port(case, backend, runners)
-            original = _port(numbered[case["id"].removeprefix("custom-")], backend, runners)
+            original = numbered[case["id"].removeprefix("custom-")]
             if any(struct.pack("!d", actual[field]) != struct.pack("!d", original[field]) for field in reference.FIELDS
             ):
                 raise AssertionError(f"{backend}/{case['id']}: numbered/custom definition differs")
-            source_id = case["id"].removeprefix("custom-")
-            if case["fuel_model"] in reference.SURFACE_LOAD_CONTROLS:
-                documented.append(dict(backend=backend, id=source_id, control=case["id"],
-                                       reason="numbered C++ loads differ from the retained port loads",
-                                       numbered_cpp=raw_results[source_id]["output"], numbered_port=original))
             differences = check_values(actual, expected["output"], fields)
             records.append(dict(backend=backend, id=case["id"], actual=actual, differences=differences))
-            total += 1
             paired += 1
-        if total != PORT_CASES or paired != PAIRED_CASES or sum(
-            row["backend"] == backend for row in documented
-        ) != LOAD_DIFFERENCE_CASES:
+        if len(numbered) != NUMBERED_CASES or paired != PAIRED_CASES:
             raise ValueError("Incomplete port calibration")
-        counts[backend] = dict(cases=total, fields=total * len(reference.FIELDS), paired_cases=paired,
-                               load_difference_cases=LOAD_DIFFERENCE_CASES)
+        counts[backend] = dict(cases=PORT_CASES, fields=PORT_CASES * len(reference.FIELDS), paired_cases=paired)
     result = dict(schema_version=1, kind="ports", upstream_sha=reference.PIN, passed=True,
                   parity_approved=False, artifacts=_artifacts(root), fields=fields, counts=counts,
                   platform=platform.platform(), system=platform.system(), machine=platform.machine(),
                   platform_key=platform_key, python=sys.version, numpy=np.__version__, observations=records,
-                  documented_differences=documented,
                   libc_family="musl" if platform_key == "linux-musl-x86_64" else platform.libc_ver()[0])
     if 'rust' in backends:
         from behave_fire import _rust

@@ -40,6 +40,7 @@ from behave_fire.components.fuel_models_array import build_fuel_lookup_arrays
 from behave_fire.components.mortality import build_mortality_lookup
 from behave_fire.components.slope_tool import SlopeTool
 from behave_fire.components.species_master_table import SpeciesMasterTable, SpeciesMasterTableRecord
+from check_rust_tables import SCAL_LOAD_REFERENCE
 from rust_reference_platform import canonical_case
 
 ROOT = next(parent for parent in Path(__file__).resolve().parents if (parent / "pytest.ini").is_file())
@@ -242,7 +243,8 @@ def _envelope(payload):
     hashes = {path.relative_to(ROOT).as_posix(): hashlib.sha256(path.read_bytes().replace(b"\r\n", b"\n")).hexdigest()
               for path in paths}
     return {"schema_version": 1, "provenance": {"python_reference_sha": REFERENCE_SHA,
-            "source_sha256": hashes, "oracle": "explicit Python"}, **payload}
+            "scal_load_reference": SCAL_LOAD_REFERENCE, "source_sha256": hashes,
+            "oracle": "explicit Python"}, **payload}
 
 
 def _modules():

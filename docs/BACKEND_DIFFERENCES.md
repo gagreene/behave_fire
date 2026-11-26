@@ -71,8 +71,8 @@ This deliberately changes last-bit Python results and corresponding derived
 fixture intermediates. Upstream corrected the extinction units of the 23
 previously inconsistent C++ records at the current pin, so both ports and the
 C++ store the same fractional values. The separately labelled Percent-unit
-custom controls remain as explicit equation checks, and fuel models 152 and
-153 keep their documented load difference (see [C++ validation](CPP_VALIDATION.md)).
+custom controls remain as explicit equation checks. Both ports also use the pinned
+C++ loads for models 152 and 153 (see [C++ validation](CPP_VALIDATION.md)).
 
 NaN means unavailable physical data. A missing condition or denominator does not
 silently select a zero fallback. Availability follows actual field dependencies:

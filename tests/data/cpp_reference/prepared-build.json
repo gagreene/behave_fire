@@ -4,24 +4,24 @@
     "id": "MSVC",
     "version": "19.50.35728.0"
   },
-  "driver_sha256": "5c2cd6285251f86279534de93256221518bcfca717dc58b82f0e4aa3fe2b21b9",
-  "driver_source_sha256_lf": "4feb0b3aca1696c886ee91b3620fbaaed3d2f2c59a07a7536f3be8389dfed1b8",
+  "driver_sha256": "93672221c870945809ddd0757283cf62b95a32c32c54c13c491b9fadfe48fd4f",
+  "driver_source_sha256_lf": "5bd78cbaba0dc6199c3ae58d0b8d3a2ba5d26114541240845b3bf7407b1664ea",
   "flags": [
     "/O2",
     "/fp:precise",
     "/D_USE_MATH_DEFINES=",
     "/EHsc"
   ],
-  "historical_custom_manifest_sha256": "ef94d6a840de26a2af30e20790e78aec420ec67fa9ddcfd12356220e124db85b",
+  "historical_custom_manifest_sha256": "47953176225a1e3af02de9fb7dc0796124343979c427e16664e4632f89511e01",
   "historical_manifest_sha256": "a8c10db6cf6d87acb76ba5469f02ae75fdcc99417fcf12d282f75a55810a635e",
   "original_replay_sha256": "84ab8f5bf4197dcea68f302a2969f8f4c075c995a8e8f084d8611a12120ef14a",
   "prepared_overlay_sha256": {
     "CMakeLists.txt": "79ff7cba02089f01fa27cd18c10e6b4e0fdaa18f18b80e29c8982af5e8eaf101",
     "crown_reference.hpp": "b891482ff0e800d10e9b5918d4544bc5fd041da90358fb84b6f48f729cb45640",
-    "driver.cpp": "4feb0b3aca1696c886ee91b3620fbaaed3d2f2c59a07a7536f3be8389dfed1b8",
+    "driver.cpp": "5bd78cbaba0dc6199c3ae58d0b8d3a2ba5d26114541240845b3bf7407b1664ea",
     "probe.cpp": "48338485a0b6f3fd64d0b3542a56c996e043d5e77e9887f0189101c1065df015"
   },
-  "reason": "Add six guarded Scott and Reinhardt Crown measurements",
+  "reason": "Replay the explicit Surface controls with the pinned SCAL16 and SCAL14 loads",
   "schema_version": 1,
   "source_digest_format": "Git text-auto binary probe: CRLF-to-LF without encoding changes; binary raw SHA256",
   "submodule_checkout_used": true,

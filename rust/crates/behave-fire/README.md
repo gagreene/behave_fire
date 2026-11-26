@@ -49,8 +49,11 @@ provenance is retained. Preserve `LICENSE`, `NOTICE`,
 when redistributing the corresponding source or compiled code.
 
 The crate contains newly authored shape/error code and embedded fuel, species,
-and fine dead fuel moisture tables generated from the explicit Python reference
-at commit `7933789f00470c6bbfbe942dc22bdd7f74e192f9`. The tables contain 96 fuel
+and fine dead fuel moisture tables generated from the Python reference.
+The baseline is commit `7933789f00470c6bbfbe942dc22bdd7f74e192f9`. The fuel
+table includes the SCAL14 and SCAL16 load corrections from
+[Behave revision 3ca33d5](https://github.com/firelab/behave/blob/3ca33d5b919d4253b411bfb6464b4c872dda6fc9/src/behave/fuelModels.cpp#L461-L472).
+The tables contain 96 fuel
 records, 24 species records, and 774 moisture entries. Their provenance is
 recorded in the packaged fixtures; `tools/check_rust_tables.py --check` checks
 drift during repository development and CI. Building or using the crate never
