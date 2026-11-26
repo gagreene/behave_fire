@@ -51,6 +51,7 @@ def test_default_observations_need_neither_cpp_sources_nor_overlay(tmp_path, cpp
 
 
 @pytest.mark.parametrize('backend', ['python', pytest.param('rust', marks=pytest.mark.rust)])
+@pytest.mark.cpp_comparison
 def test_default_qualified_policy_checks_selected_backend_and_unit_controls(tmp_path, backend):
     import cpp_controls
 

@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- Run the full platform and packaging CI once per promotion. Pull requests into
+  `pre_release` and merges into it run the quick tier; promotion and hotfix pull
+  requests into `master` run the full tier, and the following `master` push reuses
+  that result only when its Git tree equals the tested merge tree (otherwise it runs
+  the full tier). A `plan` job (`tools/ci_plan.py`) chooses the tier, and manual
+  dispatches can target `musl`, `sdist`, or `musl-and-sdist`. C++ calibration in a
+  manual run now needs `cpp_qualification=true`.
+- Move comparisons of Python and Rust outputs with pinned C++ outputs from CI into
+  the full local check before each merge: the Python tests carry the
+  `cpp_comparison` marker, which CI deselects, and the Rust comparison tests are
+  `#[ignore]`d and run locally with `--include-ignored`. CI keeps Python/Rust
+  parity, reference-data integrity, packaging, and installation checks.
 - Correct the README and landscape example Crown runs: `do_crown_run` reads surface
   spread rate, fireline intensity, and heat per unit area in base units, so the
   examples now pass a base-unit surface run instead of metric display output, which

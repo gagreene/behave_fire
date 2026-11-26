@@ -173,6 +173,7 @@ fn verify_manifest() {
 
 // ---- comparison policy ----
 #[test]
+#[ignore = "pinned C++ comparison: run by the full local check with --include-ignored"]
 fn cpp_ignite_observations_follow_the_qualified_policy() {
     verify_manifest();
     let cases = parse_rows(CASES);

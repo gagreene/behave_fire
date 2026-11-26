@@ -77,6 +77,7 @@ def test_generation_accepts_current_and_legacy_receipts_before_preservation_guar
 
 # ---- python-only measurement and replacement tests ----
 
+@pytest.mark.cpp_comparison
 def test_python_only_comparison_never_imports_the_native_extension(tmp_path):
     script = '''
 import pathlib, sys
@@ -99,6 +100,7 @@ assert data['parity_approved'] is False
 
 
 @pytest.mark.rust
+@pytest.mark.cpp_comparison
 def test_replacement_port_measurement_keeps_stale_acceptance_closed(tmp_path, cpp_snapshot_template):
     from behave_fire import _rust
 

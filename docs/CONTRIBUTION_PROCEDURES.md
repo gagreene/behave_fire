@@ -198,10 +198,34 @@ When a PR changes anything under `rust/`, also run the Rust checks. There is no
 ```shell
 cargo fmt    --manifest-path rust/Cargo.toml --all -- --check
 cargo clippy --manifest-path rust/Cargo.toml --workspace --all-targets --locked -- -D warnings
-cargo test   --manifest-path rust/Cargo.toml -p behave-fire --locked --no-fail-fast
+cargo test   --manifest-path rust/Cargo.toml -p behave-fire --locked --no-fail-fast -- --include-ignored
 cargo doc    --manifest-path rust/Cargo.toml --workspace --no-deps --locked
 cargo +<MSRV> check --manifest-path rust/Cargo.toml --workspace --all-targets --locked
 ```
+
+### Pinned C++ comparisons
+
+Comparisons of Python and Rust outputs with the pinned C++ outputs run in this full
+local check on every PR's latest commit, not in CI. The default `pytest` run includes
+the tests marked `cpp_comparison`; CI deselects them with `-m "not cpp_comparison"`,
+and its wheel suites pass `--skip-cpp-comparisons` to `tools/test_native_wheel_suite.py`.
+The Rust comparison tests in `rust/crates/behave-fire/tests/` are marked `#[ignore]`,
+so `cargo test` in CI and in the extracted crate skips them; the local command above
+runs them with `--include-ignored`. `tests/integration/test_cpp_comparison_selection.py`
+pins both sets. Run every comparison on every PR, whether or not it touches C++
+data, with the native extension built from the PR's commit:
+
+```shell
+uv run --no-sync python -m pytest --require-rust -m cpp_comparison -rA
+cargo test --manifest-path rust/Cargo.toml -p behave-fire --locked --no-fail-fast -- --ignored
+```
+
+The full default suite already contains the Python set, and the Rust command above
+already contains the Rust set; these two commands report them separately for the
+`C++ comparisons` line of the PR test record. CI still checks Python/Rust parity,
+fixture and reference-data integrity, packaging, and installation. The live C++ lane
+(`cpp_live`) and C++ qualification are separate steps (see
+[CPP_VALIDATION.md](CPP_VALIDATION.md)).
 
 `<MSRV>` is the `rust-version` declared in `rust/Cargo.toml` (currently 1.78). After
 any change under `rust/`, rebuild the extension before the native route (a plain
@@ -218,28 +242,42 @@ current PR head.
 
 ### CI tiers
 
-The `CI` workflow (`.github/workflows/ci.yml`) runs in two tiers:
+The `CI` workflow (`.github/workflows/ci.yml`) starts with a `plan` job
+(`tools/ci_plan.py`) that chooses one tier for the whole run. The full wheel matrix runs
+once per promotion, not on every merge into `pre_release`:
 
 - **Quick tier**, for a pull request that does not target `master` (including each
-  upper layer of a stack): `cargo fmt --check`, Clippy, the Rust core tests and the
+  upper layer of a stack) and for a push to `pre_release` (a merge): Python lint and
+  function order, `cargo fmt --check`, Clippy, the Rust core tests and the
   documentation build on one operating system, `python-only` on one Python
   version, and `native-pytest` on one Linux job. The MSRV, wheel, and crate
   validation jobs are skipped.
-- **Full tier**, for a pull request into `master`, every push to `pre_release` and
-  `master`, a call from `release.yml`, and a manual `workflow_dispatch` on any
-  branch: every job and every matrix row, including the wheel and crate validation.
-  The wheel validation starts only after the other jobs have passed.
+- **Full tier**, for a promotion or hotfix pull request into `master`, a call from
+  `release.yml`, and a manual dispatch with scope `full`: every job and every matrix
+  row, including the wheel and crate validation. The wheel validation starts only
+  after the other jobs have passed. When every full-tier job of a pull request into
+  `master` passes, the `full-result` job uploads a `ci-full-result` artifact that
+  records the tested merge tree.
+- **Reused**, for the push to `master` that lands such a pull request: the `plan` job
+  compares the landed Git tree with the tree recorded by the latest successful full
+  run of that pull request's final head. When they are equal, it reports that run in
+  the job summary and skips every other job. When the proof is missing or the trees
+  differ, the push runs the full tier.
+- **Targeted**, for a manual dispatch with scope `musl`, `sdist`, or
+  `musl-and-sdist`: only the named artifacts are built and tested, for
+  platform-specific changes. For example, `gh workflow run CI --ref <branch> -f
+  scope=musl-and-sdist` builds the musl and pure wheels, runs the Alpine install
+  matrix and the full native musl suite, and builds and checks the source
+  distribution, without the other platforms.
 
-A newer run for the same pull request, or for `pre_release`, cancels the older one,
-so a burst of merges ends with one full run on the last commit. Every other run
-(`master`, tags, manual dispatch) has its own concurrency group, so it is never
-cancelled and never replaces a queued run, because each `master` run gates a
-release. Changing a pull request's base branch re-runs the workflow, so retargeting
-a pull request to `master` runs the full tier; an edit to its title or description
-starts a run in which every job is skipped. A wheel or platform failure on `pre_release`
-is fixed promptly, because it can block the next pull request. The quick tier does
-not replace the local full suite and the test record above, which remain required
-for every PR.
+A newer run for the same pull request, or for `pre_release`, cancels the older one.
+Every other run (`master`, tags, manual dispatch) has its own concurrency group, so
+it is never cancelled and never replaces a queued run, because each `master` run
+gates a release. Changing a pull request's base branch re-runs the workflow, so
+retargeting a pull request to `master` runs the full tier; an edit to its title or
+description starts a run in which every job is skipped. The quick tier does not
+replace the local full suite and the test record above, which remain required for
+every PR.
 
 ## Dependency changes
 
@@ -266,10 +304,12 @@ for every PR.
   Python / OS:
   Command:
   Result (passed / skipped):
+  C++ comparisons (Python `-m cpp_comparison`, Rust `-- --ignored`):
   Additional opt-in tests or limitations:
   ```
 
-- Check the box only after the full default suite passes on the latest commit.
+- Check the box only after the full default suite, including the pinned C++
+  comparisons, passes on the latest commit.
   If tests were not run or did not pass, leave it unchecked and explain why.
   **Do not merge a PR while the box is unchecked.** Reviewers must verify the
   recorded SHA and results before merging.
@@ -295,7 +335,7 @@ Use the procedures in [RELEASING.md](RELEASING.md) for build-only GitHub runs, d
 - Put Python tests in `tests/unit`, `tests/integration`, or `tests/regression` and name them `test_*.py`. Shared helpers live at the top of `tests/`, and fixtures live in `tests/data/`.
 - Unit tests exercise an isolated function or contract. Integration tests exercise components, backends, or distribution tooling together. Regression tests preserve fixes for confirmed defects and state the original failure in the docstring. Use the smallest input that reproduces the defect.
 - Pytest applies `integration` and `regression` from the tier directory. The collection test checks for agreement. Use `python -m pytest -m integration` or `python -m pytest -m regression` to select a tier.
-- Keep pinned C++ observations under the `cpp_reference` marker. See [CPP_VALIDATION.md](CPP_VALIDATION.md) for offline validation and live qualification commands.
+- Keep pinned C++ observations under the `cpp_reference` marker, and mark every test that compares Python or Rust outputs with pinned C++ outputs `cpp_comparison` (Python) or `#[ignore = "pinned C++ comparison: run by the full local check with --include-ignored"]` (Rust), then add it to `tests/integration/test_cpp_comparison_selection.py`. See [CPP_VALIDATION.md](CPP_VALIDATION.md) for offline validation and live qualification commands.
 
 
 ## C++ parity

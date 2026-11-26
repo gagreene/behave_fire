@@ -18,6 +18,7 @@ pytestmark = pytest.mark.cpp_reference
 # ---- comparison tests ----
 
 @pytest.mark.parametrize("backend", ["python", pytest.param("rust", marks=pytest.mark.rust)])
+@pytest.mark.cpp_comparison
 def test_approved_cases_match_exact_binary64(backend):
     policy = reference.load_reference()["policy"]["ignite"]
     expected = ignite.load_observations(ROOT)

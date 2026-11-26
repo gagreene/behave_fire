@@ -105,6 +105,7 @@ def test_crown_summarizes_only_the_authenticated_observations(tmp_path):
 # ---- port measurements tests ----
 
 @pytest.mark.parametrize('backend', ['python', pytest.param('rust', marks=pytest.mark.rust)])
+@pytest.mark.cpp_comparison
 def test_crown_measures_public_ports(backend):
     crown = importlib.import_module('cpp_crown')
     measured = crown.measure_ports(ROOT, (backend,))[backend]

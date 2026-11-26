@@ -150,9 +150,13 @@ Original numbered-unit differences remain
 documented exceptions, tested through their separate explicit controls.
 
 Use the existing `CI` workflow with `workflow_dispatch` on the prepared branch
-for qualification. The manual and release validation jobs check out the
-optional reference and build C++. Ordinary PR and push validation uses the
-stored offline evidence.
+for qualification, with `-f scope=full -f cpp_qualification=true`. The qualification
+and release validation jobs check out the optional reference and build C++.
+Ordinary PR and push CI checks the integrity of the stored offline evidence but
+does not compare Python or Rust outputs with it: those comparisons (pytest marker
+`cpp_comparison` and the `#[ignore]`d Rust comparison tests) run in the full local
+check on every PR's latest commit (see "Pinned C++ comparisons" in
+[CONTRIBUTION_PROCEDURES.md](CONTRIBUTION_PROCEDURES.md)).
 The wheel reports use the actual staged wheel extension, including Alpine/musl
 and Windows ARM64, and fail rather than skip if calibration cannot run.
 

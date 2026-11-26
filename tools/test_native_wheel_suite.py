@@ -152,6 +152,8 @@ def main():
     parser.add_argument("--cpp-platform", default=os.environ.get("BEHAVE_CPP_PLATFORM"), choices=(
         "linux-x86_64", "linux-aarch64", "linux-musl-x86_64", "macos-x86_64", "macos-arm64",
         "windows-x86_64", "windows-arm64"))
+    parser.add_argument("--skip-cpp-comparisons", action="store_true",
+                        help="deselect tests marked cpp_comparison; CI uses this, the full local check does not")
     arguments = parser.parse_args()
     if arguments.cpp_calibration and arguments.cpp_platform is None:
         parser.error("Calibration requires an explicit --cpp-platform matrix identity")
@@ -183,8 +185,9 @@ def main():
                  reports / "numpy-platform-oracle.json", environment)
             _run([python, "-B", "tools/probe_direction_oracle.py"], root,
                  reports / "numpy-direction-oracle.json", environment)
+            selection = ["-m", "not cpp_comparison"] if arguments.skip_cpp_comparisons else []
             _run([python, "-B", "-m", "pytest", "--require-rust", "-W", "error", "--tb=short",
-                  "-p", "no:cacheprovider", "--junitxml", reports / "pytest.xml"],
+                  "-p", "no:cacheprovider", "--junitxml", reports / "pytest.xml", *selection],
                  root, reports / "pytest.log", environment)
             if arguments.cpp_calibration:
                 _run_calibration(python, root, reports, environment, arguments.cpp_platform)

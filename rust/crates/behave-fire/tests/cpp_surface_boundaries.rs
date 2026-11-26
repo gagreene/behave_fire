@@ -71,6 +71,7 @@ fn prepared_engine_preserves_wind_at_tiny_positive_spread() {
 }
 
 #[test]
+#[ignore = "pinned C++ comparison: run by the full local check with --include-ignored"]
 fn reaction_order_matches_pinned_cpp_near_extinction() {
     let fuels = FuelModels::default();
     let fuel = PreparedFuel::from_model(fuels.for_grid(204));

@@ -35,7 +35,8 @@ Cargo's documented registry limit is currently 10 MB; recheck it when releasing.
 The repository budget stays smaller. [Cargo publishing documentation](https://doc.rust-lang.org/cargo/reference/publishing.html)
 
 `crate-validation.yml` extracts the archive in a separate Rust container with
-no checkout and no Python interpreter. It runs packaged tests and doctests,
+no checkout and no Python interpreter. It runs packaged tests and doctests
+(the `#[ignore]`d pinned C++ comparisons run only with `--include-ignored`),
 the standalone example, and a separate downstream consumer. The consumer uses
 default/custom fuels, embedded species, surface fire, mortality, and worker
 counts 0/1/2/4. Its dependency points only at the extracted package. Linux
