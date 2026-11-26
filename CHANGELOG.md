@@ -12,6 +12,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   build-only and targeted runs stay available while qualification is withdrawn.
   `release.yml` grants its CI call the permissions the `plan` job needs, and a
   missing, unreadable, or invalid reuse record on `master` falls back to the full tier.
+- Enforce the Surface caps and the exact binary64 rules for FireSize, Ignite, and
+  Mortality in the local C++ comparisons whatever the release approval state, and
+  add deliberate-failure tests that perturb temporary fixture copies.
 - Run the full platform and packaging CI once per promotion. Pull requests into
   `pre_release` and merges into it run the quick tier; promotion and hotfix pull
   requests into `master` run the full tier, and the following `master` push reuses

@@ -54,13 +54,22 @@ fn comparison_gate(policy: &Value, observations: &[Observation]) -> Result<(), S
     }
     require_qualification(&policy["qualification"])?;
     require_source_qualification(policy)?;
-    for observation in observations {
-        let Observation {
-            case,
-            field,
-            cpp,
-            rust,
-        } = observation;
+    exact_regression(observations)?;
+    Ok(())
+}
+
+/// Apply the established exact binary64 rule whatever the release approval state.
+///
+/// The full local check relies on this, so a withdrawn qualification never hides a
+/// numerical regression; `comparison_gate` adds the release approval requirement.
+fn exact_regression(observations: &[Observation]) -> Result<usize, String> {
+    for Observation {
+        case,
+        field,
+        cpp,
+        rust,
+    } in observations
+    {
         if !same_binary64(*cpp, *rust) {
             return Err(format!(
                 "{case} {field}: C++ {cpp} ({:#018x}), Rust {rust} ({:#018x})",
@@ -69,7 +78,7 @@ fn comparison_gate(policy: &Value, observations: &[Observation]) -> Result<(), S
             ));
         }
     }
-    Ok(())
+    Ok(observations.len())
 }
 
 /// Require every declared JSON object key and reject extra keys.
@@ -87,6 +96,56 @@ fn is_hex_identity(value: Option<&Value>, length: usize) -> bool {
                 .bytes()
                 .all(|byte| byte.is_ascii_digit() || (b'a'..=b'f').contains(&byte))
     })
+}
+
+/// Measure the core on each approved case and pair it with the C++ result.
+fn observe(cases: Vec<Value>, results: Vec<Value>) -> Vec<Observation> {
+    let mut observations = Vec::new();
+    for (((id, mode, wind, spread, elapsed), case), result) in
+        APPROVED_CASES.into_iter().zip(cases).zip(results)
+    {
+        assert_eq!(
+            case,
+            json!({
+                "id": id, "operation": "fire_size", "mode": mode,
+                "wind_mph": wind, "spread_ft_min": spread, "elapsed_min": elapsed,
+            })
+        );
+        assert_eq!(result.as_object().unwrap().len(), 5, "case {id}");
+        assert_eq!(result["id"], id);
+        assert_eq!(result["status"], "ok", "case {id}");
+        assert_eq!(result["upstream_entries"].as_u64(), Some(1), "case {id}");
+        assert_eq!(result["geometry_entries"].as_u64(), Some(1), "case {id}");
+        let output = result["output"].as_object().unwrap();
+        assert_eq!(output.len(), FIELDS.len(), "case {id}");
+        let mut size = FireSize::new();
+        let crown = mode == "Crown";
+        let elapsed = f64::from(elapsed);
+        size.calculate_fire_basic_dimensions(
+            crown,
+            f64::from(wind),
+            SpeedUnit::MilesPerHour,
+            f64::from(spread),
+            SpeedUnit::FeetPerMinute,
+        );
+        let actual = [
+            size.get_fire_area(crown, AreaUnit::SquareFeet, elapsed, TimeUnit::Minutes),
+            size.get_fire_length_to_width_ratio(),
+            size.get_fire_perimeter(crown, LengthUnit::Feet, elapsed, TimeUnit::Minutes),
+        ];
+        for (field, rust) in FIELDS.into_iter().zip(actual) {
+            let cpp = output[field].as_f64().unwrap();
+            assert!(cpp.is_finite() && cpp >= 0.0, "case {id} {field}: {cpp}");
+            assert!(rust.is_finite(), "case {id} {field}: {rust}");
+            observations.push(Observation {
+                case: id,
+                field,
+                cpp,
+                rust,
+            });
+        }
+    }
+    observations
 }
 
 /// Read JSONL in fixture order, rejecting blank or malformed rows.
@@ -198,51 +257,9 @@ fn cpp_fire_size_observations_follow_the_qualified_policy() {
     let results = parse_rows(RESULTS);
     assert_eq!(cases.len(), APPROVED_CASES.len());
     assert_eq!(results.len(), APPROVED_CASES.len());
-    let mut observations = Vec::new();
-    for (((id, mode, wind, spread, elapsed), case), result) in
-        APPROVED_CASES.into_iter().zip(cases).zip(results)
-    {
-        assert_eq!(
-            case,
-            json!({
-                "id": id, "operation": "fire_size", "mode": mode,
-                "wind_mph": wind, "spread_ft_min": spread, "elapsed_min": elapsed,
-            })
-        );
-        assert_eq!(result.as_object().unwrap().len(), 5, "case {id}");
-        assert_eq!(result["id"], id);
-        assert_eq!(result["status"], "ok", "case {id}");
-        assert_eq!(result["upstream_entries"].as_u64(), Some(1), "case {id}");
-        assert_eq!(result["geometry_entries"].as_u64(), Some(1), "case {id}");
-        let output = result["output"].as_object().unwrap();
-        assert_eq!(output.len(), FIELDS.len(), "case {id}");
-        let mut size = FireSize::new();
-        let crown = mode == "Crown";
-        let elapsed = f64::from(elapsed);
-        size.calculate_fire_basic_dimensions(
-            crown,
-            f64::from(wind),
-            SpeedUnit::MilesPerHour,
-            f64::from(spread),
-            SpeedUnit::FeetPerMinute,
-        );
-        let actual = [
-            size.get_fire_area(crown, AreaUnit::SquareFeet, elapsed, TimeUnit::Minutes),
-            size.get_fire_length_to_width_ratio(),
-            size.get_fire_perimeter(crown, LengthUnit::Feet, elapsed, TimeUnit::Minutes),
-        ];
-        for (field, rust) in FIELDS.into_iter().zip(actual) {
-            let cpp = output[field].as_f64().unwrap();
-            assert!(cpp.is_finite() && cpp >= 0.0, "case {id} {field}: {cpp}");
-            assert!(rust.is_finite(), "case {id} {field}: {rust}");
-            observations.push(Observation {
-                case: id,
-                field,
-                cpp,
-                rust,
-            });
-        }
-    }
+    let observations = observe(cases, results);
+    assert_eq!(exact_regression(&observations), Ok(9));
+    println!("CPP_FIRE_SIZE_ENFORCED exact_binary64=9");
     assert_eq!(observations.len(), 9);
     let policy: Value = serde_json::from_str(POLICY).unwrap();
     if policy["approved"].as_bool().unwrap() {
@@ -253,6 +270,24 @@ fn cpp_fire_size_observations_follow_the_qualified_policy() {
             Err(QUALIFICATION_REQUIRED.into())
         );
     }
+}
+
+#[test]
+#[ignore = "pinned C++ comparison: run by the full local check with --include-ignored"]
+fn perturbed_cpp_copy_fails_the_exact_regression() {
+    // A temporary copy of the packaged results with one value moved one ulp toward zero.
+    let mut results = parse_rows(RESULTS);
+    let field = FIELDS[0];
+    let value = results[0]["output"][field].as_f64().unwrap();
+    let perturbed = if value == 0.0 {
+        f64::from_bits(1)
+    } else {
+        f64::from_bits(value.to_bits() - 1)
+    };
+    results[0]["output"][field] = json!(perturbed);
+    let observations = observe(parse_rows(CASES), results);
+    let error = exact_regression(&observations).unwrap_err();
+    assert!(error.contains(field), "{error}");
 }
 
 #[test]

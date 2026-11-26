@@ -187,8 +187,9 @@ The first three commands check integrity, not scientific parity. The comparer
 records every Python/C++ and Rust/C++ field difference without accepting it.
 `assert_matches_cpp` raises until an explicit field policy is approved. The
 standalone crate verifies its own copied fixture hashes. Its `#[ignore]`d
-comparison tests, run with `--include-ignored`, evaluate real core cells, record
-raw differences, and likewise refuse to certify an unapproved policy. No Python, C++, or NumPy runtime is added to the Rust library.
+comparison tests, run with `--include-ignored`, evaluate real core cells, enforce
+the Surface caps and the exact binary64 rules whatever the approval state, record
+raw differences, and refuse to certify an unapproved policy. No Python, C++, or NumPy runtime is added to the Rust library.
 
 Manifest verification is divided deliberately. Offline readers verify shipped
 goldens, policy, inventory, findings, tools, and crate-local copies. Historical

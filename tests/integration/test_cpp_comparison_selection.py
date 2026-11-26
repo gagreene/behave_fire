@@ -19,6 +19,12 @@ PYTHON_COMPARISONS = {
     "tests/integration/test_cpp_fire_size.py::test_approved_cases_match_exact_binary64[rust]",
     "tests/integration/test_cpp_ignite.py::test_approved_cases_match_exact_binary64[python]",
     "tests/integration/test_cpp_ignite.py::test_approved_cases_match_exact_binary64[rust]",
+    *(f"tests/integration/test_cpp_local_enforcement.py::test_exact_mismatch_fails_while_qualification_is_withdrawn"
+      f"[{backend}-{dataset}]" for backend in ("python", "rust") for dataset in ("fire_size", "ignite", "mortality")),
+    "tests/integration/test_cpp_local_enforcement.py::"
+    "test_surface_cap_violation_fails_while_qualification_is_withdrawn[python]",
+    "tests/integration/test_cpp_local_enforcement.py::"
+    "test_surface_cap_violation_fails_while_qualification_is_withdrawn[rust]",
     "tests/integration/test_cpp_measurement.py::test_python_only_comparison_never_imports_the_native_extension",
     "tests/integration/test_cpp_measurement.py::test_replacement_port_measurement_keeps_stale_acceptance_closed",
     "tests/integration/test_cpp_mortality.py::test_approved_cases_match_exact_binary64[python]",
@@ -36,6 +42,9 @@ RUST_COMPARISONS = {
     ("cpp_ignite.rs", "cpp_ignite_observations_follow_the_qualified_policy"),
     ("cpp_mortality.rs", "cpp_mortality_observations_follow_the_qualified_policy"),
     ("cpp_reference.rs", "cpp_surface_observations_follow_the_qualified_policy"),
+    ("cpp_reference.rs", "perturbed_cpp_copy_fails_the_surface_caps"),
+    *((name, "perturbed_cpp_copy_fails_the_exact_regression")
+      for name in ("cpp_fire_size.rs", "cpp_ignite.rs", "cpp_mortality.rs")),
     ("cpp_surface_boundaries.rs", "reaction_order_matches_pinned_cpp_near_extinction"),
 }
 

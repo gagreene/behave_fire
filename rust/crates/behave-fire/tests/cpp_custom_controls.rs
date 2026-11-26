@@ -186,9 +186,8 @@ fn explicit_percent_controls_match_numbered_physics_and_consume_all_cpp_fields()
         for (field, rust) in cpp_policy::FIELDS.into_iter().zip(values) {
             let cpp = number(&golden["output"], field);
             assert!(rust.is_finite() && cpp.is_finite());
-            if policy["approved"].as_bool() == Some(true) {
-                cpp_policy::compare(rust, cpp, &policy, field).unwrap();
-            }
+            // The owner's caps apply whatever the release approval state.
+            cpp_policy::compare(rust, cpp, &policy, field).unwrap();
             println!("CPP_PERCENT_CONTROL id={id} field={field} cpp={cpp:.17e} rust={rust:.17e}");
             compared += 1;
         }

@@ -67,6 +67,15 @@ fn comparison_gate(
     require_mortality_proof(&qualification["mortality"])?;
     cpp_policy::require_qualification(surface)
         .map_err(|error| format!("Mortality source qualification: {error}"))?;
+    exact_regression(observations)?;
+    Ok(())
+}
+
+/// Apply the established exact binary64 rule whatever the release approval state.
+///
+/// The full local check relies on this, so a withdrawn qualification never hides a
+/// numerical regression; `comparison_gate` adds the release approval requirement.
+fn exact_regression(observations: &[Observation]) -> Result<usize, String> {
     for Observation { case, cpp, rust } in observations {
         if !same_binary64(*cpp, *rust) {
             return Err(format!(
@@ -76,7 +85,7 @@ fn comparison_gate(
             ));
         }
     }
-    Ok(())
+    Ok(observations.len())
 }
 
 /// Require every declared JSON object key and reject extra keys.
@@ -94,6 +103,49 @@ fn is_lower_hex(value: &Value, length: usize) -> bool {
                 .bytes()
                 .all(|byte| byte.is_ascii_digit() || (b'a'..=b'f').contains(&byte))
     })
+}
+
+/// Measure the core on each approved case and pair it with the C++ result.
+fn observe(cases: Vec<Value>, results: Vec<Value>) -> Vec<Observation> {
+    let mut observations = Vec::new();
+    for (((id, intensity, wind, air), case), result) in
+        APPROVED_CASES.into_iter().zip(cases).zip(results)
+    {
+        assert_eq!(
+            case,
+            json!({
+                "id": id, "operation": "mortality", "intensity_btu_ft_s": intensity,
+                "wind_mph": wind, "air_temperature_f": air,
+            }),
+            "case {id}"
+        );
+        assert!(has_exact_keys(
+            &result,
+            &[
+                "id",
+                "output",
+                "output_entries",
+                "status",
+                "upstream_entries"
+            ],
+        ));
+        assert_eq!(result["id"], id);
+        assert_eq!(result["status"], "ok", "case {id}");
+        assert_eq!(result["upstream_entries"].as_u64(), Some(1), "case {id}");
+        assert_eq!(result["output_entries"].as_u64(), Some(1), "case {id}");
+        let output = &result["output"];
+        assert!(has_exact_keys(output, &[FIELD]), "case {id}");
+        let cpp = output[FIELD].as_f64().unwrap();
+        let rust = calculate_scorch_height(f64::from(intensity), f64::from(wind), f64::from(air));
+        assert!(cpp.is_finite() && cpp >= 0.0, "case {id} {FIELD}: {cpp}");
+        assert!(rust.is_finite(), "case {id} {FIELD}: {rust}");
+        observations.push(Observation {
+            case: id,
+            cpp,
+            rust,
+        });
+    }
+    observations
 }
 
 /// Read JSONL in fixture order, rejecting blank or malformed rows.
@@ -170,44 +222,9 @@ fn cpp_mortality_observations_follow_the_qualified_policy() {
     let results = parse_rows(RESULTS);
     assert_eq!(cases.len(), APPROVED_CASES.len());
     assert_eq!(results.len(), APPROVED_CASES.len());
-    let mut observations = Vec::new();
-    for (((id, intensity, wind, air), case), result) in
-        APPROVED_CASES.into_iter().zip(cases).zip(results)
-    {
-        assert_eq!(
-            case,
-            json!({
-                "id": id, "operation": "mortality", "intensity_btu_ft_s": intensity,
-                "wind_mph": wind, "air_temperature_f": air,
-            }),
-            "case {id}"
-        );
-        assert!(has_exact_keys(
-            &result,
-            &[
-                "id",
-                "output",
-                "output_entries",
-                "status",
-                "upstream_entries"
-            ],
-        ));
-        assert_eq!(result["id"], id);
-        assert_eq!(result["status"], "ok", "case {id}");
-        assert_eq!(result["upstream_entries"].as_u64(), Some(1), "case {id}");
-        assert_eq!(result["output_entries"].as_u64(), Some(1), "case {id}");
-        let output = &result["output"];
-        assert!(has_exact_keys(output, &[FIELD]), "case {id}");
-        let cpp = output[FIELD].as_f64().unwrap();
-        let rust = calculate_scorch_height(f64::from(intensity), f64::from(wind), f64::from(air));
-        assert!(cpp.is_finite() && cpp >= 0.0, "case {id} {FIELD}: {cpp}");
-        assert!(rust.is_finite(), "case {id} {FIELD}: {rust}");
-        observations.push(Observation {
-            case: id,
-            cpp,
-            rust,
-        });
-    }
+    let observations = observe(cases, results);
+    assert_eq!(exact_regression(&observations), Ok(6));
+    println!("CPP_MORTALITY_ENFORCED exact_binary64=6");
     assert_eq!(observations.len(), 6);
     let policy: Value = serde_json::from_str(POLICY).unwrap();
     let surface: Value = serde_json::from_str(SURFACE_POLICY).unwrap();
@@ -217,6 +234,24 @@ fn cpp_mortality_observations_follow_the_qualified_policy() {
     } else {
         assert_eq!(decision, Err(QUALIFICATION_REQUIRED.into()));
     }
+}
+
+#[test]
+#[ignore = "pinned C++ comparison: run by the full local check with --include-ignored"]
+fn perturbed_cpp_copy_fails_the_exact_regression() {
+    // A temporary copy of the packaged results with one value moved one ulp toward zero.
+    let mut results = parse_rows(RESULTS);
+    let field = FIELD;
+    let value = results[0]["output"][field].as_f64().unwrap();
+    let perturbed = if value == 0.0 {
+        f64::from_bits(1)
+    } else {
+        f64::from_bits(value.to_bits() - 1)
+    };
+    results[0]["output"][field] = json!(perturbed);
+    let observations = observe(parse_rows(CASES), results);
+    let error = exact_regression(&observations).unwrap_err();
+    assert!(error.contains(field), "{error}");
 }
 
 #[test]

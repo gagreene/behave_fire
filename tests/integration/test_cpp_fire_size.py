@@ -22,13 +22,17 @@ def test_approved_cases_match_exact_binary64(backend):
     policy = reference.load_reference()["policy"]["fire_size"]
     observations = fire_size.load_observations(ROOT)
     measured = fire_size.measure_ports(ROOT, (backend,))[backend]
+    compared = 0
     for actual, expected in zip(measured, observations, strict=True):
         assert actual["id"] == expected["id"]
+        # The established exact rule applies whatever the release approval state.
+        compared += fire_size.check_exact(actual["output"], expected["output"], policy)
         if policy["approved"]:
             fire_size.assert_matches_cpp(actual["output"], expected["output"], policy)
         else:
             with pytest.raises(reference.UnapprovedCppPolicy):
                 fire_size.assert_matches_cpp(actual["output"], expected["output"], policy)
+    assert compared == 9
 
 
 # ---- comparison rejection tests ----

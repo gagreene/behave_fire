@@ -86,6 +86,15 @@ fn comparison_gate(policy: &Value, observations: &[Value]) -> Result<(), ReviewR
         return Err(ReviewRequired::RequiresOwnerReview);
     }
     cpp_policy::require_qualification(policy).map_err(|_| ReviewRequired::MissingCalibration)?;
+    enforce_caps(policy, observations)?;
+    Ok(())
+}
+
+/// Apply the owner's Surface caps and documented load exceptions whatever the approval state.
+///
+/// The full local check relies on this, so a withdrawn qualification never hides a
+/// numerical regression; `comparison_gate` adds the release approval requirement.
+fn enforce_caps(policy: &Value, observations: &[Value]) -> Result<(usize, usize), ReviewRequired> {
     let mut compared = 0;
     let mut documented = 0;
     for row in observations {
@@ -114,7 +123,7 @@ fn comparison_gate(policy: &Value, observations: &[Value]) -> Result<(), ReviewR
     if compared != 2855 || documented != 60 {
         return Err(ReviewRequired::IncompleteCoverage);
     }
-    Ok(())
+    Ok((compared, documented))
 }
 
 fn number(record: &Value, key: &str) -> f64 {
@@ -312,6 +321,8 @@ fn cpp_surface_observations_follow_the_qualified_policy() {
     for observation in &observations {
         println!("CPP_SURFACE_RAW {observation}");
     }
+    assert_eq!(enforce_caps(&policy, &observations), Ok((2855, 60)));
+    println!("CPP_SURFACE_ENFORCED compared=2855 documented=60");
     if policy["approved"].as_bool() == Some(true) {
         assert_eq!(comparison_gate(&policy, &observations), Ok(()));
     } else {
@@ -326,6 +337,34 @@ fn cpp_surface_observations_follow_the_qualified_policy() {
         observations.len(),
         unavailable,
         policy["approved"],
+    );
+}
+
+#[test]
+#[ignore = "pinned C++ comparison: run by the full local check with --include-ignored"]
+fn perturbed_cpp_copy_fails_the_surface_caps() {
+    // A temporary copy of the packaged results with one compared field moved beyond the cap.
+    let cases = parse_rows(include_str!("data/cpp_reference/surface/cases.jsonl"));
+    let mut results = parse_rows(include_str!("data/cpp_reference/surface/results.jsonl"));
+    let policy: Value = serde_json::from_str(include_str!(
+        "data/cpp_reference/surface/tolerance-policy.json"
+    ))
+    .unwrap();
+    let (id, case) = cases
+        .iter()
+        .find(|(id, case)| {
+            results[*id]["status"] == "ok"
+                && !cpp_policy::LOAD_MODELS.contains(&case["fuel_model"].as_i64().unwrap())
+        })
+        .unwrap();
+    let field = FIELDS[0];
+    let golden = results.get_mut(id).unwrap();
+    let value = golden["output"][field].as_f64().unwrap();
+    golden["output"][field] = json!(value + (value.abs() * 1e-9).max(1e-9));
+    let observations = compare_core_to_cpp(case, &results[id], &FuelModels::default());
+    assert_eq!(
+        enforce_caps(&policy, &observations),
+        Err(ReviewRequired::NumericalMismatch)
     );
 }
 

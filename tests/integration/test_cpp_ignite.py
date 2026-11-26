@@ -23,13 +23,17 @@ def test_approved_cases_match_exact_binary64(backend):
     policy = reference.load_reference()["policy"]["ignite"]
     expected = ignite.load_observations(ROOT)
     measured = ignite.measure_ports(ROOT, (backend,))[backend]
+    compared = 0
     for actual, original in zip(measured, expected, strict=True):
         assert actual["id"] == original["id"]
+        # The established exact rule applies whatever the release approval state.
+        compared += ignite.check_exact(actual["output"], original["output"], policy)
         if policy["approved"]:
             ignite.assert_matches_cpp(actual["output"], original["output"], policy)
         else:
             with pytest.raises(reference.UnapprovedCppPolicy):
                 ignite.assert_matches_cpp(actual["output"], original["output"], policy)
+    assert compared == 8
 
 
 def test_exact_policy_rejects_a_changed_zero_sign():
