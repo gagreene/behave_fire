@@ -22,13 +22,13 @@
         "--target-dir",
         "target"
       ],
-      "source_tree": "0fc20753c20d469cb5de60172c33d6ad83a6e892",
+      "source_tree": "006ce8db97ca2d3d1a7eba049a47ee74599451b6",
       "target": "x86_64-pc-windows-msvc"
     },
-    "extension_sha256": "8471f8a2ac6af0dbacbc62beea6ef4de55e2568e6698dcc866315b2de55f626a",
-    "file": "windows-x86_64-bc3b3dca5e92-d7ged96z/_rust.pyd"
+    "extension_sha256": "58ba1b0b2735c9676f98fb5779bba97381321ee7cd2787b8eddf7ac4b6450b1c",
+    "file": "windows-x86_64-91d431d2b8d2-zspngbwk/_rust.pyd"
   },
-  "created": "2026-11-27T00:38:27+00:00",
+  "created": "2026-11-27T01:49:28+00:00",
   "datasets": {
     "fire_size": {
       "cases.jsonl": "b7eaafc8c07ad95c79dcb2cc553a659bf3106b1a215d08febb9f0e2c0ac2d755",
@@ -78,12 +78,12 @@
   },
   "reports": {
     "ports": {
-      "file": "windows-x86_64-bc3b3dca5e92-d7ged96z/ports.json",
-      "sha256": "1160c5e7f14c7a18019ba72674b429ea8993339312e7c9d732a5bbebe43b2db4"
+      "file": "windows-x86_64-91d431d2b8d2-zspngbwk/ports.json",
+      "sha256": "b076d011a3fecf38d124e6e890e87c94e8ace0d8ee52f2d3bb9e93245237e978"
     },
     "rust": {
-      "file": "windows-x86_64-bc3b3dca5e92-d7ged96z/rust.log",
-      "sha256": "9319ebb07422f31bc5d9a4d4bead355d85ce3f70cc2b10ce0b614f3d5ddf2531"
+      "file": "windows-x86_64-91d431d2b8d2-zspngbwk/rust.log",
+      "sha256": "eab8eaedca2194e19f7e7acda055ca4f0776fcfafc09d54ab0e22431922bcf41"
     }
   },
   "results": {
@@ -119,7 +119,7 @@
     }
   },
   "schema_version": 2,
-  "source_commit": "bc3b3dca5e92f6a562319a69d421004f857324de",
+  "source_commit": "91d431d2b8d286dc4001cb3c71ec236f11eb8d91",
   "source_files": {
     ".github/workflows/ci.yml": "c200c9f9d41d853fd8db0ab54738713f491f332f0587325ded2538761d5b470c",
     ".github/workflows/cpp-live-validation.yml": "87fdc583529286cc18f6f60af0c53f75f17065215bf09f29fa220dd70d4491e6",
@@ -315,10 +315,10 @@
     "tools/time_standard_runs.py": "75eb84b55751350d5e98dceb2883f49fc8ad44a6442c0728bbe81c536c8855f0",
     "uv.lock": "c259b3a141f671cfa47424d8668c3b6cfe3a75a6ec086594a8f47e3aab970101"
   },
-  "source_tree": "0fc20753c20d469cb5de60172c33d6ad83a6e892",
+  "source_tree": "006ce8db97ca2d3d1a7eba049a47ee74599451b6",
   "toolchains": {
     "cargo": "cargo 1.99.0 (5f94df478 2026-08-27)",
-    "cargo_encoded_rustflags": "-Cdebuginfo=0",
+    "cargo_encoded_rustflags": "-Cdebuginfo=0\u001f--remap-path-prefix=C:\\bf\\cargo=cargo-home\u001f--remap-path-prefix=C:/bf/cargo=cargo-home\u001f--remap-path-prefix=C:\\bf\\tmp=build\u001f--remap-path-prefix=C:/bf/tmp=build",
     "numpy": "2.1.3",
     "python": "3.12.8 | packaged by conda-forge | (main, Dec  5 2024, 14:06:27) [MSC v.1942 64 bit (AMD64)]",
     "rustc": "rustc 1.99.0 (b940084d7 2026-09-28)\nbinary: rustc\ncommit-hash: b940084d7eb6a299eb4bfeb8e34901bc051e7ac4\ncommit-date: 2026-09-28\nhost: x86_64-pc-windows-msvc\nrelease: 1.99.0\nLLVM version: 23.1.1"
