@@ -87,4 +87,5 @@ exclude = [
     "rust/target/**", "**/__pycache__/**", "**/*.pyc", "dist/**", "build/**", "**/*.pdb",
     "**/*.crate", "**/*.egg-info/**", "reference/behave_cpp",
     "reference/behave_cpp/**", "reference/behave_cpp_overlay/**", "tests/data/cpp_receipts/**",
+    "src/examples/data/**", "src/examples/results/**",
 ]

@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- Keep generated example data (src/examples/data and src/examples/results) out of the
+  source distribution, and make the Rust-only consumer check fail when Python is installed
+  (a negated command does not trip set -e).
 - Fix three Python/Rust parity defects found in review. An object-array fuel identifier above
   the table (for example 256.5) is bounds-checked before it is narrowed, so it no longer
   selects model 256. The native Surface rate vector keeps the shape of the wind inputs for

@@ -210,6 +210,17 @@ def test_publication_does_not_require_cpp_evidence():
             assert set(jobs[upload]['needs']) == needs, (name, upload)
     assert not (ROOT / '.github/workflows/cpp-receipt-validation.yml').exists()
 
+def test_rust_only_consumer_fails_when_python_is_installed():
+    jobs = yaml.load((ROOT / '.github/workflows/crate-validation.yml').read_text(), Loader=yaml.BaseLoader)['jobs']
+    runs = [step.get('run', '') for job in jobs.values() for step in job.get('steps', [])
+            if 'command -v' in step.get('run', '')]
+    script, = runs
+    # A negated command is exempt from `set -e`, so `! command -v python` cannot fail the step.
+    assert '! command -v' not in script
+    assert 'if command -v python || command -v python3; then' in script
+    assert script.index('exit 1') < script.index('mkdir standalone')
+
+
 def test_wheel_validation_scopes_select_targeted_jobs():
     workflow = yaml.load((ROOT / ".github/workflows/wheel-validation.yml").read_text(), Loader=yaml.BaseLoader)
     jobs = workflow["jobs"]
