@@ -270,8 +270,9 @@ surface_inputs = dict(
     slope_units          = 1,                           # Percent
     aspect               = np.array([[180.0]]),         # degrees
     canopy_cover         = np.array([[0.40]]),          # fraction (0–1)
-    canopy_height        = np.array([[15.0]]),          # feet
-    crown_ratio          = np.array([[0.55]]),          # fraction (0–1)
+    canopy_height        = np.array([[15.0]]),          # m, the canopy height of the Crown run below
+    canopy_height_units  = 4,                           # Meters
+    crown_ratio          = np.array([[0.60]]),          # fraction (0–1)
     wind_height_mode     = 'TenMeter',
 )
 results = runner.do_surface_run(
@@ -321,7 +322,7 @@ crown = runner.do_crown_run(
 print(f"Fire type : {int(crown['fire_type'][0, 0])}")   # 0=surface … 3=active crown
 ```
 
-> **Note on `do_crown_run` inputs:** `canopy_base_height` and `canopy_height` default to **feet** and `canopy_bulk_density` to **lb/ft³**. Select other units with `canopy_base_height_units` and `canopy_height_units` (`LengthUnitsEnum`), and `canopy_bulk_density_units` (`DensityUnitsEnum`). Surface results passed in `surface_results` must stay in base units.
+> **Note on `do_crown_run` inputs:** `canopy_base_height` and `canopy_height` default to **feet** and `canopy_bulk_density` to **lb/ft³**. Select other units with `canopy_base_height_units` and `canopy_height_units` (`LengthUnitsEnum`), and `canopy_bulk_density_units` (`DensityUnitsEnum`). Surface results passed in `surface_results` must stay in base units, and the Surface and Crown calls must describe the same canopy: the quick start gives both a 15 m canopy height (the Surface run takes `canopy_height_units` too) and a crown ratio of 0.60, which is (15 m - 6 m crown base) / 15 m.
 
 ### Choosing a backend
 
@@ -563,7 +564,7 @@ described in [C++ validation](docs/CPP_VALIDATION.md).
 - **Input domains:** Python retains its historical guards and coercions. Rust validates structural controls before workers and uses float64 IEEE results for physical numeric domains; see [backend differences](docs/BACKEND_DIFFERENCES.md).
 - **Crown fuel is always FM10 / WAF=0.4** — hardcoded per Rothermel (1991); not configurable.
 - **Moisture as fraction** — `0.06` = 6%; see [Units](#units).
-- **Crown canopy inputs in base units** — `canopy_base_height` and `canopy_height` must be in feet, `canopy_bulk_density` in lb/ft³; no unit enum is applied to these parameters.
+- **Crown canopy input units** — `canopy_base_height` and `canopy_height` default to feet and `canopy_bulk_density` to lb/ft³. Select other units with `canopy_base_height_units`, `canopy_height_units`, and `canopy_bulk_density_units`, as the [Crown fire](#crown-fire) example does. `surface_results` must stay in base units.
 - **Wind orientation strings** — `'RelativeToUpslope'` or `'RelativeToNorth'`; misspellings silently default to upslope.
 - **Fuel snapshots** — each `BehaveRun` copies the fuel registry at construction; later registry edits do not affect an existing model.
 
@@ -616,7 +617,7 @@ Before submitting a change:
 
 1. Create a focused branch from `pre_release`.
 2. Add or update tests for the behavior you change, in Python and, for native code, in Rust.
-3. Run the full test suite (see [Testing](#testing)), the Rust checks, and the pinned C++ comparisons on every pull request, as described in [docs/CONTRIBUTION_PROCEDURES.md](docs/CONTRIBUTION_PROCEDURES.md).
+3. Run the full test suite (see [Testing](#testing)) and the Rust checks on every pull request, as described in [docs/CONTRIBUTION_PROCEDURES.md](docs/CONTRIBUTION_PROCEDURES.md). The pinned C++ comparisons run only when the pinned C++ reference changes.
 4. Fill in the test record in the pull request description from a run on the pull request's latest commit.
 5. Describe scientific assumptions, unit changes, and regression risks in the pull request.
 

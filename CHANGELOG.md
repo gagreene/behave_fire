@@ -35,10 +35,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Correct the README and landscape example Crown runs: `do_crown_run` reads surface
   spread rate, fireline intensity, and heat per unit area in base units, so the
   examples now pass a base-unit surface run instead of metric display output, which
-  understated crown-stage spread (5.34 instead of about 30.5 ft/min in the README
-  case). The README also documents the canopy unit selectors, labels model 124 as
+  understated crown-stage spread (5.34 instead of about 30.5 ft/min in the earlier
+  README case, whose Surface and Crown canopy inputs differed). The README also
+  documents the canopy unit selectors, labels model 124 as
   GS4, and states the shipped mortality coverage (24 species with crown scorch and
-  bole char equations). Calculations are unchanged.
+  bole char equations). The quick start now gives the Surface and Crown runs the same
+  15 m canopy height and a matching crown ratio (0.60), which gives a final spread of
+  about 17.72 ft/min on both backends. Calculations are unchanged.
 - Publish to PyPI only from a tag push; a manual run on a tag ref can no longer
   reach the production publishing job.
 - Link the GCC runtime statically into the musl wheel, which no longer bundles a

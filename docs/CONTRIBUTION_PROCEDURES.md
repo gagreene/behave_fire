@@ -388,7 +388,7 @@ Use the procedures in [RELEASING.md](RELEASING.md) for build-only GitHub runs, d
 
 - Put Python tests in `tests/unit`, `tests/integration`, or `tests/regression` and name them `test_*.py`. Shared helpers live at the top of `tests/`, and fixtures live in `tests/data/`.
 - Unit tests exercise an isolated function or contract. Integration tests exercise components, backends, or distribution tooling together. Regression tests preserve fixes for confirmed defects and state the original failure in the docstring. Use the smallest input that reproduces the defect.
-- Pytest applies `integration` and `regression` from the tier directory. The collection test checks for agreement. Use `python -m pytest -m integration` or `python -m pytest -m regression` to select a tier.
+- Pytest applies `integration` and `regression` from the tier directory. The collection test checks for agreement. Select a tier with `python -m pytest -m "integration and not cpp_comparison"` or `python -m pytest -m "regression and not cpp_comparison"`: a command-line `-m` replaces the default `-m "not cpp_comparison"` from `pytest.ini`, so a bare `-m integration` also selects the pinned C++ comparisons.
 - Keep pinned C++ observations under the `cpp_reference` marker, and mark every test that compares Python or Rust outputs with pinned C++ outputs `cpp_comparison` (Python) or `#[ignore = "pinned C++ comparison: run with --include-ignored when the pinned C++ reference changes"]` (Rust), then add it to `tests/integration/test_cpp_comparison_selection.py`. See [CPP_VALIDATION.md](CPP_VALIDATION.md) for offline validation and live qualification commands.
 
 
