@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- Fix three Python/Rust parity defects found in review. An object-array fuel identifier above
+  the table (for example 256.5) is bounds-checked before it is narrowed, so it no longer
+  selects model 256. The native Surface rate vector keeps the shape of the wind inputs for
+  `y_component`, which does not depend on `slope_phi`. An unused `user_waf` no longer joins the
+  native broadcast outside `UserInput` mode. The fixtures' source hash for
+  `fuel_models_array.py` is refreshed; no fixture value changes.
 - Add machine-checked local C++ comparison receipts (`tools/cpp_receipt.py`) for use when the
   pinned upstream C++ reference changes. A receipt binds one platform's full local comparison
   to the tested commit, sources, fixture inventory, extension, toolchains, and host;

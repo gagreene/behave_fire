@@ -88,6 +88,8 @@ def _flatten(operation, operands):
             flat.pop(field, None)
         if operation == 'surface.calculate_surface_wind_adjustment_factor':
             flat.pop('depth', None)
+    else:
+        flat.pop('user_waf', None)
     if operation == 'crown.calculate_crowning_surface_fire_spread_rate':
         flat.pop('canopy_height', None)
     if operation == 'crown.calculate_crown_surface_fire':
@@ -198,6 +200,16 @@ def execute_component(operation, arguments, *, threads=1):
             'passive_crown_fire_heat_per_unit_area': ('surface_hpua', 'canopy_hpua', 'cfb')},
     }
     overrides = independent.get(name, {})
+    if name == 'calculate_surface_rate_vector':
+        result = _invoke(operation, flat, settings, threads)
+        wind_inputs = {key: flat[key] for key in
+                       ('no_wind_no_slope_spread_rate', 'wind_phi', 'wind_direction', 'aspect') if key in flat}
+        if broadcast_shape(*(value.shape for value in wind_inputs.values())) != result['y_component'].shape:
+            # y_component does not depend on slope_phi, so it keeps the shape of the wind inputs. A neutral scalar
+            # slope_phi satisfies the native input list without contributing an axis.
+            neutral = _invoke(operation, dict(wind_inputs, slope_phi=np.zeros(())), settings, threads)
+            result['y_component'] = neutral['y_component']
+        return result
     if overrides:
         from ._bridge import _EMPTY_KEYS
 

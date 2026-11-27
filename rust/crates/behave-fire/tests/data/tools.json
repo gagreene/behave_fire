@@ -7880,7 +7880,7 @@
       "src/behave_fire/components/fine_dead_fuel_moisture_tool.py": "de7bf4297525d929e627e7f317f0ae0410829e35185f2023592588b6c14fd18e",
       "src/behave_fire/components/fire_size.py": "49dc5a69e918f6b8724d0cc486b38cba59d81819f4117824570a1de0323e63c2",
       "src/behave_fire/components/fuel_models.py": "34dba477be7a2e8ca73bd409ac85e0e95f85973344adb73829ed05dbc661f2cd",
-      "src/behave_fire/components/fuel_models_array.py": "7f1d824b5bbd1990d67c7c195cc6922930a5fdf5b847b7c7a8df58c0701f7024",
+      "src/behave_fire/components/fuel_models_array.py": "d6ba432a8037a76a5d051f1959b83e7ce648aba07a98e65f18dddfcae2b81114",
       "src/behave_fire/components/ignite.py": "fa69ffcd34bebf80a5ed613adab1379828b37e41b5b70eba70532979b5991ec8",
       "src/behave_fire/components/mortality.py": "f8a661269ad7d78ec40b98b0ecb5baeb95234a3642e7764961206d9157369937",
       "src/behave_fire/components/safety.py": "2496b47da5dc55292011e672a2b4c5b8694ba42e96766c7b2eaf5c90a75988d7",

@@ -35,7 +35,9 @@ def _fuel_model_indices(value, rows=_MAX_FM + 1):
     :return: Int32 indices without narrowing invalid real identifiers first.
     """
     data = np.asarray(value)
-    if data.dtype.kind not in 'biuf':
+    if data.dtype == object:
+        data = np.asarray(value, dtype=np.float64)
+    elif data.dtype.kind not in 'biuf':
         data = np.asarray(value, dtype=np.int32)
     valid = (data >= 1) & (data <= min(_MAX_FM, rows - 1))
     return np.asarray(np.where(valid, data, 0), dtype=np.int32)
