@@ -17,14 +17,14 @@ Unit enums (scalar integers, same values as behave_units.py):
                    (PressureUnitsEnum from behave_units.py)
 """
 
+
 import numpy as np
-from typing import Union
 
 
 def calculate_vpd(
-        temperature: Union[float, np.ndarray],
+        temperature: float | np.ndarray,
         temp_units: int,
-        relative_humidity: Union[float, np.ndarray],
+        relative_humidity: float | np.ndarray,
         rh_units: int,
         output_units: int = 0
 ) -> dict:
@@ -49,9 +49,9 @@ def calculate_vpd(
         ``output_units``.
     """
     try:
-        from .behave_units import temp_to_base, fraction_to_base, pressure_from_base
+        from .behave_units import fraction_to_base, pressure_from_base, temp_to_base
     except ImportError:
-        from behave_units import temp_to_base, fraction_to_base, pressure_from_base
+        from behave_units import fraction_to_base, pressure_from_base, temp_to_base
 
     # Convert inputs to base units: °F and fraction
     temp_f = temp_to_base(value=temperature, units=temp_units)

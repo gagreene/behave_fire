@@ -1,0 +1,3 @@
+{"id":"calm-crown","status":"ok","upstream_entries":1,"geometry_entries":1,"output":{"area_ft2":50.26548245743669,"length_to_width_ratio":1,"perimeter_ft":25.132741228718345}}
+{"id":"surface-5-mph","status":"ok","upstream_entries":1,"geometry_entries":1,"output":{"area_ft2":6253.5248264527745,"length_to_width_ratio":1.5900642088709862,"perimeter_ft":291.64697534293572}}
+{"id":"zero-elapsed","status":"ok","upstream_entries":1,"geometry_entries":1,"output":{"area_ft2":0,"length_to_width_ratio":1.5900642088709862,"perimeter_ft":0}}

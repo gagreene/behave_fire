@@ -1,0 +1,1055 @@
+// Phase 1 protocol probe. Scientific calculations are called in pinned upstream sources.
+#include "crown_reference.hpp"
+#include "fineDeadFuelMoistureTool.h"
+#include "fireSize.h"
+#include "fuelModels.h"
+#include "ignite.h"
+#include "mortality.h"
+#include "safety.h"
+#include "slopeTool.h"
+#include "species_master_table.h"
+#include "spot.h"
+#include "surface.h"
+#include "vaporPressureDeficitCalculator.h"
+#include <array>
+#include <cctype>
+#include <cerrno>
+#include <clocale>
+#include <cmath>
+#include <cstdlib>
+#include <fstream>
+#include <iomanip>
+#include <iostream>
+#include <limits>
+#include <locale>
+#include <map>
+#include <memory>
+#include <set>
+#include <sstream>
+#include <stdexcept>
+#include <string>
+
+namespace {
+struct Value {
+    enum Kind { Number, String, Boolean, Null } kind;
+    std::string text;
+};
+
+// Constructor placement follows C++ idiom; parser helpers precede its public API.
+class Parser {
+    const std::string& input_;
+    std::size_t offset_ = 0;
+
+    char peek() const { return offset_ < input_.size() ? input_[offset_] : '\0'; }
+    void space() { while (peek() == ' ' || peek() == '\t' || peek() == '\r' || peek() == '\n') ++offset_; }
+    std::string string() {
+        if (peek() != '"') throw std::runtime_error("expected_string");
+        ++offset_;
+        std::string result;
+        while (peek() != '"') {
+            unsigned char c = static_cast<unsigned char>(peek());
+            if (c < 32 || c > 126) throw std::runtime_error("invalid_or_non_ascii_string");
+            ++offset_;
+            if (c == '\\') {
+                char escaped = peek();
+                if (escaped != '"' && escaped != '\\' && escaped != '/')
+                    throw std::runtime_error("unsupported_string_escape");
+                c = static_cast<unsigned char>(escaped);
+                ++offset_;
+            }
+            result.push_back(static_cast<char>(c));
+        }
+        ++offset_;
+        return result;
+    }
+    Value value() {
+        space();
+        if (peek() == '"') return {Value::String, string()};
+        std::size_t begin = offset_;
+        for (const std::string token : {"true", "false", "null"}) {
+            if (input_.compare(offset_, token.size(), token) == 0) {
+                offset_ += token.size();
+                return {token == "null" ? Value::Null : Value::Boolean, token};
+            }
+        }
+        if (peek() == '-') ++offset_;
+        if (peek() == '0') ++offset_;
+        else {
+            if (peek() < '1' || peek() > '9') throw std::runtime_error("expected_json_number");
+            while (peek() >= '0' && peek() <= '9') ++offset_;
+        }
+        if (peek() == '.') {
+            ++offset_;
+            if (peek() < '0' || peek() > '9') throw std::runtime_error("invalid_fraction");
+            while (peek() >= '0' && peek() <= '9') ++offset_;
+        }
+        if (peek() == 'e' || peek() == 'E') {
+            ++offset_;
+            if (peek() == '+' || peek() == '-') ++offset_;
+            if (peek() < '0' || peek() > '9') throw std::runtime_error("invalid_exponent");
+            while (peek() >= '0' && peek() <= '9') ++offset_;
+        }
+        return {Value::Number, input_.substr(begin, offset_ - begin)};
+    }
+public:
+    explicit Parser(const std::string& input) : input_(input) {}
+    std::map<std::string, Value> parse() {
+        space();
+        if (peek() != '{') throw std::runtime_error("expected_object");
+        ++offset_;
+        space();
+        std::map<std::string, Value> result;
+        if (peek() != '}') {
+            while (true) {
+                space();
+                std::string key = string();
+                space();
+                if (peek() != ':') throw std::runtime_error("expected_colon");
+                ++offset_;
+                Value item = value();
+                if (!result.emplace(key, item).second) throw std::runtime_error("duplicate_key");
+                space();
+                if (peek() != ',') break;
+                ++offset_;
+            }
+        }
+        if (peek() != '}') throw std::runtime_error("expected_object_end");
+        ++offset_;
+        space();
+        if (offset_ != input_.size()) throw std::runtime_error("trailing_input");
+        return result;
+    }
+};
+
+std::string encode(const std::string& value) {
+    std::string result = "\"";
+    for (char c : value) {
+        if (c == '"' || c == '\\') result.push_back('\\');
+        result.push_back(c);
+    }
+    return result + '"';
+}
+
+/// Encode a finite numeric result with the reference driver's JSON formatting.
+///
+/// :param result: Output fields and their values.
+/// :return: JSON object preserving negative zeros.
+std::string encode_result(const std::map<std::string, double>& result) {
+    std::ostringstream output;
+    output.imbue(std::locale::classic());
+    output << std::setprecision(17) << '{';
+    bool first = true;
+    for (const auto& item : result) {
+        if (!std::isfinite(item.second)) throw std::runtime_error("nonfinite_upstream_output");
+        if (!first) output << ',';
+        first = false;
+        output << encode(item.first) << ':';
+        if (item.second == 0.0 && std::signbit(item.second)) output << "-0.0";
+        else output << item.second;
+    }
+    output << '}';
+    return output.str();
+}
+
+struct GeometryTrap {};
+struct UpstreamTrap {};
+
+/// Check the trap before reading the reviewed operation's outputs.
+///
+/// :param forbid: Whether the output entry trap is enabled.
+/// :param entered: Entry flag to set once the trap is cleared.
+/// :return: Nothing. Marks output entry on success.
+void enter_output(bool forbid, bool& entered) {
+    if (forbid) throw GeometryTrap{};
+    entered = true;
+}
+
+/// Register a validated request and check the trap before its upstream call.
+///
+/// :param id: Validated request ID.
+/// :param ids: IDs already seen on this invocation.
+/// :param forbid: Whether the upstream entry trap is enabled.
+/// :param entered: Entry flag to set once the trap is cleared.
+/// :return: Nothing. Records the ID and marks upstream entry on success.
+void enter_upstream(const std::string& id, std::set<std::string>& ids, bool forbid, bool& entered) {
+    if (!ids.insert(id).second) throw std::runtime_error("duplicate_id");
+    if (forbid) throw UpstreamTrap{};
+    entered = true;
+}
+
+double numeric(const Value& value, const std::string& field) {
+    if (value.kind == Value::String) {
+        if (value.text == "NaN") return std::numeric_limits<double>::quiet_NaN();
+        if (value.text == "Inf") return std::numeric_limits<double>::infinity();
+        if (value.text == "-Inf") return -std::numeric_limits<double>::infinity();
+    }
+    if (value.kind != Value::Number) throw std::runtime_error("numeric_type_" + field);
+    char* end = nullptr;
+    errno = 0;
+    const double result = std::strtod(value.text.c_str(), &end);
+    if (errno == ERANGE) throw std::runtime_error("number_range_" + field);
+    if (!end || *end) throw std::runtime_error("invalid_number_" + field);
+    return result;
+}
+
+const std::map<int, double> percent_controls = {
+    {110,24},{111,24},{150,20},{151,13},{152,15},{153,15},{154,25},
+    {155,25},{156,20},{157,35},{158,24},{159,35},{166,26},{167,30},
+    {168,35},{169,30},{170,27},{171,40},{172,32},{190,28},{191,25},
+    {192,45},{193,26}
+};
+const double tons_per_acre_to_lb_ft2 = 2000.0 / 43560.0;
+const std::map<int, std::map<std::string, double>> load_controls = {
+    {152, {{"dead_1h_load_lb_ft2", 2.25 * tons_per_acre_to_lb_ft2}}},
+    {153, {{"dead_100h_load_lb_ft2", 1.05 * tons_per_acre_to_lb_ft2},
+           {"live_herb_load_lb_ft2", 1.45 * tons_per_acre_to_lb_ft2}}},
+};
+struct Request { std::string id; int model; double direction; std::map<std::string, double> physical; std::map<std::string,std::string> modes; double user_waf; std::string session; bool percent_control; double moe_percent; };
+Request validate(const std::map<std::string, Value>& input) {
+    // Deny known hazardous special-mode inputs before any upstream construction.
+    // These checks do not enable those out-of-scope operations.
+    if (input.count("curing")) {
+        const double curing = numeric(input.at("curing"), "curing");
+        if (!std::isfinite(curing)) throw std::runtime_error("nonfinite_curing");
+        if (curing < 0 || curing > 1) throw std::runtime_error("curing_range");
+    }
+    for (const auto& field : {std::string("life_state"), std::string("size_class")}) {
+        if (input.count(field)) {
+            const double value = numeric(input.at(field), field);
+            const double maximum = field == "life_state" ? 1 : 4;
+            if (!std::isfinite(value) || std::floor(value) != value || value < 0 || value > maximum)
+                throw std::runtime_error("chaparral_index_" + field);
+        }
+    }
+    const std::set<std::string> optional = {"wind_height","wind_orientation","waf_method","user_waf","moisture_mode","session","fuel_mode","moe_percent",
+        "dead_1h_load_lb_ft2", "dead_100h_load_lb_ft2", "live_herb_load_lb_ft2"};
+    std::set<std::string> fields = {"id", "operation", "fuel_model", "wind_direction", "m1h", "m10h", "m100h", "mlh", "mlw",
+        "wind_speed", "slope", "aspect", "canopy_cover", "canopy_height", "crown_ratio"};
+    fields.insert(optional.begin(), optional.end());
+    for (const auto& item : input)
+        if (!fields.count(item.first)) throw std::runtime_error("unsupported_field");
+    for (const auto& field : fields)
+        if (!optional.count(field) && !input.count(field)) throw std::runtime_error("missing_field_" + field);
+    if (input.at("id").kind != Value::String || input.at("id").text.empty() || input.at("id").text.size() > 64)
+        throw std::runtime_error("invalid_id");
+    for (unsigned char c : input.at("id").text)
+        if (!std::isalnum(c) && c != '_' && c != '-' && c != '.') throw std::runtime_error("invalid_id");
+    if (input.at("operation").kind != Value::String || input.at("operation").text != "surface")
+        throw std::runtime_error("unsupported_operation");
+    const double model = numeric(input.at("fuel_model"), "fuel_model");
+    if (!std::isfinite(model) || std::floor(model) != model || model < 0 || model > 255)
+        throw std::runtime_error("fuel_model_storage_bounds");
+    const double direction = numeric(input.at("wind_direction"), "wind_direction");
+    if (!std::isfinite(direction)) throw std::runtime_error("nonfinite_angle");
+    if (direction != 0 && direction != 90 && direction != 180 && direction != 270 && direction != 360)
+        throw std::runtime_error("angle_not_in_reviewed_grid");
+    for (const auto& name : {std::string("fuel_model"), std::string("wind_direction")}) {
+        const Value& value = input.at(name);
+        if (value.kind != Value::Number || value.text.find_first_of(".eE") != std::string::npos)
+            throw std::runtime_error("integer_token_required_" + name);
+    }
+    std::map<std::string, double> physical;
+    const std::map<std::string, double> maximum = {{"m1h",300},{"m10h",300},{"m100h",300},{"mlh",300},{"mlw",300},{"wind_speed",40},{"slope",60},{"aspect",360},{"canopy_cover",100},{"canopy_height",200},{"crown_ratio",1}};
+    for (const auto& bound : maximum) {
+        const double value = numeric(input.at(bound.first), bound.first);
+        if (!std::isfinite(value) || value < 0 || value > bound.second)
+            throw std::runtime_error("physical_domain_" + bound.first);
+        if (bound.first == "aspect" && value != 0 && value != 90 && value != 180 && value != 270 && value != 360)
+            throw std::runtime_error("aspect_not_in_reviewed_grid");
+        physical.emplace(bound.first,value);
+    }
+    std::map<std::string,std::string> modes = {{"wind_height","TwentyFoot"},{"wind_orientation","North"},{"waf_method","CrownRatio"},{"moisture_mode","BySizeClass"}};
+    const std::map<std::string,std::set<std::string>> choices = {
+        {"wind_height",{"TwentyFoot","TenMeter"}}, {"wind_orientation",{"North","Upslope"}},
+        {"waf_method",{"CrownRatio","UserInput"}}, {"moisture_mode",{"BySizeClass"}}};
+    for (const auto& choice : choices) {
+        if (input.count(choice.first)) {
+            const Value& value = input.at(choice.first);
+            if (value.kind != Value::String || !choice.second.count(value.text))
+                throw std::runtime_error("unsupported_mode_" + choice.first);
+            modes[choice.first] = value.text;
+        }
+    }
+    double user_waf = 0.0;
+    if (modes.at("waf_method") == "UserInput") {
+        if (!input.count("user_waf")) throw std::runtime_error("missing_user_waf");
+        user_waf = numeric(input.at("user_waf"), "user_waf");
+        if (!std::isfinite(user_waf) || user_waf < 0 || user_waf > 1) throw std::runtime_error("user_waf_range");
+    } else if (input.count("user_waf")) throw std::runtime_error("unused_user_waf");
+    std::string session;
+    if (input.count("session")) {
+        const Value& value = input.at("session");
+        if (value.kind != Value::String || value.text.empty() || value.text.size() > 32) throw std::runtime_error("invalid_session");
+        for (unsigned char c : value.text) if (!std::isalnum(c) && c != '_' && c != '-' && c != '.') throw std::runtime_error("invalid_session");
+        session = value.text;
+    }
+    bool percent_control = false;
+    if (input.count("fuel_mode")) {
+        const Value& mode = input.at("fuel_mode");
+        if (mode.kind != Value::String || (mode.text != "numbered" && mode.text != "percent_unit_custom"))
+            throw std::runtime_error("unsupported_fuel_mode");
+        percent_control = mode.text == "percent_unit_custom";
+    }
+    double moe_percent = 0.0;
+    if (percent_control) {
+        const auto expected = percent_controls.find(static_cast<int>(model));
+        if (expected == percent_controls.end() || !input.count("moe_percent"))
+            throw std::runtime_error("unreviewed_percent_control");
+        moe_percent = numeric(input.at("moe_percent"), "moe_percent");
+        if (!std::isfinite(moe_percent) || moe_percent != expected->second)
+            throw std::runtime_error("unreviewed_percent_quantity");
+    } else if (input.count("moe_percent")) throw std::runtime_error("unused_custom_moe");
+    const auto control_loads = load_controls.find(static_cast<int>(model));
+    const std::map<std::string, double> no_loads;
+    const auto& expected_loads = percent_control && control_loads != load_controls.end()
+        ? control_loads->second : no_loads;
+    for (const std::string field : {"dead_1h_load_lb_ft2", "dead_100h_load_lb_ft2", "live_herb_load_lb_ft2"}) {
+        const auto expected = expected_loads.find(field);
+        const auto value = input.find(field);
+        if ((expected != expected_loads.end()) != (value != input.end()))
+            throw std::runtime_error("unreviewed_load_control");
+        if (expected != expected_loads.end()) {
+            if (value->second.kind != Value::Number || numeric(value->second, field) != expected->second)
+                throw std::runtime_error("unreviewed_load_control");
+            physical.emplace(field, expected->second);
+        }
+    }
+    return {input.at("id").text, static_cast<int>(model), direction, physical, modes, user_waf, session, percent_control, moe_percent};
+}
+
+/// Validate the exact input tuple for one approved Crown case.
+///
+/// :param input: Parsed request object.
+/// :return: Reviewed input and expected classification for a fresh Crown calculation.
+crown_reference::Request validate_crown(const std::map<std::string, Value>& input) {
+    const std::set<std::string> fields = {"id", "operation", "wind_fpm", "canopy_base_ft", "crown_ratio"};
+    for (const auto& item : input)
+        if (!fields.count(item.first)) throw std::runtime_error("unsupported_field");
+    for (const auto& field : fields)
+        if (!input.count(field)) throw std::runtime_error("missing_field_" + field);
+
+    const Value& id = input.at("id");
+    if (id.kind != Value::String || id.text.empty()) throw std::runtime_error("invalid_id");
+    for (const auto& field : {"wind_fpm", "canopy_base_ft", "crown_ratio"})
+        if (input.at(field).kind != Value::Number) throw std::runtime_error(std::string("numeric_type_") + field);
+
+    struct ReviewedCase {
+        const char* wind_fpm;
+        const char* canopy_base_ft;
+        const char* crown_ratio;
+        FireType::FireTypeEnum fire_type;
+    };
+    const std::map<std::string, ReviewedCase> reviewed = {
+        {"calm", {"0", "15", "0.5", FireType::Surface}},
+        {"wind5", {"440", "15", "0.5", FireType::Surface}},
+        {"wind15", {"1320", "15", "0.5", FireType::ConditionalCrownFire}},
+        {"torching", {"616", "5", "0.8333333333333334", FireType::Torching}},
+        {"active", {"2200", "15", "0.5", FireType::Crowning}},
+        {"zero-base", {"0", "0", "1.0", FireType::Torching}},
+    };
+    const auto match = reviewed.find(id.text);
+    if (match == reviewed.end()) throw std::runtime_error("unreviewed_crown_request");
+    const auto& expected = match->second;
+    if (input.at("wind_fpm").text != expected.wind_fpm ||
+            input.at("canopy_base_ft").text != expected.canopy_base_ft ||
+            input.at("crown_ratio").text != expected.crown_ratio)
+        throw std::runtime_error("unreviewed_crown_request");
+    return {numeric(input.at("wind_fpm"), "wind_fpm"), numeric(input.at("canopy_base_ft"), "canopy_base_ft"),
+        numeric(input.at("crown_ratio"), "crown_ratio"), expected.fire_type};
+}
+
+using FineDeadFuelMoistureRequest = std::array<int, 8>;
+
+/// Validate the approved moisture inputs and every upstream table access.
+///
+/// :param input: Parsed request object.
+/// :return: Reviewed lookup indices in public port order.
+FineDeadFuelMoistureRequest validate_fine_dead_fuel_moisture(const std::map<std::string, Value>& input) {
+    const auto id = input.find("id");
+    if (id == input.end() || id->second.kind != Value::String) throw std::runtime_error("invalid_id");
+    const std::map<std::string, FineDeadFuelMoistureRequest> reviewed = {
+        {"exposed-low-slope", {{0, 20, 0, 0, 0, 0, 1, 3}}},
+        {"exposed-high-slope", {{0, 20, 1, 0, 0, 0, 1, 3}}},
+        {"shaded-upper-indices", {{5, 20, 1, 3, 1, 2, 2, 5}}},
+    };
+    const auto allowed = reviewed.find(id->second.text);
+    if (allowed == reviewed.end()) throw std::runtime_error("unreviewed_moisture_request");
+    const std::array<const char*, 8> fields = {{
+        "dry_bulb_i", "rh_i", "slope_i", "aspect_i", "shading_i", "month_i", "elev_i", "time_i",
+    }};
+    const FineDeadFuelMoistureRequest upper = {{5, 20, 1, 3, 1, 2, 2, 5}};
+    const auto& indices = allowed->second;
+    if (input.size() > fields.size() + 2) throw std::runtime_error("unsupported_field");
+    for (std::size_t index = 0; index < fields.size(); ++index) {
+        const auto field = input.find(fields[index]);
+        if (field == input.end()) throw std::runtime_error(std::string("missing_field_") + fields[index]);
+        if (field->second.kind != Value::Number)
+            throw std::runtime_error(std::string("numeric_type_") + fields[index]);
+        if (field->second.text != std::to_string(indices[index]))
+            throw std::runtime_error("unreviewed_moisture_request");
+        if (indices[index] < 0 || indices[index] > upper[index])
+            throw std::runtime_error("unsafe_moisture_index");
+    }
+    // F-005 requires independent bounds on the derived correction-table access.
+    const int row = 12 * indices[5] + (indices[4] == 0 ? 2 * indices[3] + indices[2] : 8 + indices[3]);
+    const int column = indices[6] + 3 * indices[7];
+    if (row < 0 || row >= 36 || column < 0 || column >= 18)
+        throw std::runtime_error("unsafe_moisture_table_access");
+    return indices;
+}
+
+struct FireSizeRequest {
+    bool crown;
+    double wind_mph;
+    double spread_ft_min;
+    double elapsed_min;
+};
+
+/// Validate a standalone request against the three reviewed FireSize inputs.
+///
+/// :param input: Parsed request object.
+/// :return: The matching reviewed input for a fresh FireSize object.
+FireSizeRequest validate_fire_size(const std::map<std::string, Value>& input) {
+    const std::set<std::string> fields = {"id", "operation", "mode", "wind_mph", "spread_ft_min", "elapsed_min"};
+    for (const auto& item : input)
+        if (!fields.count(item.first)) throw std::runtime_error("unsupported_field");
+    for (const auto& field : fields)
+        if (!input.count(field)) throw std::runtime_error("missing_field_" + field);
+
+    const Value& id = input.at("id");
+    if (id.kind != Value::String || id.text.empty()) throw std::runtime_error("invalid_id");
+    const Value& mode = input.at("mode");
+    if (mode.kind != Value::String || (mode.text != "Crown" && mode.text != "Surface"))
+        throw std::runtime_error("unsupported_fire_size_mode");
+    for (const auto& field : {"elapsed_min", "spread_ft_min", "wind_mph"})
+        if (input.at(field).kind != Value::Number) throw std::runtime_error(std::string("numeric_type_") + field);
+
+    const FireSizeRequest request = {
+        mode.text == "Crown",
+        numeric(input.at("wind_mph"), "wind_mph"),
+        numeric(input.at("spread_ft_min"), "spread_ft_min"),
+        numeric(input.at("elapsed_min"), "elapsed_min"),
+    };
+    const std::map<std::string, FireSizeRequest> reviewed = {
+        {"calm-crown", {true, 0.0, 4.0, 2.0}},
+        {"surface-5-mph", {false, 5.0, 10.0, 10.0}},
+        {"zero-elapsed", {false, 5.0, 10.0, 0.0}},
+    };
+    const auto match = reviewed.find(id.text);
+    if (match == reviewed.end()) throw std::runtime_error("unreviewed_fire_size_request");
+    const auto& expected = match->second;
+    if (request.crown != expected.crown || request.wind_mph != expected.wind_mph
+            || request.spread_ft_min != expected.spread_ft_min || request.elapsed_min != expected.elapsed_min
+            || std::signbit(request.wind_mph) || std::signbit(request.elapsed_min))
+        throw std::runtime_error("unreviewed_fire_size_request");
+    return expected;
+}
+
+struct IgniteRequest {
+    double air_temperature_f;
+    double sun_shade_fraction;
+    double moisture_1h;
+};
+
+/// Validate a standalone request against the four reviewed firebrand inputs.
+///
+/// :param input: Parsed request object.
+/// :return: The matching reviewed input for a fresh Ignite object.
+IgniteRequest validate_ignite(const std::map<std::string, Value>& input) {
+    const std::set<std::string> fields = {
+        "id", "operation", "air_temperature_f", "sun_shade_fraction", "moisture_1h",
+    };
+    for (const auto& item : input)
+        if (!fields.count(item.first)) throw std::runtime_error("unsupported_field");
+    for (const auto& field : fields)
+        if (!input.count(field)) throw std::runtime_error("missing_field_" + field);
+
+    const Value& id = input.at("id");
+    if (id.kind != Value::String || id.text.empty()) throw std::runtime_error("invalid_id");
+    for (const auto& field : {"air_temperature_f", "moisture_1h", "sun_shade_fraction"})
+        if (input.at(field).kind != Value::Number) throw std::runtime_error(std::string("numeric_type_") + field);
+
+    const IgniteRequest request = {
+        numeric(input.at("air_temperature_f"), "air_temperature_f"),
+        numeric(input.at("sun_shade_fraction"), "sun_shade_fraction"),
+        numeric(input.at("moisture_1h"), "moisture_1h"),
+    };
+    const double air_temperature_f = 71.0;
+    const double sun_shade_fraction = 0.5;
+    const std::map<std::string, double> reviewed_moisture = {
+        {"ignite-dry", 0.0},
+        {"ignite-moisture-12-5", 0.125},
+        {"ignite-moisture-25", 0.25},
+        {"ignite-wet", 0.5},
+    };
+    const auto match = reviewed_moisture.find(id.text);
+    if (match == reviewed_moisture.end() || request.air_temperature_f != air_temperature_f
+            || request.sun_shade_fraction != sun_shade_fraction || request.moisture_1h != match->second
+            || std::signbit(request.moisture_1h))
+        throw std::runtime_error("unreviewed_ignite_request");
+    return {air_temperature_f, sun_shade_fraction, match->second};
+}
+
+struct MortalityRequest {
+    double intensity_btu_ft_s;
+    double wind_mph;
+    double air_temperature_f;
+};
+
+/// Validate a standalone request against the six reviewed scorch height inputs.
+///
+/// :param input: Parsed request object.
+/// :return: The matching reviewed input for a fresh Mortality object.
+MortalityRequest validate_mortality(const std::map<std::string, Value>& input) {
+    const std::set<std::string> fields = {"id", "operation", "intensity_btu_ft_s", "wind_mph", "air_temperature_f"};
+    for (const auto& item : input)
+        if (!fields.count(item.first)) throw std::runtime_error("unsupported_field");
+    for (const auto& field : fields)
+        if (!input.count(field)) throw std::runtime_error("missing_field_" + field);
+
+    const Value& id = input.at("id");
+    if (id.kind != Value::String || id.text.empty()) throw std::runtime_error("invalid_id");
+    for (const auto& field : {"air_temperature_f", "intensity_btu_ft_s", "wind_mph"})
+        if (input.at(field).kind != Value::Number) throw std::runtime_error(std::string("numeric_type_") + field);
+
+    const MortalityRequest request = {
+        numeric(input.at("intensity_btu_ft_s"), "intensity_btu_ft_s"),
+        numeric(input.at("wind_mph"), "wind_mph"),
+        numeric(input.at("air_temperature_f"), "air_temperature_f"),
+    };
+    const std::map<std::string, MortalityRequest> reviewed = {
+        {"scorch-one-calm-14", {1.0, 0.0, 14.0}},
+        {"scorch-one-calm-77", {1.0, 0.0, 77.0}},
+        {"scorch-one-wind-77", {1.0, 2.0, 77.0}},
+        {"scorch-zero-calm-14", {0.0, 0.0, 14.0}},
+        {"scorch-zero-calm-77", {0.0, 0.0, 77.0}},
+        {"scorch-zero-wind-77", {0.0, 2.0, 77.0}},
+    };
+    const auto match = reviewed.find(id.text);
+    if (match == reviewed.end()) throw std::runtime_error("unreviewed_mortality_request");
+    const auto& expected = match->second;
+    if (request.intensity_btu_ft_s != expected.intensity_btu_ft_s || request.wind_mph != expected.wind_mph
+            || request.air_temperature_f != expected.air_temperature_f
+            || std::signbit(request.intensity_btu_ft_s) || std::signbit(request.wind_mph))
+        throw std::runtime_error("unreviewed_mortality_request");
+    return expected;
+}
+
+struct SafetyRequest {
+    int flame_ft;
+    int personnel;
+    int equipment;
+};
+
+/// Validate a request against the eight reviewed standalone Safety inputs.
+///
+/// :param input: Parsed request object.
+/// :return: Reviewed flame height and occupancy for a fresh Safety object.
+SafetyRequest validate_safety(const std::map<std::string, Value>& input) {
+    const std::set<std::string> fields = {"id", "operation", "flame_ft", "personnel", "equipment"};
+    for (const auto& item : input)
+        if (!fields.count(item.first)) throw std::runtime_error("unsupported_field");
+    for (const auto& field : fields)
+        if (!input.count(field)) throw std::runtime_error("missing_field_" + field);
+
+    const auto& id = input.at("id");
+    if (id.kind != Value::String || id.text.empty()) throw std::runtime_error("invalid_id");
+    for (const auto& field : {"flame_ft", "personnel", "equipment"}) {
+        const auto& value = input.at(field);
+        if (value.kind != Value::Number) throw std::runtime_error(std::string("numeric_type_") + field);
+        if (value.text != "0" && value.text != "1") throw std::runtime_error("unreviewed_safety_request");
+    }
+    const std::string& flame = input.at("flame_ft").text;
+    const std::string& personnel = input.at("personnel").text;
+    const std::string& equipment = input.at("equipment").text;
+    if (id.text != "safety-" + flame + "ft-" + personnel + "p-" + equipment + "e")
+        throw std::runtime_error("unreviewed_safety_request");
+    return {flame.front() - '0', personnel.front() - '0', equipment.front() - '0'};
+}
+
+struct SlopeToolRequest {
+    bool projection;
+    double distance_ft;
+    double slope_degrees;
+    int scale;
+    double contour_interval_ft;
+    int contours;
+};
+
+/// Validate the two reviewed SlopeTool input tuples before entering C++.
+///
+/// :param input: Parsed request object.
+/// :return: Reviewed projection or map-slope request.
+SlopeToolRequest validate_slope_tool(const std::map<std::string, Value>& input) {
+    const auto id = input.find("id");
+    if (id == input.end() || id->second.kind != Value::String) throw std::runtime_error("invalid_id");
+    const std::map<std::string, std::map<std::string, std::string>> reviewed = {
+        {"slope-projection", {{"distance_ft", "8"}, {"slope_degrees", "30"}}},
+        {"slope-map", {{"scale", "1980"}, {"distance_ft", "0.125"},
+                       {"contour_interval_ft", "20"}, {"contours", "3"}}},
+    };
+    const auto allowed = reviewed.find(id->second.text);
+    if (allowed == reviewed.end()) throw std::runtime_error("unreviewed_slope_tool_request");
+    for (const auto& item : input)
+        if (item.first != "id" && item.first != "operation" && !allowed->second.count(item.first))
+            throw std::runtime_error("unsupported_field");
+    for (const auto& item : allowed->second) {
+        const auto field = input.find(item.first);
+        if (field == input.end()) throw std::runtime_error("missing_field_" + item.first);
+        if (field->second.kind != Value::Number) throw std::runtime_error("numeric_type_" + item.first);
+        if (field->second.text != item.second) throw std::runtime_error("unreviewed_slope_tool_request");
+    }
+    const double distance = numeric(input.at("distance_ft"), "distance_ft");
+    if (id->second.text == "slope-projection")
+        return {true, distance, numeric(input.at("slope_degrees"), "slope_degrees"), 0, 0.0, 0};
+    return {false, distance, 0.0, static_cast<int>(numeric(input.at("scale"), "scale")),
+            numeric(input.at("contour_interval_ft"), "contour_interval_ft"),
+            static_cast<int>(numeric(input.at("contours"), "contours"))};
+}
+
+struct SpotRequest {
+    double flame_ft;
+    double wind_mph;
+    double cover_ft;
+};
+
+/// Validate a standalone request against the four reviewed flat Spot inputs.
+///
+/// :param input: Parsed request object.
+/// :return: The matching reviewed input for a fresh Spot object.
+SpotRequest validate_spot(const std::map<std::string, Value>& input) {
+    const std::set<std::string> fields = {"id", "operation", "flame_ft", "wind_mph", "cover_ft"};
+    for (const auto& item : input)
+        if (!fields.count(item.first)) throw std::runtime_error("unsupported_field");
+    for (const auto& field : fields)
+        if (!input.count(field)) throw std::runtime_error("missing_field_" + field);
+
+    const Value& id = input.at("id");
+    if (id.kind != Value::String || id.text.empty()) throw std::runtime_error("invalid_id");
+    for (const auto& field : {"cover_ft", "flame_ft", "wind_mph"})
+        if (input.at(field).kind != Value::Number) throw std::runtime_error(std::string("numeric_type_") + field);
+
+    const SpotRequest request = {
+        numeric(input.at("flame_ft"), "flame_ft"),
+        numeric(input.at("wind_mph"), "wind_mph"),
+        numeric(input.at("cover_ft"), "cover_ft"),
+    };
+    const std::map<std::string, SpotRequest> reviewed = {
+        {"spot-flat-calm-zero-cover", {5.0, 0.0, 0.0}},
+        {"spot-flat-calm-ten-cover", {5.0, 0.0, 10.0}},
+        {"spot-flat-wind-zero-cover", {5.0, 5.0, 0.0}},
+        {"spot-flat-wind-ten-cover", {5.0, 5.0, 10.0}},
+    };
+    const auto match = reviewed.find(id.text);
+    if (match == reviewed.end()) throw std::runtime_error("unreviewed_spot_request");
+    const auto& expected = match->second;
+    if (request.flame_ft != expected.flame_ft || request.wind_mph != expected.wind_mph
+            || request.cover_ft != expected.cover_ft || std::signbit(request.wind_mph) || std::signbit(request.cover_ft))
+        throw std::runtime_error("unreviewed_spot_request");
+    return expected;
+}
+
+struct UnitsRequest {
+    double input_celsius;
+    double input_fahrenheit;
+};
+
+/// Validate the approved signed Celsius and Fahrenheit conversion inputs.
+///
+/// :param input: Parsed request object.
+/// :return: The reviewed inputs for both conversion directions.
+UnitsRequest validate_units(const std::map<std::string, Value>& input) {
+    const std::set<std::string> fields = {"id", "operation", "input_celsius", "input_fahrenheit"};
+    for (const auto& item : input)
+        if (!fields.count(item.first)) throw std::runtime_error("unsupported_field");
+    for (const auto& field : fields)
+        if (!input.count(field)) throw std::runtime_error("missing_field_" + field);
+
+    const auto& id = input.at("id");
+    if (id.kind != Value::String || id.text.empty()) throw std::runtime_error("invalid_id");
+    for (const auto& name : {"input_celsius", "input_fahrenheit"})
+        if (input.at(name).kind != Value::Number)
+            throw std::runtime_error(std::string("numeric_type_") + name);
+    if (id.text != "temperature-minus10c-14f" || input.at("input_celsius").text != "-10"
+            || input.at("input_fahrenheit").text != "14")
+        throw std::runtime_error("unreviewed_units_request");
+    return {numeric(input.at("input_celsius"), "input_celsius"),
+            numeric(input.at("input_fahrenheit"), "input_fahrenheit")};
+}
+
+struct VpdRequest {
+    double temperature_k;
+    double rh_pct;
+};
+
+/// Validate the two approved VPD tuples before the upstream calculation.
+///
+/// :param input: Parsed request object.
+/// :return: Reviewed temperature in Kelvin and relative humidity in percent.
+VpdRequest validate_vpd(const std::map<std::string, Value>& input) {
+    const std::set<std::string> fields = {"id", "operation", "temperature_k", "rh_pct"};
+    for (const auto& item : input)
+        if (!fields.count(item.first)) throw std::runtime_error("unsupported_field");
+    for (const auto& field : fields)
+        if (!input.count(field)) throw std::runtime_error("missing_field_" + field);
+
+    const auto& id = input.at("id");
+    if (id.kind != Value::String || id.text.empty()) throw std::runtime_error("invalid_id");
+    const std::map<std::string, std::array<std::string, 2>> reviewed = {
+        {"freezing-dry", {{"273.15", "0"}}},
+        {"warm-half-humidity", {{"293.15", "50"}}},
+    };
+    const auto allowed = reviewed.find(id.text);
+    if (allowed == reviewed.end()) throw std::runtime_error("unreviewed_vpd_request");
+    const std::array<const char*, 2> numeric_fields = {{"temperature_k", "rh_pct"}};
+    for (std::size_t index = 0; index < numeric_fields.size(); ++index) {
+        const auto& value = input.at(numeric_fields[index]);
+        if (value.kind != Value::Number)
+            throw std::runtime_error(std::string("numeric_type_") + numeric_fields[index]);
+        if (value.text != allowed->second[index]) throw std::runtime_error("unreviewed_vpd_request");
+    }
+    return {numeric(input.at("temperature_k"), "temperature_k"), numeric(input.at("rh_pct"), "rh_pct")};
+}
+
+struct Unavailable {};
+struct Session {
+    FuelModels fuels;
+    Surface surface;
+    Session() : fuels(), surface(fuels) {}
+};
+
+// Registration follows validation and precedes execution; no numbered record is edited.
+int register_percent_control(FuelModels& fuels, const Request& request) {
+    if (!request.percent_control) return request.model;
+    const int source = request.model;
+    const int custom = 250;
+    const auto heat = HeatOfCombustionUnits::BtusPerPound;
+    const auto loading = LoadingUnits::PoundsPerSquareFoot;
+    const auto savr = SurfaceAreaToVolumeUnits::SquareFeetOverCubicFeet;
+    const auto dead_1h = request.physical.find("dead_1h_load_lb_ft2");
+    const auto dead_100h = request.physical.find("dead_100h_load_lb_ft2");
+    const auto live_herb = request.physical.find("live_herb_load_lb_ft2");
+    const bool accepted = fuels.setCustomFuelModel(custom, "UNIT_CONTROL", "Explicit Percent-unit control",
+        fuels.getFuelbedDepth(source, LengthUnits::Feet), LengthUnits::Feet,
+        request.moe_percent, FractionUnits::Percent,
+        fuels.getHeatOfCombustionDead(source, heat), fuels.getHeatOfCombustionLive(source, heat), heat,
+        dead_1h == request.physical.end() ? fuels.getFuelLoadOneHour(source, loading) : dead_1h->second,
+        fuels.getFuelLoadTenHour(source, loading),
+        dead_100h == request.physical.end() ? fuels.getFuelLoadHundredHour(source, loading) : dead_100h->second,
+        live_herb == request.physical.end() ? fuels.getFuelLoadLiveHerbaceous(source, loading) : live_herb->second,
+        fuels.getFuelLoadLiveWoody(source, loading), loading, fuels.getSavrOneHour(source, savr),
+        fuels.getSavrLiveHerbaceous(source, savr), fuels.getSavrLiveWoody(source, savr), savr,
+        fuels.getIsDynamic(source));
+    if (!accepted) throw std::runtime_error("custom_registration_failed");
+    return custom;
+}
+
+std::string run(const Request& request, bool forbid_geometry, bool& geometry_entered, std::unique_ptr<Session>& session) {
+    FuelModels fuels;
+    if (!fuels.isFuelModelDefined(request.model) || fuels.isAllFuelLoadZero(request.model))
+        throw Unavailable{};
+    if (!session) session.reset(new Session);
+    const int model = register_percent_control(session->fuels, request);
+    Surface& surface = session->surface;
+    surface.updateSurfaceInputs(model, request.physical.at("m1h"), request.physical.at("m10h"), request.physical.at("m100h"), request.physical.at("mlh"), request.physical.at("mlw"),
+        FractionUnits::Percent, request.physical.at("wind_speed"), SpeedUnits::MilesPerHour,
+        (request.modes.at("wind_height") == "TenMeter" ? WindHeightInputMode::TenMeter : WindHeightInputMode::TwentyFoot), request.direction,
+        (request.modes.at("wind_orientation") == "North" ? WindAndSpreadOrientationMode::RelativeToNorth : WindAndSpreadOrientationMode::RelativeToUpslope), request.physical.at("slope"),
+        SlopeUnits::Percent, request.physical.at("aspect"), request.physical.at("canopy_cover"), FractionUnits::Percent,
+        request.physical.at("canopy_height"), LengthUnits::Feet, request.physical.at("crown_ratio"), FractionUnits::Fraction);
+    surface.setMoistureInputMode(MoistureInputMode::BySizeClass);
+    surface.setWindAdjustmentFactorCalculationMethod(request.modes.at("waf_method") == "UserInput"
+        ? WindAdjustmentFactorCalculationMethod::UserInput : WindAdjustmentFactorCalculationMethod::UseCrownRatio);
+    if (request.modes.at("waf_method") == "UserInput") surface.setUserProvidedWindAdjustmentFactor(request.user_waf);
+    surface.doSurfaceRunInDirectionOfMaxSpread();
+    if (forbid_geometry) throw GeometryTrap{};
+    geometry_entered = true;
+    const std::map<std::string, double> result = {
+        {"fireline_intensity_btu_ft_s", surface.getFirelineIntensity(FirelineIntensityUnits::BtusPerFootPerSecond)},
+        {"flame_length_ft", surface.getFlameLength(LengthUnits::Feet)},
+        {"heat_per_unit_area_btu_ft2", surface.getHeatPerUnitArea(HeatPerUnitAreaUnits::BtusPerSquareFoot)},
+        {"length_to_width_ratio", surface.getFireLengthToWidthRatio()},
+        {"spread_chains_per_hour", surface.getSpreadRate(SpeedUnits::ChainsPerHour)}
+    };
+    return encode_result(result);
+}
+
+/// Run a guarded Crown calculation on fresh upstream objects.
+///
+/// :param request: Reviewed Crown input.
+/// :param forbid_output: Whether the output entry trap is enabled.
+/// :param output_entered: Output entry flag to set once the trap is cleared.
+/// :return: JSON object containing the eleven Crown outputs.
+std::string run_crown(const crown_reference::Request& request, bool forbid_output, bool& output_entered) {
+    FuelModels fuels;
+    const double expected_length_to_width = crown_reference::preflight(fuels, request);
+    Crown crown(fuels);
+    crown_reference::calculate(crown, request);
+    enter_output(forbid_output, output_entered);
+    return encode_result(crown_reference::read_result(crown, request, expected_length_to_width));
+}
+
+/// Measure one guarded lookup with a fresh upstream moisture tool.
+///
+/// :param indices: Reviewed indices in public port order.
+/// :param forbid_output: Whether the output entry trap is enabled.
+/// :return: Total moisture fraction as a JSON object.
+std::string run_fine_dead_fuel_moisture(const FineDeadFuelMoistureRequest& indices, bool forbid_output) {
+    if (forbid_output) throw GeometryTrap{};
+    FineDeadFuelMoistureTool tool;
+    tool.calculateByIndex(indices[3], indices[0], indices[6], indices[5],
+                          indices[1], indices[4], indices[2], indices[7]);
+    return encode_result({{"moisture_fraction", tool.getFineDeadFuelMoisture(FractionUnits::Fraction)}});
+}
+
+/// Calculate and read geometry on a fresh upstream FireSize object.
+///
+/// :param request: Reviewed FireSize input.
+/// :param forbid_geometry: Whether the geometry entry trap is enabled.
+/// :param geometry_entered: Geometry entry flag to set once the trap is cleared.
+/// :return: JSON object with length-to-width ratio, area, and perimeter.
+std::string run_fire_size(const FireSizeRequest& request, bool forbid_geometry, bool& geometry_entered) {
+    if (forbid_geometry) throw GeometryTrap{};
+    geometry_entered = true;
+    FireSize size;
+    size.calculateFireBasicDimensions(request.crown, request.wind_mph, SpeedUnits::MilesPerHour,
+        request.spread_ft_min, SpeedUnits::FeetPerMinute);
+    return encode_result({
+        {"area_ft2", size.getFireArea(request.crown, AreaUnits::SquareFeet, request.elapsed_min, TimeUnits::Minutes)},
+        {"length_to_width_ratio", size.getFireLengthToWidthRatio()},
+        {"perimeter_ft", size.getFirePerimeter(request.crown, LengthUnits::Feet, request.elapsed_min, TimeUnits::Minutes)},
+    });
+}
+
+/// Calculate firebrand ignition probability on a fresh upstream Ignite object.
+///
+/// :param request: Reviewed Ignite input.
+/// :param forbid_output: Whether the output entry trap is enabled.
+/// :return: JSON object with ignition probability and fuel temperature.
+std::string run_ignite(const IgniteRequest& request, bool forbid_output) {
+    if (forbid_output) throw GeometryTrap{};
+    Ignite ignite;
+    ignite.initializeMembers();
+    ignite.setAirTemperature(request.air_temperature_f, TemperatureUnits::Fahrenheit);
+    ignite.setSunShade(request.sun_shade_fraction, FractionUnits::Fraction);
+    ignite.setMoistureOneHour(request.moisture_1h, FractionUnits::Fraction);
+    const double probability = ignite.calculateFirebrandIgnitionProbability(FractionUnits::Fraction);
+    return encode_result({
+        {"firebrand_probability", probability},
+        {"fuel_temperature_f", ignite.getFuelTemperature(TemperatureUnits::Fahrenheit)},
+    });
+}
+
+/// Calculate scorch height with a fresh upstream Mortality object and species table.
+///
+/// :param request: Reviewed Mortality input.
+/// :param forbid_output: Whether the output entry trap is enabled.
+/// :return: JSON object with scorch height in feet.
+std::string run_mortality(const MortalityRequest& request, bool forbid_output) {
+    if (forbid_output) throw GeometryTrap{};
+    SpeciesMasterTable species;
+    Mortality mortality(species);
+    const double scorch_height = mortality.calculateScorchHeight(
+        request.intensity_btu_ft_s, FirelineIntensityUnits::BtusPerFootPerSecond,
+        request.wind_mph, SpeedUnits::MilesPerHour,
+        request.air_temperature_f, TemperatureUnits::Fahrenheit, LengthUnits::Feet);
+    return encode_result({{"scorch_height_ft", scorch_height}});
+}
+
+/// Calculate standalone zone geometry on a fresh upstream Safety object.
+///
+/// :param request: Reviewed Safety input.
+/// :param forbid_output: Whether the output entry trap is enabled.
+/// :return: JSON object with zone area, radius, and separation distance.
+std::string run_safety(const SafetyRequest& request, bool forbid_output) {
+    if (forbid_output) throw GeometryTrap{};
+    constexpr double pi = 3.141592653589793238462643383279502884;
+    Safety safety;
+    safety.initializeMembers();
+    safety.updateSafetyInputs(request.flame_ft, LengthUnits::Feet, request.personnel, request.equipment,
+        9.0 * pi, 16.0 * pi, AreaUnits::SquareFeet);
+    safety.calculateSafetyZone();
+    return encode_result({
+        {"area_sqft", safety.getSafetyZoneArea(AreaUnits::SquareFeet)},
+        {"radius_ft", safety.getSafetyZoneRadius(LengthUnits::Feet)},
+        {"separation_ft", safety.getSeparationDistance(LengthUnits::Feet)},
+    });
+}
+
+/// Measure a reviewed projection or map slope on a fresh SlopeTool object.
+///
+/// :param request: Reviewed SlopeTool input.
+/// :param forbid_output: Whether the output entry trap is enabled.
+/// :return: JSON object with the fields for the reviewed operation.
+std::string run_slope_tool(const SlopeToolRequest& request, bool forbid_output) {
+    if (forbid_output) throw GeometryTrap{};
+    SlopeTool tool;
+    if (request.projection) {
+        tool.calculateHorizontalDistance(request.distance_ft, LengthUnits::Feet,
+                                         request.slope_degrees, SlopeUnits::Degrees);
+        std::map<std::string, double> result;
+        for (int index = 0; index < 7; ++index)
+            result.emplace("horizontal_" + std::to_string(index * 15) + "_ft",
+                           tool.getHorizontalDistanceAtIndex(index, LengthUnits::Feet));
+        return encode_result(result);
+    }
+    tool.calculateSlopeFromMapMeasurements(request.scale, request.distance_ft, LengthUnits::Feet,
+                                           request.contour_interval_ft, request.contours, LengthUnits::Feet);
+    return encode_result({
+        {"elevation_ft", tool.getSlopeElevationChangeFromMapMeasurements(LengthUnits::Feet)},
+        {"horizontal_ft", tool.getSlopeHorizontalDistanceFromMapMeasurements(LengthUnits::Feet)},
+        {"slope_degrees", tool.getSlopeFromMapMeasurementsInDegrees()},
+        {"slope_percent", tool.getSlopeFromMapMeasurementsInPercent()},
+    });
+}
+
+/// Calculate flat surface-fire spotting distance on a fresh upstream Spot object.
+///
+/// :param request: Reviewed Spot input.
+/// :param forbid_output: Whether the output entry trap is enabled.
+/// :return: JSON object with the flat spotting distance in feet.
+std::string run_spot(const SpotRequest& request, bool forbid_output) {
+    if (forbid_output) throw GeometryTrap{};
+    Spot spot;
+    spot.updateSpotInputsForSurfaceFire(
+        SpotFireLocation::MIDSLOPE_WINDWARD, 0.0, LengthUnits::Miles,
+        0.0, LengthUnits::Feet, request.cover_ft, LengthUnits::Feet,
+        SpotDownWindCanopyMode::CLOSED, request.wind_mph, SpeedUnits::MilesPerHour,
+        request.flame_ft, LengthUnits::Feet);
+    spot.calculateSpottingDistanceFromSurfaceFire();
+    const double distance = spot.getMaxFlatTerrainSpottingDistanceFromSurfaceFire(LengthUnits::Feet);
+    return encode_result({{"flat_distance_ft", distance}});
+}
+
+/// Measure the two reviewed temperature conversions.
+///
+/// :param request: Reviewed Celsius and Fahrenheit inputs.
+/// :param forbid_output: Whether the output entry trap is enabled.
+/// :return: JSON object with the Celsius and Fahrenheit outputs.
+std::string run_units(const UnitsRequest& request, bool forbid_output) {
+    if (forbid_output) throw GeometryTrap{};
+    return encode_result({
+        {"celsius", TemperatureUnits::fromBaseUnits(request.input_fahrenheit, TemperatureUnits::Celsius)},
+        {"fahrenheit", TemperatureUnits::toBaseUnits(request.input_celsius, TemperatureUnits::Celsius)},
+    });
+}
+
+/// Measure the three public vapor pressure outputs using one fresh calculator.
+///
+/// :param request: Reviewed VPD input.
+/// :param forbid_output: Whether the output entry trap is enabled.
+/// :return: JSON object with pressures and deficit in kilopascals.
+std::string run_vpd(const VpdRequest& request, bool forbid_output) {
+    if (forbid_output) throw GeometryTrap{};
+    VaporPressureDeficitCalculator tool;
+    tool.setTemperature(request.temperature_k, TemperatureUnits::Kelvin);
+    tool.setRelativeHumidity(request.rh_pct, FractionUnits::Percent);
+    tool.runCalculation();
+    return encode_result({
+        {"actual_vp", tool.getActualVaporPressure(PressureUnits::KiloPascal)},
+        {"saturated_vp", tool.getSaturatedVaporPressure(PressureUnits::KiloPascal)},
+        {"vpd", tool.getVaporPressureDeficit(PressureUnits::KiloPascal)},
+    });
+}
+}
+
+int main(int argc, char** argv) {
+    std::setlocale(LC_ALL, "C");
+    if (argc != 3 && argc != 4) return 64;
+    const bool forbid = argc == 4 && std::string(argv[3]) == "--forbid-upstream";
+    const bool forbid_geometry = argc == 4 && std::string(argv[3]) == "--forbid-geometry";
+    if (argc == 4 && !forbid && !forbid_geometry) return 64;
+    std::ifstream input(argv[1], std::ios::binary);
+    std::ofstream output(argv[2], std::ios::binary);
+    if (!input || !output) return 66;
+    std::set<std::string> ids;
+    std::map<std::string,std::unique_ptr<Session>> sessions;
+    std::string line;
+    while (std::getline(input, line)) {
+        std::string id;
+        bool entered = false;
+        bool geometry_entered = false;
+        try {
+            if (line.size() > 65536) throw std::runtime_error("line_too_long");
+            const auto object = Parser(line).parse();
+            if (object.count("id") && object.at("id").kind == Value::String) id = object.at("id").text;
+            const auto operation_field = object.find("operation");
+            const std::string operation = operation_field != object.end() && operation_field->second.kind == Value::String
+                ? operation_field->second.text : "";
+            std::string result;
+            if (operation == "crown") {
+                const auto request = validate_crown(object);
+                enter_upstream(id, ids, forbid, entered);
+                result = run_crown(request, forbid_geometry, geometry_entered);
+            } else if (operation == "fine_dead_fuel_moisture") {
+                const auto request = validate_fine_dead_fuel_moisture(object);
+                enter_upstream(id, ids, forbid, entered);
+                result = run_fine_dead_fuel_moisture(request, forbid_geometry);
+            } else if (operation == "fire_size") {
+                const FireSizeRequest request = validate_fire_size(object);
+                enter_upstream(id, ids, forbid, entered);
+                result = run_fire_size(request, forbid_geometry, geometry_entered);
+            } else if (operation == "ignite") {
+                const IgniteRequest request = validate_ignite(object);
+                enter_upstream(id, ids, forbid, entered);
+                result = run_ignite(request, forbid_geometry);
+            } else if (operation == "mortality") {
+                const MortalityRequest request = validate_mortality(object);
+                enter_upstream(id, ids, forbid, entered);
+                result = run_mortality(request, forbid_geometry);
+            } else if (operation == "safety") {
+                const SafetyRequest request = validate_safety(object);
+                enter_upstream(id, ids, forbid, entered);
+                result = run_safety(request, forbid_geometry);
+            } else if (operation == "slope_tool") {
+                const SlopeToolRequest request = validate_slope_tool(object);
+                enter_upstream(id, ids, forbid, entered);
+                result = run_slope_tool(request, forbid_geometry);
+            } else if (operation == "spot_surface") {
+                const SpotRequest request = validate_spot(object);
+                enter_upstream(id, ids, forbid, entered);
+                result = run_spot(request, forbid_geometry);
+            } else if (operation == "units") {
+                const UnitsRequest request = validate_units(object);
+                enter_upstream(id, ids, forbid, entered);
+                result = run_units(request, forbid_geometry);
+            } else if (operation == "vapor_pressure_deficit") {
+                const VpdRequest request = validate_vpd(object);
+                enter_upstream(id, ids, forbid, entered);
+                result = run_vpd(request, forbid_geometry);
+            } else {
+                const Request request = validate(object);
+                enter_upstream(request.id, ids, forbid, entered);
+                std::unique_ptr<Session> fresh;
+                auto& session = request.session.empty() ? fresh : sessions[request.session];
+                result = run(request, forbid_geometry, geometry_entered, session);
+            }
+            const bool report_output_entries = operation == "crown" || operation == "fine_dead_fuel_moisture"
+                || operation == "ignite" || operation == "mortality"
+                || operation == "safety" || operation == "slope_tool" || operation == "spot_surface"
+                || operation == "units" || operation == "vapor_pressure_deficit";
+            output << "{\"id\":" << encode(id) << ",\"status\":\"ok\",\"upstream_entries\":1,"
+                   << (report_output_entries ? "\"output_entries\"" : "\"geometry_entries\"")
+                   << ':' << (operation == "crown" ? static_cast<int>(geometry_entered) : 1)
+                   << ",\"output\":" << result << "}\n";
+        } catch (const UpstreamTrap&) {
+            std::cerr << "UPSTREAM_ENTRY_BLOCKED\n";
+            return 86;
+        } catch (const Unavailable&) {
+            output << "{\"id\":" << encode(id) << ",\"status\":\"unavailable\",\"upstream_entries\":1,\"geometry_entries\":0,\"finding\":\"F-013\"}\n";
+        } catch (const GeometryTrap&) {
+            std::cerr << "GEOMETRY_ENTRY_BLOCKED\n";
+            return 87;
+        } catch (const std::exception& error) {
+            // IDs are schema-limited for accepted rows; encode also escapes rejected strings.
+            output << "{\"id\":" << (id.empty() ? "null" : encode(id))
+                   << ",\"status\":\"rejected\",\"upstream_entries\":" << (entered ? 1 : 0)
+                   << ",\"error\":" << encode(error.what()) << "}\n";
+            if (entered) return 70;
+        }
+    }
+    output.flush();
+    const bool flush_failed = !output;
+    output.close();
+    return input.bad() || flush_failed || !output ? 74 : 0;
+}

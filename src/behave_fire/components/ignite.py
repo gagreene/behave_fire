@@ -2,7 +2,9 @@
 ignite.py — Vectorized Ignition Probability (§13.3)
 
 Implements fuel temperature adjustment and probability-of-ignition calculations
-for both firebrand and lightning ignition sources.
+for firebrand ignition. The legacy lightning calculation remains available
+for compatibility and emits DeprecationWarning; upstream removed it because
+its scientific basis is no longer considered reliable.
 
 Public API
 ----------
@@ -34,8 +36,9 @@ Charge types:
     2: unknown (weighted average of negative and positive)
 """
 
+import warnings
+
 import numpy as np
-from typing import Union
 
 # Lightning coefficient table — shape (8, 4): [a_pos, b_pos, a_neg, b_neg]
 # Each row corresponds to one of the 8 fuel bed types (index 0–7).
@@ -55,32 +58,10 @@ _CC_NEG,   _CC_POS   = 0.2, 0.9     # conditional prob given neg / pos charge
 _FREQ_NEG, _FREQ_POS = 0.723, 0.277  # historical frequency of neg / pos strikes
 
 
-def calculate_fuel_temperature(
-        air_temp_f: Union[float, np.ndarray],
-        sun_shade_fraction: Union[float, np.ndarray]
-) -> np.ndarray:
-    """
-    Fuel temperature adjustment (Rothermel 1983).
-
-    Fuel exposed to direct sun is warmer than air temperature; shaded fuel
-    approaches air temperature.  The adjustment ranges from +25°F (full sun)
-    to +5°F (full shade).
-
-    :param air_temp_f: Air temperature (°F) (*S) or scalar.
-    :param sun_shade_fraction: Shade fraction (0 = full sun, 1 = full shade)
-        (*S) or scalar.
-    :return: (*S) ndarray — fuel temperature (°F).
-    """
-    t = np.asarray(air_temp_f,         dtype=float)
-    s = np.asarray(sun_shade_fraction, dtype=float)
-    # Adjustment: +25°F at full sun, decreasing linearly to +5°F at full shade
-    return t + (25.0 - 20.0 * s)
-
-
 def calculate_firebrand_ignition_probability(
-        air_temp_f: Union[float, np.ndarray],
-        sun_shade_fraction: Union[float, np.ndarray],
-        moisture_1h_fraction: Union[float, np.ndarray]
+        air_temp_f: float | np.ndarray,
+        sun_shade_fraction: float | np.ndarray,
+        moisture_1h_fraction: float | np.ndarray
 ) -> np.ndarray:
     """
     Probability of ignition from a glowing firebrand (Rothermel & Rinehart 1983).
@@ -114,14 +95,40 @@ def calculate_firebrand_ignition_probability(
     )
 
 
+def calculate_fuel_temperature(
+        air_temp_f: float | np.ndarray,
+        sun_shade_fraction: float | np.ndarray
+) -> np.ndarray:
+    """
+    Fuel temperature adjustment (Rothermel 1983).
+
+    Fuel exposed to direct sun is warmer than air temperature; shaded fuel
+    approaches air temperature.  The adjustment ranges from +25°F (full sun)
+    to +5°F (full shade).
+
+    :param air_temp_f: Air temperature (°F) (*S) or scalar.
+    :param sun_shade_fraction: Shade fraction (0 = full sun, 1 = full shade)
+        (*S) or scalar.
+    :return: (*S) ndarray — fuel temperature (°F).
+    """
+    t = np.asarray(air_temp_f,         dtype=float)
+    s = np.asarray(sun_shade_fraction, dtype=float)
+    # Adjustment: +25°F at full sun, decreasing linearly to +5°F at full shade
+    return t + (25.0 - 20.0 * s)
+
+
 def calculate_lightning_ignition_probability(
-        fuel_bed_type_grid: Union[int, np.ndarray],
-        moisture_100h_fraction: Union[float, np.ndarray],
-        duff_depth_inches: Union[float, np.ndarray],
+        fuel_bed_type_grid: int | np.ndarray,
+        moisture_100h_fraction: float | np.ndarray,
+        duff_depth_inches: float | np.ndarray,
         charge_type: int
 ) -> np.ndarray:
     """
     Probability of ignition from a lightning strike (Latham 1991).
+
+    Deprecated: upstream Behave removed this model because its scientific
+    basis is no longer considered reliable. Retained for compatibility only;
+    firebrand ignition remains supported.
 
     Different equation forms are used for each fuel bed type:
     - Types 0, 1, 2, 7: exponential in moisture
@@ -139,6 +146,13 @@ def calculate_lightning_ignition_probability(
         0 = negative, 1 = positive, 2 = unknown (frequency-weighted average).
     :return: (*S) ndarray — probability of ignition [0, 1].
     """
+    warnings.warn(
+        "Lightning ignition probability is deprecated: upstream Behave removed "
+        "this model because its scientific basis is no longer considered reliable. "
+        "Retained for compatibility only.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
     ft  = np.clip(np.asarray(fuel_bed_type_grid, dtype=np.int32), 0, 7)
     # Convert fraction → percent, cap at 40%
     m   = np.minimum(np.asarray(moisture_100h_fraction, dtype=float) * 100.0, 40.0)

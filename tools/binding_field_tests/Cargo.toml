@@ -1,0 +1,11 @@
+[package]
+name = "behave-binding-field-tests"
+version = "0.0.0"
+edition = "2021"
+rust-version = "1.78"
+publish = false
+
+[workspace]
+
+[dependencies]
+behave-fire = { path = "../../rust/crates/behave-fire" }

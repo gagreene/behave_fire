@@ -2,24 +2,31 @@
 FuelModels component for managing fuel model data.
 Provides access to standard NFFL fuel models and custom fuel models.
 
-All standard fuel model data is a direct translation of fuelModels.cpp.
+Standard fuel model data follows fuelModels.cpp at firelab/behave f3b2943.
+Metric model moisture-of-extinction percentages are stored as fractions here.
   - fuel_bed_depth      : feet
   - moisture_of_extinction_dead : fraction (e.g. 0.25, not 25)
   - heat_of_combustion_* : BTU/lb
-  - dead_1h/10h/100h, live_herb/woody : lbs/ft²  (using f = 2000/43560)
+  - dead_1h/10h/100h, live_herb/woody : lbs/ft² (converted from tons/acre or tonnes/ha)
   - savr_1h, savr_live_herb, savr_live_woody : ft²/ft³
   - is_dynamic, is_reserved, is_defined : bool
 """
 
 try:
     from .behave_units import (
-        LengthUnits, FractionUnits, HeatOfCombustionUnits,
-        LoadingUnits, SurfaceAreaToVolumeUnits,
+        FractionUnits,
+        HeatOfCombustionUnits,
+        LengthUnits,
+        LoadingUnits,
+        SurfaceAreaToVolumeUnits,
     )
 except ImportError:
     from behave_units import (
-        LengthUnits, FractionUnits, HeatOfCombustionUnits,
-        LoadingUnits, SurfaceAreaToVolumeUnits,
+        FractionUnits,
+        HeatOfCombustionUnits,
+        LengthUnits,
+        LoadingUnits,
+        SurfaceAreaToVolumeUnits,
     )
 
 
@@ -29,6 +36,12 @@ class FuelModels:
     Direct Python translation of C++ FuelModels class.
     """
 
+    def __contains__(self, fuel_model_number):
+        return fuel_model_number in self.fuel_models_
+
+    def __getitem__(self, fuel_model_number):
+        return self.fuel_models_[fuel_model_number]
+
     def __init__(self):
         self.fuel_models_ = {}
         self._initialize_standard_fuel_models()
@@ -36,10 +49,15 @@ class FuelModels:
     # ------------------------------------------------------------------
     def _initialize_standard_fuel_models(self):
         """
-        Populate every standard fuel model record, mirroring
-        FuelModels::populateFuelModels() in fuelModels.cpp exactly.
+        Populate standard fuel records with upstream units and fractional moisture.
         """
         f = 2000.0 / 43560.0  # tons/acre -> lbs/ft²
+
+        # Metric V-, M-, and F-models: match firelab/behave f3b2943.
+        meters_to_feet = 1.0 / 0.3048
+        tonnes_ha_to_lb_ft2 = (1000.0 / 0.45359237) / (10000.0 / (0.3048 * 0.3048))
+        kj_kg_to_btu_lb = 0.429592
+        savr_m_to_ft = 0.3048
 
         def rec(number, code, name,
                 depth, moe, hoc_d, hoc_l,
@@ -144,7 +162,8 @@ class FuelModels:
             1.0, 0.10, 8000, 8000,
             0, 0, 0, 0, 0, 1500, 1500, 1500, False)
         # 94–95 reserved then given records
-        reserved(94); reserved(95)
+        reserved(94)
+        reserved(95)
         rec(94, "NB4", "Future standard non-burnable [94]",
             1.0, 0.10, 8000, 8000,
             0, 0, 0, 0, 0, 1500, 1500, 1500, False)
@@ -201,14 +220,14 @@ class FuelModels:
         # official firelab/behave C++ source (fuelModels.cpp, commit 618a751 "add new
         # fuel models") — inconsistent with every other model's fraction convention;
         # corrected here to 0.24.
-        rec(110, "V-Hb", "Short Gass, < 0.5 m (Dynamic)",
-            0.35, 0.24, 19000, 19000,
-            0.3*f, 0, 0, 1.2*f, 0,
-            6000, 6000, 6000, True)
+        rec(110, "V-Hb", "Short Grass, < 0.5 m (Dynamic)",
+            0.35*meters_to_feet, 0.24, 19000*kj_kg_to_btu_lb, 19000*kj_kg_to_btu_lb,
+            0.3*tonnes_ha_to_lb_ft2, 0, 0, 1.2*tonnes_ha_to_lb_ft2, 0,
+            6000*savr_m_to_ft, 6000*savr_m_to_ft, 6000*savr_m_to_ft, True)
         rec(111, "V-Ha", "Tall Grass, > 0.5 m (Dynamic)",
-            0.6, 0.24, 19000, 19000,
-            0.5*f, 0.1*f, 0, 2.5*f, 0.3*f,
-            4000, 6000, 4000, True)
+            0.6*meters_to_feet, 0.24, 19000*kj_kg_to_btu_lb, 19000*kj_kg_to_btu_lb,
+            0.5*tonnes_ha_to_lb_ft2, 0.1*tonnes_ha_to_lb_ft2, 0, 2.5*tonnes_ha_to_lb_ft2, 0.3*tonnes_ha_to_lb_ft2,
+            4000*savr_m_to_ft, 6000*savr_m_to_ft, 4000*savr_m_to_ft, True)
         # 112 reserved
         reserved(112)
         # 113–119 available for custom grass models
@@ -245,31 +264,31 @@ class FuelModels:
         rec(142, "SH2", "Moderate load, dry climate shrub (S)",
             1.0, 0.15, 8000, 8000,
             1.35*f, 2.4*f, 0.75*f, 0, 3.85*f,
-            2000, 1800, 1600, True)
+            2000, 1800, 1600, False)
         rec(143, "SH3", "Moderate load, humid climate shrub (S)",
             2.4, 0.40, 8000, 8000,
             0.45*f, 3.0*f, 0, 0, 6.2*f,
-            1600, 1800, 1400, True)
+            1600, 1800, 1400, False)
         rec(144, "SH4", "Low load, humid climate timber-shrub (S)",
             3.0, 0.30, 8000, 8000,
             0.85*f, 1.15*f, 0.2*f, 0, 2.55*f,
-            2000, 1800, 1600, True)
+            2000, 1800, 1600, False)
         rec(145, "SH5", "High load, dry climate shrub (S)",
             6.0, 0.15, 8000, 8000,
             3.6*f, 2.1*f, 0, 0, 2.9*f,
-            750, 1800, 1600, True)
+            750, 1800, 1600, False)
         rec(146, "SH6", "Low load, humid climate shrub (S)",
             2.0, 0.30, 8000, 8000,
             2.9*f, 1.45*f, 0, 0, 1.4*f,
-            750, 1800, 1600, True)
+            750, 1800, 1600, False)
         rec(147, "SH7", "Very high load, dry climate shrub (S)",
             6.0, 0.15, 8000, 8000,
             3.5*f, 5.3*f, 2.2*f, 0, 3.4*f,
-            750, 1800, 1600, True)
+            750, 1800, 1600, False)
         rec(148, "SH8", "High load, humid climate shrub (S)",
             3.0, 0.40, 8000, 8000,
             2.05*f, 3.4*f, 0.85*f, 0, 4.35*f,
-            750, 1800, 1600, True)
+            750, 1800, 1600, False)
         rec(149, "SH9", "Very high load, humid climate shrub (D)",
             4.4, 0.40, 8000, 8000,
             4.5*f, 2.45*f, 0, 1.55*f, 7.0*f,
@@ -286,11 +305,11 @@ class FuelModels:
             640, 2200, 640, False)
         rec(152, "SCAL16", "North Slope Ceanothus with Moderate Load Grass (Static)",
             6, 0.15, 8000, 8000,
-            2.2*f, 4.8*f, 1.8*f, 3.0*f, 2.8*f,
+            2.25*f, 4.8*f, 1.8*f, 3.0*f, 2.8*f,
             500, 1500, 500, False)
         rec(153, "SCAL14", "Manzanita/Scrub Oak with Low Load Grass (Static)",
             3, 0.15, 9211, 9211,
-            3.0*f, 4.5*f, 1.1*f, 1.4*f, 5.0*f,
+            3.0*f, 4.5*f, 1.05*f, 1.45*f, 5.0*f,
             350, 1500, 250, False)
         rec(154, "SCAL18", "Coastal Sage/Buckwheat Scrub with Low Load Grass (Static)",
             3, 0.25, 9200, 9200,
@@ -298,25 +317,25 @@ class FuelModels:
             640, 1500, 640, False)
         rec(155, "V-MH",
             "Short Green Shrub < 1 m With Grass, Discontinuous (< 1 m) often discontinuous and with grass (Dynamic)",
-            0.55, 0.25, 19500, 19500,
-            1.0*f, 1.0*f, 0, 1.5*f, 5.5*f,
-            4500, 8500, 4000, True)
+            0.55*meters_to_feet, 0.25, 19500*kj_kg_to_btu_lb, 19500*kj_kg_to_btu_lb,
+            1.0*tonnes_ha_to_lb_ft2, 1.0*tonnes_ha_to_lb_ft2, 0, 1.5*tonnes_ha_to_lb_ft2, 5.5*tonnes_ha_to_lb_ft2,
+            4500*savr_m_to_ft, 8500*savr_m_to_ft, 4000*savr_m_to_ft, True)
         rec(156, "V-MMb", "Short Shrub < 1 m, Low Dead Fraction and/or Thick Foliage (Static)",
-            0.9, 0.20, 20500, 20500,
-            4.0*f, 0.5*f, 0, 0, 7.0*f,
-            3000, 3000, 3000, False)
+            0.9*meters_to_feet, 0.20, 20500*kj_kg_to_btu_lb, 20500*kj_kg_to_btu_lb,
+            4.0*tonnes_ha_to_lb_ft2, 0.5*tonnes_ha_to_lb_ft2, 0, 0, 7.0*tonnes_ha_to_lb_ft2,
+            3000*savr_m_to_ft, 3000*savr_m_to_ft, 3000*savr_m_to_ft, False)
         rec(157, "V-MAb", "Short Shrub < 1 m, High Dead Fraction and/or Thin Fuel (Static)",
-            0.5, 0.35, 21000, 21000,
-            6.0*f, 0.5*f, 0, 0, 7.5*f,
-            4500, 4500, 4500, False)
+            0.5*meters_to_feet, 0.35, 21000*kj_kg_to_btu_lb, 21000*kj_kg_to_btu_lb,
+            6.0*tonnes_ha_to_lb_ft2, 0.5*tonnes_ha_to_lb_ft2, 0, 0, 7.5*tonnes_ha_to_lb_ft2,
+            4500*savr_m_to_ft, 4500*savr_m_to_ft, 4500*savr_m_to_ft, False)
         rec(158, "V-MMa", "Tall Shrub > 1 m, Low Dead Fraction and/or Thick Foliage (Static)",
-            1.7, 0.24, 20500, 20500,
-            6.0*f, 4.0*f, 0, 0, 13.0*f,
-            2500, 3000, 3000, False)
+            1.7*meters_to_feet, 0.24, 20500*kj_kg_to_btu_lb, 20500*kj_kg_to_btu_lb,
+            6.0*tonnes_ha_to_lb_ft2, 4.0*tonnes_ha_to_lb_ft2, 0, 0, 13.0*tonnes_ha_to_lb_ft2,
+            2500*savr_m_to_ft, 3000*savr_m_to_ft, 3000*savr_m_to_ft, False)
         rec(159, "V-MAa", "Tall Shrub > 1 m, High Dead Fraction and/or Thin Fuel (Static)",
-            1.05, 0.35, 21000, 21000,
-            9.5*f, 2.5*f, 0, 0, 14.5*f,
-            3500, 4000, 4000, False)
+            1.05*meters_to_feet, 0.35, 21000*kj_kg_to_btu_lb, 21000*kj_kg_to_btu_lb,
+            9.5*tonnes_ha_to_lb_ft2, 2.5*tonnes_ha_to_lb_ft2, 0, 0, 14.5*tonnes_ha_to_lb_ft2,
+            3500*savr_m_to_ft, 4000*savr_m_to_ft, 4000*savr_m_to_ft, False)
 
         # ---- Timber and understory (TU) ---------------------------------
         # 160 available for custom TU model
@@ -327,7 +346,7 @@ class FuelModels:
         rec(162, "TU2", "Moderate load, humid climate timber-shrub (S)",
             1.0, 0.30, 8000, 8000,
             0.95*f, 1.8*f, 1.25*f, 0, 0.2*f,
-            2000, 1800, 1600, True)
+            2000, 1800, 1600, False)
         rec(163, "TU3", "Moderate load, humid climate timber-grass-shrub (D)",
             1.3, 0.30, 8000, 8000,
             1.1*f, 0.15*f, 0.25*f, 0.65*f, 1.1*f,
@@ -335,40 +354,41 @@ class FuelModels:
         rec(164, "TU4", "Dwarf conifer understory (S)",
             0.5, 0.12, 8000, 8000,
             4.5*f, 0, 0, 0, 2.0*f,
-            2300, 1800, 2000, True)
+            2300, 1800, 2000, False)
         rec(165, "TU5", "Very high load, dry climate timber-shrub (S)",
             1.0, 0.25, 8000, 8000,
             4.0*f, 4.0*f, 3.0*f, 0, 3.0*f,
-            1500, 1800, 750, True)
+            1500, 1800, 750, False)
         rec(166, "M-EUCd",
             "Discontinuous Litter Eucalyptus Plantation, With or Without Shrub Understory (Static)",
-            0.4, 0.26, 21000, 20500,
-            1.37*f, 2.89*f, 1.59*f, 0, 1.84*f,
-            4500, 4200, 5000, False)
+            0.4*meters_to_feet, 0.26, 21000*kj_kg_to_btu_lb, 20500*kj_kg_to_btu_lb,
+            1.37*tonnes_ha_to_lb_ft2, 2.89*tonnes_ha_to_lb_ft2, 1.59*tonnes_ha_to_lb_ft2, 0, 1.84*tonnes_ha_to_lb_ft2,
+            4500*savr_m_to_ft, 4200*savr_m_to_ft, 5000*savr_m_to_ft, False)
         rec(167, "M-H", "Deciduous or Conifer Litter, Shrub and Herb Understory",
-            0.1, 0.30, 20500, 20500,
-            2.71*f, 1.0*f, 0, 0.66*f, 0.1*f,
-            5500, 8000, 4500, True)
+            0.1*meters_to_feet, 0.30, 20500*kj_kg_to_btu_lb, 20500*kj_kg_to_btu_lb,
+            2.71*tonnes_ha_to_lb_ft2, 1.0*tonnes_ha_to_lb_ft2, 0, 0.66*tonnes_ha_to_lb_ft2, 0.1*tonnes_ha_to_lb_ft2,
+            5500*savr_m_to_ft, 8000*savr_m_to_ft, 4500*savr_m_to_ft, True)
         rec(168, "M-F", "Deciduous or Conifer Litter, Shrub and Fern Understory (Dynamic)",
-            0.3, 0.35, 19500, 19500,
-            4.5*f, 1.5*f, 0.5*f, 2.35*f, 0.48*f,
-            6000, 8000, 4500, True)
+            0.3*meters_to_feet, 0.35, 19500*kj_kg_to_btu_lb, 19500*kj_kg_to_btu_lb,
+            4.5*tonnes_ha_to_lb_ft2, 1.5*tonnes_ha_to_lb_ft2, 0.5*tonnes_ha_to_lb_ft2, 2.35*tonnes_ha_to_lb_ft2, 0.48
+            *tonnes_ha_to_lb_ft2,
+            6000*savr_m_to_ft, 8000*savr_m_to_ft, 4500*savr_m_to_ft, True)
         rec(169, "M-CAD", "Deciduous Litter, Shrub Understory (Static)",
-            0.63, 0.30, 20000, 20000,
-            4.54*f, 1.87*f, 0.61*f, 0, 9.08*f,
-            6000, 4921, 5000, False)
+            0.63*meters_to_feet, 0.30, 20000*kj_kg_to_btu_lb, 20000*kj_kg_to_btu_lb,
+            4.54*tonnes_ha_to_lb_ft2, 1.87*tonnes_ha_to_lb_ft2, 0.61*tonnes_ha_to_lb_ft2, 0, 9.08*tonnes_ha_to_lb_ft2,
+            6000*savr_m_to_ft, 4921*savr_m_to_ft, 5000*savr_m_to_ft, False)
         rec(170, "M-ESC", "Sclerophyll Broadleaf Litter, Shrub Understory (Static)",
-            0.5, 0.27, 20500, 20500,
-            5.65*f, 1.5*f, 0.48*f, 0, 7.89*f,
-            5000, 4921, 5500, False)
+            0.5*meters_to_feet, 0.27, 20500*kj_kg_to_btu_lb, 20500*kj_kg_to_btu_lb,
+            5.65*tonnes_ha_to_lb_ft2, 1.5*tonnes_ha_to_lb_ft2, 0.48*tonnes_ha_to_lb_ft2, 0, 7.89*tonnes_ha_to_lb_ft2,
+            5000*savr_m_to_ft, 4921*savr_m_to_ft, 5500*savr_m_to_ft, False)
         rec(171, "M-PIN", "Medium-Long Needle Pine Litter, Shrub Understory (Static)",
-            0.5, 0.40, 20500, 21500,
-            7.21*f, 3.0*f, 0, 0, 6.89*f,
-            5500, 5500, 6000, False)
+            0.5*meters_to_feet, 0.40, 20500*kj_kg_to_btu_lb, 21500*kj_kg_to_btu_lb,
+            7.21*tonnes_ha_to_lb_ft2, 3.0*tonnes_ha_to_lb_ft2, 0, 0, 6.89*tonnes_ha_to_lb_ft2,
+            5500*savr_m_to_ft, 5500*savr_m_to_ft, 6000*savr_m_to_ft, False)
         rec(172, "M-EUC", "Eucalyptus Litter, Shrub Understory (Static)",
-            0.64, 0.32, 21000, 21000,
-            8.37*f, 3.81*f, 0, 0, 4.51*f,
-            4700, 4200, 5000, False)
+            0.64*meters_to_feet, 0.32, 21000*kj_kg_to_btu_lb, 21000*kj_kg_to_btu_lb,
+            8.37*tonnes_ha_to_lb_ft2, 3.81*tonnes_ha_to_lb_ft2, 0, 0, 4.51*tonnes_ha_to_lb_ft2,
+            4700*savr_m_to_ft, 4200*savr_m_to_ft, 5000*savr_m_to_ft, False)
         # 173–179 available for custom TU models
 
         # ---- Timber and litter (TL) -------------------------------------
@@ -376,55 +396,55 @@ class FuelModels:
         rec(181, "TL1", "Low load, compact conifer litter (S)",
             0.2, 0.30, 8000, 8000,
             1.0*f, 2.2*f, 3.6*f, 0, 0,
-            2000, 1800, 1600, True)
+            2000, 1800, 1600, False)
         rec(182, "TL2", "Low load broadleaf litter (S)",
             0.2, 0.25, 8000, 8000,
             1.4*f, 2.3*f, 2.2*f, 0, 0,
-            2000, 1800, 1600, True)
+            2000, 1800, 1600, False)
         rec(183, "TL3", "Moderate load conifer litter (S)",
             0.3, 0.20, 8000, 8000,
             0.5*f, 2.2*f, 2.8*f, 0, 0,
-            2000, 1800, 1600, True)
+            2000, 1800, 1600, False)
         rec(184, "TL4", "Small downed logs (S)",
             0.4, 0.25, 8000, 8000,
             0.5*f, 1.5*f, 4.2*f, 0, 0,
-            2000, 1800, 1600, True)
+            2000, 1800, 1600, False)
         rec(185, "TL5", "High load conifer litter (S)",
             0.6, 0.25, 8000, 8000,
             1.15*f, 2.5*f, 4.4*f, 0, 0,
-            2000, 1800, 160, True)          # savr_lw = 160, matches C++ exactly
+            2000, 1800, 160, False)          # savr_lw = 160, matches C++ exactly
         rec(186, "TL6", "High load broadleaf litter (S)",
             0.3, 0.25, 8000, 8000,
             2.4*f, 1.2*f, 1.2*f, 0, 0,
-            2000, 1800, 1600, True)
+            2000, 1800, 1600, False)
         rec(187, "TL7", "Large downed logs (S)",
             0.4, 0.25, 8000, 8000,
             0.3*f, 1.4*f, 8.1*f, 0, 0,
-            2000, 1800, 1600, True)
+            2000, 1800, 1600, False)
         rec(188, "TL8", "Long-needle litter (S)",
             0.3, 0.35, 8000, 8000,
             5.8*f, 1.4*f, 1.1*f, 0, 0,
-            1800, 1800, 1600, True)
+            1800, 1800, 1600, False)
         rec(189, "TL9", "Very high load broadleaf litter (S)",
             0.6, 0.35, 8000, 8000,
             6.65*f, 3.30*f, 4.15*f, 0, 0,
-            1800, 1800, 1600, True)
+            1800, 1800, 1600, False)
         rec(190, "F-RAC", "Very Compact Litter, Short Needle Conifers (Static)",
-            0.05, 0.28, 20500, 20500,
-            3.75*f, 2.0*f, 1.0*f, 0, 1.18*f,
-            6500, 4921, 4500, False)
+            0.05*meters_to_feet, 0.28, 20500*kj_kg_to_btu_lb, 20500*kj_kg_to_btu_lb,
+            3.75*tonnes_ha_to_lb_ft2, 2.0*tonnes_ha_to_lb_ft2, 1.0*tonnes_ha_to_lb_ft2, 0, 1.18*tonnes_ha_to_lb_ft2,
+            6500*savr_m_to_ft, 4921*savr_m_to_ft, 4500*savr_m_to_ft, False)
         rec(191, "F-FOL", "Compact Litter, Deciduous or Evergreen Foliage (Static)",
-            0.15, 0.25, 20500, 20500,
-            2.67*f, 1.27*f, 0.69*f, 0, 1.16*f,
-            4500, 5500, 5000, False)
+            0.15*meters_to_feet, 0.25, 20500*kj_kg_to_btu_lb, 20500*kj_kg_to_btu_lb,
+            2.67*tonnes_ha_to_lb_ft2, 1.27*tonnes_ha_to_lb_ft2, 0.69*tonnes_ha_to_lb_ft2, 0, 1.16*tonnes_ha_to_lb_ft2,
+            4500*savr_m_to_ft, 5500*savr_m_to_ft, 5000*savr_m_to_ft, False)
         rec(192, "F-PIN", "Litter from Medium-Long Needle Pine Trees (Static)",
-            0.1, 0.45, 20500, 21500,
-            6.5*f, 1.5*f, 0, 0, 0,
-            5500, 5500, 5500, False)
+            0.1*meters_to_feet, 0.45, 20500*kj_kg_to_btu_lb, 21500*kj_kg_to_btu_lb,
+            6.5*tonnes_ha_to_lb_ft2, 1.5*tonnes_ha_to_lb_ft2, 0, 0, 0,
+            5500*savr_m_to_ft, 5500*savr_m_to_ft, 5500*savr_m_to_ft, False)
         rec(193, "F-EUC", "Pure Eucalyptus Litter, No Understory (Static)",
-            0.32, 0.26, 21000, 20500,
-            4.63*f, 2.96*f, 1.27*f, 0, 1.12*f,
-            4200, 4200, 5000, False)
+            0.32*meters_to_feet, 0.26, 21000*kj_kg_to_btu_lb, 20500*kj_kg_to_btu_lb,
+            4.63*tonnes_ha_to_lb_ft2, 2.96*tonnes_ha_to_lb_ft2, 1.27*tonnes_ha_to_lb_ft2, 0, 1.12*tonnes_ha_to_lb_ft2,
+            4200*savr_m_to_ft, 4200*savr_m_to_ft, 5000*savr_m_to_ft, False)
         # 194–199 available for custom TL models
 
         # ---- Slash and blowdown (SB) ------------------------------------
@@ -432,131 +452,22 @@ class FuelModels:
         rec(201, "SB1", "Low load activity fuel (S)",
             1.0, 0.25, 8000, 8000,
             1.5*f, 3.0*f, 11.0*f, 0, 0,
-            2000, 1800, 1600, True)
+            2000, 1800, 1600, False)
         rec(202, "SB2", "Moderate load activity or low load blowdown (S)",
             1.0, 0.25, 8000, 8000,
             4.5*f, 4.25*f, 4.0*f, 0, 0,
-            2000, 1800, 1600, True)
+            2000, 1800, 1600, False)
         rec(203, "SB3", "High load activity fuel or moderate load blowdown (S)",
             1.2, 0.25, 8000, 8000,
             5.5*f, 2.75*f, 3.0*f, 0, 0,
-            2000, 1800, 1600, True)
+            2000, 1800, 1600, False)
         rec(204, "SB4", "High load blowdown (S)",
             2.7, 0.25, 8000, 8000,
             5.25*f, 3.5*f, 5.25*f, 0, 0,
-            2000, 1800, 1600, True)
+            2000, 1800, 1600, False)
         # 205–210 reserved
         for i in range(205, 211):
             reserved(i)
-        # 211–219 available for custom SB models
-        # 220–256 available for custom models
-
-    # ------------------------------------------------------------------
-    def get(self, fuel_model_number):
-        """Dictionary-like get; returns None if not found."""
-        return self.fuel_models_.get(fuel_model_number)
-
-    def get_fuel_model(self, fuel_model_number):
-        """Alias for get()."""
-        return self.fuel_models_.get(fuel_model_number)
-
-    def __getitem__(self, fuel_model_number):
-        return self.fuel_models_[fuel_model_number]
-
-    def __contains__(self, fuel_model_number):
-        return fuel_model_number in self.fuel_models_
-
-    # ------------------------------------------------------------------
-    def set_custom_fuel_model(self, fuel_model_number, code, name,
-                              fuel_bed_depth, length_units,
-                              moisture_of_extinction_dead, moisture_units,
-                              heat_of_combustion_dead, heat_of_combustion_live,
-                              heat_of_combustion_units,
-                              fuel_load_one_hour, fuel_load_ten_hour,
-                              fuel_load_hundred_hour,
-                              fuel_load_live_herbaceous, fuel_load_live_woody,
-                              loading_units,
-                              savr_one_hour, savr_live_herbaceous, savr_live_woody,
-                              savr_units, is_dynamic):
-        """
-        Set a custom fuel model.  Mirrors C++ setCustomFuelModel():
-
-        - Reserved slots cannot be overwritten (returns ``False``).
-        - All numeric inputs are converted to internal base units before storage
-          using the supplied unit enum arguments.
-        - Base units are: depth=ft, moisture=fraction, heat=BTU/lb,
-          load=lb/ft², SAVR=ft²/ft³.
-
-        :param fuel_model_number: Fuel model slot number to populate.
-        :param code: Three-character fuel model code (truncated to 3 chars).
-        :param name: Descriptive fuel model name.
-        :param fuel_bed_depth: Fuel bed depth, in ``length_units``.
-        :param length_units: ``LengthUnitsEnum`` int for ``fuel_bed_depth``
-            (e.g. ``LengthUnits.LengthUnitsEnum.Feet``).
-        :param moisture_of_extinction_dead: Dead fuel moisture of extinction,
-            in ``moisture_units``.
-        :param moisture_units: ``FractionUnitsEnum`` int for moisture
-            (0=Fraction, 1=Percent).
-        :param heat_of_combustion_dead: Heat of combustion for dead fuel,
-            in ``heat_of_combustion_units``.
-        :param heat_of_combustion_live: Heat of combustion for live fuel,
-            in ``heat_of_combustion_units``.
-        :param heat_of_combustion_units: ``HeatOfCombustionUnitsEnum`` int
-            (0=BtusPerPound, 1=KilojoulesPerKilogram).
-        :param fuel_load_one_hour: 1-hr dead fuel load, in ``loading_units``.
-        :param fuel_load_ten_hour: 10-hr dead fuel load, in ``loading_units``.
-        :param fuel_load_hundred_hour: 100-hr dead fuel load, in ``loading_units``.
-        :param fuel_load_live_herbaceous: Live herbaceous fuel load, in ``loading_units``.
-        :param fuel_load_live_woody: Live woody fuel load, in ``loading_units``.
-        :param loading_units: ``LoadingUnitsEnum`` int for all five fuel loads
-            (e.g. ``LoadingUnits.LoadingUnitsEnum.TonsPerAcre``).
-        :param savr_one_hour: 1-hr dead SAVR, in ``savr_units``.
-        :param savr_live_herbaceous: Live herbaceous SAVR, in ``savr_units``.
-        :param savr_live_woody: Live woody SAVR, in ``savr_units``.
-        :param savr_units: ``SurfaceAreaToVolumeUnitsEnum`` int for all three
-            SAVRs (e.g. ``SurfaceAreaToVolumeUnits.SurfaceAreaToVolumeUnitsEnum.SquareFeetOverCubicFeet``).
-        :param is_dynamic: ``True`` if the model uses dynamic live/dead
-            load transfer.
-        :return: ``True`` on success; ``False`` if the slot is reserved.
-        """
-        existing = self.fuel_models_.get(fuel_model_number)
-        if existing and existing.get('is_reserved', False):
-            return False
-
-        # --- Convert all inputs to internal base units before storage ---
-        fuel_bed_depth             = LengthUnits.toBaseUnits(fuel_bed_depth, length_units)
-        moisture_of_extinction_dead = FractionUnits.toBaseUnits(moisture_of_extinction_dead, moisture_units)
-        heat_of_combustion_dead    = HeatOfCombustionUnits.toBaseUnits(heat_of_combustion_dead, heat_of_combustion_units)
-        heat_of_combustion_live    = HeatOfCombustionUnits.toBaseUnits(heat_of_combustion_live, heat_of_combustion_units)
-        fuel_load_one_hour         = LoadingUnits.toBaseUnits(fuel_load_one_hour,         loading_units)
-        fuel_load_ten_hour         = LoadingUnits.toBaseUnits(fuel_load_ten_hour,         loading_units)
-        fuel_load_hundred_hour     = LoadingUnits.toBaseUnits(fuel_load_hundred_hour,     loading_units)
-        fuel_load_live_herbaceous  = LoadingUnits.toBaseUnits(fuel_load_live_herbaceous,  loading_units)
-        fuel_load_live_woody       = LoadingUnits.toBaseUnits(fuel_load_live_woody,       loading_units)
-        savr_one_hour              = SurfaceAreaToVolumeUnits.toBaseUnits(savr_one_hour,          savr_units)
-        savr_live_herbaceous       = SurfaceAreaToVolumeUnits.toBaseUnits(savr_live_herbaceous,   savr_units)
-        savr_live_woody            = SurfaceAreaToVolumeUnits.toBaseUnits(savr_live_woody,        savr_units)
-
-        self.fuel_models_[fuel_model_number] = {
-            'code': code[:3],
-            'name': name,
-            'fuel_bed_depth':              fuel_bed_depth,
-            'moisture_of_extinction_dead': moisture_of_extinction_dead,
-            'heat_of_combustion_dead':     heat_of_combustion_dead,
-            'heat_of_combustion_live':     heat_of_combustion_live,
-            'dead_1h':    fuel_load_one_hour,
-            'dead_10h':   fuel_load_ten_hour,
-            'dead_100h':  fuel_load_hundred_hour,
-            'live_herb':  fuel_load_live_herbaceous,
-            'live_woody': fuel_load_live_woody,
-            'savr_1h':        savr_one_hour,
-            'savr_live_herb': savr_live_herbaceous,
-            'savr_live_woody':savr_live_woody,
-            'is_dynamic':  is_dynamic,
-            'is_reserved': False,
-            'is_defined':  True,
-        }
-        return True
 
     def clear_custom_fuel_model(self, fuel_model_number):
         """Clear a custom (non-reserved) fuel model.  Mirrors C++ clearCustomFuelModel()."""
@@ -568,117 +479,16 @@ class FuelModels:
         return True
 
     # ------------------------------------------------------------------
+    def get(self, fuel_model_number):
+        """Dictionary-like get; returns None if not found."""
+        return self.fuel_models_.get(fuel_model_number)
+
+    # ------------------------------------------------------------------
     # Getter methods matching C++ API
     # ------------------------------------------------------------------
     def get_fuel_code(self, fuel_model_number):
         m = self.get(fuel_model_number)
         return m['code'] if m else ''
-
-    def get_fuel_name(self, fuel_model_number):
-        m = self.get(fuel_model_number)
-        return m['name'] if m else ''
-
-    def get_fuelbed_depth(self, fuel_model_number, length_units=None):
-        """
-        Return fuel bed depth.
-
-        :param fuel_model_number: Fuel model number to look up.
-        :param length_units: ``LengthUnitsEnum`` int for output units.
-            ``None`` (default) returns the raw value in feet (base unit).
-        :return: Fuel bed depth in ``length_units``, or 0.0 if not found.
-        """
-        m = self.get(fuel_model_number)
-        if not m:
-            return 0.0
-        val = m.get('fuel_bed_depth', 0.0)
-        if length_units is not None:
-            return LengthUnits.fromBaseUnits(val, length_units)
-        return val
-
-    def get_moisture_of_extinction_dead(self, fuel_model_number, moisture_units=None):
-        """
-        Return dead fuel moisture of extinction.
-
-        :param fuel_model_number: Fuel model number to look up.
-        :param moisture_units: ``FractionUnitsEnum`` int for output units.
-            ``None`` (default) returns the raw value as a fraction (base unit).
-        :return: Moisture of extinction in ``moisture_units``, or 0.0 if not found.
-        """
-        m = self.get(fuel_model_number)
-        if not m:
-            return 0.0
-        val = m.get('moisture_of_extinction_dead', 0.0)
-        if moisture_units is not None:
-            return FractionUnits.fromBaseUnits(val, moisture_units)
-        return val
-
-    def get_heat_of_combustion_dead(self, fuel_model_number, heat_units=None):
-        """
-        Return heat of combustion for dead fuel.
-
-        :param fuel_model_number: Fuel model number to look up.
-        :param heat_units: ``HeatOfCombustionUnitsEnum`` int for output units.
-            ``None`` (default) returns the raw value in BTU/lb (base unit).
-        :return: Heat of combustion in ``heat_units``, or 0.0 if not found.
-        """
-        m = self.get(fuel_model_number)
-        if not m:
-            return 0.0
-        val = m.get('heat_of_combustion_dead', 0.0)
-        if heat_units is not None:
-            return HeatOfCombustionUnits.fromBaseUnits(val, heat_units)
-        return val
-
-    def get_heat_of_combustion_live(self, fuel_model_number, heat_units=None):
-        """
-        Return heat of combustion for live fuel.
-
-        :param fuel_model_number: Fuel model number to look up.
-        :param heat_units: ``HeatOfCombustionUnitsEnum`` int for output units.
-            ``None`` (default) returns the raw value in BTU/lb (base unit).
-        :return: Heat of combustion in ``heat_units``, or 0.0 if not found.
-        """
-        m = self.get(fuel_model_number)
-        if not m:
-            return 0.0
-        val = m.get('heat_of_combustion_live', 0.0)
-        if heat_units is not None:
-            return HeatOfCombustionUnits.fromBaseUnits(val, heat_units)
-        return val
-
-    def get_fuel_load_one_hour(self, fuel_model_number, loading_units=None):
-        """
-        Return 1-hr dead fuel load.
-
-        :param fuel_model_number: Fuel model number to look up.
-        :param loading_units: ``LoadingUnitsEnum`` int for output units.
-            ``None`` (default) returns the raw value in lb/ft² (base unit).
-        :return: 1-hr fuel load in ``loading_units``, or 0.0 if not found.
-        """
-        m = self.get(fuel_model_number)
-        if not m:
-            return 0.0
-        val = m.get('dead_1h', 0.0)
-        if loading_units is not None:
-            return LoadingUnits.fromBaseUnits(val, loading_units)
-        return val
-
-    def get_fuel_load_ten_hour(self, fuel_model_number, loading_units=None):
-        """
-        Return 10-hr dead fuel load.
-
-        :param fuel_model_number: Fuel model number to look up.
-        :param loading_units: ``LoadingUnitsEnum`` int for output units.
-            ``None`` (default) returns the raw value in lb/ft² (base unit).
-        :return: 10-hr fuel load in ``loading_units``, or 0.0 if not found.
-        """
-        m = self.get(fuel_model_number)
-        if not m:
-            return 0.0
-        val = m.get('dead_10h', 0.0)
-        if loading_units is not None:
-            return LoadingUnits.fromBaseUnits(val, loading_units)
-        return val
 
     def get_fuel_load_hundred_hour(self, fuel_model_number, loading_units=None):
         """
@@ -731,21 +541,118 @@ class FuelModels:
             return LoadingUnits.fromBaseUnits(val, loading_units)
         return val
 
-    def get_savr_one_hour(self, fuel_model_number, savr_units=None):
+    def get_fuel_load_one_hour(self, fuel_model_number, loading_units=None):
         """
-        Return 1-hr dead fuel surface-area-to-volume ratio (SAVR).
+        Return 1-hr dead fuel load.
 
         :param fuel_model_number: Fuel model number to look up.
-        :param savr_units: ``SurfaceAreaToVolumeUnitsEnum`` int for output units.
-            ``None`` (default) returns the raw value in ft²/ft³ (base unit).
-        :return: 1-hr SAVR in ``savr_units``, or 0.0 if not found.
+        :param loading_units: ``LoadingUnitsEnum`` int for output units.
+            ``None`` (default) returns the raw value in lb/ft² (base unit).
+        :return: 1-hr fuel load in ``loading_units``, or 0.0 if not found.
         """
         m = self.get(fuel_model_number)
         if not m:
             return 0.0
-        val = m.get('savr_1h', 0.0)
-        if savr_units is not None:
-            return SurfaceAreaToVolumeUnits.fromBaseUnits(val, savr_units)
+        val = m.get('dead_1h', 0.0)
+        if loading_units is not None:
+            return LoadingUnits.fromBaseUnits(val, loading_units)
+        return val
+
+    def get_fuel_load_ten_hour(self, fuel_model_number, loading_units=None):
+        """
+        Return 10-hr dead fuel load.
+
+        :param fuel_model_number: Fuel model number to look up.
+        :param loading_units: ``LoadingUnitsEnum`` int for output units.
+            ``None`` (default) returns the raw value in lb/ft² (base unit).
+        :return: 10-hr fuel load in ``loading_units``, or 0.0 if not found.
+        """
+        m = self.get(fuel_model_number)
+        if not m:
+            return 0.0
+        val = m.get('dead_10h', 0.0)
+        if loading_units is not None:
+            return LoadingUnits.fromBaseUnits(val, loading_units)
+        return val
+
+    def get_fuel_model(self, fuel_model_number):
+        """Alias for get()."""
+        return self.fuel_models_.get(fuel_model_number)
+
+    def get_fuel_name(self, fuel_model_number):
+        m = self.get(fuel_model_number)
+        return m['name'] if m else ''
+
+    def get_fuelbed_depth(self, fuel_model_number, length_units=None):
+        """
+        Return fuel bed depth.
+
+        :param fuel_model_number: Fuel model number to look up.
+        :param length_units: ``LengthUnitsEnum`` int for output units.
+            ``None`` (default) returns the raw value in feet (base unit).
+        :return: Fuel bed depth in ``length_units``, or 0.0 if not found.
+        """
+        m = self.get(fuel_model_number)
+        if not m:
+            return 0.0
+        val = m.get('fuel_bed_depth', 0.0)
+        if length_units is not None:
+            return LengthUnits.fromBaseUnits(val, length_units)
+        return val
+
+    def get_heat_of_combustion_dead(self, fuel_model_number, heat_units=None):
+        """
+        Return heat of combustion for dead fuel.
+
+        :param fuel_model_number: Fuel model number to look up.
+        :param heat_units: ``HeatOfCombustionUnitsEnum`` int for output units.
+            ``None`` (default) returns the raw value in BTU/lb (base unit).
+        :return: Heat of combustion in ``heat_units``, or 0.0 if not found.
+        """
+        m = self.get(fuel_model_number)
+        if not m:
+            return 0.0
+        val = m.get('heat_of_combustion_dead', 0.0)
+        if heat_units is not None:
+            return HeatOfCombustionUnits.fromBaseUnits(val, heat_units)
+        return val
+
+    def get_heat_of_combustion_live(self, fuel_model_number, heat_units=None):
+        """
+        Return heat of combustion for live fuel.
+
+        :param fuel_model_number: Fuel model number to look up.
+        :param heat_units: ``HeatOfCombustionUnitsEnum`` int for output units.
+            ``None`` (default) returns the raw value in BTU/lb (base unit).
+        :return: Heat of combustion in ``heat_units``, or 0.0 if not found.
+        """
+        m = self.get(fuel_model_number)
+        if not m:
+            return 0.0
+        val = m.get('heat_of_combustion_live', 0.0)
+        if heat_units is not None:
+            return HeatOfCombustionUnits.fromBaseUnits(val, heat_units)
+        return val
+
+    def get_is_dynamic(self, fuel_model_number):
+        m = self.get(fuel_model_number)
+        return m.get('is_dynamic', False) if m else False
+
+    def get_moisture_of_extinction_dead(self, fuel_model_number, moisture_units=None):
+        """
+        Return dead fuel moisture of extinction.
+
+        :param fuel_model_number: Fuel model number to look up.
+        :param moisture_units: ``FractionUnitsEnum`` int for output units.
+            ``None`` (default) returns the raw value as a fraction (base unit).
+        :return: Moisture of extinction in ``moisture_units``, or 0.0 if not found.
+        """
+        m = self.get(fuel_model_number)
+        if not m:
+            return 0.0
+        val = m.get('moisture_of_extinction_dead', 0.0)
+        if moisture_units is not None:
+            return FractionUnits.fromBaseUnits(val, moisture_units)
         return val
 
     def get_savr_live_herbaceous(self, fuel_model_number, savr_units=None):
@@ -782,17 +689,22 @@ class FuelModels:
             return SurfaceAreaToVolumeUnits.fromBaseUnits(val, savr_units)
         return val
 
-    def get_is_dynamic(self, fuel_model_number):
-        m = self.get(fuel_model_number)
-        return m.get('is_dynamic', False) if m else False
+    def get_savr_one_hour(self, fuel_model_number, savr_units=None):
+        """
+        Return 1-hr dead fuel surface-area-to-volume ratio (SAVR).
 
-    def is_fuel_model_defined(self, fuel_model_number):
+        :param fuel_model_number: Fuel model number to look up.
+        :param savr_units: ``SurfaceAreaToVolumeUnitsEnum`` int for output units.
+            ``None`` (default) returns the raw value in ft²/ft³ (base unit).
+        :return: 1-hr SAVR in ``savr_units``, or 0.0 if not found.
+        """
         m = self.get(fuel_model_number)
-        return m.get('is_defined', False) if m else False
-
-    def is_fuel_model_reserved(self, fuel_model_number):
-        m = self.get(fuel_model_number)
-        return m.get('is_reserved', False) if m else False
+        if not m:
+            return 0.0
+        val = m.get('savr_1h', 0.0)
+        if savr_units is not None:
+            return SurfaceAreaToVolumeUnits.fromBaseUnits(val, savr_units)
+        return val
 
     def is_all_fuel_load_zero(self, fuel_model_number):
         m = self.get(fuel_model_number)
@@ -800,3 +712,116 @@ class FuelModels:
             return True
         return not any(m.get(k, 0.0) for k in
                        ('dead_1h', 'dead_10h', 'dead_100h', 'live_herb', 'live_woody'))
+
+    def is_fuel_model_defined(self, fuel_model_number):
+        """Test definition only within the official C++ fuel identifier range.
+
+        :param fuel_model_number: Fuel identifier to inspect.
+        :return: False outside 1..256, otherwise the stored definition flag.
+        """
+        if not 1 <= fuel_model_number <= 256:
+            return False
+        m = self.get(fuel_model_number)
+        return m.get('is_defined', False) if m else False
+
+    def is_fuel_model_reserved(self, fuel_model_number):
+        m = self.get(fuel_model_number)
+        return m.get('is_reserved', False) if m else False
+
+    # ------------------------------------------------------------------
+    def set_custom_fuel_model(self, fuel_model_number, code, name,
+                              fuel_bed_depth, length_units,
+                              moisture_of_extinction_dead, moisture_units,
+                              heat_of_combustion_dead, heat_of_combustion_live,
+                              heat_of_combustion_units,
+                              fuel_load_one_hour, fuel_load_ten_hour,
+                              fuel_load_hundred_hour,
+                              fuel_load_live_herbaceous, fuel_load_live_woody,
+                              loading_units,
+                              savr_one_hour, savr_live_herbaceous, savr_live_woody,
+                              savr_units, is_dynamic):
+        """
+        Set a custom fuel model.  Mirrors C++ setCustomFuelModel():
+
+        - Reserved slots cannot be overwritten (returns ``False``).
+        - All numeric inputs are converted to internal base units before storage
+          using the supplied unit enum arguments.
+        - Base units are: depth=ft, moisture=fraction, heat=BTU/lb,
+          load=lb/ft², SAVR=ft²/ft³.
+
+        :param fuel_model_number: Fuel model slot number to populate.
+        :param code: Three-character fuel model code (truncated to 3 chars).
+        :param name: Descriptive fuel model name.
+        :param fuel_bed_depth: Fuel bed depth, in ``length_units``.
+        :param length_units: ``LengthUnitsEnum`` int for ``fuel_bed_depth``
+            (e.g. ``LengthUnits.LengthUnitsEnum.Feet``).
+        :param moisture_of_extinction_dead: Dead fuel moisture of extinction,
+            in ``moisture_units``.
+        :param moisture_units: ``FractionUnitsEnum`` int for moisture
+            (0=Fraction, 1=Percent).
+        :param heat_of_combustion_dead: Heat of combustion for dead fuel,
+            in ``heat_of_combustion_units``.
+        :param heat_of_combustion_live: Heat of combustion for live fuel,
+            in ``heat_of_combustion_units``.
+        :param heat_of_combustion_units: ``HeatOfCombustionUnitsEnum`` int
+            (0=BtusPerPound, 1=KilojoulesPerKilogram).
+        :param fuel_load_one_hour: 1-hr dead fuel load, in ``loading_units``.
+        :param fuel_load_ten_hour: 10-hr dead fuel load, in ``loading_units``.
+        :param fuel_load_hundred_hour: 100-hr dead fuel load, in ``loading_units``.
+        :param fuel_load_live_herbaceous: Live herbaceous fuel load, in ``loading_units``.
+        :param fuel_load_live_woody: Live woody fuel load, in ``loading_units``.
+        :param loading_units: ``LoadingUnitsEnum`` int for all five fuel loads
+            (e.g. ``LoadingUnits.LoadingUnitsEnum.TonsPerAcre``).
+        :param savr_one_hour: 1-hr dead SAVR, in ``savr_units``.
+        :param savr_live_herbaceous: Live herbaceous SAVR, in ``savr_units``.
+        :param savr_live_woody: Live woody SAVR, in ``savr_units``.
+        :param savr_units: ``SurfaceAreaToVolumeUnitsEnum`` int for all three
+            SAVRs (e.g. ``SurfaceAreaToVolumeUnits.SurfaceAreaToVolumeUnitsEnum.SquareFeetOverCubicFeet``).
+        :param is_dynamic: ``True`` if the model uses dynamic live/dead
+            load transfer.
+        :return: ``True`` on success; ``False`` for reserved slots or IDs outside 1..256.
+        """
+        if not 1 <= fuel_model_number <= 256:
+            return False
+        existing = self.fuel_models_.get(fuel_model_number)
+        if existing and existing.get('is_reserved', False):
+            return False
+
+        # --- Convert all inputs to internal base units before storage ---
+        fuel_bed_depth             = LengthUnits.toBaseUnits(fuel_bed_depth, length_units)
+        moisture_of_extinction_dead = FractionUnits.toBaseUnits(moisture_of_extinction_dead, moisture_units)
+        heat_of_combustion_dead    = HeatOfCombustionUnits.toBaseUnits(heat_of_combustion_dead, heat_of_combustion_units
+        )
+        heat_of_combustion_live    = HeatOfCombustionUnits.toBaseUnits(heat_of_combustion_live, heat_of_combustion_units
+        )
+        fuel_load_one_hour         = LoadingUnits.toBaseUnits(fuel_load_one_hour,         loading_units)
+        fuel_load_ten_hour         = LoadingUnits.toBaseUnits(fuel_load_ten_hour,         loading_units)
+        fuel_load_hundred_hour     = LoadingUnits.toBaseUnits(fuel_load_hundred_hour,     loading_units)
+        fuel_load_live_herbaceous  = LoadingUnits.toBaseUnits(fuel_load_live_herbaceous,  loading_units)
+        fuel_load_live_woody       = LoadingUnits.toBaseUnits(fuel_load_live_woody,       loading_units)
+        savr_one_hour              = SurfaceAreaToVolumeUnits.toBaseUnits(savr_one_hour,          savr_units)
+        savr_live_herbaceous       = SurfaceAreaToVolumeUnits.toBaseUnits(savr_live_herbaceous,   savr_units)
+        savr_live_woody            = SurfaceAreaToVolumeUnits.toBaseUnits(savr_live_woody,        savr_units)
+
+        self.fuel_models_[fuel_model_number] = {
+            'code': code[:3],
+            'name': name,
+            'fuel_bed_depth':              fuel_bed_depth,
+            'moisture_of_extinction_dead': moisture_of_extinction_dead,
+            'heat_of_combustion_dead':     heat_of_combustion_dead,
+            'heat_of_combustion_live':     heat_of_combustion_live,
+            'dead_1h':    fuel_load_one_hour,
+            'dead_10h':   fuel_load_ten_hour,
+            'dead_100h':  fuel_load_hundred_hour,
+            'live_herb':  fuel_load_live_herbaceous,
+            'live_woody': fuel_load_live_woody,
+            'savr_1h':        savr_one_hour,
+            'savr_live_herb': savr_live_herbaceous,
+            'savr_live_woody':savr_live_woody,
+            'is_dynamic':  is_dynamic,
+            'is_reserved': False,
+            'is_defined':  True,
+        }
+        return True
+        # 211–219 available for custom SB models
+        # 220–256 available for custom models

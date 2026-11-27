@@ -1,0 +1,54 @@
+{
+  "available": 6,
+  "build": {
+    "compiler": {
+      "id": "MSVC",
+      "version": "19.50.35728.0"
+    },
+    "driver_sha256": "9d93426d04be12a678a707f8c6b35e86905557bf6bb1a689909e86e1c8b312fd",
+    "flags": [
+      "/O2",
+      "/fp:precise",
+      "/D_USE_MATH_DEFINES=",
+      "/EHsc"
+    ],
+    "machine": "AMD64",
+    "overlay_sha256": {
+      "CMakeLists.txt": "705a4dcb5a86fc3bf0e7c4679f0feb40b44f44faaad4aa7235bfd1efa093781d",
+      "driver.cpp": "16bd2d292fdcabea9ea4fe6fca832a3fc18c530043b0b3db5e1c32bf0ad69389",
+      "probe.cpp": "48338485a0b6f3fd64d0b3542a56c996e043d5e77e9887f0189101c1065df015"
+    },
+    "pinned_checkout_clean": true,
+    "platform": "Windows-10-10.0.19044-SP0",
+    "upstream_sources": {
+      "src/behave/behaveUnits.cpp": "420149652f256ac89219470fbccde305221221b3cf4548f3ccb5ae4c58ba1a8e",
+      "src/behave/behaveUnits.h": "2840c9f1cec8bb9770601d0da54831a3daa9628188355ed17eb63b565431bf3c",
+      "src/behave/canopy_coefficient_table.cpp": "fa8730fdf629a08132fc627f2a5bf1e03c2f2067b448db8eb780399a050d56e3",
+      "src/behave/canopy_coefficient_table.h": "d17af2581e0ba8b0eb752ac92c6852c271b859ab064fd1ef117a2202b6d7a1cb",
+      "src/behave/mortality.cpp": "4dd1f05e919b43e57992e4f80d1aa2c7280839c366334ec3ec7493c586fff7b0",
+      "src/behave/mortality.h": "5c01d307d9438da95e341a38ae041cf508b94aada123c05bd446ee25a6349711",
+      "src/behave/mortality_equation_table.cpp": "44d17a64cabb6e65b90f7c564e9877c9ca323da0993afbd35a859a4e8088ed52",
+      "src/behave/mortality_equation_table.h": "3f6e74f9a9cd7552cf23347152edf70b1fd3e5bd1248184fb536a9a84a17e614",
+      "src/behave/mortality_inputs.cpp": "9503d415b3a9b30826c7f63cabebef5fb8bd8eb4f4574b25c669c4a2f765996e",
+      "src/behave/mortality_inputs.h": "6cd86b4101998b65cc0da738ecb5a5f8d4846b5edac6e75b6d18ca85bedefa99",
+      "src/behave/species_master_table.cpp": "bc02eb254f05b81cc55f32fd073ae5303433d7ddb69ee97e20179e4dd3031231",
+      "src/behave/species_master_table.h": "8b646d45ba555865ed908fd925898d66bc68b3dbc771e5988b816e34d70d4ab4"
+    }
+  },
+  "case_count": 6,
+  "command": "behave_ref_driver cases.jsonl results.jsonl",
+  "fields": [
+    "scorch_height_ft"
+  ],
+  "files": {
+    "cases.jsonl": "07268db26a450cbeab2f9780fbbce0800f49005520ce22429549f7a070a0981c",
+    "results.jsonl": "c2a06f1fb3b1c7f46a47b2081d34e412f1135a84ff86610a97e583c9c178a066",
+    "schema.json": "d4024bc1ac533410a575e5bf076be8889854b4f4b2bbb610e08c11270fe33a50"
+  },
+  "generator": "behave_ref_driver guarded mortality operation",
+  "operation": "mortality",
+  "result_count": 6,
+  "schema_version": 1,
+  "seed": null,
+  "upstream_sha": "3ca33d5b919d4253b411bfb6464b4c872dda6fc9"
+}

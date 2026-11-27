@@ -19,8 +19,12 @@ Key design points
     - Active             -> crown ROS/HPUA/FLI/FL
 """
 
+
 import numpy as np
-from typing import Union
+
+from .behave_units import SpeedUnits, speed_from_base
+from .fuel_models_array import _fuel_model_indices
+from .surface import calculate_flame_length, calculate_twenty_foot_wind_speed
 
 # ---------------------------------------------------------------------------
 # FM10 physical constants - pre-computed from the fuel model, used to
@@ -66,25 +70,41 @@ def _load_surface_modules():
 
 
 def assign_final_crown_fire_behavior(
-        is_surface_fire: Union[bool, np.ndarray],
-        is_passive_crown: Union[bool, np.ndarray],
-        surface_ros: Union[float, np.ndarray],
-        surface_hpua: Union[float, np.ndarray],
-        surface_fli: Union[float, np.ndarray],
-        passive_ros: Union[float, np.ndarray],
-        passive_hpua: Union[float, np.ndarray],
-        passive_fli: Union[float, np.ndarray],
-        passive_fl: Union[float, np.ndarray],
-        crown_ros: Union[float, np.ndarray],
-        crown_hpua: Union[float, np.ndarray],
-        crown_fli: Union[float, np.ndarray],
-        crown_fl: Union[float, np.ndarray],
+        is_surface_fire: bool | np.ndarray,
+        is_passive_crown: bool | np.ndarray,
+        surface_ros: float | np.ndarray,
+        surface_hpua: float | np.ndarray,
+        surface_fli: float | np.ndarray,
+        passive_ros: float | np.ndarray,
+        passive_hpua: float | np.ndarray,
+        passive_fli: float | np.ndarray,
+        passive_fl: float | np.ndarray,
+        crown_ros: float | np.ndarray,
+        crown_hpua: float | np.ndarray,
+        crown_fli: float | np.ndarray,
+        crown_fl: float | np.ndarray,
 ) -> dict:
-    """Step 12 - assign final head fire behavior based on fire type."""
+    """Select the final head fire behavior for each fire type.
+
+    :param is_surface_fire: Mask for Surface and Conditional Crown Fire.
+    :param is_passive_crown: Mask for Torching.
+    :param surface_ros: Surface spread rate in ft/min.
+    :param surface_hpua: Surface heat per unit area in BTU/ft^2.
+    :param surface_fli: Surface fireline intensity in BTU/ft/s.
+    :param passive_ros: Passive crown spread rate in ft/min.
+    :param passive_hpua: Passive crown heat per unit area in BTU/ft^2.
+    :param passive_fli: Passive crown fireline intensity in BTU/ft/s.
+    :param passive_fl: Passive crown flame length in feet.
+    :param crown_ros: Active crown spread rate in ft/min.
+    :param crown_hpua: Active crown heat per unit area in BTU/ft^2.
+    :param crown_fli: Active crown fireline intensity in BTU/ft/s.
+    :param crown_fl: Active crown flame length in feet.
+    :return: Selected spread rate, heat per unit area, intensity, and flame length.
+    """
     final_ros = np.where(is_surface_fire, surface_ros, np.where(is_passive_crown, passive_ros, crown_ros))
     final_hpua = np.where(is_surface_fire, surface_hpua, np.where(is_passive_crown, passive_hpua, crown_hpua))
     final_fli = np.where(is_surface_fire, surface_fli, np.where(is_passive_crown, passive_fli, crown_fli))
-    surface_fl = np.where(surface_fli > 0.0, 0.2 * surface_fli ** (2.0 / 3.0), 0.0)
+    surface_fl = calculate_flame_length(surface_fli)
     final_fl = np.where(is_surface_fire, surface_fl, np.where(is_passive_crown, passive_fl, crown_fl))
     return {
         'final_spread_rate': final_ros,
@@ -95,7 +115,7 @@ def assign_final_crown_fire_behavior(
 
 
 def calculate_critical_crown_fire_spread_rate(
-        canopy_bulk_density: Union[float, np.ndarray],
+        canopy_bulk_density: float | np.ndarray,
 ) -> np.ndarray:
     """Step 5 - calculate Van Wagner critical active crown spread rate."""
     cbd_kg_m3 = canopy_bulk_density * 16.0185
@@ -104,8 +124,8 @@ def calculate_critical_crown_fire_spread_rate(
 
 
 def calculate_critical_surface_fireline_intensity(
-        canopy_base_height: Union[float, np.ndarray],
-        moisture_foliar: Union[float, np.ndarray],
+        canopy_base_height: float | np.ndarray,
+        moisture_foliar: float | np.ndarray,
 ) -> np.ndarray:
     """Step 4 - calculate Van Wagner critical surface fireline intensity."""
     mf_pct_safe = np.maximum(moisture_foliar, 30.0)
@@ -115,10 +135,10 @@ def calculate_critical_surface_fireline_intensity(
 
 
 def calculate_crown_fire_ratios(
-        surface_fli: Union[float, np.ndarray],
-        crown_ros: Union[float, np.ndarray],
-        critical_surface_fli: Union[float, np.ndarray],
-        critical_crown_ros: Union[float, np.ndarray],
+        surface_fli: float | np.ndarray,
+        crown_ros: float | np.ndarray,
+        critical_surface_fli: float | np.ndarray,
+        critical_crown_ros: float | np.ndarray,
 ) -> dict:
     """Step 6 - calculate transition and active crown fire ratios."""
     safe_crit_fli = np.where(critical_surface_fli > 1e-7, critical_surface_fli, 1.0)
@@ -140,9 +160,9 @@ def calculate_crown_fire_ratios(
 
 
 def calculate_crown_fraction_burned(
-        surface_ros: Union[float, np.ndarray],
-        surface_critical_ros: Union[float, np.ndarray],
-        crowning_surface_ros: Union[float, np.ndarray],
+        surface_ros: float | np.ndarray,
+        surface_critical_ros: float | np.ndarray,
+        crowning_surface_ros: float | np.ndarray,
 ) -> np.ndarray:
     """Step 10 - calculate Scott & Reinhardt crown fraction burned."""
     cfb_denom = crowning_surface_ros - surface_critical_ros
@@ -155,11 +175,11 @@ def calculate_crown_fraction_burned(
 
 
 def calculate_crown_heat_and_intensity(
-        surface_hpua: Union[float, np.ndarray],
-        crown_ros: Union[float, np.ndarray],
-        canopy_base_height: Union[float, np.ndarray],
-        canopy_height: Union[float, np.ndarray],
-        canopy_bulk_density: Union[float, np.ndarray],
+        surface_hpua: float | np.ndarray,
+        crown_ros: float | np.ndarray,
+        canopy_base_height: float | np.ndarray,
+        canopy_height: float | np.ndarray,
+        canopy_bulk_density: float | np.ndarray,
 ) -> dict:
     """
     Step 3 - calculate canopy load, crown heat per unit area, active crown
@@ -183,24 +203,37 @@ def calculate_crown_heat_and_intensity(
 def calculate_crown_surface_fire(
         lut: dict,
         S: tuple,
-        m1h: Union[float, np.ndarray],
-        m10h: Union[float, np.ndarray],
-        m100h: Union[float, np.ndarray],
-        mlh: Union[float, np.ndarray],
-        mlw: Union[float, np.ndarray],
-        wind_speed: Union[float, np.ndarray],
+        m1h: float | np.ndarray,
+        m10h: float | np.ndarray,
+        m100h: float | np.ndarray,
+        mlh: float | np.ndarray,
+        mlw: float | np.ndarray,
+        wind_speed: float | np.ndarray,
         wind_speed_units: int,
-        wind_direction: Union[float, np.ndarray],
+        wind_direction: float | np.ndarray,
         wind_orientation_mode: str,
-        slope_deg: Union[float, np.ndarray],
-        aspect: Union[float, np.ndarray],
-        canopy_height: Union[float, np.ndarray],
+        slope_deg: float | np.ndarray,
+        aspect: float | np.ndarray,
+        canopy_height: float | np.ndarray,
 ) -> dict:
-    """
-    Step 2 - run the crown fuel spread calculation using FM10, WAF=0.4.
+    """Run crown spread with FM10 and compute its length-to-width ratio.
 
-    Returns FM10 particle/intermediate arrays, crown surface results, active
-    crown ROS, and crown length-to-width ratio.
+    :param lut: Fuel property lookup arrays.
+    :param S: Spatial shape.
+    :param m1h: One-hour dead fuel moisture fraction.
+    :param m10h: Ten-hour dead fuel moisture fraction.
+    :param m100h: Hundred-hour dead fuel moisture fraction.
+    :param mlh: Live herbaceous fuel moisture fraction.
+    :param mlw: Live woody fuel moisture fraction.
+    :param wind_speed: Open wind speed at 20 ft, in ``wind_speed_units``.
+    :param wind_speed_units: SpeedUnitsEnum value.
+    :param wind_direction: Wind direction in degrees.
+    :param wind_orientation_mode: Reference direction for the wind angle.
+    :param slope_deg: Slope in degrees.
+    :param aspect: Downslope bearing in degrees.
+    :param canopy_height: Canopy height in feet.
+    :return: FM10 intermediates, crown surface results, active crown spread
+        rate, and crown length-to-width ratio.
     """
     (
         build_particle_arrays,
@@ -240,8 +273,13 @@ def calculate_crown_surface_fire(
     )
 
     crown_ros = 3.34 * crown_surface['spread_rate']
-    crown_ews_mph = crown_surface['effective_wind_speed']
-    crown_lwr = np.where(crown_ews_mph > 1e-7, 1.0 + 0.125 * crown_ews_mph, 1.0)
+    # Rothermel (1991), Equation 10 uses open wind at 20 ft.
+    twenty_foot_wind_mph = speed_from_base(
+        calculate_twenty_foot_wind_speed(wind_speed, wind_speed_units),
+        SpeedUnits.SpeedUnitsEnum.MilesPerHour,
+    )
+    twenty_foot_wind_mph = np.broadcast_to(twenty_foot_wind_mph, crown_ros.shape)
+    crown_lwr = np.where(twenty_foot_wind_mph > 1e-7, 1.0 + 0.125 * twenty_foot_wind_mph, 1.0)
 
     return {
         'p_crown': p_crown,
@@ -254,11 +292,11 @@ def calculate_crown_surface_fire(
 
 
 def calculate_crowning_surface_fire_spread_rate(
-        ri_crown: Union[float, np.ndarray],
+        ri_crown: float | np.ndarray,
         ib_crown: dict,
-        critical_crown_ros: Union[float, np.ndarray],
+        critical_crown_ros: float | np.ndarray,
         S: tuple,
-        canopy_height: Union[float, np.ndarray],
+        canopy_height: float | np.ndarray,
 ) -> np.ndarray:
     """
     Step 9 - calculate R'sa, the surface ROS at which active crown ROS is
@@ -300,11 +338,11 @@ def calculate_crowning_surface_fire_spread_rate(
 
 
 def calculate_passive_crown_fire_behavior(
-        surface_ros: Union[float, np.ndarray],
-        surface_hpua: Union[float, np.ndarray],
-        crown_ros: Union[float, np.ndarray],
-        canopy_hpua: Union[float, np.ndarray],
-        cfb: Union[float, np.ndarray],
+        surface_ros: float | np.ndarray,
+        surface_hpua: float | np.ndarray,
+        crown_ros: float | np.ndarray,
+        canopy_hpua: float | np.ndarray,
+        cfb: float | np.ndarray,
 ) -> dict:
     """Step 11 - calculate passive crown fire spread, HPUA, FLI, and FL."""
     passive_ros = surface_ros + cfb * (crown_ros - surface_ros)
@@ -320,8 +358,8 @@ def calculate_passive_crown_fire_behavior(
 
 
 def calculate_surface_fire_critical_spread_rate(
-        critical_surface_fli: Union[float, np.ndarray],
-        surface_hpua: Union[float, np.ndarray],
+        critical_surface_fli: float | np.ndarray,
+        surface_hpua: float | np.ndarray,
 ) -> np.ndarray:
     """Step 8 - calculate surface ROS at which torching begins."""
     safe_surface_hpua = np.where(surface_hpua > 1e-7, surface_hpua, 1.0)
@@ -329,8 +367,8 @@ def calculate_surface_fire_critical_spread_rate(
 
 
 def classify_crown_fire_type(
-        transition_ratio: Union[float, np.ndarray],
-        active_ratio: Union[float, np.ndarray],
+        transition_ratio: float | np.ndarray,
+        active_ratio: float | np.ndarray,
 ) -> dict:
     """
     Step 7 - classify fire type.
@@ -351,16 +389,16 @@ def classify_crown_fire_type(
 
 
 def coerce_crown_fire_inputs(
-        fuel_model_grid: Union[int, np.ndarray],
-        wind_speed: Union[float, np.ndarray],
-        wind_direction: Union[float, np.ndarray],
-        slope: Union[float, np.ndarray],
+        fuel_model_grid: int | np.ndarray,
+        wind_speed: float | np.ndarray,
+        wind_direction: float | np.ndarray,
+        slope: float | np.ndarray,
         slope_units: int = 0,
-        aspect: Union[float, np.ndarray] = 0.0,
-        canopy_base_height: Union[float, np.ndarray] = 0.0,
-        canopy_height: Union[float, np.ndarray] = 0.0,
-        canopy_bulk_density: Union[float, np.ndarray] = 0.0,
-        moisture_foliar: Union[float, np.ndarray] = 100.0,
+        aspect: float | np.ndarray = 0.0,
+        canopy_base_height: float | np.ndarray = 0.0,
+        canopy_height: float | np.ndarray = 0.0,
+        canopy_bulk_density: float | np.ndarray = 0.0,
+        moisture_foliar: float | np.ndarray = 100.0,
 ) -> dict:
     """
     Step 0 - coerce crown fire spatial inputs to arrays and base units.
@@ -404,23 +442,23 @@ def get_surface_fire_inputs(surface_results: dict) -> dict:
 def run_crown_fire(
         surface_results: dict,
         lut: dict,
-        fuel_model_grid: Union[int, np.ndarray],
-        m1h: Union[float, np.ndarray],
-        m10h: Union[float, np.ndarray],
-        m100h: Union[float, np.ndarray],
-        mlh: Union[float, np.ndarray],
-        mlw: Union[float, np.ndarray],
-        wind_speed: Union[float, np.ndarray],
+        fuel_model_grid: int | np.ndarray,
+        m1h: float | np.ndarray,
+        m10h: float | np.ndarray,
+        m100h: float | np.ndarray,
+        mlh: float | np.ndarray,
+        mlw: float | np.ndarray,
+        wind_speed: float | np.ndarray,
         wind_speed_units: int,
-        wind_direction: Union[float, np.ndarray],
+        wind_direction: float | np.ndarray,
         wind_orientation_mode: str,
-        slope: Union[float, np.ndarray],
+        slope: float | np.ndarray,
         slope_units: int = 0,
-        aspect: Union[float, np.ndarray] = 0.0,
-        canopy_base_height: Union[float, np.ndarray] = 0.0,
-        canopy_height: Union[float, np.ndarray] = 0.0,
-        canopy_bulk_density: Union[float, np.ndarray] = 0.0,
-        moisture_foliar: Union[float, np.ndarray] = 100.0
+        aspect: float | np.ndarray = 0.0,
+        canopy_base_height: float | np.ndarray = 0.0,
+        canopy_height: float | np.ndarray = 0.0,
+        canopy_bulk_density: float | np.ndarray = 0.0,
+        moisture_foliar: float | np.ndarray = 100.0
 ) -> dict:
     """
     Vectorized crown fire calculations.
@@ -430,7 +468,7 @@ def run_crown_fire(
     intermediate component.
     """
     inputs = coerce_crown_fire_inputs(
-        fuel_model_grid=fuel_model_grid,
+        fuel_model_grid=_fuel_model_indices(fuel_model_grid),
         wind_speed=wind_speed,
         wind_direction=wind_direction,
         slope=slope,

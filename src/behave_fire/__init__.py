@@ -1,5 +1,5 @@
 """
-Behave Fire Behavior Model - Python Implementation
+Behave Fire Behavior Model - Python and Rust implementations
 
 This package provides vectorized (NumPy array) fire behavior modeling:
 - Surface fire calculations
@@ -8,25 +8,45 @@ This package provides vectorized (NumPy array) fire behavior modeling:
 - Spot fire prediction
 - Ignition potential assessment
 - Safety zone calculations
+- Support tools
 
-Main entry point: BehaveRun class in behave.py
+Main entry point: the automatic BehaveRun facade in auto.py, which selects the
+Python reference implementation or the native Rust extension (backend="auto",
+"python", or "rust"). Explicit namespaces are behave_fire.python and
+behave_fire.rust. The explicit Python compatibility class remains in behave.py.
 """
 
-from .behave import BehaveRun
+from ._version import get_version as _get_version
+from .auto import BehaveBackendWarning, BehaveRun, available_backends, get_backend
+from .components.behave_units import (
+    AreaUnits,
+    BasalAreaUnits,
+    DensityUnits,
+    FirelineIntensityUnits,
+    FractionUnits,
+    HeatOfCombustionUnits,
+    HeatPerUnitAreaUnits,
+    HeatSinkUnits,
+    HeatSourceAndReactionIntensityUnits,
+    LengthUnits,
+    LoadingUnits,
+    PressureUnits,
+    SlopeUnits,
+    SpeedUnits,
+    SurfaceAreaToVolumeUnits,
+    TemperatureUnits,
+    TimeUnits,
+)
 from .components.fuel_models import FuelModels
 from .components.species_master_table import SpeciesMasterTable
-from .components.behave_units import (
-    AreaUnits, BasalAreaUnits, LengthUnits, LoadingUnits, PressureUnits,
-    SurfaceAreaToVolumeUnits, SpeedUnits, FractionUnits, SlopeUnits,
-    DensityUnits, HeatOfCombustionUnits, HeatSinkUnits, HeatPerUnitAreaUnits,
-    HeatSourceAndReactionIntensityUnits, FirelineIntensityUnits,
-    TemperatureUnits, TimeUnits,
-)
 
-__version__ = "1.0.0b2"
+__version__ = _get_version()
 __author__ = "Behave Development Team"
 __all__ = [
     'BehaveRun',
+    'BehaveBackendWarning',
+    'available_backends',
+    'get_backend',
     'FuelModels',
     'SpeciesMasterTable',
     'AreaUnits',

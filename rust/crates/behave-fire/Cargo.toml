@@ -1,0 +1,18 @@
+[package]
+name = "behave-fire"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+description = "Standalone wildfire fire-behavior calculations"
+license = "MIT AND BSD-3-Clause"
+repository.workspace = true
+readme = "README.md"
+keywords = ["wildfire", "fire-behavior", "forestry", "science"]
+categories = ["science"]
+exclude = ["reference/behave_cpp/**", "reference/behave_cpp_overlay/**"]
+
+[lib]
+name = "behave_fire"
+
+[dev-dependencies]
+serde_json = { version = "=1.0.117", features = ["float_roundtrip"] }

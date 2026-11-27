@@ -1,0 +1,10 @@
+[workspace]
+members = ["crates/behave-fire", "crates/behave-py"]
+default-members = ["crates/behave-fire"]
+resolver = "2"
+
+[workspace.package]
+edition = "2021"
+rust-version = "1.78"
+license = "MIT"
+repository = "https://github.com/gagreene/behave_fire"

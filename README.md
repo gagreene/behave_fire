@@ -1,125 +1,262 @@
 # behave_fire
 
-A pure Python port of the US Forest Service [Behave<sup>7</sup>](https://www.firelab.org/project/behave) fire behavior modeling system. The library targets **100% feature parity** with the C++ reference implementation — same equations, same constant values, and matching method signatures (translated to snake_case). All computation runs on **NumPy arrays**, so it works equally well for scalar values or a 10-million-cell raster.
+[![CI](https://github.com/gagreene/behave_fire/actions/workflows/ci.yml/badge.svg)](https://github.com/gagreene/behave_fire/actions/workflows/ci.yml)
 
----
+behave_fire is an open-source Python and Rust implementation of the US Forest Service [Behave<sup>7</sup>](https://www.firelab.org/project/behave) fire behavior system. The package covers surface fire spread (Rothermel 1972), crown fire initiation and spread, tree mortality, spotting distance, ignition probability, safety zones, and the Behave support tools. The same calls accept a single value or NumPy arrays of any shape, so a whole raster runs as easily as one cell.
 
-## Table of Contents
+The package has two implementations that give the same results within documented tolerances. A native Rust implementation is selected automatically when the compiled extension is installed, as it is with the native wheels for Linux, macOS, and Windows. A NumPy implementation is the behavioral reference and runs anywhere Python and NumPy do. The Rust core is also a standalone crate, `behave-fire`, with no runtime or build dependencies, for use directly from Rust applications. Results are checked against a pinned release of the official Behave C++ code (see [Validation against Behave C++](#validation-against-behave-c)).
 
-1. [Features](#features)
-2. [Project Structure](#project-structure)
-3. [Requirements](#requirements)
-4. [Installation](#installation)
-5. [Quick Start](#quick-start)
-6. [Unit System](#unit-system)
-7. [Components](#components)
-8. [Example — Landscape Fire Behavior](#example--landscape-fire-behavior)
-9. [Running the Tests](#running-the-tests)
-10. [Key Design Notes](#key-design-notes)
+## Contents
 
----
+- [What behave_fire does](#what-behave_fire-does)
+  - [Models and tools](#models-and-tools)
+  - [Validation against Behave C++](#validation-against-behave-c)
+- [How behave_fire is structured](#how-behave_fire-is-structured)
+  - [Calculation backends](#calculation-backends)
+  - [Repository layout](#repository-layout)
+- [How to install behave_fire](#how-to-install-behave_fire)
+  - [Requirements](#requirements)
+  - [Installation](#installation)
+- [How to use behave_fire](#how-to-use-behave_fire)
+  - [Quick start](#quick-start)
+  - [Choosing a backend](#choosing-a-backend)
+  - [Units](#units)
+  - [Components](#components)
+  - [Landscape example](#landscape-example)
+  - [Rust crate and raster engine](#rust-crate-and-raster-engine)
+  - [Performance](#performance)
+  - [Important behavior and limitations](#important-behavior-and-limitations)
+- [How to maintain/contribute to behave_fire](#how-to-maintaincontribute-to-behave_fire)
+  - [Testing](#testing)
+  - [Contributing](#contributing)
+  - [Documentation](#documentation)
+- [References](#references)
+- [License](#license)
 
-## Features
+## What behave_fire does
+
+### Models and tools
 
 | Module | Capability |
 |--------|------------|
 | **Surface fire** | Rothermel (1972) spread model — ROS, flame length, fireline intensity, heat per unit area, backing/flanking spread, fire geometry |
 | **Crown fire** | Rothermel (1991) & Scott–Reinhardt (2005) — transition ratio, active ratio, fire-type classification (surface / torching / conditional / active crown) |
-| **Tree mortality** | Crown scorch (Van Wagner), bole char, and crown damage equations for 300+ species / 9 GACC regions |
+| **Tree mortality** | Crown scorch (with Van Wagner scorch height) and bole char equations for 24 species / 9 GACC regions |
 | **Spotting** | Albini firebrand lofting model for burning piles, surface fires, and torching trees |
-| **Ignition** | Firebrand and lightning ignition probability |
+| **Ignition** | Firebrand ignition probability; deprecated lightning calculation retained for compatibility |
 | **Safety zones** | Minimum separation distance, zone radius, and personnel capacity from radiant heat |
-| **Containment** | Fried & Fried (1995) single-resource Runge-Kutta ODE containment simulation (standalone function) |
 | **Support tools** | Fine dead fuel moisture (Nelson 2000 LUT), slope tool, vapor pressure deficit calculator |
-| **Unit system** | 18 physical-quantity classes with full metric ↔ US-customary conversion |
+| **Unit system** | 17 physical-quantity classes with full metric ↔ US-customary conversion |
+| **Backends** | Python reference, native Rust, and an automatic selector (`python` / `rust` / `auto`) |
+| **Rust crate** | Standalone `behave-fire` core with typed scalar stages, raster columns, stage injection, and tiles |
 
----
+### Validation against Behave C++
 
-## Project Structure
+The pinned-reference check compares both implementations with [Behave `3ca33d5`](https://github.com/firelab/behave/commit/3ca33d5b919d4253b411bfb6464b4c872dda6fc9). Full qualification across GNU, MSVC and all seven native wheel platforms is pending for the corrected fuel tables. Run the check, with `pytest -m cpp_comparison` and the `--include-ignored` Rust tests, when the pinned C++ reference changes; ordinary merges and releases do not repeat it.
+
+- **Surface** compares 583 numbered cases and 139 paired custom controls, including models 152 (SCAL16) and 153 (SCAL14), against pinned C++ outputs with `1e-12` relative and absolute caps.
+- **FireSize, Ignite, and Mortality scorch height** use exact binary64 comparisons for the standalone cases.
+- **Crown:** the six fire-type classifications match exactly. Crown numeric outputs are measured but have no approved comparison policy yet.
+- **Spot, Safety, SlopeTool, fine dead fuel moisture, vapor pressure deficit, and Units:** measured, with no approved comparison policy yet.
+
+The positive-wind standalone FireSize Crown mode is outside these results ([upstream issue #85](https://github.com/firelab/behave/issues/85)). See the [pinned observations and comparison rules](docs/CPP_VALIDATION.md). Lightning ignition remains available only as a deprecated compatibility API.
+
+## How behave_fire is structured
+
+### Calculation backends
+
+`BehaveRun(fuel_models, backend="auto")` picks an implementation when a model is created:
+
+- **`rust`:** the compiled extension, a thin PyO3 layer over the standalone `behave-fire` crate. Physical values are calculated in float64, and `threads` controls native parallelism.
+- **`python`:** the NumPy reference implementation, which keeps NumPy's original dtypes and masked arrays.
+- **`auto`** (default): Rust when a compatible extension is installed, otherwise Python with a once-per-process `BehaveBackendWarning`.
+
+Both implementations share one public API and one set of equations; intentional differences are listed in [docs/BACKEND_DIFFERENCES.md](docs/BACKEND_DIFFERENCES.md). See [Choosing a backend](#choosing-a-backend) for the details.
+
+### Repository layout
 
 ```
 behave_fire/
 ├── src/
-│   ├── behave_fire/                 # Main package
-│   │   ├── behave.py                # BehaveRun — public facade / entry point
-│   │   ├── __init__.py              # Package exports
-│   │   ├── components/
-│   │   │   ├── behave_units.py      # Unit conversion backbone (18 classes)
-│   │   │   ├── fuel_models.py       # ~60 standard fuel model records (Scott-Burgan 40 + classic 13)
-│   │   │   ├── fuel_models_array.py # NumPy lookup arrays for vectorised fuel access
-│   │   │   ├── surface.py           # Surface fire (Rothermel 1972)
-│   │   │   ├── crown.py             # Crown fire dynamics
-│   │   │   ├── fire_size.py         # Elliptical fire geometry helpers
-│   │   │   ├── mortality.py         # Tree mortality
-│   │   │   ├── spot.py              # Spotting distances
-│   │   │   ├── ignite.py            # Ignition probability
-│   │   │   ├── safety.py            # Safety zone calculations
-│   │   │   ├── contain.py           # Containment simulation (standalone function)
-│   │   │   ├── species_master_table.py  # Tree species database
-│   │   │   ├── fine_dead_fuel_moisture_tool.py
-│   │   │   ├── slope_tool.py
-│   │   │   └── vapor_pressure_deficit_calculator.py
-│   │   └── tests/
-│   │       ├── conftest.py          # Belt-and-suspenders sys.path guard for pytest
-│   │       └── test_behave.py       # Standalone test script (mirrors testBehave.cpp)
+│   ├── behave_fire/                 # Python package
+│   │   ├── __init__.py              # Package exports (automatic BehaveRun, FuelModels, units)
+│   │   ├── auto.py                  # Automatic backend facade, available_backends, get_backend
+│   │   ├── behave.py                # Explicit Python BehaveRun (the behavioral reference)
+│   │   ├── python/                  # Explicit Python namespace (behave_fire.python)
+│   │   ├── rust/                    # Explicit native namespace (behave_fire.rust) and bindings adapters
+│   │   ├── _backend_contract.py     # Native extension API version and required capabilities
+│   │   ├── _version.py              # Installed-version lookup with source-checkout fallback
+│   │   └── components/              # Python reference implementations
+│   │       ├── behave_units.py      # Unit conversion backbone (17 classes)
+│   │       ├── fuel_models.py       # Standard fuel model records (Scott-Burgan 40, classic 13, metric)
+│   │       ├── fuel_models_array.py # NumPy lookup arrays for vectorised fuel access
+│   │       ├── surface.py           # Surface fire (Rothermel 1972)
+│   │       ├── crown.py             # Crown fire dynamics
+│   │       ├── fire_size.py         # Elliptical fire geometry helpers
+│   │       ├── mortality.py         # Tree mortality
+│   │       ├── spot.py              # Spotting distances
+│   │       ├── ignite.py            # Ignition probability
+│   │       ├── safety.py            # Safety zone calculations
+│   │       ├── species_master_table.py  # Tree species database
+│   │       ├── fine_dead_fuel_moisture_tool.py
+│   │       ├── slope_tool.py
+│   │       └── vapor_pressure_deficit_calculator.py
 │   └── examples/
 │       ├── landscape_fire_behavior.py   # Full 10 km × 10 km raster demo
 │       ├── data/                        # Auto-generated GeoTIFF inputs
 │       └── results/                     # GeoTIFF outputs + summary PNG
+├── rust/                            # Cargo workspace (members: behave-fire, behave-py; default member: behave-fire)
+│   ├── Cargo.toml / Cargo.lock      #   Workspace manifest and locked dependency set (no Cargo.toml at the repository root)
+│   └── crates/
+│       ├── behave-fire/             # Standalone Rust core (publishable crate): no runtime or build dependencies, no unsafe code
+│       │   ├── Cargo.toml, README.md, LICENSE, NOTICE, LICENSES/   #   Crate metadata, documentation, and bundled notices
+│       │   ├── src/
+│       │   │   ├── lib.rs                                    # Public API and module declarations (forbids unsafe code)
+│       │   │   ├── model.rs                                  # Owned registry state shared by the model calculation methods
+│       │   │   ├── batch.rs                                  # Model batch owners filled directly through borrowed output slices
+│       │   │   ├── parallel.rs                               # Bounded, ordered chunk execution with scoped native workers
+│       │   │   ├── output.rs                                 # Borrowed slices into final typed output buffers
+│       │   │   ├── grid.rs                                   # Checked row-major shape metadata and owned typed per-cell results
+│       │   │   ├── error.rs                                  # BehaveError: malformed API input, distinct from a scientific no-data result
+│       │   │   ├── math.rs                                   # Scalar operations with NumPy-compatible NaN and signed-zero behavior
+│       │   │   ├── units.rs                                  # Typed scalar unit conversions preserving the Python float64 operation order
+│       │   │   ├── engine/                                   # Typed scalar science, independent of any array runtime
+│       │   │   │   ├── mod.rs                                # Module root and reusable numerical inputs
+│       │   │   │   ├── options.rs                            # Enum-valued numerical configuration (string interpretation belongs to adapters)
+│       │   │   │   ├── fuel.rs                               # Prepared per-fuel numeric records and immutable dense lookup snapshots
+│       │   │   │   ├── fuelbed_fields.rs                     # Field-level fuelbed science shared by sessions and component dependency groups
+│       │   │   │   ├── field.rs                              # Compile-time physical and categorical output identities
+│       │   │   │   ├── missing.rs                            # Explicit whole-cell unavailable results (no NumPy metadata)
+│       │   │   │   ├── state.rs                              # Reusable numeric cell state; absent slots are never fabricated inputs
+│       │   │   │   ├── stage.rs                              # Stages group shared equations; field dependencies support partial injection
+│       │   │   │   ├── tweaks.rs                             # Explicit stage overrides applied before their dependent outputs
+│       │   │   │   ├── surface.rs                            # Surface stage composition over numerical cells and enum-valued controls
+│       │   │   │   ├── crown.rs                              # Crown composition with borrowed model-10 fuel and independent Surface values
+│       │   │   │   ├── run.rs                                # Fully configured borrowed model runs over the typed batch owners
+│       │   │   │   ├── session.rs                            # Owned, typed field slots with explicit injection and recomputation lifetimes
+│       │   │   │   ├── session_surface.rs                    # Scalar Surface stage composition using only declared, retained fields
+│       │   │   │   ├── session_crown.rs                      # Independent Crown fields and selected final branches from staged values
+│       │   │   │   └── session_fused.rs                      # Reborrows the owned snapshot for the configured model kernel
+│       │   │   ├── raster/                                   # Row-major raster execution over borrowed columns
+│       │   │   │   ├── mod.rs                                # Borrowed raster columns, explicit stage inputs, and tile execution
+│       │   │   │   ├── inputs.rs                             # Single field lists that keep packing and length checks consistent
+│       │   │   │   ├── stages.rs                             # Explicit raster stage inputs and override columns, separate from science
+│       │   │   │   ├── outputs.rs                            # Reuses the owned typed buffers instead of parallel containers
+│       │   │   │   ├── surface.rs                            # Surface raster execution; assembles only the current scalar cell on the stack
+│       │   │   │   └── crown.rs                              # Crown raster execution with one model-10 fuel and independent Surface columns
+│       │   │   ├── surface/                                  # Scalar surface fire stages in reference base units
+│       │   │   │   ├── mod.rs                                # Module root for the surface stages
+│       │   │   │   ├── types.rs                              # Particles, fuelbed intermediates, results, wind coefficients, and rate vectors
+│       │   │   │   ├── particles.rs                          # Fixed five-particle construction with dynamic herb transfer
+│       │   │   │   ├── fuelbed.rs                            # Fuelbed weighting that follows the Python five-particle sums
+│       │   │   │   ├── reaction.rs                           # Reaction and residence stages with dependency-aware missing values
+│       │   │   │   ├── wind.rs                               # Wind and slope stages with enum-valued direction, height, and adjustment
+│       │   │   │   ├── prepared_wind.rs                      # Immutable wind terms shared by forward spread and the Crown backsolve
+│       │   │   │   └── geometry.rs                           # Ellipse geometry, spread, and intensity helpers in Python operation order
+│       │   │   ├── crown.rs                                  # Crown fire stages in base units (ft, ft/min, lb/ft³, BTU/ft², BTU/ft/s)
+│       │   │   ├── fire_size.rs                              # Stateful fire ellipse helper (base-unit float64 values)
+│       │   │   ├── mortality.rs                              # Scorch and logistic tree mortality
+│       │   │   ├── spot.rs                                   # Flat-terrain spotting equations
+│       │   │   ├── ignite.rs                                 # Fuel temperature and ignition probabilities
+│       │   │   ├── safety.rs                                 # Butler and Cohen safety-zone geometry
+│       │   │   ├── slope.rs                                  # Stateful slope helper (raw-distance conversion and table behavior)
+│       │   │   ├── vapor_pressure_deficit.rs                 # Unit-aware Tetens vapor pressure calculations
+│       │   │   ├── fine_dead_fuel_moisture.rs                # Standalone fine dead fuel moisture lookup, with the invalid-index sentinel
+│       │   │   ├── fuel_models.rs                            # Owned fuel registries, typed custom registration, and grid lookup semantics
+│       │   │   ├── species.rs                                # Species registry with case-insensitive operations
+│       │   │   └── generated/                                # Generated tables (fuel_models.rs, species.rs, fine_dead_fuel_moisture.rs); do not edit, regenerate with tools/check_rust_tables.py
+│       │   ├── examples/            #   standalone.rs, raster_tweaks.rs, staged_raster.rs, configured_tiles.rs
+│       │   └── tests/               #   Golden and parity test files, with data/ holding the compact packaged fixtures
+│       └── behave-py/               # Unpublished PyO3 bindings, built as behave_fire._rust
+│           └── src/
+│               ├── lib.rs           #     Module list and the explicit owned NumPy bindings
+│               ├── operation.rs     #     Typed operation enum for the native operation entries
+│               ├── capabilities.rs  #     Native capability list that mirrors the Python backend contract
+│               ├── dispatch.rs      #     Typed operation dispatch (numerical work stays in the core crate)
+│               ├── component_*.rs   #     Per-component column adapters, schemas, and requirements
+│               ├── model*.rs, crown*.rs, surface*.rs   # Model, crown, and surface binding routes and field writers
+│               ├── grid_session.rs  #     Python-owned staged sessions
+│               ├── numeric/         #     Numeric snapshot, shape, and contract handling for Python inputs
+│               ├── prepared/        #     Primitive argument parsing: controls, selectors, and keys
+│               └── structures.rs, data.rs, state.rs, effects.rs, tools.rs   # Structured records, default-table export, checked stateful tools, effects and tools bindings
+├── tests/                           # Python test tiers, fixtures, and the standalone legacy harness
+├── tools/                           # Parity, timing, packaging, and artifact-validation tools, plus the binding_field_tests crate and rust_consumer.rs
+├── docs/                            # Contracts and procedures (see Documentation)
+├── .github/workflows/               # CI, wheel validation, and release workflows
+├── pyproject.toml                   # Maturin build configuration and Python metadata
+├── uv.lock                          # Locked development/CI dependencies
 ├── pytest.ini
-├── CODEBASE.md                      # Architecture reference
+├── CHANGELOG.md
+├── LICENSE / NOTICE / LICENSES/     # MIT license plus bundled NumPy-derived and Intel SVML BSD-3-Clause notices
 └── README.md
 ```
 
----
+## How to install behave_fire
 
-## Requirements
+### Requirements
 
-- Python ≥ 3.10
-- [NumPy](https://numpy.org/)
-- [SciPy](https://scipy.org/) *(used in the landscape example)*
-- [rasterio](https://rasterio.readthedocs.io/) *(used in the landscape example)*
-- [matplotlib](https://matplotlib.org/) *(used in the landscape example)*
+- Python ≥ 3.11. The certification targets are standard CPython 3.11, 3.12, 3.13, and 3.14. PyPy and free-threaded CPython (3.13t/3.14t) are not supported.
+- [NumPy](https://numpy.org/) ≥ 2.1.3 (≥ 2.3.3 on Python ≥ 3.14 or native Windows ARM64, where earlier releases have no binary wheel).
+- Rust ≥ 1.78 only to build from source or to use the `behave-fire` crate. Wheel users do not need Rust.
+- [SciPy](https://scipy.org/), [rasterio](https://rasterio.readthedocs.io/), and [matplotlib](https://matplotlib.org/) *(optional, for the landscape example only)*.
 
-Install the runtime dependencies:
+### Installation
 
-```bash
-pip install numpy scipy rasterio matplotlib
+#### From a release
+
+Release artifacts are built and validated by CI (see [docs/RELEASING.md](docs/RELEASING.md)); publication to PyPI is a separate, owner-authorized step. After a release is published:
+
+```sh
+pip install behave-fire
+pip install "behave-fire[examples]"   # adds SciPy, rasterio, and matplotlib for the example
 ```
 
----
+Each release provides:
 
-## Installation
+| Artifact | Platforms | Backend after install |
+|----------|-----------|-----------------------|
+| Native `cp311-abi3` wheels | Linux x86-64 and aarch64 (manylinux 2_17), Alpine/musl x86-64 (musllinux 1_2), macOS x86-64 and arm64, Windows x86-64 and ARM64 | Rust, selected by `backend="auto"` |
+| Universal `py3-none-any` wheel | Any other platform with a supported Python | Python (no extension) |
+| Source distribution | Any (requires Rust to build) | Rust, built locally |
 
-Clone the repository and add `src/` to your Python path:
+Installing a behave-fire wheel never requires compiling anything. Whether the *whole environment* installs without a compiler also depends on NumPy having a binary wheel for your interpreter and platform; use `pip install --only-binary=:all: behave-fire` to enforce that. Compiler-free claims are made only for the interpreter/platform combinations that CI actually installs and tests.
 
-```bash
-git clone <repo-url>
+#### From source
+
+Source, Git, editable, and `--no-binary` installs build the extension with Maturin and require Rust and a native linker:
+
+```sh
+git clone https://github.com/gagreene/behave_fire.git
 cd behave_fire
-pip install numpy scipy rasterio matplotlib
+uv sync --locked --extra test --extra dev        # builds the extension and installs test tools
+uv run --no-sync python -m pytest --require-rust
 ```
 
-Then either run scripts from the project root (the examples do their own `sys.path` setup) or install in editable mode if you have a `pyproject.toml` / `setup.py`:
+#### Python-only use of a checkout
 
-```bash
-pip install -e .
+The Python implementation needs no build step. Put `src/` on the Python path (or run scripts from the repository root; the examples set their own path). With no extension present, `backend="auto"` selects Python and emits a once-per-process `BehaveBackendWarning`:
+
+```sh
+uv sync --locked --no-install-project --extra test --extra dev   # dependencies only; never installs the project
+uv run --no-sync python -m pytest
 ```
 
----
+Do not use `pip install -e .` for this route: it builds the extension and needs Rust.
 
-## Quick Start
+## How to use behave_fire
+
+### Quick start
 
 ```python
 import numpy as np
-from behave_fire.components.fuel_models import FuelModels
-from behave_fire.behave import BehaveRun
+from behave_fire import BehaveRun, FuelModels
 
 fm     = FuelModels()
-runner = BehaveRun(fm)
+runner = BehaveRun(fm)          # backend="auto": Rust when its extension is installed, otherwise Python
 
 # --- Surface fire on a single cell ---
-results = runner.do_surface_run(
-    fuel_model_grid      = np.array([[124]]),          # GR4
+surface_inputs = dict(
+    fuel_model_grid      = np.array([[124]]),          # GS4
     m1h                  = np.array([[0.06]]),          # 6% (as fraction)
     m10h                 = np.array([[0.07]]),
     m100h                = np.array([[0.08]]),
@@ -133,9 +270,13 @@ results = runner.do_surface_run(
     slope_units          = 1,                           # Percent
     aspect               = np.array([[180.0]]),         # degrees
     canopy_cover         = np.array([[0.40]]),          # fraction (0–1)
-    canopy_height        = np.array([[15.0]]),          # feet
-    crown_ratio          = np.array([[0.55]]),          # fraction (0–1)
+    canopy_height        = np.array([[15.0]]),          # m, the canopy height of the Crown run below
+    canopy_height_units  = 4,                           # Meters
+    crown_ratio          = np.array([[0.60]]),          # fraction (0–1)
     wind_height_mode     = 'TenMeter',
+)
+results = runner.do_surface_run(
+    **surface_inputs,
     out_units={
         'spread_rate'        : 3,   # MetersPerMinute
         'flame_length'       : 4,   # Meters
@@ -146,13 +287,18 @@ results = runner.do_surface_run(
 print(f"ROS          : {results['spread_rate'][0, 0]:.2f} m/min")
 print(f"Flame length : {results['flame_length'][0, 0]:.2f} m")
 print(f"FLI          : {results['fireline_intensity'][0, 0]:.1f} kW/m")
+print(f"Backend      : {runner.backend_in_use}")
 ```
 
-### Crown fire + mortality
+#### Crown fire
+
+`do_crown_run` reads `spread_rate`, `fireline_intensity`, and `heat_per_unit_area` from `surface_results` in base units (ft/min, BTU/ft/s, and BTU/ft²) without conversion. Pass a surface run made without `out_units`, and convert results separately for display.
 
 ```python
+surface_base = runner.do_surface_run(**surface_inputs)   # base units for the crown run
+
 crown = runner.do_crown_run(
-    surface_results     = results,
+    surface_results     = surface_base,
     fuel_model_grid     = np.array([[124]]),
     m1h=np.array([[0.06]]), m10h=np.array([[0.07]]),
     m100h=np.array([[0.08]]), mlh=np.array([[0.60]]),
@@ -164,20 +310,62 @@ crown = runner.do_crown_run(
     slope               = np.array([[20.0]]),
     slope_units         = 1,
     aspect              = np.array([[180.0]]),
-    canopy_base_height  = np.array([[19.7]]),   # feet (6 m × 3.28084)
-    canopy_height       = np.array([[49.2]]),   # feet (15 m × 3.28084)
-    canopy_bulk_density = np.array([[0.0075]]), # lb/ft³ (0.12 kg/m³ ÷ 16.0185)
+    canopy_base_height  = np.array([[6.0]]),    # m
+    canopy_base_height_units = 4,               # Meters
+    canopy_height       = np.array([[15.0]]),   # m
+    canopy_height_units = 4,                    # Meters
+    canopy_bulk_density = np.array([[0.12]]),   # kg/m³
+    canopy_bulk_density_units = 1,              # KilogramsPerCubicMeter
     moisture_foliar     = np.array([[100.0]]),  # percent
 )
 
 print(f"Fire type : {int(crown['fire_type'][0, 0])}")   # 0=surface … 3=active crown
 ```
 
-> **Note on `do_crown_run` inputs:** `canopy_base_height` and `canopy_height` are always in **feet** and `canopy_bulk_density` is in **lb/ft³** — these parameters do not have associated unit enums and must be converted before calling.
+> **Note on `do_crown_run` inputs:** `canopy_base_height` and `canopy_height` default to **feet** and `canopy_bulk_density` to **lb/ft³**. Select other units with `canopy_base_height_units` and `canopy_height_units` (`LengthUnitsEnum`), and `canopy_bulk_density_units` (`DensityUnitsEnum`). Surface results passed in `surface_results` must stay in base units, and the Surface and Crown calls must describe the same canopy: the quick start gives both a 15 m canopy height (the Surface run takes `canopy_height_units` too) and a crown ratio of 0.60, which is (15 m - 6 m crown base) / 15 m.
 
----
+### Choosing a backend
 
-## Unit System
+The package root selects an implementation when a model is constructed. Importing the package or its explicit Python namespace does not probe the native extension.
+
+```python
+from behave_fire import BehaveRun, FuelModels, available_backends, get_backend
+from behave_fire.python import BehaveRun as PythonBehaveRun
+from behave_fire.rust import BehaveRun as RustBehaveRun
+
+fuels = FuelModels()
+model = BehaveRun(fuels, backend="auto", threads=1)
+print(model.backend_in_use)  # "python" or "rust"; read-only
+python_model = BehaveRun(fuels, backend="python")
+rust_model = BehaveRun(fuels, backend="rust", threads=4)
+safety = get_backend("rust").safety.calculate_safety_zone
+```
+
+`available_backends()` reports Python and, when compatible and complete, Rust. `get_backend("python")` and `get_backend("rust")` expose their model, registries, and component modules. Standalone imports include `from behave_fire.python import safety` and `from behave_fire.rust import safety`. Historical imports such as `behave_fire.components.surface` continue to use Python. Nested component import paths under the new namespaces are not required; access their module attributes.
+
+`backend="auto"` prefers a compatible, complete Rust extension. An absent extension (the universal wheel, or an unbuilt checkout), loader error, incompatible API, or incomplete advertised operation inventory selects Python and emits `BehaveBackendWarning`, a `RuntimeWarning` subclass, once per process, with its cause. An availability query can cache the extension status but does not consume that warning. Forced Rust raises a chained `ImportError` for any unavailable or incomplete extension. Explicit native imports permit compatible incomplete development extensions; an unsupported operation raises `NotImplementedError`. Calculation and facade errors propagate and never trigger a fallback.
+
+Configure strict fallback handling before the first warned automatic selection:
+
+```python
+import warnings
+from behave_fire import BehaveBackendWarning, BehaveRun, FuelModels
+
+warnings.simplefilter("error", BehaveBackendWarning)
+model = BehaveRun(FuelModels())
+```
+
+A warning promoted to an error does not consume the warning, so subsequent attempts remain strict. Changing filters after a warning was already emitted cannot make that process's once-only warning retroactively strict. Create a new process to reset the cached extension outcome and warning state.
+
+The automatic facade uses composition. The facade's class identity and default `repr` therefore differ from the historical Python facade, and an automatic model is not an `isinstance` of `behave_fire.behave.BehaveRun`. Use `from behave_fire.python import BehaveRun` (the historical class alias) or `from behave_fire.behave import BehaveRun` for legacy subclassing and type checks. Root registry and unit enum identities are unchanged. Historical static calls on the root class, such as `BehaveRun.calculate_fire_area(...)`, keep using Python without probing Rust. Calls on model instances always use their selected backend. All 11 calculation signatures remain discoverable.
+
+Each model caches its numerical fuel snapshot at construction. Later changes to the input registry do not update that model. The automatic facade accepts either registry type, converting a native registry snapshot for its Python route. Explicit Python accepts its original registry; use a native registry's `to_python()` conversion when needed. Native registries also expose `FuelModels.from_python(registry)`. Pickle and deepcopy preserve the selected backend, thread setting, and actual cached snapshot. Native unpickling requires a compatible native extension and never silently selects Python. Deep copies own independent numerical state; shallow copies retain the reference sharing behavior.
+
+Native `threads=1` runs serially, `threads=0` uses available parallelism, and a positive count requests that many workers, capped by actual work. Negative and non-integer counts are rejected on the native route. The automatic Python route ignores `threads`; explicit Python retains its original constructor without that argument. Create another model to choose a different backend.
+
+Rust calculates physical values in float64, including float16, float32, and integer inputs. Masked physical values become NaN, and physical results are plain float64 arrays. Rounding and classification near thresholds can differ from Python's original dtype arithmetic. Select Python when that behavior is required. Controls, codes, and flags remain typed; see [docs/BACKEND_DIFFERENCES.md](docs/BACKEND_DIFFERENCES.md).
+
+### Units
 
 All physical quantities have a designated **base unit** stored internally (US customary). Unit conversion happens at call boundaries via integer enum values passed through the `wind_speed_units`, `slope_units`, `out_units`, etc. parameters.
 
@@ -192,22 +380,20 @@ All physical quantities have a designated **base unit** stored internally (US cu
 | Area | ft² | `2` = hectares |
 | Moisture | fraction (0–1) | pass fractions; use `FractionUnits` for % ↔ fraction |
 
-> **Important:** Moisture inputs (`m1h`, `m10h`, `m100h`, `mlh`, `mlw`, `moisture_foliar`) are always **fractions** (e.g. `0.06` for 6%). Passing percent values without converting will produce silently wrong results.
+> **Important:** Fuel moisture inputs (`m1h`, `m10h`, `m100h`, `mlh`, `mlw`) are **fractions** (e.g. `0.06` for 6%). Foliar moisture (`moisture_foliar`) is **percent** (e.g. `100.0` for 100%).
 
-The full set of 18 unit classes exported from the package:
+The full set of 17 unit classes exported from the package:
 `AreaUnits`, `BasalAreaUnits`, `LengthUnits`, `LoadingUnits`, `PressureUnits`,
 `SurfaceAreaToVolumeUnits`, `SpeedUnits`, `FractionUnits`, `SlopeUnits`,
 `DensityUnits`, `HeatOfCombustionUnits`, `HeatSinkUnits`, `HeatPerUnitAreaUnits`,
 `HeatSourceAndReactionIntensityUnits`, `FirelineIntensityUnits`,
 `TemperatureUnits`, `TimeUnits`.
 
-See `src/behave/components/behave_units.py` for the full enum listings.
+See `src/behave_fire/components/behave_units.py` for the full enum listings.
 
----
+### Components
 
-## Components
-
-### `BehaveRun` — the facade
+#### `BehaveRun` — the facade
 
 The single public entry point for array/raster fire behavior calculations. Key methods:
 
@@ -225,30 +411,22 @@ The single public entry point for array/raster fire behavior calculations. Key m
 | `calculate_fire_length(...)` | Fire ellipse major axis at elapsed time |
 | `calculate_fire_width(...)` | Fire ellipse minor axis at elapsed time |
 
-#### Wind adjustment factor
+##### Wind adjustment factor
 
 `do_surface_run()` accepts an optional `waf_method` parameter:
 
 - `'UseCrownRatio'` *(default)* — WAF is derived automatically from `canopy_cover`, `canopy_height`, and `crown_ratio` using Albini & Baughman (1979).
 - `'UserInput'` — use the value supplied in `user_waf` directly, bypassing automatic calculation.
 
-### Fuel models
+#### Fuel models
 
-`FuelModels` ships with all ~60 standard models (original 13 + Scott–Burgan 40+). Custom models can be defined by directly populating the `fuel_models_` dict with the required field set.
+`FuelModels` ships with the standard models: the original 13, Scott–Burgan 40, and the metric (V-, M-, F-) models, stored in US customary units. Custom models can be registered with `set_custom_fuel_model()` (with unit arguments) or by populating the `fuel_models_` dict with the required field set. The Rust registry offers typed add/remove/get operations.
 
-### Containment simulation
+#### Ignition support
 
-`run_contain_sim_array()` in `contain.py` is a standalone vectorized function (not a `BehaveRun` method). It implements a simplified single-resource Runge-Kutta ODE containment model and returns a status grid with the following codes:
+Firebrand ignition remains supported. `calculate_lightning_ignition_probability()` emits `DeprecationWarning` because upstream Behave removed the model, citing an unreliable scientific basis. The function and its package re-export retain their existing signatures and numerical results for compatibility. No replacement lightning model or removal version is specified.
 
-| Code | Meaning |
-|------|---------|
-| `1` | REPORTED |
-| `3` | CONTAINED |
-| `4` | OVERRUN |
-| `5` | EXHAUSTED |
-| `8` | TIME_LIMIT_EXCEEDED |
-
-### Crown fire type classification
+#### Crown fire type classification
 
 | Value | Meaning |
 |---|---|
@@ -257,11 +435,9 @@ The single public entry point for array/raster fire behavior calculations. Key m
 | `2` | Conditional crown fire |
 | `3` | Active crown fire |
 
----
+### Landscape example
 
-## Example — Landscape Fire Behavior
-
-`src/examples/landscape_fire_behavior.py` demonstrates a full end-to-end run over a synthetic **10 km × 10 km** landscape at **30 m resolution** (334 × 334 cells):
+`src/examples/landscape_fire_behavior.py` demonstrates a full end-to-end run over a synthetic **10 km × 10 km** landscape at **30 m resolution** (334 × 334 cells). The example needs the optional dependencies (`pip install "behave-fire[examples]"`, or SciPy, rasterio, and matplotlib):
 
 1. **Generates** synthetic terrain (elevation, slope, aspect), fuel model map, forest structure, and weather GeoTIFFs → `src/examples/data/`
 2. **Runs** surface fire, crown fire, scorch height, tree mortality, and spotting across the entire raster
@@ -275,39 +451,191 @@ python landscape_fire_behavior.py
 
 Expected runtime: ~10–30 seconds on a modern laptop.
 
----
+### Rust crate and raster engine
 
-## Running the Tests
+`rust/crates/behave-fire` is an independently versioned Rust library (`behave_fire`) with no runtime or build dependencies. The crate does not need Python, NumPy, a C++ compiler, or this repository. The Python extension is a thin PyO3 layer (`rust/crates/behave-py`, never published) over the same core, so native Python results and standalone Rust results come from one implementation of the equations.
 
-The test suite mirrors the C++ `testBehave.cpp` reference and uses a custom accumulator. Run it directly:
+- **Complete calculation coverage:** surface and crown pipelines with every public stage, mortality, spotting, ignition, safety zones, fine dead fuel moisture, vapor pressure deficit, slope and ellipse helpers. The `BehaveRun` Rust facade provides all eleven calculation routes.
+- **Typed scalar stages (`engine`):** `SurfacePlan` and `CrownPlan` run a cell from numerical inputs and an immutable `PreparedFuels` snapshot. Intermediates such as `FuelbedIntermediates` can be computed, edited, and resumed.
+- **Stage injection:** `SurfaceTweaks` and `CrownTweaks` replace reaction intensity, rates, wind or slope factors, or crown thresholds at the stage that would produce them, so downstream outputs use the injected value.
+- **Raster columns (`raster`):** `SurfaceRaster` and `CrownRaster` borrow structure-of-arrays inputs (uniform scalars or per-cell slices), validate them once, and write typed output columns. `run_tile` processes a caller-chosen range. The library performs no raster file I/O.
+- **Bounded parallelism:** scoped standard-library threads with deterministic output order; no global thread pool.
 
-```bash
-cd src/behave_fire
-python tests/test_behave.py
+Run the complete default/custom-fuel example and the raster-override example from the crate directory:
+
+```sh
+cargo run --example standalone
+cargo run --example raster_tweaks
 ```
 
-A pytest-compatible subset can be run from the project root, but currently requires test files matching `test_*_array.py` to be present in `src/behave/tests/`:
+Python models use the same native raster engine. New public `behave_fire.rust.SurfaceGrid` and `CrownGrid` expose owned staged calculations, base-unit field injection, retention, and recomputation:
 
-```bash
-# from project root
-pytest
+```python
+from behave_fire.rust import SurfaceGrid
+
+grid = SurfaceGrid(dict(fuel_model_grid=124, m1h=.06, m10h=.07, m100h=.08,
+    mlh=.6, mlw=.9, wind_speed=88., wind_direction=35., slope=12.,
+    canopy_cover=.4, canopy_height=30., crown_ratio=.5), shape=(2, 3))
+for stage in ("particles", "fuelbed", "reaction"):
+    grid.run_stage(stage)
+grid.set("reaction_intensity", grid.get("reaction_intensity") * .9)
+grid.run_remaining()
+spread_ft_min = grid.get("spread_rate")
+grid.run_fused()  # Restart from inputs and persistent overrides.
 ```
 
----
+Getters return independent arrays. `run_remaining` preserves transient injections; explicit producer runs replace their own transient values. Fused restart clears transient injections while retaining edited inputs and persistent overrides. Grid sessions require Rust, reject complex/object data, and do not support pickling. See [the complete Python example](src/examples/staged_raster.py), [the engine contract](docs/RUST_ENGINE.md), and [standalone packaging](docs/CRATES_IO.md). Registry publication remains a separate owner-authorized step.
 
-## Key Design Notes
+### Performance
 
-- **Pure Python / NumPy** — no C extensions required; BLAS-level vectorization via NumPy broadcasting.
+The Rust and Python backends produce matching results within the documented tolerances, so the choice between them only affects run time. Run time depends on hardware, load, and build; `python tools/time_standard_runs.py` prints a report for the machine it runs on, with no pass or fail threshold.
+
+One-machine report, not a guarantee: behave_fire 0.1.0rc1, heterogeneous 100,000-cell rasters, one thread, five timed calls after one warm-up, Intel Xeon E5-2640 v3 (16 logical cores), Windows 10, CPython 3.12.8, NumPy 2.1.3, measured 2026-11-24 (Table 1).
+
+**Table 1.** Median wall time in seconds.
+
+| Model | Python | Rust |
+|-------|-------:|-----:|
+| Surface | 0.381 | 0.116 |
+| Crown | 0.541 | 0.162 |
+
+### Important behavior and limitations
+
+#### Fuel model IDs
+
+Fuel model IDs are supported from **1 through 256**. All other IDs, including
+NaN and infinite IDs supplied through Python, use undefined row zero rather than
+an endpoint fuel. Undefined fuels retain their existing zero-spread behavior;
+no new NaN, classification-code, flag, or storage-type policy applies.
+Custom registration outside 1–256 returns `False`; custom models 257–260 are
+no longer supported. Model 256 remains supported. The range follows the official
+[C++ definition bounds](https://github.com/firelab/behave/blob/f3b2943e69abca942e795c5b1b45276f6338abb5/src/behave/fuelModels.cpp#L863).
+The upstream C++ stores 256 fuel models (indices 0 through 255) and, in
+[its surface run](https://github.com/firelab/behave/blob/f3b2943e69abca942e795c5b1b45276f6338abb5/src/behave/surface.cpp#L97),
+checks for zero fuel load with unchecked lookups before it checks the definition.
+For IDs below 0 and above 255 it therefore reads outside its storage and has no
+defined result (ID 256 passes its range check but is outside its storage), so
+there is no C++ result to compare against for those IDs. See
+[Backend differences](docs/BACKEND_DIFFERENCES.md).
+
+#### Numeric types and automatic fallback
+
+Native models, component helpers, units, and state tools calculate physical values in float64. Float16,
+float32, and integer physical inputs widen once; masked real values become NaN,
+and physical results are plain float64 arrays. Classifications remain int32,
+with -1 for unavailable classifications. Python retains its original dtype and
+masked-array behavior. These differences also apply when `backend="auto"`
+selects Rust; see [Backend differences](docs/BACKEND_DIFFERENCES.md).
+
+Auto uses Rust when available. Otherwise it selects Python and warns once per
+process. A separate warning accompanies supported complex-input calls routed
+to Python before native calculation. Explicit Rust rejects complex/object
+arithmetic. General object input does not trigger automatic fallback.
+
+If Python is already selected because no usable extension exists, calls retain
+Python's original complex/object behavior without Rust-specific input preflight.
+
+#### Surface boundary behavior
+
+Python and Rust retain wind-driven elliptical shape for tiny positive baseline
+spread, including rates at or below `1e-7 ft/min`. Zero wind and zero slope
+produce a circular shape. Zero and nonpositive baseline rates retain guarded
+effective-wind handling.
+
+Surface flame length is zero for fireline intensity strictly below
+`1e-7 BTU/ft/s`; at and above that threshold, the existing Byram equation applies.
+These deliberately change the previous Python behavior to follow the pinned
+[C++ effective-wind calculation](https://github.com/firelab/behave/blob/f3b2943e69abca942e795c5b1b45276f6338abb5/src/behave/surfaceFire.cpp#L406)
+and [flame-length cutoff](https://github.com/firelab/behave/blob/f3b2943e69abca942e795c5b1b45276f6338abb5/src/behave/surfaceFire.cpp#L218).
+The separate moisture-of-extinction discrepancy has an explicit unit-control
+disposition (see [C++ validation](docs/CPP_VALIDATION.md)).
+
+Moisture damping uses the pinned C++ multiplication order with the same empirical
+coefficients. Upstream corrected the extinction units of 23 fuel records at the
+current pin, so behave_fire and the C++ now store the same fractional values.
+Comparison caps of `1e-12` relative and absolute require a current complete
+manual GNU/MSVC and seven-native-platform qualification before acceptance, as
+described in [C++ validation](docs/CPP_VALIDATION.md).
+
+#### Design notes
+
+- **Python reference, optional Rust** — the Python implementation is the behavioral reference; the Rust backend must match it within documented tolerances. Source-only Python remains available, and compatible native wheels select the Rust backend automatically.
 - **US customary internally** — all state is stored in feet, BTU, °F, etc. Metric conversion happens only at call boundaries.
-- **No input validation** — out-of-range inputs return `0.0` silently, matching the C++ guard pattern.
+- **Input domains:** Python retains its historical guards and coercions. Rust validates structural controls before workers and uses float64 IEEE results for physical numeric domains; see [backend differences](docs/BACKEND_DIFFERENCES.md).
 - **Crown fuel is always FM10 / WAF=0.4** — hardcoded per Rothermel (1991); not configurable.
-- **Moisture as fraction** — `0.06` = 6%; see the [Unit System](#unit-system) section.
-- **Crown canopy inputs in base units** — `canopy_base_height` and `canopy_height` must be in feet, `canopy_bulk_density` in lb/ft³; no unit enum is applied to these parameters.
+- **Moisture as fraction** — `0.06` = 6%; see [Units](#units).
+- **Crown canopy input units** — `canopy_base_height` and `canopy_height` default to feet and `canopy_bulk_density` to lb/ft³. Select other units with `canopy_base_height_units`, `canopy_height_units`, and `canopy_bulk_density_units`, as the [Crown fire](#crown-fire) example does. `surface_results` must stay in base units.
 - **Wind orientation strings** — `'RelativeToUpslope'` or `'RelativeToNorth'`; misspellings silently default to upslope.
+- **Fuel snapshots** — each `BehaveRun` copies the fuel registry at construction; later registry edits do not affect an existing model.
 
-For a full architecture reference, gotcha catalogue, and Mermaid data-flow diagram see [`CODEBASE.md`](CODEBASE.md).
+## How to maintain/contribute to behave_fire
 
----
+### Testing
+
+Python tests (the Python-only route, no Rust required; run from the repository root):
+
+```bash
+uv sync --locked --no-install-project --extra test --extra dev
+uv run --no-sync python -m pytest
+```
+
+Native Python tests need a built extension (`uv sync --locked --extra test --extra dev`, which requires Rust). `--require-rust` makes a missing or incompatible extension a failure instead of a skip:
+
+```bash
+uv run --no-sync python -m pytest --require-rust
+```
+
+Pytest imports the package through `src` and discovers `test_*.py` under `tests/unit`, `tests/integration`, and `tests/regression`. Pytest also applies the `integration` and `regression` markers from the corresponding directories. Shared fixtures live in `tests/data/`. The native and parity suites compare Rust against the explicit Python backend (including dtype, mask, shape, and exception behavior) and cover packaging, dispatch, serialization, ownership, and workflow contracts. These checks do not establish full C++ numerical parity.
+
+Rust tests (from the repository root; `rust/` has no `Cargo.toml` at the root, so pass the manifest path):
+
+```bash
+cargo test   --manifest-path rust/Cargo.toml -p behave-fire --locked
+cargo fmt    --manifest-path rust/Cargo.toml --all -- --check
+cargo clippy --manifest-path rust/Cargo.toml --workspace --all-targets --locked -- -D warnings
+cargo +1.78.0 test --manifest-path rust/Cargo.toml -p behave-fire --locked   # minimum supported Rust
+# Only when the pinned C++ reference changes: add `-- --include-ignored` to run the pinned C++ comparisons
+```
+
+Run the legacy accumulator harness separately, also from the project root:
+
+```bash
+python tests/legacy/behave_harness.py
+```
+
+Expected lightning deprecation warnings may appear. The standalone harness locates `src/` relative to its own file and uses the same canonical `behave_fire` imports as pytest. No machine-specific paths or `PYTHONPATH` settings are required.
+
+Useful tools under `tools/`: `compare_backends.py` (Rust versus the frozen Python oracle), `time_standard_runs.py` (a timing report for one machine), and the packaging checks described in [docs/RELEASING.md](docs/RELEASING.md).
+
+### Contributing
+
+Read [docs/CONTRIBUTION_PROCEDURES.md](docs/CONTRIBUTION_PROCEDURES.md) before opening a pull request. The procedures cover branch routing, commit rules, the local checks recorded in every pull request, and the rules for numerical changes.
+
+Every pull request targets `pre_release`, the integration branch for the next release. `master` holds released code only: the repository owner promotes `pre_release` into `master` through a pull request, chooses the version at that point, and tags it. An urgent fix to released code uses a `hotfix/` branch from `master` and is merged back into `pre_release`.
+
+Before submitting a change:
+
+1. Create a focused branch from `pre_release`.
+2. Add or update tests for the behavior you change, in Python and, for native code, in Rust.
+3. Run the full test suite (see [Testing](#testing)) and the Rust checks on every pull request, as described in [docs/CONTRIBUTION_PROCEDURES.md](docs/CONTRIBUTION_PROCEDURES.md). The pinned C++ comparisons run only when the pinned C++ reference changes.
+4. Fill in the test record in the pull request description from a run on the pull request's latest commit.
+5. Describe scientific assumptions, unit changes, and regression risks in the pull request.
+
+The Python implementation is the behavioral reference. Rust must match it within the documented tolerances, and any intentional difference belongs in [docs/BACKEND_DIFFERENCES.md](docs/BACKEND_DIFFERENCES.md). Existing golden fixtures and pinned C++ observations are the behavior-preservation oracle: do not regenerate them to make a change pass. The `behave-fire` core stays free of normal and build dependencies.
+
+### Documentation
+
+| Document | Contents |
+|----------|----------|
+| [CHANGELOG.md](CHANGELOG.md) | Release notes, including unreleased changes |
+| [docs/RUST_BACKEND.md](docs/RUST_BACKEND.md) | Backend, selection, ownership, dtype, and packaging contract |
+| [docs/BACKEND_DIFFERENCES.md](docs/BACKEND_DIFFERENCES.md) | Intentional differences between the Rust and Python backends |
+| [docs/RUST_ENGINE.md](docs/RUST_ENGINE.md) | Typed stages, raster API, injection, and engine design |
+| [docs/RELEASING.md](docs/RELEASING.md) | Building, validating, and releasing Python wheels and the source distribution |
+| [docs/CRATES_IO.md](docs/CRATES_IO.md) | Packaging and publishing the standalone Rust crate |
+| [docs/CONTRIBUTION_PROCEDURES.md](docs/CONTRIBUTION_PROCEDURES.md) | Branches, PRs, test records, release routing, and contributor rules |
+| [docs/CPP_VALIDATION.md](docs/CPP_VALIDATION.md) | Pinned C++ Surface validation and documented unit differences |
+| [docs/FBFM_DESCRIPTIONS.md](docs/FBFM_DESCRIPTIONS.md) | Fire behavior fuel model descriptions |
 
 ## References
 
@@ -319,10 +647,8 @@ For a full architecture reference, gotcha catalogue, and Mermaid data-flow diagr
 - Albini, F. A. & Baughman, R. G. (1979). *Estimating windspeeds for predicting wildland fire behavior.* USDA Forest Service Research Paper INT-221.
 - Butler, B. W. & Cohen, J. D. (1998). *Firefighter safety zones: a theoretical model based on radiative heating.* International Journal of Wildland Fire, 8(2), 73–77.
 - Nelson, R. M. (2000). *Prediction of diurnal change in 10-h fuel stick moisture content.* Canadian Journal of Forest Research, 30(7), 1071–1087.
-- Fried, J. S. & Fried, B. D. (1996). *Simulating wildfire containment with realistic tactics.* Forest Science, 42(3), 267–281.
 - Ryan, K. C. & Reinhardt, E. D. (1988). *Predicting postfire mortality of seven western conifers.* Canadian Journal of Forest Research, 18(10), 1291–1297.
 
+## License
 
-
-
-
+MIT. See [LICENSE](LICENSE). Bundled code derived from NumPy and Intel SVML keeps its BSD-3-Clause notices (see [NOTICE](NOTICE) and [LICENSES/](LICENSES/)). © 2026 Gregory Greene.

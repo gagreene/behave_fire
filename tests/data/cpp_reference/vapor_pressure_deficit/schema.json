@@ -1,0 +1,20 @@
+{
+  "bounds": "The driver accepts only the two reviewed case IDs and exact numeric tuples.",
+  "call_sequence": [
+    "Construct a fresh VaporPressureDeficitCalculator for each reviewed request.",
+    "Set temperature in Kelvin and relative humidity in percent, then run the calculator.",
+    "Read both vapor pressures and the deficit in kilopascals."
+  ],
+  "operation": "vapor_pressure_deficit",
+  "output": {
+    "actual_vp": "Kilopascals",
+    "saturated_vp": "Kilopascals",
+    "vpd": "Kilopascals"
+  },
+  "request": {
+    "rh_pct": "Relative humidity in percent",
+    "temperature_k": "Kelvin"
+  },
+  "schema_version": 1,
+  "scope": "The measurements cover the freezing and warm inputs in the reviewed dataset."
+}

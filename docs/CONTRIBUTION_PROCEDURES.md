@@ -1,0 +1,429 @@
+# Contribution procedures
+
+These procedures apply to changes proposed for behave_fire. The root [`README.md`](../README.md) describes the
+package and how to run its tests.
+
+## Function organization
+
+- Organize functions alphabetically in every code file, in every language (Python, Rust, and any other), to make them easier to locate in an IDE. This covers top-level functions and the methods within a class, `impl` block, or equivalent.
+- Python: group dunder methods first, then other underscore names, then public names. Alphabetize each group case-insensitively by the full name.
+- Rust: group non-`pub` functions first, then `pub` functions, alphabetically by name within each group. In other languages, group private functions before public functions and alphabetize each group by the bare name.
+- Apply the same organization to production modules and test modules.
+- Preserve a non-alphabetical order only when a framework, runtime dependency, or the idiomatic conventions of the language require it, and document the reason in the file. In Rust, that includes `use` and `mod` declarations, a trailing `#[cfg(test)] mod tests` block, trait-implementation method order set by the trait, and items whose declaration order matters, such as macros defined before use.
+
+## Function signatures and docstrings
+
+- Keep short function signatures on one line.
+- When a signature must wrap, put the opening parenthesis after the function name, place one parameter per line with an eight-space continuation indent, and align the closing parenthesis with `def`.
+- Give every production function and method a docstring, including private, nested, and `None`-returning helpers.
+- Use reStructuredText fields: a concise summary, a blank line, one `:param name:` entry per input in signature order, and a final `:return:` entry.
+- Indent wrapped `:param` and `:return:` descriptions by eight spaces, and describe side effects in `:return:` when a function writes files instead of returning a value.
+- Apply these rules to first-party production code. Do not reformat vendored or generated code solely to enforce this preference.
+
+## Rust and native backend
+
+- The Cargo workspace is in `rust/` (core crate `behave-fire`, unpublished PyO3 bindings `behave-py`); there is no `Cargo.toml` at the repository root, so pass `--manifest-path rust/Cargo.toml`. Build, test, and lint commands appear below under "Local tests before every PR merge".
+- The Python implementation under `src/behave_fire/components/` is the behavioral reference. Rust must match it within the documented tolerances; do not change expected values to make a change pass, and treat regenerating fixtures (`tools/export_rust_reference.py`) as an explicit, reviewed action. A suspected Python defect needs an explicit fix decision; Rust results must not silently differ from Python.
+- Keep the `behave-fire` core free of normal and build dependencies and of any Python, NumPy, or C++ requirement. Record intentional Rust/Python differences in `docs/BACKEND_DIFFERENCES.md`.
+- Never publish to PyPI or crates.io, create release tags, or enable publishing switches without the user's direct permission. See `docs/RELEASING.md` and `docs/CRATES_IO.md`.
+
+## Local-only files and staging
+
+- Plans, ledgers, scratch files, PR-description drafts, agent instruction files (`AGENTS.md`, `.claude/`, skill files), session logs, `development/`, `.superpowers/`, `*.pdb`, and `rust/target/` are never committed or pushed.
+- `.claude/` is listed in `.gitignore`. `AGENTS.md` is not tracked and is excluded locally through `.git/info/exclude`, which lives in the common git directory. Every linked worktree of a clone shares it, but a fresh clone does not inherit it, so add `AGENTS.md` and `.claude/` to `.git/info/exclude` once per clone. A worktree created from a branch that does not track `AGENTS.md` has no copy of the guidance file, so bootstrap the local guidance files per worktree.
+- Stage explicit paths. Never use `git add -A`, `git add .`, or `git commit -a`.
+- Check `git diff --cached --name-only` before every commit and `git diff --name-only <base> HEAD` after it. Stop and report if a local-only file appears.
+
+### Fresh clones and linked worktrees
+
+Set up the exclusions once per clone, using `git rev-parse --git-path info/exclude`
+to locate the common exclusion file. Add `AGENTS.md` and `.claude/` on separate
+lines if they are absent. Linked worktrees share that exclusion file.
+
+Bootstrap local guidance separately in each worktree: create an untracked
+`AGENTS.md` and, when used, `.claude/CLAUDE.md` with a short pointer to these
+procedures. Preserve personal instructions locally. Do not copy personal paths,
+session-context settings, or personal e-mail addresses into tracked documents.
+
+## Branches, commits, and pushes
+
+1. Create a focused work branch from its intended PR base under the merge
+   routing below. Keep unrelated edits, generated results, temporary files,
+   and local reference data out of the change. Check the staged diff before
+   committing.
+2. Use commits that describe the actual change. Do not add AI authorship or
+   attribution statements to commit messages, PR titles, or PR descriptions.
+   All commits must be verified and authored by a human. Use the GitHub noreply
+   address `127547449+gagreene@users.noreply.github.com` for commits, tags,
+   and package metadata, never a personal e-mail address. Before the first commit,
+   check `git config user.email`; stop and tell the user if it differs.
+3. Coding agents must obtain the user's **direct permission** before creating
+   or amending any commit. They must obtain **separate direct permission** before
+   pushing a commit, branch, or tag. Permission to edit, test, stage, prepare a
+   PR, or continue work does not grant permission to commit or push. Do not
+   automate commits or pushes without explicit user authorization for each action.
+   After preparing and validating changes, stop and report what is ready, then
+   ask separately before committing and before pushing. Never otherwise modify
+   an existing commit without the user's direct permission.
+
+## Merge routing and releases
+
+Version numbers use `MAJOR.MINOR.PATCH` (for example, `0.1.0`). The Python version
+comes from `rust/crates/behave-py/Cargo.toml`, not `pyproject.toml`. TestPyPI
+rehearsals use release candidates `MAJOR.MINOR.PATCHrcN` with `N` starting at 1:
+Cargo `0.1.0-rc.1` builds Python `0.1.0rc1`. Each TestPyPI upload needs a new `N`.
+The standalone core crate keeps its own version in
+`rust/crates/behave-fire/Cargo.toml`. A change to only these first-party version
+fields (including the matching `rust/Cargo.lock` entries and the core version
+requirement in `behave-py`) is a version-only change. No manifest or lock change
+needs new C++ comparison evidence unless it changes the pinned C++ reference (see
+"Pinned C++ comparisons"). Two branches live permanently, and neither may ever
+be deleted:
+
+- `master` holds released code only. Every release tag is on `master`.
+- `pre_release` is the integration branch for all work toward the next release,
+  whatever its size.
+
+Route every change as follows:
+
+| Change | Work branch starts from | PR target |
+| --- | --- | --- |
+| Standalone change or bottom PR of a next-release stack | `pre_release` | `pre_release` |
+| Upper PR in a dependent next-release stack | Preceding stack branch | Preceding stack branch until it lands, then retarget as the stack advances |
+| Hotfix for a serious defect in released code | `master` (`hotfix/<name>`) | `master` |
+
+Do not classify a change as a patch, minor, or major change when its PR is opened.
+The owner chooses the version when the release is promoted, from the combined
+changes: anything that alters inputs, results, or documented behavior is at least a
+minor release, and only fixes with no such change make a patch release.
+
+### Stacked pull requests
+
+Dependent PRs may target preceding branches within the same repository. The
+bottom PR targets `pre_release`; all PRs in the stack collectively must land on
+`pre_release`. An upper PR's temporary base is not a separate integration destination.
+
+Use `gh stack` to manage the stack when available. Land the bottom PR first, then
+let the stack workflow rebase and retarget remaining PRs as predecessors merge.
+Verify the resulting bases and commit ranges after each transition. Resolve
+conflicts before continuing, and preserve the reviewed scope of each layer.
+
+Every PR keeps its own review and test record. A rebase changes its head commit:
+rerun the full default suite and update the recorded SHA and results before that
+PR merges. Stack management does not grant permission to commit, push, merge,
+delete branches, or update either permanent branch directly.
+
+Landing a stack is a separate, explicitly authorized step for each layer. Merge
+commits are the project's preference; the installed `gh stack` supports merge,
+squash, and rebase methods, so this is a policy choice, not a tool limitation.
+To land one layer, use the single-PR command with a head guard, then synchronize:
+
+```shell
+gh pr merge <bottom-pr-number> --repo gagreene/behave_fire --merge --match-head-commit <tested-head-sha>
+gh stack sync
+```
+
+Never use an unqualified `gh stack merge` or `--yes` as a one-layer shortcut: they
+can merge several PRs atomically. Do not pass `--prune` to `gh stack sync` (it
+deletes branches). After each layer lands, verify that the next PR targets
+`pre_release` and that its commit range is unchanged, then rerun its tests.
+
+### Release notes
+
+A next-release PR, including an upper stacked PR, that changes behavior adds its bullet under an `Unreleased`
+heading at the top of `CHANGELOG.md` (create the heading if it is absent) and does
+not change the package version. Breaking changes, and the action users need to take,
+go in a `Breaking changes and action needed` block of the same section.
+
+### Releasing
+
+1. Confirm that `pre_release` holds everything intended for the release and that
+   every PR in it has its test record.
+2. Set the version in a version-bump PR into `pre_release`. Along with a hotfix PR, it
+   is the only PR that changes the version. It edits the version in
+   `rust/crates/behave-py/Cargo.toml` and the matching `rust/Cargo.lock` entry; the
+   Python version is dynamic and comes from that manifest, so `pyproject.toml` never
+   carries a version. For a final release, the same PR renames the `Unreleased` heading
+   of `CHANGELOG.md` to the new version and date. Release candidates (`rcN`) keep the
+   `Unreleased` heading until the final release.
+3. Open a promotion PR from `pre_release` into `master`. Its description carries the
+   test record for the head of `pre_release`.
+4. After the owner merges it, run the full test suite on Linux, macOS, and Windows
+   before tagging (use the CI matrix when one is configured), then create an
+   annotated tag on `master`. Release tags use the `vMAJOR.MINOR.PATCH` form (for
+   example, `v1.2.3`).
+5. `master` is now one merge commit ahead of `pre_release`: merge `master` back into
+   `pre_release` through a PR, as a merge commit, so that the two branches stay equal
+   after every release.
+
+### Hotfixes
+
+When a serious defect is found in released code and cannot wait for the next release:
+
+1. Branch `hotfix/<name>` from `master`, fix the defect with a regression test, and
+   open a PR into `master`. PRs that are open on `pre_release` are not blocked or
+   changed by this.
+2. The hotfix PR is its own release: it bumps the patch version (in
+   `rust/crates/behave-py/Cargo.toml` and `rust/Cargo.lock`) and adds a section for
+   the new version to `CHANGELOG.md`. After the owner merges it, run the full test
+   suite and tag, as for any release.
+3. Merge `master` back into `pre_release` through a PR. Resolve any conflict with
+   unreleased work in that PR, where the author of the fix is best placed to do it;
+   the open feature PRs then only need "Update branch". If `pre_release` already
+   holds a different fix for the same defect, keep the correct one and say so in the PR.
+
+## Local tests before every PR merge
+
+Run the full local check against the **latest PR commit** before merging. Every
+PR runs both pytest routes and the Rust checks, whatever the PR changes. The
+pinned C++ comparisons are separate (see "Pinned C++ comparisons"). The project builds with Maturin, so
+`pip install -e .` needs a Rust toolchain. From the repository root, the
+Python-only route installs dependencies without building or installing the project:
+
+```shell
+uv sync --locked --no-install-project --extra test --extra dev
+uv run --no-sync python -m pytest -vv
+```
+
+The native route builds the extension (Rust required) and fails, rather than skips,
+if it is missing or incompatible:
+
+```shell
+uv sync --locked --extra test --extra dev
+uv run --no-sync python -m pytest --require-rust -vv
+```
+
+Run the Rust checks on every PR. There is no `Cargo.toml` at the repository root,
+so every command passes `--manifest-path`:
+
+```shell
+cargo fmt    --manifest-path rust/Cargo.toml --all -- --check
+cargo clippy --manifest-path rust/Cargo.toml --workspace --all-targets --locked -- -D warnings
+cargo test   --manifest-path rust/Cargo.toml -p behave-fire --locked --no-fail-fast
+cargo doc    --manifest-path rust/Cargo.toml --workspace --no-deps --locked
+cargo +<MSRV> check --manifest-path rust/Cargo.toml --workspace --all-targets --locked
+```
+
+### Style and integrity checks
+
+Run these against the PR's latest commit as well, and record the outcome with the test record:
+
+```shell
+python -m ruff check src tests tools
+python tools/check_function_order.py --require-labels
+python tools/cpp_reference.py --check
+python tools/cpp_inventory.py --check
+python tools/export_cpp_crate.py --check
+git diff --check <base> HEAD
+```
+
+The three `cpp_*`/`export_*` commands check the committed C++ observations, the coverage
+inventory, and the crate-local fixture copies. They check integrity, not scientific parity.
+
+### Running the suites reliably
+
+- Use the project interpreter and run from the repository root (`pytest.ini` puts `src`, the
+  root, and `tests` on the path). Pass the options of the recorded command, normally
+  `--require-rust -W error` for the native route and `-W error` for the Python-only route.
+- `pytest.ini` already adds `-q`. Do not add another `-q`: `-qq` removes the final
+  `N passed` summary line that the PR test record needs.
+- On Windows, add `-p no:cacheprovider --basetemp <scratch directory>` if a locked `.pytest_cache`
+  or an old temporary directory stops collection.
+- The Python-only route must not see a built extension. An ignored `_rust` binary left in
+  `src/behave_fire/` from the native route makes the route a native run. Run the Python-only route
+  in a separate clean clone checked out at the PR's commit (a `git archive` copy is not enough:
+  some tests call `git`), or with the extension removed.
+- Build the extension from the PR's commit before the native route, and rebuild it after any
+  change under `rust/`. On Windows, use a short `CARGO_TARGET_DIR` outside deeply nested
+  worktrees: long target paths exceed linker limits.
+- Compare content with line endings normalized. Git's autocrlf can make Windows runs pass where
+  Linux or macOS fail, and a few files in the repository carry CRLF endings. Keep each file's
+  existing line endings when editing it.
+- Several files are hash-pinned in `tests/data/cpp_reference/hashes.json` (for example the
+  `tools/cpp_*.py` modules, which includes docstring text). Editing one changes its digest and
+  fails the `test_cpp_reference` tests. Refresh those hashes only through the reviewed
+  regeneration described under "C++ parity", never by weakening a check.
+- Record the exact counts (passed, skipped, deselected, subtests) from the final summary line.
+  Counts differ between the routes and change when tests are added or deselected, so do not
+  compare them with an earlier run's numbers without explaining the difference.
+### Pinned C++ comparisons
+
+The comparisons of Python and Rust outputs with the pinned C++ outputs are needed only when the
+pinned upstream C++ reference changes: a new pin in `reference/behave_cpp`, or regenerated C++
+observations (the `cases.jsonl` and `results.jsonl` files under `tests/data/cpp_reference/`).
+Changes to the hash list, tolerance or approval wording, manifests of unchanged observations, or
+tooling do not count. They are not part of the local check for an ordinary PR, of CI, or of a
+release.
+
+The Python comparisons carry the `cpp_comparison` marker, and the default `pytest` run deselects
+them (`pytest.ini` adds `-m "not cpp_comparison"`; CI and the wheel suites also deselect them with
+`-m "not cpp_comparison"` and `--skip-cpp-comparisons` to `tools/test_native_wheel_suite.py`).
+The Rust comparison tests in `rust/crates/behave-fire/tests/` are marked `#[ignore]`, so plain
+`cargo test`, CI, and the extracted crate skip them.
+`tests/integration/test_cpp_comparison_selection.py` pins both sets. The comparisons enforce the
+owner's Surface caps for all 583 available numbered cases and 139 paired custom controls, plus the
+exact binary64 rules for FireSize, Ignite, and Mortality. The remaining measured modules retain
+their measurement-only policies. Deliberate-failure tests
+(`tests/integration/test_cpp_local_enforcement.py` and the `perturbed_cpp_copy_*` Rust tests)
+perturb a temporary copy of a fixture and prove that a cap violation or a one-ulp exact mismatch
+fails the check.
+
+When the pin changes, build the native extension from the PR's commit and run both sets:
+
+```shell
+uv run --no-sync python -m pytest --require-rust -m cpp_comparison -rA
+cargo test --manifest-path rust/Cargo.toml -p behave-fire --locked --no-fail-fast -- --ignored
+```
+
+Then record a platform's full comparison with `tools/cpp_receipt.py` (see "Local comparison
+receipts" in [CPP_VALIDATION.md](CPP_VALIDATION.md)); the receipt and its archive stay local and are
+not committed or published. CI still
+checks Python/Rust parity, fixture and reference-data integrity, packaging, and installation. The
+live C++ lane (`cpp_live`) and C++ qualification are separate steps (see
+[CPP_VALIDATION.md](CPP_VALIDATION.md)).
+`<MSRV>` is the `rust-version` declared in `rust/Cargo.toml` (currently 1.78). After
+any change under `rust/`, rebuild the extension before the native route (a plain
+`uv sync` does not notice Rust source changes; use `uv sync --reinstall-package behave-fire`).
+
+Document any skips, failures, or unavailable platform checks; a failed full suite
+does not satisfy the passing-test checkbox below. If pytest cannot use its cache
+folder, add `-p no:cacheprovider`.
+
+Rerun the suite after changes to the PR branch. Record the command, Python
+version, operating system, latest commit SHA, and pass/skip counts in the PR description.
+When the PR changes the pinned C++ reference, also record the pinned C++ comparison
+results (Python `-m cpp_comparison` and Rust `-- --ignored` counts). Do not treat a run against an earlier commit as validation of the
+current PR head.
+
+### CI tiers
+
+The `CI` workflow (`.github/workflows/ci.yml`) starts with a `plan` job
+(`tools/ci_plan.py`) that chooses one tier for the whole run. The full wheel matrix runs
+once per promotion, not on every merge into `pre_release`:
+
+- **Quick tier**, for a pull request that does not target `master` (including each
+  upper layer of a stack) and for a push to `pre_release` (a merge): Python lint and
+  function order, `cargo fmt --check`, Clippy, the Rust core tests and the
+  documentation build on one operating system, `python-only` on one Python
+  version, and `native-pytest` on one Linux job. The MSRV, wheel, and crate
+  validation jobs are skipped.
+- **Full tier**, for a promotion or hotfix pull request into `master`, a call from
+  `release.yml`, and a manual dispatch with scope `full`: every job and every matrix
+  row, including the wheel and crate validation. The wheel validation starts only
+  after the other jobs have passed. When every full-tier job of a pull request into
+  `master` passes, the `full-result` job uploads a `ci-full-result` artifact that
+  records the tested merge tree.
+- **Reused**, for the push to `master` that lands such a pull request: the `plan` job
+  compares the landed Git tree with the tree recorded by the latest successful full
+  run of that pull request's final head. When they are equal, it reports that run in
+  the job summary and skips every other job. When the proof is missing or the trees
+  differ, the push runs the full tier.
+- **Targeted**, for a manual dispatch with scope `musl`, `sdist`, or
+  `musl-and-sdist`: only the named artifacts are built and tested, for
+  platform-specific changes. For example, `gh workflow run CI --ref <branch> -f
+  scope=musl-and-sdist` builds the musl and pure wheels, runs the Alpine install
+  matrix and the full native musl suite, and builds and checks the source
+  distribution, without the other platforms.
+
+A newer run for the same pull request, or for `pre_release`, cancels the older one.
+Every other run (`master`, tags, manual dispatch) has its own concurrency group, so
+it is never cancelled and never replaces a queued run, because each `master` run
+gates a release. Changing a pull request's base branch re-runs the workflow, so
+retargeting a pull request to `master` runs the full tier; an edit to its title or
+description starts a run in which every job is skipped. The quick tier does not
+replace the local full suite and the test record above, which remain required for
+every PR.
+
+## Dependency changes
+
+- `pyproject.toml` is the declaration of the package's dependencies, and
+  `requirements.txt` must stay consistent with it.
+- Raise a minimum version (a `>=` floor) only after confirming the exact version
+  installs on every supported Python version and operating system. Do not rely on a
+  dry-run resolution, which can silently pick a newer version.
+- A numerical change after an upgrade is a behavior change, not a tooling update.
+  Review it as such before merging.
+
+## Pull requests and merge review
+
+- Every branch merge requires a PR, including promotions, hotfixes, and the
+  merge of `master` back into `pre_release`. Follow the target branch in the
+  merge routing above. Do not merge or fast-forward work branches directly into
+  either permanent branch.
+- Every PR description must include this checkbox and the test record:
+
+  ```markdown
+  - [ ] Full default test suite passed locally against this PR's latest commit.
+
+  Commit SHA:
+  Python / OS:
+  Command:
+  Result (passed / skipped):
+  C++ comparisons (`not applicable` unless the pinned C++ reference changed; then Python `-m cpp_comparison`, Rust `-- --ignored`):
+  Additional opt-in tests or limitations:
+  ```
+
+- Check the box only after the full default suite passes on the latest commit.
+  If tests were not run or did not pass, leave it unchecked and explain why.
+  **Do not merge a PR while the box is unchecked.** Reviewers must verify the
+  recorded SHA and results before merging.
+- Describe changes to equations, constants, units, and regression risks in the PR.
+  Because the package targets parity with the Behave C++ reference implementation,
+  cite the reference source for any changed equation or constant. Add or update
+  tests for behave_fire-owned behavior; avoid tests that merely repeat behavior
+  owned by external dependencies.
+
+The checkbox is a reviewer-enforced rule, not a GitHub-required status check. A
+checked box records the author's local test result; it does not replace review of
+the test output or prove that other operating systems passed.
+
+Coding agents must obtain direct permission before pushing release tags.
+
+## Python packaging and source tests
+
+Use the procedures in [RELEASING.md](RELEASING.md) for build-only GitHub runs, downloading the complete seven-platform native wheel set, the universal fallback wheel, and source distribution validation. Every tested OS/architecture has a native wheel, including Alpine/musl x86-64 and Windows ARM64; pure-only installation remains independently tested. Python-only source tests must use `uv sync --locked --no-install-project --extra test --extra dev` and `uv run --no-sync python -m pytest`; never install the project editable in that route. The native test route must run `python -m pytest --require-rust` against a built extension. The test extra contains pytest and PyYAML, without optional raster dependencies. All Python package release tags target approved released commits on `master`; the standalone Rust core has its own version and tag namespace.
+
+
+## Test organization
+
+- Put Python tests in `tests/unit`, `tests/integration`, or `tests/regression` and name them `test_*.py`. Shared helpers live at the top of `tests/`, and fixtures live in `tests/data/`.
+- Unit tests exercise an isolated function or contract. Integration tests exercise components, backends, or distribution tooling together. Regression tests preserve fixes for confirmed defects and state the original failure in the docstring. Use the smallest input that reproduces the defect.
+- Pytest applies `integration` and `regression` from the tier directory. The collection test checks for agreement. Select a tier with `python -m pytest -m "integration and not cpp_comparison"` or `python -m pytest -m "regression and not cpp_comparison"`: a command-line `-m` replaces the default `-m "not cpp_comparison"` from `pytest.ini`, so a bare `-m integration` also selects the pinned C++ comparisons.
+- Keep pinned C++ observations under the `cpp_reference` marker, and mark every test that compares Python or Rust outputs with pinned C++ outputs `cpp_comparison` (Python) or `#[ignore = "pinned C++ comparison: run with --include-ignored when the pinned C++ reference changes"]` (Rust), then add it to `tests/integration/test_cpp_comparison_selection.py`. See [CPP_VALIDATION.md](CPP_VALIDATION.md) for offline validation and live qualification commands.
+
+
+## C++ parity
+
+The coverage unit is hybrid (owner decision 11, 2026-11-13). Every public C++ method belongs to a route bundle, and every scientific candidate with Python or Rust targets also has a per-function status. State and lifecycle methods are exercised through bundle contracts. Route assignment and source-derived candidate mappings are not execution evidence. During pilot preparation, `pending_pilot` and `not_in_pilot` explicitly identify work that has no qualified numerical dataset; neither status is a waiver or a claim of tested coverage. The offline inventory check validates the committed snapshot without the C++ checkout. Its `--require-ready` gate rejects a snapshot with no executable scientific route. A tested status requires hashed cases, results, a manifest, and the owner's approved field policy and finding decision.
+
+- Python remains the behavioral reference of this repository. The official upstream C++ in `reference/behave_cpp`, pinned to `f3b2943e69abca942e795c5b1b45276f6338abb5`, is the validation oracle for the operations it can execute safely. Every Python and Rust implementation of Behave scientific logic is compared with it, and every difference is either fixed with the owner's approval or recorded as an owner-approved finding.
+- Every public C++ function has an entry in the coverage inventory (`tests/data/cpp_reference/inventory.json`) with its fully qualified signature and a status of tested, waived (owner-approved, with a reason), no counterpart, unreachable oracle, or deferred (owner-approved and time-limited, used for the C++ containment code while the module is out of the repository). A waiver or a deferral needs the owner's approval and a reason. A new or changed ported function needs an inventory entry in the same PR.
+- Every output field of every compared operation has a classification in the tolerance policy: exact, relative, absolute, angular, or documented difference.
+- Do not loosen a tolerance, widen a comparison, skip a test, or regenerate a golden merely to make a test pass. A golden refresh requires a written reason that names the C++ revision, the driver, the inputs, the build, and the defect in the old baseline.
+- Record every intended difference from C++ as a numbered finding in the findings register, and pin the exact difference in a test (both the C++ value and the port value), so that a change on either side fails.
+- The driver never sends an ID outside 0 to 255 to C++, because the upstream storage and getters are unchecked for other values. Every operation also declares and enforces its own index, enum, derived-index, and conversion bounds before any C++ call (for example Western Aspen model numbers 1 to 5, and the month, humidity, shading, slope, and time-of-day indices of the fine dead fuel moisture tool). Such cases are recorded as unavailable and are never filled with invented C++ results.
+- Change the pinned C++ revision only in a dedicated PR whose purpose is to update behave_fire to a newer upstream version. Do not change the pin as part of unrelated work.
+- No scientific test and no automatic job discovers or compares the pinned revision with the upstream default branch. Detecting and adopting newer upstream versions is a manual decision by the owner. Explicit retrieval of pinned dependencies (`uv sync`, wheel installs) and of the reference checkout at its pinned SHA is allowed.
+- A PR that changes ported science states the pinned C++ SHA it was checked against in its description, and lists new or changed findings.
+- A PR that changes a golden dataset includes the written refresh reason (the C++ revision, the driver, the inputs, the build, and the defect in the old baseline) and regenerates only through the explicit tools below, then reruns the integrity checks in "Style and integrity checks". Review the regenerated files like code.
+  - Python/Rust parity fixtures in `tests/data/rust_port/`: `python tools/export_rust_reference.py` writes them from the Python implementation, and `--check` reports missing or changed fixtures without writing. A suspected Python defect needs an explicit fix decision first.
+  - C++ observations in `tests/data/cpp_reference/`: `python tools/cpp_reference.py --generate --driver <driver> --attestation <attestation> --reason "<reason>"`. Generation needs an attested driver and a written reason, and a live run first checks the pinned checkout with `python tools/cpp_reference.py --verify-live`.
+  - The expected hash list `tests/data/cpp_reference/hashes.json`, after an intended change to a hashed file such as a `tools/cpp_*.py` module: `python tools/cpp_reference.py --sync-hashes --reason "<reason>"`. It records artifact identities and changes no observation.
+  - The standalone crate's fixture copies: `python tools/export_cpp_crate.py` copies the reviewed inputs and never runs C++ or calculates goldens (`--check` only reports drift).
+- A PR that changes the pinned C++ revision does only that work: the submodule update, regenerated goldens, ports, and documentation updates.
+- Python-facing numerical behavior changes found by a comparison are described plainly in the PR and need the owner's explicit approval.
+- Do not edit files inside the pinned C++ checkout. The driver and build files live in the overlay folder.
+- No C++ source, notice text, or built driver is copied into any published artifact. The submodule `reference/behave_cpp` and the overlay are excluded from the sdist, wheels, and the crate archive, and a packaging check fails if they appear. The C++ is built as upstream builds it, for local use only, and the Phase 1 audit records the file-level license notices (the upstream repository says public domain, but some files carry author copyright notices and one group declares GPL 2).
+
+## Code style and linting
+
+- Function order: in every code file the checker supports (Python and Rust), private functions come first and functions are alphabetical within each group, including methods in a class or `impl` block. For other languages the rule is a manual review rule. A different order is allowed only where language idiom or an import-time dependency requires it, marked with `# order-exempt: <reason>` (Rust: `// order-exempt: <reason>`); a marker without a reason exempts nothing. Test files have their own intentional order (below), which is an exception to the alphabetical rule for tests.
+- Test files: helpers come first in the same order, then the tests in groups that start with a `# ---- <label> ----` comment (Rust: `// ---- <label> ----`). Every test belongs to a group in its own scope. Group labels are alphabetical, with "other tests" last. Tests keep their order inside a group. The standalone legacy harness is exempt from the label requirement.
+- Underscore and dunder ordering: Python: dunder methods first, then other underscore names, then public names, each group alphabetical (case-insensitive, full names). Rust: functions without `pub` first, then `pub` functions. The checker implements the same rule (decided by the owner, 2026-11-12).
+- Python lint: `python -m ruff check src tests tools`, configured in `pyproject.toml` with line length 120, source roots `src`, `tests`, and `tools`, and the rule families `E`, `F`, `I`, `W`, `UP`, and `B`, with no ignore list. The ruff version is pinned. The blocking `style` CI job runs in the quick tier and reusable release CI, checks Python lint and function order plus Rust format and strict Clippy, and must pass before wheel validation starts. No ignore list or additional exclusion is enabled; exceptions require owner approval and a reason.
+- Rust lint and format: `cargo fmt --manifest-path rust/Cargo.toml --all -- --check` and `cargo clippy --manifest-path rust/Cargo.toml --workspace --all-targets --locked -- -D warnings`.
+- A reorder is its own commit, separate from lint fixes and from behavior changes. Mechanical commits are verified: the checker compares fully qualified function identities, signatures, decorators and attributes, defaults, and bodies, proves that all other code is unchanged except approved provenance changes, and normalizes only declaration order, and the full suite gives the same results. Under the squash policy the reorder categories (Python production, Rust production, Rust tests) are separate sequential PRs.
+- A change to a hashed source (`behave.py` and every `components/*.py`, plus the four files that `tools/check_rust_tables.py` hashes) refreshes both sets of reference provenance, and a change to a function signature or annotation is classified as signature metadata, not as a hash-only change. Run `python tools/export_rust_reference.py --check` and `python tools/check_rust_tables.py --check` before opening the PR.
+- Run the style checks against the PR's latest commit and record them in the PR description with the test record.
+
+The checker tests cover controlled snippets and assert that the whole repository passes its own scanner. Run `python tools/check_function_order.py --require-labels` to match the style CI check. `--prove-reorder BEFORE AFTER` verifies one Python or Rust file pair. Python ASTs retain signatures, decorators, defaults, bodies, and scope; Rust comparison retains tokens, attributes, string contents, and enclosing impl/module identities. Duplicate same-named definitions retain their relative order. Runtime/import tests and the full suite remain required because structural proof alone cannot establish import-time safety.

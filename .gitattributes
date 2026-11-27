@@ -1,0 +1,38 @@
+# Generated contracts and tables are checked through deterministic exporters.
+tests/data/rust_api_inventory.json linguist-generated=true
+tests/data/rust_port/*.json linguist-generated=true
+# The sdist fixture check compares archived bytes with the committed blobs, so keep them identical on Windows.
+tests/data/rust_port/*.json text eol=lf
+rust/crates/behave-fire/tests/data/* linguist-generated=true
+rust/crates/behave-fire/src/generated/*.rs linguist-generated=true
+
+# Release artifacts preserve identical notice bytes on every build platform.
+LICENSE text eol=lf
+NOTICE text eol=lf
+LICENSES/* text eol=lf
+rust/crates/behave-fire/LICENSE text eol=lf
+rust/crates/behave-fire/NOTICE text eol=lf
+rust/crates/behave-fire/LICENSES/* text eol=lf
+
+# Pinned C++ observation hashes must survive Windows and Unix checkouts.
+tests/data/cpp_reference/** text eol=lf
+rust/crates/behave-fire/tests/data/cpp_reference/** text eol=lf
+reference/behave_cpp_overlay/** text eol=lf
+tools/cpp_reference.py text eol=lf
+tools/cpp_controls.py text eol=lf
+tools/cpp_calibrate.py text eol=lf
+tools/cpp_crown.py text eol=lf
+tools/cpp_fine_dead_fuel_moisture.py text eol=lf
+tools/cpp_fire_size.py text eol=lf
+tools/cpp_ignite.py text eol=lf
+tools/cpp_mortality.py text eol=lf
+tools/cpp_safety.py text eol=lf
+tools/cpp_slope_tool.py text eol=lf
+tools/cpp_spot.py text eol=lf
+tools/cpp_units.py text eol=lf
+tools/cpp_vapor_pressure_deficit.py text eol=lf
+tools/cpp_inventory.py text eol=lf
+tools/check_cpp_driver.py text eol=lf
+tools/export_cpp_crate.py text eol=lf
+tests/*/test_cpp*.py text eol=lf
+rust/crates/behave-fire/tests/cpp_reference.rs text eol=lf

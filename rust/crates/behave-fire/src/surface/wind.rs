@@ -1,0 +1,245 @@
+//! Wind and slope stages with enum-valued direction, height, and adjustment controls.
+use super::{RateVector, WindCoefficients};
+use crate::{
+    math::np_min,
+    units::{SlopeUnit, SpeedUnit},
+};
+
+macro_rules! retaining_wind {
+    ($t:ty, $speed:ty) => {
+        /// Share the exact product order with precomputed packing powers.
+        pub(super) fn wind_phi_product(
+            midflame: $t,
+            wind_b: $t,
+            wind_c: $t,
+            packing_power: $t,
+        ) -> $t {
+            midflame.powf(wind_b) * wind_c * packing_power
+        }
+        /// Share the effective-wind inverse without regrouping floating-point terms.
+        pub(super) fn effective_wind_power(
+            phi: $t,
+            wind_b: $t,
+            wind_c: $t,
+            packing_power: $t,
+        ) -> $t {
+            ((phi * packing_power) / wind_c).powf(1.0 / wind_b)
+        }
+        /// Calculate effective wind speed in mph for ellipse shape.
+        pub fn calculate_effective_wind_speed(
+            spread_rate: $t,
+            no_wind_no_slope_spread_rate: $t,
+            wind_b: $t,
+            wind_c: $t,
+            relative_packing_ratio: $t,
+            wind_e: $t,
+        ) -> $speed {
+            let r0 = if no_wind_no_slope_spread_rate > 0.0 {
+                no_wind_no_slope_spread_rate
+            } else {
+                1.0
+            };
+            let phi = if no_wind_no_slope_spread_rate.is_nan() {
+                <$t>::NAN
+            } else if no_wind_no_slope_spread_rate > 0.0 {
+                spread_rate / r0 - 1.0
+            } else {
+                0.0
+            };
+            match crate::engine::missing::all_above(&[
+                (phi, 0.),
+                (wind_b, 1e-7),
+                (wind_c, 1e-7),
+                (relative_packing_ratio, 1e-7),
+            ]) {
+                None => return <$speed>::NAN,
+                Some(false) => return 0.,
+                Some(true) => {}
+            }
+            let rpr = if relative_packing_ratio > 1e-7 {
+                relative_packing_ratio
+            } else {
+                1.0
+            };
+            let wc = if wind_c > 1e-7 { wind_c } else { 1.0 };
+            let wb = if wind_b > 1e-7 { wind_b } else { 1.0 };
+            let fpm =
+                if phi > 0.0 && wind_b > 1e-7 && wind_c > 1e-7 && relative_packing_ratio > 1e-7 {
+                    effective_wind_power(phi, wb, wc, rpr.powf(wind_e))
+                } else {
+                    0.0
+                };
+            // Exact independent Python speed_from_base factor (unit code 5).
+            (fpm as $speed) * 0.01136363636
+        }
+        /// Calculate wind amplification from midflame ft/min and dimensionless coefficients.
+        pub fn calculate_wind_phi(
+            sigma: $t,
+            midflame_wind_speed: $t,
+            wind_b: $t,
+            wind_c: $t,
+            relative_packing_ratio: $t,
+            wind_e: $t,
+        ) -> $t {
+            match crate::engine::missing::all_above(&[(sigma, 1e-7), (midflame_wind_speed, 1e-7)]) {
+                None => return <$t>::NAN,
+                Some(false) => return 0.,
+                Some(true) => {}
+            }
+            if relative_packing_ratio.is_nan() {
+                return <$t>::NAN;
+            }
+            let rpr = if relative_packing_ratio > 1e-7 {
+                relative_packing_ratio
+            } else {
+                1.0
+            };
+            if sigma > 1e-7 && midflame_wind_speed > 1e-7 {
+                wind_phi_product(midflame_wind_speed, wind_b, wind_c, rpr.powf(-wind_e))
+            } else {
+                0.0
+            }
+        }
+    };
+}
+retaining_wind!(f64, f64);
+
+/// Calculate midflame wind speed in ft/min, normalizing inputs to f64 like Python.
+pub fn calculate_midflame_wind_speed(waf: f64, twenty_foot_wind_speed: f64) -> f64 {
+    waf * twenty_foot_wind_speed
+}
+/// Calculate slope phi with slope units, packing ratio, and reaction-intensity limit.
+pub fn calculate_slope_phi(
+    slope: f64,
+    slope_units: SlopeUnit,
+    packing_ratio: f64,
+    reaction_intensity: f64,
+) -> f64 {
+    let slope_tan = slope_units.to_base(slope).to_radians().tan();
+    if crate::engine::missing::all_above(&[(slope_tan, 1e-7), (packing_ratio, 1e-7)]).is_none() {
+        return f64::NAN;
+    }
+    let pr = if packing_ratio > 1e-7 {
+        packing_ratio
+    } else {
+        1.0
+    };
+    let phi = if slope_tan > 1e-7 && packing_ratio > 1e-7 {
+        5.275 * pr.powf(-0.3) * slope_tan.powi(2)
+    } else {
+        0.0
+    };
+    np_min(phi, 0.9 * reaction_intensity)
+}
+/// Calculate the spread vector in ft/min, correcting north-oriented wind by aspect.
+pub fn calculate_surface_rate_vector(
+    no_wind_no_slope_spread_rate: f64,
+    wind_phi: f64,
+    slope_phi: f64,
+    wind_direction: f64,
+    wind_orientation_mode: crate::engine::WindOrientation,
+    aspect: f64,
+) -> RateVector {
+    let corrected = if wind_orientation_mode == crate::engine::WindOrientation::North {
+        wind_direction - aspect
+    } else {
+        wind_direction
+    };
+    let rad = corrected.to_radians();
+    let slope_rate = no_wind_no_slope_spread_rate * slope_phi;
+    let wind_rate = no_wind_no_slope_spread_rate * wind_phi;
+    let x_component = slope_rate + wind_rate * rad.cos();
+    let y_component = wind_rate * rad.sin();
+    let rate_vector = (x_component.powi(2) + y_component.powi(2)).sqrt();
+    RateVector {
+        x_component,
+        y_component,
+        rate_vector,
+    }
+}
+/// Calculate WAF, using user input only when the method matches and a value is present.
+pub fn calculate_surface_wind_adjustment_factor(
+    canopy_cover: f64,
+    canopy_height: f64,
+    crown_ratio: f64,
+    depth: f64,
+    waf_method: crate::engine::WafMethod,
+    user_waf: Option<f64>,
+) -> f64 {
+    if waf_method == crate::engine::WafMethod::UserInput {
+        if let Some(value) = user_waf {
+            return value;
+        }
+    }
+    calculate_wind_adjustment_factor(canopy_cover, canopy_height, crown_ratio, depth)
+}
+/// Calculate Albini/Rothermel wind coefficients from sigma in ft²/ft³.
+pub fn calculate_surface_wind_coefficients(sigma: f64) -> WindCoefficients {
+    if sigma.is_nan() {
+        return WindCoefficients {
+            safe_sigma: f64::NAN,
+            wind_c: f64::NAN,
+            wind_b: f64::NAN,
+            wind_e: f64::NAN,
+        };
+    }
+    let safe_sigma = if sigma > 1e-7 { sigma } else { 1.0 };
+    WindCoefficients {
+        safe_sigma,
+        wind_c: 7.47 * (-0.133 * safe_sigma.powf(0.55)).exp(),
+        wind_b: 0.02526 * safe_sigma.powf(0.54),
+        wind_e: 0.715 * (-0.000359 * safe_sigma).exp(),
+    }
+}
+/// Convert open wind to twenty-foot ft/min; 10-meter mode divides by 1.15.
+pub fn calculate_twenty_foot_wind_speed(
+    wind_speed: f64,
+    wind_speed_units: SpeedUnit,
+    wind_height_mode: crate::engine::WindHeight,
+) -> f64 {
+    let value = wind_speed_units.to_base(wind_speed);
+    if wind_height_mode == crate::engine::WindHeight::TenMetre {
+        value / 1.15
+    } else {
+        value
+    }
+}
+/// Calculate open or sheltered wind adjustment from canopy fractions, canopy feet, and fuel depth feet.
+pub fn calculate_wind_adjustment_factor(
+    canopy_cover: f64,
+    canopy_height: f64,
+    crown_ratio: f64,
+    depth: f64,
+) -> f64 {
+    let ccf = crown_ratio * canopy_cover / 3.0;
+    let no_canopy = match crate::engine::missing::any_below(&[
+        (canopy_cover, 1e-7),
+        (ccf, 0.05),
+        (canopy_height, 6.),
+    ]) {
+        None => return f64::NAN,
+        Some(value) => value,
+    };
+    if (no_canopy && depth.is_nan()) || (!no_canopy && canopy_height.is_infinite()) {
+        return f64::NAN;
+    }
+    let safe_depth = if depth > 1e-7 { depth } else { 1.0 };
+    let open = if depth > 1e-7 {
+        1.83 / ((20.0 + 0.36 * safe_depth) / (0.13 * safe_depth)).ln()
+    } else {
+        1.0
+    };
+    let ch = if canopy_height > 1e-7 {
+        canopy_height
+    } else {
+        1.0
+    };
+    let cc = if ccf > 1e-7 { ccf } else { 1.0 };
+    let denom = (cc * ch).sqrt() * ((20.0 + 0.36 * ch) / (0.13 * ch)).ln();
+    let canopy = if denom > 1e-7 { 0.555 / denom } else { 1.0 };
+    if no_canopy {
+        open
+    } else {
+        canopy
+    }
+}

@@ -1,0 +1,6 @@
+{"id":"scorch-zero-calm-77","status":"ok","upstream_entries":1,"output_entries":1,"output":{"scorch_height_ft":0}}
+{"id":"scorch-zero-wind-77","status":"ok","upstream_entries":1,"output_entries":1,"output":{"scorch_height_ft":0}}
+{"id":"scorch-zero-calm-14","status":"ok","upstream_entries":1,"output_entries":1,"output":{"scorch_height_ft":0}}
+{"id":"scorch-one-calm-77","status":"ok","upstream_entries":1,"output_entries":1,"output":{"scorch_height_ft":1}}
+{"id":"scorch-one-wind-77","status":"ok","upstream_entries":1,"output_entries":1,"output":{"scorch_height_ft":0.33333333333333331}}
+{"id":"scorch-one-calm-14","status":"ok","upstream_entries":1,"output_entries":1,"output":{"scorch_height_ft":0.5}}

@@ -1,0 +1,2456 @@
+{
+  "schema": 1,
+  "profiles": [
+    {
+      "name": "frozen-windows-correct-rounding",
+      "atan2_f32_bits": [
+        1070141531,
+        1078530011
+      ],
+      "provenance": {
+        "oracle": "Unchanged integer_direction.json; independently replayed all 384 cases with Windows NumPy 2.1.3",
+        "fingerprint_run": "https://github.com/gagreene/behave_fire/actions/runs/41911463296",
+        "fingerprint_artifact": "numpy-direction-oracle-windows-2025"
+      },
+      "overrides": []
+    },
+    {
+      "name": "ubuntu-24.04",
+      "atan2_f32_bits": [
+        1070141530,
+        1078530011
+      ],
+      "provenance": {
+        "platform": "Linux-7.0.0-1017-azure-x86_64-with-glibc2.39",
+        "machine": "x86_64",
+        "libc": [
+          "glibc",
+          "2.39"
+        ],
+        "numpy": "2.5.4",
+        "fixture_sha256": "4541b6bb0d184e86702c0687ad73a2df4c5c9f4801197ab8aed57da5cff6ea1e",
+        "run": "https://github.com/gagreene/behave_fire/actions/runs/41915458525",
+        "commit": "4c9f3ef60e6df15bb5222bface486681e9beca58",
+        "artifact": "numpy-direction-oracle-ubuntu-24.04",
+        "capture_sha256": "52494566c5c13cff5bb67d75feb673e80b53e98c26de1838d8ceeb9da417c469",
+        "oracle": "behave_fire.components.surface.calculate_direction_of_max_spread; no native imports",
+        "disabled_cpu_features": "AVX5124FMAPS,AVX5124VNNIW,AVX512BF16,AVX512BITALG,AVX512BW,AVX512CD,AVX512DQ,AVX512ER,AVX512F,AVX512FP16,AVX512IFMA,AVX512PF,AVX512VBMI,AVX512VBMI2,AVX512VL,AVX512VNNI,AVX512VPOPCNTDQ,AVX512_CLX,AVX512_CNL,AVX512_ICL,AVX512_KNL,AVX512_KNM,AVX512_SKX,AVX512_SPR,X86_V4",
+        "atan2_dispatch": {
+          "fff": {
+            "current": "baseline(X86_V2)",
+            "available": "X86_V4 baseline(X86_V2)"
+          },
+          "ddd": {
+            "current": "baseline(X86_V2)",
+            "available": "X86_V4 baseline(X86_V2)"
+          }
+        }
+      },
+      "overrides": [
+        {
+          "case_index": 21,
+          "identity": {
+            "name": "calculate_direction_of_max_spread",
+            "inputs": {
+              "x_component": {
+                "values": [
+                  -128.0,
+                  -127.0,
+                  -1.0,
+                  0.0,
+                  1.0,
+                  2.0,
+                  126.0,
+                  127.0
+                ],
+                "masks": [
+                  false,
+                  false,
+                  false,
+                  false,
+                  false,
+                  false,
+                  false,
+                  false
+                ],
+                "masked_array": false,
+                "dtype": "int8",
+                "scalar_array": false,
+                "numpy_scalar": false,
+                "math_profile": "numpy-simd",
+                "fill_value": null,
+                "weak_kind": null,
+                "raw_bits": [
+                  18446744073709551488,
+                  18446744073709551489,
+                  18446744073709551615,
+                  0,
+                  1,
+                  2,
+                  126,
+                  127
+                ]
+              },
+              "y_component": {
+                "values": [
+                  32767.0,
+                  65535.0,
+                  65534.0,
+                  127.0,
+                  3.0,
+                  2.0,
+                  1.0,
+                  0.0
+                ],
+                "masks": [
+                  false,
+                  false,
+                  false,
+                  false,
+                  false,
+                  false,
+                  false,
+                  false
+                ],
+                "masked_array": false,
+                "dtype": "uint16",
+                "scalar_array": false,
+                "numpy_scalar": false,
+                "math_profile": "numpy-simd",
+                "fill_value": null,
+                "weak_kind": null,
+                "raw_bits": [
+                  32767,
+                  65535,
+                  65534,
+                  127,
+                  3,
+                  2,
+                  1,
+                  0
+                ]
+              },
+              "rate_vector": {
+                "values": [
+                  1.0,
+                  1.0,
+                  1.0,
+                  1.0,
+                  1.0,
+                  1.0,
+                  1.0,
+                  1.0
+                ],
+                "masks": [
+                  false,
+                  false,
+                  false,
+                  false,
+                  false,
+                  false,
+                  false,
+                  false
+                ],
+                "masked_array": false,
+                "dtype": "float64",
+                "scalar_array": false,
+                "numpy_scalar": false,
+                "math_profile": "numpy-simd",
+                "fill_value": null,
+                "weak_kind": null
+              },
+              "aspect": {
+                "values": [
+                  95.0
+                ],
+                "masks": [
+                  false
+                ],
+                "masked_array": false,
+                "dtype": "float64",
+                "scalar_array": true,
+                "numpy_scalar": false,
+                "math_profile": "numpy-simd",
+                "fill_value": null,
+                "weak_kind": null
+              }
+            },
+            "options": {
+              "wind_orientation_mode": "RelativeToNorth"
+            },
+            "normalize_half_loop": false,
+            "original_loop_dtype": "float32"
+          },
+          "identity_sha256": "ba626c22bae919b843807453abbab3b6d5c9c0b919e41313dd22e5a542d1cb28",
+          "frozen_output": {
+            "values": [
+              5.223808288574219,
+              5.111030578613281,
+              5.0008697509765625,
+              5.0,
+              346.56504821777344,
+              320.0,
+              275.0,
+              275.0
+            ],
+            "masks": [
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+              false
+            ],
+            "masked_array": false,
+            "dtype": "float64",
+            "scalar_array": false,
+            "numpy_scalar": false,
+            "math_profile": "numpy-simd",
+            "fill_value": null,
+            "weak_kind": null
+          },
+          "output": {
+            "values": [
+              5.223808288574219,
+              5.111030578613281,
+              5.000862121582031,
+              5.0,
+              346.56504821777344,
+              320.0,
+              275.0,
+              275.0
+            ],
+            "masks": [
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+              false
+            ],
+            "dtype": "float64",
+            "masked_array": false,
+            "scalar_array": false,
+            "numpy_scalar": false,
+            "fill_value": null,
+            "math_profile": "numpy-simd",
+            "weak_kind": null
+          },
+          "different_cells": [
+            2
+          ]
+        },
+        {
+          "case_index": 23,
+          "identity": {
+            "name": "calculate_direction_of_max_spread",
+            "inputs": {
+              "x_component": {
+                "values": [
+                  -128.0,
+                  -127.0,
+                  -1.0,
+                  0.0,
+                  1.0,
+                  2.0,
+                  126.0,
+                  127.0
+                ],
+                "masks": [
+                  false,
+                  true,
+                  false,
+                  true,
+                  false,
+                  true,
+                  false,
+                  true
+                ],
+                "masked_array": true,
+                "dtype": "int8",
+                "scalar_array": false,
+                "numpy_scalar": false,
+                "math_profile": "numpy-simd",
+                "fill_value": 17.0,
+                "weak_kind": null,
+                "raw_bits": [
+                  18446744073709551488,
+                  18446744073709551489,
+                  18446744073709551615,
+                  0,
+                  1,
+                  2,
+                  126,
+                  127
+                ]
+              },
+              "y_component": {
+                "values": [
+                  32767.0,
+                  65535.0,
+                  65534.0,
+                  127.0,
+                  3.0,
+                  2.0,
+                  1.0,
+                  0.0
+                ],
+                "masks": [
+                  false,
+                  false,
+                  false,
+                  false,
+                  false,
+                  false,
+                  false,
+                  false
+                ],
+                "masked_array": false,
+                "dtype": "uint16",
+                "scalar_array": false,
+                "numpy_scalar": false,
+                "math_profile": "numpy-simd",
+                "fill_value": null,
+                "weak_kind": null,
+                "raw_bits": [
+                  32767,
+                  65535,
+                  65534,
+                  127,
+                  3,
+                  2,
+                  1,
+                  0
+                ]
+              },
+              "rate_vector": {
+                "values": [
+                  1.0,
+                  1.0,
+                  1.0,
+                  1.0,
+                  1.0,
+                  1.0,
+                  1.0,
+                  1.0
+                ],
+                "masks": [
+                  false,
+                  false,
+                  false,
+                  false,
+                  false,
+                  false,
+                  false,
+                  false
+                ],
+                "masked_array": false,
+                "dtype": "float64",
+                "scalar_array": false,
+                "numpy_scalar": false,
+                "math_profile": "numpy-simd",
+                "fill_value": null,
+                "weak_kind": null
+              },
+              "aspect": {
+                "values": [
+                  95.0
+                ],
+                "masks": [
+                  false
+                ],
+                "masked_array": false,
+                "dtype": "float64",
+                "scalar_array": true,
+                "numpy_scalar": false,
+                "math_profile": "numpy-simd",
+                "fill_value": null,
+                "weak_kind": null
+              }
+            },
+            "options": {
+              "wind_orientation_mode": "RelativeToNorth"
+            },
+            "normalize_half_loop": false,
+            "original_loop_dtype": "float32"
+          },
+          "identity_sha256": "66df0d8a460b2610d78f260414d7f75a4e04828e081990388c1e98afee4e895e",
+          "frozen_output": {
+            "values": [
+              5.223808288574219,
+              5.111030578613281,
+              5.0008697509765625,
+              5.0,
+              346.56504821777344,
+              320.0,
+              275.0,
+              275.0
+            ],
+            "masks": [
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+              false
+            ],
+            "masked_array": false,
+            "dtype": "float64",
+            "scalar_array": false,
+            "numpy_scalar": false,
+            "math_profile": "numpy-simd",
+            "fill_value": null,
+            "weak_kind": null
+          },
+          "output": {
+            "values": [
+              5.223808288574219,
+              5.111030578613281,
+              5.000862121582031,
+              5.0,
+              346.56504821777344,
+              320.0,
+              275.0,
+              275.0
+            ],
+            "masks": [
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+              false
+            ],
+            "dtype": "float64",
+            "masked_array": false,
+            "scalar_array": false,
+            "numpy_scalar": false,
+            "fill_value": null,
+            "math_profile": "numpy-simd",
+            "weak_kind": null
+          },
+          "different_cells": [
+            2
+          ]
+        },
+        {
+          "case_index": 57,
+          "identity": {
+            "name": "calculate_direction_of_max_spread",
+            "inputs": {
+              "x_component": {
+                "values": [
+                  -32768.0,
+                  -32767.0,
+                  -1.0,
+                  0.0,
+                  1.0,
+                  2.0,
+                  32766.0,
+                  32767.0
+                ],
+                "masks": [
+                  false,
+                  false,
+                  false,
+                  false,
+                  false,
+                  false,
+                  false,
+                  false
+                ],
+                "masked_array": false,
+                "dtype": "int16",
+                "scalar_array": false,
+                "numpy_scalar": false,
+                "math_profile": "numpy-simd",
+                "fill_value": null,
+                "weak_kind": null,
+                "raw_bits": [
+                  18446744073709518848,
+                  18446744073709518849,
+                  18446744073709551615,
+                  0,
+                  1,
+                  2,
+                  32766,
+                  32767
+                ]
+              },
+              "y_component": {
+                "values": [
+                  32767.0,
+                  65535.0,
+                  65534.0,
+                  127.0,
+                  3.0,
+                  2.0,
+                  1.0,
+                  0.0
+                ],
+                "masks": [
+                  false,
+                  false,
+                  false,
+                  false,
+                  false,
+                  false,
+                  false,
+                  false
+                ],
+                "masked_array": false,
+                "dtype": "uint16",
+                "scalar_array": false,
+                "numpy_scalar": false,
+                "math_profile": "numpy-simd",
+                "fill_value": null,
+                "weak_kind": null,
+                "raw_bits": [
+                  32767,
+                  65535,
+                  65534,
+                  127,
+                  3,
+                  2,
+                  1,
+                  0
+                ]
+              },
+              "rate_vector": {
+                "values": [
+                  1.0,
+                  1.0,
+                  1.0,
+                  1.0,
+                  1.0,
+                  1.0,
+                  1.0,
+                  1.0
+                ],
+                "masks": [
+                  false,
+                  false,
+                  false,
+                  false,
+                  false,
+                  false,
+                  false,
+                  false
+                ],
+                "masked_array": false,
+                "dtype": "float64",
+                "scalar_array": false,
+                "numpy_scalar": false,
+                "math_profile": "numpy-simd",
+                "fill_value": null,
+                "weak_kind": null
+              },
+              "aspect": {
+                "values": [
+                  95.0
+                ],
+                "masks": [
+                  false
+                ],
+                "masked_array": false,
+                "dtype": "float64",
+                "scalar_array": true,
+                "numpy_scalar": false,
+                "math_profile": "numpy-simd",
+                "fill_value": null,
+                "weak_kind": null
+              }
+            },
+            "options": {
+              "wind_orientation_mode": "RelativeToNorth"
+            },
+            "normalize_half_loop": false,
+            "original_loop_dtype": "float32"
+          },
+          "identity_sha256": "c4bccd0dcb57f8b6e50019f76c19df4b05e8a2d3c10f720277872595f631e721",
+          "frozen_output": {
+            "values": [
+              50.00086975097656,
+              31.564697265625,
+              5.0008697509765625,
+              5.0,
+              346.56504821777344,
+              320.0,
+              275.0,
+              275.0
+            ],
+            "masks": [
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+              false
+            ],
+            "masked_array": false,
+            "dtype": "float64",
+            "scalar_array": false,
+            "numpy_scalar": false,
+            "math_profile": "numpy-simd",
+            "fill_value": null,
+            "weak_kind": null
+          },
+          "output": {
+            "values": [
+              50.00086975097656,
+              31.564682006835938,
+              5.000862121582031,
+              5.0,
+              346.56504821777344,
+              320.0,
+              275.0,
+              275.0
+            ],
+            "masks": [
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+              false
+            ],
+            "dtype": "float64",
+            "masked_array": false,
+            "scalar_array": false,
+            "numpy_scalar": false,
+            "fill_value": null,
+            "math_profile": "numpy-simd",
+            "weak_kind": null
+          },
+          "different_cells": [
+            1,
+            2
+          ]
+        },
+        {
+          "case_index": 59,
+          "identity": {
+            "name": "calculate_direction_of_max_spread",
+            "inputs": {
+              "x_component": {
+                "values": [
+                  -32768.0,
+                  -32767.0,
+                  -1.0,
+                  0.0,
+                  1.0,
+                  2.0,
+                  32766.0,
+                  32767.0
+                ],
+                "masks": [
+                  false,
+                  true,
+                  false,
+                  true,
+                  false,
+                  true,
+                  false,
+                  true
+                ],
+                "masked_array": true,
+                "dtype": "int16",
+                "scalar_array": false,
+                "numpy_scalar": false,
+                "math_profile": "numpy-simd",
+                "fill_value": 17.0,
+                "weak_kind": null,
+                "raw_bits": [
+                  18446744073709518848,
+                  18446744073709518849,
+                  18446744073709551615,
+                  0,
+                  1,
+                  2,
+                  32766,
+                  32767
+                ]
+              },
+              "y_component": {
+                "values": [
+                  32767.0,
+                  65535.0,
+                  65534.0,
+                  127.0,
+                  3.0,
+                  2.0,
+                  1.0,
+                  0.0
+                ],
+                "masks": [
+                  false,
+                  false,
+                  false,
+                  false,
+                  false,
+                  false,
+                  false,
+                  false
+                ],
+                "masked_array": false,
+                "dtype": "uint16",
+                "scalar_array": false,
+                "numpy_scalar": false,
+                "math_profile": "numpy-simd",
+                "fill_value": null,
+                "weak_kind": null,
+                "raw_bits": [
+                  32767,
+                  65535,
+                  65534,
+                  127,
+                  3,
+                  2,
+                  1,
+                  0
+                ]
+              },
+              "rate_vector": {
+                "values": [
+                  1.0,
+                  1.0,
+                  1.0,
+                  1.0,
+                  1.0,
+                  1.0,
+                  1.0,
+                  1.0
+                ],
+                "masks": [
+                  false,
+                  false,
+                  false,
+                  false,
+                  false,
+                  false,
+                  false,
+                  false
+                ],
+                "masked_array": false,
+                "dtype": "float64",
+                "scalar_array": false,
+                "numpy_scalar": false,
+                "math_profile": "numpy-simd",
+                "fill_value": null,
+                "weak_kind": null
+              },
+              "aspect": {
+                "values": [
+                  95.0
+                ],
+                "masks": [
+                  false
+                ],
+                "masked_array": false,
+                "dtype": "float64",
+                "scalar_array": true,
+                "numpy_scalar": false,
+                "math_profile": "numpy-simd",
+                "fill_value": null,
+                "weak_kind": null
+              }
+            },
+            "options": {
+              "wind_orientation_mode": "RelativeToNorth"
+            },
+            "normalize_half_loop": false,
+            "original_loop_dtype": "float32"
+          },
+          "identity_sha256": "f99121b114a9438f4d9f9e2c9a04e087ff37ab248143efc775f9bb6b66f06b8d",
+          "frozen_output": {
+            "values": [
+              50.00086975097656,
+              31.564697265625,
+              5.0008697509765625,
+              5.0,
+              346.56504821777344,
+              320.0,
+              275.0,
+              275.0
+            ],
+            "masks": [
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+              false
+            ],
+            "masked_array": false,
+            "dtype": "float64",
+            "scalar_array": false,
+            "numpy_scalar": false,
+            "math_profile": "numpy-simd",
+            "fill_value": null,
+            "weak_kind": null
+          },
+          "output": {
+            "values": [
+              50.00086975097656,
+              31.564682006835938,
+              5.000862121582031,
+              5.0,
+              346.56504821777344,
+              320.0,
+              275.0,
+              275.0
+            ],
+            "masks": [
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+              false
+            ],
+            "dtype": "float64",
+            "masked_array": false,
+            "scalar_array": false,
+            "numpy_scalar": false,
+            "fill_value": null,
+            "math_profile": "numpy-simd",
+            "weak_kind": null
+          },
+          "different_cells": [
+            1,
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "name": "macos-15",
+      "atan2_f32_bits": [
+        1070141531,
+        1078530010
+      ],
+      "provenance": {
+        "platform": "macOS-15.8.2-arm64-arm-64bit",
+        "machine": "arm64",
+        "libc": [
+          "",
+          ""
+        ],
+        "numpy": "2.5.4",
+        "fixture_sha256": "4541b6bb0d184e86702c0687ad73a2df4c5c9f4801197ab8aed57da5cff6ea1e",
+        "run": "https://github.com/gagreene/behave_fire/actions/runs/41915458525",
+        "commit": "4c9f3ef60e6df15bb5222bface486681e9beca58",
+        "artifact": "numpy-direction-oracle-macos-15",
+        "capture_sha256": "b46b94881fec0c5ffbb2dfc0d5dbd449de6402b252481bc0f4df365f4f391b35",
+        "oracle": "behave_fire.components.surface.calculate_direction_of_max_spread; no native imports",
+        "disabled_cpu_features": "AVX5124FMAPS,AVX5124VNNIW,AVX512BF16,AVX512BITALG,AVX512BW,AVX512CD,AVX512DQ,AVX512ER,AVX512F,AVX512FP16,AVX512IFMA,AVX512PF,AVX512VBMI,AVX512VBMI2,AVX512VL,AVX512VNNI,AVX512VPOPCNTDQ,AVX512_CLX,AVX512_CNL,AVX512_ICL,AVX512_KNL,AVX512_KNM,AVX512_SKX,AVX512_SPR,X86_V4",
+        "atan2_dispatch": {
+          "fff": {
+            "current": "baseline(NEON NEON_FP16 NEON_VFPV4 ASIMD)",
+            "available": "baseline(NEON NEON_FP16 NEON_VFPV4 ASIMD)"
+          },
+          "ddd": {
+            "current": "baseline(NEON NEON_FP16 NEON_VFPV4 ASIMD)",
+            "available": "baseline(NEON NEON_FP16 NEON_VFPV4 ASIMD)"
+          }
+        }
+      },
+      "overrides": [
+        {
+          "case_index": 33,
+          "identity": {
+            "name": "calculate_direction_of_max_spread",
+            "inputs": {
+              "x_component": {
+                "values": [
+                  -128.0,
+                  -127.0,
+                  -1.0,
+                  0.0,
+                  1.0,
+                  2.0,
+                  126.0,
+                  127.0
+                ],
+                "masks": [
+                  false,
+                  false,
+                  false,
+                  false,
+                  false,
+                  false,
+                  false,
+                  false
+                ],
+                "masked_array": false,
+                "dtype": "int8",
+                "scalar_array": false,
+                "numpy_scalar": false,
+                "math_profile": "numpy-simd",
+                "fill_value": null,
+                "weak_kind": null,
+                "raw_bits": [
+                  18446744073709551488,
+                  18446744073709551489,
+                  18446744073709551615,
+                  0,
+                  1,
+                  2,
+                  126,
+                  127
+                ]
+              },
+              "y_component": {
+                "values": [
+                  1.0,
+                  1.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  1.0,
+                  1.0,
+                  0.0
+                ],
+                "masks": [
+                  false,
+                  false,
+                  false,
+                  false,
+                  false,
+                  false,
+                  false,
+                  false
+                ],
+                "masked_array": false,
+                "dtype": "bool",
+                "scalar_array": false,
+                "numpy_scalar": false,
+                "math_profile": "numpy-simd",
+                "fill_value": null,
+                "weak_kind": null,
+                "raw_bits": [
+                  1,
+                  1,
+                  0,
+                  1,
+                  0,
+                  1,
+                  1,
+                  0
+                ]
+              },
+              "rate_vector": {
+                "values": [
+                  1.0,
+                  1.0,
+                  1.0,
+                  1.0,
+                  1.0,
+                  1.0,
+                  1.0,
+                  1.0
+                ],
+                "masks": [
+                  false,
+                  false,
+                  false,
+                  false,
+                  false,
+                  false,
+                  false,
+                  false
+                ],
+                "masked_array": false,
+                "dtype": "float64",
+                "scalar_array": false,
+                "numpy_scalar": false,
+                "math_profile": "numpy-simd",
+                "fill_value": null,
+                "weak_kind": null
+              },
+              "aspect": {
+                "values": [
+                  95.0
+                ],
+                "masks": [
+                  false
+                ],
+                "masked_array": false,
+                "dtype": "float64",
+                "scalar_array": true,
+                "numpy_scalar": false,
+                "math_profile": "numpy-simd",
+                "fill_value": null,
+                "weak_kind": null
+              }
+            },
+            "options": {
+              "wind_orientation_mode": "RelativeToNorth"
+            },
+            "normalize_half_loop": true,
+            "original_loop_dtype": "float16"
+          },
+          "identity_sha256": "1130507300c014166224e17b40fef93e81e82894b40ce023cfcb70dde2f275ca",
+          "frozen_output": {
+            "values": [
+              94.5523681640625,
+              94.54884338378906,
+              95.0,
+              5.0,
+              275.0,
+              301.56505012512207,
+              275.0,
+              275.0
+            ],
+            "masks": [
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+              false
+            ],
+            "masked_array": false,
+            "dtype": "float64",
+            "scalar_array": false,
+            "numpy_scalar": false,
+            "math_profile": "numpy-simd",
+            "fill_value": null,
+            "weak_kind": null
+          },
+          "output": {
+            "values": [
+              94.5523681640625,
+              94.54884338378906,
+              94.99998474121094,
+              5.0,
+              275.0,
+              301.56505012512207,
+              275.0,
+              275.0
+            ],
+            "masks": [
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+              false
+            ],
+            "dtype": "float64",
+            "masked_array": false,
+            "scalar_array": false,
+            "numpy_scalar": false,
+            "fill_value": null,
+            "math_profile": "numpy-simd",
+            "weak_kind": null
+          },
+          "different_cells": [
+            2
+          ]
+        },
+        {
+          "case_index": 35,
+          "identity": {
+            "name": "calculate_direction_of_max_spread",
+            "inputs": {
+              "x_component": {
+                "values": [
+                  -128.0,
+                  -127.0,
+                  -1.0,
+                  0.0,
+                  1.0,
+                  2.0,
+                  126.0,
+                  127.0
+                ],
+                "masks": [
+                  false,
+                  true,
+                  false,
+                  true,
+                  false,
+                  true,
+                  false,
+                  true
+                ],
+                "masked_array": true,
+                "dtype": "int8",
+                "scalar_array": false,
+                "numpy_scalar": false,
+                "math_profile": "numpy-simd",
+                "fill_value": 17.0,
+                "weak_kind": null,
+                "raw_bits": [
+                  18446744073709551488,
+                  18446744073709551489,
+                  18446744073709551615,
+                  0,
+                  1,
+                  2,
+                  126,
+                  127
+                ]
+              },
+              "y_component": {
+                "values": [
+                  1.0,
+                  1.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  1.0,
+                  1.0,
+                  0.0
+                ],
+                "masks": [
+                  false,
+                  false,
+                  false,
+                  false,
+                  false,
+                  false,
+                  false,
+                  false
+                ],
+                "masked_array": false,
+                "dtype": "bool",
+                "scalar_array": false,
+                "numpy_scalar": false,
+                "math_profile": "numpy-simd",
+                "fill_value": null,
+                "weak_kind": null,
+                "raw_bits": [
+                  1,
+                  1,
+                  0,
+                  1,
+                  0,
+                  1,
+                  1,
+                  0
+                ]
+              },
+              "rate_vector": {
+                "values": [
+                  1.0,
+                  1.0,
+                  1.0,
+                  1.0,
+                  1.0,
+                  1.0,
+                  1.0,
+                  1.0
+                ],
+                "masks": [
+                  false,
+                  false,
+                  false,
+                  false,
+                  false,
+                  false,
+                  false,
+                  false
+                ],
+                "masked_array": false,
+                "dtype": "float64",
+                "scalar_array": false,
+                "numpy_scalar": false,
+                "math_profile": "numpy-simd",
+                "fill_value": null,
+                "weak_kind": null
+              },
+              "aspect": {
+                "values": [
+                  95.0
+                ],
+                "masks": [
+                  false
+                ],
+                "masked_array": false,
+                "dtype": "float64",
+                "scalar_array": true,
+                "numpy_scalar": false,
+                "math_profile": "numpy-simd",
+                "fill_value": null,
+                "weak_kind": null
+              }
+            },
+            "options": {
+              "wind_orientation_mode": "RelativeToNorth"
+            },
+            "normalize_half_loop": true,
+            "original_loop_dtype": "float16"
+          },
+          "identity_sha256": "0a30dc48122cc7b22667506febbe25c4c5ac08ac39ee0b47361cc8388292c39e",
+          "frozen_output": {
+            "values": [
+              94.5523681640625,
+              94.54884338378906,
+              95.0,
+              5.0,
+              275.0,
+              301.56505012512207,
+              275.0,
+              275.0
+            ],
+            "masks": [
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+              false
+            ],
+            "masked_array": false,
+            "dtype": "float64",
+            "scalar_array": false,
+            "numpy_scalar": false,
+            "math_profile": "numpy-simd",
+            "fill_value": null,
+            "weak_kind": null
+          },
+          "output": {
+            "values": [
+              94.5523681640625,
+              94.54884338378906,
+              94.99998474121094,
+              5.0,
+              275.0,
+              301.56505012512207,
+              275.0,
+              275.0
+            ],
+            "masks": [
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+              false
+            ],
+            "dtype": "float64",
+            "masked_array": false,
+            "scalar_array": false,
+            "numpy_scalar": false,
+            "fill_value": null,
+            "math_profile": "numpy-simd",
+            "weak_kind": null
+          },
+          "different_cells": [
+            2
+          ]
+        },
+        {
+          "case_index": 41,
+          "identity": {
+            "name": "calculate_direction_of_max_spread",
+            "inputs": {
+              "x_component": {
+                "values": [
+                  -32768.0,
+                  -32767.0,
+                  -1.0,
+                  0.0,
+                  1.0,
+                  2.0,
+                  32766.0,
+                  32767.0
+                ],
+                "masks": [
+                  false,
+                  false,
+                  false,
+                  false,
+                  false,
+                  false,
+                  false,
+                  false
+                ],
+                "masked_array": false,
+                "dtype": "int16",
+                "scalar_array": false,
+                "numpy_scalar": false,
+                "math_profile": "numpy-simd",
+                "fill_value": null,
+                "weak_kind": null,
+                "raw_bits": [
+                  18446744073709518848,
+                  18446744073709518849,
+                  18446744073709551615,
+                  0,
+                  1,
+                  2,
+                  32766,
+                  32767
+                ]
+              },
+              "y_component": {
+                "values": [
+                  32767.0,
+                  32766.0,
+                  2.0,
+                  1.0,
+                  0.0,
+                  -1.0,
+                  -32767.0,
+                  -32768.0
+                ],
+                "masks": [
+                  false,
+                  false,
+                  false,
+                  false,
+                  false,
+                  false,
+                  false,
+                  false
+                ],
+                "masked_array": false,
+                "dtype": "int16",
+                "scalar_array": false,
+                "numpy_scalar": false,
+                "math_profile": "numpy-simd",
+                "fill_value": null,
+                "weak_kind": null,
+                "raw_bits": [
+                  32767,
+                  32766,
+                  2,
+                  1,
+                  0,
+                  18446744073709551615,
+                  18446744073709518849,
+                  18446744073709518848
+                ]
+              },
+              "rate_vector": {
+                "values": [
+                  1.0,
+                  1.0,
+                  1.0,
+                  1.0,
+                  1.0,
+                  1.0,
+                  1.0,
+                  1.0
+                ],
+                "masks": [
+                  false,
+                  false,
+                  false,
+                  false,
+                  false,
+                  false,
+                  false,
+                  false
+                ],
+                "masked_array": false,
+                "dtype": "float64",
+                "scalar_array": false,
+                "numpy_scalar": false,
+                "math_profile": "numpy-simd",
+                "fill_value": null,
+                "weak_kind": null
+              },
+              "aspect": {
+                "values": [
+                  95.0
+                ],
+                "masks": [
+                  false
+                ],
+                "masked_array": false,
+                "dtype": "float64",
+                "scalar_array": true,
+                "numpy_scalar": false,
+                "math_profile": "numpy-simd",
+                "fill_value": null,
+                "weak_kind": null
+              }
+            },
+            "options": {
+              "wind_orientation_mode": "RelativeToNorth"
+            },
+            "normalize_half_loop": false,
+            "original_loop_dtype": "float32"
+          },
+          "identity_sha256": "e98721c4de1124fb7b3a9a5de7d1bed7dc37d42786b3334b91b8a43356d00c63",
+          "frozen_output": {
+            "values": [
+              50.00086975097656,
+              50.00086975097656,
+              31.565040588378906,
+              5.0,
+              275.0,
+              248.4349365234375,
+              229.99911499023438,
+              229.99911499023438
+            ],
+            "masks": [
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+              false
+            ],
+            "masked_array": false,
+            "dtype": "float64",
+            "scalar_array": false,
+            "numpy_scalar": false,
+            "math_profile": "numpy-simd",
+            "fill_value": null,
+            "weak_kind": null
+          },
+          "output": {
+            "values": [
+              50.00086975097656,
+              50.00086975097656,
+              31.565040588378906,
+              5.0,
+              275.0,
+              248.4349365234375,
+              229.9991455078125,
+              229.9991455078125
+            ],
+            "masks": [
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+              false
+            ],
+            "dtype": "float64",
+            "masked_array": false,
+            "scalar_array": false,
+            "numpy_scalar": false,
+            "fill_value": null,
+            "math_profile": "numpy-simd",
+            "weak_kind": null
+          },
+          "different_cells": [
+            6,
+            7
+          ]
+        },
+        {
+          "case_index": 43,
+          "identity": {
+            "name": "calculate_direction_of_max_spread",
+            "inputs": {
+              "x_component": {
+                "values": [
+                  -32768.0,
+                  -32767.0,
+                  -1.0,
+                  0.0,
+                  1.0,
+                  2.0,
+                  32766.0,
+                  32767.0
+                ],
+                "masks": [
+                  false,
+                  true,
+                  false,
+                  true,
+                  false,
+                  true,
+                  false,
+                  true
+                ],
+                "masked_array": true,
+                "dtype": "int16",
+                "scalar_array": false,
+                "numpy_scalar": false,
+                "math_profile": "numpy-simd",
+                "fill_value": 17.0,
+                "weak_kind": null,
+                "raw_bits": [
+                  18446744073709518848,
+                  18446744073709518849,
+                  18446744073709551615,
+                  0,
+                  1,
+                  2,
+                  32766,
+                  32767
+                ]
+              },
+              "y_component": {
+                "values": [
+                  32767.0,
+                  32766.0,
+                  2.0,
+                  1.0,
+                  0.0,
+                  -1.0,
+                  -32767.0,
+                  -32768.0
+                ],
+                "masks": [
+                  false,
+                  false,
+                  false,
+                  false,
+                  false,
+                  false,
+                  false,
+                  false
+                ],
+                "masked_array": false,
+                "dtype": "int16",
+                "scalar_array": false,
+                "numpy_scalar": false,
+                "math_profile": "numpy-simd",
+                "fill_value": null,
+                "weak_kind": null,
+                "raw_bits": [
+                  32767,
+                  32766,
+                  2,
+                  1,
+                  0,
+                  18446744073709551615,
+                  18446744073709518849,
+                  18446744073709518848
+                ]
+              },
+              "rate_vector": {
+                "values": [
+                  1.0,
+                  1.0,
+                  1.0,
+                  1.0,
+                  1.0,
+                  1.0,
+                  1.0,
+                  1.0
+                ],
+                "masks": [
+                  false,
+                  false,
+                  false,
+                  false,
+                  false,
+                  false,
+                  false,
+                  false
+                ],
+                "masked_array": false,
+                "dtype": "float64",
+                "scalar_array": false,
+                "numpy_scalar": false,
+                "math_profile": "numpy-simd",
+                "fill_value": null,
+                "weak_kind": null
+              },
+              "aspect": {
+                "values": [
+                  95.0
+                ],
+                "masks": [
+                  false
+                ],
+                "masked_array": false,
+                "dtype": "float64",
+                "scalar_array": true,
+                "numpy_scalar": false,
+                "math_profile": "numpy-simd",
+                "fill_value": null,
+                "weak_kind": null
+              }
+            },
+            "options": {
+              "wind_orientation_mode": "RelativeToNorth"
+            },
+            "normalize_half_loop": false,
+            "original_loop_dtype": "float32"
+          },
+          "identity_sha256": "5517f6e700ce52957919568fc157bbae33efe8d3198a9c69c2f8cc810a33af9d",
+          "frozen_output": {
+            "values": [
+              50.00086975097656,
+              50.00086975097656,
+              31.565040588378906,
+              5.0,
+              275.0,
+              248.4349365234375,
+              229.99911499023438,
+              229.99911499023438
+            ],
+            "masks": [
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+              false
+            ],
+            "masked_array": false,
+            "dtype": "float64",
+            "scalar_array": false,
+            "numpy_scalar": false,
+            "math_profile": "numpy-simd",
+            "fill_value": null,
+            "weak_kind": null
+          },
+          "output": {
+            "values": [
+              50.00086975097656,
+              50.00086975097656,
+              31.565040588378906,
+              5.0,
+              275.0,
+              248.4349365234375,
+              229.9991455078125,
+              229.9991455078125
+            ],
+            "masks": [
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+              false
+            ],
+            "dtype": "float64",
+            "masked_array": false,
+            "scalar_array": false,
+            "numpy_scalar": false,
+            "fill_value": null,
+            "math_profile": "numpy-simd",
+            "weak_kind": null
+          },
+          "different_cells": [
+            6,
+            7
+          ]
+        },
+        {
+          "case_index": 69,
+          "identity": {
+            "name": "calculate_direction_of_max_spread",
+            "inputs": {
+              "x_component": {
+                "values": [
+                  -32768.0,
+                  -32767.0,
+                  -1.0,
+                  0.0,
+                  1.0,
+                  2.0,
+                  32766.0,
+                  32767.0
+                ],
+                "masks": [
+                  false,
+                  false,
+                  false,
+                  false,
+                  false,
+                  false,
+                  false,
+                  false
+                ],
+                "masked_array": false,
+                "dtype": "int16",
+                "scalar_array": false,
+                "numpy_scalar": false,
+                "math_profile": "numpy-simd",
+                "fill_value": null,
+                "weak_kind": null,
+                "raw_bits": [
+                  18446744073709518848,
+                  18446744073709518849,
+                  18446744073709551615,
+                  0,
+                  1,
+                  2,
+                  32766,
+                  32767
+                ]
+              },
+              "y_component": {
+                "values": [
+                  1.0,
+                  1.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  1.0,
+                  1.0,
+                  0.0
+                ],
+                "masks": [
+                  false,
+                  false,
+                  false,
+                  false,
+                  false,
+                  false,
+                  false,
+                  false
+                ],
+                "masked_array": false,
+                "dtype": "bool",
+                "scalar_array": false,
+                "numpy_scalar": false,
+                "math_profile": "numpy-simd",
+                "fill_value": null,
+                "weak_kind": null,
+                "raw_bits": [
+                  1,
+                  1,
+                  0,
+                  1,
+                  0,
+                  1,
+                  1,
+                  0
+                ]
+              },
+              "rate_vector": {
+                "values": [
+                  1.0,
+                  1.0,
+                  1.0,
+                  1.0,
+                  1.0,
+                  1.0,
+                  1.0,
+                  1.0
+                ],
+                "masks": [
+                  false,
+                  false,
+                  false,
+                  false,
+                  false,
+                  false,
+                  false,
+                  false
+                ],
+                "masked_array": false,
+                "dtype": "float64",
+                "scalar_array": false,
+                "numpy_scalar": false,
+                "math_profile": "numpy-simd",
+                "fill_value": null,
+                "weak_kind": null
+              },
+              "aspect": {
+                "values": [
+                  95.0
+                ],
+                "masks": [
+                  false
+                ],
+                "masked_array": false,
+                "dtype": "float64",
+                "scalar_array": true,
+                "numpy_scalar": false,
+                "math_profile": "numpy-simd",
+                "fill_value": null,
+                "weak_kind": null
+              }
+            },
+            "options": {
+              "wind_orientation_mode": "RelativeToNorth"
+            },
+            "normalize_half_loop": false,
+            "original_loop_dtype": "float32"
+          },
+          "identity_sha256": "74527ce3f7efd93e4d7073efd4347c2a056e31de660cc1bb2d507a058ec10c0a",
+          "frozen_output": {
+            "values": [
+              94.99824523925781,
+              94.99824523925781,
+              95.0,
+              5.0,
+              275.0,
+              301.56505012512207,
+              275.0,
+              275.0
+            ],
+            "masks": [
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+              false
+            ],
+            "masked_array": false,
+            "dtype": "float64",
+            "scalar_array": false,
+            "numpy_scalar": false,
+            "math_profile": "numpy-simd",
+            "fill_value": null,
+            "weak_kind": null
+          },
+          "output": {
+            "values": [
+              94.99824523925781,
+              94.99824523925781,
+              94.99998474121094,
+              5.0,
+              275.0,
+              301.56505012512207,
+              275.0,
+              275.0
+            ],
+            "masks": [
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+              false
+            ],
+            "dtype": "float64",
+            "masked_array": false,
+            "scalar_array": false,
+            "numpy_scalar": false,
+            "fill_value": null,
+            "math_profile": "numpy-simd",
+            "weak_kind": null
+          },
+          "different_cells": [
+            2
+          ]
+        },
+        {
+          "case_index": 71,
+          "identity": {
+            "name": "calculate_direction_of_max_spread",
+            "inputs": {
+              "x_component": {
+                "values": [
+                  -32768.0,
+                  -32767.0,
+                  -1.0,
+                  0.0,
+                  1.0,
+                  2.0,
+                  32766.0,
+                  32767.0
+                ],
+                "masks": [
+                  false,
+                  true,
+                  false,
+                  true,
+                  false,
+                  true,
+                  false,
+                  true
+                ],
+                "masked_array": true,
+                "dtype": "int16",
+                "scalar_array": false,
+                "numpy_scalar": false,
+                "math_profile": "numpy-simd",
+                "fill_value": 17.0,
+                "weak_kind": null,
+                "raw_bits": [
+                  18446744073709518848,
+                  18446744073709518849,
+                  18446744073709551615,
+                  0,
+                  1,
+                  2,
+                  32766,
+                  32767
+                ]
+              },
+              "y_component": {
+                "values": [
+                  1.0,
+                  1.0,
+                  0.0,
+                  1.0,
+                  0.0,
+                  1.0,
+                  1.0,
+                  0.0
+                ],
+                "masks": [
+                  false,
+                  false,
+                  false,
+                  false,
+                  false,
+                  false,
+                  false,
+                  false
+                ],
+                "masked_array": false,
+                "dtype": "bool",
+                "scalar_array": false,
+                "numpy_scalar": false,
+                "math_profile": "numpy-simd",
+                "fill_value": null,
+                "weak_kind": null,
+                "raw_bits": [
+                  1,
+                  1,
+                  0,
+                  1,
+                  0,
+                  1,
+                  1,
+                  0
+                ]
+              },
+              "rate_vector": {
+                "values": [
+                  1.0,
+                  1.0,
+                  1.0,
+                  1.0,
+                  1.0,
+                  1.0,
+                  1.0,
+                  1.0
+                ],
+                "masks": [
+                  false,
+                  false,
+                  false,
+                  false,
+                  false,
+                  false,
+                  false,
+                  false
+                ],
+                "masked_array": false,
+                "dtype": "float64",
+                "scalar_array": false,
+                "numpy_scalar": false,
+                "math_profile": "numpy-simd",
+                "fill_value": null,
+                "weak_kind": null
+              },
+              "aspect": {
+                "values": [
+                  95.0
+                ],
+                "masks": [
+                  false
+                ],
+                "masked_array": false,
+                "dtype": "float64",
+                "scalar_array": true,
+                "numpy_scalar": false,
+                "math_profile": "numpy-simd",
+                "fill_value": null,
+                "weak_kind": null
+              }
+            },
+            "options": {
+              "wind_orientation_mode": "RelativeToNorth"
+            },
+            "normalize_half_loop": false,
+            "original_loop_dtype": "float32"
+          },
+          "identity_sha256": "93978dfe974dbd048064a9b8f9192a69f10fdda323f110b02edf83cb2dd8fcad",
+          "frozen_output": {
+            "values": [
+              94.99824523925781,
+              94.99824523925781,
+              95.0,
+              5.0,
+              275.0,
+              301.56505012512207,
+              275.0,
+              275.0
+            ],
+            "masks": [
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+              false
+            ],
+            "masked_array": false,
+            "dtype": "float64",
+            "scalar_array": false,
+            "numpy_scalar": false,
+            "math_profile": "numpy-simd",
+            "fill_value": null,
+            "weak_kind": null
+          },
+          "output": {
+            "values": [
+              94.99824523925781,
+              94.99824523925781,
+              94.99998474121094,
+              5.0,
+              275.0,
+              301.56505012512207,
+              275.0,
+              275.0
+            ],
+            "masks": [
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+              false
+            ],
+            "dtype": "float64",
+            "masked_array": false,
+            "scalar_array": false,
+            "numpy_scalar": false,
+            "fill_value": null,
+            "math_profile": "numpy-simd",
+            "weak_kind": null
+          },
+          "different_cells": [
+            2
+          ]
+        },
+        {
+          "case_index": 185,
+          "identity": {
+            "name": "calculate_direction_of_max_spread",
+            "inputs": {
+              "x_component": {
+                "values": [
+                  0.0,
+                  1.0,
+                  2.0,
+                  3.0,
+                  127.0,
+                  65534.0,
+                  65535.0,
+                  32767.0
+                ],
+                "masks": [
+                  false,
+                  false,
+                  false,
+                  false,
+                  false,
+                  false,
+                  false,
+                  false
+                ],
+                "masked_array": false,
+                "dtype": "uint16",
+                "scalar_array": false,
+                "numpy_scalar": false,
+                "math_profile": "numpy-simd",
+                "fill_value": null,
+                "weak_kind": null,
+                "raw_bits": [
+                  0,
+                  1,
+                  2,
+                  3,
+                  127,
+                  65534,
+                  65535,
+                  32767
+                ]
+              },
+              "y_component": {
+                "values": [
+                  32767.0,
+                  32766.0,
+                  2.0,
+                  1.0,
+                  0.0,
+                  -1.0,
+                  -32767.0,
+                  -32768.0
+                ],
+                "masks": [
+                  false,
+                  false,
+                  false,
+                  false,
+                  false,
+                  false,
+                  false,
+                  false
+                ],
+                "masked_array": false,
+                "dtype": "int16",
+                "scalar_array": false,
+                "numpy_scalar": false,
+                "math_profile": "numpy-simd",
+                "fill_value": null,
+                "weak_kind": null,
+                "raw_bits": [
+                  32767,
+                  32766,
+                  2,
+                  1,
+                  0,
+                  18446744073709551615,
+                  18446744073709518849,
+                  18446744073709518848
+                ]
+              },
+              "rate_vector": {
+                "values": [
+                  1.0,
+                  1.0,
+                  1.0,
+                  1.0,
+                  1.0,
+                  1.0,
+                  1.0,
+                  1.0
+                ],
+                "masks": [
+                  false,
+                  false,
+                  false,
+                  false,
+                  false,
+                  false,
+                  false,
+                  false
+                ],
+                "masked_array": false,
+                "dtype": "float64",
+                "scalar_array": false,
+                "numpy_scalar": false,
+                "math_profile": "numpy-simd",
+                "fill_value": null,
+                "weak_kind": null
+              },
+              "aspect": {
+                "values": [
+                  95.0
+                ],
+                "masks": [
+                  false
+                ],
+                "masked_array": false,
+                "dtype": "float64",
+                "scalar_array": true,
+                "numpy_scalar": false,
+                "math_profile": "numpy-simd",
+                "fill_value": null,
+                "weak_kind": null
+              }
+            },
+            "options": {
+              "wind_orientation_mode": "RelativeToNorth"
+            },
+            "normalize_half_loop": false,
+            "original_loop_dtype": "float32"
+          },
+          "identity_sha256": "b9f8c38e0b5bd0b250bb541c188b35f26dd495521197e4bd515d13d2044bd39a",
+          "frozen_output": {
+            "values": [
+              5.0,
+              4.9982452392578125,
+              320.0,
+              293.4349479675293,
+              275.0,
+              275.0,
+              248.435302734375,
+              229.99911499023438
+            ],
+            "masks": [
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+              false
+            ],
+            "masked_array": false,
+            "dtype": "float64",
+            "scalar_array": false,
+            "numpy_scalar": false,
+            "math_profile": "numpy-simd",
+            "fill_value": null,
+            "weak_kind": null
+          },
+          "output": {
+            "values": [
+              5.0,
+              4.9982452392578125,
+              320.0,
+              293.4349479675293,
+              275.0,
+              275.0,
+              248.435302734375,
+              229.9991455078125
+            ],
+            "masks": [
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+              false
+            ],
+            "dtype": "float64",
+            "masked_array": false,
+            "scalar_array": false,
+            "numpy_scalar": false,
+            "fill_value": null,
+            "math_profile": "numpy-simd",
+            "weak_kind": null
+          },
+          "different_cells": [
+            7
+          ]
+        },
+        {
+          "case_index": 187,
+          "identity": {
+            "name": "calculate_direction_of_max_spread",
+            "inputs": {
+              "x_component": {
+                "values": [
+                  0.0,
+                  1.0,
+                  2.0,
+                  3.0,
+                  127.0,
+                  65534.0,
+                  65535.0,
+                  32767.0
+                ],
+                "masks": [
+                  false,
+                  true,
+                  false,
+                  true,
+                  false,
+                  true,
+                  false,
+                  true
+                ],
+                "masked_array": true,
+                "dtype": "uint16",
+                "scalar_array": false,
+                "numpy_scalar": false,
+                "math_profile": "numpy-simd",
+                "fill_value": 17.0,
+                "weak_kind": null,
+                "raw_bits": [
+                  0,
+                  1,
+                  2,
+                  3,
+                  127,
+                  65534,
+                  65535,
+                  32767
+                ]
+              },
+              "y_component": {
+                "values": [
+                  32767.0,
+                  32766.0,
+                  2.0,
+                  1.0,
+                  0.0,
+                  -1.0,
+                  -32767.0,
+                  -32768.0
+                ],
+                "masks": [
+                  false,
+                  false,
+                  false,
+                  false,
+                  false,
+                  false,
+                  false,
+                  false
+                ],
+                "masked_array": false,
+                "dtype": "int16",
+                "scalar_array": false,
+                "numpy_scalar": false,
+                "math_profile": "numpy-simd",
+                "fill_value": null,
+                "weak_kind": null,
+                "raw_bits": [
+                  32767,
+                  32766,
+                  2,
+                  1,
+                  0,
+                  18446744073709551615,
+                  18446744073709518849,
+                  18446744073709518848
+                ]
+              },
+              "rate_vector": {
+                "values": [
+                  1.0,
+                  1.0,
+                  1.0,
+                  1.0,
+                  1.0,
+                  1.0,
+                  1.0,
+                  1.0
+                ],
+                "masks": [
+                  false,
+                  false,
+                  false,
+                  false,
+                  false,
+                  false,
+                  false,
+                  false
+                ],
+                "masked_array": false,
+                "dtype": "float64",
+                "scalar_array": false,
+                "numpy_scalar": false,
+                "math_profile": "numpy-simd",
+                "fill_value": null,
+                "weak_kind": null
+              },
+              "aspect": {
+                "values": [
+                  95.0
+                ],
+                "masks": [
+                  false
+                ],
+                "masked_array": false,
+                "dtype": "float64",
+                "scalar_array": true,
+                "numpy_scalar": false,
+                "math_profile": "numpy-simd",
+                "fill_value": null,
+                "weak_kind": null
+              }
+            },
+            "options": {
+              "wind_orientation_mode": "RelativeToNorth"
+            },
+            "normalize_half_loop": false,
+            "original_loop_dtype": "float32"
+          },
+          "identity_sha256": "b9bd83b19a0ae4001f88cb83ed4f68a8e1f797d305d7ff8e64004c3be30c9096",
+          "frozen_output": {
+            "values": [
+              5.0,
+              4.9982452392578125,
+              320.0,
+              293.4349479675293,
+              275.0,
+              275.0,
+              248.435302734375,
+              229.99911499023438
+            ],
+            "masks": [
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+              false
+            ],
+            "masked_array": false,
+            "dtype": "float64",
+            "scalar_array": false,
+            "numpy_scalar": false,
+            "math_profile": "numpy-simd",
+            "fill_value": null,
+            "weak_kind": null
+          },
+          "output": {
+            "values": [
+              5.0,
+              4.9982452392578125,
+              320.0,
+              293.4349479675293,
+              275.0,
+              275.0,
+              248.435302734375,
+              229.9991455078125
+            ],
+            "masks": [
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+              false
+            ],
+            "dtype": "float64",
+            "masked_array": false,
+            "scalar_array": false,
+            "numpy_scalar": false,
+            "fill_value": null,
+            "math_profile": "numpy-simd",
+            "weak_kind": null
+          },
+          "different_cells": [
+            7
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+{"canopy_base_ft":15,"crown_ratio":0.5,"id":"calm","operation":"crown","wind_fpm":0}
+{"canopy_base_ft":15,"crown_ratio":0.5,"id":"wind5","operation":"crown","wind_fpm":440}
+{"canopy_base_ft":15,"crown_ratio":0.5,"id":"wind15","operation":"crown","wind_fpm":1320}
+{"canopy_base_ft":5,"crown_ratio":0.8333333333333334,"id":"torching","operation":"crown","wind_fpm":616}
+{"canopy_base_ft":15,"crown_ratio":0.5,"id":"active","operation":"crown","wind_fpm":2200}
+{"canopy_base_ft":0,"crown_ratio":1.0,"id":"zero-base","operation":"crown","wind_fpm":0}

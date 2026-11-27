@@ -1,0 +1,109 @@
+name: Standalone crate validation
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.metadata.outputs.version }}
+      msrv: ${{ steps.metadata.outputs.msrv }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Read independent crate metadata
+        id: metadata
+        run: |
+          python - <<'PY'
+          import os
+          import tomllib
+          from pathlib import Path
+          core = tomllib.loads(Path("rust/crates/behave-fire/Cargo.toml").read_text())
+          workspace = tomllib.loads(Path("rust/Cargo.toml").read_text())
+          with open(os.environ["GITHUB_OUTPUT"], "a") as output:
+              print(f"version={core['package']['version']}", file=output)
+              print(f"msrv={workspace['workspace']['package']['rust-version']}", file=output)
+          PY
+      # Generate normalized Cargo metadata with the declared minimum version,
+      # so the archive does not gain manifest keys older consumers cannot read.
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ steps.metadata.outputs.msrv }}
+      - name: Package and dry-run without publishing
+        env:
+          PYO3_PYTHON: nonexistent-python-for-standalone-core
+        run: |
+          cargo package --manifest-path rust/Cargo.toml -p behave-fire --locked
+          cargo publish --dry-run --manifest-path rust/Cargo.toml -p behave-fire --locked
+          cargo package --list --manifest-path rust/Cargo.toml -p behave-fire --locked
+          python tools/check_crate_package.py "rust/target/package/behave-fire-${{ steps.metadata.outputs.version }}.crate"
+      - name: Stage archive and downstream source only
+        run: |
+          mkdir standalone-artifacts
+          cp rust/target/package/*.crate standalone-artifacts/
+          cp tools/rust_consumer.rs standalone-artifacts/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: standalone-crate
+          path: standalone-artifacts/*
+          if-no-files-found: error
+
+  rust-only-consumer:
+    needs: package
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - toolchain: stable
+            image: rust:1-slim-bookworm
+          - toolchain: msrv
+            image: rust:${{ needs.package.outputs.msrv }}-slim-bookworm
+    container: ${{ matrix.image }}
+    steps:
+      # No checkout: only the package archive and downstream test source enter
+      # this Rust-only environment. Source builds cannot find a sibling repo.
+      - uses: actions/download-artifact@v4
+        with:
+          name: standalone-crate
+          path: artifacts
+      - name: Test extracted crate and independent consumer
+        shell: bash
+        env:
+          CORE_VERSION: ${{ needs.package.outputs.version }}
+          PYO3_PYTHON: nonexistent-python-for-standalone-core
+        run: |
+          set -euo pipefail
+          ! command -v python
+          ! command -v python3
+          test ! -d .git
+          mkdir standalone
+          tar -xzf "artifacts/behave-fire-${CORE_VERSION}.crate" -C standalone
+          cd standalone
+          cargo test --manifest-path "behave-fire-${CORE_VERSION}/Cargo.toml" --locked --no-fail-fast
+          cargo run --manifest-path "behave-fire-${CORE_VERSION}/Cargo.toml" --example standalone --locked
+          mkdir -p consumer/src
+          cp ../artifacts/rust_consumer.rs consumer/src/main.rs
+          cat > consumer/Cargo.toml <<EOF
+          [package]
+          name = "behave-archive-consumer"
+          version = "0.0.0"
+          edition = "2021"
+          [dependencies]
+          behave-fire = { path = "../behave-fire-${CORE_VERSION}" }
+          EOF
+          cargo run --manifest-path consumer/Cargo.toml
+          ldd consumer/target/debug/behave-archive-consumer > consumer-links.txt
+          cat consumer-links.txt
+          if grep -E '(libpython|libstdc\+\+|libc\+\+)' consumer-links.txt; then
+            echo "The downstream binary unexpectedly requires Python or a C++ runtime."
+            exit 1
+          fi

@@ -1,0 +1,72 @@
+{
+  "available": 139,
+  "build": {
+    "compiler": {
+      "id": "MSVC",
+      "version": "19.50.35728.0"
+    },
+    "driver_sha256": "93672221c870945809ddd0757283cf62b95a32c32c54c13c491b9fadfe48fd4f",
+    "driver_source_sha256_lf": "5bd78cbaba0dc6199c3ae58d0b8d3a2ba5d26114541240845b3bf7407b1664ea",
+    "overlay_sha256": {
+      "CMakeLists.txt": "79ff7cba02089f01fa27cd18c10e6b4e0fdaa18f18b80e29c8982af5e8eaf101",
+      "crown_reference.hpp": "b891482ff0e800d10e9b5918d4544bc5fd041da90358fb84b6f48f729cb45640",
+      "driver.cpp": "5bd78cbaba0dc6199c3ae58d0b8d3a2ba5d26114541240845b3bf7407b1664ea",
+      "probe.cpp": "48338485a0b6f3fd64d0b3542a56c996e043d5e77e9887f0189101c1065df015"
+    },
+    "upstream_sha": "3ca33d5b919d4253b411bfb6464b4c872dda6fc9"
+  },
+  "case_count": 139,
+  "dataset": "surface_custom",
+  "fields": [
+    "fireline_intensity_btu_ft_s",
+    "flame_length_ft",
+    "heat_per_unit_area_btu_ft2",
+    "length_to_width_ratio",
+    "spread_chains_per_hour"
+  ],
+  "files": {
+    "cases.jsonl": "977a27e2ba207f53e078cb30f31a93ee9b8102dad259523815fcf739d6e36188",
+    "results.jsonl": "45b68c8af0f4c52dc0e859643fe9bf146a20cdcadedd88d872b95a1843c1dce8"
+  },
+  "generation_reason": "Use the pinned Behave SCAL16 and SCAL14 loads for the explicit Surface controls",
+  "load_controls": {
+    "152": {
+      "dead_1h_load_lb_ft2": 0.10330578512396693
+    },
+    "153": {
+      "dead_100h_load_lb_ft2": 0.048209366391184574,
+      "live_herb_load_lb_ft2": 0.06657483930211203
+    }
+  },
+  "moisture_units": "Percent",
+  "registered_model": 250,
+  "result_count": 139,
+  "schema_version": 1,
+  "source_cases_sha256": "266d08d8b82d65d950461c73e70b44c228ad7b54fbe99eb1d14ed8af6add66da",
+  "source_models": [
+    110,
+    111,
+    150,
+    151,
+    152,
+    153,
+    154,
+    155,
+    156,
+    157,
+    158,
+    159,
+    166,
+    167,
+    168,
+    169,
+    170,
+    171,
+    172,
+    190,
+    191,
+    192,
+    193
+  ],
+  "upstream_sha": "3ca33d5b919d4253b411bfb6464b4c872dda6fc9"
+}

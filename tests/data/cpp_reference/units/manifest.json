@@ -1,0 +1,45 @@
+{
+  "available": 1,
+  "build": {
+    "compiler": {
+      "id": "MSVC",
+      "version": "19.50.35728.0"
+    },
+    "driver_sha256": "9d93426d04be12a678a707f8c6b35e86905557bf6bb1a689909e86e1c8b312fd",
+    "flags": [
+      "/O2",
+      "/fp:precise",
+      "/D_USE_MATH_DEFINES=",
+      "/EHsc"
+    ],
+    "machine": "AMD64",
+    "overlay_sha256": {
+      "CMakeLists.txt": "705a4dcb5a86fc3bf0e7c4679f0feb40b44f44faaad4aa7235bfd1efa093781d",
+      "driver.cpp": "16bd2d292fdcabea9ea4fe6fca832a3fc18c530043b0b3db5e1c32bf0ad69389",
+      "probe.cpp": "48338485a0b6f3fd64d0b3542a56c996e043d5e77e9887f0189101c1065df015"
+    },
+    "pinned_checkout_clean": true,
+    "platform": "Windows-10-10.0.19044-SP0",
+    "upstream_sources": {
+      "src/behave/behaveUnits.cpp": "420149652f256ac89219470fbccde305221221b3cf4548f3ccb5ae4c58ba1a8e",
+      "src/behave/behaveUnits.h": "2840c9f1cec8bb9770601d0da54831a3daa9628188355ed17eb63b565431bf3c"
+    }
+  },
+  "case_count": 1,
+  "command": "behave_ref_driver cases.jsonl results.jsonl",
+  "fields": [
+    "celsius",
+    "fahrenheit"
+  ],
+  "files": {
+    "cases.jsonl": "7a36321c7fc643a42cfb077dc265b6726855a419ff8cd9c3d4bd1ee2733db1a6",
+    "results.jsonl": "861be3164c72af174895097cdaae2d98eb348534ee9bcd42f1f4ee3f9548665e",
+    "schema.json": "90080426fd393d314bc4771a932d6870b7c91e38d354965f84a429f53f443286"
+  },
+  "generator": "behave_ref_driver guarded standalone Units operation",
+  "operation": "units",
+  "result_count": 1,
+  "schema_version": 1,
+  "seed": null,
+  "upstream_sha": "3ca33d5b919d4253b411bfb6464b4c872dda6fc9"
+}

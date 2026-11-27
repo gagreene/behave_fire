@@ -1,0 +1,56 @@
+{
+  "available": 2,
+  "build": {
+    "compiler": {
+      "id": "MSVC",
+      "version": "19.50.35728.0"
+    },
+    "driver_sha256": "9d93426d04be12a678a707f8c6b35e86905557bf6bb1a689909e86e1c8b312fd",
+    "flags": [
+      "/O2",
+      "/fp:precise",
+      "/D_USE_MATH_DEFINES=",
+      "/EHsc"
+    ],
+    "machine": "AMD64",
+    "overlay_sha256": {
+      "CMakeLists.txt": "705a4dcb5a86fc3bf0e7c4679f0feb40b44f44faaad4aa7235bfd1efa093781d",
+      "driver.cpp": "16bd2d292fdcabea9ea4fe6fca832a3fc18c530043b0b3db5e1c32bf0ad69389",
+      "probe.cpp": "48338485a0b6f3fd64d0b3542a56c996e043d5e77e9887f0189101c1065df015"
+    },
+    "pinned_checkout_clean": true,
+    "platform": "Windows-10-10.0.19044-SP0",
+    "upstream_sources": {
+      "src/behave/behaveUnits.cpp": "420149652f256ac89219470fbccde305221221b3cf4548f3ccb5ae4c58ba1a8e",
+      "src/behave/behaveUnits.h": "2840c9f1cec8bb9770601d0da54831a3daa9628188355ed17eb63b565431bf3c",
+      "src/behave/slopeTool.cpp": "698960850574110e9aeadd460d1a88cb3ad9d5e026a846e3ed7925280ae12cce",
+      "src/behave/slopeTool.h": "16d8921fcd793aa616a7ffa4f95d9af61b3651f4f8293957ada47ea2295407b2"
+    }
+  },
+  "case_count": 2,
+  "command": "behave_ref_driver cases.jsonl results.jsonl",
+  "fields": [
+    "elevation_ft",
+    "horizontal_0_ft",
+    "horizontal_15_ft",
+    "horizontal_30_ft",
+    "horizontal_45_ft",
+    "horizontal_60_ft",
+    "horizontal_75_ft",
+    "horizontal_90_ft",
+    "horizontal_ft",
+    "slope_degrees",
+    "slope_percent"
+  ],
+  "files": {
+    "cases.jsonl": "b19e3d0aa6b5ea1460b67bb01bb2d6310004e87beeee801d4a34b29b6f95cc1e",
+    "results.jsonl": "ed96c5367bd6f42360ec4d41bb81a378b52581ac7d787a8a235a9ef31df3e939",
+    "schema.json": "bc366576dac0ee6abd15c18a8d314ebd42030e5000fe96a601c675fafabf9924"
+  },
+  "generator": "behave_ref_driver guarded standalone SlopeTool operation",
+  "operation": "slope_tool",
+  "result_count": 2,
+  "schema_version": 1,
+  "seed": null,
+  "upstream_sha": "3ca33d5b919d4253b411bfb6464b4c872dda6fc9"
+}

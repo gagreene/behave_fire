@@ -1,0 +1,216 @@
+[
+  {
+    "class": "unsafe_oracle_route",
+    "evidence": "surfaceInputEnums.h:83; fuelModels.cpp:38,863",
+    "finding": "ID 256 passes the upstream definition bound but is outside its 256-row storage.",
+    "id": "F-001",
+    "status": "registered; original owner-approved finding"
+  },
+  {
+    "class": "unsafe_oracle_route",
+    "evidence": "surface.cpp:97,128; fuelModels.cpp:887",
+    "finding": "Negative and oversized IDs can reach unchecked fuel getters before the Surface definition check.",
+    "id": "F-002",
+    "status": "registered; original owner-approved finding"
+  },
+  {
+    "class": "unsafe_oracle_route",
+    "evidence": "fuelModels.cpp:772-862",
+    "finding": "Custom registration above 255 can write outside upstream fuel storage.",
+    "id": "F-003",
+    "status": "registered; original owner-approved finding"
+  },
+  {
+    "class": "unsafe_oracle_route",
+    "evidence": "westernAspen.cpp:74-78",
+    "finding": "Western Aspen model numbers outside 1 to 5 index outside the depth array.",
+    "id": "F-004",
+    "status": "registered; feature remains out of scope"
+  },
+  {
+    "class": "unsafe_oracle_route",
+    "evidence": "fineDeadFuelMoistureTool.cpp:225-246",
+    "finding": "Fine dead fuel moisture omits upper-bound comparisons for several primitive indices.",
+    "id": "F-005",
+    "status": "registered; per-operation guards required before a later route"
+  },
+  {
+    "class": "unsafe_oracle_route",
+    "evidence": "westernAspen.cpp:55-70",
+    "finding": "Western Aspen curing interpolation uses sizeof(curingArray) - 1 as an element bound; NaN curing can read out of bounds.",
+    "id": "F-006",
+    "status": "registered by owner decision 12; no Aspen operation enabled"
+  },
+  {
+    "class": "unsafe_oracle_route",
+    "evidence": "chaparralFuel.cpp:59-68,251-253,274-293,321-332",
+    "finding": "Chaparral life state and negative size class need independent guards; month values above 2 become 12 upstream, a quirk to preserve.",
+    "id": "F-007",
+    "status": "registered by owner decision 12; no Chaparral operation enabled"
+  },
+  {
+    "class": "unsafe_oracle_route",
+    "evidence": "surfaceInputs.cpp:128-135; surfaceFire.cpp:340-350",
+    "finding": "Upstream angle-normalization loops can fail to terminate for infinite or huge finite angles; only a bounded reviewed grid may reach C++.",
+    "id": "F-008",
+    "status": "registered by owner decision 12; draft driver restricts five grid values"
+  },
+  {
+    "class": "unavailable_link_risk",
+    "evidence": "surfaceFire.h:138",
+    "finding": "SurfaceFire::getChaparralFuelType is declared but no definition was found.",
+    "id": "F-009",
+    "status": "registered by owner decision 12; route not used"
+  },
+  {
+    "class": "open_scientific_difference",
+    "evidence": "Phase 0 api/README.md and domains/REPORT.md",
+    "finding": "Mortality crown-volume, scorch, and species-specific equation contracts differ between C++ and the Python reference.",
+    "id": "F-010",
+    "status": "registered by owner decision 12; no scientific fix or golden generation The updated pin corrects PIPA2 DBH conversion and the four-inch aggregate threshold. The six accepted standalone scorch-height inputs remain a narrower comparison scope."
+  },
+  {
+    "class": "open_scientific_difference",
+    "evidence": "Phase 0 api/README.md and domains/REPORT.md",
+    "finding": "Crown-ratio clipping and nonpositive-height behavior differ between implementations.",
+    "id": "F-011",
+    "status": "registered by owner decision 12; no scientific fix or golden generation"
+  },
+  {
+    "class": "build_note",
+    "compiler_definition": "/D_USE_MATH_DEFINES=",
+    "evidence": "original upstream-build.log; retry-1 upstream-build.exit=0",
+    "finding": "Pinned upstream does not build on this MSVC toolchain without _USE_MATH_DEFINES supplied before cmath.",
+    "id": "F-012",
+    "scientific_finding": false,
+    "status": "registered by explicit retry approval"
+  },
+  {
+    "class": "unsafe_oracle_route",
+    "controls": "undefined-geometry-trap, geometry-trap-positive-control",
+    "evidence": "surface.cpp:97-100,263-265; surfaceFire.cpp:205-207; fireSize.cpp:5-8; fireSize.h:73",
+    "finding": "The skipped zero-load path resets SurfaceFire but does not initialize the separate FireSize geometry returned by public getters.",
+    "id": "F-013",
+    "status": "The new pin initializes FireSize scalar state. The driver still records undefined and zero-load Surface cases as unavailable before querying geometry."
+  },
+  {
+    "analysis": "development/cpp-pilot/DIFFERENCES-ANALYSIS.md",
+    "class": "open_scientific_difference",
+    "evidence": "fuelModels.cpp:126,340,486-509; surfaceFuelbedIntermediates.cpp:341; Python fuel_models.py:6,310-325",
+    "finding": "Twenty-three numbered C++ registry records store dead moisture-of-extinction values 100 times the Python fractional convention.",
+    "id": "F-014",
+    "observation_scope": "Historical measurements before the owner-approved damping alignment and explicit unit controls",
+    "observed_case": {
+      "absolute": 1602.1601478624093,
+      "backend": "python",
+      "cpp": 2649.566089568236,
+      "field": "fireline_intensity_btu_ft_s",
+      "id": "fm159-angle0",
+      "port": 1047.4059417058265,
+      "relative": 0.6046877464843656
+    },
+    "status": "Resolved upstream at the updated pin by firelab/behave PRs #81 and #83. All 23 corrected models enter the direct numbered comparison."
+  },
+  {
+    "analysis": "development/cpp-pilot/DIFFERENCES-ANALYSIS.md",
+    "class": "open_scientific_difference",
+    "evidence": "Python surface.py:282-286; C++ surfaceFire.cpp:406",
+    "finding": "Low-spread effective-wind guards differ, producing different ellipse ratios at extinction boundaries.",
+    "id": "F-015",
+    "observation_scope": "Historical measurements before the owner-approved boundary alignment",
+    "observed_case": {
+      "absolute": 0.06945421887837466,
+      "backend": "python",
+      "cpp": 1.0694542188783747,
+      "field": "length_to_width_ratio",
+      "id": "fm204-extinction-below",
+      "port": 1.0,
+      "relative": 0.06494361109839472
+    },
+    "status": "Owner approved matching C++ for positive baseline spread on 2026-11-14; boundary regressions pass; pinned reference review remains pending; no tolerance change"
+  },
+  {
+    "analysis": "development/cpp-pilot/DIFFERENCES-ANALYSIS.md",
+    "class": "open_scientific_difference",
+    "evidence": "C++ surfaceFire.cpp:218; Python surface.py:437-438",
+    "finding": "C++ flame length has a small-intensity cutoff while Python applies its law for any positive intensity.",
+    "id": "F-016",
+    "observation_scope": "Historical measurements before the owner-approved boundary alignment",
+    "observed_case": {
+      "absolute": 1.2715734607518977e-13,
+      "backend": "python",
+      "cpp": 0,
+      "field": "flame_length_ft",
+      "id": "fm204-extinction-below",
+      "port": 1.2715734607518977e-13,
+      "relative": null
+    },
+    "status": "Owner approved the C++ strict intensity cutoff on 2026-11-14; boundary regressions pass; pinned reference review remains pending; no tolerance change"
+  },
+  {
+    "analysis": "development/cpp-pilot/DIFFERENCES-ANALYSIS.md",
+    "class": "open_scientific_difference",
+    "evidence": "C++ surfaceFireReactionIntensity.cpp:136; Python surface.py:685",
+    "finding": "Damping-polynomial evaluation order yields different tiny cancellation residuals near extinction; large relative differences are not material-output errors.",
+    "id": "F-017",
+    "observation_scope": "Historical measurements before the owner-approved damping alignment and explicit unit controls",
+    "observed_case": {
+      "absolute": 4.6632962066303345e-28,
+      "backend": "python",
+      "cpp": 5.829120258257021e-29,
+      "field": "fireline_intensity_btu_ft_s",
+      "id": "fm204-extinction-below",
+      "port": 5.246208232456036e-28,
+      "relative": 8.000000000042403
+    },
+    "status": "Owner approved C++ multiplication order and the exactly classified reference refresh on 2026-11-14; Python/Rust boundary regressions pass; numerical caps remain conditional on complete calibration"
+  },
+  {
+    "class": "open_scientific_difference",
+    "evidence": "behaveUnits.cpp:157,219; spotInputs.cpp:101,239; spot.cpp:330",
+    "finding": "The pinned Spot input path converts 5 mph to 440 ft/min and back using 0.01136363636, so its flat terrain Surface fire formula receives 4.9999999984 mph. Python and Rust use the supplied 5 mph.",
+    "id": "F-018",
+    "observation_scope": "Pinned MSVC and local Python and Rust scalar observations at 5 ft flame, 5 mph wind at 20 ft, and 0 or 10 ft effective cover",
+    "observed_cases": [
+      {
+        "absolute_ft": 1.263675812879228e-07,
+        "cpp_ft": 585.6449943521519,
+        "id": "spot-flat-wind-zero-cover",
+        "python_ft": 585.6449944785195,
+        "rust_ft": 585.6449944785195
+      },
+      {
+        "absolute_ft": 1.1262898169661639e-07,
+        "cpp_ft": 565.5562061067343,
+        "id": "spot-flat-wind-ten-cover",
+        "python_ft": 565.5562062193633,
+        "rust_ft": 565.5562062193633
+      }
+    ],
+    "status": "Owner approved recording the four same-input measurements. The converted wind reproduces both pinned C++ results in the ports as a separate diagnostic. Spot has no approved acceptance policy."
+  },
+  {
+    "class": "intended_load_record_difference",
+    "evidence": "Behave 3ca33d5 includes upstream PR #81 and the reviewed two-pin replay of 806 existing inputs.",
+    "finding": "The updated C++ records changed the dead one-hour load of model 152 from 2.2 to 2.25 tons/acre and the dead hundred-hour and live herbaceous loads of model 153 from 1.1 and 1.4 to 1.05 and 1.45 tons/acre. Python and Rust initially retained their previous loads.",
+    "id": "F-019",
+    "observation_scope": "Twelve numbered Surface cases exercise these two models. The corresponding custom controls explicitly specify the three loads in pounds per square foot.",
+    "status": "Resolved. Python, Rust, and the custom controls now use the pinned Behave loads. All 583 available numbered cases and 139 explicit controls enter the comparison."
+  },
+  {
+    "class": "unsafe_oracle_route",
+    "evidence": "Behave 3ca33d5 crown.cpp:206,230,317-336,583-590",
+    "finding": "Scott and Reinhardt calculates active wind with 3.0 divided by converted canopy bulk density. Zero density yields a non-finite wind input for the threshold Surface run.",
+    "id": "F-020",
+    "observation_scope": "Source review and guarded rejection of a density override before upstream entry.",
+    "status": "Guarded Crown cases require the fixed positive density. Port-only tests cover zero canopy fuel."
+  },
+  {
+    "class": "upstream_initialization_and_unit_contract",
+    "evidence": "Behave PR #84 and issue #85, and guarded Scott and Reinhardt Crown replay.",
+    "finding": "The updated pin initializes state needed by fresh objects. Full Crown passes its twenty-foot wind readback to FireSize with a miles-per-hour tag. The reviewed scope follows that call and its length-to-width calculation.",
+    "id": "F-021",
+    "observation_scope": "Six fixed full Crown calls, including zero base and both calm and positive winds.",
+    "status": "The bounded full Crown route is measured at the updated pin. Standalone positive-wind Crown-mode FireSize is tracked separately upstream."
+  }
+]

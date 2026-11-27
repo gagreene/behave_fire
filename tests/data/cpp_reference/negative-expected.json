@@ -1,0 +1,374 @@
+[
+  {
+    "id": "fuel-0",
+    "status": "rejected",
+    "upstream_entries": 0,
+    "error": "fuel_model_storage_bounds"
+  },
+  {
+    "id": "fuel-1",
+    "status": "rejected",
+    "upstream_entries": 0,
+    "error": "fuel_model_storage_bounds"
+  },
+  {
+    "id": "fuel-2",
+    "status": "rejected",
+    "upstream_entries": 0,
+    "error": "fuel_model_storage_bounds"
+  },
+  {
+    "id": "fuel-3",
+    "status": "rejected",
+    "upstream_entries": 0,
+    "error": "fuel_model_storage_bounds"
+  },
+  {
+    "id": "fuel-4",
+    "status": "rejected",
+    "upstream_entries": 0,
+    "error": "fuel_model_storage_bounds"
+  },
+  {
+    "id": "fuel-5",
+    "status": "rejected",
+    "upstream_entries": 0,
+    "error": "fuel_model_storage_bounds"
+  },
+  {
+    "id": "fuel-6",
+    "status": "rejected",
+    "upstream_entries": 0,
+    "error": "fuel_model_storage_bounds"
+  },
+  {
+    "id": "fuel-7",
+    "status": "rejected",
+    "upstream_entries": 0,
+    "error": "fuel_model_storage_bounds"
+  },
+  {
+    "id": "fuel-8",
+    "status": "rejected",
+    "upstream_entries": 0,
+    "error": "fuel_model_storage_bounds"
+  },
+  {
+    "id": "fuel-9",
+    "status": "rejected",
+    "upstream_entries": 0,
+    "error": "fuel_model_storage_bounds"
+  },
+  {
+    "id": "fuel-10",
+    "status": "rejected",
+    "upstream_entries": 0,
+    "error": "fuel_model_storage_bounds"
+  },
+  {
+    "id": "fuel-11",
+    "status": "rejected",
+    "upstream_entries": 0,
+    "error": "fuel_model_storage_bounds"
+  },
+  {
+    "id": "fuel-12",
+    "status": "rejected",
+    "upstream_entries": 0,
+    "error": "fuel_model_storage_bounds"
+  },
+  {
+    "id": "fuel-13",
+    "status": "rejected",
+    "upstream_entries": 0,
+    "error": "fuel_model_storage_bounds"
+  },
+  {
+    "id": "fuel-14",
+    "status": "rejected",
+    "upstream_entries": 0,
+    "error": "number_range_fuel_model"
+  },
+  {
+    "id": "fuel-15",
+    "status": "rejected",
+    "upstream_entries": 0,
+    "error": "numeric_type_fuel_model"
+  },
+  {
+    "id": "fuel-16",
+    "status": "rejected",
+    "upstream_entries": 0,
+    "error": "numeric_type_fuel_model"
+  },
+  {
+    "id": "fuel-17",
+    "status": "rejected",
+    "upstream_entries": 0,
+    "error": "numeric_type_fuel_model"
+  },
+  {
+    "id": "nonfinite-angle-0",
+    "status": "rejected",
+    "upstream_entries": 0,
+    "error": "nonfinite_angle"
+  },
+  {
+    "id": "nonfinite-angle-1",
+    "status": "rejected",
+    "upstream_entries": 0,
+    "error": "nonfinite_angle"
+  },
+  {
+    "id": "nonfinite-angle-2",
+    "status": "rejected",
+    "upstream_entries": 0,
+    "error": "nonfinite_angle"
+  },
+  {
+    "id": "nonfinite-angle-3",
+    "status": "rejected",
+    "upstream_entries": 0,
+    "error": "number_range_wind_direction"
+  },
+  {
+    "id": "grid-angle-4",
+    "status": "rejected",
+    "upstream_entries": 0,
+    "error": "angle_not_in_reviewed_grid"
+  },
+  {
+    "id": "grid-angle-5",
+    "status": "rejected",
+    "upstream_entries": 0,
+    "error": "angle_not_in_reviewed_grid"
+  },
+  {
+    "id": "grid-angle-6",
+    "status": "rejected",
+    "upstream_entries": 0,
+    "error": "angle_not_in_reviewed_grid"
+  },
+  {
+    "id": "grid-angle-7",
+    "status": "rejected",
+    "upstream_entries": 0,
+    "error": "angle_not_in_reviewed_grid"
+  },
+  {
+    "id": "curing-0",
+    "status": "rejected",
+    "upstream_entries": 0,
+    "error": "nonfinite_curing"
+  },
+  {
+    "id": "curing-1",
+    "status": "rejected",
+    "upstream_entries": 0,
+    "error": "nonfinite_curing"
+  },
+  {
+    "id": "curing-2",
+    "status": "rejected",
+    "upstream_entries": 0,
+    "error": "nonfinite_curing"
+  },
+  {
+    "id": "curing-3",
+    "status": "rejected",
+    "upstream_entries": 0,
+    "error": "number_range_curing"
+  },
+  {
+    "id": "chaparral-life-negative",
+    "status": "rejected",
+    "upstream_entries": 0,
+    "error": "chaparral_index_life_state"
+  },
+  {
+    "id": "chaparral-life-large",
+    "status": "rejected",
+    "upstream_entries": 0,
+    "error": "chaparral_index_life_state"
+  },
+  {
+    "id": "chaparral-size-negative",
+    "status": "rejected",
+    "upstream_entries": 0,
+    "error": "chaparral_index_size_class"
+  },
+  {
+    "id": "chaparral-size-large",
+    "status": "rejected",
+    "upstream_entries": 0,
+    "error": "chaparral_index_size_class"
+  },
+  {
+    "id": "chaparral-month",
+    "status": "rejected",
+    "upstream_entries": 0,
+    "error": "unsupported_field"
+  },
+  {
+    "id": "finite-curing-unsupported",
+    "status": "rejected",
+    "upstream_entries": 0,
+    "error": "unsupported_field"
+  },
+  {
+    "id": "unknown-operation",
+    "status": "rejected",
+    "upstream_entries": 0,
+    "error": "unsupported_operation"
+  },
+  {
+    "id": "unknown-field",
+    "status": "rejected",
+    "upstream_entries": 0,
+    "error": "unsupported_field"
+  },
+  {
+    "id": "missing-model",
+    "status": "rejected",
+    "upstream_entries": 0,
+    "error": "missing_field_fuel_model"
+  },
+  {
+    "id": null,
+    "status": "rejected",
+    "upstream_entries": 0,
+    "error": "duplicate_key"
+  },
+  {
+    "id": null,
+    "status": "rejected",
+    "upstream_entries": 0,
+    "error": "expected_object_end"
+  },
+  {
+    "id": null,
+    "status": "rejected",
+    "upstream_entries": 0,
+    "error": "expected_string"
+  },
+  {
+    "id": "fuel-underflow",
+    "status": "rejected",
+    "upstream_entries": 0,
+    "error": "number_range_fuel_model"
+  },
+  {
+    "id": "angle-underflow",
+    "status": "rejected",
+    "upstream_entries": 0,
+    "error": "number_range_wind_direction"
+  },
+  {
+    "id": "fuel-rounding",
+    "status": "rejected",
+    "upstream_entries": 0,
+    "error": "integer_token_required_fuel_model"
+  },
+  {
+    "id": "angle-rounding",
+    "status": "rejected",
+    "upstream_entries": 0,
+    "error": "integer_token_required_wind_direction"
+  },
+  {
+    "id": "angle-decimal",
+    "status": "rejected",
+    "upstream_entries": 0,
+    "error": "integer_token_required_wind_direction"
+  },
+  {
+    "id": "physical-m1h",
+    "status": "rejected",
+    "upstream_entries": 0,
+    "error": "physical_domain_m1h"
+  },
+  {
+    "id": "physical-wind_speed",
+    "status": "rejected",
+    "upstream_entries": 0,
+    "error": "physical_domain_wind_speed"
+  },
+  {
+    "id": "physical-slope",
+    "status": "rejected",
+    "upstream_entries": 0,
+    "error": "physical_domain_slope"
+  },
+  {
+    "id": "physical-aspect",
+    "status": "rejected",
+    "upstream_entries": 0,
+    "error": "aspect_not_in_reviewed_grid"
+  },
+  {
+    "id": "physical-canopy_cover",
+    "status": "rejected",
+    "upstream_entries": 0,
+    "error": "physical_domain_canopy_cover"
+  },
+  {
+    "id": "bad-mode-0",
+    "status": "rejected",
+    "upstream_entries": 0,
+    "error": "unsupported_mode_wind_height"
+  },
+  {
+    "id": "bad-mode-1",
+    "status": "rejected",
+    "upstream_entries": 0,
+    "error": "unsupported_mode_wind_orientation"
+  },
+  {
+    "id": "bad-mode-2",
+    "status": "rejected",
+    "upstream_entries": 0,
+    "error": "unsupported_mode_waf_method"
+  },
+  {
+    "id": "bad-mode-3",
+    "status": "rejected",
+    "upstream_entries": 0,
+    "error": "unsupported_mode_moisture_mode"
+  },
+  {
+    "id": "bad-mode-4",
+    "status": "rejected",
+    "upstream_entries": 0,
+    "error": "unused_user_waf"
+  },
+  {
+    "id": "bad-mode-5",
+    "status": "rejected",
+    "upstream_entries": 0,
+    "error": "missing_user_waf"
+  },
+  {
+    "id": "bad-mode-6",
+    "status": "rejected",
+    "upstream_entries": 0,
+    "error": "user_waf_range"
+  },
+  {
+    "id": "bad-mode-7",
+    "status": "rejected",
+    "upstream_entries": 0,
+    "error": "user_waf_range"
+  },
+  {
+    "id": "bad-mode-8",
+    "status": "rejected",
+    "upstream_entries": 0,
+    "error": "unsupported_mode_wind_height"
+  },
+  {
+    "id": "bad-mode-9",
+    "status": "rejected",
+    "upstream_entries": 0,
+    "error": "invalid_session"
+  }
+]

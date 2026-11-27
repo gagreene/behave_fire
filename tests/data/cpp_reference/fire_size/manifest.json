@@ -1,0 +1,48 @@
+{
+  "available": 3,
+  "build": {
+    "compiler": {
+      "id": "MSVC",
+      "version": "19.50.35728.0"
+    },
+    "driver_sha256": "9d93426d04be12a678a707f8c6b35e86905557bf6bb1a689909e86e1c8b312fd",
+    "flags": [
+      "/O2",
+      "/fp:precise",
+      "/D_USE_MATH_DEFINES=",
+      "/EHsc"
+    ],
+    "machine": "AMD64",
+    "overlay_sha256": {
+      "CMakeLists.txt": "705a4dcb5a86fc3bf0e7c4679f0feb40b44f44faaad4aa7235bfd1efa093781d",
+      "driver.cpp": "16bd2d292fdcabea9ea4fe6fca832a3fc18c530043b0b3db5e1c32bf0ad69389",
+      "probe.cpp": "48338485a0b6f3fd64d0b3542a56c996e043d5e77e9887f0189101c1065df015"
+    },
+    "pinned_checkout_clean": true,
+    "platform": "Windows-10-10.0.19044-SP0",
+    "upstream_sources": {
+      "src/behave/behaveUnits.cpp": "420149652f256ac89219470fbccde305221221b3cf4548f3ccb5ae4c58ba1a8e",
+      "src/behave/behaveUnits.h": "2840c9f1cec8bb9770601d0da54831a3daa9628188355ed17eb63b565431bf3c",
+      "src/behave/fireSize.cpp": "1c674f27e8f00ed729639964b16b75a62d5dc507dd1efe0cdd453b14de5ac3b0",
+      "src/behave/fireSize.h": "5e061a0c088a16c423088fb6fdd556cf0979c2be9a26e87e04a6472aca4b99e0"
+    }
+  },
+  "case_count": 3,
+  "command": "behave_ref_driver cases.jsonl results.jsonl",
+  "fields": [
+    "area_ft2",
+    "length_to_width_ratio",
+    "perimeter_ft"
+  ],
+  "files": {
+    "cases.jsonl": "b7eaafc8c07ad95c79dcb2cc553a659bf3106b1a215d08febb9f0e2c0ac2d755",
+    "results.jsonl": "3c8a90c2d0cb8af549b5d555938e439ed5867b5d2fbb66fdad978aa5c056d3df",
+    "schema.json": "bcefacdfef527819dd578abc68c46e9c05518c143d6f013f170a06d6be4df340"
+  },
+  "generator": "behave_ref_driver guarded fire_size operation",
+  "operation": "fire_size",
+  "result_count": 3,
+  "schema_version": 1,
+  "seed": null,
+  "upstream_sha": "3ca33d5b919d4253b411bfb6464b4c872dda6fc9"
+}

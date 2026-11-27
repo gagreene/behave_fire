@@ -1,0 +1,13 @@
+{
+  "fuel_records": 96,
+  "moisture_cells": 774,
+  "reference_revision": "7933789f00470c6bbfbe942dc22bdd7f74e192f9",
+  "scal_load_reference": "firelab/behave@3ca33d5b919d4253b411bfb6464b4c872dda6fc9:src/behave/fuelModels.cpp",
+  "source_sha256_lf": {
+    "behave_units": "c60185999a863b8fdfc1452155a792e996b06c4661bb247f1d49e314ad4d880a",
+    "fine_dead_fuel_moisture_tool": "de7bf4297525d929e627e7f317f0ae0410829e35185f2023592588b6c14fd18e",
+    "fuel_models": "34dba477be7a2e8ca73bd409ac85e0e95f85973344adb73829ed05dbc661f2cd",
+    "species_master_table": "63a6412e39cd51ffe3cb9a1366a64fecbef6b15b12e40b20a350372f03fda568"
+  },
+  "species_records": 24
+}

@@ -1,0 +1,48 @@
+{
+  "available": 2,
+  "build": {
+    "compiler": {
+      "id": "MSVC",
+      "version": "19.50.35728.0"
+    },
+    "driver_sha256": "9d93426d04be12a678a707f8c6b35e86905557bf6bb1a689909e86e1c8b312fd",
+    "flags": [
+      "/O2",
+      "/fp:precise",
+      "/D_USE_MATH_DEFINES=",
+      "/EHsc"
+    ],
+    "machine": "AMD64",
+    "overlay_sha256": {
+      "CMakeLists.txt": "705a4dcb5a86fc3bf0e7c4679f0feb40b44f44faaad4aa7235bfd1efa093781d",
+      "driver.cpp": "16bd2d292fdcabea9ea4fe6fca832a3fc18c530043b0b3db5e1c32bf0ad69389",
+      "probe.cpp": "48338485a0b6f3fd64d0b3542a56c996e043d5e77e9887f0189101c1065df015"
+    },
+    "pinned_checkout_clean": true,
+    "platform": "Windows-10-10.0.19044-SP0",
+    "upstream_sources": {
+      "src/behave/behaveUnits.cpp": "420149652f256ac89219470fbccde305221221b3cf4548f3ccb5ae4c58ba1a8e",
+      "src/behave/behaveUnits.h": "2840c9f1cec8bb9770601d0da54831a3daa9628188355ed17eb63b565431bf3c",
+      "src/behave/vaporPressureDeficitCalculator.cpp": "f97bca9263ed194a6ee685c284a005e887dea54bb1931829966b187e6e581fac",
+      "src/behave/vaporPressureDeficitCalculator.h": "428e33d014608bab6066e9ee00b76a8fc7d6e0c09a9e72ebdd2280cc01c991d7"
+    }
+  },
+  "case_count": 2,
+  "command": "behave_ref_driver cases.jsonl results.jsonl",
+  "fields": [
+    "actual_vp",
+    "saturated_vp",
+    "vpd"
+  ],
+  "files": {
+    "cases.jsonl": "bd89f8a338c027aeb10f79ac50e700981681543f0b90787b3a1a901d55566238",
+    "results.jsonl": "134482dba1abbeaf38c0dd54df1ff389beeb8a9793315ad284d10502d9579943",
+    "schema.json": "51014229c56d1e8b02a5811d1fa6d1d94b677c93a3eea57ed4c687b70c40b99b"
+  },
+  "generator": "behave_ref_driver guarded standalone VPD operation",
+  "operation": "vapor_pressure_deficit",
+  "result_count": 2,
+  "schema_version": 1,
+  "seed": null,
+  "upstream_sha": "3ca33d5b919d4253b411bfb6464b4c872dda6fc9"
+}

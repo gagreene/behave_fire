@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "operation": "mortality",
+  "request": {
+    "id": "Case identifier",
+    "operation": "mortality",
+    "intensity_btu_ft_s": "BtusPerFootPerSecond",
+    "wind_mph": "MilesPerHour, midflame",
+    "air_temperature_f": "Fahrenheit"
+  },
+  "bounds": "The driver accepts only the six reviewed IDs and their exact finite input tuples in cases.jsonl.",
+  "call_sequence": [
+    "Construct a fresh SpeciesMasterTable and its Mortality instance.",
+    "Call the public scalar calculateScorchHeight with the three inputs and their units."
+  ],
+  "output": {
+    "scorch_height_ft": "Feet"
+  },
+  "scope": "This is the standalone scorch-height equation. Species-dependent mortality, the exact small-intensity boundary, and temperatures near 140 degrees Fahrenheit are outside these observations."
+}

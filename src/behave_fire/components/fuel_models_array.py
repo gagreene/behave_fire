@@ -24,7 +24,21 @@ except ImportError:
     from fuel_models import FuelModels
 
 # Maximum fuel model number supported in the lookup table.
-_MAX_FM = 260
+_MAX_FM = 256
+
+
+def _fuel_model_indices(value, rows=_MAX_FM + 1):
+    """Map fuel identifiers outside the supported table to undefined row zero.
+
+    :param value: Fuel identifier scalar or array, including nonfinite real values.
+    :param rows: Actual lookup row count, including the undefined row.
+    :return: Int32 indices without narrowing invalid real identifiers first.
+    """
+    data = np.asarray(value)
+    if data.dtype.kind not in 'biuf':
+        data = np.asarray(value, dtype=np.int32)
+    valid = (data >= 1) & (data <= min(_MAX_FM, rows - 1))
+    return np.asarray(np.where(valid, data, 0), dtype=np.int32)
 
 
 def build_fuel_lookup_arrays(fuel_models: FuelModels) -> dict:

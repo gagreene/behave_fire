@@ -42,3 +42,14 @@ Thumbs.db
 src/examples/data/
 src/examples/results/
 
+# Local development files
+# Local agent workflow files (personal, not for repo)
+.claude/
+/development/
+/.superpowers/
+
+# Rust build outputs and native extension artifacts
+/rust/target/
+*.so
+*.dylib
+*.pdb

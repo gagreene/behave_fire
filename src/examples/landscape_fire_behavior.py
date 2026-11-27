@@ -24,30 +24,33 @@ Output GeoTIFFs → src/examples/results/
 PNG summary map  → src/examples/results/fire_behavior_summary.png
 """
 
-import sys
 import os
+import sys
+from importlib import import_module as _import_module
 
 # ---------------------------------------------------------------------------
 # Path setup — allow running as a plain script OR via pytest/import
 # ---------------------------------------------------------------------------
+if os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')) not in sys.path:
+    sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')))
+
+import matplotlib
+import numpy as np
+import rasterio
+from rasterio.crs import CRS
+from rasterio.transform import from_origin
+from scipy.ndimage import gaussian_filter
+
 _HERE = os.path.dirname(os.path.abspath(__file__))
 _SRC  = os.path.abspath(os.path.join(_HERE, ".."))
-if _SRC not in sys.path:
-    sys.path.insert(0, _SRC)
 
-import numpy as np
-from scipy.ndimage import gaussian_filter
-import rasterio
-from rasterio.transform import from_origin
-from rasterio.crs import CRS
-import matplotlib
 matplotlib.use("Agg")                 # non-interactive backend for script use
-import matplotlib.pyplot as plt
-import matplotlib.colors as mcolors
-from matplotlib.patches import Patch
+mcolors = _import_module('matplotlib.colors')
+plt = _import_module('matplotlib.pyplot')
+Patch = _import_module('matplotlib.patches').Patch
 
-from behave_fire.behave import BehaveRun
-from behave_fire.components.fuel_models import FuelModels
+BehaveRun = _import_module('behave_fire.behave').BehaveRun
+FuelModels = _import_module('behave_fire.components.fuel_models').FuelModels
 
 # ---------------------------------------------------------------------------
 # Directories
@@ -82,6 +85,32 @@ print(f"Origin (UL): E={ORIGIN_E:.0f} m, N={ORIGIN_N:.0f} m  (EPSG:{EPSG})")
 TRANSFORM = from_origin(ORIGIN_E, ORIGIN_N, CELL_SIZE, CELL_SIZE)
 CRS_OBJ   = CRS.from_epsg(EPSG)
 
+def _r(arr):
+    """Return the array as a 2D (NROWS,NCOLS) grid — outputs are already this shape."""
+    return np.asarray(arr)
+
+def _save2d(arr, fname, desc=""):
+    path = os.path.join(RESULTS_DIR, fname)
+    a = np.asarray(arr).astype(np.float32)
+    if a.ndim != 2:
+        raise ValueError(f"{fname}: expected 2D array, got shape {a.shape}")
+    save_tif(a, path, dtype=np.float32)
+    print(f"  {fname:<55s}  min={np.nanmin(a):.3f}  max={np.nanmax(a):.3f}  {desc}")
+
+def make_moisture(base, elev_gain, sigma=6, noise_amp=0.01, lo=0.02, hi=0.50):
+    """Create a spatially smooth moisture grid.
+
+    :param base: Base moisture fraction at lowest elevation.
+    :param elev_gain: Additional moisture fraction added from low to high elevation.
+    :param sigma: Gaussian smoothing radius (cells) for spatial noise.
+    :param noise_amp: Amplitude of random spatial noise (fraction).
+    :param lo: Lower clip bound (fraction).
+    :param hi: Upper clip bound (fraction).
+    """
+    m = (base + elev_norm * elev_gain
+         + gaussian_filter(RNG.standard_normal((NROWS, NCOLS)), sigma=sigma) * noise_amp)
+    return np.clip(m, lo, hi).astype(np.float32)
+
 def save_tif(array: np.ndarray, path: str, nodata: float = -9999.0,
              dtype=None, descriptions: list[str] | None = None):
     """Write a 2-D (rows×cols) or 3-D (bands×rows×cols) ndarray to a GeoTIFF."""
@@ -105,6 +134,14 @@ def save_tif(array: np.ndarray, path: str, nodata: float = -9999.0,
             dst.write(arr[b].astype(dtype), b + 1)
             if descriptions and b < len(descriptions):
                 dst.update_tags(b + 1, description=descriptions[b])
+
+def stats(label, arr, unit):
+    a = np.asarray(arr).ravel()
+    print(f"  {label:<40s}  "
+          f"mean={np.nanmean(a):8.2f}  "
+          f"p50={np.nanpercentile(a,50):8.2f}  "
+          f"p90={np.nanpercentile(a,90):8.2f}  "
+          f"max={np.nanmax(a):8.2f}  [{unit}]")
 
 
 # ===========================================================================
@@ -199,7 +236,7 @@ save_tif(fuel_grid, os.path.join(DATA_DIR, "fuel_models.tif"), dtype=np.int32, n
 
 unique_fm, counts = np.unique(fuel_grid, return_counts=True)
 print("  Fuel model distribution (model : cells):")
-for fm, n in zip(unique_fm, counts):
+for fm, n in zip(unique_fm, counts, strict=False):
     pct = n / fuel_grid.size * 100
     print(f"    {fm:4d} : {n:6d} cells  ({pct:.1f} %)")
 
@@ -266,20 +303,6 @@ print("\n[4/5] Generating weather inputs …")
 # Mild elevation-moisture gradient + local random variation
 elev_norm = (elev - elev.min()) / (elev.max() - elev.min())   # 0–1
 
-def make_moisture(base, elev_gain, sigma=6, noise_amp=0.01, lo=0.02, hi=0.50):
-    """Create a spatially smooth moisture grid.
-
-    :param base: Base moisture fraction at lowest elevation.
-    :param elev_gain: Additional moisture fraction added from low to high elevation.
-    :param sigma: Gaussian smoothing radius (cells) for spatial noise.
-    :param noise_amp: Amplitude of random spatial noise (fraction).
-    :param lo: Lower clip bound (fraction).
-    :param hi: Upper clip bound (fraction).
-    """
-    m = (base + elev_norm * elev_gain
-         + gaussian_filter(RNG.standard_normal((NROWS, NCOLS)), sigma=sigma) * noise_amp)
-    return np.clip(m, lo, hi).astype(np.float32)
-
 
 m1h   = make_moisture(0.06, 0.04, sigma=8,  noise_amp=0.015)           # 1-hr  dead  ~6–10 %
 m10h  = make_moisture(0.08, 0.04, sigma=10, noise_amp=0.010)           # 10-hr dead  ~8–12 %
@@ -345,7 +368,7 @@ runner = BehaveRun(fm)
 # ---- 5a  Surface run ----
 # Wind input is at 10-m mast height → wind_height_mode='TenMeter'
 # Wind is compass-north bearing      → wind_orientation_mode='RelativeToNorth'
-surface = runner.do_surface_run(
+surface_inputs = dict(
     fuel_model_grid      = fuel_grid,
     m1h=m1h, m10h=m10h, m100h=m100h, mlh=mlh, mlw=mlw,
     moisture_units       = 0,          # Fraction (data stored as 0.06, not 6%)
@@ -364,6 +387,12 @@ surface = runner.do_surface_run(
     crown_ratio_units    = 0,          # Fraction (data stored as 0–1)
     wind_height_mode     = 'TenMeter',
     waf_method           = 'UseCrownRatio',
+)
+# The crown run reads surface spread rate, fireline intensity, and heat per unit
+# area in base units (ft/min, BTU/ft/s, BTU/ft^2), so it gets its own base-unit run.
+surface_base = runner.do_surface_run(**surface_inputs)
+surface = runner.do_surface_run(
+    **surface_inputs,
     out_units={
         'spread_rate'              : 3,   # MetersPerMinute
         'backing_spread_rate'      : 3,
@@ -381,7 +410,7 @@ surface = runner.do_surface_run(
 
 # ---- 5b  Crown run ----
 crown = runner.do_crown_run(
-    surface_results      = surface,
+    surface_results      = surface_base,
     fuel_model_grid      = fuel_grid,
     m1h=m1h, m10h=m10h, m100h=m100h, mlh=mlh, mlw=mlw,
     moisture_units       = 0,          # Fraction (data stored as 0–1)
@@ -490,14 +519,6 @@ print("  Fire size    : done")
 # ===========================================================================
 print("\nSaving output rasters …")
 
-def _save2d(arr, fname, desc=""):
-    path = os.path.join(RESULTS_DIR, fname)
-    a = np.asarray(arr).astype(np.float32)
-    if a.ndim != 2:
-        raise ValueError(f"{fname}: expected 2D array, got shape {a.shape}")
-    save_tif(a, path, dtype=np.float32)
-    print(f"  {fname:<55s}  min={np.nanmin(a):.3f}  max={np.nanmax(a):.3f}  {desc}")
-
 _save2d(surface['spread_rate'],                "surface_spread_rate_mpm.tif",     "m/min")
 _save2d(surface['backing_spread_rate'],        "surface_backing_ros_mpm.tif",     "m/min")
 _save2d(surface['flanking_spread_rate'],       "surface_flanking_ros_mpm.tif",    "m/min")
@@ -532,10 +553,6 @@ _save2d(fire_area_ha,                          "fire_area_60min_ha.tif",        
 # 7.  SUMMARY MAP  (12-panel figure, 3 rows × 4 cols)
 # ===========================================================================
 print("\nGenerating summary map …")
-
-def _r(arr):
-    """Return the array as a 2D (NROWS,NCOLS) grid — outputs are already this shape."""
-    return np.asarray(arr)
 
 # Discrete fire-type colormap — 4 values matching C++ FireType enum
 FIRE_TYPE_COLORS = {
@@ -627,14 +644,6 @@ print(f"  Saved -> {out_png}")
 print("\n" + "=" * 60)
 print("Landscape-wide fire behavior statistics")
 print("=" * 60)
-
-def stats(label, arr, unit):
-    a = np.asarray(arr).ravel()
-    print(f"  {label:<40s}  "
-          f"mean={np.nanmean(a):8.2f}  "
-          f"p50={np.nanpercentile(a,50):8.2f}  "
-          f"p90={np.nanpercentile(a,90):8.2f}  "
-          f"max={np.nanmax(a):8.2f}  [{unit}]")
 
 stats("Surface ROS",               surface['spread_rate'],           "m/min")
 stats("Backing ROS",               surface['backing_spread_rate'],   "m/min")

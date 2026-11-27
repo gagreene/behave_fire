@@ -1,0 +1,4 @@
+{"id":"ignite-dry","operation":"ignite","air_temperature_f":71,"sun_shade_fraction":0.5,"moisture_1h":0}
+{"id":"ignite-moisture-12-5","operation":"ignite","air_temperature_f":71,"sun_shade_fraction":0.5,"moisture_1h":0.125}
+{"id":"ignite-moisture-25","operation":"ignite","air_temperature_f":71,"sun_shade_fraction":0.5,"moisture_1h":0.25}
+{"id":"ignite-wet","operation":"ignite","air_temperature_f":71,"sun_shade_fraction":0.5,"moisture_1h":0.5}

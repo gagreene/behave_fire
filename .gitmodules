@@ -1,0 +1,3 @@
+[submodule "reference/behave_cpp"]
+	path = reference/behave_cpp
+	url = https://github.com/firelab/behave.git
