@@ -25,6 +25,13 @@ def test_built_wheels_all_receive_cpp_payload_checks_before_aggregation():
     assert index < metadata_index
 
 
+def test_ci_manual_dispatch_never_joins_or_cancels_the_push_group():
+    concurrency = yaml.load((ROOT / '.github/workflows/ci.yml').read_text(), Loader=yaml.BaseLoader)['concurrency']
+    push = "github.event_name == 'push' && github.ref == 'refs/heads/pre_release'"
+    assert push + " && github.ref" in concurrency['group']
+    assert concurrency['cancel-in-progress'] == "${{ github.event_name == 'pull_request' || (" + push + ") }}"
+
+
 def test_ci_tiers_come_from_the_plan_job():
     workflow = yaml.load((ROOT / '.github/workflows/ci.yml').read_text(), Loader=yaml.BaseLoader)
     jobs = workflow['jobs']

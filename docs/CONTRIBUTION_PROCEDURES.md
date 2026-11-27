@@ -75,8 +75,9 @@ Cargo `0.1.0-rc.1` builds Python `0.1.0rc1`. Each TestPyPI upload needs a new `N
 The standalone core crate keeps its own version in
 `rust/crates/behave-fire/Cargo.toml`. A change to only these first-party version
 fields (including the matching `rust/Cargo.lock` entries and the core version
-requirement in `behave-py`) needs no new C++ source qualification; any other
-manifest or lock change does. Two branches live permanently, and neither may ever
+requirement in `behave-py`) is a version-only change. No manifest or lock change
+needs new C++ comparison evidence unless it changes the pinned C++ reference (see
+"Pinned C++ comparisons"). Two branches live permanently, and neither may ever
 be deleted:
 
 - `master` holds released code only. Every release tag is on `master`.
@@ -248,9 +249,11 @@ inventory, and the crate-local fixture copies. They check integrity, not scienti
 ### Pinned C++ comparisons
 
 The comparisons of Python and Rust outputs with the pinned C++ outputs are needed only when the
-pinned upstream C++ reference changes: a new pin in `reference/behave_cpp` or changed files under
-`tests/data/cpp_reference/`. They are not part of the local check for an ordinary PR, of CI, or of
-a release.
+pinned upstream C++ reference changes: a new pin in `reference/behave_cpp`, or regenerated C++
+observations (the `cases.jsonl` and `results.jsonl` files under `tests/data/cpp_reference/`).
+Changes to the hash list, tolerance or approval wording, manifests of unchanged observations, or
+tooling do not count. They are not part of the local check for an ordinary PR, of CI, or of a
+release.
 
 The Python comparisons carry the `cpp_comparison` marker, and the default `pytest` run deselects
 them (`pytest.ini` adds `-m "not cpp_comparison"`; CI and the wheel suites also deselect them with

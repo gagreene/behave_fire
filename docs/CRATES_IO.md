@@ -9,8 +9,8 @@ forbids unsafe code and contains no float32/SVML emulation.
 
 The initial core version is `0.1.0`. Publication requires separate approval.
 Changing only the core version (with its `rust/Cargo.lock` entry and the
-version requirement in `behave-py`) needs no new C++ source qualification; any
-other manifest or lock change does.
+version requirement in `behave-py`) is a version-only change. No manifest or lock
+change needs new C++ comparison evidence unless it changes the pinned C++ reference.
 A read-only crates.io query on 2026-11-04 returned no existing `behave-fire`
 package. This does not reserve the name or establish ownership. Recheck both
 before the first upload. The Python version and its `v*` tags are independent.

@@ -264,3 +264,11 @@ def test_failed_rust_retry_preserves_prior_reports(tmp_path, monkeypatch):
         receipts.write_receipt(root, archive, "operator")
     assert old_log.read_text(encoding="utf-8") == "previous successful evidence"
     assert previous.read_text(encoding="utf-8") == "previous receipt"
+
+def test_musl_crt_static_belongs_in_the_rustflags_not_the_command():
+    musl = "x86_64-unknown-linux-musl"
+    flagged = "-Cdebuginfo=0\x1f-Ctarget-feature=-crt-static"
+    assert receipts._target_flags("-Cdebuginfo=0", musl) == flagged
+    assert receipts._target_flags(flagged, musl) == flagged
+    assert receipts._target_flags("-Cdebuginfo=0", "x86_64-pc-windows-msvc") == "-Cdebuginfo=0"
+    assert "crt-static" not in " ".join(receipts._build_command(musl))

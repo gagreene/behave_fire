@@ -213,6 +213,17 @@ def test_sdist_rejects_cpp_reference_sources_and_notices(tmp_path, name):
         checker.check_archive(archive)
 
 
+def test_sdist_rejects_local_cpp_receipts(tmp_path):
+    checker = _load("check_sdist")
+    configuration = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))
+    assert "tests/data/cpp_receipts/**" in configuration["tool"]["maturin"]["exclude"]
+    files = dict.fromkeys(checker.REQUIRED, b"fixture")
+    files["tests/data/cpp_receipts/windows-x86_64.json"] = b"{}"
+    archive = _tar(tmp_path / "behave_fire.tar.gz", "behave_fire", files)
+    with pytest.raises(ValueError, match="local C\\+\\+ receipt"):
+        checker.check_archive(archive)
+
+
 # ---- wheel inventory tests ----
 
 @pytest.mark.parametrize("name", FORBIDDEN)

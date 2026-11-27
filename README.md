@@ -589,10 +589,11 @@ Pytest imports the package through `src` and discovers `test_*.py` under `tests/
 Rust tests (from the repository root; `rust/` has no `Cargo.toml` at the root, so pass the manifest path):
 
 ```bash
-cargo test   --manifest-path rust/Cargo.toml -p behave-fire --locked -- --include-ignored   # includes the pinned C++ comparisons
+cargo test   --manifest-path rust/Cargo.toml -p behave-fire --locked
 cargo fmt    --manifest-path rust/Cargo.toml --all -- --check
 cargo clippy --manifest-path rust/Cargo.toml --workspace --all-targets --locked -- -D warnings
 cargo +1.78.0 test --manifest-path rust/Cargo.toml -p behave-fire --locked   # minimum supported Rust
+# Only when the pinned C++ reference changes: add `-- --include-ignored` to run the pinned C++ comparisons
 ```
 
 Run the legacy accumulator harness separately, also from the project root:

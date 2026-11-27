@@ -17,6 +17,8 @@ REQUIRED = {
 }
 # Python/Rust acceptance fixtures that the shipped parity checker and tests read.
 FIXTURES = "tests/data/rust_port"
+# Local C++ comparison receipts stay out of every distribution.
+LOCAL_EVIDENCE = "tests/data/cpp_receipts/"
 
 
 def _check_cpp_inputs(archive, members):
@@ -40,6 +42,16 @@ def _check_cpp_inputs(archive, members):
         actual = hashlib.sha256(archive.extractfile(members[relative]).read()).hexdigest()
         if actual != expected:
             raise ValueError(f"C++ offline input changed in the archive: {relative}")
+
+
+def _check_local_evidence(name):
+    """Reject local C++ comparison receipts, which carry operator, host, and build metadata.
+
+    :param name: Distribution-relative POSIX member name.
+    :return: None; raises ValueError when a local receipt is included.
+    """
+    if name.startswith(LOCAL_EVIDENCE):
+        raise ValueError(f"local C++ receipt in distribution: {name}")
 
 
 def _check_reference_payload(name):
@@ -83,6 +95,7 @@ def check_archive(path, expected=()):
                 raise ValueError(f"unsafe archive member: {member.name}")
             name = "/".join(parts[1:])
             _check_reference_payload(name)
+            _check_local_evidence(name)
             if member.isfile():
                 if name in names:
                     raise ValueError(f"duplicate archive member: {name}")

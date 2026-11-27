@@ -83,8 +83,6 @@ def _build_command(target):
                "--locked", "--release", "--target", target, "--target-dir", "target"]
     if target.endswith("-apple-darwin"):
         command.extend(["--", "-C", "link-arg=-undefined", "-C", "link-arg=dynamic_lookup"])
-    if target.endswith("-linux-musl"):
-        command.extend(["--", "-C", "target-feature=-crt-static"])
     return command
 
 
@@ -116,6 +114,9 @@ def _build_extension(root, commit, snapshot):
     if not host or not toolchains["cargo"]:
         raise ValueError("Could not identify the Cargo toolchain and its host target")
     target = host[1]
+    encoded_flags = _target_flags(encoded_flags, target)
+    environment["CARGO_ENCODED_RUSTFLAGS"] = encoded_flags
+    toolchains["cargo_encoded_rustflags"] = encoded_flags
     command = _build_command(target)
     subprocess.run(command, cwd=snapshot, check=True, env=environment)
     if target.endswith("-apple-darwin"):
@@ -206,6 +207,20 @@ def _read_json(path):
     """
     return json.loads(Path(path).read_bytes(), object_pairs_hook=reference._unique_object,
                       parse_constant=reference._reject_constant)
+
+
+def _target_flags(encoded_flags, target):
+    """Add the target rustflags that Cargo needs before it probes the crate types.
+
+    A musl cdylib needs ``-crt-static`` in the effective rustflags, so it cannot be passed after ``--``.
+
+    :param encoded_flags: Cargo encoded rustflags (separated by the ASCII unit separator).
+    :param target: Rust host target triple.
+    :return: Encoded rustflags for the target.
+    """
+    if target.endswith("-linux-musl") and "target-feature=-crt-static" not in encoded_flags:
+        return "\x1f".join(flag for flag in (encoded_flags, "-Ctarget-feature=-crt-static") if flag)
+    return encoded_flags
 
 
 def _toolchains(snapshot, environment):

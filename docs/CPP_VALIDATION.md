@@ -203,8 +203,10 @@ exact pinned checkout, clean source state, and matching source/driver identities
 
 ## Local comparison receipts
 
-Make a receipt when the pinned C++ reference changes (a new pin in `reference/behave_cpp` or new
-files under `tests/data/cpp_reference/`). Routine pull requests and releases do not need one.
+Make a receipt when the pinned C++ reference changes (a new pin in `reference/behave_cpp` or
+regenerated observations in the `cases.jsonl` and `results.jsonl` files under
+`tests/data/cpp_reference/`). Routine pull requests and releases do not need one, and neither do
+changes to the hash list, approval wording, or tooling.
 A receipt records one platform's full local comparison of the Python and Rust ports with the
 pinned C++ outputs. Run the writer from a clean checkout with Python, NumPy, and the
 native Rust toolchain available.

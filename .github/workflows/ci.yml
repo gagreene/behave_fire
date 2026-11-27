@@ -31,8 +31,8 @@ permissions:
 # a unique group, so it is never cancelled and never replaces a queued run. GitHub keeps only one
 # pending run per group, so a shared group would drop queued master runs even without cancellation.
 concurrency:
-  group: ci-${{ (github.event.action == 'edited' && !github.event.changes.base) && github.run_id || github.event.pull_request.number || (github.ref == 'refs/heads/pre_release' && github.ref) || github.run_id }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' || github.ref == 'refs/heads/pre_release' }}
+  group: ci-${{ (github.event.action == 'edited' && !github.event.changes.base) && github.run_id || github.event.pull_request.number || (github.event_name == 'push' && github.ref == 'refs/heads/pre_release' && github.ref) || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref == 'refs/heads/pre_release') }}
 
 # Tiers, decided once by the plan job:
 # - quick: pull requests into any branch except master, and pushes to pre_release (Python style/order, fmt,
