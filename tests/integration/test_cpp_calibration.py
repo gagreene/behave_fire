@@ -167,6 +167,7 @@ def test_source_changes_invalidate_otherwise_complete_qualification(tmp_path, mu
 # ---- signed zero revalidation tests ----
 
 @pytest.mark.rust
+@pytest.mark.cpp_comparison
 def test_revalidation_preserves_paired_bits_and_signed_zero(tmp_path):
     module = importlib.import_module('cpp_calibrate')
     controls = importlib.import_module('cpp_controls')

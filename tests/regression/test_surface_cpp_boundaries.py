@@ -96,6 +96,7 @@ def test_grid_fused_supported_tweaks_preserve_small_spread_shape():
 
 # ---- reaction damping tests ----
 
+@pytest.mark.cpp_comparison
 def test_reaction_order_matches_pinned_cpp_near_extinction(_surface_backend):
     """The damping expression must not introduce the old threefold heat residual."""
     from behave_fire import BehaveRun

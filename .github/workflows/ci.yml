@@ -7,10 +7,21 @@ on:
     branches: [pre_release, master]
   workflow_call:
     inputs:
-      cpp_live:
+      tier:
+        # Present only for release.yml calls, which always run the full tier.
+        type: string
+        default: full
+  workflow_dispatch:
+    inputs:
+      scope:
+        description: "full: complete platform and packaging checks. Targeted scopes build and test only the named artifacts."
+        type: choice
+        options: [full, musl, sdist, musl-and-sdist]
+        default: full
+      cpp_qualification:
+        description: "Collect the nine C++ calibration reports (full scope only); approval remains a separate decision."
         type: boolean
         default: false
-  workflow_dispatch:
 
 permissions:
   contents: read
@@ -20,18 +31,49 @@ permissions:
 # a unique group, so it is never cancelled and never replaces a queued run. GitHub keeps only one
 # pending run per group, so a shared group would drop queued master runs even without cancellation.
 concurrency:
-  group: ci-${{ (github.event.action == 'edited' && !github.event.changes.base) && github.run_id || github.event.pull_request.number || (github.ref == 'refs/heads/pre_release' && github.ref) || github.run_id }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' || github.ref == 'refs/heads/pre_release' }}
+  group: ci-${{ (github.event.action == 'edited' && !github.event.changes.base) && github.run_id || github.event.pull_request.number || (github.event_name == 'push' && github.ref == 'refs/heads/pre_release' && github.ref) || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref == 'refs/heads/pre_release') }}
 
-# Tiers: a pull request that does not target master runs the quick tier (Python style/order, fmt,
-# Clippy, Rust core tests,
-# the table check, and one Python and one native job). Everything else (pull requests into master, pushes,
-# workflow_call from release.yml, and workflow_dispatch) runs the full tier. The pull_request trigger
-# includes the edited type so that changing a pull request's base branch re-evaluates the tier. An edit
-# that does not change the base branch (title or description) skips every job.
+# Tiers, decided once by the plan job:
+# - quick: pull requests into any branch except master, and pushes to pre_release (Python style/order, fmt,
+#   Clippy, Rust core tests, the table check, and one Python and one native job). Merging into pre_release
+#   never starts the full wheel matrix.
+# - full: pull requests into master (promotion and hotfix), release.yml through workflow_call, a manual
+#   dispatch with scope full, and a master push whose landed tree has no successful full result.
+# - reused: a master push whose Git tree equals the merge tree that a successful full pull request run tested.
+#   The plan job records that run and every other job is skipped.
+# - targeted: a manual dispatch with scope musl, sdist, or musl-and-sdist builds and tests only those artifacts.
+# - none: a pull request edit that does not change the base branch (title or description).
+# Comparisons against pinned C++ outputs are not part of these tiers; they run when the pinned C++
+# reference changes (docs/CONTRIBUTION_PROCEDURES.md), and C++ qualification is a separate manual input.
 jobs:
+  plan:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      actions: read
+      pull-requests: read
+    outputs:
+      tier: ${{ steps.plan.outputs.tier }}
+      scope: ${{ steps.plan.outputs.scope }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Choose the tier and reuse a matching full result on master
+        id: plan
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EVENT: ${{ github.event_name }}
+          ACTION: ${{ github.event.action }}
+          BASE_CHANGED: ${{ github.event.changes.base != null }}
+          BASE_REF: ${{ github.base_ref }}
+          CALLED_TIER: ${{ inputs.tier }}
+          SCOPE: ${{ inputs.scope }}
+        run: python tools/ci_plan.py >> "$GITHUB_OUTPUT"
+
   style:
-    if: ${{ !(github.event.action == 'edited' && !github.event.changes.base) }}
+    needs: plan
+    if: ${{ contains(fromJSON('["quick","full"]'), needs.plan.outputs.tier) }}
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
@@ -49,12 +91,13 @@ jobs:
       - run: cargo clippy --manifest-path rust/Cargo.toml --workspace --all-targets --locked -- -D warnings
 
   rust:
-    if: ${{ !(github.event.action == 'edited' && !github.event.changes.base) }}
+    needs: plan
+    if: ${{ contains(fromJSON('["quick","full"]'), needs.plan.outputs.tier) }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        os: ${{ fromJSON(github.event_name == 'pull_request' && github.base_ref != 'master' && '["ubuntu-24.04"]' || '["ubuntu-24.04","macos-15","windows-2025"]') }}
+        os: ${{ fromJSON(needs.plan.outputs.tier == 'full' && '["ubuntu-24.04","macos-15","windows-2025"]' || '["ubuntu-24.04"]') }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v6
@@ -73,7 +116,8 @@ jobs:
           RUSTDOCFLAGS: -D warnings
 
   msrv:
-    if: ${{ !(github.event_name == 'pull_request' && github.base_ref != 'master') && !(github.event.action == 'edited' && !github.event.changes.base) }}
+    needs: plan
+    if: ${{ needs.plan.outputs.tier == 'full' }}
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
@@ -92,12 +136,13 @@ jobs:
       - run: cargo test --manifest-path rust/Cargo.toml -p behave-fire --locked --no-fail-fast
 
   python-only:
-    if: ${{ !(github.event.action == 'edited' && !github.event.changes.base) }}
+    needs: plan
+    if: ${{ contains(fromJSON('["quick","full"]'), needs.plan.outputs.tier) }}
     runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
-        python: ${{ fromJSON(github.event_name == 'pull_request' && github.base_ref != 'master' && '["3.12"]' || '["3.11","3.12","3.13","3.14"]') }}
+        python: ${{ fromJSON(needs.plan.outputs.tier == 'full' && '["3.11","3.12","3.13","3.14"]' || '["3.12"]') }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v6
@@ -109,15 +154,16 @@ jobs:
         run: |
           uv run --no-sync python -c 'import importlib.util,sys; import pytest,build,twine; sys.path.insert(0,"src"); assert importlib.util.find_spec("behave_fire._rust") is None'
       - run: uv run --no-sync python tools/check_rust_tables.py --check
-      - run: uv run --no-sync python -m pytest
+      - run: uv run --no-sync python -m pytest -m "not cpp_comparison"
 
   native-pytest:
-    if: ${{ !(github.event.action == 'edited' && !github.event.changes.base) }}
+    needs: plan
+    if: ${{ contains(fromJSON('["quick","full"]'), needs.plan.outputs.tier) }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        os: ${{ fromJSON(github.event_name == 'pull_request' && github.base_ref != 'master' && '["ubuntu-24.04"]' || '["ubuntu-24.04","macos-15","windows-2025"]') }}
+        os: ${{ fromJSON(needs.plan.outputs.tier == 'full' && '["ubuntu-24.04","macos-15","windows-2025"]' || '["ubuntu-24.04"]') }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v6
@@ -126,7 +172,7 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - uses: astral-sh/setup-uv@v6
       - run: uv sync --locked --extra test --extra dev
-      - run: uv run --no-sync python -m pytest --require-rust
+      - run: uv run --no-sync python -m pytest --require-rust -m "not cpp_comparison"
       - name: Record scalar alias compatibility evidence
         if: always()
         run: uv run --no-sync python tools/probe_numpy_aliases.py
@@ -178,16 +224,51 @@ jobs:
           if-no-files-found: warn
 
   wheel-validation:
-    needs: [style, rust, msrv, python-only, native-pytest, crate-validation]
+    needs: [plan, style, rust, msrv, python-only, native-pytest, crate-validation]
     uses: ./.github/workflows/wheel-validation.yml
-    if: ${{ !(github.event_name == 'pull_request' && github.base_ref != 'master') && !(github.event.action == 'edited' && !github.event.changes.base) }}
+    # Targeted dispatches skip the quick jobs; any failed prerequisite still stops the wheels.
+    if: ${{ !cancelled() && !contains(needs.*.result, 'failure') && contains(fromJSON('["full","targeted"]'), needs.plan.outputs.tier) }}
     with:
-      cpp_calibration: ${{ github.event_name == 'workflow_dispatch' }}
+      scope: ${{ needs.plan.outputs.scope }}
+      cpp_calibration: ${{ github.event_name == 'workflow_dispatch' && needs.plan.outputs.tier == 'full' && inputs.cpp_qualification == true }}
 
   crate-validation:
+    needs: plan
     uses: ./.github/workflows/crate-validation.yml
-    if: ${{ !(github.event_name == 'pull_request' && github.base_ref != 'master') && !(github.event.action == 'edited' && !github.event.changes.base) }}
+    if: ${{ needs.plan.outputs.tier == 'full' }}
 
   cpp-calibration:
-    if: ${{ github.event_name == 'workflow_dispatch' || inputs.cpp_live }}
+    needs: plan
+    if: ${{ github.event_name == 'workflow_dispatch' && needs.plan.outputs.tier == 'full' && inputs.cpp_qualification == true }}
     uses: ./.github/workflows/cpp-live-validation.yml
+
+  full-result:
+    # Proof for the master push: written only after every full-tier job of a pull request into master passed.
+    needs: [plan, style, rust, msrv, python-only, native-pytest, crate-validation, wheel-validation]
+    if: ${{ success() && github.event_name == 'pull_request' && needs.plan.outputs.tier == 'full' }}
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Record the tested merge tree
+        shell: bash
+        env:
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          mkdir result
+          python - <<'PY'
+          import json, os, subprocess
+          tree = subprocess.run(["git", "rev-parse", "HEAD^{tree}"], check=True, capture_output=True, text=True)
+          record = {"tier": "full", "tree": tree.stdout.strip(), "merge_sha": os.environ["GITHUB_SHA"],
+                    "head_sha": os.environ["HEAD_SHA"], "base_sha": os.environ["BASE_SHA"],
+                    "pull_request": int(os.environ["NUMBER"]), "run_id": int(os.environ["GITHUB_RUN_ID"])}
+          with open("result/result.json", "w", encoding="utf-8") as handle:
+              json.dump(record, handle, indent=2)
+          print(json.dumps(record))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ci-full-result
+          path: result/result.json
+          if-no-files-found: error

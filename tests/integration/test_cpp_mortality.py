@@ -18,17 +18,22 @@ reference = importlib.import_module('cpp_reference')
 # ---- comparison tests ----
 
 @pytest.mark.parametrize('backend', ['python', pytest.param('rust', marks=pytest.mark.rust)])
+@pytest.mark.cpp_comparison
 def test_approved_cases_match_exact_binary64(backend):
     policy = reference.load_reference()['policy']['mortality']
     expected = mortality.load_observations(ROOT)
     measured = mortality.measure_ports(ROOT, (backend,))[backend]
+    compared = 0
     for actual, original in zip(measured, expected, strict=True):
         assert actual['id'] == original['id']
+        # The established exact rule applies whatever the release approval state.
+        compared += mortality.check_exact(actual['output'], original['output'], policy)
         if policy['approved']:
             mortality.assert_matches_cpp(actual['output'], original['output'], policy)
         else:
             with pytest.raises(reference.UnapprovedCppPolicy):
                 mortality.assert_matches_cpp(actual['output'], original['output'], policy)
+    assert compared == 6
 
 
 def test_exact_policy_rejects_a_changed_zero_sign():

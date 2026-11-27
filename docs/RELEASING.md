@@ -1,22 +1,22 @@
 # Python package release procedure
 
-Python package versions come from `rust/crates/behave-py/Cargo.toml` and use `MAJOR.MINOR.PATCH`. A release such as Cargo `0.1.0` builds Python `0.1.0` with tag `v0.1.0`. TestPyPI rehearsals use release candidates: Cargo `0.1.0-rc.1` builds Python `0.1.0rc1`, and each rehearsal upload needs the next `rcN`. The standalone core version (`rust/crates/behave-fire/Cargo.toml`, currently `0.1.0`) is independent. Never bump the core solely to match Python. Version-only edits to these first-party version fields need no new C++ source qualification; any other manifest or lock change does.
+Python package versions come from `rust/crates/behave-py/Cargo.toml` and use `MAJOR.MINOR.PATCH`. A release such as Cargo `0.1.0` builds Python `0.1.0` with tag `v0.1.0`. TestPyPI rehearsals use release candidates: Cargo `0.1.0-rc.1` builds Python `0.1.0rc1`, and each rehearsal upload needs the next `rcN`. The standalone core version (`rust/crates/behave-fire/Cargo.toml`, currently `0.1.0`) is independent. Never bump the core solely to match Python. Version-only edits to these first-party version fields are ordinary version bumps. No manifest or lock change needs new C++ comparison evidence unless it changes the pinned C++ reference.
 
-Build-only validation is safe on an unmerged branch. PR CI calls `.github/workflows/wheel-validation.yml` through a local reusable-workflow reference, so the branch's own scripts and workflow run before merge. The registered CI workflow also accepts manual dispatch on a selected ref; it builds and tests artifacts without publishing. Manual `release.yml` dispatch defaults to `build-only`. No package upload is authorized by implementing or testing these files.
+Build-only validation is safe on an unmerged branch. CI for a promotion or hotfix pull request into `master` calls `.github/workflows/wheel-validation.yml` through a local reusable-workflow reference, so the branch's own scripts and workflow run before merge. Pull requests into `pre_release` run only the quick tier, so validate wheel or packaging changes on such a branch with a manual `scope=full` or targeted dispatch. The registered CI workflow also accepts manual dispatch on a selected ref; it builds and tests artifacts without publishing. Manual `release.yml` dispatch defaults to `build-only`. No package upload is authorized by implementing or testing these files.
 
 ## Build wheels on GitHub
 
 Push the implementation branch and open its PR to run CI, or dispatch the registered CI workflow on a ref that contains `workflow_dispatch`:
 
 ```sh
-gh workflow run CI --ref pre_release
+gh workflow run CI --ref pre_release -f scope=full
 gh run list --workflow CI --branch pre_release --event workflow_dispatch --limit 5
 gh run watch RUN_ID --exit-status
 gh run download RUN_ID --name distributions --dir dist
 python tools/check_wheel_metadata.py dist
 ```
 
-Replace `RUN_ID` with the run reported by GitHub. Use a feature branch instead of `pre_release` when validating changes before merge. CI also runs on pushes to `pre_release` and `master`; its workflow can be rerun through GitHub Actions for an existing commit. The manual command runs the full CI pipeline, including all seven native wheel targets, pure wheel, sdist, isolated installation tests and Rust/package checks. It has read-only repository permissions and no publication job.
+Replace `RUN_ID` with the run reported by GitHub. Use a feature branch instead of `pre_release` when validating changes before merge. Pushes to `pre_release` run only the quick tier; the full platform and packaging checks run on promotion and hotfix pull requests into `master`, and the following `master` push reuses that result when its tree is identical (see the CI tiers in `docs/CONTRIBUTION_PROCEDURES.md`). The manual command with `scope=full` runs the full CI pipeline, including all seven native wheel targets, pure wheel, sdist, isolated installation tests and Rust/package checks. A targeted scope (`musl`, `sdist`, or `musl-and-sdist`) builds and tests only those artifacts and does not produce the complete `distributions` artifact. Every manual run has read-only repository permissions and no publication job.
 
 Use the `distributions` artifact from a successful run; individual `distributions-*` artifacts are intermediate build outputs. The combined artifact contains seven `cp311-abi3` native wheels, one universal `py3-none-any` wheel and one source archive. Test evidence is uploaded separately per platform/interpreter. All installation tests run outside the source checkout on CPython 3.11–3.14, with both the exact NumPy floor and a current allowed version. On every platform the complete artifact set selects Rust; a separate pure-only install selects Python and captures exactly one fallback warning. Discovery stays silent and does not consume the warning.
 
@@ -36,9 +36,7 @@ The test extra includes pytest and PyYAML for the collected regression and workf
 
 ## Build and inspect artifacts
 
-Use a clean authorized release commit. Run the [live C++ pytest lane](CPP_VALIDATION.md#opt-in-live-pytest)
-locally and complete manual CI qualification on the release candidate. Release validation runs the live
-lane on MSVC and GNU before publication. All Rust manifests, sources, embedded tables, and notices must be tracked by Git before a git-mode sdist build. `git ls-files` includes staged new files; the tracking gate does not itself certify a clean release commit. Do not commit to bypass a packaging check without permission.
+Use a clean authorized release commit. A release does not need new C++ comparison evidence; that is produced only when the pinned upstream C++ reference changes (see [local C++ receipts](CPP_VALIDATION.md#local-comparison-receipts)). All Rust manifests, sources, embedded tables, and notices must be tracked by Git before a git-mode sdist build. `git ls-files` includes staged new files. The tracking gate checks archive inputs.
 
 ```sh
 uv run --no-sync python tools/check_sdist.py --check-tracked .
@@ -73,7 +71,9 @@ Every row runs CPython 3.11, 3.12, 3.13, and 3.14. All rows remain **unverified 
 
 Each row tests the exact applicable floor and a current resolver-selected binary release separately, logs interpreter/platform/package provenance and dependency versions, and uploads pip installation reports. Floor metadata uses mutually exclusive markers, including Python 3.14 on Windows ARM64. Alpine jobs pin Docker Hub manifest digests resolved during implementation and force `linux/amd64`; JavaScript actions run on the Ubuntu host. An unavailable runner or missing binary dependency leaves its row unverified. Failing rows block artifact aggregation and publishing. Never remove a row, tolerate its failure, or substitute a source dependency build. Omitting a requested target requires an explicit release-scope revision.
 
-Alpine/musl and Windows ARM64 additionally run the full default `pytest --require-rust -W error` suite on Python 3.12, matching the Python version used by the existing native source-suite jobs. `tools/test_native_wheel_suite.py` selects the compatible built wheel, installs it with binary-only test dependencies and the applicable NumPy floor in a temporary environment, and temporarily stages that wheel's exact native binary and bundled companion libraries into the matching source checkout. This preserves relative loader paths, including musl's bundled libgcc. The suite receives its complete fixtures and tools without rebuilding a different extension. All staged files are removed afterward; an existing local build or library directory is never overwritten. The separate isolated install tests remain required on all four Python versions.
+Alpine/musl and Windows ARM64 additionally run the full default `pytest --require-rust -W error` suite, without the `cpp_comparison` tests (deselected by default), on Python 3.12, matching the Python version used by the existing native source-suite jobs. `tools/test_native_wheel_suite.py` selects the compatible built wheel, installs it with binary-only test dependencies and the applicable NumPy floor in a temporary environment, and temporarily stages that wheel's exact native binary and bundled companion libraries into the matching source checkout. This preserves relative loader paths for any bundled companion libraries. The suite receives its complete fixtures and tools without rebuilding a different extension. All staged files are removed afterward; an existing local build or library directory is never overwritten. The separate isolated install tests remain required on all four Python versions.
+
+The musl wheel links the GCC runtime statically: the build redirects the explicit `gcc_s` request of Rust's musl unwinder to the static `libgcc_eh` and passes `-static-libgcc`, and the build job then rejects any `libgcc_s` member or `NEEDED` entry in the repaired wheel. The wheel ships no separate libgcc_s shared library. Any incorporated GCC runtime code is covered by the GCC Runtime Library Exception, provided its eligibility conditions are met.
 
 The corresponding evidence artifact includes a `full-suite` directory with the
 full pytest log, JUnit XML, wheel/binary hashes, interpreter/NumPy identity, cast
@@ -95,7 +95,7 @@ Runner labels and setup-python ARM64 support were checked against [GitHub's runn
 4. After explicit owner authorization, enable only the intended repository variable: `TESTPYPI_PUBLISHING_ENABLED=true` or `PYPI_PUBLISHING_ENABLED=true`. These switches default to disabled when absent and prevent an unconfigured tag from publishing. The protected environment remains the final approval gate.
 5. Use an explicit manual `target=testpypi` dispatch only after its own authorization. A default manual dispatch builds and validates without publishing. Verify uploaded TestPyPI artifacts separately when upload is authorized.
 6. Follow `docs/CONTRIBUTION_PROCEDURES.md`: version-bump PR into `pre_release`, promotion PR into `master`, full Linux/macOS/Windows checks, then an explicitly authorized annotated Python tag on an approved commit reachable from `master`. The workflow checks annotation, ancestry, and exact Python-version spelling. Tag creation and pushing each require permission.
-7. Production publication requires the approved tag, every CI/package/wheel/MSRV gate, the enabled production switch, and protected-environment approval. No release can omit a requested certification row without explicit scope approval.
+7. Production publication requires the approved tag, every CI/package/wheel/MSRV gate, the enabled production switch, and protected-environment approval. A release does not wait on C++ comparison evidence, which is produced only when the pinned C++ reference changes. No release can omit a requested certification row without explicit scope approval.
 
 Crates.io publication is separate (`release-crate.yml`, independent `behave-fire-vX.Y.Z` tags and core version). Standalone archive validation is a required CI gate and therefore also gates Python release validation. Publishing the crate is not a prerequisite for Python publication: Python source archives bundle both crates and build through their relative path dependency. See [standalone crate verification](CRATES_IO.md) for package, Rust-only consumer, and separately authorized registry steps.
 ## Build backend minimum

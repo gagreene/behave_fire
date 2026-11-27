@@ -71,6 +71,15 @@ fn comparison_gate(
     require_ignite_proof(&qualification["ignite"])?;
     cpp_policy::require_qualification(surface)
         .map_err(|error| format!("Ignite source qualification: {error}"))?;
+    exact_regression(observations)?;
+    Ok(())
+}
+
+/// Apply the established exact binary64 rule whatever the release approval state.
+///
+/// The pinned-reference check relies on this, so a withdrawn qualification never hides a
+/// numerical regression; `comparison_gate` adds the release approval requirement.
+fn exact_regression(observations: &[Observation]) -> Result<usize, String> {
     for Observation {
         case,
         field,
@@ -86,7 +95,7 @@ fn comparison_gate(
             ));
         }
     }
-    Ok(())
+    Ok(observations.len())
 }
 
 /// Require every declared JSON object key and reject extra keys.
@@ -104,6 +113,65 @@ fn is_lower_hex(value: &Value, length: usize) -> bool {
                 .bytes()
                 .all(|byte| byte.is_ascii_digit() || (b'a'..=b'f').contains(&byte))
     })
+}
+
+/// Measure the core on each approved case and pair it with the C++ result.
+fn observe(cases: Vec<Value>, results: Vec<Value>) -> Vec<Observation> {
+    let mut observations = Vec::new();
+    for (((id, moisture), case), result) in APPROVED_CASES.into_iter().zip(cases).zip(results) {
+        let fixture_moisture = if moisture == 0.0 {
+            json!(0)
+        } else {
+            json!(moisture)
+        };
+        assert_eq!(
+            case,
+            json!({
+                "id": id, "operation": "ignite", "air_temperature_f": 71,
+                "sun_shade_fraction": 0.5, "moisture_1h": fixture_moisture,
+            }),
+            "case {id}"
+        );
+        assert!(has_exact_keys(
+            &result,
+            &[
+                "id",
+                "output",
+                "output_entries",
+                "status",
+                "upstream_entries"
+            ],
+        ));
+        assert_eq!(result["id"], id);
+        assert_eq!(result["status"], "ok", "case {id}");
+        assert_eq!(result["upstream_entries"].as_u64(), Some(1), "case {id}");
+        assert_eq!(result["output_entries"].as_u64(), Some(1), "case {id}");
+        let output = &result["output"];
+        assert!(has_exact_keys(output, &FIELDS), "case {id}");
+        let air = case["air_temperature_f"].as_f64().unwrap();
+        let shade = case["sun_shade_fraction"].as_f64().unwrap();
+        let actual = [
+            calculate_firebrand_ignition_probability(air, shade, moisture),
+            calculate_fuel_temperature(air, shade),
+        ];
+        let probability = output["firebrand_probability"].as_f64().unwrap();
+        assert!(
+            (0.0..=1.0).contains(&probability),
+            "case {id}: {probability}"
+        );
+        for (field, rust) in FIELDS.into_iter().zip(actual) {
+            let cpp = output[field].as_f64().unwrap();
+            assert!(cpp.is_finite(), "case {id} {field}: {cpp}");
+            assert!(rust.is_finite(), "case {id} {field}: {rust}");
+            observations.push(Observation {
+                case: id,
+                field,
+                cpp,
+                rust,
+            });
+        }
+    }
+    observations
 }
 
 /// Read JSONL in fixture order, rejecting blank or malformed rows.
@@ -173,66 +241,16 @@ fn verify_manifest() {
 
 // ---- comparison policy ----
 #[test]
+#[ignore = "pinned C++ comparison: run with --include-ignored when the pinned C++ reference changes"]
 fn cpp_ignite_observations_follow_the_qualified_policy() {
     verify_manifest();
     let cases = parse_rows(CASES);
     let results = parse_rows(RESULTS);
     assert_eq!(cases.len(), APPROVED_CASES.len());
     assert_eq!(results.len(), APPROVED_CASES.len());
-    let mut observations = Vec::new();
-    for (((id, moisture), case), result) in APPROVED_CASES.into_iter().zip(cases).zip(results) {
-        let fixture_moisture = if moisture == 0.0 {
-            json!(0)
-        } else {
-            json!(moisture)
-        };
-        assert_eq!(
-            case,
-            json!({
-                "id": id, "operation": "ignite", "air_temperature_f": 71,
-                "sun_shade_fraction": 0.5, "moisture_1h": fixture_moisture,
-            }),
-            "case {id}"
-        );
-        assert!(has_exact_keys(
-            &result,
-            &[
-                "id",
-                "output",
-                "output_entries",
-                "status",
-                "upstream_entries"
-            ],
-        ));
-        assert_eq!(result["id"], id);
-        assert_eq!(result["status"], "ok", "case {id}");
-        assert_eq!(result["upstream_entries"].as_u64(), Some(1), "case {id}");
-        assert_eq!(result["output_entries"].as_u64(), Some(1), "case {id}");
-        let output = &result["output"];
-        assert!(has_exact_keys(output, &FIELDS), "case {id}");
-        let air = case["air_temperature_f"].as_f64().unwrap();
-        let shade = case["sun_shade_fraction"].as_f64().unwrap();
-        let actual = [
-            calculate_firebrand_ignition_probability(air, shade, moisture),
-            calculate_fuel_temperature(air, shade),
-        ];
-        let probability = output["firebrand_probability"].as_f64().unwrap();
-        assert!(
-            (0.0..=1.0).contains(&probability),
-            "case {id}: {probability}"
-        );
-        for (field, rust) in FIELDS.into_iter().zip(actual) {
-            let cpp = output[field].as_f64().unwrap();
-            assert!(cpp.is_finite(), "case {id} {field}: {cpp}");
-            assert!(rust.is_finite(), "case {id} {field}: {rust}");
-            observations.push(Observation {
-                case: id,
-                field,
-                cpp,
-                rust,
-            });
-        }
-    }
+    let observations = observe(cases, results);
+    assert_eq!(exact_regression(&observations), Ok(8));
+    println!("CPP_IGNITE_ENFORCED exact_binary64=8");
     assert_eq!(observations.len(), 8);
     let policy: Value = serde_json::from_str(POLICY).unwrap();
     let surface: Value = serde_json::from_str(SURFACE_POLICY).unwrap();
@@ -242,6 +260,24 @@ fn cpp_ignite_observations_follow_the_qualified_policy() {
     } else {
         assert_eq!(decision, Err(QUALIFICATION_REQUIRED.into()));
     }
+}
+
+#[test]
+#[ignore = "pinned C++ comparison: run with --include-ignored when the pinned C++ reference changes"]
+fn perturbed_cpp_copy_fails_the_exact_regression() {
+    // A temporary copy of the packaged results with one value moved one ulp toward zero.
+    let mut results = parse_rows(RESULTS);
+    let field = FIELDS[0];
+    let value = results[0]["output"][field].as_f64().unwrap();
+    let perturbed = if value == 0.0 {
+        f64::from_bits(1)
+    } else {
+        f64::from_bits(value.to_bits() - 1)
+    };
+    results[0]["output"][field] = json!(perturbed);
+    let observations = observe(parse_rows(CASES), results);
+    let error = exact_regression(&observations).unwrap_err();
+    assert!(error.contains(field), "{error}");
 }
 
 #[test]

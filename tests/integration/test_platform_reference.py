@@ -78,6 +78,19 @@ def test_canonical_export_keeps_original_golden_after_arm_cast(monkeypatch, doma
     assert current["output"] == live
 
 
+def test_compare_fails_without_acceptance_scenarios(monkeypatch, tmp_path, capsys):
+    spec = importlib.util.spec_from_file_location("platform_test_compare_empty", DRAFT / "tools/compare_backends.py")
+    compare = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(compare)
+    (tmp_path / "tests/data/rust_port").mkdir(parents=True)
+    monkeypatch.setattr(compare, "ROOT", tmp_path)
+    assert compare.main([]) == 1
+    report = json.loads(capsys.readouterr().out)
+    assert report["domains"] == {}
+    failure, = report["failures"]
+    assert "no acceptance scenarios" in failure["error"]
+
+
 @pytest.mark.parametrize("domain,name", SPECS)
 @pytest.mark.rust
 def test_compare_reports_frozen_diagnostic_and_retains_live_gate(monkeypatch, tmp_path, capsys, domain, name):

@@ -15,12 +15,9 @@ jobs:
   verify:
     uses: ./.github/workflows/crate-validation.yml
 
-  cpp-live:
-    uses: ./.github/workflows/cpp-live-validation.yml
-
   publish-crate:
     if: inputs.publish
-    needs: [verify, cpp-live]
+    needs: [verify]
     runs-on: ubuntu-latest
     environment:
       name: crates-io

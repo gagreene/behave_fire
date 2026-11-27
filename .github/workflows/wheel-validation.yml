@@ -7,17 +7,28 @@ on:
         type: boolean
         required: false
         default: false
+      scope:
+        # full: every platform and packaging check. musl, sdist, and musl-and-sdist build and test
+        # only those artifacts, for targeted manual checks of platform-specific changes.
+        type: string
+        required: false
+        default: full
   workflow_dispatch:
     inputs:
       cpp_calibration:
         type: boolean
         default: false
+      scope:
+        type: choice
+        options: [full, musl, sdist, musl-and-sdist]
+        default: full
 
 permissions:
   contents: read
 
 jobs:
   build-pure-wheel:
+    if: ${{ contains(fromJSON('["full","musl","musl-and-sdist"]'), inputs.scope) }}
     runs-on: ubuntu-24.04
     container: python:3.11-slim
     steps:
@@ -34,13 +45,13 @@ jobs:
           if-no-files-found: error
 
   build-native-wheels:
+    if: ${{ inputs.scope == 'full' }}
     strategy:
       fail-fast: false
       matrix:
         include:
           - {os: ubuntu-24.04, target: x86_64, artifact: linux-x86_64, architecture: x64, compatibility: "2_17"}
           - {os: ubuntu-24.04-arm, target: aarch64, artifact: linux-aarch64, architecture: arm64, compatibility: "2_17"}
-          - {os: ubuntu-24.04, target: x86_64-unknown-linux-musl, artifact: linux-musl-x86_64, architecture: x64, compatibility: musllinux_1_2}
           - {os: macos-15-intel, target: x86_64, artifact: macos-x86_64, architecture: x64, compatibility: "off"}
           - {os: macos-15, target: aarch64, artifact: macos-arm64, architecture: arm64, compatibility: "off"}
           - {os: windows-2025, target: x86_64, artifact: windows-x86_64, architecture: x64, compatibility: "off"}
@@ -65,7 +76,66 @@ jobs:
           path: dist/*.whl
           if-no-files-found: error
 
+  build-musl-wheel:
+    if: ${{ contains(fromJSON('["full","musl","musl-and-sdist"]'), inputs.scope) }}
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+          architecture: x64
+      - name: Link the GCC runtime statically into the musl extension
+        shell: bash
+        # Rust's musl unwinder requests gcc_s explicitly. The stub library script redirects that
+        # request to the static libgcc_eh, and -static-libgcc covers the compiler driver's own
+        # runtime libraries, so the wheel ships no libgcc_s shared library.
+        run: |
+          stub="$GITHUB_WORKSPACE/rust/target/static-libgcc"
+          mkdir -p "$stub"
+          printf 'INPUT(-lgcc_eh)\n' > "$stub/libgcc_s.so"
+          echo "CARGO_TARGET_X86_64_UNKNOWN_LINUX_MUSL_RUSTFLAGS=-C link-arg=-static-libgcc -C link-arg=-L$stub" \
+            >> "$GITHUB_ENV"
+      - uses: PyO3/maturin-action@v1
+        with:
+          maturin-version: "1.10.0"
+          command: build
+          target: x86_64-unknown-linux-musl
+          args: --release --locked --out dist --interpreter python3.11
+          manylinux: musllinux_1_2
+      - name: Require a musl wheel without a GCC runtime shared library
+        shell: bash
+        run: |
+          set -euo pipefail
+          wheels=(dist/*.whl)
+          test "${#wheels[@]}" -eq 1
+          if unzip -Z1 "${wheels[0]}" | grep -E '(^|/)libgcc_s[^/]*\.so'; then
+            echo "the musl wheel bundles libgcc_s" >&2
+            exit 1
+          fi
+          extract="$RUNNER_TEMP/musl-wheel"
+          mkdir -p "$extract"
+          unzip -q "${wheels[0]}" -d "$extract"
+          binaries=0
+          while IFS= read -r -d '' file; do
+            if [ "$(head -c 4 "$file" | od -An -c | tr -d ' \n')" = '177ELF' ]; then
+              binaries=$((binaries + 1))
+              readelf -d "$file" | tee -a "$RUNNER_TEMP/musl-dynamic.txt"
+              if readelf -d "$file" | grep -E 'NEEDED.*libgcc_s'; then
+                echo "$file requires libgcc_s" >&2
+                exit 1
+              fi
+            fi
+          done < <(find "$extract" -type f -print0)
+          test "$binaries" -ge 1
+      - uses: actions/upload-artifact@v4
+        with:
+          name: distributions-linux-musl-x86_64
+          path: dist/*.whl
+          if-no-files-found: error
+
   build-sdist:
+    if: ${{ contains(fromJSON('["full","sdist","musl-and-sdist"]'), inputs.scope) }}
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
@@ -77,7 +147,9 @@ jobs:
           python -m pip install --only-binary=:all: build
       - run: python tools/check_sdist.py --check-tracked . --inventory sdist-expected.txt
       - run: python -m build --sdist --outdir dist
-      - run: python tools/check_sdist.py dist/*.tar.gz --inventory sdist-expected.txt > sdist-inventory.txt
+      - run: >-
+          python tools/check_sdist.py dist/*.tar.gz --inventory sdist-expected.txt --committed-fixtures .
+          > sdist-inventory.txt
       - name: Rebuild using only the extracted source distribution
         shell: bash
         run: |
@@ -92,6 +164,39 @@ jobs:
           version=$("$RUNNER_TEMP/sdist-venv/bin/python" -c 'import importlib.metadata; print(importlib.metadata.version("behave-fire"))')
           cd "$RUNNER_TEMP"
           "$RUNNER_TEMP/sdist-venv/bin/python" -I smoke_test_wheel.py --expect rust --version "$version"
+      - name: Run the shipped fixture checks from the extracted source distribution
+        shell: bash
+        run: |
+          python - "$RUNNER_TEMP/sdist-wheel" "$RUNNER_TEMP/sdist-source/src/behave_fire" <<'EOF'
+          import sys, zipfile
+          from pathlib import Path
+          wheel, = Path(sys.argv[1]).glob("*.whl")
+          with zipfile.ZipFile(wheel) as archive:
+              native = [name for name in archive.namelist() if name.startswith("behave_fire/_rust.")]
+              assert len(native) == 1, native
+              (Path(sys.argv[2]) / Path(native[0]).name).write_bytes(archive.read(native[0]))
+          EOF
+          "$RUNNER_TEMP/sdist-venv/bin/python" -m pip install --only-binary=:all: pytest pyyaml
+          cd "$RUNNER_TEMP/sdist-source"
+          "$RUNNER_TEMP/sdist-venv/bin/python" -B -m pytest -p no:cacheprovider --require-rust \
+            tests/integration/test_platform_reference.py
+          "$RUNNER_TEMP/sdist-venv/bin/python" -B tools/compare_backends.py --output "$RUNNER_TEMP/sdist-parity.json" \
+            > /dev/null
+          python - "$GITHUB_WORKSPACE/tests/data/rust_port" "$RUNNER_TEMP/sdist-parity.json" <<'EOF'
+          import json, sys
+          from pathlib import Path
+          expected = {}
+          for path in sorted(Path(sys.argv[1]).glob("*.json")):
+              cases = json.loads(path.read_text(encoding="utf-8")).get("cases", [])
+              count = sum(case.get("policy", "acceptance") == "acceptance" for case in cases)
+              if count:
+                  expected[path.stem] = count
+          report = json.loads(Path(sys.argv[2]).read_text(encoding="utf-8"))
+          found = {domain: summary["scenarios"] for domain, summary in report["domains"].items()}
+          assert found == expected, (found, expected)
+          assert not report["failures"], report["failures"]
+          print(f"source distribution parity: {sum(found.values())} acceptance cases across {len(found)} domains")
+          EOF
       - uses: actions/upload-artifact@v4
         with:
           name: distributions-sdist
@@ -104,6 +209,7 @@ jobs:
 
   test-native-platforms:
     needs: [build-native-wheels, build-pure-wheel]
+    if: ${{ inputs.scope == 'full' }}
     strategy:
       fail-fast: false
       matrix:
@@ -144,7 +250,7 @@ jobs:
           path: ${{ runner.temp }}/evidence
       - name: Qualify native Surface comparison caps
         if: ${{ inputs.cpp_calibration && matrix.python == '3.12' }}
-        run: python tools/test_native_wheel_suite.py --wheels "${{ runner.temp }}/artifacts" --report-dir "${{ runner.temp }}/cpp-full-suite" --cpp-calibration --cpp-platform '${{ matrix.platform.artifact }}'
+        run: python tools/test_native_wheel_suite.py --wheels "${{ runner.temp }}/artifacts" --report-dir "${{ runner.temp }}/cpp-full-suite" --cpp-calibration --cpp-platform '${{ matrix.platform.artifact }}' --skip-cpp-comparisons
       - name: Preserve native calibration evidence
         if: ${{ always() && inputs.cpp_calibration && matrix.python == '3.12' }}
         uses: actions/upload-artifact@v4
@@ -154,7 +260,8 @@ jobs:
           if-no-files-found: error
 
   test-alpine-platform:
-    needs: [build-native-wheels, build-pure-wheel]
+    needs: [build-musl-wheel, build-pure-wheel]
+    if: ${{ contains(fromJSON('["full","musl","musl-and-sdist"]'), inputs.scope) }}
     runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
@@ -186,7 +293,7 @@ jobs:
           docker run --rm --platform linux/amd64 -e BEHAVE_CPP_CALIBRATION -e BEHAVE_CPP_PLATFORM -e GITHUB_ACTIONS -e GITHUB_SHA -e GITHUB_RUN_ID -e GITHUB_REPOSITORY -e GITHUB_EVENT_NAME -v "$GITHUB_WORKSPACE:/source" -v "$RUNNER_TEMP/alpine:/artifacts" -w /source '${{ matrix.image }}' sh -ec '
             apk add --no-cache git
             export GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=safe.directory GIT_CONFIG_VALUE_0=/source
-            python tools/test_native_wheel_suite.py --wheels /artifacts/wheels --report-dir /artifacts/full-suite
+            python tools/test_native_wheel_suite.py --wheels /artifacts/wheels --report-dir /artifacts/full-suite --skip-cpp-comparisons
           '
       - uses: actions/upload-artifact@v4
         if: always()
@@ -205,6 +312,7 @@ jobs:
 
   test-windows-arm64-platform:
     needs: [build-native-wheels, build-pure-wheel]
+    if: ${{ inputs.scope == 'full' }}
     runs-on: windows-11-arm
     strategy:
       fail-fast: false
@@ -233,7 +341,7 @@ jobs:
         env:
           BEHAVE_CPP_CALIBRATION: ${{ inputs.cpp_calibration }}
           BEHAVE_CPP_PLATFORM: windows-arm64
-        run: python tools/test_native_wheel_suite.py --wheels "$env:RUNNER_TEMP/artifacts" --report-dir "$env:RUNNER_TEMP/full-suite"
+        run: python tools/test_native_wheel_suite.py --wheels "$env:RUNNER_TEMP/artifacts" --report-dir "$env:RUNNER_TEMP/full-suite" --skip-cpp-comparisons
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -251,6 +359,7 @@ jobs:
 
   check-distributions:
     needs: [build-sdist, test-native-platforms, test-alpine-platform, test-windows-arm64-platform]
+    if: ${{ inputs.scope == 'full' }}
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4

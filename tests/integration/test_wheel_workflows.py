@@ -25,19 +25,55 @@ def test_built_wheels_all_receive_cpp_payload_checks_before_aggregation():
     assert index < metadata_index
 
 
-def test_manual_and_release_cpp_calibration_use_the_opt_in_live_lane():
+def test_ci_manual_dispatch_never_joins_or_cancels_the_push_group():
+    concurrency = yaml.load((ROOT / '.github/workflows/ci.yml').read_text(), Loader=yaml.BaseLoader)['concurrency']
+    push = "github.event_name == 'push' && github.ref == 'refs/heads/pre_release'"
+    assert push + " && github.ref" in concurrency['group']
+    assert concurrency['cancel-in-progress'] == "${{ github.event_name == 'pull_request' || (" + push + ") }}"
+
+
+def test_ci_tiers_come_from_the_plan_job():
+    workflow = yaml.load((ROOT / '.github/workflows/ci.yml').read_text(), Loader=yaml.BaseLoader)
+    jobs = workflow['jobs']
+    assert workflow['on']['push']['branches'] == ['pre_release', 'master']
+    plan = jobs['plan']
+    assert plan['steps'][-1]['run'] == 'python tools/ci_plan.py >> "$GITHUB_OUTPUT"'
+    assert plan['permissions'] == {'contents': 'read', 'actions': 'read', 'pull-requests': 'read'}
+    quick = "${{ contains(fromJSON('[\"quick\",\"full\"]'), needs.plan.outputs.tier) }}"
+    for name in ('style', 'rust', 'python-only', 'native-pytest'):
+        assert jobs[name]['needs'] == 'plan' and jobs[name]['if'] == quick, name
+    for name in ('msrv', 'crate-validation'):
+        assert jobs[name]['if'] == "${{ needs.plan.outputs.tier == 'full' }}", name
+    wheels = jobs['wheel-validation']
+    assert 'contains(fromJSON(\'["full","targeted"]\'), needs.plan.outputs.tier)' in wheels['if']
+    assert "!contains(needs.*.result, 'failure')" in wheels['if']
+    assert wheels['with']['scope'] == '${{ needs.plan.outputs.scope }}'
+    record = jobs['full-result']
+    assert set(record['needs']) == {'plan', 'style', 'rust', 'msrv', 'python-only', 'native-pytest',
+                                    'crate-validation', 'wheel-validation'}
+    assert record['if'].startswith("${{ success() && github.event_name == 'pull_request'")
+    upload = next(step for step in record['steps'] if step.get('uses') == 'actions/upload-artifact@v4')
+    assert upload['with']['name'] == 'ci-full-result'
+    text = (ROOT / '.github/workflows/ci.yml').read_text()
+    assert text.count('github.base_ref') == 1, 'Only the plan job reads the base branch; tiers come from ci_plan.py'
+
+
+def test_manual_cpp_calibration_uses_the_opt_in_live_lane():
     workflow = yaml.load((ROOT / '.github/workflows/ci.yml').read_text(), Loader=yaml.BaseLoader)
     job = workflow['jobs']['cpp-calibration']
-    setting = workflow['on']['workflow_call']['inputs']['cpp_live']
-    assert setting == {'type': 'boolean', 'default': 'false'}
-    assert job['if'] == "${{ github.event_name == 'workflow_dispatch' || inputs.cpp_live }}"
+    assert 'cpp_live' not in workflow['on']['workflow_call']['inputs']
+    assert workflow['on']['workflow_call']['inputs']['tier'] == {'type': 'string', 'default': 'full'}
+    assert workflow['on']['workflow_dispatch']['inputs']['cpp_qualification']['default'] == 'false'
+    manual = ("github.event_name == 'workflow_dispatch' && needs.plan.outputs.tier == 'full' && "
+              "inputs.cpp_qualification == true")
+    assert job['if'] == "${{ " + manual + " }}"
     release = yaml.load((ROOT / '.github/workflows/release.yml').read_text(), Loader=yaml.BaseLoader)
-    assert release['jobs']['validation']['with'] == {'cpp_live': 'true'}
+    assert 'cpp_live' not in release['jobs']['validation'].get('with', {})
     shared = './.github/workflows/cpp-live-validation.yml'
     assert job['uses'] == shared
     crate = yaml.load((ROOT / '.github/workflows/release-crate.yml').read_text(), Loader=yaml.BaseLoader)
-    assert crate['jobs']['cpp-live']['uses'] == shared
-    assert set(crate['jobs']['publish-crate']['needs']) == {'verify', 'cpp-live'}
+    assert 'cpp-live' not in crate['jobs']
+    assert set(crate['jobs']['publish-crate']['needs']) == {'verify'}
     assert crate['jobs']['publish-crate']['if'] == 'inputs.publish'
     lane = yaml.load((ROOT / shared).read_text(), Loader=yaml.BaseLoader)
     assert 'workflow_call' in lane['on']
@@ -56,8 +92,7 @@ def test_manual_and_release_cpp_calibration_use_the_opt_in_live_lane():
             for step in ordinary.get('steps', []):
                 if step.get('uses') == 'actions/checkout@v4':
                     assert step.get('with', {}).get('submodules', 'false') == 'false'
-    assert workflow['jobs']['wheel-validation']['with']['cpp_calibration'
-    ] == "${{ github.event_name == 'workflow_dispatch' }}"
+    assert workflow['jobs']['wheel-validation']['with']['cpp_calibration'] == "${{ " + manual + " }}"
 
 
 def test_maturin_action_uses_only_one_compatibility_setting():
@@ -69,14 +104,34 @@ def test_maturin_action_uses_only_one_compatibility_setting():
     assert "--compatibility" not in build["args"]
 
 
+def test_musl_wheel_links_the_gcc_runtime_statically():
+    workflow = yaml.load((ROOT / ".github/workflows/wheel-validation.yml").read_text(), Loader=yaml.BaseLoader)
+    job = workflow["jobs"]["build-musl-wheel"]
+    steps = job["steps"]
+    names = [step.get("name", "") for step in steps]
+    link = names.index("Link the GCC runtime statically into the musl extension")
+    check = names.index("Require a musl wheel without a GCC runtime shared library")
+    build = next(index for index, step in enumerate(steps) if step.get("uses") == "PyO3/maturin-action@v1")
+    assert link < build < check
+    assert steps[build]["with"]["target"] == "x86_64-unknown-linux-musl"
+    assert steps[build]["with"]["manylinux"] == "musllinux_1_2"
+    upload = next(step for step in steps if step.get("uses") == "actions/upload-artifact@v4")
+    assert upload["with"]["name"] == "distributions-linux-musl-x86_64"
+    assert workflow["jobs"]["test-alpine-platform"]["needs"] == ["build-musl-wheel", "build-pure-wheel"]
+    assert "INPUT(-lgcc_eh)" in steps[link]["run"]
+    assert "CARGO_TARGET_X86_64_UNKNOWN_LINUX_MUSL_RUSTFLAGS=-C link-arg=-static-libgcc" in steps[link]["run"]
+    assert "NEEDED.*libgcc_s" in steps[check]["run"]
+    assert "libgcc_s[^/]*\\.so" in steps[check]["run"]
+
+
 def test_native_build_matrix_covers_every_tested_platform():
     workflow = yaml.load((ROOT / ".github/workflows/wheel-validation.yml").read_text(), Loader=yaml.BaseLoader)
     job = workflow["jobs"]["build-native-wheels"]
     rows = {row["artifact"]: row for row in job["strategy"]["matrix"]["include"]}
-    assert set(rows) == {"linux-x86_64", "linux-aarch64", "linux-musl-x86_64", "macos-x86_64",
-                         "macos-arm64", "windows-x86_64", "windows-arm64"}
-    assert rows["linux-musl-x86_64"]["target"] == "x86_64-unknown-linux-musl"
-    assert rows["linux-musl-x86_64"]["compatibility"] == "musllinux_1_2"
+    # The musl wheel has its own job (build-musl-wheel) so targeted runs can build it alone.
+    assert set(rows) == {"linux-x86_64", "linux-aarch64", "macos-x86_64", "macos-arm64", "windows-x86_64",
+                         "windows-arm64"}
+    assert "build-musl-wheel" in workflow["jobs"]
     for platform in ("linux-x86_64", "linux-aarch64"):
         assert rows[platform]["compatibility"] == "2_17"
     assert rows["windows-arm64"]["os"] == "windows-11-arm"
@@ -109,6 +164,65 @@ def test_previous_fallback_hosts_require_native_choice():
         steps = workflow["jobs"][job]["steps"]
         install = next(step["run"] for step in steps if "test_wheel_install.py --wheels" in step.get("run", ""))
         assert "--expect-choice rust" in install
+
+
+def test_pypi_publication_requires_a_tag_push():
+    release = yaml.load((ROOT / '.github/workflows/release.yml').read_text(), Loader=yaml.BaseLoader)
+    jobs = release['jobs']
+    # A manual dispatch on a tag ref also has refs/tags/v*; only the tag push may publish to PyPI.
+    assert jobs['publish-pypi']['if'] == ("github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') "
+                                          "&& vars.PYPI_PUBLISHING_ENABLED == 'true'")
+    assert jobs['publish-testpypi']['if'] == ("github.event_name == 'workflow_dispatch' && inputs.target == 'testpypi' "
+                                              "&& vars.TESTPYPI_PUBLISHING_ENABLED == 'true'")
+    assert jobs['publish-pypi']['environment']['name'] == 'pypi'
+
+
+def test_reusable_ci_callers_grant_the_permissions_its_jobs_request():
+    called = yaml.load((ROOT / '.github/workflows/ci.yml').read_text(), Loader=yaml.BaseLoader)
+    requested = {}
+    for job in called['jobs'].values():
+        for scope, level in job.get('permissions', {}).items():
+            requested[scope] = 'write' if 'write' in (level, requested.get(scope)) else level
+    assert requested == {'contents': 'read', 'actions': 'read', 'pull-requests': 'read'}
+    callers = 0
+    for path in (ROOT / '.github/workflows').glob('*.yml'):
+        workflow = yaml.load(path.read_text(), Loader=yaml.BaseLoader)
+        for name, job in workflow['jobs'].items():
+            if job.get('uses') != './.github/workflows/ci.yml':
+                continue
+            callers += 1
+            granted = job.get('permissions', workflow.get('permissions', {}))
+            for scope, level in requested.items():
+                assert granted.get(scope) in ({level, 'write'} if level == 'read' else {'write'}), (path.name, name)
+    assert callers == 1
+
+
+def test_publication_does_not_require_cpp_evidence():
+    # C++ evidence is produced when the pinned upstream C++ changes, so no publisher waits on it.
+    expected = {'release.yml': {'publish-testpypi': {'validation', 'release-policy'},
+                                'publish-pypi': {'validation', 'release-policy'}},
+                'release-crate.yml': {'publish-crate': {'verify'}}}
+    for name, uploads in expected.items():
+        text = (ROOT / '.github/workflows' / name).read_text()
+        assert 'receipt' not in text and 'qualification' not in text and 'cpp-live' not in text, name
+        jobs = yaml.load(text, Loader=yaml.BaseLoader)['jobs']
+        for upload, needs in uploads.items():
+            assert set(jobs[upload]['needs']) == needs, (name, upload)
+    assert not (ROOT / '.github/workflows/cpp-receipt-validation.yml').exists()
+
+def test_wheel_validation_scopes_select_targeted_jobs():
+    workflow = yaml.load((ROOT / ".github/workflows/wheel-validation.yml").read_text(), Loader=yaml.BaseLoader)
+    jobs = workflow["jobs"]
+    assert workflow["on"]["workflow_call"]["inputs"]["scope"]["default"] == "full"
+    assert workflow["on"]["workflow_dispatch"]["inputs"]["scope"]["options"] == ["full", "musl", "sdist",
+                                                                                  "musl-and-sdist"]
+    musl = "${{ contains(fromJSON('[\"full\",\"musl\",\"musl-and-sdist\"]'), inputs.scope) }}"
+    sdist = "${{ contains(fromJSON('[\"full\",\"sdist\",\"musl-and-sdist\"]'), inputs.scope) }}"
+    full = "${{ inputs.scope == 'full' }}"
+    expected = {"build-pure-wheel": musl, "build-musl-wheel": musl, "test-alpine-platform": musl,
+                "build-sdist": sdist, "build-native-wheels": full, "test-native-platforms": full,
+                "test-windows-arm64-platform": full, "check-distributions": full}
+    assert {name: job.get("if") for name, job in jobs.items()} == expected
 
 
 def test_wheels_require_the_quick_style_gate():

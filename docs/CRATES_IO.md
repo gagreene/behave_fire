@@ -9,8 +9,8 @@ forbids unsafe code and contains no float32/SVML emulation.
 
 The initial core version is `0.1.0`. Publication requires separate approval.
 Changing only the core version (with its `rust/Cargo.lock` entry and the
-version requirement in `behave-py`) needs no new C++ source qualification; any
-other manifest or lock change does.
+version requirement in `behave-py`) is a version-only change. No manifest or lock
+change needs new C++ comparison evidence unless it changes the pinned C++ reference.
 A read-only crates.io query on 2026-11-04 returned no existing `behave-fire`
 package. This does not reserve the name or establish ownership. Recheck both
 before the first upload. The Python version and its `v*` tags are independent.
@@ -35,7 +35,8 @@ Cargo's documented registry limit is currently 10 MB; recheck it when releasing.
 The repository budget stays smaller. [Cargo publishing documentation](https://doc.rust-lang.org/cargo/reference/publishing.html)
 
 `crate-validation.yml` extracts the archive in a separate Rust container with
-no checkout and no Python interpreter. It runs packaged tests and doctests,
+no checkout and no Python interpreter. It runs packaged tests and doctests
+(the `#[ignore]`d pinned C++ comparisons run only with `--include-ignored`, when the pinned reference changes),
 the standalone example, and a separate downstream consumer. The consumer uses
 default/custom fuels, embedded species, surface fire, mortality, and worker
 counts 0/1/2/4. Its dependency points only at the extracted package. Linux
@@ -63,9 +64,10 @@ short-lived credential. [Official authentication action](https://github.com/rust
 
 ## Subsequent releases
 
-Run the [live C++ pytest lane](CPP_VALIDATION.md#opt-in-live-pytest) and
-manual CI qualification before release. The crate release workflow requires
-the shared live GNU and MSVC checks before publication.
+A crate release does not need C++ comparison evidence. That evidence is produced only when the
+pinned upstream C++ reference changes (see
+[local comparison receipts](CPP_VALIDATION.md#local-comparison-receipts)), and `release-crate.yml`
+does not wait on it.
 
 The manual workflow defaults to `publish=false`, which runs checks only. An
 authorized publication uses `publish=true` on the exact

@@ -14,7 +14,7 @@
       "windows-arm64"
     ]
   },
-  "approval_gate": "Pending complete qualification with the pinned SCAL16 and SCAL14 loads in both ports and the explicit Surface controls",
+  "approval_gate": "Pending complete qualification after the release review fixes and the SCAL16 and SCAL14 load corrections",
   "approved": false,
   "conditional_owner_approval": true,
   "crown": {

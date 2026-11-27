@@ -138,23 +138,31 @@ activate them. A qualification must cover GNU and MSVC builds plus all seven
 native wheel platforms from one manual CI run, with complete case/field evidence,
 matching input hashes, and no widened cap. The full reports remain CI artifacts;
 only their validated compact qualification metadata is eligible for the repository.
-Qualification passed in [manual run 43752200280](https://github.com/gagreene/behave_fire/actions/runs/43752200280)
-at commit `8ba5085a636d4f8ebc6dbc5747dbe311c0a22b4b`: GNU and MSVC each
-checked 773 cases (722 available, 51 unavailable); each of seven native platforms
-checked 583 cases and 2,915 fields per backend, including all 139 numbered/custom
-pairs. The compact qualification binds the exact production, build, tool, and
-workflow source inventory. Changed, added, or deleted sources invalidate it;
+The most recent qualification passed in [manual run 45552664829](https://github.com/gagreene/behave_fire/actions/runs/45552664829)
+at source commit `b1a1baf7be61651ab69f6a3bd361a0918d0832f9` and was activated at
+`b58110d`: GNU and MSVC each checked 773 cases (722 available, 51 unavailable);
+each of seven native platforms checked 710 cases and 3,550 fields per backend,
+including all 139 numbered/custom pairs. Commit `7a57e8e` withdrew it, because the
+release review fixes and the CI policy change edited qualified sources.
+The withdrawn qualification is historical evidence. The compact qualification binds the exact
+production, build, tool, and workflow source inventory. Changed, added, or deleted sources invalidate it;
 metadata-only activation can follow without changing the tested implementation.
 All nine complete reports passed validation before reactivation of the unchanged
 caps. The final budget and inventory verification code is included in that
-qualification. The historical run covered the source and input data at that revision.
+qualification. `python tools/cpp_inventory.py --check --require-ready` passed at
+activation; while the qualification is withdrawn it fails by design.
 The SCAL14 and SCAL16 load correction requires fresh qualification before
 claiming coverage across the full platform matrix.
 
 Use the existing `CI` workflow with `workflow_dispatch` on the prepared branch
-for qualification. The manual and release validation jobs check out the
-optional reference and build C++. Ordinary PR and push validation uses the
-stored offline evidence.
+to investigate the nine-report qualification, with `-f scope=full -f cpp_qualification=true`.
+Those jobs check out the optional reference and build C++.
+Ordinary PR and push CI checks the integrity of the stored offline evidence but
+does not compare Python or Rust outputs with it: those comparisons (pytest marker
+`cpp_comparison` and the `#[ignore]`d Rust comparison tests) are deselected by default
+and run when the pinned C++ reference changes (see "Pinned C++ comparisons" in
+[CONTRIBUTION_PROCEDURES.md](CONTRIBUTION_PROCEDURES.md)). Neither a pull request merge nor
+a release publication waits on them.
 The wheel reports use the actual staged wheel extension, including Alpine/musl
 and Windows ARM64, and fail rather than skip if calibration cannot run.
 
@@ -173,16 +181,19 @@ Use the configured interpreter and the contributor procedures:
 python tools/cpp_reference.py --check
 python tools/cpp_inventory.py --check
 python tools/export_cpp_crate.py --check
-python -m pytest --require-rust -W error
+python -m pytest --require-rust -W error -m cpp_comparison
+cargo test --manifest-path rust/Cargo.toml -p behave-fire --locked --no-fail-fast -- --include-ignored
 python tools/cpp_reference.py --compare development/cpp-pilot/measurements
 ```
 
-The first three commands check integrity, not scientific parity. The comparer
+The first three commands check integrity, not scientific parity. The last three compare the
+ports with the pinned C++ outputs; run them when the pinned reference changes. The comparer
 records every Python/C++ and Rust/C++ field difference without accepting it.
 `assert_matches_cpp` raises until an explicit field policy is approved. The
-standalone crate verifies its own copied fixture hashes, evaluates real core
-cells, records raw differences, and likewise refuses to certify an unapproved
-policy. No Python, C++, or NumPy runtime is added to the Rust library.
+standalone crate verifies its own copied fixture hashes. Its `#[ignore]`d
+comparison tests, run with `--include-ignored`, evaluate real core cells, enforce
+the Surface caps and the exact binary64 rules whatever the approval state, record
+raw differences, and refuse to certify an unapproved policy. No Python, C++, or NumPy runtime is added to the Rust library.
 
 Manifest verification is divided deliberately. Offline readers verify shipped
 goldens, policy, inventory, findings, tools, and crate-local copies. Historical
@@ -190,6 +201,49 @@ build-input hashes are provenance; the absent C++ sources, overlay, and executab
 are not opened by an offline reader. Live verification additionally requires the
 exact pinned checkout, clean source state, and matching source/driver identities.
 
+## Local comparison receipts
+
+Make a receipt when the pinned C++ reference changes (a new pin in `reference/behave_cpp` or
+regenerated observations in the `cases.jsonl` and `results.jsonl` files under
+`tests/data/cpp_reference/`). Routine pull requests and releases do not need one, and neither do
+changes to the hash list, approval wording, or tooling.
+A receipt records one platform's full local comparison of the Python and Rust ports with the
+pinned C++ outputs. Run the writer from a clean checkout with Python, NumPy, and the
+native Rust toolchain available.
+
+    python tools/cpp_receipt.py --write --archive <dir>
+
+The writer extracts the exact Git commit into a temporary directory, builds the
+native extension with Cargo, and runs the ports comparison using that extension.
+It runs the standalone Rust comparisons from the same source snapshot. Each attempt
+gets a new directory in the external archive for the ports report, Rust comparison
+log, and exact extension tested. After verifying the full attempt, the writer
+atomically updates the compact receipt at
+`tests/data/cpp_receipts/<platform-key>.json`. The receipt is evidence for the commit it
+names. It and its archive stay local: do not commit or publish them.
+
+The receipt binds the results to the commit and its tree, the version-neutral qualified source
+inventory, the fixture inventory (`fixture_inventory_sha256`, the SHA-256 of
+`tests/data/cpp_reference/hashes.json`), the Surface and exact-module datasets, the pin, the
+overlay, the public API identity, the native extension, the toolchains, and the host.
+It records the Cargo build command, compiler version, target, and flags. The verifier checks the hashes of the
+archived reports and extension. Receipts live outside `tests/data/cpp_reference/`, whose hasher
+lists every file under that tree, so a receipt never changes the inventory digest it records.
+
+`tools/cpp_receipt.py --check <receipt> --archive <dir>` requires the checkout to match the
+receipt's commit apart from receipt files, reads the archived reports, checks their hashes, and
+re-applies the existing numerical rules for all available Surface observations within the `1e-12`
+caps (722 cases, 3,610 fields, and 139 paired controls per backend),
+exact binary64 FireSize, Ignite, and Mortality results (9, 8, and 6 fields per backend), the
+Rust core counts (2,915 numbered Surface fields and 9, 8, and 6 exact fields), and the
+four Rust deliberate-failure tests. Measurement-only modules must have matching
+dataset hashes and complete case IDs and output fields for both backends.
+
+If an archive is ever shared, keep it free of local paths. Build in a neutral location and remap source
+prefixes, for example with `TEMP`, `TMP`, and `CARGO_HOME` set to neutral directories and
+`CARGO_ENCODED_RUSTFLAGS` set to `-Cdebuginfo=0` plus `--remap-path-prefix` entries for those
+directories (use the `\x1f` separator), then scan the archive for the user name and absolute
+paths before sharing it. Do not set `CARGO_TERM_QUIET`: the verifier needs the per-test lines.
 ## Opt-in live pytest
 
 Initialize the registered submodule and install CMake and the platform
@@ -213,10 +267,11 @@ alongside the replay with the existing numerical policies.
 
 Set `BEHAVE_CPP_LIVE_OUT` to retain reports in an explicit directory outside
 the checkout. Otherwise pytest uses its temporary directory. The compiler
-job selects GNU or MSVC through `BEHAVE_CPP_LIVE_COMPILER`. Run the local
-lane and the manual CI qualification before release and after any driver,
-overlay, or pin change. Release CI also runs the same live test before it
-can proceed to publication.
+job selects GNU or MSVC through `BEHAVE_CPP_LIVE_COMPILER`. Use the local
+lane to investigate driver, overlay, or pin changes. Manual CI can still collect
+the historical nine-report qualification for investigations. Publication does not
+wait on C++ evidence.
+
 ## Dependency and distribution boundaries
 
 The registered optional submodule at `reference/behave_cpp` is pinned to the

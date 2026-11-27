@@ -35,6 +35,7 @@ fn rows(source: &str) -> BTreeMap<String, Value> {
 
 // ---- custom fuel controls ----
 #[test]
+#[ignore = "pinned C++ comparison: run with --include-ignored when the pinned C++ reference changes"]
 fn explicit_percent_controls_match_numbered_physics_and_consume_all_cpp_fields() {
     let inputs = include_bytes!("data/cpp_reference/surface_custom/cases.jsonl");
     let outputs = include_bytes!("data/cpp_reference/surface_custom/results.jsonl");
@@ -185,6 +186,7 @@ fn explicit_percent_controls_match_numbered_physics_and_consume_all_cpp_fields()
         for (field, rust) in cpp_policy::FIELDS.into_iter().zip(values) {
             let cpp = number(&golden["output"], field);
             assert!(rust.is_finite() && cpp.is_finite());
+            // The owner's caps apply whatever the release approval state.
             cpp_policy::compare(rust, cpp, &policy, field)
                 .unwrap_or_else(|error| panic!("{id}: {error}"));
             println!("CPP_PERCENT_CONTROL id={id} field={field} cpp={cpp:.17e} rust={rust:.17e}");

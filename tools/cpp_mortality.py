@@ -59,6 +59,20 @@ def assert_matches_cpp(actual, expected, policy):
     """
     if policy.get("approved") is not True:
         raise reference.UnapprovedCppPolicy("Mortality comparisons require complete qualification")
+    check_exact(actual, expected, policy)
+
+
+def check_exact(actual, expected, policy):
+    """Apply the established exact binary64 rule whatever the release approval state.
+
+    The full local check calls this directly, so a withdrawn qualification never hides a
+    numerical regression; ``assert_matches_cpp`` adds the release approval requirement.
+
+    :param actual: Observed standalone scorch height from a selected port.
+    :param expected: Pinned C++ result in feet.
+    :param policy: Validated Mortality comparison policy. Its fields must be the established exact rules.
+    :return: Number of exactly compared fields; raises on a rule change or a mismatch.
+    """
     if policy.get("fields") != EXACT_FIELDS:
         raise ValueError("Unexpected Mortality comparison fields")
     _validate_output(actual)
@@ -66,6 +80,7 @@ def assert_matches_cpp(actual, expected, policy):
     field = FIELDS[0]
     if struct.pack("!d", actual[field]) != struct.pack("!d", expected[field]):
         raise AssertionError(f"{field}: port={actual[field]!r}, C++={expected[field]!r}")
+    return len(FIELDS)
 
 
 def exact_evidence(root, paths, record):

@@ -71,6 +71,20 @@ def assert_matches_cpp(actual, expected, policy):
     """
     if policy.get("approved") is not True:
         raise reference.UnapprovedCppPolicy("FireSize comparisons require complete qualification")
+    check_exact(actual, expected, policy)
+
+
+def check_exact(actual, expected, policy):
+    """Apply the established exact binary64 rule whatever the release approval state.
+
+    The full local check calls this directly, so a withdrawn qualification never hides a
+    numerical regression; ``assert_matches_cpp`` adds the release approval requirement.
+
+    :param actual: FireSize output from the selected backend.
+    :param expected: Geometry observed from pinned C++ in the same units.
+    :param policy: Validated FireSize comparison policy. Its fields must be the established exact rules.
+    :return: Number of exactly compared fields; raises on a rule change or a mismatch.
+    """
     if policy.get("fields") != EXACT_FIELDS:
         raise ValueError("Unexpected FireSize policy fields")
     _validate_output(actual)
@@ -78,6 +92,7 @@ def assert_matches_cpp(actual, expected, policy):
     for name in FIELDS:
         if struct.pack("!d", actual[name]) != struct.pack("!d", expected[name]):
             raise AssertionError(f"{name}: port={actual[name]!r}, C++={expected[name]!r}")
+    return len(FIELDS)
 
 
 def load_cases(root):

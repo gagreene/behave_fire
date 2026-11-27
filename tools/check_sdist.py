@@ -15,6 +15,10 @@ REQUIRED = {
     "rust/crates/behave-fire/Cargo.toml", "rust/crates/behave-fire/src/lib.rs",
     "rust/crates/behave-py/Cargo.toml", "rust/crates/behave-py/src/lib.rs",
 }
+# Python/Rust acceptance fixtures that the shipped parity checker and tests read.
+FIXTURES = "tests/data/rust_port"
+# Local C++ comparison receipts stay out of every distribution.
+LOCAL_EVIDENCE = "tests/data/cpp_receipts/"
 
 
 def _check_cpp_inputs(archive, members):
@@ -38,6 +42,16 @@ def _check_cpp_inputs(archive, members):
         actual = hashlib.sha256(archive.extractfile(members[relative]).read()).hexdigest()
         if actual != expected:
             raise ValueError(f"C++ offline input changed in the archive: {relative}")
+
+
+def _check_local_evidence(name):
+    """Reject local C++ comparison receipts, which carry operator, host, and build metadata.
+
+    :param name: Distribution-relative POSIX member name.
+    :return: None; raises ValueError when a local receipt is included.
+    """
+    if name.startswith(LOCAL_EVIDENCE):
+        raise ValueError(f"local C++ receipt in distribution: {name}")
 
 
 def _check_reference_payload(name):
@@ -81,6 +95,7 @@ def check_archive(path, expected=()):
                 raise ValueError(f"unsafe archive member: {member.name}")
             name = "/".join(parts[1:])
             _check_reference_payload(name)
+            _check_local_evidence(name)
             if member.isfile():
                 if name in names:
                     raise ValueError(f"duplicate archive member: {name}")
@@ -99,6 +114,35 @@ def check_archive(path, expected=()):
     return sorted(names)
 
 
+def check_committed_fixtures(path, root):
+    """Require the archived acceptance fixtures to equal the committed ones byte for byte.
+
+    :param path: Source tarball built by Maturin.
+    :param root: Repository root whose ``HEAD`` commit defines the fixtures.
+    :return: Sorted fixture names; raises ValueError for a missing, extra, or changed file.
+    """
+    listing = subprocess.run(["git", "-C", str(root), "ls-tree", "-r", "--name-only", "HEAD", "--", FIXTURES],
+        check=True, capture_output=True, text=True).stdout.split()
+    committed = {name for name in listing if name.endswith(".json")}
+    if not committed:
+        raise ValueError(f"no committed fixtures under {FIXTURES}")
+    with tarfile.open(path) as archive:
+        archived = {}
+        for member in archive.getmembers():
+            name = "/".join(PurePosixPath(member.name).parts[1:])
+            if member.isfile() and name.startswith(FIXTURES + "/"):
+                archived[name] = archive.extractfile(member).read()
+    if set(archived) != committed:
+        raise ValueError(f"fixture set differs: missing {sorted(committed - set(archived))}, "
+                         f"extra {sorted(set(archived) - committed)}")
+    for name in sorted(committed):
+        blob = subprocess.run(["git", "-C", str(root), "cat-file", "blob", f"HEAD:{name}"], check=True,
+            capture_output=True).stdout
+        if archived[name] != blob:
+            raise ValueError(f"fixture changed in the archive: {name}")
+    return sorted(committed)
+
+
 def check_tracked(root):
     """Require every declared build input to be tracked before source packaging.
 
@@ -113,6 +157,7 @@ def check_tracked(root):
             if path.is_file() and "target" not in path.parts and path.suffix not in {".pyc", ".crate"})
     inputs.update(path.relative_to(root).as_posix() for path in (root / "src/behave_fire").rglob("*") if path.is_file()
         and "__pycache__" not in path.parts and path.suffix.lower() not in {".pyc", ".pyd", ".so", ".dylib", ".pdb"})
+    inputs.update(path.relative_to(root).as_posix() for path in (root / FIXTURES).glob("*.json"))
     missing = inputs - tracked
     if missing:
         raise ValueError(f"sdist requires tracked inputs: {sorted(missing)}")
@@ -140,6 +185,8 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("archive", nargs="?", type=Path)
     parser.add_argument("--check-tracked", type=Path)
+    parser.add_argument("--committed-fixtures", type=Path, metavar="ROOT",
+        help="with ARCHIVE, require its acceptance fixtures to equal ROOT's HEAD commit")
     parser.add_argument("--inventory", type=Path)
     parser.add_argument("--wheel", type=Path)
     arguments = parser.parse_args()
@@ -150,6 +197,8 @@ def main():
     if arguments.archive:
         expected = arguments.inventory.read_text(encoding="utf-8").splitlines() if arguments.inventory else ()
         print("\n".join(check_archive(arguments.archive, expected)))
+        if arguments.committed_fixtures:
+            check_committed_fixtures(arguments.archive, arguments.committed_fixtures.resolve())
     if arguments.wheel:
         print("\n".join(check_wheel(arguments.wheel)))
     if not arguments.check_tracked and not arguments.archive and not arguments.wheel:

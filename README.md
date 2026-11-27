@@ -41,7 +41,7 @@ The package has two implementations that give the same results within documented
 |--------|------------|
 | **Surface fire** | Rothermel (1972) spread model — ROS, flame length, fireline intensity, heat per unit area, backing/flanking spread, fire geometry |
 | **Crown fire** | Rothermel (1991) & Scott–Reinhardt (2005) — transition ratio, active ratio, fire-type classification (surface / torching / conditional / active crown) |
-| **Tree mortality** | Crown scorch (Van Wagner), bole char, and crown damage equations for 300+ species / 9 GACC regions |
+| **Tree mortality** | Crown scorch (with Van Wagner scorch height) and bole char equations for 24 species / 9 GACC regions |
 | **Spotting** | Albini firebrand lofting model for burning piles, surface fires, and torching trees |
 | **Ignition** | Firebrand ignition probability; deprecated lightning calculation retained for compatibility |
 | **Safety zones** | Minimum separation distance, zone radius, and personnel capacity from radiant heat |
@@ -52,7 +52,7 @@ The package has two implementations that give the same results within documented
 
 ### Validation against Behave C++
 
-Both implementations are tested against [Behave `3ca33d5`](https://github.com/firelab/behave/commit/3ca33d5b919d4253b411bfb6464b4c872dda6fc9). Full qualification across GNU, MSVC and all seven native wheel platforms is pending for the corrected fuel tables.
+The pinned-reference check compares both implementations with [Behave `3ca33d5`](https://github.com/firelab/behave/commit/3ca33d5b919d4253b411bfb6464b4c872dda6fc9). Full qualification across GNU, MSVC and all seven native wheel platforms is pending for the corrected fuel tables. Run the check, with `pytest -m cpp_comparison` and the `--include-ignored` Rust tests, when the pinned C++ reference changes; ordinary merges and releases do not repeat it.
 
 - **Surface** compares 583 numbered cases and 139 paired custom controls, including models 152 (SCAL16) and 153 (SCAL14), against pinned C++ outputs with `1e-12` relative and absolute caps.
 - **FireSize, Ignite, and Mortality scorch height** use exact binary64 comparisons for the standalone cases.
@@ -255,8 +255,8 @@ fm     = FuelModels()
 runner = BehaveRun(fm)          # backend="auto": Rust when its extension is installed, otherwise Python
 
 # --- Surface fire on a single cell ---
-results = runner.do_surface_run(
-    fuel_model_grid      = np.array([[124]]),          # GR4
+surface_inputs = dict(
+    fuel_model_grid      = np.array([[124]]),          # GS4
     m1h                  = np.array([[0.06]]),          # 6% (as fraction)
     m10h                 = np.array([[0.07]]),
     m100h                = np.array([[0.08]]),
@@ -270,9 +270,13 @@ results = runner.do_surface_run(
     slope_units          = 1,                           # Percent
     aspect               = np.array([[180.0]]),         # degrees
     canopy_cover         = np.array([[0.40]]),          # fraction (0–1)
-    canopy_height        = np.array([[15.0]]),          # feet
-    crown_ratio          = np.array([[0.55]]),          # fraction (0–1)
+    canopy_height        = np.array([[15.0]]),          # m, the canopy height of the Crown run below
+    canopy_height_units  = 4,                           # Meters
+    crown_ratio          = np.array([[0.60]]),          # fraction (0–1)
     wind_height_mode     = 'TenMeter',
+)
+results = runner.do_surface_run(
+    **surface_inputs,
     out_units={
         'spread_rate'        : 3,   # MetersPerMinute
         'flame_length'       : 4,   # Meters
@@ -286,11 +290,15 @@ print(f"FLI          : {results['fireline_intensity'][0, 0]:.1f} kW/m")
 print(f"Backend      : {runner.backend_in_use}")
 ```
 
-#### Crown fire + mortality
+#### Crown fire
+
+`do_crown_run` reads `spread_rate`, `fireline_intensity`, and `heat_per_unit_area` from `surface_results` in base units (ft/min, BTU/ft/s, and BTU/ft²) without conversion. Pass a surface run made without `out_units`, and convert results separately for display.
 
 ```python
+surface_base = runner.do_surface_run(**surface_inputs)   # base units for the crown run
+
 crown = runner.do_crown_run(
-    surface_results     = results,
+    surface_results     = surface_base,
     fuel_model_grid     = np.array([[124]]),
     m1h=np.array([[0.06]]), m10h=np.array([[0.07]]),
     m100h=np.array([[0.08]]), mlh=np.array([[0.60]]),
@@ -302,16 +310,19 @@ crown = runner.do_crown_run(
     slope               = np.array([[20.0]]),
     slope_units         = 1,
     aspect              = np.array([[180.0]]),
-    canopy_base_height  = np.array([[19.7]]),   # feet (6 m × 3.28084)
-    canopy_height       = np.array([[49.2]]),   # feet (15 m × 3.28084)
-    canopy_bulk_density = np.array([[0.0075]]), # lb/ft³ (0.12 kg/m³ ÷ 16.0185)
+    canopy_base_height  = np.array([[6.0]]),    # m
+    canopy_base_height_units = 4,               # Meters
+    canopy_height       = np.array([[15.0]]),   # m
+    canopy_height_units = 4,                    # Meters
+    canopy_bulk_density = np.array([[0.12]]),   # kg/m³
+    canopy_bulk_density_units = 1,              # KilogramsPerCubicMeter
     moisture_foliar     = np.array([[100.0]]),  # percent
 )
 
 print(f"Fire type : {int(crown['fire_type'][0, 0])}")   # 0=surface … 3=active crown
 ```
 
-> **Note on `do_crown_run` inputs:** `canopy_base_height` and `canopy_height` are always in **feet** and `canopy_bulk_density` is in **lb/ft³** — these parameters do not have associated unit enums and must be converted before calling.
+> **Note on `do_crown_run` inputs:** `canopy_base_height` and `canopy_height` default to **feet** and `canopy_bulk_density` to **lb/ft³**. Select other units with `canopy_base_height_units` and `canopy_height_units` (`LengthUnitsEnum`), and `canopy_bulk_density_units` (`DensityUnitsEnum`). Surface results passed in `surface_results` must stay in base units, and the Surface and Crown calls must describe the same canopy: the quick start gives both a 15 m canopy height (the Surface run takes `canopy_height_units` too) and a crown ratio of 0.60, which is (15 m - 6 m crown base) / 15 m.
 
 ### Choosing a backend
 
@@ -553,7 +564,7 @@ described in [C++ validation](docs/CPP_VALIDATION.md).
 - **Input domains:** Python retains its historical guards and coercions. Rust validates structural controls before workers and uses float64 IEEE results for physical numeric domains; see [backend differences](docs/BACKEND_DIFFERENCES.md).
 - **Crown fuel is always FM10 / WAF=0.4** — hardcoded per Rothermel (1991); not configurable.
 - **Moisture as fraction** — `0.06` = 6%; see [Units](#units).
-- **Crown canopy inputs in base units** — `canopy_base_height` and `canopy_height` must be in feet, `canopy_bulk_density` in lb/ft³; no unit enum is applied to these parameters.
+- **Crown canopy input units** — `canopy_base_height` and `canopy_height` default to feet and `canopy_bulk_density` to lb/ft³. Select other units with `canopy_base_height_units`, `canopy_height_units`, and `canopy_bulk_density_units`, as the [Crown fire](#crown-fire) example does. `surface_results` must stay in base units.
 - **Wind orientation strings** — `'RelativeToUpslope'` or `'RelativeToNorth'`; misspellings silently default to upslope.
 - **Fuel snapshots** — each `BehaveRun` copies the fuel registry at construction; later registry edits do not affect an existing model.
 
@@ -583,6 +594,7 @@ cargo test   --manifest-path rust/Cargo.toml -p behave-fire --locked
 cargo fmt    --manifest-path rust/Cargo.toml --all -- --check
 cargo clippy --manifest-path rust/Cargo.toml --workspace --all-targets --locked -- -D warnings
 cargo +1.78.0 test --manifest-path rust/Cargo.toml -p behave-fire --locked   # minimum supported Rust
+# Only when the pinned C++ reference changes: add `-- --include-ignored` to run the pinned C++ comparisons
 ```
 
 Run the legacy accumulator harness separately, also from the project root:
@@ -605,7 +617,7 @@ Before submitting a change:
 
 1. Create a focused branch from `pre_release`.
 2. Add or update tests for the behavior you change, in Python and, for native code, in Rust.
-3. Run the full test suite (see [Testing](#testing)) and, for changes under `rust/`, the Rust checks.
+3. Run the full test suite (see [Testing](#testing)) and the Rust checks on every pull request, as described in [docs/CONTRIBUTION_PROCEDURES.md](docs/CONTRIBUTION_PROCEDURES.md). The pinned C++ comparisons run only when the pinned C++ reference changes.
 4. Fill in the test record in the pull request description from a run on the pull request's latest commit.
 5. Describe scientific assumptions, unit changes, and regression risks in the pull request.
 

@@ -572,7 +572,10 @@ class BehaveRun(_NativeState):
     ) -> dict:
         """Run the vectorized crown fire pipeline.
 
-        :param surface_results: Output dict from ``do_surface_run()``.
+        :param surface_results: Output dict from ``do_surface_run()`` in base units. Crown reads
+            ``spread_rate`` (ft/min), ``fireline_intensity`` (BTU/ft/s), and ``heat_per_unit_area``
+            (BTU/ft^2) without conversion, so pass a surface run made without ``out_units``
+            for these keys.
         :param fuel_model_grid: Integer fuel model number array (*S).
         :param m1h: 1-hr dead fuel moisture as array (*S) or scalar, in ``moisture_units``.
         :param m10h: 10-hr dead fuel moisture as array (*S) or scalar, in ``moisture_units``.

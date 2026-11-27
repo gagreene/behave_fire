@@ -26,12 +26,7 @@ const FIELDS: [&str; 5] = [
     "spread_chains_per_hour",
 ];
 
-fn compare_core_to_cpp(
-    case: &Value,
-    golden: &Value,
-    fuels: &FuelModels,
-    policy: &Value,
-) -> Vec<Value> {
+fn compare_core_to_cpp(case: &Value, golden: &Value, fuels: &FuelModels) -> Vec<Value> {
     assert_eq!(case["operation"], "surface");
     let cell = surface_cell(case);
     let plan = SurfacePlan::new(surface_options(case));
@@ -52,8 +47,6 @@ fn compare_core_to_cpp(
         .zip(actual_values)
         .map(|(field, rust)| {
             let cpp = number(&golden["output"], field);
-            cpp_policy::compare(rust, cpp, policy, field)
-                .unwrap_or_else(|error| panic!("{}: {error}", case["id"]));
             let absolute = (rust - cpp).abs();
             let relative = if cpp == 0.0 {
                 None
@@ -77,6 +70,18 @@ fn compare_core_to_cpp(
             })
         })
         .collect()
+}
+
+/// Apply the owner's Surface caps to every available numbered observation.
+fn enforce_caps(policy: &Value, observations: &[Value]) -> Result<(), String> {
+    for row in observations {
+        let left = row["rust"].as_str().unwrap().parse::<f64>().unwrap();
+        let right = row["cpp"].as_str().unwrap().parse::<f64>().unwrap();
+        let field = row["field"].as_str().unwrap();
+        cpp_policy::compare(left, right, policy, field)
+            .map_err(|error| format!("{}: {error}", row["id"]))?;
+    }
+    Ok(())
 }
 
 fn number(record: &Value, key: &str) -> f64 {
@@ -210,6 +215,7 @@ fn verify_manifest() {
 
 // ---- comparison policy ----
 #[test]
+#[ignore = "pinned C++ comparison: run with --include-ignored when the pinned C++ reference changes"]
 fn cpp_surface_observations_follow_the_qualified_policy() {
     verify_manifest();
     let cases = parse_rows(include_str!("data/cpp_reference/surface/cases.jsonl"));
@@ -253,7 +259,7 @@ fn cpp_surface_observations_follow_the_qualified_policy() {
                     .map(String::as_str)
                     .collect();
                 assert_eq!(fields, expected_fields, "case {id}");
-                observations.extend(compare_core_to_cpp(case, golden, &fuels, &policy));
+                observations.extend(compare_core_to_cpp(case, golden, &fuels));
             }
             "unavailable" => {
                 assert_eq!(golden["finding"], "F-013");
@@ -271,6 +277,8 @@ fn cpp_surface_observations_follow_the_qualified_policy() {
     for observation in &observations {
         println!("CPP_SURFACE_RAW {observation}");
     }
+    enforce_caps(&policy, &observations).unwrap();
+    println!("CPP_SURFACE_ENFORCED compared={}", observations.len());
     if policy["approved"].as_bool().unwrap() {
         cpp_policy::require_qualification(&policy).unwrap();
     }
@@ -281,6 +289,29 @@ fn cpp_surface_observations_follow_the_qualified_policy() {
         unavailable,
         policy["approved"],
     );
+}
+
+#[test]
+#[ignore = "pinned C++ comparison: run with --include-ignored when the pinned C++ reference changes"]
+fn perturbed_cpp_copy_fails_the_surface_caps() {
+    // A temporary copy of the packaged results with one compared field moved beyond the cap.
+    let cases = parse_rows(include_str!("data/cpp_reference/surface/cases.jsonl"));
+    let mut results = parse_rows(include_str!("data/cpp_reference/surface/results.jsonl"));
+    let policy: Value = serde_json::from_str(include_str!(
+        "data/cpp_reference/surface/tolerance-policy.json"
+    ))
+    .unwrap();
+    let (id, case) = cases
+        .iter()
+        .find(|(id, case)| results[*id]["status"] == "ok" && case["fuel_model"] == 152)
+        .unwrap();
+    let field = FIELDS[0];
+    let golden = results.get_mut(id).unwrap();
+    let value = golden["output"][field].as_f64().unwrap();
+    golden["output"][field] = json!(value + (value.abs() * 1e-9).max(1e-9));
+    let observations = compare_core_to_cpp(case, &results[id], &FuelModels::default());
+    let error = enforce_caps(&policy, &observations).unwrap_err();
+    assert!(error.contains(id) && error.contains(field), "{error}");
 }
 
 #[test]

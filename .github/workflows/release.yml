@@ -16,9 +16,13 @@ permissions:
 
 jobs:
   validation:
+    # A called workflow cannot exceed its caller's permissions; ci.yml's plan job reads
+    # workflow runs, artifacts, and pull requests to decide its tier.
+    permissions:
+      contents: read
+      actions: read
+      pull-requests: read
     uses: ./.github/workflows/ci.yml
-    with:
-      cpp_live: true
 
   release-policy:
     runs-on: ubuntu-24.04
@@ -59,7 +63,7 @@ jobs:
           repository-url: https://test.pypi.org/legacy/
 
   publish-pypi:
-    if: startsWith(github.ref, 'refs/tags/v') && vars.PYPI_PUBLISHING_ENABLED == 'true'
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') && vars.PYPI_PUBLISHING_ENABLED == 'true'
     needs: [validation, release-policy]
     runs-on: ubuntu-24.04
     environment:

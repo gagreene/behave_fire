@@ -1,6 +1,7 @@
 """Artifact inventory and version behavior exercised through real file formats."""
 
 import importlib.util
+import io
 import subprocess
 import sys
 import tarfile
@@ -20,6 +21,30 @@ def _load(name):
 
 class ArchiveTests(unittest.TestCase):
     # ---- archive payload tests ----
+
+    def test_archive_fixtures_match_committed_bytes(self):
+        checker = _load("check_sdist")
+        listing = subprocess.run(["git", "-C", str(ROOT), "ls-tree", "-r", "--name-only", "HEAD", "--",
+            checker.FIXTURES], check=True, capture_output=True, text=True).stdout.split()
+        committed = {name: subprocess.run(["git", "-C", str(ROOT), "cat-file", "blob", "HEAD:" + name], check=True,
+            capture_output=True).stdout for name in listing if name.endswith(".json")}
+        self.assertTrue(committed)
+        first = sorted(committed)[0]
+        cases = {"complete": (committed, None), "changed": ({**committed, first: committed[first] + b" "}, "changed"),
+                 "missing": ({name: data for name, data in committed.items() if name != first}, "missing")}
+        for label, (files, error) in cases.items():
+            with self.subTest(label), tempfile.TemporaryDirectory() as temporary:
+                archive = Path(temporary) / "source.tar.gz"
+                with tarfile.open(archive, "w:gz") as handle:
+                    for name, data in files.items():
+                        info = tarfile.TarInfo("package/" + name)
+                        info.size = len(data)
+                        handle.addfile(info, io.BytesIO(data))
+                if error is None:
+                    self.assertEqual(checker.check_committed_fixtures(archive, ROOT), sorted(committed))
+                else:
+                    with self.assertRaisesRegex(ValueError, error):
+                        checker.check_committed_fixtures(archive, ROOT)
 
     def test_archive_rejects_missing_core_manifest(self):
         checker = _load("check_sdist")
