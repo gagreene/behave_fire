@@ -7,19 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-- Add machine-checked local C++ comparison receipts (`tools/cpp_receipt.py`). A receipt binds one
-  platform's full local comparison to the tested commit, sources, fixture inventory, extension,
-  toolchains, and host; verification reads the archived reports, re-applies the Surface caps and
-  exact rules, and rejects claimed platforms without evidence. Receipts live in
-  `tests/data/cpp_receipts/`, outside the hashed fixture inventory. The platform claims
-  (`windows-x86_64`) are not yet approved, and the qualification stays withdrawn.
-- Require approved local C++ receipts for TestPyPI, PyPI, and crates.io uploads.
-  The shared gate verifies the archived evidence against the release candidate.
-  Build-only and targeted validation remain available before claims are approved.
-  `release.yml` grants its CI call the permissions the `plan` job needs, and a
+- Add machine-checked local C++ comparison receipts (`tools/cpp_receipt.py`) for use when the
+  pinned upstream C++ reference changes. A receipt binds one platform's full local comparison
+  to the tested commit, sources, fixture inventory, extension, toolchains, and host;
+  verification reads the archived reports and re-applies the Surface caps and exact rules.
+  The receipt stays local and is not committed, and the qualification stays
+  withdrawn. Neither pull request merges nor release publication wait on it.
+- Publication no longer runs live C++ qualification: `release.yml` and `release-crate.yml`
+  validate the distributions and the crate only. `release.yml` grants its CI call the
+  permissions the `plan` job needs, and a
   missing, unreadable, or invalid reuse record on `master` falls back to the full tier.
 - Enforce the Surface caps and the exact binary64 rules for FireSize, Ignite, and
-  Mortality in the local C++ comparisons whatever the release approval state, and
+  Mortality in the pinned C++ comparisons whatever the approval state, and
   add deliberate-failure tests that perturb temporary fixture copies.
 - Run the full platform and packaging CI once per promotion. Pull requests into
   `pre_release` and merges into it run the quick tier; promotion and hotfix pull
@@ -28,11 +27,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   the full tier). A `plan` job (`tools/ci_plan.py`) chooses the tier, and manual
   dispatches can target `musl`, `sdist`, or `musl-and-sdist`. C++ calibration in a
   manual run now needs `cpp_qualification=true`.
-- Move comparisons of Python and Rust outputs with pinned C++ outputs from CI into
-  the full local check before each merge: the Python tests carry the
-  `cpp_comparison` marker, which CI deselects, and the Rust comparison tests are
-  `#[ignore]`d and run locally with `--include-ignored`. CI keeps Python/Rust
-  parity, reference-data integrity, packaging, and installation checks.
+- Move comparisons of Python and Rust outputs with pinned C++ outputs out of CI and
+  routine runs: the Python tests carry the `cpp_comparison` marker, which the default
+  pytest run and CI deselect, and the Rust comparison tests are `#[ignore]`d and run
+  with `--include-ignored`. Run them when the pinned C++ reference changes. CI keeps
+  Python/Rust parity, reference-data integrity, packaging, and installation checks.
 - Correct the README and landscape example Crown runs: `do_crown_run` reads surface
   spread rate, fireline intensity, and heat per unit area in base units, so the
   examples now pass a base-unit surface run instead of metric display output, which

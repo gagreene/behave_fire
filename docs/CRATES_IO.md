@@ -36,7 +36,7 @@ The repository budget stays smaller. [Cargo publishing documentation](https://do
 
 `crate-validation.yml` extracts the archive in a separate Rust container with
 no checkout and no Python interpreter. It runs packaged tests and doctests
-(the `#[ignore]`d pinned C++ comparisons run only with `--include-ignored`),
+(the `#[ignore]`d pinned C++ comparisons run only with `--include-ignored`, when the pinned reference changes),
 the standalone example, and a separate downstream consumer. The consumer uses
 default/custom fuels, embedded species, surface fire, mortality, and worker
 counts 0/1/2/4. Its dependency points only at the extracted package. Linux
@@ -64,9 +64,10 @@ short-lived credential. [Official authentication action](https://github.com/rust
 
 ## Subsequent releases
 
-Prepare the [approved local C++ receipts](CPP_VALIDATION.md#local-comparison-receipts)
-for the release candidate. The crate's `qualification-gate` job verifies the receipts
-and archived evidence before publication. Check-only runs skip that gate.
+A crate release does not need C++ comparison evidence. That evidence is produced only when the
+pinned upstream C++ reference changes (see
+[local comparison receipts](CPP_VALIDATION.md#local-comparison-receipts)), and `release-crate.yml`
+does not wait on it.
 
 The manual workflow defaults to `publish=false`, which runs checks only. An
 authorized publication uses `publish=true` on the exact

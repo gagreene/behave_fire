@@ -1,17 +1,18 @@
 """Write and verify local C++ comparison receipts bound to a reviewed revision.
 
-A receipt records one platform's full local comparison of the Python and Rust ports with the
-pinned Behave C++ outputs. It binds the results to the tested commit and tree, the qualified
-source inventory, the fixture inventory, the native extension, the toolchains, and the host,
-and it names the archived full reports by SHA-256. Verification reads those archived reports,
-re-applies the existing numerical rules (Surface ``1e-12`` caps for all available cases
-and exact binary64 FireSize, Ignite, and Mortality results), and rejects a claimed
-platform without valid evidence.
+Run this when the pinned upstream C++ reference changes; routine pull requests and releases do
+not need it. A receipt records one platform's full local comparison of the Python and Rust
+ports with the pinned Behave C++ outputs. It binds the results to the tested commit and tree,
+the qualified source inventory, the fixture inventory, the native extension, the toolchains,
+and the host, and it names the archived full reports by SHA-256. Verification reads those
+archived reports and re-applies the existing numerical rules (Surface ``1e-12`` caps for all
+available cases and exact binary64 FireSize, Ignite, and Mortality results).
 
-Receipts live in ``tests/data/cpp_receipts/``, outside ``tests/data/cpp_reference/``: the
-reference hasher lists every file under that tree in ``hashes.json``, so a receipt stored there
-would change the fixture inventory digest it records. Writing or checking a receipt never
-activates a qualification; approval of the platform claims and activation are separate steps.
+``--write`` stores the receipt in ``tests/data/cpp_receipts/``, outside
+``tests/data/cpp_reference/``: the reference hasher lists every file under that tree in
+``hashes.json``, so a receipt stored there would change the fixture inventory digest it records.
+The receipt is local evidence for the commit it names and is not committed. Writing or checking
+a receipt never activates a qualification.
 """
 
 import argparse
@@ -25,8 +26,6 @@ import sys
 from datetime import UTC, datetime
 from pathlib import Path
 from tempfile import TemporaryDirectory, mkdtemp
-from urllib.parse import urlsplit
-from urllib.request import HTTPRedirectHandler, build_opener
 from zipfile import ZipFile
 
 import cpp_calibrate as calibrate
@@ -37,7 +36,6 @@ import cpp_mortality as mortality
 import cpp_reference as reference
 
 RECEIPTS = Path("tests/data/cpp_receipts")
-CLAIMS = RECEIPTS / "claims.json"
 PLATFORMS = ("linux-x86_64", "linux-aarch64", "linux-musl-x86_64", "macos-x86_64", "macos-arm64",
              "windows-x86_64", "windows-arm64")
 BACKENDS = ("python", "rust")
@@ -54,46 +52,6 @@ RUST_TESTS = {"cpp_surface_observations_follow_the_qualified_policy": 1,
               "perturbed_cpp_copy_fails_the_surface_caps": 1,
               "perturbed_cpp_copy_fails_the_exact_regression": 3}
 SCHEMA = 2
-
-
-class _HttpsRedirect(HTTPRedirectHandler):
-    """Keep evidence archive downloads on HTTPS across redirects."""
-
-    def redirect_request(self, req, fp, code, msg, headers, newurl):
-        """Build an HTTPS redirect request or reject the redirect.
-
-        :param req: Original request.
-        :param fp: Response stream.
-        :param code: Redirect status code.
-        :param msg: Redirect status message.
-        :param headers: Redirect response headers.
-        :param newurl: Redirect URL resolved by urllib.
-        :return: Request for the HTTPS destination.
-        """
-        target = urlsplit(newurl)
-        if target.scheme != "https" or not target.hostname or target.username is not None:
-            raise ValueError("Evidence archive redirects require HTTPS without credentials")
-        return super().redirect_request(req, fp, code, msg, headers, newurl)
-
-
-def _approved_claims(root):
-    """Read approved platform claims and require their receipt files.
-
-    :param root: Repository root.
-    :return: Claimed platforms and the approved archive location.
-    """
-    claims = _read_json(root / CLAIMS)
-    if set(claims) != {"schema_version", "approved", "platforms", "archive_location"} or claims["schema_version"] != 1:
-        raise ValueError("Malformed platform claims")
-    platforms = claims["platforms"]
-    if not platforms or len(set(platforms)) != len(platforms) or not set(platforms) <= set(PLATFORMS):
-        raise ValueError("Platform claims must name distinct supported platforms")
-    missing = [key for key in platforms if not (root / RECEIPTS / f"{key}.json").is_file()]
-    if missing:
-        raise ValueError(f"Missing platform evidence: {missing}")
-    if claims["approved"] is not True:
-        raise ValueError("Platform claims are not approved")
-    return platforms, claims["archive_location"]
 
 
 def _bound_revision(root, receipt):
@@ -210,25 +168,6 @@ def _evidence_file(archive, relative):
     if path.anchor or len(path.parts) != 2 or ".." in path.parts or not resolved.is_relative_to(archive):
         raise ValueError(f"Invalid archived evidence path: {relative}")
     return resolved
-
-
-def _extract_release_archive(path, destination):
-    """Extract a ZIP containing only comparison evidence in attempt directories.
-
-    :param path: ZIP archive whose digest has already been verified.
-    :param destination: Empty temporary directory for the evidence.
-    :return: None; writes verified member paths under the destination.
-    """
-    with ZipFile(path) as bundle:
-        seen = set()
-        for member in bundle.infolist():
-            name = member.filename.rstrip("/")
-            pattern = (r"[a-z0-9_-]+" if member.is_dir()
-                       else r"[a-z0-9_-]+/(?:ports\.json|rust\.log|_rust\.(?:pyd|so))")
-            if not re.fullmatch(pattern, name) or name in seen:
-                raise ValueError(f"Unsafe evidence archive member: {member.filename}")
-            seen.add(name)
-        bundle.extractall(destination)
 
 
 def _git(root, *args):
@@ -408,25 +347,6 @@ def _validate_provenance(receipt, report, archive):
         raise ValueError("Archived native extension is missing or differs from the receipt")
 
 
-def check_claims(root, archive):
-    """Check the owner's approval and verify each claimed platform using the approved archive.
-
-    :param root: Repository root.
-    :param archive: Directory holding the archived full reports.
-    :return: Verified summaries per claimed platform; raises on missing evidence or missing approval.
-    """
-    root = Path(root)
-    platforms, location = _approved_claims(root)
-    if not isinstance(location, str) or not Path(location).is_absolute():
-        raise ValueError("Approved claims require an absolute archive location")
-    approved_archive = Path(location).resolve()
-    if approved_archive != Path(archive).resolve() or not approved_archive.is_dir():
-        raise ValueError("Evidence directory does not match the approved archive")
-    if approved_archive.is_relative_to(root.resolve()):
-        raise ValueError("The approved archive must be outside the checkout")
-    return {key: check_receipt(root, root / RECEIPTS / f"{key}.json", approved_archive) for key in platforms}
-
-
 def check_receipt(root, path, archive):
     """Verify one receipt and the archived reports it names.
 
@@ -486,34 +406,8 @@ def check_receipt(root, path, archive):
     return results
 
 
-def check_release_claims(root):
-    """Download and verify the approved release archive and every claimed platform.
-
-    :param root: Repository root.
-    :return: Verified summaries per platform; raises if release evidence is invalid.
-    """
-    root = Path(root)
-    platforms, location = _approved_claims(root)
-    if not isinstance(location, dict) or set(location) != {"url", "sha256"}:
-        raise ValueError("Release claims require an approved HTTPS archive and SHA-256")
-    url, digest = location["url"], location["sha256"]
-    endpoint = urlsplit(url) if isinstance(url, str) else None
-    if (endpoint is None or endpoint.scheme != "https" or not endpoint.hostname or endpoint.username is not None
-            or endpoint.fragment or not isinstance(digest, str) or not re.fullmatch(r"[0-9a-f]{64}", digest)):
-        raise ValueError("Release claims require an approved HTTPS archive and SHA-256")
-    with TemporaryDirectory(prefix="bf-release-evidence-") as temporary:
-        download = Path(temporary) / "evidence.zip"
-        with build_opener(_HttpsRedirect()).open(url, timeout=30) as source, download.open("wb") as output:
-            shutil.copyfileobj(source, output)
-        if reference._digest(download) != digest:
-            raise ValueError("Downloaded evidence archive SHA-256 differs from approved claims")
-        archive = Path(temporary) / "archive"
-        _extract_release_archive(download, archive)
-        return {key: check_receipt(root, root / RECEIPTS / f"{key}.json", archive) for key in platforms}
-
-
 def main(argv=None):
-    """Write a receipt, check one receipt, or check every claimed platform.
+    """Write a receipt or check one receipt against its archived reports.
 
     :param argv: Optional command-line arguments.
     :return: None; ``--write`` writes the archived reports and the receipt file.
@@ -522,25 +416,14 @@ def main(argv=None):
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument("--write", action="store_true")
     group.add_argument("--check", type=Path, metavar="RECEIPT")
-    group.add_argument("--check-claims", action="store_true")
-    group.add_argument("--check-release-claims", action="store_true")
     parser.add_argument("--root", type=Path, default=reference.ROOT)
-    parser.add_argument("--archive", type=Path, help="directory of archived full reports")
+    parser.add_argument("--archive", type=Path, required=True, help="directory of archived full reports")
     parser.add_argument("--operator", default="127547449+gagreene@users.noreply.github.com")
     arguments = parser.parse_args(argv)
-    if arguments.check_release_claims:
-        if arguments.archive is not None:
-            parser.error("--check-release-claims uses the approved archive URL")
-        print(json.dumps(check_release_claims(arguments.root), indent=2))
-        return
-    if arguments.archive is None:
-        parser.error("--archive is required for local receipt operations")
     if arguments.write:
         print(json.dumps(write_receipt(arguments.root, arguments.archive, arguments.operator)["results"], indent=2))
-    elif arguments.check:
-        print(json.dumps(check_receipt(arguments.root, arguments.check, arguments.archive), indent=2))
     else:
-        print(json.dumps(check_claims(arguments.root, arguments.archive), indent=2))
+        print(json.dumps(check_receipt(arguments.root, arguments.check, arguments.archive), indent=2))
 
 
 def write_receipt(root, archive, operator):

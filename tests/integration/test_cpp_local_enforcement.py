@@ -1,4 +1,4 @@
-"""Prove that the full local check fails on a numerical regression, even with qualification withdrawn.
+"""Prove that the pinned-reference check fails on a numerical regression, even with qualification withdrawn.
 
 Each test copies a pinned C++ results fixture to a temporary directory, perturbs one expected
 value, and runs the same comparison path the local check uses. The repository fixtures are

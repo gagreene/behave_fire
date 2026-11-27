@@ -66,7 +66,7 @@ def test_manual_cpp_calibration_uses_the_opt_in_live_lane():
     assert job['uses'] == shared
     crate = yaml.load((ROOT / '.github/workflows/release-crate.yml').read_text(), Loader=yaml.BaseLoader)
     assert 'cpp-live' not in crate['jobs']
-    assert set(crate['jobs']['publish-crate']['needs']) == {'verify', 'qualification-gate'}
+    assert set(crate['jobs']['publish-crate']['needs']) == {'verify'}
     assert crate['jobs']['publish-crate']['if'] == 'inputs.publish'
     lane = yaml.load((ROOT / shared).read_text(), Loader=yaml.BaseLoader)
     assert 'workflow_call' in lane['on']
@@ -190,33 +190,18 @@ def test_reusable_ci_callers_grant_the_permissions_its_jobs_request():
     assert callers == 1
 
 
-def test_uploads_require_approved_cpp_receipts():
-    shared = './.github/workflows/cpp-receipt-validation.yml'
-    workflow = yaml.load((ROOT / shared).read_text(), Loader=yaml.BaseLoader)
-    assert 'workflow_call' in workflow['on']
-    steps = workflow['jobs']['verify']['steps']
-    assert next(step for step in steps if step.get('uses') == 'actions/checkout@v4')['with']['fetch-depth'] == '0'
-    assert 'uv run --no-sync python tools/cpp_receipt.py --check-release-claims' in [
-        step.get('run', '') for step in steps]
-    assert all(step.get('continue-on-error', 'false') == 'false' for step in steps)
-    testpypi = ("github.event_name == 'workflow_dispatch' && inputs.target == 'testpypi' "
-                "&& vars.TESTPYPI_PUBLISHING_ENABLED == 'true'")
-    pypi = ("github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') "
-            "&& vars.PYPI_PUBLISHING_ENABLED == 'true'")
-    expected = {'release.yml': ("(" + testpypi + ") || (" + pypi + ")", ('publish-testpypi', 'publish-pypi')),
-                'release-crate.yml': ('inputs.publish', ('publish-crate',))}
-    for name, (condition, uploads) in expected.items():
-        jobs = yaml.load((ROOT / '.github/workflows' / name).read_text(), Loader=yaml.BaseLoader)['jobs']
-        gate = jobs['qualification-gate']
-        # The gate runs only for an actual upload, so build-only runs work while qualification is withdrawn.
-        assert gate['if'] == condition, name
-        assert gate['uses'] == shared
-        assert all('always()' not in jobs[upload]['if'] for upload in uploads)
-        for upload in uploads:
-            assert 'qualification-gate' in jobs[upload]['needs'], (name, upload)
-        validation = [job for job in jobs.values() if job.get('uses', '').startswith('./')]
-        assert all('qualification-gate' not in job.get('needs', []) for job in validation), name
-
+def test_publication_does_not_require_cpp_evidence():
+    # C++ evidence is produced when the pinned upstream C++ changes, so no publisher waits on it.
+    expected = {'release.yml': {'publish-testpypi': {'validation', 'release-policy'},
+                                'publish-pypi': {'validation', 'release-policy'}},
+                'release-crate.yml': {'publish-crate': {'verify'}}}
+    for name, uploads in expected.items():
+        text = (ROOT / '.github/workflows' / name).read_text()
+        assert 'receipt' not in text and 'qualification' not in text and 'cpp-live' not in text, name
+        jobs = yaml.load(text, Loader=yaml.BaseLoader)['jobs']
+        for upload, needs in uploads.items():
+            assert set(jobs[upload]['needs']) == needs, (name, upload)
+    assert not (ROOT / '.github/workflows/cpp-receipt-validation.yml').exists()
 
 def test_wheel_validation_scopes_select_targeted_jobs():
     workflow = yaml.load((ROOT / ".github/workflows/wheel-validation.yml").read_text(), Loader=yaml.BaseLoader)

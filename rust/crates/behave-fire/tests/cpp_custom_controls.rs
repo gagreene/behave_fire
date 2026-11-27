@@ -35,7 +35,7 @@ fn rows(source: &str) -> BTreeMap<String, Value> {
 
 // ---- custom fuel controls ----
 #[test]
-#[ignore = "pinned C++ comparison: run by the full local check with --include-ignored"]
+#[ignore = "pinned C++ comparison: run with --include-ignored when the pinned C++ reference changes"]
 fn explicit_percent_controls_match_numbered_physics_and_consume_all_cpp_fields() {
     let inputs = include_bytes!("data/cpp_reference/surface_custom/cases.jsonl");
     let outputs = include_bytes!("data/cpp_reference/surface_custom/results.jsonl");

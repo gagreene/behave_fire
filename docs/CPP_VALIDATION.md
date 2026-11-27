@@ -159,9 +159,10 @@ to investigate the nine-report qualification, with `-f scope=full -f cpp_qualifi
 Those jobs check out the optional reference and build C++.
 Ordinary PR and push CI checks the integrity of the stored offline evidence but
 does not compare Python or Rust outputs with it: those comparisons (pytest marker
-`cpp_comparison` and the `#[ignore]`d Rust comparison tests) run in the full local
-check on every PR's latest commit (see "Pinned C++ comparisons" in
-[CONTRIBUTION_PROCEDURES.md](CONTRIBUTION_PROCEDURES.md)).
+`cpp_comparison` and the `#[ignore]`d Rust comparison tests) are deselected by default
+and run when the pinned C++ reference changes (see "Pinned C++ comparisons" in
+[CONTRIBUTION_PROCEDURES.md](CONTRIBUTION_PROCEDURES.md)). Neither a pull request merge nor
+a release publication waits on them.
 The wheel reports use the actual staged wheel extension, including Alpine/musl
 and Windows ARM64, and fail rather than skip if calibration cannot run.
 
@@ -180,12 +181,13 @@ Use the configured interpreter and the contributor procedures:
 python tools/cpp_reference.py --check
 python tools/cpp_inventory.py --check
 python tools/export_cpp_crate.py --check
-python -m pytest --require-rust -W error
+python -m pytest --require-rust -W error -m cpp_comparison
 cargo test --manifest-path rust/Cargo.toml -p behave-fire --locked --no-fail-fast -- --include-ignored
 python tools/cpp_reference.py --compare development/cpp-pilot/measurements
 ```
 
-The first three commands check integrity, not scientific parity. The comparer
+The first three commands check integrity, not scientific parity. The last three compare the
+ports with the pinned C++ outputs; run them when the pinned reference changes. The comparer
 records every Python/C++ and Rust/C++ field difference without accepting it.
 `assert_matches_cpp` raises until an explicit field policy is approved. The
 standalone crate verifies its own copied fixture hashes. Its `#[ignore]`d
@@ -201,6 +203,8 @@ exact pinned checkout, clean source state, and matching source/driver identities
 
 ## Local comparison receipts
 
+Make a receipt when the pinned C++ reference changes (a new pin in `reference/behave_cpp` or new
+files under `tests/data/cpp_reference/`). Routine pull requests and releases do not need one.
 A receipt records one platform's full local comparison of the Python and Rust ports with the
 pinned C++ outputs. Run the writer from a clean checkout with Python, NumPy, and the
 native Rust toolchain available.
@@ -213,7 +217,8 @@ It runs the standalone Rust comparisons from the same source snapshot. Each atte
 gets a new directory in the external archive for the ports report, Rust comparison
 log, and exact extension tested. After verifying the full attempt, the writer
 atomically updates the compact receipt at
-`tests/data/cpp_receipts/<platform-key>.json`.
+`tests/data/cpp_receipts/<platform-key>.json`. The receipt is evidence for the commit it
+names. It and its archive stay local: do not commit or publish them.
 
 The receipt binds the results to the commit and its tree, the version-neutral qualified source
 inventory, the fixture inventory (`fixture_inventory_sha256`, the SHA-256 of
@@ -231,22 +236,12 @@ exact binary64 FireSize, Ignite, and Mortality results (9, 8, and 6 fields per b
 Rust core counts (2,915 numbered Surface fields and 9, 8, and 6 exact fields), and the
 four Rust deliberate-failure tests. Measurement-only modules must have matching
 dataset hashes and complete case IDs and output fields for both backends.
-For approved claims, the supplied directory must resolve to the absolute archive
-location in the claims file. `--check-claims` requires a valid receipt for every
-platform listed in `tests/data/cpp_receipts/claims.json`.
 
-The shared publication gate runs `tools/cpp_receipt.py --check-release-claims`.
-For this check, `archive_location` in the approved claims file must contain `url`
-and `sha256`. The URL points to an HTTPS ZIP the runner can download without
-credentials. Any redirects must also use HTTPS. The digest is the lowercase SHA-256 of the ZIP. Include each
-claimed attempt directory directly at the archive root with its `ports.json`,
-`rust.log`, and native extension. The gate verifies the ZIP's digest, then checks
-each receipt and its evidence against the release candidate. Build-only and
-check-only workflows skip the publication gate.
-
-The claims file lists `windows-x86_64`. Publication requires owner approval of
-the platform claims and archive, plus a valid receipt for each platform.
-
+If an archive is ever shared, keep it free of local paths. Build in a neutral location and remap source
+prefixes, for example with `TEMP`, `TMP`, and `CARGO_HOME` set to neutral directories and
+`CARGO_ENCODED_RUSTFLAGS` set to `-Cdebuginfo=0` plus `--remap-path-prefix` entries for those
+directories (use the `\x1f` separator), then scan the archive for the user name and absolute
+paths before sharing it. Do not set `CARGO_TERM_QUIET`: the verifier needs the per-test lines.
 ## Opt-in live pytest
 
 Initialize the registered submodule and install CMake and the platform
@@ -272,8 +267,9 @@ Set `BEHAVE_CPP_LIVE_OUT` to retain reports in an explicit directory outside
 the checkout. Otherwise pytest uses its temporary directory. The compiler
 job selects GNU or MSVC through `BEHAVE_CPP_LIVE_COMPILER`. Use the local
 lane to investigate driver, overlay, or pin changes. Manual CI can still collect
-the historical nine-report qualification for investigations. Publication uses
-the approved local receipts.
+the historical nine-report qualification for investigations. Publication does not
+wait on C++ evidence.
+
 ## Dependency and distribution boundaries
 
 The registered optional submodule at `reference/behave_cpp` is pinned to the

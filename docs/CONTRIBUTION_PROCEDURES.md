@@ -174,8 +174,8 @@ When a serious defect is found in released code and cannot wait for the next rel
 ## Local tests before every PR merge
 
 Run the full local check against the **latest PR commit** before merging. Every
-PR runs both pytest routes, the Rust checks, and the pinned C++ comparisons that
-they contain, whatever the PR changes. The project builds with Maturin, so
+PR runs both pytest routes and the Rust checks, whatever the PR changes. The
+pinned C++ comparisons are separate (see "Pinned C++ comparisons"). The project builds with Maturin, so
 `pip install -e .` needs a Rust toolchain. From the repository root, the
 Python-only route installs dependencies without building or installing the project:
 
@@ -185,8 +185,7 @@ uv run --no-sync python -m pytest -vv
 ```
 
 The native route builds the extension (Rust required) and fails, rather than skips,
-if it is missing or incompatible. The Rust half of the pinned C++ comparisons runs
-only on this route:
+if it is missing or incompatible:
 
 ```shell
 uv sync --locked --extra test --extra dev
@@ -199,43 +198,86 @@ so every command passes `--manifest-path`:
 ```shell
 cargo fmt    --manifest-path rust/Cargo.toml --all -- --check
 cargo clippy --manifest-path rust/Cargo.toml --workspace --all-targets --locked -- -D warnings
-cargo test   --manifest-path rust/Cargo.toml -p behave-fire --locked --no-fail-fast -- --include-ignored
+cargo test   --manifest-path rust/Cargo.toml -p behave-fire --locked --no-fail-fast
 cargo doc    --manifest-path rust/Cargo.toml --workspace --no-deps --locked
 cargo +<MSRV> check --manifest-path rust/Cargo.toml --workspace --all-targets --locked
 ```
 
+### Style and integrity checks
+
+Run these against the PR's latest commit as well, and record the outcome with the test record:
+
+```shell
+python -m ruff check src tests tools
+python tools/check_function_order.py --require-labels
+python tools/cpp_reference.py --check
+python tools/cpp_inventory.py --check
+python tools/export_cpp_crate.py --check
+git diff --check <base> HEAD
+```
+
+The three `cpp_*`/`export_*` commands check the committed C++ observations, the coverage
+inventory, and the crate-local fixture copies. They check integrity, not scientific parity.
+
+### Running the suites reliably
+
+- Use the project interpreter and run from the repository root (`pytest.ini` puts `src`, the
+  root, and `tests` on the path). Pass the options of the recorded command, normally
+  `--require-rust -W error` for the native route and `-W error` for the Python-only route.
+- `pytest.ini` already adds `-q`. Do not add another `-q`: `-qq` removes the final
+  `N passed` summary line that the PR test record needs.
+- On Windows, add `-p no:cacheprovider --basetemp <scratch directory>` if a locked `.pytest_cache`
+  or an old temporary directory stops collection.
+- The Python-only route must not see a built extension. An ignored `_rust` binary left in
+  `src/behave_fire/` from the native route makes the route a native run. Run the Python-only route
+  in a separate clean clone checked out at the PR's commit (a `git archive` copy is not enough:
+  some tests call `git`), or with the extension removed.
+- Build the extension from the PR's commit before the native route, and rebuild it after any
+  change under `rust/`. On Windows, use a short `CARGO_TARGET_DIR` outside deeply nested
+  worktrees: long target paths exceed linker limits.
+- Compare content with line endings normalized. Git's autocrlf can make Windows runs pass where
+  Linux or macOS fail, and a few files in the repository carry CRLF endings. Keep each file's
+  existing line endings when editing it.
+- Several files are hash-pinned in `tests/data/cpp_reference/hashes.json` (for example the
+  `tools/cpp_*.py` modules, which includes docstring text). Editing one changes its digest and
+  fails the `test_cpp_reference` tests. Refresh those hashes only through the reviewed
+  regeneration described under "C++ parity", never by weakening a check.
+- Record the exact counts (passed, skipped, deselected, subtests) from the final summary line.
+  Counts differ between the routes and change when tests are added or deselected, so do not
+  compare them with an earlier run's numbers without explaining the difference.
 ### Pinned C++ comparisons
 
-Comparisons of Python and Rust outputs with the pinned C++ outputs run in this full
-local check on every PR's latest commit, not in CI. The default `pytest` run includes
-the tests marked `cpp_comparison`; CI deselects them with `-m "not cpp_comparison"`,
-and its wheel suites pass `--skip-cpp-comparisons` to `tools/test_native_wheel_suite.py`.
-The Rust comparison tests in `rust/crates/behave-fire/tests/` are marked `#[ignore]`,
-so `cargo test` in CI and in the extracted crate skips them; the local command above
-runs them with `--include-ignored`. `tests/integration/test_cpp_comparison_selection.py`
-pins both sets. The comparisons enforce the owner's Surface caps for all 583
-available numbered cases and 139 paired custom controls, plus the exact binary64
-rules for FireSize, Ignite, and Mortality, regardless of release approval.
-The remaining measured modules retain their measurement-only policies.
-Deliberate-failure tests (`tests/integration/test_cpp_local_enforcement.py` and the
-`perturbed_cpp_copy_*` Rust tests) perturb a temporary copy of a fixture and prove
-that a cap violation or a one-ulp exact mismatch fails the check. For release evidence,
-`tools/cpp_receipt.py` records a platform's full comparison in a machine-checked receipt (see
-"Local comparison receipts" in [CPP_VALIDATION.md](CPP_VALIDATION.md)). Run every comparison on every PR, whether or not it touches C++
-data, with the native extension built from the PR's commit:
+The comparisons of Python and Rust outputs with the pinned C++ outputs are needed only when the
+pinned upstream C++ reference changes: a new pin in `reference/behave_cpp` or changed files under
+`tests/data/cpp_reference/`. They are not part of the local check for an ordinary PR, of CI, or of
+a release.
+
+The Python comparisons carry the `cpp_comparison` marker, and the default `pytest` run deselects
+them (`pytest.ini` adds `-m "not cpp_comparison"`; CI and the wheel suites also deselect them with
+`-m "not cpp_comparison"` and `--skip-cpp-comparisons` to `tools/test_native_wheel_suite.py`).
+The Rust comparison tests in `rust/crates/behave-fire/tests/` are marked `#[ignore]`, so plain
+`cargo test`, CI, and the extracted crate skip them.
+`tests/integration/test_cpp_comparison_selection.py` pins both sets. The comparisons enforce the
+owner's Surface caps for all 583 available numbered cases and 139 paired custom controls, plus the
+exact binary64 rules for FireSize, Ignite, and Mortality. The remaining measured modules retain
+their measurement-only policies. Deliberate-failure tests
+(`tests/integration/test_cpp_local_enforcement.py` and the `perturbed_cpp_copy_*` Rust tests)
+perturb a temporary copy of a fixture and prove that a cap violation or a one-ulp exact mismatch
+fails the check.
+
+When the pin changes, build the native extension from the PR's commit and run both sets:
 
 ```shell
 uv run --no-sync python -m pytest --require-rust -m cpp_comparison -rA
 cargo test --manifest-path rust/Cargo.toml -p behave-fire --locked --no-fail-fast -- --ignored
 ```
 
-The full default suite already contains the Python set, and the Rust command above
-already contains the Rust set; these two commands report them separately for the
-`C++ comparisons` line of the PR test record. CI still checks Python/Rust parity,
-fixture and reference-data integrity, packaging, and installation. The live C++ lane
-(`cpp_live`) and C++ qualification are separate steps (see
+Then record a platform's full comparison with `tools/cpp_receipt.py` (see "Local comparison
+receipts" in [CPP_VALIDATION.md](CPP_VALIDATION.md)); the receipt and its archive stay local and are
+not committed or published. CI still
+checks Python/Rust parity, fixture and reference-data integrity, packaging, and installation. The
+live C++ lane (`cpp_live`) and C++ qualification are separate steps (see
 [CPP_VALIDATION.md](CPP_VALIDATION.md)).
-
 `<MSRV>` is the `rust-version` declared in `rust/Cargo.toml` (currently 1.78). After
 any change under `rust/`, rebuild the extension before the native route (a plain
 `uv sync` does not notice Rust source changes; use `uv sync --reinstall-package behave-fire`).
@@ -245,9 +287,9 @@ does not satisfy the passing-test checkbox below. If pytest cannot use its cache
 folder, add `-p no:cacheprovider`.
 
 Rerun the suite after changes to the PR branch. Record the command, Python
-version, operating system, latest commit SHA, pass/skip counts, and the pinned C++
-comparison results (Python `-m cpp_comparison` and Rust `-- --ignored` counts) in
-the PR description. Do not treat a run against an earlier commit as validation of the
+version, operating system, latest commit SHA, and pass/skip counts in the PR description.
+When the PR changes the pinned C++ reference, also record the pinned C++ comparison
+results (Python `-m cpp_comparison` and Rust `-- --ignored` counts). Do not treat a run against an earlier commit as validation of the
 current PR head.
 
 ### CI tiers
@@ -314,12 +356,11 @@ every PR.
   Python / OS:
   Command:
   Result (passed / skipped):
-  C++ comparisons (Python `-m cpp_comparison`, Rust `-- --ignored`):
+  C++ comparisons (`not applicable` unless the pinned C++ reference changed; then Python `-m cpp_comparison`, Rust `-- --ignored`):
   Additional opt-in tests or limitations:
   ```
 
-- Check the box only after the full default suite, including the pinned C++
-  comparisons, passes on the latest commit.
+- Check the box only after the full default suite passes on the latest commit.
   If tests were not run or did not pass, leave it unchecked and explain why.
   **Do not merge a PR while the box is unchecked.** Reviewers must verify the
   recorded SHA and results before merging.
@@ -345,7 +386,7 @@ Use the procedures in [RELEASING.md](RELEASING.md) for build-only GitHub runs, d
 - Put Python tests in `tests/unit`, `tests/integration`, or `tests/regression` and name them `test_*.py`. Shared helpers live at the top of `tests/`, and fixtures live in `tests/data/`.
 - Unit tests exercise an isolated function or contract. Integration tests exercise components, backends, or distribution tooling together. Regression tests preserve fixes for confirmed defects and state the original failure in the docstring. Use the smallest input that reproduces the defect.
 - Pytest applies `integration` and `regression` from the tier directory. The collection test checks for agreement. Use `python -m pytest -m integration` or `python -m pytest -m regression` to select a tier.
-- Keep pinned C++ observations under the `cpp_reference` marker, and mark every test that compares Python or Rust outputs with pinned C++ outputs `cpp_comparison` (Python) or `#[ignore = "pinned C++ comparison: run by the full local check with --include-ignored"]` (Rust), then add it to `tests/integration/test_cpp_comparison_selection.py`. See [CPP_VALIDATION.md](CPP_VALIDATION.md) for offline validation and live qualification commands.
+- Keep pinned C++ observations under the `cpp_reference` marker, and mark every test that compares Python or Rust outputs with pinned C++ outputs `cpp_comparison` (Python) or `#[ignore = "pinned C++ comparison: run with --include-ignored when the pinned C++ reference changes"]` (Rust), then add it to `tests/integration/test_cpp_comparison_selection.py`. See [CPP_VALIDATION.md](CPP_VALIDATION.md) for offline validation and live qualification commands.
 
 
 ## C++ parity
@@ -361,7 +402,11 @@ The coverage unit is hybrid (owner decision 11, 2026-11-13). Every public C++ me
 - Change the pinned C++ revision only in a dedicated PR whose purpose is to update behave_fire to a newer upstream version. Do not change the pin as part of unrelated work.
 - No scientific test and no automatic job discovers or compares the pinned revision with the upstream default branch. Detecting and adopting newer upstream versions is a manual decision by the owner. Explicit retrieval of pinned dependencies (`uv sync`, wheel installs) and of the reference checkout at its pinned SHA is allowed.
 - A PR that changes ported science states the pinned C++ SHA it was checked against in its description, and lists new or changed findings.
-- A PR that changes a golden dataset includes the written refresh reason described in `docs/TESTING.md`.
+- A PR that changes a golden dataset includes the written refresh reason (the C++ revision, the driver, the inputs, the build, and the defect in the old baseline) and regenerates only through the explicit tools below, then reruns the integrity checks in "Style and integrity checks". Review the regenerated files like code.
+  - Python/Rust parity fixtures in `tests/data/rust_port/`: `python tools/export_rust_reference.py` writes them from the Python implementation, and `--check` reports missing or changed fixtures without writing. A suspected Python defect needs an explicit fix decision first.
+  - C++ observations in `tests/data/cpp_reference/`: `python tools/cpp_reference.py --generate --driver <driver> --attestation <attestation> --reason "<reason>"`. Generation needs an attested driver and a written reason, and a live run first checks the pinned checkout with `python tools/cpp_reference.py --verify-live`.
+  - The expected hash list `tests/data/cpp_reference/hashes.json`, after an intended change to a hashed file such as a `tools/cpp_*.py` module: `python tools/cpp_reference.py --sync-hashes --reason "<reason>"`. It records artifact identities and changes no observation.
+  - The standalone crate's fixture copies: `python tools/export_cpp_crate.py` copies the reviewed inputs and never runs C++ or calculates goldens (`--check` only reports drift).
 - A PR that changes the pinned C++ revision does only that work: the submodule update, regenerated goldens, ports, and documentation updates.
 - Python-facing numerical behavior changes found by a comparison are described plainly in the PR and need the owner's explicit approval.
 - Do not edit files inside the pinned C++ checkout. The driver and build files live in the overlay folder.

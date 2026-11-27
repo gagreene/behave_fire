@@ -215,7 +215,7 @@ fn verify_manifest() {
 
 // ---- comparison policy ----
 #[test]
-#[ignore = "pinned C++ comparison: run by the full local check with --include-ignored"]
+#[ignore = "pinned C++ comparison: run with --include-ignored when the pinned C++ reference changes"]
 fn cpp_surface_observations_follow_the_qualified_policy() {
     verify_manifest();
     let cases = parse_rows(include_str!("data/cpp_reference/surface/cases.jsonl"));
@@ -292,7 +292,7 @@ fn cpp_surface_observations_follow_the_qualified_policy() {
 }
 
 #[test]
-#[ignore = "pinned C++ comparison: run by the full local check with --include-ignored"]
+#[ignore = "pinned C++ comparison: run with --include-ignored when the pinned C++ reference changes"]
 fn perturbed_cpp_copy_fails_the_surface_caps() {
     // A temporary copy of the packaged results with one compared field moved beyond the cap.
     let cases = parse_rows(include_str!("data/cpp_reference/surface/cases.jsonl"));

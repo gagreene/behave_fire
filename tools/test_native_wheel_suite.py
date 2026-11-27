@@ -153,7 +153,7 @@ def main():
         "linux-x86_64", "linux-aarch64", "linux-musl-x86_64", "macos-x86_64", "macos-arm64",
         "windows-x86_64", "windows-arm64"))
     parser.add_argument("--skip-cpp-comparisons", action="store_true",
-                        help="deselect tests marked cpp_comparison; CI uses this, the full local check does not")
+                        help="deselect tests marked cpp_comparison (the default run also does)")
     arguments = parser.parse_args()
     if arguments.cpp_calibration and arguments.cpp_platform is None:
         parser.error("Calibration requires an explicit --cpp-platform matrix identity")

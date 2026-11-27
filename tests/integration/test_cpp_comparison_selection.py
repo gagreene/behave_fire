@@ -1,4 +1,4 @@
-"""Keep pinned C++ comparisons out of CI and inside the full local check, without drift."""
+"""Keep pinned C++ comparisons out of CI and routine runs, selectable on a pin change, without drift."""
 
 import os
 import re
@@ -10,7 +10,7 @@ import yaml
 
 ROOT = Path(__file__).resolve().parents[2]
 CORE_TESTS = ROOT / "rust/crates/behave-fire/tests"
-IGNORE = '#[ignore = "pinned C++ comparison: run by the full local check with --include-ignored"]'
+IGNORE = '#[ignore = "pinned C++ comparison: run with --include-ignored when the pinned C++ reference changes"]'
 PYTHON_COMPARISONS = {
     "tests/integration/test_cpp_calibration.py::test_revalidation_preserves_paired_bits_and_signed_zero",
     "tests/integration/test_cpp_crown.py::test_crown_measures_public_ports[python]",
@@ -92,6 +92,25 @@ def test_python_comparison_marker_selects_exactly_the_pinned_comparisons():
     collected = {line.strip() for line in result.stdout.splitlines() if "::" in line}
     assert collected == PYTHON_COMPARISONS
 
+
+def test_default_pytest_run_deselects_the_comparisons():
+    environment = os.environ.copy()
+    environment.pop("PYTEST_ADDOPTS", None)
+    files = sorted({name.split("::")[0] for name in PYTHON_COMPARISONS})
+
+    def counts(*options):
+        result = subprocess.run([sys.executable, "-B", "-m", "pytest", "-p", "no:cacheprovider", "--collect-only",
+                                 "-qq", *options, *files], cwd=ROOT, env=environment, text=True, capture_output=True,
+                                check=False)
+        assert result.returncode == 0, result.stdout + result.stderr
+        return {name: int(count) for name, count in (line.rsplit(": ", 1) for line in result.stdout.splitlines()
+                                                     if ": " in line and "::" not in line)}
+
+    everything = counts("-o", "addopts=")
+    routine = counts()
+    for name in files:
+        comparisons = sum(node.startswith(name + "::") for node in PYTHON_COMPARISONS)
+        assert everything[name] - routine.get(name, 0) == comparisons, name
 
 def test_rust_comparisons_are_ignored_by_default_and_named_exactly():
     ignored = set()

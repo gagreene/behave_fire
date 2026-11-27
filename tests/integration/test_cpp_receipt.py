@@ -1,14 +1,10 @@
-"""Check local C++ receipts: location outside the hashed fixtures, claims, and archived-report verification."""
+"""Check local C++ receipts: location outside the hashed fixtures and archived-report verification."""
 
 import json
 import math
 import subprocess
 import sys
-from io import BytesIO
 from pathlib import Path
-from types import SimpleNamespace
-from urllib.request import Request
-from zipfile import ZipFile
 
 import pytest
 
@@ -19,7 +15,6 @@ import cpp_receipt as receipts
 import cpp_reference as reference
 
 ROOT = Path(__file__).resolve().parents[2]
-CLAIMS = {"schema_version": 1, "approved": False, "platforms": ["windows-x86_64"], "archive_location": None}
 
 
 def _cargo_log(**changes):
@@ -75,12 +70,6 @@ def _receipt(archive, ports, log_text):
         reports=dict(ports=dict(file="attempt/ports.json", sha256=reference._digest(ports_copy)),
                      rust=dict(file="attempt/rust.log", sha256=reference._digest(log))),
         results=json.loads(json.dumps(results)))
-
-
-def _write_claims(root, **changes):
-    path = root / receipts.CLAIMS
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(dict(CLAIMS, **changes)), encoding="utf-8")
 
 
 @pytest.fixture(scope="module")
@@ -195,46 +184,7 @@ def test_receipt_verification_reads_the_archived_reports(tmp_path, monkeypatch, 
             receipts.check_receipt(ROOT, path, archive)
 
 
-# ---- receipt location and claims tests ----
-
-def test_check_claims_rejects_missing_platform_evidence(tmp_path):
-    _write_claims(tmp_path, platforms=["windows-x86_64", "linux-x86_64"], approved=True)
-    with pytest.raises(ValueError, match=r"Missing platform evidence: \['windows-x86_64', 'linux-x86_64'\]"):
-        receipts.check_claims(tmp_path, tmp_path / "archive")
-
-
-def test_check_claims_requires_owner_approval_after_valid_evidence(tmp_path, monkeypatch):
-    root = tmp_path / "checkout"
-    _write_claims(root)
-    (root / receipts.RECEIPTS / "windows-x86_64.json").write_text("{}", encoding="utf-8")
-    monkeypatch.setattr(receipts, "check_receipt", lambda root, path, archive: {"platform": path.stem})
-    with pytest.raises(ValueError, match="not approved"):
-        receipts.check_claims(root, tmp_path)
-    _write_claims(root, approved=True)
-    with pytest.raises(ValueError, match="archive location"):
-        receipts.check_claims(root, tmp_path)
-    archive = tmp_path / "approved-archive"
-    archive.mkdir()
-    _write_claims(root, approved=True, archive_location=archive.as_posix())
-    with pytest.raises(ValueError, match="approved archive"):
-        receipts.check_claims(root, tmp_path)
-    assert receipts.check_claims(root, archive) == {"windows-x86_64": {"platform": "windows-x86_64"}}
-
-
-@pytest.mark.parametrize("claims", [
-    dict(CLAIMS, platforms=[]),
-    dict(CLAIMS, platforms=["windows-x86_64", "windows-x86_64"]),
-    dict(CLAIMS, platforms=["solaris-sparc"]),
-    dict(CLAIMS, extra=True),
-    dict(CLAIMS, schema_version=2),
-])
-def test_check_claims_rejects_malformed_claims(tmp_path, claims):
-    path = tmp_path / receipts.CLAIMS
-    path.parent.mkdir(parents=True)
-    path.write_text(json.dumps(claims), encoding="utf-8")
-    with pytest.raises(ValueError, match="claims"):
-        receipts.check_claims(tmp_path, tmp_path)
-
+# ---- receipt location tests ----
 
 def test_receipt_rejects_rename_into_receipt_directory(tmp_path, monkeypatch):
     commit, tree = "1" * 40, "2" * 40
@@ -315,57 +265,3 @@ def test_failed_rust_retry_preserves_prior_reports(tmp_path, monkeypatch):
     assert old_log.read_text(encoding="utf-8") == "previous successful evidence"
     assert previous.read_text(encoding="utf-8") == "previous receipt"
 
-
-# ---- release evidence tests ----
-
-@pytest.mark.parametrize("failure,error", [
-    (None, None), ("approved", "not approved"), ("archive", "approved HTTPS archive"),
-    ("archive-null", "approved HTTPS archive"),
-    ("missing", "Missing platform evidence"),
-    ("digest", "archive SHA-256"), ("path", "Unsafe evidence archive member"), ("receipt", "bad receipt"),
-])
-def test_release_claims_fail_closed(tmp_path, monkeypatch, failure, error):
-    fixture = BytesIO()
-    with ZipFile(fixture, "w") as bundle:
-        bundle.writestr("../outside.log" if failure == "path" else "attempt/rust.log", "evidence")
-    payload = fixture.getvalue()
-    archive = tmp_path / "evidence.zip"
-    archive.write_bytes(payload)
-    location = {"url": "https://example.test/evidence.zip", "sha256": reference._digest(archive)}
-    if failure == "archive":
-        location["url"] = "http://example.test/evidence.zip"
-    if failure == "digest":
-        location["sha256"] = "0" * 64
-    _write_claims(tmp_path, approved=failure != "approved", archive_location=None if failure == "archive-null"
-                  else location)
-    receipt = tmp_path / receipts.RECEIPTS / "windows-x86_64.json"
-    if failure != "missing":
-        receipt.write_text("{}", encoding="utf-8")
-
-    def verify_receipt(root, path, archive):
-        assert (archive / "attempt/rust.log").read_text(encoding="utf-8") == "evidence"
-        if failure == "receipt":
-            raise ValueError("bad receipt")
-        return {"validated": True}
-
-    if failure not in {"approved", "archive", "archive-null", "missing"}:
-        opener = SimpleNamespace(open=lambda *_args, **_kwargs: archive.open("rb"))
-        monkeypatch.setattr(receipts, "build_opener", lambda *_: opener)
-    monkeypatch.setattr(receipts, "check_receipt", verify_receipt)
-    if failure is None:
-        assert receipts.check_release_claims(tmp_path) == {"windows-x86_64": {"validated": True}}
-    else:
-        with pytest.raises(ValueError, match=error):
-            receipts.check_release_claims(tmp_path)
-
-
-@pytest.mark.parametrize("scheme", ["http", "https"])
-def test_release_redirect_requires_https(scheme):
-    handler = receipts._HttpsRedirect()
-    request = Request("https://example.test/evidence.zip")
-    target = f"{scheme}://download.example.test/evidence.zip"
-    if scheme == "https":
-        assert handler.redirect_request(request, None, 302, "Found", {}, target).full_url == target
-    else:
-        with pytest.raises(ValueError, match="HTTPS"):
-            handler.redirect_request(request, None, 302, "Found", {}, target)

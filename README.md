@@ -52,7 +52,7 @@ The package has two implementations that give the same results within documented
 
 ### Validation against Behave C++
 
-The full local check before each merge compares both implementations with [Behave `3ca33d5`](https://github.com/firelab/behave/commit/3ca33d5b919d4253b411bfb6464b4c872dda6fc9). Full qualification across GNU, MSVC and all seven native wheel platforms is pending for the corrected fuel tables. Release claims use verified local receipts for the platforms listed in the approved claims file.
+The pinned-reference check compares both implementations with [Behave `3ca33d5`](https://github.com/firelab/behave/commit/3ca33d5b919d4253b411bfb6464b4c872dda6fc9). Full qualification across GNU, MSVC and all seven native wheel platforms is pending for the corrected fuel tables. Run the check, with `pytest -m cpp_comparison` and the `--include-ignored` Rust tests, when the pinned C++ reference changes; ordinary merges and releases do not repeat it.
 
 - **Surface** compares 583 numbered cases and 139 paired custom controls, including models 152 (SCAL16) and 153 (SCAL14), against pinned C++ outputs with `1e-12` relative and absolute caps.
 - **FireSize, Ignite, and Mortality scorch height** use exact binary64 comparisons for the standalone cases.

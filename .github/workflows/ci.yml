@@ -44,8 +44,8 @@ concurrency:
 #   The plan job records that run and every other job is skipped.
 # - targeted: a manual dispatch with scope musl, sdist, or musl-and-sdist builds and tests only those artifacts.
 # - none: a pull request edit that does not change the base branch (title or description).
-# Comparisons against pinned C++ outputs are not part of these tiers; they run in the full local check
-# before every merge (docs/CONTRIBUTION_PROCEDURES.md), and C++ qualification is a separate manual input.
+# Comparisons against pinned C++ outputs are not part of these tiers; they run when the pinned C++
+# reference changes (docs/CONTRIBUTION_PROCEDURES.md), and C++ qualification is a separate manual input.
 jobs:
   plan:
     runs-on: ubuntu-24.04

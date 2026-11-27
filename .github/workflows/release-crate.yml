@@ -15,13 +15,9 @@ jobs:
   verify:
     uses: ./.github/workflows/crate-validation.yml
 
-  qualification-gate:
-    if: inputs.publish
-    uses: ./.github/workflows/cpp-receipt-validation.yml
-
   publish-crate:
     if: inputs.publish
-    needs: [verify, qualification-gate]
+    needs: [verify]
     runs-on: ubuntu-latest
     environment:
       name: crates-io

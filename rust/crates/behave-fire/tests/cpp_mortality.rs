@@ -73,7 +73,7 @@ fn comparison_gate(
 
 /// Apply the established exact binary64 rule whatever the release approval state.
 ///
-/// The full local check relies on this, so a withdrawn qualification never hides a
+/// The pinned-reference check relies on this, so a withdrawn qualification never hides a
 /// numerical regression; `comparison_gate` adds the release approval requirement.
 fn exact_regression(observations: &[Observation]) -> Result<usize, String> {
     for Observation { case, cpp, rust } in observations {
@@ -215,7 +215,7 @@ fn verify_manifest() {
 
 // ---- comparison policy ----
 #[test]
-#[ignore = "pinned C++ comparison: run by the full local check with --include-ignored"]
+#[ignore = "pinned C++ comparison: run with --include-ignored when the pinned C++ reference changes"]
 fn cpp_mortality_observations_follow_the_qualified_policy() {
     verify_manifest();
     let cases = parse_rows(CASES);
@@ -237,7 +237,7 @@ fn cpp_mortality_observations_follow_the_qualified_policy() {
 }
 
 #[test]
-#[ignore = "pinned C++ comparison: run by the full local check with --include-ignored"]
+#[ignore = "pinned C++ comparison: run with --include-ignored when the pinned C++ reference changes"]
 fn perturbed_cpp_copy_fails_the_exact_regression() {
     // A temporary copy of the packaged results with one value moved one ulp toward zero.
     let mut results = parse_rows(RESULTS);
