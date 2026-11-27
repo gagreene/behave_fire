@@ -264,4 +264,3 @@ def test_failed_rust_retry_preserves_prior_reports(tmp_path, monkeypatch):
         receipts.write_receipt(root, archive, "operator")
     assert old_log.read_text(encoding="utf-8") == "previous successful evidence"
     assert previous.read_text(encoding="utf-8") == "previous receipt"
-
