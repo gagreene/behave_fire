@@ -6,6 +6,7 @@ from dataclasses import dataclass
 import numpy as np
 
 from ._ownership import _owned_inputs
+from .components.fuel_models import _REGISTRY_VALUE_FIELDS, _reject_complex_registry_value
 
 # Entries are parameter/layout proofs, never a catch-and-retry permission.
 # Further operations enter this table only with complete, nonzero-imaginary tests.
@@ -107,14 +108,9 @@ def snapshot_registry(fuel_models):
         fuel_models = fuel_models.to_python()
     if not isinstance(fuel_models, FuelModels):
         raise TypeError('fuel_models must be a FuelModels registry or provide to_python()')
-    physical = ('fuel_bed_depth', 'moisture_of_extinction_dead', 'heat_of_combustion_dead',
-                'heat_of_combustion_live', 'dead_1h', 'dead_10h', 'dead_100h', 'live_herb',
-                'live_woody', 'savr_1h', 'savr_live_herb', 'savr_live_woody', 'is_dynamic', 'is_defined')
     for number, record in fuel_models.fuel_models_.items():
-        for name in physical:
-            if _complex_sites(record.get(name), name):
-                raise TypeError(f'Complex fuel registry support is not verified: model {number}, {name}; '
-                                'select backend="python" explicitly.')
+        for name in _REGISTRY_VALUE_FIELDS:
+            _reject_complex_registry_value(number, name, record.get(name))
     return RegistrySnapshot(copy.deepcopy(fuel_models))
 
 

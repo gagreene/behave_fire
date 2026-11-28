@@ -12,6 +12,8 @@ Metric model moisture-of-extinction percentages are stored as fractions here.
   - is_dynamic, is_reserved, is_defined : bool
 """
 
+import numbers
+
 try:
     from .behave_units import (
         FractionUnits,
@@ -28,6 +30,29 @@ except ImportError:
         LoadingUnits,
         SurfaceAreaToVolumeUnits,
     )
+
+# Registry fields that hold numbers or flags; none may be complex.
+_REGISTRY_VALUE_FIELDS = (
+    'fuel_bed_depth', 'moisture_of_extinction_dead', 'heat_of_combustion_dead', 'heat_of_combustion_live',
+    'dead_1h', 'dead_10h', 'dead_100h', 'live_herb', 'live_woody', 'savr_1h', 'savr_live_herb', 'savr_live_woody',
+    'is_dynamic', 'is_defined',
+)
+
+
+def _reject_complex_registry_value(number, name, value):
+    """Reject a complex value in fuel-registry data before it is cast to a real lookup array.
+
+    Complex Python and NumPy scalars and complex arrays are rejected even when the imaginary part is zero.
+    Calculation inputs are not registry data and are not checked here.
+
+    :param number: Fuel model number, named in the error.
+    :param name: Registry field name, named in the error.
+    :param value: Registry value to check.
+    :return: None; raises ``TypeError`` for a complex value.
+    """
+    kind = getattr(getattr(value, 'dtype', None), 'kind', None)
+    if kind == 'c' or (isinstance(value, numbers.Complex) and not isinstance(value, numbers.Real)):
+        raise TypeError(f'Fuel model {number} field {name}: complex values are not accepted in a fuel registry')
 
 
 class FuelModels:
@@ -786,6 +811,16 @@ class FuelModels:
         existing = self.fuel_models_.get(fuel_model_number)
         if existing and existing.get('is_reserved', False):
             return False
+
+        for field, value in (
+                ('fuel_bed_depth', fuel_bed_depth), ('moisture_of_extinction_dead', moisture_of_extinction_dead),
+                ('heat_of_combustion_dead', heat_of_combustion_dead),
+                ('heat_of_combustion_live', heat_of_combustion_live), ('dead_1h', fuel_load_one_hour),
+                ('dead_10h', fuel_load_ten_hour), ('dead_100h', fuel_load_hundred_hour),
+                ('live_herb', fuel_load_live_herbaceous), ('live_woody', fuel_load_live_woody),
+                ('savr_1h', savr_one_hour), ('savr_live_herb', savr_live_herbaceous),
+                ('savr_live_woody', savr_live_woody)):
+            _reject_complex_registry_value(fuel_model_number, field, value)
 
         # --- Convert all inputs to internal base units before storage ---
         fuel_bed_depth             = LengthUnits.toBaseUnits(fuel_bed_depth, length_units)

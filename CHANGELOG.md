@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- Reject complex values in fuel-registry data on every backend, before they are cast to a real
+  lookup array, including complex values with a zero imaginary part and NumPy `complex64` and
+  `complex128` scalars. The `TypeError` names the fuel model number and the registry field.
+  Complex calculation inputs are not registry data and keep their existing behavior.
+- Honor an explicit `S` in the native `calculate_crowning_surface_fire_spread_rate`, so its
+  output has the shape the Python reference returns. Compare object-array fuel identifiers by
+  their original value, so `Decimal("256.000000000000000001")` no longer rounds onto model 256
+  and `10**400` no longer overflows.
 - Keep generated example data (src/examples/data and src/examples/results) out of the
   source distribution, and make the Rust-only consumer check fail when Python is installed
   (a negated command does not trip set -e).

@@ -20,6 +20,16 @@ _FINAL_FIELDS = {'final_spread_rate': ('is_surface_fire', 'is_passive_crown', 's
                  'final_flame_length': ('is_surface_fire', 'is_passive_crown', 'surface_fli', 'passive_fl', 'crown_fl')}
 
 
+def _expand_to(value, shape):
+    """Broadcast an output over an explicit spatial shape, as the reference does with its S-shaped fills.
+
+    :param value: Calculated output.
+    :param shape: Explicit shape requested by the caller.
+    :return: Independently owned array on the broadcast of both shapes.
+    """
+    return np.array(np.broadcast_to(value, np.broadcast_shapes(np.shape(value), shape)), copy=True)
+
+
 def _flatten(operation, operands):
     """Expand actual record fields and prebind numerical lookup rows once.
 
@@ -145,6 +155,8 @@ def execute_component(operation, arguments, *, threads=1):
     """
     from ._bridge import _PARTICLES
 
+    explicit = tuple(arguments['S']) if operation == 'crown.calculate_crowning_surface_fire_spread_rate' and (
+        'S' in arguments) else None
     flat, settings = _flatten(operation, arguments)
     if operation == 'surface.calculate_fuelbed_intermediates':
         dependencies = _native.component_dependencies()
@@ -235,4 +247,5 @@ def execute_component(operation, arguments, *, threads=1):
                 + '.')}
         for field in _PARTICLES:
             result['p_crown'][field] = np.stack([result['p_crown'].pop(f'{field}.{i}') for i in range(5)])
-    return result[''] if '' in result else result
+    result = result[''] if '' in result else result
+    return result if explicit is None else _expand_to(result, explicit)

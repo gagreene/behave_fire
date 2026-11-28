@@ -16,6 +16,7 @@ Usage
 """
 import numpy as np
 
+from ..components.fuel_models import _REGISTRY_VALUE_FIELDS, _reject_complex_registry_value
 from .fuel_models import FuelModels
 
 _MAX_FM = 256
@@ -62,6 +63,9 @@ def build_fuel_lookup_arrays(fuel_models: FuelModels) -> dict:
     is_dynamic = np.zeros(_MAX_FM + 1, dtype=bool)
     is_defined = np.zeros(_MAX_FM + 1, dtype=bool)
     fm_dict = fuel_models.fuel_models_
+    for number, record in fm_dict.items():
+        for field in _REGISTRY_VALUE_FIELDS:
+            _reject_complex_registry_value(number, field, record.get(field))
     for n in range(1, _MAX_FM + 1):
         m = fm_dict.get(n)
         if m is None:

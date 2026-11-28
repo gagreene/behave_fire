@@ -42,6 +42,19 @@ def test_rust_rejects_a_fractional_identifier_instead_of_selecting_a_model():
     with pytest.raises(TypeError, match="real numeric"):
         run.do_surface_run(**_cell(np.array([[256.5]], dtype=object)))
 
+def test_object_array_identifiers_are_compared_exactly_not_rounded():
+    from decimal import Decimal
+    from fractions import Fraction
+
+    for value in (Decimal("256.000000000000000001"), Decimal("NaN"), Fraction(513, 2), 10 ** 400, -(10 ** 400)):
+        assert _fuel_model_indices(np.array([value], dtype=object), 257)[0] == 0, value
+    exact = np.array([Decimal(256), 124, np.float64(10.)], dtype=object)
+    assert _fuel_model_indices(exact, 257).tolist() == [256, 124, 10]
+    for value in (5 + 0j, np.complex128(5)):
+        with pytest.raises(TypeError, match="real numbers"):
+            _fuel_model_indices(np.array([value], dtype=object), 257)
+
+
 def test_object_array_identifiers_are_bounds_checked_before_narrowing():
     for value in (256.5, 257, -1.2, 1e30, float("inf"), float("nan"), .5):
         assert _fuel_model_indices(np.array([value], dtype=object), 257)[0] == 0, value
