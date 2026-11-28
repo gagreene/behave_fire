@@ -1,4 +1,6 @@
 """Owned primitive component transport with structural record and shape handling."""
+import operator
+
 import numpy as np
 
 from ..components.fuel_models_array import _fuel_model_indices
@@ -20,6 +22,17 @@ _FINAL_FIELDS = {'final_spread_rate': ('is_surface_fire', 'is_passive_crown', 's
                  'final_flame_length': ('is_surface_fire', 'is_passive_crown', 'surface_fli', 'passive_fl', 'crown_fl')}
 
 
+def _expand_to(value, shape):
+    """Broadcast an output over an explicit spatial shape, as the reference does with its S-shaped fills.
+
+    :param value: Calculated output.
+    :param shape: Explicit shape requested by the caller.
+    :return: Independently owned array on the broadcast of both shapes.
+    """
+    return np.array(np.broadcast_to(value, np.broadcast_shapes(np.shape(value), shape)), copy=True)
+
+
+
 def _flatten(operation, operands):
     """Expand actual record fields and prebind numerical lookup rows once.
 
@@ -39,7 +52,8 @@ def _flatten(operation, operands):
             index = _fuel_model_indices(grid, len(lookup['depth']))
             shape = grid.shape
         else:
-            shape = tuple(arguments.pop('S')) if 'S' in arguments else np.atleast_1d(arguments['fuel_model_grid']).shape
+            shape = (_shape_of(arguments.pop('S')) if 'S' in arguments
+                     else np.atleast_1d(arguments['fuel_model_grid']).shape)
             arguments.pop('fuel_model_grid', None)
             index = 10
             if 'slope_deg' in arguments:
@@ -88,8 +102,13 @@ def _flatten(operation, operands):
             flat.pop(field, None)
         if operation == 'surface.calculate_surface_wind_adjustment_factor':
             flat.pop('depth', None)
+    else:
+        flat.pop('user_waf', None)
     if operation == 'crown.calculate_crowning_surface_fire_spread_rate':
         flat.pop('canopy_height', None)
+        if 'ib.depth' in flat:
+            # The fixed wind-adjustment factor makes the bed depth irrelevant, so it must not add an axis.
+            flat['ib.depth'] = np.zeros(())
     if operation == 'crown.calculate_crown_surface_fire':
         flat.pop('canopy_height', None)
     return flat, settings
@@ -133,6 +152,17 @@ def _project(value, shape):
     return np.array(selected.reshape(shape), copy=True)
 
 
+def _shape_of(value):
+    """Normalize a shape argument the way NumPy does: an integer or an iterable of integers.
+
+    :param value: ``S`` argument, for example ``3``, ``np.int64(3)``, ``(3,)``, or ``(3, 1)``.
+    :return: Tuple of Python integers.
+    """
+    try:
+        return tuple(operator.index(axis) for axis in value)
+    except TypeError:
+        return (operator.index(value),)
+
 def execute_component(operation, arguments, *, threads=1):
     """Execute normalized component data without dtype, mask, or object payloads.
 
@@ -143,6 +173,8 @@ def execute_component(operation, arguments, *, threads=1):
     """
     from ._bridge import _PARTICLES
 
+    explicit = _shape_of(arguments['S']) if operation == 'crown.calculate_crowning_surface_fire_spread_rate' and (
+        'S' in arguments) else None
     flat, settings = _flatten(operation, arguments)
     if operation == 'surface.calculate_fuelbed_intermediates':
         dependencies = _native.component_dependencies()
@@ -198,6 +230,16 @@ def execute_component(operation, arguments, *, threads=1):
             'passive_crown_fire_heat_per_unit_area': ('surface_hpua', 'canopy_hpua', 'cfb')},
     }
     overrides = independent.get(name, {})
+    if name == 'calculate_surface_rate_vector':
+        result = _invoke(operation, flat, settings, threads)
+        wind_inputs = {key: flat[key] for key in
+                       ('no_wind_no_slope_spread_rate', 'wind_phi', 'wind_direction', 'aspect') if key in flat}
+        if broadcast_shape(*(value.shape for value in wind_inputs.values())) != result['y_component'].shape:
+            # y_component does not depend on slope_phi, so it keeps the shape of the wind inputs. A neutral scalar
+            # slope_phi satisfies the native input list without contributing an axis.
+            neutral = _invoke(operation, dict(wind_inputs, slope_phi=np.zeros(())), settings, threads)
+            result['y_component'] = neutral['y_component']
+        return result
     if overrides:
         from ._bridge import _EMPTY_KEYS
 
@@ -223,4 +265,5 @@ def execute_component(operation, arguments, *, threads=1):
                 + '.')}
         for field in _PARTICLES:
             result['p_crown'][field] = np.stack([result['p_crown'].pop(f'{field}.{i}') for i in range(5)])
-    return result[''] if '' in result else result
+    result = result[''] if '' in result else result
+    return result if explicit is None else _expand_to(result, explicit)

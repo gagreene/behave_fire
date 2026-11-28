@@ -82,8 +82,10 @@ jobs:
           PYO3_PYTHON: nonexistent-python-for-standalone-core
         run: |
           set -euo pipefail
-          ! command -v python
-          ! command -v python3
+          if command -v python || command -v python3; then
+            echo "The Rust-only consumer must run without Python installed" >&2
+            exit 1
+          fi
           test ! -d .git
           mkdir standalone
           tar -xzf "artifacts/behave-fire-${CORE_VERSION}.crate" -C standalone

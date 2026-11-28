@@ -7,6 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- Close gaps in the fuel-registry and fuel-identifier checks. A complex value boxed in an object or
+  masked array, a list, or a tuple is rejected like a plain complex value, and the registry is
+  validated before a getter, `clear_custom_fuel_model`, or a setter reads a stored field, so a
+  complex `is_reserved` can no longer let a standard model be cleared. Object-array fuel
+  identifiers keep their earlier results (numeric text and missing values included) except that
+  they are compared exactly, a nested sequence raises `ValueError`, and a value such as
+  `Decimal("256.000000000000000001")` maps to the undefined row. The native crowning spread rate
+  accepts an integer `S` and ignores the unused bed depth's shape.
+- Reject complex values in fuel-registry data on every backend, before they are cast to a real
+  lookup array, including complex values with a zero imaginary part and NumPy `complex64` and
+  `complex128` scalars. The `TypeError` names the fuel model number and the registry field.
+  Complex calculation inputs are not registry data and keep their existing behavior.
+- Honor an explicit `S` in the native `calculate_crowning_surface_fire_spread_rate`, so its
+  output has the shape the Python reference returns. Compare object-array fuel identifiers by
+  their original value, so `Decimal("256.000000000000000001")` no longer rounds onto model 256
+  and `10**400` no longer overflows.
+- Keep generated example data (src/examples/data and src/examples/results) out of the
+  source distribution, and make the Rust-only consumer check fail when Python is installed
+  (a negated command does not trip set -e).
+- Fix three Python/Rust parity defects found in review. An object-array fuel identifier above
+  the table (for example 256.5) is bounds-checked before it is narrowed, so it no longer
+  selects model 256. The native Surface rate vector keeps the shape of the wind inputs for
+  `y_component`, which does not depend on `slope_phi`. An unused `user_waf` no longer joins the
+  native broadcast outside `UserInput` mode. The fixtures' source hash for
+  `fuel_models_array.py` is refreshed; no fixture value changes.
 - Add machine-checked local C++ comparison receipts (`tools/cpp_receipt.py`) for use when the
   pinned upstream C++ reference changes. A receipt binds one platform's full local comparison
   to the tested commit, sources, fixture inventory, extension, toolchains, and host;

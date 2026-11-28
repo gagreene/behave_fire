@@ -16,15 +16,41 @@ Usage
     depth_grid = lut['depth'][fuel_model_grid]   # shape matches fuel_model_grid
 """
 
+from decimal import Decimal, InvalidOperation
+
 import numpy as np
 
 try:
-    from .fuel_models import FuelModels
+    from .fuel_models import _REGISTRY_VALUE_FIELDS, FuelModels, _reject_complex_registry_value
 except ImportError:
-    from fuel_models import FuelModels
+    from fuel_models import _REGISTRY_VALUE_FIELDS, FuelModels, _reject_complex_registry_value
 
 # Maximum fuel model number supported in the lookup table.
 _MAX_FM = 256
+
+
+def _exact_fuel_number(item):
+    """Return the original real value of an object element, without rounding or narrowing it.
+
+    :param item: Element of an object array of fuel identifiers.
+    :return: An exact real number, or ``None`` for a missing value that selects the undefined row. Text is parsed
+        exactly; nested sequences and text that is not a number raise ``ValueError``, as before, and complex
+        elements raise ``TypeError``.
+    """
+    if isinstance(item, np.ndarray) and item.ndim == 0:
+        item = item.item()
+    if item is None:
+        return None
+    if isinstance(item, (complex, np.complexfloating)):
+        raise TypeError('Fuel identifiers must be real numbers')
+    if isinstance(item, (list, tuple, set, frozenset, dict, np.ndarray)):
+        raise ValueError('Fuel identifiers must be scalars, not sequences')
+    if isinstance(item, (str, bytes)):
+        try:
+            return Decimal(item.decode('ascii') if isinstance(item, bytes) else item)
+        except (InvalidOperation, UnicodeDecodeError):
+            raise ValueError(f'could not convert {item!r} to a fuel identifier') from None
+    return item
 
 
 def _fuel_model_indices(value, rows=_MAX_FM + 1):
@@ -35,10 +61,41 @@ def _fuel_model_indices(value, rows=_MAX_FM + 1):
     :return: Int32 indices without narrowing invalid real identifiers first.
     """
     data = np.asarray(value)
+    if data.dtype == object:
+        return _object_fuel_indices(data, rows)
     if data.dtype.kind not in 'biuf':
         data = np.asarray(value, dtype=np.int32)
     valid = (data >= 1) & (data <= min(_MAX_FM, rows - 1))
     return np.asarray(np.where(valid, data, 0), dtype=np.int32)
+
+
+def _object_fuel_indices(data, rows):
+    """Map object-array identifiers by comparing each original value, never a rounded copy.
+
+    A float64 conversion would round ``Decimal("256.000000000000000001")`` onto model 256 and overflow for
+    ``10**400``. Exact comparisons keep every value outside the table on the undefined row.
+
+    :param data: Object array of fuel identifiers.
+    :param rows: Actual lookup row count, including the undefined row.
+    :return: Int32 indices; see ``_exact_fuel_number`` for the elements that raise.
+    """
+    limit = min(_MAX_FM, rows - 1)
+    flat = data.reshape(-1)
+    indices = np.zeros(flat.shape, dtype=np.int32)
+    for position, item in enumerate(flat):
+        number = _exact_fuel_number(item)
+        if number is None:
+            continue
+        try:
+            inside = 1 <= number <= limit
+        except InvalidOperation:
+            continue
+        except TypeError:
+            number = float(number)
+            inside = 1 <= number <= limit
+        if inside:
+            indices[position] = int(number)
+    return indices.reshape(data.shape)
 
 
 def build_fuel_lookup_arrays(fuel_models: FuelModels) -> dict:
@@ -85,6 +142,9 @@ def build_fuel_lookup_arrays(fuel_models: FuelModels) -> dict:
     is_defined = np.zeros(_MAX_FM + 1, dtype=bool)
 
     fm_dict = fuel_models.fuel_models_
+    for number, record in fm_dict.items():
+        for field in _REGISTRY_VALUE_FIELDS:
+            _reject_complex_registry_value(number, field, record.get(field))
 
     for n in range(1, _MAX_FM + 1):
         m = fm_dict.get(n)

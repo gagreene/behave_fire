@@ -12,6 +12,7 @@ Metric model moisture-of-extinction percentages are stored as fractions here.
 """
 import copy
 
+from ..components.fuel_models import _reject_complex_registry_value, _validate_record
 from ._bridge import _native
 from ._serialization import NativeState as _NativeState
 from .behave_units import FractionUnits, HeatOfCombustionUnits, LengthUnits, LoadingUnits, SurfaceAreaToVolumeUnits
@@ -61,7 +62,7 @@ class FuelModels(_NativeState):
         :param fuel_model_number: Input matching the public API.
         :return: Calculation result or updated receiver state.
         """
-        existing = self.fuel_models_.get(fuel_model_number)
+        existing = _validate_record(fuel_model_number, self.fuel_models_.get(fuel_model_number))
         if existing and existing.get('is_reserved', False):
             return False
         if fuel_model_number in self.fuel_models_:
@@ -85,7 +86,7 @@ class FuelModels(_NativeState):
         :param fuel_model_number: Input matching the public API.
         :return: Calculation result or updated receiver state.
         """
-        return self.fuel_models_.get(fuel_model_number)
+        return _validate_record(fuel_model_number, self.fuel_models_.get(fuel_model_number))
 
     def get_fuel_code(self, fuel_model_number):
         """Execute the explicit native operation.
@@ -182,7 +183,7 @@ class FuelModels(_NativeState):
         :param fuel_model_number: Input matching the public API.
         :return: Calculation result or updated receiver state.
         """
-        return self.fuel_models_.get(fuel_model_number)
+        return _validate_record(fuel_model_number, self.fuel_models_.get(fuel_model_number))
 
     def get_fuel_name(self, fuel_model_number):
         """Execute the explicit native operation.
@@ -411,9 +412,18 @@ class FuelModels(_NativeState):
         """
         if not 1 <= fuel_model_number <= 256:
             return False
-        existing = self.fuel_models_.get(fuel_model_number)
+        existing = _validate_record(fuel_model_number, self.fuel_models_.get(fuel_model_number))
         if existing and existing.get('is_reserved', False):
             return False
+        for field, value in (
+                ('fuel_bed_depth', fuel_bed_depth), ('moisture_of_extinction_dead', moisture_of_extinction_dead),
+                ('heat_of_combustion_dead', heat_of_combustion_dead),
+                ('heat_of_combustion_live', heat_of_combustion_live), ('dead_1h', fuel_load_one_hour),
+                ('dead_10h', fuel_load_ten_hour), ('dead_100h', fuel_load_hundred_hour),
+                ('live_herb', fuel_load_live_herbaceous), ('live_woody', fuel_load_live_woody),
+                ('savr_1h', savr_one_hour), ('savr_live_herb', savr_live_herbaceous),
+                ('savr_live_woody', savr_live_woody), ('is_dynamic', is_dynamic)):
+            _reject_complex_registry_value(fuel_model_number, field, value)
         fuel_bed_depth = LengthUnits.toBaseUnits(fuel_bed_depth, length_units)
         moisture_of_extinction_dead = FractionUnits.toBaseUnits(moisture_of_extinction_dead, moisture_units)
         heat_of_combustion_dead = HeatOfCombustionUnits.toBaseUnits(heat_of_combustion_dead, heat_of_combustion_units)

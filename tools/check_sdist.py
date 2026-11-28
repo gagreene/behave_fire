@@ -17,8 +17,8 @@ REQUIRED = {
 }
 # Python/Rust acceptance fixtures that the shipped parity checker and tests read.
 FIXTURES = "tests/data/rust_port"
-# Local C++ comparison receipts stay out of every distribution.
-LOCAL_EVIDENCE = "tests/data/cpp_receipts/"
+# Local C++ comparison receipts and generated example data stay out of every distribution.
+LOCAL_EVIDENCE = ("tests/data/cpp_receipts/", "src/examples/data/", "src/examples/results/")
 
 
 def _check_cpp_inputs(archive, members):
@@ -45,13 +45,15 @@ def _check_cpp_inputs(archive, members):
 
 
 def _check_local_evidence(name):
-    """Reject local C++ comparison receipts, which carry operator, host, and build metadata.
+    """Reject local C++ comparison receipts and generated example data.
+
+    Receipts carry operator, host, and build metadata; the example data and result rasters are local outputs.
 
     :param name: Distribution-relative POSIX member name.
-    :return: None; raises ValueError when a local receipt is included.
+    :return: None; raises ValueError when a local file is included.
     """
     if name.startswith(LOCAL_EVIDENCE):
-        raise ValueError(f"local C++ receipt in distribution: {name}")
+        raise ValueError(f"local file in distribution: {name}")
 
 
 def _check_reference_payload(name):

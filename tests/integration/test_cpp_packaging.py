@@ -213,14 +213,18 @@ def test_sdist_rejects_cpp_reference_sources_and_notices(tmp_path, name):
         checker.check_archive(archive)
 
 
-def test_sdist_rejects_local_cpp_receipts(tmp_path):
+@pytest.mark.parametrize("name", ["tests/data/cpp_receipts/windows-x86_64.json",
+                                  "src/examples/results/crown_flame_length_m.tif",
+                                  "src/examples/data/landscape.tif"])
+def test_sdist_rejects_local_receipts_and_generated_example_data(tmp_path, name):
     checker = _load("check_sdist")
     configuration = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))
-    assert "tests/data/cpp_receipts/**" in configuration["tool"]["maturin"]["exclude"]
+    pattern = "/".join(name.split("/")[:3]) + "/**"
+    assert pattern in configuration["tool"]["maturin"]["exclude"]
     files = dict.fromkeys(checker.REQUIRED, b"fixture")
-    files["tests/data/cpp_receipts/windows-x86_64.json"] = b"{}"
+    files[name] = b"synthetic local file"
     archive = _tar(tmp_path / "behave_fire.tar.gz", "behave_fire", files)
-    with pytest.raises(ValueError, match="local C\\+\\+ receipt"):
+    with pytest.raises(ValueError, match="local file in distribution"):
         checker.check_archive(archive)
 
 
