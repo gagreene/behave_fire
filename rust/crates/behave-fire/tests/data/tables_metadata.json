@@ -6,7 +6,7 @@
   "source_sha256_lf": {
     "behave_units": "c60185999a863b8fdfc1452155a792e996b06c4661bb247f1d49e314ad4d880a",
     "fine_dead_fuel_moisture_tool": "de7bf4297525d929e627e7f317f0ae0410829e35185f2023592588b6c14fd18e",
-    "fuel_models": "34dba477be7a2e8ca73bd409ac85e0e95f85973344adb73829ed05dbc661f2cd",
+    "fuel_models": "ad2133d391b6c8d4147b7adb2751b92d1917e18c304e8409aecb33c50fc03ddd",
     "species_master_table": "63a6412e39cd51ffe3cb9a1366a64fecbef6b15b12e40b20a350372f03fda568"
   },
   "species_records": 24

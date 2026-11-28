@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- Close gaps in the fuel-registry and fuel-identifier checks. A complex value boxed in an object or
+  masked array, a list, or a tuple is rejected like a plain complex value, and the registry is
+  validated before a getter, `clear_custom_fuel_model`, or a setter reads a stored field, so a
+  complex `is_reserved` can no longer let a standard model be cleared. Object-array fuel
+  identifiers keep their earlier results (numeric text and missing values included) except that
+  they are compared exactly, a nested sequence raises `ValueError`, and a value such as
+  `Decimal("256.000000000000000001")` maps to the undefined row. The native crowning spread rate
+  accepts an integer `S` and ignores the unused bed depth's shape.
 - Reject complex values in fuel-registry data on every backend, before they are cast to a real
   lookup array, including complex values with a zero imaginary part and NumPy `complex64` and
   `complex128` scalars. The `TypeError` names the fuel model number and the registry field.

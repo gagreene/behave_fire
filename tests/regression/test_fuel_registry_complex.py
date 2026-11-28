@@ -7,6 +7,9 @@ from behave_fire import BehaveRun, FuelModels
 from behave_fire.components.fuel_models import FuelModels as PythonFuelModels
 
 COMPLEX_VALUES = [12 + 0j, 12 + 5j, np.complex128(12 + 0j), np.complex128(12 + 5j), np.complex64(12 + 1j)]
+BOXED_COMPLEX_VALUES = [np.array(np.complex128(12 + 5j), dtype=object), np.array(5j, dtype=object),
+                        np.array([1 + 0j], dtype=object), np.ma.array([5j], dtype=object, mask=[True]), [1 + 0j],
+                        (np.complex64(2),)]
 SETTER_ARGS = (0, .2, 0, 8000, 8000, 0, .1, .05, .05, .02, .02, 0, 2000, 1500, 1500, 0, False)
 BACKENDS = ["python", pytest.param("rust", marks=pytest.mark.rust), pytest.param("auto", marks=pytest.mark.rust)]
 
@@ -35,6 +38,40 @@ def test_complex_value_in_a_stored_registry_is_rejected_on_every_backend(backend
     registry.fuel_models_[256][field] = value
     with pytest.raises(TypeError, match=rf"Fuel model 256 field {field}: complex values are not accepted"):
         BehaveRun(registry, backend=backend).do_surface_run(**_cell())
+
+
+@pytest.mark.parametrize("backend", BACKENDS)
+@pytest.mark.parametrize("field", ["fuel_bed_depth", "is_dynamic"])
+@pytest.mark.parametrize("value", BOXED_COMPLEX_VALUES)
+def test_complex_value_boxed_in_a_container_is_rejected_on_every_backend(backend, field, value):
+    registry = _registry_with_model_256()
+    registry.fuel_models_[256][field] = value
+    with pytest.raises(TypeError, match=rf"Fuel model 256 field {field}: complex values are not accepted"):
+        BehaveRun(registry, backend=backend).do_surface_run(**_cell())
+
+
+@pytest.mark.parametrize("registry_class", [PythonFuelModels, pytest.param("rust", marks=pytest.mark.rust)])
+def test_complex_value_is_rejected_before_a_getter_or_a_reserved_flag_is_read(registry_class):
+    if registry_class == "rust":
+        from behave_fire.rust.fuel_models import FuelModels as registry_class
+    registry = registry_class()
+    registry.fuel_models_[124]["fuel_bed_depth"] = np.complex128(12 + 5j)
+    with pytest.raises(TypeError, match="Fuel model 124 field fuel_bed_depth: complex values are not accepted"):
+        registry.get_fuelbed_depth(124, 1)
+    registry = registry_class()
+    registry.fuel_models_[124]["is_reserved"] = 0j
+    with pytest.raises(TypeError, match="Fuel model 124 field is_reserved: complex values are not accepted"):
+        registry.clear_custom_fuel_model(124)
+    assert 124 in registry.fuel_models_
+
+
+@pytest.mark.parametrize("registry_class", [PythonFuelModels, pytest.param("rust", marks=pytest.mark.rust)])
+def test_complex_is_dynamic_flag_is_rejected_by_both_setters(registry_class):
+    if registry_class == "rust":
+        from behave_fire.rust.fuel_models import FuelModels as registry_class
+    for flag in (np.complex64(1 + 0j), 1j, np.complex128(0)):
+        with pytest.raises(TypeError, match="Fuel model 256 field is_dynamic: complex values are not accepted"):
+            registry_class().set_custom_fuel_model(256, "ZZ1", "custom", 3., *SETTER_ARGS[:-1], flag)
 
 
 @pytest.mark.rust

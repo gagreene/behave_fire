@@ -43,6 +43,31 @@ def test_crowning_surface_fire_spread_rate_honors_an_explicit_shape():
     np.testing.assert_allclose(actual, expected, rtol=1e-12, atol=1e-12)
 
 
+def test_crowning_surface_fire_spread_rate_ignores_the_unused_bed_depth_shape():
+    from behave_fire.components import crown as reference
+    from behave_fire.components import fuel_models_array
+    from behave_fire.components.fuel_models import FuelModels
+    from behave_fire.components.surface import (
+        build_particle_arrays,
+        calculate_fuelbed_intermediates,
+        calculate_reaction_intensity,
+    )
+    from behave_fire.rust import crown
+
+    lut = fuel_models_array.build_fuel_lookup_arrays(FuelModels())
+    particles = build_particle_arrays(lut=lut, fuel_model_grid=np.array([10], dtype=np.int32), m1h=np.array([.06]),
+                                      m10h=np.array([.07]), m100h=np.array([.08]), mlh=np.array([.6]),
+                                      mlw=np.array([.9]))
+    bed = calculate_fuelbed_intermediates(p=particles)
+    reaction = calculate_reaction_intensity(ib=bed)
+    wide = dict(bed, depth=np.array([1., 2.]))
+    for shape in ((3,), (3, 1), 3, np.int64(3)):
+        expected = reference.calculate_crowning_surface_fire_spread_rate(reaction, wide, 2., shape, 25.)
+        actual = crown.calculate_crowning_surface_fire_spread_rate(reaction, wide, 2., shape, 25.)
+        assert np.shape(actual) == np.shape(expected), shape
+        np.testing.assert_allclose(actual, expected, rtol=1e-12, atol=1e-12)
+
+
 def test_pressure_unit_boolean_index_keeps_its_reference_axes():
     from behave_fire.components import vapor_pressure_deficit_calculator as reference
     from behave_fire.rust import vapor_pressure_deficit_calculator as native

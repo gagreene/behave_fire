@@ -55,6 +55,29 @@ def test_object_array_identifiers_are_compared_exactly_not_rounded():
             _fuel_model_indices(np.array([value], dtype=object), 257)
 
 
+def test_object_array_text_and_missing_values_keep_their_historical_results():
+    def indices(element):
+        data = np.empty(1, dtype=object)
+        data[0] = element
+        return _fuel_model_indices(data, 257).tolist()
+
+    assert [indices(text) for text in ("10.5", b"1e1", "1e1", " 7 ", "nan", "inf", "-5", "300")] == [
+        [10], [10], [10], [7], [0], [0], [0], [0]]
+    assert indices("256.000000000000000001") == [0]
+    assert indices(None) == [0] and indices(np.array(256.5)) == [0] and indices(np.array(5)) == [5]
+    for bad in ("invalid", "", "0x10", b"invalid"):
+        with pytest.raises(ValueError):
+            indices(bad)
+
+
+def test_object_array_nested_sequences_are_rejected_not_narrowed():
+    for element in ([256.5], [5], (5,), np.array([256.5])):
+        data = np.empty(1, dtype=object)
+        data[0] = element
+        with pytest.raises(ValueError, match="scalars"):
+            _fuel_model_indices(data, 257)
+
+
 def test_object_array_identifiers_are_bounds_checked_before_narrowing():
     for value in (256.5, 257, -1.2, 1e30, float("inf"), float("nan"), .5):
         assert _fuel_model_indices(np.array([value], dtype=object), 257)[0] == 0, value

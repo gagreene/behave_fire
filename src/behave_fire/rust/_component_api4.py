@@ -1,4 +1,6 @@
 """Owned primitive component transport with structural record and shape handling."""
+import operator
+
 import numpy as np
 
 from ..components.fuel_models_array import _fuel_model_indices
@@ -30,6 +32,7 @@ def _expand_to(value, shape):
     return np.array(np.broadcast_to(value, np.broadcast_shapes(np.shape(value), shape)), copy=True)
 
 
+
 def _flatten(operation, operands):
     """Expand actual record fields and prebind numerical lookup rows once.
 
@@ -49,7 +52,8 @@ def _flatten(operation, operands):
             index = _fuel_model_indices(grid, len(lookup['depth']))
             shape = grid.shape
         else:
-            shape = tuple(arguments.pop('S')) if 'S' in arguments else np.atleast_1d(arguments['fuel_model_grid']).shape
+            shape = (_shape_of(arguments.pop('S')) if 'S' in arguments
+                     else np.atleast_1d(arguments['fuel_model_grid']).shape)
             arguments.pop('fuel_model_grid', None)
             index = 10
             if 'slope_deg' in arguments:
@@ -102,6 +106,9 @@ def _flatten(operation, operands):
         flat.pop('user_waf', None)
     if operation == 'crown.calculate_crowning_surface_fire_spread_rate':
         flat.pop('canopy_height', None)
+        if 'ib.depth' in flat:
+            # The fixed wind-adjustment factor makes the bed depth irrelevant, so it must not add an axis.
+            flat['ib.depth'] = np.zeros(())
     if operation == 'crown.calculate_crown_surface_fire':
         flat.pop('canopy_height', None)
     return flat, settings
@@ -145,6 +152,17 @@ def _project(value, shape):
     return np.array(selected.reshape(shape), copy=True)
 
 
+def _shape_of(value):
+    """Normalize a shape argument the way NumPy does: an integer or an iterable of integers.
+
+    :param value: ``S`` argument, for example ``3``, ``np.int64(3)``, ``(3,)``, or ``(3, 1)``.
+    :return: Tuple of Python integers.
+    """
+    try:
+        return tuple(operator.index(axis) for axis in value)
+    except TypeError:
+        return (operator.index(value),)
+
 def execute_component(operation, arguments, *, threads=1):
     """Execute normalized component data without dtype, mask, or object payloads.
 
@@ -155,7 +173,7 @@ def execute_component(operation, arguments, *, threads=1):
     """
     from ._bridge import _PARTICLES
 
-    explicit = tuple(arguments['S']) if operation == 'crown.calculate_crowning_surface_fire_spread_rate' and (
+    explicit = _shape_of(arguments['S']) if operation == 'crown.calculate_crowning_surface_fire_spread_rate' and (
         'S' in arguments) else None
     flat, settings = _flatten(operation, arguments)
     if operation == 'surface.calculate_fuelbed_intermediates':
